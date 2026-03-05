@@ -8,6 +8,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Husky commit-msg hook** — Validates that every commit message starts
+  with a ticket ID in `[TICKET-ID]` format
+  (`forgeos-server/.husky/commit-msg`,
+  `forgeos-server/scripts/validate-commit.sh`). Rejects non-matching
+  messages with a clear error showing valid CLAIM and WORK commit
+  formats. Bypass with `git commit --no-verify` for emergencies.
 - **Dockerfile** — Multi-stage Docker build for the ForgeOS MCP server
   (`forgeos-server/Dockerfile`). Builder stage compiles TypeScript with
   `npm ci`; runtime stage runs as non-root `node` user on Alpine with a
