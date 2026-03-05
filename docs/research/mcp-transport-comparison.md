@@ -1,5 +1,12 @@
 # MCP Transport Layer Comparison — Research Report
 
+<!--
+  Document Type: Reference (Diátaxis)
+  Audience: ForgeOS architects and backend engineers evaluating transport options
+  Purpose: Compare MCP transport layers and recommend the optimal choice for ForgeOS
+  last_reviewed: 2026-03-06T00:00:00Z
+-->
+
 > **Ticket:** FORGEOS-RES002 | **Agent:** Research Analyst | **Date:** 2026-03-06  
 > **Confidence:** HIGH (88%) | **Validity Window:** 6 months (until 2026-09-06)  
 > **Protocol Revision Analyzed:** 2025-03-26  
@@ -9,13 +16,19 @@
 
 ## Executive Summary
 
-This report evaluates the three MCP transport layer options — **stdio**, **HTTP+SSE** (deprecated), and **Streamable HTTP** — for ForgeOS's distributed multi-agent orchestration use case. The evaluation covers latency characteristics, throughput under concurrent agent load, reconnection semantics, proxy/load-balancer compatibility, and security posture.
+This report evaluates three MCP transport layer options for ForgeOS distributed multi-agent orchestration:
 
-**Recommendation:** **Streamable HTTP** is the optimal primary transport for ForgeOS distributed deployment (88% confidence). **stdio** should be retained as a fallback for local development and single-machine agent testing. **HTTP+SSE** (deprecated) should NOT be adopted — it offers no advantages over Streamable HTTP and is officially superseded.
+- **stdio** — local inter-process communication
+- **HTTP+SSE** — deprecated server-sent events over HTTP
+- **Streamable HTTP** — current MCP specification standard
+
+The evaluation covers latency, throughput under concurrent agent load, reconnection semantics, proxy/load-balancer compatibility, and security posture.
+
+**Recommendation:** Use **Streamable HTTP** as the primary transport (88% confidence). Retain **stdio** as a fallback for local development and testing. Do **not** adopt **HTTP+SSE** — it is deprecated and offers no advantages over Streamable HTTP.
 
 **Bayesian Confidence Update:**
-- *Prior:* 75% — Streamable HTTP is likely optimal based on ForgeOS already using it and it being the current spec standard.
-- *Posterior:* 88% — Evidence strongly confirms Streamable HTTP's superiority for distributed use cases. Spec-level resumability, session management, batching support, and single-endpoint design make it the clear winner. The 12% uncertainty accounts for potential latency-sensitive edge cases where stdio might be preferable for co-located agents, and the relative immaturity of Streamable HTTP implementations in the ecosystem.
+- *Prior:* 75% — Streamable HTTP is likely optimal. ForgeOS already uses it, and it is the current spec standard.
+- *Posterior:* 88% — Evidence strongly confirms Streamable HTTP's superiority for distributed use cases. Resumability, session management, batching, and single-endpoint design make it the clear winner. The 12% uncertainty accounts for latency-sensitive edge cases and ecosystem immaturity.
 
 ---
 
@@ -37,7 +50,7 @@ This report evaluates the three MCP transport layer options — **stdio**, **HTT
 
 ### Research Question
 
-> Which MCP transport layer option (stdio, HTTP+SSE, Streamable HTTP) is optimal for ForgeOS's distributed multi-agent orchestration, where agents may run on multiple machines and coordinate through a centralized ForgeOS MCP server?
+> Which MCP transport layer option (stdio, HTTP+SSE, Streamable HTTP) best fits ForgeOS distributed multi-agent orchestration? Agents may run on multiple machines and coordinate through a centralized ForgeOS MCP server.
 
 ### Success Criteria
 
@@ -111,7 +124,7 @@ This report evaluates the three MCP transport layer options — **stdio**, **HTT
 | Batch support | **Yes** (JSON-RPC batching) | Can batch multiple requests in one message |
 | Backpressure | **OS pipe buffers** | Default 64KB buffer; blocks on full |
 
-**Assessment:** stdio throughput is **excellent for single-agent scenarios** but **does not scale horizontally**. With 10 concurrent agents, you need 10 server subprocesses, each with independent state. This fundamentally conflicts with ForgeOS's centralized state model (PostgreSQL-backed ticket system).
+**Assessment:** stdio delivers excellent throughput for single-agent scenarios but does not scale horizontally. Ten concurrent agents require ten server subprocesses, each with independent state. This fundamentally conflicts with ForgeOS's centralized PostgreSQL-backed ticket system.
 
 **Quantitative estimate:** A single stdio pipe can handle ~10,000-50,000 JSON-RPC messages/second (limited by JSON parsing, not I/O). However, scaling to N agents requires N processes with N independent database connections.
 
@@ -125,7 +138,7 @@ This report evaluates the three MCP transport layer options — **stdio**, **HTT
 | State recovery | **Full re-initialization required** — new `initialize` handshake |
 | Graceful shutdown | Client closes stdin → server exits → SIGTERM → SIGKILL |
 
-**Assessment:** stdio has **no reconnection capability**. If the server process crashes, all in-flight requests are lost. The client must start an entirely new subprocess and re-initialize. This is acceptable for development but problematic for production distributed systems where partial failures are expected.
+**Assessment:** stdio provides no reconnection capability. A server process crash loses all in-flight requests. The client must spawn a new subprocess and re-initialize from scratch. This is acceptable for development but problematic for production distributed systems where partial failures are expected.
 
 ### 2.5 Proxy/Load-Balancer Compatibility
 
@@ -138,7 +151,7 @@ This report evaluates the three MCP transport layer options — **stdio**, **HTT
 | Container networking | ⚠️ Requires sidecar pattern |
 | Service mesh | ❌ Not compatible |
 
-**Assessment:** stdio is **fundamentally incompatible** with network infrastructure. It operates entirely within a single host. Deploying stdio-based MCP in Kubernetes or Docker Swarm requires the sidecar pattern (MCP server as a sidecar container communicating via shared stdin/stdout), which adds complexity without benefit.
+**Assessment:** stdio is fundamentally incompatible with network infrastructure. It operates entirely within a single host. Kubernetes or Docker Swarm deployments require the sidecar pattern (MCP server as a sidecar container using shared stdin/stdout), which adds complexity without benefit.
 
 ### 2.6 Security Posture
 
@@ -151,7 +164,7 @@ This report evaluates the three MCP transport layer options — **stdio**, **HTT
 | Credential management | **Environment variables** — spec recommends this |
 | Attack surface | **Minimal** — only the parent process can communicate |
 
-**Assessment:** stdio has the **strongest security posture** by default because there is zero network exposure. The MCP spec explicitly states that stdio implementations SHOULD NOT follow the HTTP authorization specification — instead, they should retrieve credentials from the environment. This makes stdio **inherently secure** for local deployment but provides **no distributed authentication**.
+**Assessment:** stdio has the strongest security posture by default — zero network exposure. The MCP spec states that stdio implementations SHOULD NOT follow the HTTP authorization specification. Instead, they retrieve credentials from the environment. This makes stdio inherently secure for local deployment but provides no distributed authentication.
 
 ### 2.7 Use Case Fit
 
@@ -217,7 +230,7 @@ This report evaluates the three MCP transport layer options — **stdio**, **HTT
 | Batch support | **No** | Each client message is an individual POST |
 | Backpressure | **HTTP-level** | Server can return 429/503 |
 
-**Assessment:** Better than stdio for concurrent agents — a single server process can handle multiple agents. However, SSE streams are long-lived, consuming server connection resources. Under high agent load (>1000 concurrent agents), connection exhaustion becomes a concern. Load balancing is complicated by the need for sticky sessions (SSE stream must stay on the same backend).
+**Assessment:** Better than stdio for concurrent agents — a single server process handles multiple agents. However, SSE streams are long-lived and consume server connection resources. Under high agent load (>1000 concurrent agents), connection exhaustion becomes a concern. Sticky sessions for SSE affinity complicate load balancing.
 
 ### 3.4 Reconnection Semantics
 
@@ -229,7 +242,7 @@ This report evaluates the three MCP transport layer options — **stdio**, **HTT
 | Endpoint rediscovery | **Required** — must re-establish SSE and receive new `endpoint` event |
 | Session continuity | **Lost** — no session management in protocol |
 
-**Assessment:** HTTP+SSE has basic reconnection via the `EventSource` built-in retry mechanism, but **no protocol-level resumability**. When an SSE connection drops, the client must re-establish the SSE connection, wait for a new `endpoint` event, and start fresh. Any in-flight server-to-client messages are lost. This is a significant gap for production systems.
+**Assessment:** HTTP+SSE supports basic reconnection via the `EventSource` built-in retry mechanism but lacks protocol-level resumability. When an SSE connection drops, the client must re-establish the connection, wait for a new `endpoint` event, and start fresh. Any in-flight server-to-client messages are lost — a significant gap for production systems.
 
 ### 3.5 Proxy/Load-Balancer Compatibility
 
@@ -242,14 +255,14 @@ This report evaluates the three MCP transport layer options — **stdio**, **HTT
 | Connection timeouts | ⚠️ SSE streams may be killed by proxies (default 60s timeout) |
 | WebSocket fallback | ❌ No WebSocket support in spec |
 
-**Assessment:** HTTP+SSE has **mixed proxy compatibility**. The POST endpoint works with any proxy, but the SSE stream requires:
+**Assessment:** HTTP+SSE has mixed proxy compatibility. The POST endpoint works with any proxy, but SSE streams require:
 - `X-Accel-Buffering: no` (nginx)
 - `Cache-Control: no-cache`
 - Disabled chunked transfer encoding buffering
 - Extended or disabled connection timeouts
 - Sticky session configuration on load balancers
 
-Many enterprise proxies and CDNs (Cloudflare, AWS ALB) have SSE-specific limitations or require explicit configuration. This creates operational friction.
+Many enterprise proxies and CDNs (Cloudflare, AWS ALB) have SSE-specific limitations or require explicit configuration, creating operational friction.
 
 ### 3.6 Security Posture
 
@@ -262,7 +275,7 @@ Many enterprise proxies and CDNs (Cloudflare, AWS ALB) have SSE-specific limitat
 | CORS | **Required** — SSE crosses origin boundaries |
 | Attack surface | **Moderate** — two endpoints to protect |
 
-**Assessment:** HTTP+SSE has a standard HTTP security posture but notably **lacks a protocol-level authorization framework**. The 2024-11-05 spec only mentions Origin header validation as a security measure. The OAuth 2.1 authorization framework was added in the 2025-03-26 revision alongside Streamable HTTP. This means HTTP+SSE deployments must implement custom authentication.
+**Assessment:** HTTP+SSE has a standard HTTP security posture but lacks a protocol-level authorization framework. The 2024-11-05 spec mentions only Origin header validation as a security measure. The OAuth 2.1 framework was added in the 2025-03-26 revision alongside Streamable HTTP. HTTP+SSE deployments must implement custom authentication.
 
 ### 3.7 Why Deprecated
 
@@ -312,7 +325,7 @@ The MCP specification (2025-03-26) explicitly deprecates HTTP+SSE in favor of St
 | Stateless mode latency | **+2-5ms** per request | New transport instance per request (ForgeOS current model) |
 | Message overhead | **HTTP headers** | ~200-500 bytes, but amortized with keep-alive |
 
-**Assessment:** Comparable latency to HTTP+SSE for individual requests. The key difference is that Streamable HTTP can return **streaming SSE responses** within a single POST request, allowing the server to send progress updates, intermediate results, and the final response in one HTTP transaction. In stateless mode (ForgeOS's current configuration), each request creates a new transport instance, adding ~2-5ms overhead — inconsequential for ticket operations but worth noting.
+**Assessment:** Comparable latency to HTTP+SSE for individual requests. The key difference: Streamable HTTP returns streaming SSE responses within a single POST request. The server can send progress updates, intermediate results, and the final response in one HTTP transaction. In stateless mode (ForgeOS's current configuration), each request creates a new transport instance, adding ~2–5ms overhead — inconsequential for ticket operations.
 
 **ForgeOS codebase evidence:**
 ```typescript
@@ -339,7 +352,7 @@ app.post('/mcp', async (req, res) => {
 | Connection pooling | **HTTP keep-alive** | Reuse TCP connections across requests |
 | Multiple streams | **Yes** | Client can maintain multiple SSE streams |
 
-**Assessment:** Streamable HTTP has the **highest throughput potential** of the three transports for distributed multi-agent systems. Key advantages:
+**Assessment:** Streamable HTTP offers the highest throughput potential for distributed multi-agent systems. Key advantages:
 
 1. **Stateless mode enables true horizontal scaling:** With `sessionIdGenerator: undefined` (ForgeOS's current config), any request can be served by any backend instance. A simple round-robin load balancer distributes agent requests evenly.
 
@@ -365,7 +378,7 @@ app.post('/mcp', async (req, res) => {
 | Stateless mode recovery | **Trivial** — no session to recover, just resend request |
 | Graceful shutdown | HTTP DELETE with `Mcp-Session-Id` |
 
-**Assessment:** Streamable HTTP has the **best reconnection story** of all transports:
+**Assessment:** Streamable HTTP provides the best reconnection story of all three transports:
 
 1. **Stateless mode (ForgeOS current):** Reconnection is a non-issue. Each request is independent. If a request fails, the agent simply retries. No session state to recover.
 
@@ -399,7 +412,7 @@ app.post('/mcp', async (req, res) => {
 | API gateway | ✅ Standard REST-like endpoints |
 | CDN caching | ⚠️ POST not cacheable; GET responses may be cacheable |
 
-**Assessment:** Streamable HTTP has **excellent proxy/LB compatibility**, significantly better than HTTP+SSE because:
+**Assessment:** Streamable HTTP provides excellent proxy/LB compatibility, significantly better than HTTP+SSE:
 
 1. **Single endpoint:** Load balancers only need to route to one path (`/mcp`), not manage separate SSE and POST endpoints.
 2. **Stateless mode eliminates sticky sessions:** In ForgeOS's stateless mode, any request can go to any backend. This is the simplest possible LB configuration.
@@ -423,14 +436,14 @@ app.post('/mcp', async (req, res) => {
 | Localhost binding | **SHOULD** — local servers bind to 127.0.0.1 only |
 | Third-party auth | **Supported** — delegated authorization flow |
 
-**Assessment:** Streamable HTTP has the **strongest security framework** of all MCP transports:
+**Assessment:** Streamable HTTP provides the strongest security framework of all MCP transports:
 
 1. **OAuth 2.1 integration:** The MCP authorization spec (2025-03-26) defines a complete OAuth 2.1 flow with PKCE. This wasn't available for HTTP+SSE.
 2. **Per-request authentication:** Bearer tokens MUST be included in every HTTP request, even within a session.
 3. **Server metadata discovery:** `.well-known/oauth-authorization-server` endpoint for automatic auth configuration.
 4. **Dynamic client registration:** Agents can auto-register with ForgeOS server without manual credential distribution.
 
-**ForgeOS current security:** ForgeOS uses custom API key authentication (`authMiddleware` in `middleware/auth.ts`). This could be enhanced to full OAuth 2.1 as the MCP spec recommends, providing standardized agent authentication.
+**ForgeOS current security:** ForgeOS uses custom API key authentication (`authMiddleware` in `middleware/auth.ts`). This can be upgraded to full OAuth 2.1 per the MCP spec, providing standardized agent authentication.
 
 ### 4.7 ForgeOS Codebase Evidence
 
@@ -559,13 +572,13 @@ Actively searched for evidence that Streamable HTTP is NOT optimal:
 - CI/CD pipeline tool invocations in ephemeral environments
 - IDE integration for agent debugging
 
-**Implementation approach:** The `@modelcontextprotocol/sdk` provides `StdioServerTransport` out of the box. ForgeOS could offer a `--transport=stdio` flag for local-mode server startup.
+**Implementation approach:** The `@modelcontextprotocol/sdk` provides `StdioServerTransport` out of the box. ForgeOS can offer a `--transport=stdio` flag for local-mode server startup.
 
 ### 7.3 Do NOT Adopt: HTTP+SSE
 
 **Recommendation:** Do not implement HTTP+SSE support. It is deprecated and offers no advantages over Streamable HTTP.
 
-**Exception:** If ForgeOS needs to support MCP clients using the old 2024-11-05 protocol revision, the Streamable HTTP backwards compatibility guide in the spec documents how to handle this. The spec's recommendation is to accept the old POST format but respond using the new Streamable HTTP semantics.
+**Exception:** If ForgeOS needs to support MCP clients using the old 2024-11-05 protocol revision, the Streamable HTTP backwards compatibility guide in the spec documents how to handle this. Accept the old POST format but respond with the new Streamable HTTP semantics.
 
 ### 7.4 Configuration Recommendations
 
@@ -618,8 +631,9 @@ Actively searched for evidence that Streamable HTTP is NOT optimal:
 | 11 | RFC 8414 — OAuth 2.0 Server Metadata | Standard | 1.0 | 2018 (stable) | https://datatracker.ietf.org/doc/html/rfc8414 |
 
 **Validity Window:** This analysis is valid for 6 months (until 2026-09-06).  
-**Refresh Triggers:** New MCP spec revision, major SDK version bump (v2.x), ForgeOS architecture changes requiring real-time bidirectional communication, emergence of a WebSocket MCP transport option.
+**Refresh Triggers:** New MCP spec revision, major SDK version bump (v2.x), ForgeOS architecture changes requiring real-time bidirectional communication, or emergence of a WebSocket MCP transport option.
 
 ---
 
-*Report generated by Research Analyst agent for ticket FORGEOS-RES002.*
+*Report generated by Research Analyst agent for ticket FORGEOS-RES002.*  
+*Documentation review completed by Documentation Specialist on 2026-03-06.*
