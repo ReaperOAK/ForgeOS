@@ -747,4 +747,14 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 ### [FORGEOS-RES008] — Validation Summary
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-RES008.md
 - **Decisions:** APPROVED with HIGH confidence. All 8 acceptance criteria verified against docs/research/pg-event-sourcing.md (1137 lines). DoD: 6 PASS, 4 justified N/A (research ticket, no code). Report recommends Enhanced Hybrid model over Full Event Sourcing (8.65 vs 5.35 weighted score). 16 evidence sources with weights, Bayesian confidence 75%→85%, 3 contradictions resolved. Documentation enhancements (14-term glossary, quick reference card) verified. Memory gate entries present from Research and Documentation stages.
+
+### [TASK-FOS-08-003] — QA Summary
+- **Artifacts:** .github/agent-output/QA/TASK-FOS-08-003.md, forgeos-server/src/__tests__/config.test.ts
+- **Decisions:** QA PASS with HIGH confidence. 117/117 tests passed. Coverage: 100% statements, 100% branches, 100% functions, 100% lines for config.ts. All 9 acceptance criteria verified. Rework fixes confirmed: Object.freeze applied (CI-CFG-001), WEBHOOK_SECRET production validation via Zod superRefine (CI-CFG-002). No defects found.
+- **Timestamp:** 2026-03-06T03:05:00Z
 - **Timestamp:** 2026-03-06T23:30:00Z
+
+### [TASK-FOS-08-001] — BACKEND (Infra) Complete
+- **Artifacts:** forgeos-server/Dockerfile, forgeos-server/.dockerignore
+- **Decisions:** Multi-stage Docker build with node:22-alpine for both builder and runtime. Builder uses npm ci for reproducible installs. Runtime runs as non-root node user. HEALTHCHECK curls /health every 30s. .dockerignore updated with !README.md exception and secrets/ exclusion. All 9 acceptance criteria satisfied.
+- **Timestamp:** 2026-03-06T00:00:00Z
