@@ -553,3 +553,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/__tests__/config.test.ts, .github/agent-output/QA/TASK-FOS-08-003.md
 - **Decisions:** PASS verdict on Environment Configuration. 112 tests validate Zod schema (defaults, boundaries, coercion, error messages), .env.example completeness, Dockerfile multi-stage build best practices, docker-compose.yml service orchestration, .dockerignore security, and no hardcoded secrets. Documented deviations: DATABASE_URL replaces individual DB vars (valid improvement), PORT replaces MCP_PORT (standard naming), Object.freeze not applied (non-blocking), no production-specific validation (non-blocking). All deviations are reasonable architectural decisions.
 - **Timestamp:** 2026-03-06T19:05:00Z
+
+### [FORGEOS-RES006] — Summary
+- **Artifacts:** docs/research/pg-connection-pooling.md, .github/agent-output/Research/FORGEOS-RES006.md
+- **Decisions:** Recommend phased pooling strategy — pg Pool (current, tuned to max=20) for ≤50 agents, add PgBouncer transaction mode for >50 agents. PgBouncer TX mode confirmed fully compatible with pg_advisory_xact_lock and SET LOCAL (RLS). asyncpg/SQLAlchemy evaluated but Python-only, not applicable to Node.js stack. Confidence: HIGH (87%).
+- **Timestamp:** 2026-03-06T19:15:00Z
