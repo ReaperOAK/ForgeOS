@@ -8,7 +8,7 @@ date: 2026-03-06T00:00:00Z
 status: ACCEPTED
 audience: All engineers, architects, and operators working on ForgeOS
 purpose: Document the decision to adopt MCP (Model Context Protocol) as the primary agent-to-orchestrator communication protocol
-last_reviewed: 2026-03-06T00:00:00Z
+last_reviewed: 2026-03-06T18:00:00Z
 diataxis_quadrant: explanation
 tags: [architecture, adr, mcp, protocol, phase1]
 ---
@@ -37,6 +37,7 @@ tags: [architecture, adr, mcp, protocol, phase1]
 10. [Fitness Functions](#10-fitness-functions)
 11. [Decision Validation](#11-decision-validation)
 12. [References](#12-references)
+13. [Glossary](#13-glossary)
 
 ---
 
@@ -90,10 +91,10 @@ This decision is grounded in three completed research reports:
 
 | Report | Ticket | Confidence | Key Finding |
 |--------|--------|------------|-------------|
-| MCP Protocol Core Specification | FORGEOS-RES001 | 92% | MCP's tool-centric design maps directly to ForgeOS ticket operations; JSON-RPC 2.0 foundation is mature |
-| MCP Transport Layer Comparison | FORGEOS-RES002 | 88% | Streamable HTTP scored 8.65/10, outperforming stdio (3.30) and deprecated HTTP+SSE (5.40) |
-| MCP vs gRPC vs REST Comparison | FORGEOS-RES010 | 89% | MCP scored 8.00/10, outperforming gRPC (6.05) and REST (5.63) for ForgeOS's use case |
-| MCP Python SDK Evaluation | FORGEOS-RES003 | 82% | Python SDK is production-grade with caveats; pin to v1.x, plan for v2 migration |
+| [MCP Protocol Core Specification](../../research/mcp-protocol-spec.md) | FORGEOS-RES001 | 92% | MCP's tool-centric design maps directly to ForgeOS ticket operations; JSON-RPC 2.0 foundation is mature |
+| [MCP Transport Layer Comparison](../../research/mcp-transport-comparison.md) | FORGEOS-RES002 | 88% | Streamable HTTP scored 8.65/10, outperforming stdio (3.30) and deprecated HTTP+SSE (5.40) |
+| [MCP vs gRPC vs REST Comparison](../../research/protocol-comparison.md) | FORGEOS-RES010 | 89% | MCP scored 8.00/10, outperforming gRPC (6.05) and REST (5.63) for ForgeOS's use case |
+| [MCP Python SDK Evaluation](../../research/mcp-sdk-evaluation.md) | FORGEOS-RES003 | 82% | Python SDK is production-grade with caveats; pin to v1.x, plan for v2 migration |
 
 ---
 
@@ -500,7 +501,7 @@ Measurable thresholds to validate this decision over time:
 |--------------|--------|----------|
 | Big Ball of Mud | ✅ Clear | MCP provides structured tool boundaries with validated schemas |
 | Golden Hammer | ✅ Clear | MCP is used specifically for agent communication; REST retained for dashboard/health; not forced onto all interfaces |
-| Distributed Monolith | ✅ Clear | Modular monolith architecture (ADR-001); no distributed coupling |
+| Distributed Monolith | ✅ Clear | Modular monolith architecture ([ADR-001](adr-001-postgresql.md)); no distributed coupling |
 | God Service | ✅ Clear | 10 discrete tools with single responsibilities |
 | NIH Syndrome | ✅ Clear | Adopting an established open protocol rather than building custom |
 | Resume-Driven Development | ✅ Clear | MCP selected based on scored evaluation, not technology novelty |
@@ -513,11 +514,11 @@ Measurable thresholds to validate this decision over time:
 
 | Reference | Path | Relevance |
 |-----------|------|-----------|
-| FORGEOS-RES001: MCP Protocol Core Specification | `docs/research/mcp-protocol-spec.md` | Protocol semantics, JSON-RPC format, tool/resource/prompt primitives |
-| FORGEOS-RES002: MCP Transport Layer Comparison | `docs/research/mcp-transport-comparison.md` | Transport scoring (Streamable HTTP: 8.65/10) |
-| FORGEOS-RES003: MCP Python SDK Evaluation | `docs/research/mcp-sdk-evaluation.md` | Python SDK maturity (82% confidence) |
-| FORGEOS-RES010: MCP vs gRPC vs REST Comparison | `docs/research/protocol-comparison.md` | Protocol scoring (MCP: 8.00/10) |
-| FORGEOS-ARCH001: System Component Architecture | `docs/architecture/system-components.md` | Overall architecture, component boundaries |
+| [FORGEOS-RES001: MCP Protocol Core Specification](../../research/mcp-protocol-spec.md) | `docs/research/mcp-protocol-spec.md` | Protocol semantics, JSON-RPC format, tool/resource/prompt primitives |
+| [FORGEOS-RES002: MCP Transport Layer Comparison](../../research/mcp-transport-comparison.md) | `docs/research/mcp-transport-comparison.md` | Transport scoring (Streamable HTTP: 8.65/10) |
+| [FORGEOS-RES003: MCP Python SDK Evaluation](../../research/mcp-sdk-evaluation.md) | `docs/research/mcp-sdk-evaluation.md` | Python SDK maturity (82% confidence) |
+| [FORGEOS-RES010: MCP vs gRPC vs REST Comparison](../../research/protocol-comparison.md) | `docs/research/protocol-comparison.md` | Protocol scoring (MCP: 8.00/10) |
+| [FORGEOS-ARCH001: System Component Architecture](../system-components.md) | `docs/architecture/system-components.md` | Overall architecture, component boundaries |
 
 ### 12.2 External Sources
 
@@ -529,6 +530,25 @@ Measurable thresholds to validate this decision over time:
 | OpenAPI Specification 3.1 | Standard | https://spec.openapis.org/oas/v3.1.0 |
 | Fielding's REST Dissertation | Academic | https://www.ics.uci.edu/~fielding/pubs/dissertation/rest_arch_style.htm |
 | OAuth 2.1 IETF Draft | Standard | https://datatracker.ietf.org/doc/html/draft-ietf-oauth-v2-1-12 |
+
+---
+
+## 13. Glossary
+
+| Term | Definition |
+|------|------------|
+| **ADR** | Architecture Decision Record — a document that captures a significant architectural decision, its context, and consequences |
+| **gRPC** | Google Remote Procedure Call — a high-performance RPC framework using Protocol Buffers over HTTP/2 |
+| **JSON-RPC 2.0** | A stateless, lightweight remote procedure call protocol using JSON as the data format |
+| **MCP** | Model Context Protocol — an open, transport-agnostic protocol for AI agent communication, built on JSON-RPC 2.0 |
+| **OAuth 2.1** | An authorization framework that defines how clients obtain access tokens from an authorization server |
+| **Pino** | A low-overhead structured JSON logger for Node.js |
+| **Protobuf** | Protocol Buffers — Google's language-neutral binary serialization format used by gRPC |
+| **RLS** | Row-Level Security — a PostgreSQL feature that restricts which rows a query can access based on the current session |
+| **SSE** | Server-Sent Events — a standard for servers to push real-time updates to clients over HTTP |
+| **Streamable HTTP** | The current MCP transport standard using a single HTTP endpoint for request/response and optional SSE streaming |
+| **stdio** | Standard input/output — a local inter-process communication transport where messages are exchanged via stdin/stdout |
+| **Zod** | A TypeScript-first schema validation library that provides both compile-time types and runtime validation |
 
 ---
 

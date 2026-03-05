@@ -788,3 +788,18 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/architecture/adr/adr-001-postgresql.md, .github/agent-output/Architect/FORGEOS-ARCH002.md
 - **Decisions:** Selected PostgreSQL 17 (weighted 9.15/10) over SQLite (5.85), Redis (5.60), etcd (5.65), CockroachDB (6.85) as primary state store. SQLite disqualified (single-writer). Redis rejected (no ACID/SQL). etcd rejected (KV-only, 2GB limit). CockroachDB rejected at current scale (no advisory locks, no LISTEN/NOTIFY). READ COMMITTED isolation sufficient per RES007. Enhanced hybrid model (not full ES) per RES008. Well-Architected score: 52/60 (87%). 7/7 acceptance criteria pass.
 - **Timestamp:** 2026-03-06T23:45:00Z
+
+### [FORGEOS-ARCH003] — Documentation Summary
+- **Artifacts:** docs/architecture/adr/adr-002-mcp-protocol.md (modified)
+- **Decisions:** Added cross-reference hyperlinks to 4 research reports (RES001, RES002, RES003, RES010) and 2 architecture docs (ADR-001, system-components.md) in §3.4, §11, §12.1. Added 12-term glossary as §13. Updated freshness metadata. Fixed duplicate separator. Original ADR was comprehensive; changes were additive.
+- **Timestamp:** 2026-03-06T18:00:00Z
+
+### [FORGEOS-ARCH002] — Documentation Summary
+- **Artifacts:** docs/architecture/adr/adr-001-postgresql.md, .github/agent-output/Documentation/FORGEOS-ARCH002.md
+- **Decisions:** Enhanced ADR readability (sentence condensation, active voice), fixed schema-reference.md relative path, fixed CockroachDB typo, upgraded ToC to tabular format, added 001_initial.sql hyperlink, updated last_reviewed freshness date. All 12 cross-references verified. Diátaxis classification (explanation) confirmed correct for ADR.
+
+### [TASK-FOS-08-003] — Documentation Summary
+- **Artifacts:** forgeos-server/src/config.ts (JSDoc enrichment), forgeos-server/.env.example (inline docs), forgeos-server/README.md (production requirements section, freshness), CHANGELOG.md (new entry)
+- **Decisions:** Added comprehensive JSDoc to all 3 public exports (AppConfig, loadConfig, config) and the internal configSchema. Rewritten .env.example with structured header, format hints, range constraints, and production requirement markers. Added Production Requirements subsection in README. Diátaxis classification: Reference for both README and .env.example.
+- **Timestamp:** 2026-03-06T14:00:00Z
+- **Timestamp:** 2026-03-06T23:59:00Z
