@@ -533,3 +533,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/__tests__/types.test.ts, .github/agent-output/QA/TASK-FOS-02-002.md
 - **Decisions:** PASS verdict on TypeScript Type Definitions. 89 tests validate all 5 enum/union types against SQL counterparts (exact match for 4/5, documented superset for EventType with HEARTBEAT/COMPLETED TS-only additions), all 6 domain model interfaces (Ticket 28 fields, TicketEvent 13, Agent 10, Session 9, FileLock 7, Project 8), all 10 MCP tool I/O type pairs, ForgeOSErrorCode (14 values), ErrorResponse, AgentIdentity, SSETicketEvent, SDLC_FLOWS (10 types, correct ordering), zero `any` types, all exports verified. No blocking defects.
 - **Timestamp:** 2026-03-05T18:55:00Z
+
+### [FORGEOS-RES002] — Summary
+- **Artifacts:** docs/research/mcp-transport-comparison.md, .github/agent-output/Research/FORGEOS-RES002.md
+- **Decisions:** Recommended Streamable HTTP as primary transport (weighted score 8.65/10 vs stdio 3.30/10 vs HTTP+SSE 5.40/10). Keep stdio as fallback for local dev. Do NOT adopt deprecated HTTP+SSE. Keep stateless mode for horizontal scaling. Upgrade auth to OAuth 2.1 per spec. Enable JSON-RPC batching. Confidence: HIGH (88%).
+- **Timestamp:** 2026-03-06T18:50:42Z
