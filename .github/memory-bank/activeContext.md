@@ -773,3 +773,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/db/pool.ts, forgeos-server/src/db/migrate.ts, forgeos-server/src/db/index.ts, forgeos-server/src/__tests__/db/pool.test.ts, forgeos-server/src/__tests__/db/migrate.test.ts
 - **Decisions:** Used lazy singleton pattern for pg.Pool (getPool()) over eager initialization for test isolation. Chose SHA-256 for migration checksums. Used SET LOCAL inside BEGIN/COMMIT for RLS session variables to prevent cross-connection leaks. Renamed _migrations table to schema_migrations per AC. Individual transactions per migration for partial-failure isolation. Maintained backward-compatible `export const pool` for 11 existing consumer files.
 - **Timestamp:** 2026-03-06T03:25:00Z
+
+### [TASK-FOS-08-003] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/TASK-FOS-08-003.md
+- **Decisions:** PASS — Score 94/100, 0 critical, 1 warning (ESLint not installed as devDependency — outside ticket scope). All rework issues from previous CI rejection resolved (Object.freeze added, production WEBHOOK_SECRET validation added). config.ts has 100% test coverage, CC≤4 per function, tsc strict passes clean.
+- **Timestamp:** 2026-03-06T11:30:00Z
+
+### [FORGEOS-ARCH003] — ADR: MCP as Agent Communication Protocol
+- **Artifacts:** docs/architecture/adr/adr-002-mcp-protocol.md
+- **Decisions:** Adopted MCP (8.00/10) over gRPC (6.05/10), REST (5.63/10), and custom WebSocket (4.15/10) as primary agent-to-orchestrator protocol. Chose Streamable HTTP (8.65/10) as primary transport with stdio fallback. Documented REST fallback layer as maturity risk mitigation. Rejected gRPC due to disproportionate complexity and missing AI-agent primitives at ForgeOS's projected scale (10-100 agents).
+- **Timestamp:** 2026-03-06T14:00:00Z
