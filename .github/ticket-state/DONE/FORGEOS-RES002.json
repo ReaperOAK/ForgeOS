@@ -4,7 +4,7 @@
   "description": "Compare MCP transport layer options: stdio (local), SSE (Server-Sent Events over HTTP), and Streamable HTTP. Evaluate each transport for latency characteristics, throughput under concurrent agent load, connection management complexity, firewall/proxy compatibility, and suitability for the ForgeOS distributed orchestration use case where agents may run on multiple machines.",
   "type": "research",
   "priority": "high",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "RESEARCH",
@@ -28,10 +28,10 @@
     "Research report delivered at docs/research/mcp-transport-comparison.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-05T20:50:13.469839+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -104,6 +104,15 @@
       "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
       "details": "Claimed by reaperoak@pop-os via Validator, lease until 2026-03-05T20:50:13.469839+00:00"
+    },
+    {
+      "timestamp": "2026-03-05T20:22:02.457551+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-research.md",
