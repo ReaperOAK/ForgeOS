@@ -538,3 +538,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/research/mcp-transport-comparison.md, .github/agent-output/Research/FORGEOS-RES002.md
 - **Decisions:** Recommended Streamable HTTP as primary transport (weighted score 8.65/10 vs stdio 3.30/10 vs HTTP+SSE 5.40/10). Keep stdio as fallback for local dev. Do NOT adopt deprecated HTTP+SSE. Keep stateless mode for horizontal scaling. Upgrade auth to OAuth 2.1 per spec. Enable JSON-RPC batching. Confidence: HIGH (88%).
 - **Timestamp:** 2026-03-06T18:50:42Z
+
+### [TASK-FOS-06-001] — Summary
+- **Artifacts:** forgeos-server/src/__tests__/hooks.test.ts, .github/agent-output/QA/TASK-FOS-06-001.md
+- **Decisions:** PASS verdict on Husky Commit-Msg Hook scripts. 62 tests validate commit-msg.sh regex validation (9 valid, 10 invalid, 3 edge cases, 4 error message quality, 3 git-protocol compliance, 16 regex unit tests) and pre-commit.sh structure (10 analysis tests). Implementation regex `^\[[A-Z0-9]+-[A-Z0-9]+(-[A-Z0-9]+)*\]` is superior to AC-specified regex, correctly supports 4-segment ticket IDs. Husky packaging deferred (standalone scripts). No blocking defects.
+- **Timestamp:** 2026-03-06T00:30:00Z
