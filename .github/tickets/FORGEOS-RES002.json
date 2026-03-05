@@ -4,7 +4,7 @@
   "description": "Compare MCP transport layer options: stdio (local), SSE (Server-Sent Events over HTTP), and Streamable HTTP. Evaluate each transport for latency characteristics, throughput under concurrent agent load, connection management complexity, firewall/proxy compatibility, and suitability for the ForgeOS distributed orchestration use case where agents may run on multiple machines.",
   "type": "research",
   "priority": "high",
-  "stage": "READY",
+  "stage": "RESEARCH",
   "sdlc_flow": [
     "READY",
     "RESEARCH",
@@ -28,10 +28,10 @@
     "Research report delivered at docs/research/mcp-transport-comparison.md"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Research",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-05T19:20:42+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -47,6 +47,13 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-05T18:50:42+00:00",
+      "event": "CLAIMED",
+      "agent": "Research",
+      "machine_id": "pop-os",
+      "details": "Claimed by Research on pop-os (reaperoak)"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-research.md",
