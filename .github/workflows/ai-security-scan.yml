@@ -1,0 +1,191 @@
+name: AI Security Scan
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [staged]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ai-security-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  ai-security-scan:
+    name: AI Security Scan
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+
+      - name: Scan for secrets and credentials
+        run: |
+          echo "## 🔒 AI Security Scan Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Secret Detection" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          FINDINGS=0
+
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if [ -f "$file" ]; then
+              # Skip binary files and lock files
+              if echo "$file" | grep -qE '\.(png|jpg|jpeg|gif|ico|woff|ttf|lock)$'; then
+                continue
+              fi
+
+              # Detect common secret patterns
+              # AWS Keys
+              if grep -qP 'AKIA[0-9A-Z]{16}' "$file" 2>/dev/null; then
+                echo "- 🔴 **CRITICAL** \`$file\`: Potential AWS Access Key detected" >> $GITHUB_STEP_SUMMARY
+                FINDINGS=$((FINDINGS + 1))
+              fi
+
+              # Generic API keys and tokens
+              if grep -qiP '(api[_-]?key|secret[_-]?key|access[_-]?token|auth[_-]?token)\s*[:=]\s*["\x27][A-Za-z0-9+/=_-]{20,}["\x27]' "$file" 2>/dev/null; then
+                echo "- 🔴 **CRITICAL** \`$file\`: Potential API key/token detected" >> $GITHUB_STEP_SUMMARY
+                FINDINGS=$((FINDINGS + 1))
+              fi
+
+              # Private keys
+              if grep -q 'BEGIN.*PRIVATE KEY' "$file" 2>/dev/null; then
+                echo "- 🔴 **CRITICAL** \`$file\`: Private key detected" >> $GITHUB_STEP_SUMMARY
+                FINDINGS=$((FINDINGS + 1))
+              fi
+
+              # Connection strings
+              if grep -qiP '(mongodb|postgres|mysql|redis|amqp)://[^\s]+:[^\s]+@' "$file" 2>/dev/null; then
+                echo "- 🔴 **HIGH** \`$file\`: Database connection string with credentials" >> $GITHUB_STEP_SUMMARY
+                FINDINGS=$((FINDINGS + 1))
+              fi
+
+              # JWT tokens
+              if grep -qP 'eyJ[A-Za-z0-9_-]{10,}\.eyJ[A-Za-z0-9_-]{10,}\.' "$file" 2>/dev/null; then
+                echo "- 🟠 **HIGH** \`$file\`: JWT token detected" >> $GITHUB_STEP_SUMMARY
+                FINDINGS=$((FINDINGS + 1))
+              fi
+            fi
+          done
+
+          if [ $FINDINGS -eq 0 ]; then
+            echo "✅ No secrets detected in changed files" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**$FINDINGS potential secret(s) found. These MUST be removed before merging.**" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Scan for security anti-patterns
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Security Anti-Pattern Detection" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          WARNINGS=0
+
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if [ -f "$file" ]; then
+              # Skip non-code files
+              if echo "$file" | grep -qE '\.(md|txt|png|jpg|lock)$'; then
+                continue
+              fi
+
+              # SQL injection patterns
+              if grep -qP '(query|execute|exec)\s*\(.*\+.*\$|\bformat\s*\(' "$file" 2>/dev/null; then
+                echo "- ⚠️ \`$file\`: Potential SQL injection (string concatenation in query)" >> $GITHUB_STEP_SUMMARY
+                WARNINGS=$((WARNINGS + 1))
+              fi
+
+              # Eval usage
+              if grep -qP '\beval\s*\(' "$file" 2>/dev/null; then
+                echo "- ⚠️ \`$file\`: Usage of eval() detected" >> $GITHUB_STEP_SUMMARY
+                WARNINGS=$((WARNINGS + 1))
+              fi
+
+              # Insecure HTTP
+              if grep -qP 'http://' "$file" 2>/dev/null; then
+                if ! echo "$file" | grep -qE '\.(md|yml|yaml)$'; then
+                  echo "- ℹ️ \`$file\`: HTTP (non-HTTPS) URL detected" >> $GITHUB_STEP_SUMMARY
+                fi
+              fi
+
+              # Disabled SSL verification
+              if grep -qiP '(verify\s*=\s*false|ssl[_-]?verify.*false|NODE_TLS_REJECT_UNAUTHORIZED.*0)' "$file" 2>/dev/null; then
+                echo "- ⚠️ \`$file\`: SSL verification disabled" >> $GITHUB_STEP_SUMMARY
+                WARNINGS=$((WARNINGS + 1))
+              fi
+
+              # Wildcard CORS
+              if grep -qiP "(Access-Control-Allow-Origin.*\*|cors.*origin.*\*)" "$file" 2>/dev/null; then
+                echo "- ⚠️ \`$file\`: Wildcard CORS configuration" >> $GITHUB_STEP_SUMMARY
+                WARNINGS=$((WARNINGS + 1))
+              fi
+            fi
+          done
+
+          if [ $WARNINGS -eq 0 ]; then
+            echo "✅ No security anti-patterns detected" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**$WARNINGS security warning(s) found. Please review.**" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Check workflow security
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Workflow Security" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          ISSUES=0
+
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if echo "$file" | grep -qE '\.github/workflows/.*\.yml$'; then
+              if [ -f "$file" ]; then
+                # Check for unpinned actions
+                if grep -qP 'uses:\s+[^@]+@(master|main|latest)' "$file" 2>/dev/null; then
+                  echo "- ⚠️ \`$file\`: Unpinned GitHub Action (use SHA or version tag)" >> $GITHUB_STEP_SUMMARY
+                  ISSUES=$((ISSUES + 1))
+                fi
+
+                # Check for write-all permissions
+                if grep -qP 'permissions:\s*write-all' "$file" 2>/dev/null; then
+                  echo "- ⚠️ \`$file\`: Overly permissive workflow permissions" >> $GITHUB_STEP_SUMMARY
+                  ISSUES=$((ISSUES + 1))
+                fi
+
+                # Check for pull_request_target with checkout
+                if grep -q 'pull_request_target' "$file" 2>/dev/null; then
+                  if grep -q 'actions/checkout' "$file" 2>/dev/null; then
+                    echo "- 🔴 \`$file\`: pull_request_target with checkout — potential code injection risk" >> $GITHUB_STEP_SUMMARY
+                    ISSUES=$((ISSUES + 1))
+                  fi
+                fi
+              fi
+            fi
+          done
+
+          if [ $ISSUES -eq 0 ]; then
+            echo "✅ Workflow security checks passed" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Post security summary
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+              body: `## 🔒 AI Security Scan — Issues Found\n\nSecurity issues were detected in this PR. Please review the [workflow summary](${process.env.GITHUB_SERVER_URL}/${process.env.GITHUB_REPOSITORY}/actions/runs/${process.env.GITHUB_RUN_ID}) for details.\n\n**No auto-merge will occur. Human review required.**\n\n---\n*This scan was generated automatically. False positives should be addressed with inline comments explaining the safe usage.*`
+            });

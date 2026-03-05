@@ -1,0 +1,102 @@
+name: AI Documentation Sync
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [staged]
+    paths:
+      - '**/*.ts'
+      - '**/*.js'
+      - '**/*.py'
+      - '**/*.cs'
+      - '**/*.java'
+      - '**/*.go'
+      - '**/*.rs'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ai-doc-sync-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  ai-doc-sync:
+    name: AI Documentation Sync Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+
+      - name: Check documentation freshness
+        run: |
+          echo "## 📚 AI Documentation Sync Check" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          # Separate source and doc files
+          SOURCE_CHANGED=0
+          DOC_CHANGED=0
+          README_CHANGED=false
+
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if echo "$file" | grep -qE '\.(ts|js|py|cs|java|go|rs)$'; then
+              SOURCE_CHANGED=$((SOURCE_CHANGED + 1))
+            fi
+            if echo "$file" | grep -qiE '\.(md)$'; then
+              DOC_CHANGED=$((DOC_CHANGED + 1))
+            fi
+            if echo "$file" | grep -qi 'README.md'; then
+              README_CHANGED=true
+            fi
+          done
+
+          echo "**Source files changed:** $SOURCE_CHANGED" >> $GITHUB_STEP_SUMMARY
+          echo "**Documentation files changed:** $DOC_CHANGED" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          if [ $SOURCE_CHANGED -gt 0 ] && [ $DOC_CHANGED -eq 0 ]; then
+            echo "⚠️ **Source code was modified but no documentation was updated.**" >> $GITHUB_STEP_SUMMARY
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "Consider updating:" >> $GITHUB_STEP_SUMMARY
+            echo "- README.md if public APIs changed" >> $GITHUB_STEP_SUMMARY
+            echo "- Inline JSDoc/TSDoc/docstrings for modified functions" >> $GITHUB_STEP_SUMMARY
+            echo "- Architecture docs if structural changes were made" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "✅ Documentation appears to be in sync with code changes" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Check for stale TODO comments
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### TODO/FIXME Audit" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          TODO_COUNT=0
+
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if [ -f "$file" ]; then
+              if echo "$file" | grep -qE '\.(ts|js|py|cs|java|go|rs)$'; then
+                TODOS=$(grep -ncE '(TODO|FIXME|HACK|XXX)' "$file" 2>/dev/null || echo "0")
+                if [ "$TODOS" -gt 0 ]; then
+                  echo "- ℹ️ \`$file\`: $TODOS TODO/FIXME comment(s)" >> $GITHUB_STEP_SUMMARY
+                  TODO_COUNT=$((TODO_COUNT + TODOS))
+                fi
+              fi
+            fi
+          done
+
+          if [ $TODO_COUNT -eq 0 ]; then
+            echo "✅ No TODO/FIXME comments in changed files" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**$TODO_COUNT total TODO/FIXME comments found.** Track these as issues." >> $GITHUB_STEP_SUMMARY
+          fi

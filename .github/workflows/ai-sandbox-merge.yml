@@ -1,0 +1,175 @@
+name: AI Sandbox Merge
+
+on:
+  push:
+    paths:
+      - '.github/tasks/outputs/*.patch'
+  workflow_dispatch:
+    inputs:
+      packet_id:
+        description: 'Packet ID whose output to merge'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ai-sandbox-merge
+  cancel-in-progress: false
+
+jobs:
+  sandbox-merge:
+    name: Apply Patch on Ephemeral Branch
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check guardian STOP_ALL
+        run: |
+          STOP_FILE=".github/guardian/STOP_ALL"
+          if [[ -f "$STOP_FILE" ]]; then
+            STATUS=$(head -1 "$STOP_FILE" | awk '{print $1}')
+            if [[ "$STATUS" != "CLEAR" ]]; then
+              echo "::error::Guardian STOP_ALL is active. Halting sandbox merge."
+              exit 1
+            fi
+          fi
+
+      - name: Locate patch file
+        id: locate
+        run: |
+          set -euo pipefail
+
+          if [[ -n "${PACKET_ID:-}" ]]; then
+            PATCH=$(ls .github/tasks/outputs/${PACKET_ID}.*.patch 2>/dev/null | head -1 || true)
+          else
+            PATCH=$(ls -t .github/tasks/outputs/*.patch 2>/dev/null | head -1 || true)
+          fi
+
+          if [[ -z "$PATCH" || ! -f "$PATCH" ]]; then
+            echo "::notice::No patch files found. Nothing to merge."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          BASENAME=$(basename "$PATCH" .patch)
+          PACKET_ID=$(echo "$BASENAME" | rev | cut -d. -f2- | rev)
+          AGENT=$(echo "$BASENAME" | rev | cut -d. -f1 | rev)
+
+          echo "patch=$PATCH" >> "$GITHUB_OUTPUT"
+          echo "packet_id=$PACKET_ID" >> "$GITHUB_OUTPUT"
+          echo "agent=$AGENT" >> "$GITHUB_OUTPUT"
+          echo "found=true" >> "$GITHUB_OUTPUT"
+        env:
+          PACKET_ID: ${{ github.event.inputs.packet_id || '' }}
+
+      - name: Verify claim exists and is IN_PROGRESS
+        if: steps.locate.outputs.found == 'true'
+        run: |
+          CLAIM=".github/tasks/claims/${{ steps.locate.outputs.packet_id }}.json"
+          if [[ ! -f "$CLAIM" ]]; then
+            echo "::error::No claim file for packet ${{ steps.locate.outputs.packet_id }}"
+            exit 1
+          fi
+          STATUS=$(python3 -c "import json; print(json.load(open('$CLAIM'))['status'])")
+          if [[ "$STATUS" != "IN_PROGRESS" && "$STATUS" != "CLAIMED" ]]; then
+            echo "::error::Claim status is $STATUS — expected IN_PROGRESS or CLAIMED"
+            exit 1
+          fi
+
+      - name: Create ephemeral branch and apply patch
+        if: steps.locate.outputs.found == 'true'
+        id: apply
+        run: |
+          set -euo pipefail
+          BRANCH="sandbox/${{ steps.locate.outputs.packet_id }}"
+          git config user.name "ai-sandbox-merge"
+          git config user.email "ai-sandbox-merge@noreply.github.com"
+
+          git checkout -b "$BRANCH"
+          if git apply --check "${{ steps.locate.outputs.patch }}" 2>/dev/null; then
+            git apply "${{ steps.locate.outputs.patch }}"
+            git add -A
+            git commit -m "sandbox: apply ${{ steps.locate.outputs.packet_id }} by ${{ steps.locate.outputs.agent }}"
+            git push origin "$BRANCH"
+            echo "applied=true" >> "$GITHUB_OUTPUT"
+            echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+          else
+            echo "::error::Patch does not apply cleanly"
+            echo "applied=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Run checks on ephemeral branch
+        if: steps.apply.outputs.applied == 'true'
+        run: |
+          echo "## Sandbox Checks" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          # Lint check
+          LINT_OK=true
+          if command -v npx &>/dev/null && [[ -f package.json ]]; then
+            npx eslint . --max-warnings 0 2>&1 || LINT_OK=false
+          fi
+
+          # Test check
+          TEST_OK=true
+          if command -v npx &>/dev/null && [[ -f package.json ]]; then
+            npm test 2>&1 || TEST_OK=false
+          fi
+
+          echo "| Check | Result |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|--------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Lint | $($LINT_OK && echo 'PASS' || echo 'FAIL') |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Tests | $($TEST_OK && echo 'PASS' || echo 'FAIL') |" >> "$GITHUB_STEP_SUMMARY"
+
+          if ! $LINT_OK || ! $TEST_OK; then
+            echo "::warning::Some checks failed on sandbox branch"
+          fi
+
+      - name: Create PR for human review
+        if: steps.apply.outputs.applied == 'true'
+        run: |
+          gh pr create \
+            --base main \
+            --head "${{ steps.apply.outputs.branch }}" \
+            --title "Sandbox: ${{ steps.locate.outputs.packet_id }}" \
+            --body "## AI Sandbox Merge
+
+          **Packet:** \`${{ steps.locate.outputs.packet_id }}\`
+          **Agent:** \`${{ steps.locate.outputs.agent }}\`
+
+          > This PR was auto-generated by the AI sandbox merge workflow.
+          > **Human approval required before merge.**
+          > Do NOT auto-merge. ReaperOAK must validate with \`validation_signature\`.
+
+          ---
+          Review the changes, run any additional checks, and approve if correct." \
+            --label "ai-sandbox,needs-human-review"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update claim status
+        if: steps.apply.outputs.applied == 'true'
+        run: |
+          git checkout main
+          git pull origin main
+          CLAIM=".github/tasks/claims/${{ steps.locate.outputs.packet_id }}.json"
+          python3 -c "
+          import json
+          with open('$CLAIM') as f:
+              d = json.load(f)
+          d['status'] = 'REVIEW'
+          d['sandbox_branch'] = '${{ steps.apply.outputs.branch }}'
+          with open('$CLAIM', 'w') as f:
+              json.dump(d, f, indent=2)
+          "
+          git add "$CLAIM"
+          git commit -m "claim: ${{ steps.locate.outputs.packet_id }} moved to REVIEW"
+          git push

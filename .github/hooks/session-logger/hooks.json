@@ -1,0 +1,35 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "bash .github/hooks/session-logger/log-session-start.sh",
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "LOG_LEVEL": "INFO"
+        },
+        "timeoutSec": 10
+      }
+    ],
+    "sessionEnd": [
+      {
+        "command": "bash .github/hooks/session-logger/log-session-end.sh",
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "LOG_LEVEL": "INFO"
+        },
+        "timeoutSec": 10
+      }
+    ],
+    "userPromptSubmitted": [
+      {
+        "command": "bash .github/hooks/session-logger/log-prompt.sh",
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "LOG_LEVEL": "INFO"
+        },
+        "timeoutSec": 10
+      }
+    ]
+  }
+}

@@ -1,0 +1,128 @@
+---
+source: "./.github/instructions/SDLC/8. Technical Design Doc for ARCHITECTURE.instructions.md"
+chunk_index: 2
+token_estimate: 3786
+hash: "ba896839ea05ad2635673c70445806da8a3f2db48293a1ed76b1fb7d42209a31"
+summary: "* **Layout and Organization:** For clarity, the primary actor(s) and the most critical use cases should be placed in ..."
+---
+* **Layout and Organization:** For clarity, the primary actor(s) and the most critical use cases should be placed in the top-left corner of the diagram, as this is where a reader's attention naturally begins.15 Actors should always be drawn outside the system boundary box.15  
+* **System Boundary Box:** A rectangle drawn around the use cases is essential for clearly defining the scope of the system being modeled. Everything inside the box is part of the system to be built, while the actors are external to it.15 This visual delineation is critical for preventing misunderstandings about the system's responsibilities.  
+* **Relationships:**  
+  * **Association:** A simple line between an actor and a use case indicates an interaction. Arrowheads on these associations should generally be avoided as the direction of interaction is often bidirectional or implied.15  
+  * **\<\<include\>\>:** This relationship should be used when a piece of behavior is shared and mandatory across multiple use cases (e.g., "Log In" might be included by "View Dashboard" and "Update Profile"). The included use case should be placed to the right of the invoking use case.15  
+  * **\<\<extend\>\>:** This relationship is used to model optional functionality that is only executed under certain conditions (e.g., "Calculate Sales Tax" might extend "Create Order"). The extending use case is typically placed below the base use case.15  
+  * **Sparing Use:** The \<\<include\>\> and \<\<extend\>\> relationships should be used sparingly. Overuse can lead to diagrams that are cluttered and difficult to understand. They should only be introduced when they add significant clarity or reduce redundancy.15
+
+#### **2.1.2 Activity Diagrams: Charting Complex Business Logic**
+
+When a use case involves complex, multi-step logic with branching, parallelism, or dependencies on multiple actors, an Activity Diagram is the ideal tool for modeling that flow.1 It excels at visually representing a workflow or algorithm from start to finish, much like a traditional flowchart but with more powerful notation for modern systems.17
+
+**Best Practices for Creating Activity Diagrams:**
+
+* **Start and End Points:** Every activity diagram must have a single start point (a solid black circle) and at least one end point (a solid black circle with a border). The start point should be placed in the top-left corner to follow natural reading order.17  
+* **Decision Logic:**  
+  * **Decision Nodes:** Branching logic is represented by a diamond-shaped decision node. The decision should be implied by the preceding action, not explicitly written in the diamond.17  
+  * **Guards:** Every transition path leaving a decision node must have a guard condition written in brackets (e.g., \[Payment Approved\], \`\`). Guards must be mutually exclusive (no overlaps) and complete (cover all possibilities) to ensure the logic is unambiguous.17 An \[Otherwise\] guard can be used as a default case.  
+* **Parallelism:**  
+  * **Fork and Join Nodes:** To model concurrent activities, use a solid black bar. A fork node has one incoming path and splits it into multiple parallel outgoing paths. A join node has multiple parallel incoming paths and merges them back into a single outgoing path, which can only be traversed after all incoming activities are complete.17 For every fork, there should generally be a corresponding join.  
+* **Swimlanes:** For processes that involve multiple actors, departments, or system components, the diagram should be partitioned into vertical or horizontal swimlanes. Each lane is labeled with the responsible party, and all actions within that lane are performed by that party. This technique is invaluable for clarifying responsibilities and handoffs in a complex workflow.17 To maintain readability, it is recommended to use fewer than five swimlanes; if more are needed, the process may be too complex and should be broken into smaller, separate diagrams.17
+
+#### **2.1.3 Data Flow Diagrams (DFDs): Visualizing the Journey of Data**
+
+While Activity Diagrams model the flow of control, Data Flow Diagrams model the flow of *data*. A DFD provides a high-level view of how data moves through a system—where it comes from, how it is processed, and where it is stored.1 DFDs are excellent for simplifying complex systems and ensuring all team members have a shared understanding of the data landscape.21
+
+**Best Practices for Creating Data Flow Diagrams:**
+
+* **Standard Notation:** Consistency is key. Use the universally recognized Gane and Sarson or Yourdon and Coad symbols:  
+  * **External Entities:** Squares representing sources or destinations of data outside the system (e.g., "User," "Payment Gateway").22  
+  * **Processes:** Rounded rectangles representing activities that transform data (e.g., "Validate Payment," "Create User Account").22  
+  * **Data Stores:** Open-ended rectangles representing places where data is stored (e.g., "Users Database," "Orders Table").22  
+  * **Data Flows:** Arrows labeled with the name of the data being moved (e.g., "User Credentials," "Order Details").22  
+* **Leveling (Decomposition):** DFDs should be created in hierarchical levels to manage complexity.  
+  * **Level 0 (Context Diagram):** This is the highest-level view, showing the entire system as a single process with its inputs and outputs from external entities. It defines the system's scope.21  
+  * **Level 1:** This diagram "explodes" the single process from the Level 0 diagram into its major sub-processes, showing the data flows between them and to data stores.  
+  * **Level 2 and Beyond:** Each process from the Level 1 diagram can be further decomposed into a more detailed Level 2 diagram, and so on, until the desired level of granularity is reached.21  
+* **Fundamental Rules:**  
+  * Data must not flow directly between two external entities or between two data stores. All data must pass through a process to be transformed or routed.23  
+  * Every process must have at least one input data flow and at least one output data flow. A process that only consumes or only produces data is known as a "black hole" or a "miracle," respectively, and indicates a modeling error.24  
+  * Data flows should be named clearly and consistently, representing the data itself, not the action being performed.21
+
+### **2.2 Modeling Static Structure**
+
+These artifacts describe the static, structural elements of the system—the code and data schemas that form its foundation.
+
+#### **2.2.1 Class Diagrams: The Blueprint for Object-Oriented Code**
+
+For systems built using object-oriented programming, the Class Diagram is the primary tool for modeling the static structure of the code.1 It provides a visual representation of the classes in the system, their attributes (data members) and operations (methods), and the various relationships between them.25
+
+**Best Practices for Creating Class Diagrams:**
+
+* **Naming Conventions:** Adhere to the conventions of the target programming language. Generally, class names should be singular nouns in PascalCase (e.g., Order, Customer), while attributes and operations should be in lowerCamelCase (e.g., orderDate, calculateTotal()).25  
+* **Level of Detail:** Tailor the level of detail to the diagram's audience and purpose.  
+  * **Conceptual/Analysis Models:** Focus on high-level concepts and relationships. It may be sufficient to show only class names and their associations.  
+  * **Design Models:** These are closer to implementation and should include attribute types, operation signatures, and visibility modifiers.25  
+* **Visibility:** Use standard UML notation for visibility: \+ for public, \- for private, \# for protected. This information is most relevant on detailed design diagrams.25  
+* **Relationships:** Model relationships with precision.  
+  * **Association:** A standard relationship between two classes. Always indicate multiplicity (e.g., 1, 0..1, \*) on both ends of the association.25 Defaulting to bidirectional associations should be avoided; only model them if collaboration truly occurs in both directions.26  
+  * **Aggregation (Hollow Diamond):** Represents a "has-a" or "part-of" relationship where the part can exist independently of the whole (e.g., a Department has Professors, but a Professor can exist without a Department).26  
+  * **Composition (Filled Diamond):** A stronger form of aggregation representing ownership, where the part's lifecycle is tied to the whole (e.g., an Order is composed of OrderLineItems; if the Order is deleted, its line items are also deleted).26  
+  * **Generalization (Inheritance):** An "is-a" relationship, represented by a solid line with a closed, unfilled arrowhead pointing to the superclass.25  
+* **Clarity and Simplicity:** Avoid creating overly large or cluttered diagrams. A good rule of thumb is that a diagram should be focused enough to be printed legibly on a single page.27 Use compartment visibility to hide attributes and operations that are not relevant to the specific point the diagram is making.26 Avoid crossing lines wherever possible.27
+
+#### **2.2.2 Entity-Relationship Diagrams (ERDs): Designing the Database Schema**
+
+The Entity-Relationship Diagram (ERD) is the definitive blueprint for a relational database.1 It visually represents the database tables (Entities), their columns (Attributes), and the relationships between them, including the cardinality (one-to-one, one-to-many, many-to-many) that enforces business rules.
+
+**Best Practices for Creating ERDs:**
+
+* **Clarity and Simplicity:** Use a standard, widely understood notation like Crow's Foot. The diagram should be free from unnecessary clutter; its purpose is to show the data structure, not every possible query path.28 Labels for entities, attributes, and relationships must be clear, concise, and unambiguous.  
+* **Accuracy:** This is the most critical principle. The ERD must be an accurate representation of the business's data rules. All entities and their attributes must be correctly identified.28 Relationships must correctly model the business logic; for example, a many-to-many relationship between Students and Courses must be resolved by creating a junction table (e.g., Enrollments) with one-to-many relationships to both original tables.  
+* **Consistency:** Maintain a consistent naming convention throughout the schema. A common convention is to use plural nouns in PascalCase or snake\_case for entity (table) names (e.g., Users, ProductOrders) and singular nouns for attribute (column) names, often including the entity name as a prefix or suffix for primary/foreign keys (e.g., UserID, OrderID).28  
+* **Involve Stakeholders:** Involving end-users or domain experts in the ERD design process can help ensure that the model accurately reflects their needs and the true business processes, leading to a more effective database design.28
+
+#### **2.2.3 The Data Dictionary: The Authoritative Guide to Your Data**
+
+While the ERD provides the visual structure of the database, the Data Dictionary provides the detailed, textual specification for every single piece of data.1 It is a crucial companion document that captures metadata that cannot be easily represented on a diagram, ensuring a common understanding of the meaning and characteristics of the data.29
+
+**Essential Content for a Data Dictionary:**
+
+For each attribute (column) in each entity (table), the data dictionary should contain:
+
+* **Element Name:** The logical name of the field (e.g., users.email).30  
+* **Data Type:** The technical data type (e.g., VARCHAR, INTEGER, TIMESTAMP).31  
+* **Constraints:** Any rules applied to the data, such as max\_length: 255, NOT NULL, UNIQUE, or a range of accepted values.1  
+* **Description:** A clear, plain-language definition of what the data element represents and its business purpose.30  
+* **Validation Rules:** Any specific business logic used to validate the data (e.g., "Must be a valid email format").  
+* **Indexing:** Whether the column is indexed for performance.  
+* **Example Value:** A sample of what valid data looks like.
+
+**Best Practices for Managing a Data Dictionary:**
+
+* **Establish Clear Ownership:** Assign a specific team or individual (a data steward) as the owner responsible for approving all terms and maintaining the dictionary's accuracy.32  
+* **Standardize Naming Conventions:** Enforce standardized, meaningful naming conventions for all data elements. Minimize abbreviations and avoid spaces or special characters in technical names.31  
+* **Keep it a Living Document:** Data environments are dynamic. The data dictionary must be regularly reviewed and updated as the system evolves. It is not a "write-once" artifact.31  
+* **Leverage Automation:** Manual maintenance is error-prone. Use tools that can automate metadata extraction from the database to keep the dictionary synchronized with the actual schema.31
+
+### **2.3 Modeling System Interactions**
+
+These artifacts focus on the communication patterns between different parts of the system, defining the contracts that govern their interactions.
+
+#### **2.3.1 Sequence Diagrams: The Choreography of API Contracts**
+
+A Sequence Diagram is the ideal tool for designing and visualizing the time-ordered interactions between different components or services to accomplish a specific task.1 It excels at showing the "choreography" of an operation, such as a user logging in, which might involve interactions between a web client, a backend authentication service, a user database, and a logging service.34
+
+**Best Practices for Creating Sequence Diagrams:**
+
+* **Layout:** Participants (objects, components, or actors) are arranged horizontally at the top, each with a vertical "lifeline." The initiating actor or component should be on the far left. Time progresses downwards, so messages should generally flow from left to right and top to bottom.35  
+* **Messages:**  
+  * **Synchronous Message:** A request that waits for a response. Represented by a solid line with a filled arrowhead.  
+  * **Return Message:** The response to a synchronous message. Represented by a dashed line with an open arrowhead.36  
+  * **Asynchronous Message:** A message that does not wait for a response. Represented by a solid line with an open arrowhead.36  
+* **Activation Boxes:** A thin rectangle placed on a participant's lifeline indicates the period during which that participant is active or processing a message. This clearly shows the flow of control.36  
+* **Interaction Fragments:** To model complex logic without cluttering the diagram, use fragments, which are boxes drawn around a set of messages:  
+  * **loop:** For interactions that repeat.  
+  * **opt:** For optional interactions that only occur if a certain condition is met.  
+  * **alt:** For "if-then-else" logic, showing alternative interaction paths.36  
+* **Focus on Critical Interactions:** Do not try to model every single method call. A sequence diagram should focus on the significant interactions between major components that are necessary to understand the flow.35
+
+#### **2.3.2 The API Contract: Formalizing Service-to-Service Communication**

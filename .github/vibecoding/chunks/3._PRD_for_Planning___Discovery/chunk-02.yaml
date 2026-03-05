@@ -1,0 +1,91 @@
+---
+source: "./.github/instructions/SDLC/3. PRD for Planning & Discovery.md"
+chunk_index: 2
+token_estimate: 3748
+hash: "becf54578d3fea86c179a4bb8a1cb55ece65b329edfcfe7091ba4d0ff86d71f1"
+summary: "| **Non-Functional Rqmts.** | To define the quality, performance, and security standards of the system. | Engineering..."
+---
+| **Non-Functional Rqmts.** | To define the quality, performance, and security standards of the system. | Engineering, DevOps, Security | "The API response time for data sync must be \<500ms for 99% of requests." |
+| **Design Assets** | To provide visual context and clarify user flows and interactions. | Entire Team | "Link to Figma Prototype:" |
+| **Assumptions** | To make hidden risks explicit and subject to validation. | Product, Engineering, Leadership | "Assumption: All sales reps will have the mobile app installed on their company-issued phones." |
+| **Dependencies** | To identify external factors required for project success. | Product, Project Management | "Dependency: Requires completion of the new Authentication Service by the Platform Team (JIRA-PLAT-123)." |
+| **Out of Scope** | To prevent scope creep and maintain focus by defining clear boundaries. | Entire Team, Stakeholders | "Out of Scope for V1: Integration with HubSpot; Offline data sync capabilities." |
+| **Open Questions** | To track unresolved issues and ensure they are addressed. | Entire Team | "Q: What is the rate limit for the third-party transcription API? (Owner: Tech Lead)" |
+| **Decision Log** | To create a permanent record of key decisions and their rationale. | Entire Team | "Decision (2024-05-15): We will use OAuth 2.0 for authentication to align with company security standards." |
+
+## **Section 2: The Tactical Playbook: A Step-by-Step Guide to Authoring Your PRD**
+
+Creating a Product Requirements Document is not a solitary act of writing; it is a collaborative process of discovery, refinement, and alignment. The value generated during the creation of the PRD is often as important as the final document itself. This structured, multi-phase approach ensures that the final artifact is not just a set of requirements, but a well-vetted, universally understood plan that has been pressure-tested from business, design, and technical perspectives. This process is, in itself, a direct implementation of the risk-reduction philosophy that underpins the entire SDLC.
+
+### **2.1 Phase 1: The Homework \- Synthesize, Don't Invent**
+
+The author of the PRD, typically a Product Manager or Business Analyst, does not invent requirements in a vacuum. The process begins with the primary activity of the Discovery phase: Problem Analysis.1 This initial phase is about disciplined synthesis, not creative invention. The goal is to gather all available intelligence and distill it into a coherent understanding of the problem space.
+
+The key inputs for this phase are the raw materials gathered during discovery activities.1 These include notes and transcripts from user interviews, quantitative data from market research and product analytics, competitive analysis reports, documented business requirements from leadership, and anecdotal feedback from internal, customer-facing teams like sales and customer support.1 The output of this phase is not the PRD itself, but a deep, evidence-based understanding of the user's pain points, the business context, and the market opportunity. This foundational knowledge is what allows the PRD author to write with authority and conviction.
+
+### **2.2 Phase 2: The First Draft \- Focus on the "Why"**
+
+With a solid foundation of research, the writing process can begin. The best practice is to start the first draft in a private or controlled space (e.g., a personal draft in Google Docs or Confluence) to allow for free-form thinking without premature scrutiny.4 The initial focus should be exclusively on the strategic sections of the PRD: the Problem Statement, Target Audience & Personas, Strategic Fit & Business Objectives, and Success Metrics.4
+
+During this stage, it is not only acceptable but highly encouraged to use placeholders like "TBD" (To Be Determined) for areas that are still unclear or require further input.4 The primary objective is to construct the logical, narrative foundation of the document. By first defining the "why" (the problem) and the "how we'll know we've won" (the metrics), the author creates a robust framework. The "what" (the features and requirements) will be filled in later, and will be much stronger for being built upon this strategic bedrock.
+
+### **2.3 Phase 3: The Review Gauntlet \- Forging Alignment Through Collaboration**
+
+This phase is the heart of the collaborative PRD process and the primary mechanism for risk mitigation. The draft PRD is systematically exposed to key disciplines in a specific sequence to gather feedback, identify constraints, and build consensus. Each step in this "gauntlet" is designed to de-risk a different aspect of the project.
+
+* **Step 3a: Share with Design:** The first review should be with the UX/UI design lead.4 This is the "desirability and usability" check. Engaging design before engineering is a crucial tactic because feedback on user flows, interaction models, and overall user experience can fundamentally shape the functional requirements. A designer might propose a simpler, more elegant solution to a user problem that is less complex to build. This early collaboration prevents the team from investing engineering effort in defining and estimating a solution that is ultimately flawed from a user's perspective.  
+* **Step 3b: Share with Engineering:** Once the user-facing aspects have been refined with design, the next step is to engage the Tech Lead and relevant senior engineers.4 This is the "feasibility and viability" check. The engineering team will review the requirements for technical feasibility, identify potential architectural challenges, highlight dependencies on other systems, and provide high-level effort estimates.11 This feedback is critical for right-sizing the scope of the project. It may reveal that a seemingly simple requirement is technically complex, or that a different technical approach could deliver 80% of the value for 20% of the effort. This review ensures that the PRD is grounded in technical reality before it is widely socialized.  
+* **Step 3c: Share with the Full Project Team:** With a baseline of user desirability and technical feasibility established, the PRD is now ready for review by the entire project team and key stakeholders.4 This broader review serves to build a shared understanding across all roles (including QA, marketing, and support) and to surface any remaining open questions or concerns. This is the final alignment check, ensuring that everyone who will touch the project has had an opportunity to provide input and understands the goals and scope.
+
+This sequential review process is a powerful risk reduction mechanism. The design review mitigates the risk of building an unusable product. The engineering review mitigates the risk of building an unachievable or unsustainable product. The full team review mitigates the risk of misalignment and miscommunication during execution. By the time the PRD exits this gauntlet, it has been transformed from a single person's proposal into a collectively owned and validated plan, directly fulfilling the SDLC's mandate to manage risk at each phase gate.1
+
+### **2.4 Phase 4: Finalization and Socialization**
+
+After incorporating the feedback from all review cycles, the PRD is ready for finalization. This involves resolving any remaining open questions, getting formal sign-off or agreement from the key decision-makers, and updating the document's status to "Approved" or "Ready for Development."
+
+Once finalized, the PRD should be moved to a public, easily accessible, and centralized location, such as a company-wide Confluence space or Notion workspace.4 This reinforces its status as the single source of truth for the project. The final step is to socialize the plan. This often involves more than just sharing a link. A best practice is to assemble a well-structured presentation that summarizes the PRD's key points—the problem, the goals, the solution, and the success metrics—and present it to the wider company or relevant departments.4 This act of presenting the narrative of the project ensures broad awareness and solidifies stakeholder buy-in.
+
+## **Section 3: Advanced Tactics and Best Practices for Maximum Impact**
+
+A competently written PRD can guide a project. A masterfully crafted PRD can accelerate it. The difference lies in the application of advanced tactics and best practices that elevate the document from a mere specification to a strategic tool for communication, focus, and empowerment. These techniques address the nuances of requirement definition, prioritization, and document management, ensuring the PRD has maximum impact.
+
+### **3.1 The Art of Precision: Write Unambiguous Requirements**
+
+The most common point of failure in a PRD is ambiguity. Vague, subjective terms like "user-friendly," "fast," "robust," or "seamless" are open to interpretation and are a primary cause of misalignment between product, design, and engineering.11 This ambiguity leads to constant firefighting, rework, and sprints that end in chaos because the acceptance criteria were never clearly defined.18
+
+The tactic to combat this is to replace every vague adjective with a specific, measurable, and testable acceptance criterion. This transforms a subjective wish into an objective, verifiable requirement.
+
+* **Vague:** "The product should be user-friendly." 11  
+* **Precise:** "A new user must be able to complete the core onboarding workflow in under 3 minutes without assistance, as validated by usability testing with 5 representative users."  
+* **Vague:** "The page should load fast." 12  
+* **Precise:** "The main dashboard page must achieve a Google Lighthouse Performance score of 90+ and load to an interactive state in under 2 seconds on a standard 4G mobile connection." 12
+
+By insisting on this level of precision, the PRD removes guesswork and provides the engineering and QA teams with a clear definition of "done."
+
+### **3.2 The Power of Prioritization**
+
+A flat, unprioritized list of requirements is a recipe for failure. In the real world of software development, trade-offs are inevitable. Without clear priorities, teams are forced to guess which features are most important, often leading to wasted effort on low-value items while critical functionality is delayed.11 The PRD must be an opinionated document that clearly communicates the relative importance of each requirement.
+
+A highly effective tactic is to use a formal prioritization framework for every user story or major functional requirement. The MoSCoW method (Must-have, Should-have, Could-have, Won't-have) is a popular and effective choice.12 A simpler numerical scale (e.g., P0, P1, P2) can also work. This explicit prioritization empowers the development team to make smart, autonomous decisions when faced with time or resource constraints. It ensures that if cuts need to be made, the team is cutting from the bottom of the list, preserving the core value of the release.
+
+### **3.3 Wielding the "Non-Goal" as a Strategic Weapon**
+
+The "Out of Scope" or "Non-Goals" section is frequently treated as an afterthought, but it is one of the most potent strategic tools in the document. Its primary purpose is to serve as a proactive defense against scope creep, the insidious process by which a project's scope expands beyond its original objectives, leading to delays and feature bloat.5
+
+An advanced tactic is to use this section interactively during stakeholder reviews. When a stakeholder suggests a new feature or idea that is good but not essential for the current release's core purpose, the Product Manager should not dismiss it. Instead, they should validate the stakeholder's input by saying, "That's a great idea for the future. To ensure we stay focused on our primary goal for this release, let's add it to our 'Out of Scope for V1' section to make sure we don't lose track of it." This approach achieves two critical objectives: it makes the stakeholder feel heard and valued, while simultaneously protecting the project's focus and reinforcing its established boundaries.
+
+### **3.4 The Living Document Philosophy**
+
+A common misconception, particularly in more traditional development environments, is that a PRD is a static document, written in stone once it is approved. This is a dangerous anti-pattern. In modern, agile development, a PRD must be a living document that evolves as the team learns more about the problem, the user, and the technical solution.2
+
+The key tactic for managing this evolution without creating chaos is to establish a clear and lightweight change control process. The "Change History" log in the document's metadata is the primary tool for this. Any significant change to the scope, requirements, or success metrics after the PRD has been approved should be documented in this log. The entry should include who made the change, when it was made, and a brief rationale for the change. This process ensures that the PRD can adapt to new information while remaining a reliable and trustworthy source of truth for the entire team.
+
+### **3.5 Visual Storytelling: A Picture is Worth 1,000 Requirements**
+
+Complex user flows, intricate business logic, or multi-system interactions can be notoriously difficult to describe accurately and unambiguously with text alone. Relying solely on written descriptions for these complex areas often leads to misinterpretation.
+
+A powerful tactic is to liberally supplement textual requirements with visual aids.2 Embedding a simple user flow diagram created in a tool like Miro or Figma can provide more clarity in a single image than pages of text. A sequence diagram can perfectly illustrate the interactions between a front-end client, a back-end API, and a third-party service. These visual artifacts cater to different learning styles within the team and dramatically reduce the cognitive load required to understand complex requirements, minimizing the risk of implementation errors.
+
+The application of these advanced practices fundamentally shifts the role of the PRD. There is an inherent tension between the need for a formal "source of truth" and the agile principle of embracing change.1 The most effective PRD resolves this tension by functioning not as a rigid, micro-managerial dictatorship, but as a flexible and empowering constitution for the project. Like a constitution, it defines the fundamental principles (the problem and goals), the rights and needs of the citizens (the user personas and stories), and the high-level structure of the system. It also provides a clear process for making amendments (the change control process). It does not, however, prescribe every single detail of execution. It sets the strategic context, the goals, and the boundaries, and then empowers the development team with the autonomy and trust to use their expertise to find the best implementation solutions. It defines the *what* and the *why*, trusting the team to determine the *how*.
+
+## **Section 4: Navigating Common Pitfalls and Anti-Patterns**

@@ -1,0 +1,136 @@
+name: AI Task Runner
+
+on:
+  push:
+    paths:
+      - '.github/tasks/queue/*.json'
+  workflow_dispatch:
+    inputs:
+      packet_id:
+        description: 'Delegation packet ID to execute'
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ai-task-runner
+  cancel-in-progress: false
+
+jobs:
+  validate-and-claim:
+    name: Validate Packet & Create Claim
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      packet_id: ${{ steps.validate.outputs.packet_id }}
+      agent: ${{ steps.validate.outputs.agent }}
+      valid: ${{ steps.validate.outputs.valid }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Check guardian STOP_ALL
+        id: guardian
+        run: |
+          STOP_FILE=".github/guardian/STOP_ALL"
+          if [[ -f "$STOP_FILE" ]]; then
+            STATUS=$(head -1 "$STOP_FILE" | awk '{print $1}')
+            if [[ "$STATUS" != "CLEAR" ]]; then
+              echo "::error::Guardian STOP_ALL is active. Halting task runner."
+              exit 1
+            fi
+          fi
+          echo "guardian=clear" >> "$GITHUB_OUTPUT"
+
+      - name: Find and validate packet
+        id: validate
+        run: |
+          set -euo pipefail
+
+          # Locate packet — either from dispatch input or newest queue file
+          if [[ -n "${PACKET_ID:-}" ]]; then
+            PACKET=".github/tasks/queue/${PACKET_ID}.json"
+          else
+            PACKET=$(ls -t .github/tasks/queue/*.json 2>/dev/null | head -1 || true)
+          fi
+
+          if [[ -z "$PACKET" || ! -f "$PACKET" ]]; then
+            echo "::notice::No packets in queue. Nothing to do."
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "Validating packet: $PACKET"
+
+          # Validate required fields
+          REQUIRED_FIELDS=("packet_id" "issued_by" "assigned_to" "objective" "success_criteria" "allowed_paths" "forbidden_paths" "max_token_budget")
+          MISSING=0
+          for field in "${REQUIRED_FIELDS[@]}"; do
+            if ! python3 -c "import json,sys; d=json.load(open('$PACKET')); assert '$field' in d" 2>/dev/null; then
+              echo "::error::Missing required field: $field in $PACKET"
+              MISSING=1
+            fi
+          done
+
+          if [[ "$MISSING" -eq 1 ]]; then
+            echo "valid=false" >> "$GITHUB_OUTPUT"
+            exit 1
+          fi
+
+          PACKET_ID=$(python3 -c "import json; print(json.load(open('$PACKET'))['packet_id'])")
+          AGENT=$(python3 -c "import json; print(json.load(open('$PACKET'))['assigned_to'])")
+
+          echo "packet_id=$PACKET_ID" >> "$GITHUB_OUTPUT"
+          echo "agent=$AGENT" >> "$GITHUB_OUTPUT"
+          echo "valid=true" >> "$GITHUB_OUTPUT"
+        env:
+          PACKET_ID: ${{ github.event.inputs.packet_id || '' }}
+
+      - name: Check for existing claim
+        if: steps.validate.outputs.valid == 'true'
+        run: |
+          CLAIM_FILE=".github/tasks/claims/${{ steps.validate.outputs.packet_id }}.json"
+          if [[ -f "$CLAIM_FILE" ]]; then
+            STATUS=$(python3 -c "import json; print(json.load(open('$CLAIM_FILE'))['status'])")
+            if [[ "$STATUS" == "COMPLETED" || "$STATUS" == "IN_PROGRESS" ]]; then
+              echo "::notice::Packet ${{ steps.validate.outputs.packet_id }} already $STATUS. Skipping."
+              exit 0
+            fi
+          fi
+
+      - name: Create claim
+        if: steps.validate.outputs.valid == 'true'
+        run: |
+          CLAIM_FILE=".github/tasks/claims/${{ steps.validate.outputs.packet_id }}.json"
+          mkdir -p .github/tasks/claims
+          cat > "$CLAIM_FILE" <<EOF
+          {
+            "packet_id": "${{ steps.validate.outputs.packet_id }}",
+            "agent_id": "${{ steps.validate.outputs.agent }}",
+            "started_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)",
+            "token_cost_estimate": 0,
+            "status": "CLAIMED"
+          }
+          EOF
+          git config user.name "ai-task-runner"
+          git config user.email "ai-task-runner@noreply.github.com"
+          git add "$CLAIM_FILE"
+          git commit -m "claim: ${{ steps.validate.outputs.packet_id }} by ${{ steps.validate.outputs.agent }}"
+          git push
+
+      - name: Summary
+        if: steps.validate.outputs.valid == 'true'
+        run: |
+          echo "## Task Runner — Packet Claimed" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Field | Value |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|-------|-------|" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Packet ID | \`${{ steps.validate.outputs.packet_id }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Agent | \`${{ steps.validate.outputs.agent }}\` |" >> "$GITHUB_STEP_SUMMARY"
+          echo "| Status | CLAIMED |" >> "$GITHUB_STEP_SUMMARY"

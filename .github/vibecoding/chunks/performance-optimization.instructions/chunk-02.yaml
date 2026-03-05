@@ -1,0 +1,193 @@
+---
+source: "./.github/instructions/performance-optimization.instructions.md"
+chunk_index: 2
+token_estimate: 1419
+hash: "c23e15ec84a018c4173cc531f0a9f86941866c65d3ee8687cfe3090615cf67c7"
+summary: "### Memory Management  - **Resource Cleanup:** Always release resources (files, sockets, DB   connections) promptly. ..."
+---
+### Memory Management
+
+- **Resource Cleanup:** Always release resources (files, sockets, DB
+  connections) promptly.
+- **Object Pooling:** Use for frequently created/destroyed objects (e.g., DB
+  connections, threads).
+- **Heap Monitoring:** Monitor heap usage and garbage collection. Tune GC
+  settings for your workload.
+- **Memory Leaks:** Use leak detection tools (Valgrind, LeakCanary, Chrome
+  DevTools).
+
+### Scalability
+
+- **Horizontal Scaling:** Design stateless services, use sharding/partitioning,
+  and load balancers.
+- **Auto-Scaling:** Use cloud auto-scaling groups and set sensible thresholds.
+- **Bottleneck Analysis:** Identify and address single points of failure.
+- **Distributed Systems:** Use idempotent operations, retries, and circuit
+  breakers.
+
+### Security and Performance
+
+- **Efficient Crypto:** Use hardware-accelerated and well-maintained
+  cryptographic libraries.
+- **Validation:** Validate inputs efficiently; avoid regexes in hot paths.
+- **Rate Limiting:** Protect against DoS without harming legitimate users.
+
+### Mobile Performance
+
+- **Startup Time:** Lazy load features, defer heavy work, and minimize initial
+  bundle size.
+- **Image/Asset Optimization:** Use responsive images and compress assets for
+  mobile bandwidth.
+- **Efficient Storage:** Use SQLite, Realm, or platform-optimized storage.
+- **Profiling:** Use Android Profiler, Instruments (iOS), or Firebase
+  Performance Monitoring.
+
+### Cloud and Serverless
+
+- **Cold Starts:** Minimize dependencies and keep functions warm.
+- **Resource Allocation:** Tune memory/CPU for serverless functions.
+- **Managed Services:** Use managed caching, queues, and DBs for scalability.
+- **Cost Optimization:** Monitor and optimize for cloud cost as a performance
+  metric.
+
+---
+
+## Practical Examples
+
+### Example 1: Debouncing User Input in JavaScript
+
+```javascript
+// BAD: Triggers API call on every keystroke
+input.addEventListener('input', (e) => {
+  fetch(`/search?q=${e.target.value}`);
+});
+
+// GOOD: Debounce API calls
+let timeout;
+input.addEventListener('input', (e) => {
+  clearTimeout(timeout);
+  timeout = setTimeout(() => {
+    fetch(`/search?q=${e.target.value}`);
+  }, 300);
+});
+```
+
+### Example 2: Efficient SQL Query
+
+```sql
+-- BAD: Selects all columns and does not use an index
+SELECT * FROM users WHERE email = 'user@example.com';
+
+-- GOOD: Selects only needed columns and uses an index
+SELECT id, name FROM users WHERE email = 'user@example.com';
+```
+
+### Example 3: Caching Expensive Computation in Python
+
+```python
+# BAD: Recomputes result every time
+result = expensive_function(x)
+
+# GOOD: Cache result
+from functools import lru_cache
+
+@lru_cache(maxsize=128)
+def expensive_function(x):
+    ...
+result = expensive_function(x)
+```
+
+### Example 4: Lazy Loading Images in HTML
+
+```html
+<!-- BAD: Loads all images immediately -->
+<img src="large-image.jpg" />
+
+<!-- GOOD: Lazy loads images -->
+<img src="large-image.jpg" loading="lazy" />
+```
+
+### Example 5: Asynchronous I/O in Node.js
+
+```javascript
+// BAD: Blocking file read
+const data = fs.readFileSync('file.txt');
+
+// GOOD: Non-blocking file read
+fs.readFile('file.txt', (err, data) => {
+  if (err) throw err;
+  // process data
+});
+```
+
+### Example 6: Profiling a Python Function
+
+```python
+import cProfile
+import pstats
+
+def slow_function():
+    ...
+
+cProfile.run('slow_function()', 'profile.stats')
+p = pstats.Stats('profile.stats')
+p.sort_stats('cumulative').print_stats(10)
+```
+
+### Example 7: Using Redis for Caching in Node.js
+
+```javascript
+const redis = require('redis');
+const client = redis.createClient();
+
+function getCachedData(key, fetchFunction) {
+  return new Promise((resolve, reject) => {
+    client.get(key, (err, data) => {
+      if (data) return resolve(JSON.parse(data));
+      fetchFunction().then((result) => {
+        client.setex(key, 3600, JSON.stringify(result));
+        resolve(result);
+      });
+    });
+  });
+}
+```
+
+---
+
+## References and Further Reading
+
+- [Google Web Fundamentals: Performance](https://web.dev/performance/)
+- [MDN Web Docs: Performance](https://developer.mozilla.org/en-US/docs/Web/Performance)
+- [OWASP: Performance Testing](https://owasp.org/www-project-performance-testing/)
+- [Microsoft Performance Best Practices](https://learn.microsoft.com/en-us/azure/architecture/best-practices/performance)
+- [PostgreSQL Performance Optimization](https://wiki.postgresql.org/wiki/Performance_Optimization)
+- [MySQL Performance Tuning](https://dev.mysql.com/doc/refman/8.0/en/optimization.html)
+- [Node.js Performance Best Practices](https://nodejs.org/en/docs/guides/simple-profiling/)
+- [Python Performance Tips](https://docs.python.org/3/library/profile.html)
+- [Java Performance Tuning](https://www.oracle.com/java/technologies/javase/performance.html)
+- [.NET Performance Guide](https://learn.microsoft.com/en-us/dotnet/standard/performance/)
+- [WebPageTest](https://www.webpagetest.org/)
+- [Lighthouse](https://developers.google.com/web/tools/lighthouse)
+- [Prometheus](https://prometheus.io/)
+- [Grafana](https://grafana.com/)
+- [k6 Load Testing](https://k6.io/)
+- [Gatling](https://gatling.io/)
+- [Locust](https://locust.io/)
+- [OpenTelemetry](https://opentelemetry.io/)
+- [Jaeger](https://www.jaegertracing.io/)
+- [Zipkin](https://zipkin.io/)
+
+---
+
+## Conclusion
+
+Performance optimization is an ongoing process. Always measure, profile, and
+iterate. Use these best practices, checklists, and troubleshooting tips to guide
+your development and code reviews for high-performance, scalable, and efficient
+software. If you have new tips or lessons learned, add them here—let's keep this
+guide growing!
+
+---
+
+<!-- End of Performance Optimization Instructions -->

@@ -1,0 +1,81 @@
+---
+source: "./.github/instructions/SDLC/3. PRD for Planning & Discovery.md"
+chunk_index: 3
+token_estimate: 3452
+hash: "41c3ba46cb469ab7862548a54d54e24efd02386cf1ab07d50570dcbb8237e610"
+summary: "Even with a solid template and a well-defined process, the creation of a PRD is fraught with potential pitfalls. Reco..."
+---
+Even with a solid template and a well-defined process, the creation of a PRD is fraught with potential pitfalls. Recognizing these common anti-patterns is the first step toward avoiding them. A proactive awareness of these failure modes allows teams to build stronger, more resilient requirements documents that serve their intended purpose of providing clarity and driving alignment.
+
+### **4.1 Pitfall: The Vague Requirement**
+
+* **Symptom:** The most common symptom is constant firefighting during the development cycle. Sprints frequently end in chaos, with a surge of bugs and requests for rework during the QA phase or sprint demos.18 The engineering team complains that the requirements are "unclear," and there are frequent debates about whether a feature is "done" because the acceptance criteria are subjective.  
+* **Cause:** This pitfall stems from the use of vague, ambiguous, and subjective language in the requirements section. Words like "intuitive," "fast," "easy," or "seamless" are used without being defined by objective, measurable criteria.11  
+* **Mitigation:** The mitigation strategy is to enforce a strict policy of precision. Every functional requirement must be accompanied by specific, testable acceptance criteria. Before a user story is considered "ready for development," it must be possible for a QA engineer to write a test case that can definitively pass or fail based on the written criteria.
+
+### **4.2 Pitfall: Solving Before Defining**
+
+* **Symptom:** The PRD reads like a technical specification or a UI design document. It jumps straight into detailing a specific solution—describing buttons, menus, and database tables—but lacks a clear and compelling problem statement or evidence of user need.  
+* **Cause:** This occurs when the team starts with a solution idea ("Let's build a dashboard\!") instead of doing the necessary "homework" to deeply understand the user's root problem.6 The team becomes fixated on *what* to build before understanding *why* they are building it.  
+* **Mitigation:** Adhere strictly to the "Why before What" structure outlined in Section 1\. The Problem Statement, Target Audience, and Success Metrics sections must be completed and validated *before* any detailed functional requirements or solutions are written. The PRD process should force the team to fall in love with the problem, not the solution.
+
+### **4.3 Pitfall: The "Ivory Tower" PRD**
+
+* **Symptom:** There is a palpable misalignment between teams. Leadership has one expectation for the project, the design team has another, and the engineering team builds a third version.18 The PRD is met with surprise or resistance when it is finally shared, indicating that key stakeholders were not involved in its creation.  
+* **Cause:** This happens when the Product Manager writes the PRD in isolation, without engaging key stakeholders from design, engineering, and the business early and often in the process.2  
+* **Mitigation:** The only effective mitigation is to embrace a deeply collaborative creation process, as detailed in the "Review Gauntlet" (Section 2.3). The PRD should be treated as a product of teamwork, with the Product Manager acting as a facilitator and editor rather than a sole author.4
+
+### **4.4 Pitfall: Ignoring Technical Reality**
+
+* **Symptom:** The project experiences significant, unplanned rework and frequent overtime for the engineering team. Sprints are consistently delayed because dependencies were hidden, or requirements that seemed simple on the surface turned out to be technically infeasible or vastly more complex than anticipated.18  
+* **Cause:** This is a direct result of failing to involve engineering leadership early and meaningfully in the requirements definition process.11 The PRD is written without a proper technical feasibility check.  
+* **Mitigation:** Make the engineering review a non-negotiable, critical step in the PRD process. The Tech Lead should be treated as a primary partner and co-owner of the PRD. Their input on feasibility, dependencies, and alternative technical approaches is not just helpful; it is essential for creating a realistic and achievable plan.
+
+### **4.5 Pitfall: The Bloated "Everything but the Kitchen Sink" PRD**
+
+* **Symptom:** The project suffers from chronic scope creep and feature bloat. The backlog is a sprawling list of "nice-to-have" features, and the team struggles to deliver a coherent, valuable product because they are trying to build too many things at once.18  
+* **Cause:** This is caused by two related failures: a lack of ruthless prioritization and the failure to define and defend clear non-goals.11 Every stakeholder request is added to the list without being weighed against the project's core objectives.  
+* **Mitigation:** Be disciplined and decisive in prioritization using a framework like MoSCoW. Furthermore, use the "Out of Scope" section proactively and strategically. It is the Product Manager's job to protect the project's focus by saying "no" or, more diplomatically, "not now," and the "Out of Scope" section is the tool for documenting those decisions.
+
+### **4.6 Common PRD Pitfalls and Mitigation Strategies**
+
+The following table provides a diagnostic tool for identifying and addressing the most common failures in the PRD process.
+
+| Pitfall / Anti-Pattern | Symptom (How to Spot It) | Actionable Mitigation Strategy |
+| :---- | :---- | :---- |
+| **The Vague Requirement** | Constant firefighting; debates over "done"; high bug counts in QA. | Replace all subjective language (e.g., "fast") with objective, measurable, and testable acceptance criteria (e.g., "loads in \<2s"). |
+| **Solving Before Defining** | The PRD describes a solution in detail but lacks a clear problem statement or user research. | Enforce a strict "Why before What" authoring process. Do not write a single functional requirement until the problem is clearly defined and validated. |
+| **The "Ivory Tower" PRD** | Surprise, resistance, or confusion when the PRD is shared; misalignment between teams. | Implement a mandatory, sequential "Review Gauntlet": PM drafts \-\> Design reviews \-\> Engineering reviews \-\> Full team reviews. |
+| **Ignoring Technical Reality** | Sprints are consistently delayed; frequent unplanned rework; engineers are frustrated by infeasible requests. | Make the Tech Lead a primary partner in the PRD creation. Their review for feasibility and dependencies is a non-negotiable gate. |
+| **The Bloated PRD** | Chronic scope creep; the backlog is filled with low-priority items; the team lacks focus. | Be ruthless with prioritization (e.g., use MoSCoW). Proactively use the "Out of Scope" section to document and defer non-essential features. |
+
+## **Conclusion: The PRD as a Catalyst for Alignment and Execution**
+
+The Product Requirements Document, when executed with rigor and a collaborative spirit, transcends its role as mere documentation. It becomes the primary strategic instrument of the Planning & Discovery phase, a catalyst that transforms a promising idea into an actionable, de-risked plan for execution. Its purpose is to build a bridge of understanding between the business's strategic intent and the development team's tactical work, ensuring that every effort is directed toward a common, well-defined goal.
+
+The core principles for authoring a world-class PRD are clear. It must be structured as a persuasive narrative, beginning with the foundational "why" before detailing the "what." Its creation must be a collaborative process, not a solitary act, leveraging the collective intelligence of design, engineering, and business stakeholders to forge a plan that is desirable, feasible, and viable. This process itself is a powerful risk-reduction mechanism. Finally, the PRD should function as a constitution for the project—a guiding document that provides clarity on goals and boundaries while empowering the team with the autonomy to innovate and excel in their execution.
+
+Ultimately, the greatest value derived from the PRD process is not the physical document itself, but the intangible asset it creates: a deep and resilient shared understanding across the entire team.3 It is this alignment—this collective clarity on the problem to be solved, the user to be served, and the success to be achieved—that is the true deliverable. A well-executed PRD in the Planning & Discovery phase is the single most important predictor of a successful project, setting the foundation that enables a team to not only build the product right, but to build the right product.
+
+#### **Works cited**
+
+1. SDLC.pdf  
+2. Free PRD Template: Guide to Product Requirements Documents, accessed October 28, 2025, [https://monday.com/blog/rnd/prd-template-product-requirement-document/](https://monday.com/blog/rnd/prd-template-product-requirement-document/)  
+3. PRD Templates: What To Include for Success \- Aha.io, accessed October 28, 2025, [https://www.aha.io/roadmapping/guide/requirements-management/what-is-a-good-product-requirements-document-template](https://www.aha.io/roadmapping/guide/requirements-management/what-is-a-good-product-requirements-document-template)  
+4. The Only Product Requirements Document (PRD) Template You Need, accessed October 28, 2025, [https://productschool.com/blog/product-strategy/product-template-requirements-document-prd](https://productschool.com/blog/product-strategy/product-template-requirements-document-prd)  
+5. Product requirements template | Confluence \- Atlassian, accessed October 28, 2025, [https://www.atlassian.com/software/confluence/templates/product-requirements](https://www.atlassian.com/software/confluence/templates/product-requirements)  
+6. Free PRD Template & Example for 2026 Software | Inflectra, accessed October 28, 2025, [https://www.inflectra.com/Ideas/Topic/PRD-Template.aspx](https://www.inflectra.com/Ideas/Topic/PRD-Template.aspx)  
+7. Writing PRDs and product requirements | by Carlin Yuen \- Medium, accessed October 28, 2025, [https://carlinyuen.medium.com/writing-prds-and-product-requirements-2effdb9c6def](https://carlinyuen.medium.com/writing-prds-and-product-requirements-2effdb9c6def)  
+8. What are some excellent examples of good PRDs? : r/ProductManagement \- Reddit, accessed October 28, 2025, [https://www.reddit.com/r/ProductManagement/comments/1g8v0oc/what\_are\_some\_excellent\_examples\_of\_good\_prds/](https://www.reddit.com/r/ProductManagement/comments/1g8v0oc/what_are_some_excellent_examples_of_good_prds/)  
+9. How To Write a Good PRD \- Cimit, accessed October 28, 2025, [https://www.cimit.org/documents/20151/228904/How%20To%20Write%20a%20Good%20PRD.pdf/9262a05e-05b2-6c19-7a37-9b2196af8b35](https://www.cimit.org/documents/20151/228904/How%20To%20Write%20a%20Good%20PRD.pdf/9262a05e-05b2-6c19-7a37-9b2196af8b35)  
+10. What is a Good Product Requirement Document (PRD)? \- Zeda.io, accessed October 28, 2025, [https://zeda.io/blog/product-requirement-document](https://zeda.io/blog/product-requirement-document)  
+11. 5 Common Pitfalls to Avoid When Writing Your Product Requirement ..., accessed October 28, 2025, [https://medium.com/@isaacijuo/5-common-pitfalls-to-avoid-when-writing-your-product-requirement-documents-7594a0133635](https://medium.com/@isaacijuo/5-common-pitfalls-to-avoid-when-writing-your-product-requirement-documents-7594a0133635)  
+12. Top 10 Mistakes to Avoid When Writing a Product Requirements ..., accessed October 28, 2025, [https://www.scopilot.ai/top-10-mistakes-to-avoid-when-writing-a-product-requirements-document/](https://www.scopilot.ai/top-10-mistakes-to-avoid-when-writing-a-product-requirements-document/)  
+13. How to create a product requirements document (PRD) \- Atlassian, accessed October 28, 2025, [https://www.atlassian.com/agile/product-management/requirements](https://www.atlassian.com/agile/product-management/requirements)  
+14. The best product requirement doc (PRD) prompt i've ever used : r/PromptEngineering, accessed October 28, 2025, [https://www.reddit.com/r/PromptEngineering/comments/1n2qzqr/the\_best\_product\_requirement\_doc\_prd\_prompt\_ive/](https://www.reddit.com/r/PromptEngineering/comments/1n2qzqr/the_best_product_requirement_doc_prd_prompt_ive/)  
+15. How to Write a Product Requirements Document (PRD) \- With Free Template | Formlabs, accessed October 28, 2025, [https://formlabs.com/blog/product-requirements-document-prd-with-template/](https://formlabs.com/blog/product-requirements-document-prd-with-template/)  
+16. Product Requirements Document (PRD): Purpose & Best Practices \- Fictiv, accessed October 28, 2025, [https://www.fictiv.com/articles/prd-product-requirements-document](https://www.fictiv.com/articles/prd-product-requirements-document)  
+17. How to Write a PRD (Product Requirements Document) — With ..., accessed October 28, 2025, [https://www.perforce.com/blog/alm/how-write-product-requirements-document-prd](https://www.perforce.com/blog/alm/how-write-product-requirements-document-prd)  
+18. Top 10 Sign Your Product has a Bad PRD (Product Requirements Document), accessed October 28, 2025, [https://www.smartwareadvisors.com/blogs/news/top-10-sign-your-product-has-a-bad-prd-product-requirements-document](https://www.smartwareadvisors.com/blogs/news/top-10-sign-your-product-has-a-bad-prd-product-requirements-document)  
+19. 12x PRD Examples | Real PRD Templates \- Hustle Badger, accessed October 28, 2025, [https://www.hustlebadger.com/what-do-product-teams-do/prd-template-examples/](https://www.hustlebadger.com/what-do-product-teams-do/prd-template-examples/)  
+20. The Problem with Product Requirements Documents \- Helix Design, accessed October 28, 2025, [https://helixdesign.com/tangents/the-problem-with-product-requirements-documents/](https://helixdesign.com/tangents/the-problem-with-product-requirements-documents/)

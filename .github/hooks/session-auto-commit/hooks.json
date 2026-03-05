@@ -1,0 +1,13 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionEnd": [
+      {
+        "command": "bash .github/hooks/session-auto-commit/auto-commit.sh",
+        "cwd": "${workspaceFolder}",
+        "env": {},
+        "timeoutSec": 30
+      }
+    ]
+  }
+}

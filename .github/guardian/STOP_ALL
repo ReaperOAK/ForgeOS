@@ -1,0 +1,13 @@
+# EMERGENCY STOP - Guardian File
+#
+# When this file contains the line "STOP" below, ALL agents MUST:
+# 1. Immediately cease heavy operations (writes, deploys, tests)
+# 2. Save current state to claim files
+# 3. Report status to ReaperOAK
+# 4. Wait for human clearance before resuming
+#
+# To activate: Add "STOP" on a line by itself below the delimiter
+# To deactivate: Remove the STOP line and add "CLEAR" with timestamp
+#
+# --- GUARDIAN STATUS ---
+CLEAR 2026-02-25T00:00:00Z

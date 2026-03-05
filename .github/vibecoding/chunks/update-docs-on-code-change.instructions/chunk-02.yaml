@@ -1,0 +1,85 @@
+---
+source: "./.github/instructions/update-docs-on-code-change.instructions.md"
+chunk_index: 2
+token_estimate: 610
+hash: "82348f4bead9f03af33476ec7df15a0e61885dc618f8bd6703755eee9438e83c"
+summary: ""docs:validate": "Run all documentation checks"   } } ```  ## Maintenance Schedule `apply-maintenance-schedule`  If `..."
+---
+    "docs:validate": "Run all documentation checks"
+  }
+}
+```
+
+## Maintenance Schedule `apply-maintenance-schedule`
+
+If `apply-maintenance-schedule == true`, then apply the following configurable
+instruction section.
+
+### Regular Reviews
+
+- **Monthly**: Review documentation for accuracy
+- **Per release**: Update version numbers and examples
+- **Quarterly**: Check for outdated patterns or deprecated features
+- **Annually**: Comprehensive documentation audit
+
+### Deprecation Process
+
+When deprecating features:
+
+1. Add deprecation notice to documentation
+2. Update examples to use recommended alternatives
+3. Create migration guide
+4. Update changelog with deprecation notice
+5. Set timeline for removal
+6. In next major version, remove deprecated feature and docs
+
+## Git Integration `apply-git-integration`
+
+If `apply-git-integration == true`, then apply the following configurable
+instruction section.
+
+### Pull Request Requirements
+
+**Documentation must be updated in the same PR as code changes:**
+
+- Document new features in the feature PR
+- Update examples when code changes
+- Add changelog entries with code changes
+- Update API docs when interfaces change
+
+### Documentation Review
+
+**During code review, verify:**
+
+- Documentation accurately describes the changes
+- Examples are clear and complete
+- No undocumented breaking changes
+- Changelog entry is appropriate
+- Migration guides are provided if needed
+
+## Review Checklist
+
+Before considering documentation complete, and concluding on the **final
+procedure**:
+
+- [ ] **Compiled instructions** are based on the sum of **constant instruction
+      sections** and **configurable instruction sections**
+- [ ] README.md reflects current project state
+- [ ] All new features are documented
+- [ ] Code examples are tested and work
+- [ ] API documentation is complete and accurate
+- [ ] Configuration examples are up to date
+- [ ] Breaking changes are documented with migration guide
+- [ ] CHANGELOG.md is updated
+- [ ] Links are valid and not broken
+- [ ] Installation instructions are current
+- [ ] Environment variables are documented
+
+## Updating Documentation on Code Change GOAL
+
+- Keep documentation close to code when possible
+- Use documentation generators for API reference
+- Maintain living documentation that evolves with code
+- Consider documentation as part of feature completeness
+- Review documentation in code reviews
+- Make documentation easy to find and navigate

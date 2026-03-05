@@ -1,0 +1,115 @@
+---
+source: "./.github/instructions/ARCHITECTURE.instructions.md"
+chunk_index: 2
+token_estimate: 1119
+hash: "488ad4c6ee20f353d9c4c7e442c2a1e055513a3a8e05b20cba10cbe6b9a708ed"
+summary: "| Confidence trend | Confidence gate assessments | Risk detection | | Threat detection rate | Governance audit logs |..."
+---
+| Confidence trend | Confidence gate assessments | Risk detection |
+| Threat detection rate | Governance audit logs | Security posture |
+| DAG completion % | Checkpoint protocol | Progress visibility |
+
+---
+
+## 14. Security Guardrails
+
+See `.github/instructions/security.agentic-guardrails.instructions.md` for full specification.
+
+Key constraints:
+
+- All subagents operate with least-privilege tool access
+- External content is sanitized before processing
+- Prompt injection patterns are detected and rejected
+- Memory bank entries are validated before persistence
+- Token runaway detection halts infinite loops
+- MCP servers are treated as untrusted by default
+- SARIF output format for machine-parseable security findings
+- SBOM generation for supply chain transparency
+- Policy-as-config for governance rules (YAML, not hardcoded)
+
+---
+
+## 15. CI/CD AI Integration
+
+See `.github/workflows/ai-*.yml` for workflow definitions.
+
+| Workflow | Trigger | Purpose |
+|----------|---------|---------|
+| `ai-code-review.yml` | pull_request | Automated code review with findings as comments |
+| `ai-test-validator.yml` | pull_request | Validate test coverage and quality |
+| `ai-security-scan.yml` | pull_request | Security vulnerability detection |
+| `ai-doc-sync.yml` | pull_request | Documentation freshness check |
+
+All workflows:
+
+- Use least-privilege tokens (read-only default)
+- Never auto-merge
+- Comment findings on PRs
+- Require human approval for write operations
+- Fail safely (no recursion, bounded execution)
+
+---
+
+## 16. Instruction File Authority
+
+The following instruction files are authoritative references for their
+domains and are loaded from `docs/instructions/`:
+
+| Domain | Instruction File |
+|--------|-----------------|
+| Accessibility | `a11y.instructions.md` |
+| Agent Safety | `agent-safety.instructions.md` |
+| AI Prompt Engineering | `ai-prompt-engineering-safety-best-practices.instructions.md` |
+| Context Engineering | `context-engineering.instructions.md` |
+| Docker/Containers | `containerization-docker-best-practices.instructions.md` |
+| DevOps | `devops-core-principles.instructions.md` |
+| CI/CD | `github-actions-ci-cd-best-practices.instructions.md` |
+| Markdown | `markdown.instructions.md` |
+| Memory Bank | `memory-bank.instructions.md` |
+| Performance | `performance-optimization.instructions.md` |
+| Playwright | `playwright-typescript.instructions.md` |
+| Security/OWASP | `security-and-owasp.instructions.md` |
+| Shell | `shell.instructions.md` |
+| Spec-Driven Workflow | `spec-driven-workflow-v1.instructions.md` |
+| Surgical Edits | `taming-copilot.instructions.md` |
+| Task Implementation | `task-implementation.instructions.md` |
+| Thought Logging | `copilot-thought-logging.instructions.md` |
+| TypeScript | `typescript-5-es2022.instructions.md` |
+
+---
+
+## 17. Claude Code Integration
+
+The vibecoding system supports **dual-agent operation** with both GitHub Copilot
+and Claude Code. Both agents share the same memory bank, instruction files, and
+governance principles.
+
+### Claude Code Configuration
+
+| Component | Location | Purpose |
+|-----------|----------|---------|
+| `CLAUDE.md` | Repository root | Primary instruction file (equivalent to `ReaperOAK.agent.md`) |
+| `.claude/settings.json` | `.claude/` | Hooks configuration for governance and logging |
+| `.claude/hooks/` | `.claude/hooks/` | Governance audit, prompt logging, session logging |
+| `.claude/commands/` | `.claude/commands/` | Slash commands (memory-bank-read, memory-bank-update, review, plan, security-audit, debug) |
+
+### Shared Resources (Agent-Agnostic)
+
+| Resource | Location | Used By |
+|----------|----------|---------|
+| Memory Bank | `.github/memory-bank/` | Both Copilot and Claude Code |
+| Instruction Files | `docs/instructions/` | Both Copilot and Claude Code |
+| Architecture Docs | `.github/instructions/ARCHITECTURE.instructions.md` | Both |
+| Security Guardrails | `.github/instructions/security.agentic-guardrails.instructions.md` | Both |
+| Cross-Cutting Protocols | `.github/agents/_cross-cutting-protocols.md` | Both |
+
+### Agent-Specific Resources
+
+| Resource | Copilot | Claude Code |
+|----------|---------|-------------|
+| Agent Definitions | `.github/agents/*.agent.md` | `CLAUDE.md` |
+| Hooks Config | `.github/hooks/*/hooks.json` | `.claude/settings.json` |
+| Hook Scripts | `.github/hooks/*/` | `.claude/hooks/` |
+| Log Directory | `logs/copilot/` | `logs/claude-code/` |
+| Slash Commands | N/A (built-in) | `.claude/commands/` |
+| Multi-Agent | `agent/runSubagent` tool | `Task` tool with subagent types |

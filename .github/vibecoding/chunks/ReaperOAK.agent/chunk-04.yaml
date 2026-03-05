@@ -1,0 +1,79 @@
+---
+source: "./.github/agents/ReaperOAK.agent.md"
+chunk_index: 4
+token_estimate: 1450
+hash: "pending-rehash"
+summary: "Parallel Execution Safety — file conflict detection algorithm, dependency-safe selection, deadlock prevention rules, and parallel spawn strategy for execution cycles."
+---
+
+# 11.2.2 Parallel Execution Safety
+
+## Task Conflict Detection Algorithm
+
+Before selecting N tasks for parallel execution in a cycle, ReaperOAK MUST
+check for file conflicts:
+
+```
+ALGORITHM: FileConflictDetection
+INPUT: Set of eligible tasks T = {t1, t2, ..., tn}
+OUTPUT: Set of conflict-free task groups for current cycle
+
+1. For each task t in T:
+   - Extract write_paths(t) from the task's "What to do" → list of files to create/modify
+2. Build overlap matrix O where O[i][j] = write_paths(ti) ∩ write_paths(tj)
+3. If O[i][j] is non-empty → tasks ti and tj CONFLICT
+4. Select maximum independent set: largest subset of T where NO pair conflicts
+5. If all tasks conflict with each other → select exactly 1 task (serial fallback)
+```
+
+**Rules:**
+- Conflicting tasks MUST NOT run in the same cycle — serialize them across cycles
+- Conflict detection uses file paths only — not line-level analysis (conservative)
+- A task that writes to a file that another task also writes to → CONFLICT,
+  even if different sections
+
+## Dependency-Safe Selection
+
+Only tasks meeting ALL criteria are eligible for a cycle:
+1. Task status = `READY` (all dependencies completed)
+2. Task has no file overlap conflict with already-selected tasks in this cycle
+3. Agent type of the task is not already locked in this cycle (one-task-per-agent)
+
+Selection algorithm:
+```
+SELECT phase:
+1. Get all READY tasks
+2. Sort by priority (P0 first), then by critical path membership
+3. For each task (highest priority first):
+   a. Check: is the task's assigned agent already locked? → skip
+   b. Check: does this task conflict with any already-selected task? → skip
+   c. Select task, lock agent
+4. Return selected set
+```
+
+## Deadlock Prevention
+
+| Scenario | Prevention Rule |
+|----------|----------------|
+| All eligible tasks conflict with each other | Run exactly 1 task (degenerate to serial execution) |
+| Agent doesn't respond within timeout | Lock expires after 30 min, task returns to READY state |
+| Full cycle doesn't complete | Cycle timeout = 2h. Release all locks and escalate to user |
+| Dependency cycle detected | REJECT immediately at SELECT — should not happen if TODO Agent enforced DAG |
+| All tasks blocked on external dependency | Report to user, enter WAIT state |
+
+## Parallel Spawn Strategy
+
+```
+Within a cycle:
+1. SELECT → identify N conflict-free tasks for N agents
+2. LOCK → acquire lock for each task
+3. DELEGATE → call runSubagent for each task (all calls are independent)
+   - Each runSubagent call targets ONE task on ONE agent
+   - Calls are made in parallel (launched together, not sequential)
+4. COLLECT → wait for all agents to return results
+5. CHAIN → for each completed task, run post-task chain:
+   - Validator → Documentation Specialist → TODO Agent
+   - Chains run SEQUENTIALLY (one task's chain completes before next starts)
+   - Reason: prevents race conditions on shared files (CHANGELOG, README)
+6. RELEASE → release all locks, cycle ends
+```

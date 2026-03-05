@@ -1,0 +1,36 @@
+{
+  "version": 1,
+  "hooks": {
+    "sessionStart": [
+      {
+        "command": "bash .github/hooks/governance-audit/audit-session-start.sh",
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "GOVERNANCE_LEVEL": "standard"
+        },
+        "timeoutSec": 10
+      }
+    ],
+    "sessionEnd": [
+      {
+        "command": "bash .github/hooks/governance-audit/audit-session-end.sh",
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "GOVERNANCE_LEVEL": "standard"
+        },
+        "timeoutSec": 10
+      }
+    ],
+    "userPromptSubmitted": [
+      {
+        "command": "bash .github/hooks/governance-audit/audit-prompt.sh",
+        "cwd": "${workspaceFolder}",
+        "env": {
+          "GOVERNANCE_LEVEL": "standard",
+          "BLOCK_ON_THREAT": "false"
+        },
+        "timeoutSec": 15
+      }
+    ]
+  }
+}

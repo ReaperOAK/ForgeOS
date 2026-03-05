@@ -1,0 +1,135 @@
+name: AI Test Validator
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [staged]
+    paths:
+      - '**/*.test.*'
+      - '**/*.spec.*'
+      - '**/tests/**'
+      - '**/test/**'
+      - '**/__tests__/**'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: ai-test-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  ai-test-validator:
+    name: AI Test Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            **/*.ts
+            **/*.js
+            **/*.py
+            **/*.cs
+            **/*.java
+
+      - name: Check test coverage for changed source files
+        run: |
+          echo "## 🧪 AI Test Validator Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          MISSING_TESTS=0
+
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            # Skip test files themselves, config files, and non-source files
+            if echo "$file" | grep -qE '\.(test|spec)\.|__tests__|/tests?/|\.config\.|\.d\.ts$'; then
+              continue
+            fi
+
+            # Skip markdown, yaml, json
+            if echo "$file" | grep -qE '\.(md|yml|yaml|json)$'; then
+              continue
+            fi
+
+            if [ -f "$file" ]; then
+              dir=$(dirname "$file")
+              base=$(basename "$file" | sed 's/\.[^.]*$//')
+              ext=$(echo "$file" | sed 's/.*\.//')
+
+              # Look for corresponding test file
+              TEST_FOUND=false
+
+              # Common test file patterns
+              for pattern in \
+                "${dir}/${base}.test.${ext}" \
+                "${dir}/${base}.spec.${ext}" \
+                "${dir}/__tests__/${base}.test.${ext}" \
+                "${dir}/__tests__/${base}.spec.${ext}" \
+                "${dir}/tests/${base}.test.${ext}" \
+                "${dir}/test/${base}_test.${ext}" \
+                "tests/${base}.test.${ext}" \
+                "test/${base}_test.${ext}"; do
+                if [ -f "$pattern" ]; then
+                  TEST_FOUND=true
+                  break
+                fi
+              done
+
+              if [ "$TEST_FOUND" = false ]; then
+                echo "- ⚠️ \`$file\`: No corresponding test file found" >> $GITHUB_STEP_SUMMARY
+                MISSING_TESTS=$((MISSING_TESTS + 1))
+              fi
+            fi
+          done
+
+          if [ $MISSING_TESTS -eq 0 ]; then
+            echo "✅ All changed source files have corresponding test files" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**$MISSING_TESTS source file(s) without test coverage detected.**" >> $GITHUB_STEP_SUMMARY
+            echo "Consider adding tests for comprehensive coverage." >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Validate test file quality
+        run: |
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Test Quality Checks" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          ISSUES=0
+
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if echo "$file" | grep -qE '\.(test|spec)\.'; then
+              if [ -f "$file" ]; then
+                # Check for empty test files
+                if [ $(wc -l < "$file") -lt 5 ]; then
+                  echo "- ⚠️ \`$file\`: Test file appears to be empty or minimal" >> $GITHUB_STEP_SUMMARY
+                  ISSUES=$((ISSUES + 1))
+                fi
+
+                # Check for skipped tests
+                if grep -qE '(\.skip|xit\(|xdescribe\(|@Disabled|@Ignore|pytest\.mark\.skip)' "$file"; then
+                  echo "- ⚠️ \`$file\`: Contains skipped tests" >> $GITHUB_STEP_SUMMARY
+                  ISSUES=$((ISSUES + 1))
+                fi
+
+                # Check for TODO/FIXME in tests
+                if grep -qiE '(TODO|FIXME|HACK|XXX)' "$file"; then
+                  echo "- ℹ️ \`$file\`: Contains TODO/FIXME comments" >> $GITHUB_STEP_SUMMARY
+                fi
+              fi
+            fi
+          done
+
+          if [ $ISSUES -eq 0 ]; then
+            echo "✅ Test quality checks passed" >> $GITHUB_STEP_SUMMARY
+          fi

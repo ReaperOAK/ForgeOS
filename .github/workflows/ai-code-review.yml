@@ -1,0 +1,177 @@
+name: AI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches: [staged]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: read
+
+concurrency:
+  group: ai-review-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  ai-code-review:
+    name: AI Code Review
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get changed files
+        id: changed-files
+        uses: tj-actions/changed-files@v45
+        with:
+          files: |
+            **/*.md
+            **/*.ts
+            **/*.js
+            **/*.py
+            **/*.yml
+            **/*.yaml
+            **/*.json
+
+      - name: Validate frontmatter on agent files
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          echo "## AI Code Review Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+
+          ERRORS=0
+
+          # Check agent files
+          for file in $(echo "${{ steps.changed-files.outputs.all_changed_files }}" | tr ' ' '\n' | grep '\.agent\.md$'); do
+            if [ -f "$file" ]; then
+              # Check for frontmatter
+              if ! head -1 "$file" | grep -q '^---'; then
+                echo "::error file=$file::Missing frontmatter in agent file"
+                echo "- ❌ \`$file\`: Missing frontmatter" >> $GITHUB_STEP_SUMMARY
+                ERRORS=$((ERRORS + 1))
+              fi
+
+              # Check for description field
+              if ! grep -q '^description:' "$file"; then
+                echo "::error file=$file::Missing description field in agent file"
+                echo "- ❌ \`$file\`: Missing description field" >> $GITHUB_STEP_SUMMARY
+                ERRORS=$((ERRORS + 1))
+              fi
+
+              # Check filename convention (lowercase with hyphens)
+              basename=$(basename "$file" .agent.md)
+              if echo "$basename" | grep -qP '[A-Z]'; then
+                echo "::warning file=$file::Filename should be lowercase with hyphens"
+                echo "- ⚠️ \`$file\`: Filename should be lowercase with hyphens" >> $GITHUB_STEP_SUMMARY
+              fi
+            fi
+          done
+
+          # Check instruction files
+          for file in $(echo "${{ steps.changed-files.outputs.all_changed_files }}" | tr ' ' '\n' | grep '\.instructions\.md$'); do
+            if [ -f "$file" ]; then
+              if ! head -1 "$file" | grep -q '^---'; then
+                echo "::error file=$file::Missing frontmatter in instruction file"
+                echo "- ❌ \`$file\`: Missing frontmatter" >> $GITHUB_STEP_SUMMARY
+                ERRORS=$((ERRORS + 1))
+              fi
+
+              if ! grep -q '^description:' "$file"; then
+                echo "::error file=$file::Missing description field"
+                echo "- ❌ \`$file\`: Missing description" >> $GITHUB_STEP_SUMMARY
+                ERRORS=$((ERRORS + 1))
+              fi
+
+              if ! grep -qE '^applyTo:' "$file"; then
+                echo "::error file=$file::Missing applyTo field"
+                echo "- ❌ \`$file\`: Missing applyTo field" >> $GITHUB_STEP_SUMMARY
+                ERRORS=$((ERRORS + 1))
+              fi
+            fi
+          done
+
+          # Check prompt files
+          for file in $(echo "${{ steps.changed-files.outputs.all_changed_files }}" | tr ' ' '\n' | grep '\.prompt\.md$'); do
+            if [ -f "$file" ]; then
+              if ! head -1 "$file" | grep -q '^---'; then
+                echo "::error file=$file::Missing frontmatter in prompt file"
+                echo "- ❌ \`$file\`: Missing frontmatter" >> $GITHUB_STEP_SUMMARY
+                ERRORS=$((ERRORS + 1))
+              fi
+
+              if ! grep -q '^description:' "$file"; then
+                echo "::error file=$file::Missing description field"
+                echo "- ❌ \`$file\`: Missing description" >> $GITHUB_STEP_SUMMARY
+                ERRORS=$((ERRORS + 1))
+              fi
+            fi
+          done
+
+          if [ $ERRORS -eq 0 ]; then
+            echo "✅ All changed files pass frontmatter validation" >> $GITHUB_STEP_SUMMARY
+          else
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**$ERRORS error(s) found. Please fix before merging.**" >> $GITHUB_STEP_SUMMARY
+            exit 1
+          fi
+
+      - name: Check for forbidden patterns
+        if: steps.changed-files.outputs.any_changed == 'true'
+        run: |
+          WARNINGS=0
+
+          for file in ${{ steps.changed-files.outputs.all_changed_files }}; do
+            if [ -f "$file" ]; then
+              # Check for hardcoded secrets patterns
+              if grep -qiP '(api[_-]?key|secret|password|token)\s*[:=]\s*["\x27][A-Za-z0-9+/=]{16,}' "$file" 2>/dev/null; then
+                echo "::error file=$file::Potential hardcoded secret detected"
+                echo "- 🔴 \`$file\`: Potential hardcoded secret detected" >> $GITHUB_STEP_SUMMARY
+                WARNINGS=$((WARNINGS + 1))
+              fi
+
+              # Check for force push instructions
+              if grep -qi 'git push.*--force\|git push.*-f ' "$file" 2>/dev/null; then
+                echo "::warning file=$file::Contains force push instruction"
+                echo "- ⚠️ \`$file\`: Contains force push instruction" >> $GITHUB_STEP_SUMMARY
+                WARNINGS=$((WARNINGS + 1))
+              fi
+
+              # Check for sudo/elevated privileges
+              if grep -qP '^\s*sudo\s' "$file" 2>/dev/null; then
+                echo "::warning file=$file::Contains sudo command"
+                echo "- ⚠️ \`$file\`: Contains sudo command" >> $GITHUB_STEP_SUMMARY
+                WARNINGS=$((WARNINGS + 1))
+              fi
+            fi
+          done
+
+          if [ $WARNINGS -gt 0 ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "**$WARNINGS security warning(s) found. Please review.**" >> $GITHUB_STEP_SUMMARY
+          fi
+
+      - name: Add review summary comment
+        if: always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const summary = process.env.GITHUB_STEP_SUMMARY
+              ? fs.readFileSync(process.env.GITHUB_STEP_SUMMARY, 'utf8')
+              : 'AI Code Review completed. Check workflow summary for details.';
+
+            // Only comment if there are findings
+            if (summary.includes('❌') || summary.includes('⚠️') || summary.includes('🔴')) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: `## 🤖 AI Code Review\n\n${summary}\n\n---\n*This review was generated automatically by the AI Code Review workflow. Human approval is still required to merge.*`
+              });
+            }

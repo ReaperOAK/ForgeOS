@@ -1,0 +1,479 @@
+---
+source: "./.github/agents/_cross-cutting-protocols.md"
+chunk_index: 1
+token_estimate: 3941
+hash: "1e6a050e1004adfe5bed5efe34a26048ec274634ff84b864afd946a1740fe4ad"
+summary: "--- user-invokable: false ---  # Cross-Cutting Agent Protocols v2.0  > **Applies to:** ALL subagents in this swarm. >..."
+---
+---
+user-invokable: false
+---
+
+# Cross-Cutting Agent Protocols v2.0
+
+> **Applies to:** ALL subagents in this swarm.
+> Every agent MUST follow these protocols in addition to their domain-specific
+> instructions. ReaperOAK enforces compliance.
+
+---
+
+## 1. Read-Understand-Generate (RUG) Discipline
+
+Before ANY action, follow this sequential confirmation protocol:
+
+```
+STEP 1 — READ: Load all required context files.
+  Confirm: "I have read [file1], [file2], ... and found [key patterns]."
+
+STEP 2 — UNDERSTAND: Synthesize what was read.
+  Confirm: "The current architecture uses [X pattern]. The conventions in
+  systemPatterns.md require [Y]. This constrains my approach to [Z]."
+
+STEP 3 — GENERATE: Only NOW produce output.
+  The output must demonstrably reference the context loaded in Steps 1-2.
+```
+
+**Violation detection:** If output references patterns not found in loaded
+context, the agent is hallucinating. ReaperOAK rejects and re-delegates.
+
+**Orchestrator RUG Rule (ReaperOAK):** The orchestrator NEVER performs
+implementation work directly. All implementation is delegated via `runSubagent`
+and tracked via `manage_todo_list`. The orchestrator's RUG cycle outputs
+delegation packets — never source code.
+
+---
+
+## 2. Self-Reflection Quality Scoring
+
+After completing work and BEFORE submitting output, every agent scores their
+own deliverable on a 1-10 scale across five dimensions:
+
+| Dimension | 1-3 (Poor) | 4-6 (Adequate) | 7-8 (Good) | 9-10 (Excellent) |
+|-----------|-----------|----------------|------------|-------------------|
+| **Correctness** | Has known bugs | Probably works | Tested & works | Proven correct |
+| **Completeness** | Missing sections | Covers basics | Covers edge cases | Comprehensive |
+| **Convention** | Ignores patterns | Mostly follows | Follows all patterns | Sets new standard |
+| **Clarity** | Confusing | Understandable | Clear and clean | Self-documenting |
+| **Impact** | May break things | No regressions | Improves existing | Transforms quality |
+
+**Quality Gate:**
+- ALL dimensions must score ≥ 7 to submit.
+- If any score < 7, the agent MUST self-iterate (max 3 iterations).
+- After 3 iterations without passing, escalate to ReaperOAK with honest
+  scores and specific blockers.
+
+**Output format:**
+```
+<self-reflection>
+Correctness: 8/10 — All happy paths verified, edge case X untested
+Completeness: 9/10 — All requirements covered including NFRs
+Convention: 8/10 — Follows systemPatterns.md, consistent naming
+Clarity: 7/10 — Core logic clear, helper function needs better naming
+Impact: 8/10 — Improves API response time, no regressions
+TOTAL: 40/50 — PASS (all ≥7)
+</self-reflection>
+```
+
+---
+
+## 3. Confidence-Gated Progression
+
+Every deliverable includes a confidence declaration:
+
+| Confidence | Range | Action |
+|-----------|-------|--------|
+| **High** | 90-100% | Proceed to next phase |
+| **Medium** | 70-89% | Proceed with flagged risks |
+| **Low** | 50-69% | Pause — request review from ReaperOAK |
+| **Insufficient** | < 50% | Block — escalate with unknowns listed |
+
+**Format:**
+```
+<confidence level="high" score="92">
+Basis: All tests pass, matches 3 existing patterns, reviewed by linter.
+Remaining risk: Concurrent access under >1000 RPS untested.
+</confidence>
+```
+
+**Rules:**
+- Agents CANNOT self-promote confidence above their evidence level.
+- "I think it works" = Medium at best. "Tests prove it works" = High.
+- Confidence must cite specific evidence (test results, grep matches, docs).
+
+---
+
+## 4. Anti-Laziness Verification Protocol
+
+Agents must provide **evidence** for every claim in their `<thought>` blocks:
+
+### Mandatory Evidence Types
+
+| Claim | Required Evidence |
+|-------|-----------------|
+| "I read the file" | Quote ≥1 specific pattern found in it |
+| "Tests pass" | Include test output summary or count |
+| "No regressions" | Reference grep/search results |
+| "Follows conventions" | Name the convention from systemPatterns.md |
+| "Secure implementation" | Reference specific OWASP category checked |
+| "Accessible" | Name the WCAG criterion satisfied |
+| "Performant" | Reference metric or complexity analysis |
+
+### Self-Challenge Questions (answer at least 2 per task)
+1. "What could I have missed?"
+2. "What would the Security agent find wrong with this?"
+3. "What would break if the input was 10x larger?"
+4. "Did I actually verify or just assume?"
+5. "Would a junior developer understand this without asking?"
+
+### Anti-Laziness for Orchestrator
+
+ReaperOAK must also prove diligence in delegation:
+
+| Claim | Required Evidence |
+|-------|-----------------|
+| "Task decomposed correctly" | Each subtask maps to exactly ONE agent |
+| "Dependencies are correct" | DAG edge list with justification |
+| "Research before implementation" | Research subagent was invoked FIRST |
+| "Specification adherence" | Every acceptance criterion has a corresponding task |
+| "Validation completed" | Validation subagent confirmed all acceptance criteria |
+
+**Common Failure Modes to Detect:**
+- Skipping research and jumping to implementation
+- Delegating to wrong agent (e.g., backend work to frontend)
+- Missing acceptance criteria in task decomposition
+- Not validating output before marking complete
+- Implementing directly instead of delegating
+
+---
+
+## 5. Context Engineering Protocol
+
+### Context Budget Management
+
+Each agent has a finite context window. Manage it strategically:
+
+```
+Priority 1 (ALWAYS load): systemPatterns.md, delegation packet, target files
+Priority 2 (LOAD if relevant): Related test files, API contracts, types/interfaces
+Priority 3 (SUMMARIZE): Large files where only structure matters
+Priority 4 (SKIP): Unrelated modules, generated files, vendor code
+```
+
+### File-Level Context Mapping
+
+Before modifying ANY code, build a Context Map of affected files:
+
+```yaml
+contextMap:
+  primaryFiles:        # Files being directly modified
+    - path: "src/api/users.ts"
+      role: "Target file — new endpoint being added"
+      lines: 145
+      patterns: ["Express router", "async/await", "Zod validation"]
+  secondaryFiles:      # Files that influence or are influenced by changes
+    - path: "src/types/user.ts"
+      role: "Type definitions consumed by target"
+      impact: "Must match new response shape"
+    - path: "src/middleware/auth.ts"
+      role: "Auth middleware applied to all routes"
+      impact: "New route needs same auth pattern"
+  testCoverage:        # Existing tests that need updating
+    - path: "tests/api/users.test.ts"
+      coverage: "Tests for GET/POST exist, need PUT tests"
+  patternsToFollow:    # Conventions discovered in existing code
+    - "All routes use asyncHandler wrapper"
+    - "Validation schemas co-located in route files"
+    - "Error responses follow RFC 7807 format"
+  suggestedSequence:   # Order to make changes
+    1: "Update types (user.ts)"
+    2: "Add route handler (users.ts)"
+    3: "Write tests (users.test.ts)"
+```
+
+**Context Map Rules:**
+- Search before you assume — find actual patterns in the codebase
+- Find existing implementations of the same kind before creating new ones
+- Warn about breaking changes to secondary files
+- Include test file coverage gaps in the map
+- Update the map when new patterns are discovered during implementation
+
+### Context Loading Declaration
+
+Before starting work, declare your context loading plan:
+
+```
+<context-plan>
+LOADING (full):
+  - src/api/users.ts (target file, 45 lines)
+  - src/types/user.ts (type definitions, 20 lines)
+  - tests/api/users.test.ts (existing tests, 80 lines)
+SUMMARIZING (structure only):
+  - src/api/ (directory listing for pattern discovery)
+SKIPPING (not relevant):
+  - src/frontend/ (out of scope)
+  - node_modules/ (vendor)
+Budget: ~200 lines loaded / ~3000 available
+</context-plan>
+```
+
+### Context Recovery
+
+When the agent's context feels stale or contradictory:
+1. Re-read the delegation packet
+2. Re-read systemPatterns.md
+3. Re-read the specific file being modified
+4. If still uncertain, request fresh delegation from ReaperOAK
+
+---
+
+## 6. Structured Autonomy Levels
+
+Each agent operates at one of three autonomy levels, set per-task by
+ReaperOAK in the delegation packet:
+
+| Level | Name | Agent Can Do | Agent Must Ask |
+|-------|------|-------------|---------------|
+| **L1** | Supervised | Read and analyze only | Any modification |
+| **L2** | Guided | Modify within declared scope | New files, new deps, scope changes |
+| **L3** | Autonomous | Full authority within domain | Cross-domain changes, destructive ops |
+
+**Default:** L2 (Guided) unless explicitly elevated or restricted.
+
+**Autonomy escalation:** If an agent needs higher autonomy mid-task, they
+must request it from ReaperOAK with justification:
+
+```yaml
+autonomyRequest:
+  currentLevel: L2
+  requestedLevel: L3
+  justification: "Need to create a new migration file to support schema change"
+  riskAssessment: "Low — migration is additive, no data loss"
+```
+
+---
+
+## 7. Governance Audit Trail
+
+Every agent action produces a structured audit entry:
+
+```yaml
+audit:
+  timestamp: ISO-8601
+  agentId: "{agent-name}"
+  taskId: "{task-id}"
+  action: "read|write|execute|analyze|delegate|escalate"
+  target: "file path or resource"
+  evidence: "brief description of what was done and verified"
+  confidenceAfter: 0-100
+  qualityScoreAfter: 0-50  # sum of 5 dimensions
+```
+
+These entries are appended to `activeContext.md` as a running log.
+ReaperOAK aggregates them for task-level and system-level quality dashboards.
+
+---
+
+## 8. Handoff Protocol
+
+When work transitions between agents, the handoff includes:
+
+```yaml
+handoff:
+  from: "{source-agent}"
+  to: "{target-agent}"
+  taskId: "{task-id}"
+  deliverables:
+    - path: "file/path"
+      description: "what was created/modified"
+      testEvidence: "how it was verified"
+  qualityScore: 40/50
+  confidence: 92
+  knownRisks:
+    - "Edge case X untested"
+  contextForNext:
+    mustRead:
+      - "file1.ts — contains the new API contract"
+    canSkip:
+      - "file2.ts — unchanged, irrelevant"
+  openQuestions:
+    - "Should error responses include stack traces in staging?"
+```
+
+### Sub-Agent Orchestration Patterns
+
+ReaperOAK follows these delegation rules:
+
+```
+RULE 1: One file = One subagent
+  Never assign the same file to multiple agents simultaneously.
+
+RULE 2: One concern = One subagent
+  Frontend UI work goes to Frontend. API routes go to Backend.
+  Never mix concerns in a single delegation.
+
+RULE 3: Research before Implementation
+  Always invoke Research Analyst before implementation agents
+  when the task involves unfamiliar libraries or uncertain approaches.
+
+RULE 4: Validation after Implementation
+  Always invoke QA and/or CI Reviewer after implementation is complete.
+  Never mark a task done without validation evidence.
+```
+
+**Delegation Prompt Template:**
+```
+CONTEXT: {what the project is, what was done so far}
+TASK: {specific deliverable expected}
+SCOPE: {files to modify, files to NOT touch}
+REQUIREMENTS: {acceptance criteria from the PRD}
+ACCEPTANCE: {how the agent should prove the task is done}
+CONSTRAINTS: {time, deps, patterns to follow}
+WHEN DONE: {exact output format expected}
+```
+
+---
+
+## 9. Failure Recovery Protocol
+
+When an agent encounters a failure:
+
+```
+Attempt 1: Retry with same approach, fresh context
+Attempt 2: Retry with alternative approach
+Attempt 3: Minimal viable output + detailed failure report
+After 3 failures: STOP. Report to ReaperOAK with:
+  - What was attempted (3 approaches)
+  - What failed and why
+  - Root cause hypothesis
+  - Recommended next action (different agent, human, etc.)
+```
+
+**NEVER:** Silently produce partial output and claim success.
+**NEVER:** Retry more than 3 times without escalating.
+**NEVER:** Blame external systems without evidence.
+
+---
+
+## 10. Communication Standards
+
+- **Be specific:** File paths, line numbers, function names — never vague
+- **Be constructive:** Problems MUST include suggested solutions
+- **Be honest:** Unknowns and uncertainties must be declared, not hidden
+- **Be concise:** Minimal words, maximum information density
+- **Be evidence-based:** Claims require citations (file, test, doc, metric)
+
+---
+
+## 11. Skill & Resource Loading Protocol
+
+Agents can extend their capabilities by loading skills from the project's
+`.github/skills/` directory or personal `~/.github/skills/` directory.
+
+### Skill Discovery
+
+Skills are discovered via **progressive loading**:
+
+| Level | What Loads | When |
+|-------|-----------|------|
+| 1. Discovery | `name` and `description` only | Always (lightweight metadata) |
+| 2. Instructions | Full `SKILL.md` body | When task matches description |
+| 3. Resources | Scripts, templates, references | Only when explicitly referenced |
+
+### Skill Loading Rules
+
+```
+1. SEARCH skill directories BEFORE implementing common patterns.
+   There may be a pre-built skill with scripts, templates, and reference docs.
+
+2. READ the SKILL.md description FIRST.
+   If it matches the current task, load the full instructions.
+
+3. REFERENCE bundled resources using relative paths.
+   Skills may include: scripts/, references/, assets/, templates/
+
+4. NEVER install or modify skills — load and consume only.
+
+5. PREFER skill scripts over generated code when available.
+   Pre-tested scripts are more reliable than generated equivalents.
+```
+
+### Skill Directory Structure
+
+```
+.github/skills/<skill-name>/
+├── SKILL.md              # Required: Instructions + description
+├── LICENSE.txt            # Optional: License terms
+├── scripts/              # Executable automation
+├── references/           # Documentation loaded into context
+├── assets/               # Static files used as-is
+└── templates/            # Starter code modified by agent
+```
+
+### When to Load Skills
+
+| Trigger | Action |
+|---------|--------|
+| Task involves testing | Search for `*test*` or `*playwright*` skills |
+| Task involves deployment | Search for `*deploy*` or `*infra*` skills |
+| Task involves documentation | Search for `*doc*` or `*writing*` skills |
+| Task involves unfamiliar domain | Search all skills for domain keywords |
+| Agent lacks confidence | Check if a skill provides templates/examples |
+
+---
+
+## 12. Specification Adherence Protocol
+
+Every task delegated by ReaperOAK includes acceptance criteria. Agents must
+demonstrate compliance with EVERY criterion — not just the ones they remember.
+
+### Adherence Checklist
+
+```
+Before marking a task complete:
+1. Re-read the delegation packet's acceptance criteria
+2. For EACH criterion, state:
+   - Criterion text (verbatim)
+   - Evidence of compliance (test, file path, grep result)
+   - Confidence level for THIS criterion
+3. If ANY criterion lacks evidence → task is NOT complete
+4. If ANY criterion is ambiguous → request clarification, don't assume
+```
+
+### Validation Subagent Pattern
+
+For critical tasks, ReaperOAK invokes a validation subagent:
+
+```
+CONTEXT: {agent-name} has completed {task-id}
+TASK: Validate all acceptance criteria are met
+SCOPE: {list of deliverable files}
+REQUIREMENTS: {verbatim acceptance criteria from original delegation}
+ACCEPTANCE: Each criterion has PASS/FAIL with evidence
+WHEN DONE: Return validation report
+```
+
+---
+
+## 13. Comment & Documentation Decision Framework
+
+Before writing any code comment or inline documentation, apply this filter:
+
+### Comment Decision Tree
+
+```
+1. Is the code self-explanatory via naming?
+   → YES: No comment needed
+   → NO: Continue
+
+2. Would a better variable/function name eliminate the need?
+   → YES: Refactor the name instead of commenting
+   → NO: Continue
+
+3. Does the comment explain WHY (not WHAT)?
+   → YES: Write the comment — it adds value
+   → NO: Don't write it
+
+4. Special cases that ALWAYS get comments:
+   - Complex business logic with domain rules
+   - Non-obvious algorithms (name the algorithm)
+   - Regex patterns (describe what they match)

@@ -1,0 +1,309 @@
+---
+id: sandbox-tool-acl
+version: "1.0"
+description: "Per-agent tool access control lists for sandboxed execution"
+locked_by: ReaperOAK
+immutable: true
+---
+
+# Sandbox Tool ACLs
+
+agents:
+  Architect:
+    allowed:
+      - search/codebase
+      - search/textSearch
+      - search/fileSearch
+      - search/listDirectory
+      - read/readFile
+      - read/problems
+      - edit/createFile (scoped: .github/**, docs/**)
+      - execute/runInTerminal (read-only commands only)
+      - terminal-tools/sendCommand (terminal: git)
+      - terminal-tools/listTerminals
+      - web/fetch (docs only)
+    denied:
+      - edit source files directly
+      - database operations
+      - deploy operations
+      - force-push
+    notes: "May propose architecture but not implement source code changes"
+
+  Backend:
+    allowed:
+      - search/codebase
+      - search/textSearch
+      - search/fileSearch
+      - read/readFile
+      - edit/createFile (scoped: src/**, tests/**)
+      - edit/editFile (scoped: src/**, tests/**)
+      - execute/runInTerminal (test, lint, build only)
+      - terminal-tools/sendCommand (terminals: git, backend)
+      - terminal-tools/listTerminals
+      - terminal-tools/deleteTerminal
+      - terminal-tools/cancelCommand
+    denied:
+      - database DDL
+      - deploy operations
+      - force-push
+      - edit .github/memory-bank/systemPatterns.md
+      - edit .github/memory-bank/decisionLog.md
+    notes: "May write source and test files within scope"
+
+  Frontend:
+    allowed:
+      - search/codebase
+      - search/textSearch
+      - search/fileSearch
+      - read/readFile
+      - edit/createFile (scoped: src/components/**, src/pages/**, src/styles/**)
+      - edit/editFile (scoped: src/components/**, src/pages/**, src/styles/**)
+      - execute/runInTerminal (test, lint, build only)
+      - terminal-tools/sendCommand (terminals: git, frontend)
+      - terminal-tools/listTerminals
+      - terminal-tools/deleteTerminal
+      - terminal-tools/cancelCommand
+    denied:
+      - backend source modifications
+      - database operations
+      - deploy operations
+      - force-push
+    notes: "May write frontend source and test files within scope"
+
+  QA:
+    allowed:
+      - search/codebase
+      - search/textSearch
+      - search/fileSearch
+      - read/readFile
+      - edit/createFile (scoped: tests/**, e2e/**)
+      - execute/runInTerminal (test, playwright, lint only)
+      - terminal-tools/sendCommand (terminals: git, qa)
+      - terminal-tools/listTerminals
+      - terminal-tools/deleteTerminal
+      - terminal-tools/cancelCommand
+      - read-only DB dump
+    denied:
+      - source code edits (non-test files)
+      - deploy operations
+      - database DDL
+      - force-push
+    notes: "May run tests and write test files only"
+
+  Security:
+    allowed:
+      - search/codebase
+      - search/textSearch
+      - search/fileSearch
+      - search/usages
+      - read/readFile
+      - edit/createFile (scoped: .github/memory-bank/riskRegister.md)
+      - execute/runInTerminal (security scan tools only)
+      - terminal-tools/sendCommand (terminals: git, security)
+      - terminal-tools/listTerminals
+      - terminal-tools/deleteTerminal
+      - terminal-tools/cancelCommand
+      - web/fetch (CVE databases, security advisories)
+    denied:
+      - source code edits
+      - deploy operations
+      - database operations
+      - force-push
+    notes: "May scan and report only; writes limited to riskRegister.md"
+
+  DevOps:
+    allowed:
+      - search/codebase
+      - search/textSearch
+      - search/fileSearch
+      - read/readFile
+      - edit/createFile (scoped: .github/workflows/**, infra/**)
+      - edit/editFile (scoped: .github/workflows/**, infra/**)
+      - execute/runInTerminal (terraform plan, docker build, helm template)
+      - terminal-tools/sendCommand (terminals: git, devops)
+      - terminal-tools/listTerminals
+      - terminal-tools/deleteTerminal
+      - terminal-tools/cancelCommand
+    denied:
+      - terraform apply (requires human sign-off)
+      - kubectl apply to production
+      - database operations
+      - force-push
+      - direct-deploy-production
+    notes: "May generate infra plans but not apply them"
+
+  ProductManager:
+    allowed:
+      - search/codebase
+      - search/textSearch
+      - read/readFile
+      - edit/createFile (scoped: .github/memory-bank/productContext.md, docs/specs/**)
+    denied:
+      - source code edits
+      - infrastructure changes
+      - deploy operations
+      - force-push
+    notes: "May write product context and specifications only"
+
+  Research:
+    allowed:
+      - search/codebase
+      - search/textSearch
+      - search/fileSearch
+      - read/readFile
+      - web/fetch
+      - web/githubRepo
+    denied:
+      - any file writes
+      - deploy operations
+      - database operations
+      - force-push
+    notes: "Read-only research agent; produces reports via delegation response"
+
+  Documentation:
+    allowed:
+      - search/codebase
+      - search/textSearch
+      - read/readFile
+      - edit/createFile (scoped: docs/**, README.md, CHANGELOG.md)
+      - edit/editFile (scoped: docs/**, README.md, CHANGELOG.md)
+    denied:
+      - source code edits
+      - infrastructure changes
+      - deploy operations
+      - force-push
+      - "edit/createFile (docs/reviews/**)"
+      - "edit/editFile (docs/reviews/**)"
+    notes: "May write documentation files only. Explicitly denied writes to docs/reviews/** (Validator report paths)."
+
+  CIReviewer:
+    allowed:
+      - search/codebase
+      - search/textSearch
+      - search/fileSearch
+      - read/readFile
+      - read/problems
+      - execute/runInTerminal (lint, test, build-check only)
+      - terminal-tools/sendCommand (terminals: git, ci-review)
+      - terminal-tools/listTerminals
+      - terminal-tools/cancelCommand
+    denied:
+      - any file writes
+      - deploy operations
+      - database operations
+      - force-push
+    notes: "Read-only reviewer; produces SARIF reports via delegation response"
+
+  UIDesigner:
+    allowed:
+      - search/codebase
+      - search/textSearch
+      - search/fileSearch
+      - search/listDirectory
+      - read/readFile
+      - read/problems
+      - edit/createFile (scoped: docs/design-specs/**)
+      - edit/editFile (scoped: docs/design-specs/**)
+      - stitch/create_project
+      - stitch/generate_screen_from_text
+      - stitch/edit_screens
+      - stitch/generate_variants
+      - stitch/get_project
+      - stitch/get_screen
+      - stitch/list_projects
+      - stitch/list_screens
+      - playwright/browser_snapshot
+      - playwright/browser_take_screenshot
+      - playwright/browser_navigate
+      - memory/create_entities
+      - memory/search_nodes
+      - memory/add_observations
+    denied:
+      - source code edits
+      - backend file modifications
+      - infrastructure changes
+      - deploy operations
+      - CI/CD configuration changes
+      - force-push
+      - database operations
+    notes: "May create design specifications and use Stitch/Playwright for visual design only"
+
+  TODO:
+    description: "Task decomposition and lifecycle management agent. runInTerminal is constrained to 'python todo_visual.py' only."
+    autonomy_level: L2
+    allowed_tools:
+      - search/codebase
+      - search/textSearch
+      - search/fileSearch
+      - search/listDirectory
+      - read/readFile
+      - read/problems
+      - edit/createFile
+      - edit/editFiles
+      - execute/runInTerminal  # python todo_visual.py only
+      - terminal-tools/sendCommand (terminal: tickets)
+      - terminal-tools/listTerminals
+      - todo
+    denied_tools:
+      - agent/runSubagent
+      - web/*
+      - github/*
+      - execute/createAndRunTask
+    tool_constraints:
+      execute/runInTerminal: "ONLY allowed command: python todo_visual.py (with optional flags like --json)"
+    write_scope:
+      allowed:
+        - "TODO/**/*.md"
+        - "TODO/archive/**/*.md"
+        - "TODO/.gitkeep"
+      denied:
+        - "**"
+    notes: "Decomposes features into granular tracked tasks; invokable only by ReaperOAK. Write scope is allowlist-only — denied: '**' blocks all paths not explicitly listed in allowed."
+
+  Validator:
+    description: "Independent SDLC compliance reviewer. Read-heavy, write-limited to validation reports."
+    autonomy_level: L2
+    allowed_tools:
+      - search/codebase
+      - search/textSearch
+      - search/fileSearch
+      - search/listDirectory
+      - search/searchResults
+      - search/searchSubagent
+      - read/readFile
+      - read/problems
+      - read/terminalSelection
+      - read/terminalLastCommand
+      - edit/createFile
+      - edit/editFiles
+      - execute/runInTerminal
+      - terminal-tools/sendCommand (terminals: git, validator, tickets)
+      - terminal-tools/listTerminals
+      - terminal-tools/cancelCommand
+      - todo
+    denied_tools:
+      - agent/runSubagent
+      - "web/*"
+      - "github/*"
+      - "stitch/*"
+    tool_constraints:
+      execute/runInTerminal: "Read-only verification commands only (lint, typecheck, test runners). No file modifications."
+    write_scope:
+      allowed:
+        - "docs/reviews/**"
+        - ".github/memory-bank/feedback-log.md"
+      denied:
+        - "**"
+    notes: "Independent SDLC compliance reviewer; invokable only by ReaperOAK at VALIDATION stage. Write scope is allowlist-only — denied: '**' blocks all paths not explicitly listed in allowed."
+
+# Apply Proposal Requirements
+apply_proposal:
+  description: "Any operation that applies infrastructure changes"
+  requires:
+    - agent produces apply_proposal.json with full plan
+    - human reviews and approves via PR labeled HUMAN_APPROVAL
+    - ReaperOAK validates approval signature
+    - only then may DevOps execute apply
+  format:
+    type: object
+    required: [action, target, plan_output, risk_assessment, rollback_plan]
