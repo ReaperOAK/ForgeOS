@@ -887,3 +887,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/TASK-FOS-06-001.md
 - **Decisions:** Added Commit Message Convention section to README (format, examples, rejection, developer setup, hook file table). Added prepare script to npm scripts table. Added CHANGELOG entry for Husky commit-msg hook. Shell scripts already had adequate inline comments — no changes needed. No JSDoc/TSDoc applicable (shell scripts only).
 - **Timestamp:** 2026-03-06T23:30:00Z
+
+### [FORGEOS-ARCH005] — Design Core Database Schema
+- **Artifacts:** docs/architecture/database-schema.md, .github/agent-output/Architect/FORGEOS-ARCH005.md
+- **Decisions:** Consolidated claims/lease_heartbeats/stage_transitions into tickets table + events table (hybrid model) rather than separate tables — reduces JOIN overhead, matches existing 001_initial.sql implementation. Chose TEXT[] arrays over junction tables for depends_on/file_paths (GIN-indexed, simpler schema). Chose partial unique index for file mutex over advisory locks (auditable, persistent). Documented 5 data type rationales (TEXT>VARCHAR, TIMESTAMPTZ>TIMESTAMP, UUID>SERIAL, TEXT[]>junction, JSONB>JSON). Produced ADR-003 with 5 design decisions.
+- **Timestamp:** 2026-03-07T00:00:00Z
