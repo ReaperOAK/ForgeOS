@@ -1,0 +1,64 @@
+services:
+  postgres:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: forgeos
+      POSTGRES_USER: forgeos
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "forgeos", "-d", "forgeos"]
+      interval: 10s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ./src/db/migrations:/docker-entrypoint-initdb.d:ro
+    secrets:
+      - db_password
+    restart: unless-stopped
+
+  pgbouncer:
+    image: edoburu/pgbouncer:latest
+    environment:
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - DB_USER=forgeos
+      - DB_PASSWORD_FILE=/run/secrets/db_password
+      - DB_NAME=forgeos
+      - POOL_MODE=transaction
+      - MAX_CLIENT_CONN=200
+      - DEFAULT_POOL_SIZE=50
+    ports:
+      - "6432:6432"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    secrets:
+      - db_password
+    restart: unless-stopped
+
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      DATABASE_URL: postgresql://forgeos:forgeos@pgbouncer:6432/forgeos
+      PORT: 3000
+      NODE_ENV: production
+      # Add other required env vars as needed
+    depends_on:
+      postgres:
+        condition: service_healthy
+      pgbouncer:
+        condition: service_started
+    volumes:
+      - ../:/workspace:ro
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+    name: pgdata
+
+secrets:
+  db_password:
+    file: ./secrets/db_password

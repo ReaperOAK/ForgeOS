@@ -4,7 +4,7 @@ audience: Backend engineers and architects evaluating event sourcing for ForgeOS
 purpose: Assess append-only event table design, event replay, LISTEN/NOTIFY streaming, JSONB vs normalized storage, and storage growth for ForgeOS
 diataxis: explanation
 status: reviewed
-last_reviewed: 2026-03-06T12:00:00Z
+last_reviewed: 2026-03-06T12:00:00Z  # Updated by Documentation Specialist 2026-03-06
 reviewed_by: Documentation Specialist
 ticket: FORGEOS-RES008
 ---

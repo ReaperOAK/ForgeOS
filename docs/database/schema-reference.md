@@ -2,16 +2,22 @@
 title: ForgeOS Database Schema Reference
 type: Reference
 audience: Backend Engineers, DevOps Engineers, Architects
-last_reviewed: 2026-03-06
+last_reviewed: 2026-03-06  # Updated by Documentation Specialist 2026-03-06
 migration_file: forgeos-server/src/db/migrations/001_initial.sql
 ---
 
 # ForgeOS Database Schema Reference
 
-This document describes the PostgreSQL schema for the ForgeOS distributed
-orchestration engine. It covers all tables, enums, indexes, stored functions,
-triggers, Row-Level Security policies, and seed data defined in the initial
-migration (`001_initial.sql`).
+
+This document describes the PostgreSQL schema for the ForgeOS distributed orchestration engine. It covers all tables, enums, indexes, stored functions, triggers, Row-Level Security policies, and seed data defined in the initial migration ([001_initial.sql](../../forgeos-server/src/db/migrations/001_initial.sql)).
+
+**See also:**
+- [Core Database Schema Architecture](../architecture/database-schema.md)
+- [ADR-001: PostgreSQL as Primary State Store](../architecture/adr/adr-001-postgresql.md)
+- [ADR-002: MCP as Agent Communication Protocol](../architecture/adr/adr-002-mcp-protocol.md)
+- [PG Distributed Locking](../research/pg-distributed-locking.md)
+- [PG Transaction Isolation](../research/pg-transaction-isolation.md)
+- [PG Event Sourcing](../research/pg-event-sourcing.md)
 
 **Prerequisites:** PostgreSQL 14+ with `uuid-ossp` and `pgcrypto` extensions.
 

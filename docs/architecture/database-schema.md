@@ -7,7 +7,7 @@ date: 2026-03-06T00:00:00Z
 status: APPROVED
 audience: Backend Engineers, DevOps Engineers, Architects, QA Engineers
 purpose: Define the complete PostgreSQL schema design including all tables, relationships, constraints, indexes, RLS policies, stored functions, and migration path
-last_reviewed: 2026-03-06T00:00:00Z
+last_reviewed: 2026-03-06T00:00:00Z  # Updated by Documentation Specialist 2026-03-06
 diataxis_quadrant: reference
 tags: [architecture, database, schema, postgresql, phase1, BLK-02-02]
 dependencies: [FORGEOS-ARCH001, FORGEOS-ARCH002]
@@ -18,6 +18,17 @@ evidence_base: [FORGEOS-RES005, FORGEOS-RES007, FORGEOS-RES008]
 
 > **Ticket:** FORGEOS-ARCH005 | **Agent:** Architect | **Date:** 2026-03-06
 > **Confidence:** HIGH (91%) | **Status:** APPROVED
+
+---
+
+**Related ADRs:**
+- [ADR-001: PostgreSQL as Primary State Store](adr/adr-001-postgresql.md)
+- [ADR-002: MCP as Agent Communication Protocol](adr/adr-002-mcp-protocol.md)
+
+**Key Research Reports:**
+- [PG Distributed Locking](../research/pg-distributed-locking.md)
+- [PG Transaction Isolation](../research/pg-transaction-isolation.md)
+- [PG Event Sourcing](../research/pg-event-sourcing.md)
 
 ---
 
@@ -740,7 +751,8 @@ CREATE TABLE system_config (
 
 ## 7. Entity-Relationship Diagram
 
-### 7.1 Mermaid ER Diagram
+
+### 7.1 Entity-Relationship Diagram (Mermaid)
 
 ```mermaid
 erDiagram
@@ -798,17 +810,17 @@ erDiagram
         ticket_priority priority
         ticket_status status
         ticket_stage stage
-        ticket_stage_array sdlc_flow
+        ticket_stage[] sdlc_flow
         UUID claimed_by FK
         TEXT claimed_by_name
         TEXT machine_id
         TEXT operator
         TIMESTAMPTZ lease_expiry
         INTEGER lease_duration_minutes
-        TEXT_ARRAY depends_on
-        TEXT_ARRAY file_paths
-        TEXT_ARRAY acceptance_criteria
-        TEXT_ARRAY tags
+        TEXT[] depends_on
+        TEXT[] file_paths
+        TEXT[] acceptance_criteria
+        TEXT[] tags
         INTEGER rework_count
         INTEGER max_reworks
         JSONB metadata

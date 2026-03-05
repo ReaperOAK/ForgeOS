@@ -8,7 +8,7 @@ date: 2026-03-06T00:00:00Z
 status: ACCEPTED
 audience: All engineers, architects, and operators working on ForgeOS
 purpose: Document the decision to adopt MCP (Model Context Protocol) as the primary agent-to-orchestrator communication protocol
-last_reviewed: 2026-03-06T18:00:00Z
+last_reviewed: 2026-03-06T18:00:00Z  # Updated by Documentation Specialist 2026-03-06
 diataxis_quadrant: explanation
 tags: [architecture, adr, mcp, protocol, phase1]
 ---

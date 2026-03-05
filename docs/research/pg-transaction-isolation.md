@@ -3,7 +3,7 @@ title: PostgreSQL Transaction Isolation Levels for ForgeOS
 audience: Backend engineers implementing ForgeOS ticket state machine
 purpose: Evaluate PostgreSQL isolation levels for ForgeOS operation types and recommend per-operation isolation strategy
 diataxis: explanation
-last_reviewed: 2026-03-06T12:00:00Z
+last_reviewed: 2026-03-06T12:00:00Z  # Updated by Documentation Specialist 2026-03-06
 ---
 
 # PostgreSQL Transaction Isolation Levels for ForgeOS

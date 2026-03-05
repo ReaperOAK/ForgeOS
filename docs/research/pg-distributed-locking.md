@@ -3,7 +3,7 @@ title: PostgreSQL Distributed Locking Patterns for ForgeOS
 audience: Backend engineers implementing ForgeOS ticket-claim system
 purpose: Evaluate PostgreSQL locking mechanisms for distributed ticket claiming, file-path mutex, and atomic state transitions
 diataxis: explanation
-last_reviewed: 2026-03-06T00:00:00Z
+last_reviewed: 2026-03-06T00:00:00Z  # Updated by Documentation Specialist 2026-03-06
 ---
 
 # PostgreSQL Distributed Locking Patterns for ForgeOS

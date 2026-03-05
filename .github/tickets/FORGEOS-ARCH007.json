@@ -19,8 +19,7 @@
     "FORGEOS-RES008"
   ],
   "blocked_by": [
-    "FORGEOS-ARCH005",
-    "FORGEOS-RES008"
+    "FORGEOS-ARCH005"
   ],
   "file_paths": [
     "docs/architecture/event-sourcing-schema.md"
