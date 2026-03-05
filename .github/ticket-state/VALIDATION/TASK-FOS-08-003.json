@@ -4,7 +4,7 @@
   "description": "Create the environment configuration template and config loader module. The .env.example file documents all required and optional environment variables with descriptions and example values as specified in Architecture \u00a78.3. The config loader (config/index.ts) reads environment variables with validation and sensible defaults, exports a typed Config object, and fails fast on missing required variables in production mode. Variables include: database connection (POSTGRES_PORT, DB_PASSWORD), PgBouncer (PGBOUNCER_PORT), MCP server (MCP_PORT, NODE_ENV, LOG_LEVEL), authentication (ADMIN_API_KEY), webhooks (WEBHOOK_SECRET), workspace (WORKSPACE_PATH), rate limiting, and lease defaults.",
   "type": "infra",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Config object is frozen (Object.freeze) after initialization to prevent mutation"
   ],
   "rework_count": 1,
-  "claimed_by": "Documentation Specialist",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-05T22:40:26.552986+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -189,6 +189,15 @@
       "from_stage": "DOCS",
       "to_stage": "DOCS",
       "details": "Claimed by reaperoak@pop-os via Documentation Specialist, lease until 2026-03-05T22:40:26.552986+00:00"
+    },
+    {
+      "timestamp": "2026-03-05T22:12:35.507894+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation Specialist",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
     }
   ],
   "source_task_file": "TODO/tickets/08-infrastructure.md",

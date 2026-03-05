@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-06T12:00:00Z -->
+<!-- last_reviewed: 2026-03-06T14:00:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -67,6 +67,17 @@ invalid configuration.
 | `DEFAULT_LEASE_MINUTES`  | No       | `30`                  | Default ticket claim lease duration          |
 | `MAX_LEASE_MINUTES`      | No       | `120`                 | Maximum lease extension allowed              |
 | `RECONCILIATION_INTERVAL`| No       | `300`                 | Seconds between expired-lease sweeps         |
+
+### Production Requirements
+
+When `NODE_ENV=production`, the server enforces additional startup validation:
+
+- **`WEBHOOK_SECRET`** must be set (no default).
+- **`ADMIN_API_KEY`** must differ from the built-in default
+  (`forgeos_admin_CHANGE_ME`).
+
+The server exits immediately if either check fails, listing all missing
+variables in the error output.
 
 ## HTTP Endpoints
 

@@ -1,9 +1,16 @@
 /**
- * Environment configuration loader with validation.
+ * Environment configuration loader with Zod validation.
  *
- * Loads environment variables from .env file and validates
- * required fields using Zod schemas.
+ * Reads environment variables from a `.env` file (via `dotenv`) and validates
+ * them against a strict Zod schema. Exports a frozen, typed `AppConfig` object
+ * that is the single source of truth for runtime configuration.
+ *
+ * In production mode, additional validation ensures security-critical variables
+ * (`WEBHOOK_SECRET`, `ADMIN_API_KEY`) are explicitly set.
+ *
  * @module config
+ * @see {@link https://zod.dev/ Zod documentation}
+ * @see {@link forgeos-server/.env.example .env.example} for variable reference
  */
 
 import { z } from 'zod';
@@ -11,6 +18,13 @@ import dotenv from 'dotenv';
 
 dotenv.config();
 
+/**
+ * Zod schema defining all supported environment variables, their types,
+ * constraints, and default values. Includes a `superRefine` callback that
+ * enforces production-only requirements.
+ *
+ * @internal
+ */
 const configSchema = z.object({
   DATABASE_URL: z.string().url().startsWith('postgresql://'),
   PORT: z.coerce.number().int().min(1).max(65535).default(3000),
@@ -40,11 +54,33 @@ const configSchema = z.object({
   }
 });
 
+/**
+ * Typed configuration object inferred from `configSchema`.
+ *
+ * All fields are strongly typed. Numeric fields are coerced from string
+ * environment variables. Optional fields may be `undefined` in non-production.
+ */
 export type AppConfig = z.infer<typeof configSchema>;
 
 /**
- * Parse and validate environment configuration.
- * Throws on validation failure with detailed error messages.
+ * Parse and validate environment configuration from `process.env`.
+ *
+ * Reads all supported environment variables, applies defaults, coerces
+ * numeric strings, and enforces production constraints. The returned
+ * object is frozen to prevent accidental mutation.
+ *
+ * @returns Frozen `AppConfig` object with validated configuration values
+ * @throws {Error} If any environment variable fails validation. The error
+ *   message lists each invalid field and its specific validation failure.
+ *
+ * @example
+ * ```typescript
+ * import { loadConfig, AppConfig } from './config';
+ *
+ * const cfg: AppConfig = loadConfig();
+ * console.log(cfg.PORT);       // 3000 (default)
+ * console.log(cfg.NODE_ENV);    // 'development' (default)
+ * ```
  */
 export function loadConfig(): AppConfig {
   const result = configSchema.safeParse(process.env);
@@ -57,5 +93,18 @@ export function loadConfig(): AppConfig {
   return Object.freeze(result.data);
 }
 
-/** Singleton config instance */
+/**
+ * Singleton configuration instance, created at module load time.
+ *
+ * Import this for read-only access to validated environment configuration.
+ * The object is frozen — any attempt to mutate it throws in strict mode.
+ *
+ * @example
+ * ```typescript
+ * import { config } from './config';
+ *
+ * console.log(config.DATABASE_URL);
+ * console.log(config.LOG_LEVEL);
+ * ```
+ */
 export const config = loadConfig();

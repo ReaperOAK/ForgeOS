@@ -8,6 +8,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Environment configuration** — Zod-validated config loader (`src/config.ts`)
+  with typed `AppConfig` export, `Object.freeze()` immutability, sensible
+  defaults (PORT=3000, LOG_LEVEL=info, DEFAULT_LEASE_MINUTES=30), production
+  validation for security-critical variables (`WEBHOOK_SECRET`, `ADMIN_API_KEY`),
+  and a comprehensive `.env.example` template documenting all 12 environment
+  variables.
 - **Database schema** — Initial PostgreSQL migration (`001_initial.sql`) with
   7 tables (projects, agents, sessions, tickets, file_locks, events,
   system_config), 5 enum types, 18+ indexes (B-tree, GIN, partial), Row-Level
