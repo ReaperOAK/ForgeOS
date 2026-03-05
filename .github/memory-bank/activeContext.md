@@ -862,3 +862,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/Dockerfile, forgeos-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/TASK-FOS-08-001.md
 - **Decisions:** Added inline comments to Dockerfile (stage headers, layer caching rationale, security notes). Added Docker build/run/compose section to README. Added Dockerfile + .dockerignore changelog entries. No JSDoc needed (infra files only).
 - **Timestamp:** 2026-03-06T18:00:00Z
+
+### [TASK-FOS-01-002] — Documentation Summary
+- **Artifacts:** forgeos-server/src/db/pool.ts, forgeos-server/src/db/migrate.ts, forgeos-server/README.md, CHANGELOG.md, docs/database/schema-reference.md, .github/agent-output/Documentation/TASK-FOS-01-002.md
+- **Decisions:** Added @throws and @example TSDoc tags to all 7 public pool.ts functions and runMigrations(). Added Database section to README covering pool, health check, RLS helpers, and migrations. Fixed CHANGELOG entries (corrected table name _migrations→schema_migrations, added pool/barrel exports entries). Fixed schema-reference.md migration runner section with correct table name and checksum verification details.
+- **Timestamp:** 2026-03-06T22:00:00Z
+
+### [TASK-FOS-06-001] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/TASK-FOS-06-001.md
+- **Decisions:** PASS — Score 99/100, 0 critical, 0 warnings, 1 suggestion (OC-007 informational). All 5 prior CI findings from rework #1 resolved. Shell scripts pass syntax validation, correct permissions (100755), proper husky configuration. QA and Security upstream verdicts verified PASS.
+- **Timestamp:** 2026-03-06T19:30:00Z

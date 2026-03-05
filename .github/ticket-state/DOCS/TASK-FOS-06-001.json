@@ -4,7 +4,7 @@
   "description": "Install Husky in the ForgeOS server project and create a commit-msg hook that validates commit message format as specified in Architecture \u00a77.5. The hook reads the commit message from the file passed as $1, validates it matches the required [TICKET-ID] prefix pattern using regex. Valid formats: \"[TICKET-ID] CLAIM by AGENT on MACHINE (OPERATOR)\" for claim commits and \"[TICKET-ID] STAGE complete by AGENT on MACHINE\" for work commits. Invalid messages are rejected with a clear error message showing the expected format. The hook is a shell script committed to the .husky/ directory.",
   "type": "infra",
   "priority": "medium",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Hook exits 0 on valid messages, exits 1 on invalid messages"
   ],
   "rework_count": 1,
-  "claimed_by": "CI Reviewer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-05T23:26:37.899843+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -170,6 +170,15 @@
       "from_stage": "CI",
       "to_stage": "CI",
       "details": "Claimed by reaperoak@pop-os via CI Reviewer, lease until 2026-03-05T23:26:37.899843+00:00"
+    },
+    {
+      "timestamp": "2026-03-05T22:59:23.549114+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CI Reviewer",
+      "machine_id": "system",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "Advanced from CI to DOCS"
     }
   ],
   "source_task_file": "TODO/tickets/06-git-integration.md",

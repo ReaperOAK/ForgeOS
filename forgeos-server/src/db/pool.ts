@@ -96,6 +96,14 @@ function createPool(): pg.Pool {
  * - connection timeout: 10 s
  *
  * @returns The singleton pg.Pool instance
+ *
+ * @example
+ * ```ts
+ * import { getPool } from './db/pool.js';
+ *
+ * const pool = getPool();
+ * const result = await pool.query('SELECT NOW()');
+ * ```
  */
 export function getPool(): pg.Pool {
   if (_pool === null) {
@@ -136,9 +144,20 @@ export interface PoolHealthStats {
 /**
  * Health check — verifies database connectivity and returns pool statistics.
  *
- * Executes `SELECT 1` and measures round-trip latency.
+ * Executes `SELECT 1` and measures round-trip latency. Returns
+ * `connected: false` on failure instead of throwing.
  *
- * @returns Pool health status object
+ * @returns Pool health status object with connectivity, pool counts, and latency
+ *
+ * @example
+ * ```ts
+ * import { healthCheck } from './db/pool.js';
+ *
+ * const stats = await healthCheck();
+ * if (!stats.connected) {
+ *   console.error('DB unreachable', stats.latencyMs);
+ * }
+ * ```
  */
 export async function healthCheck(): Promise<PoolHealthStats> {
   const p = getPool();
@@ -183,6 +202,20 @@ export async function healthCheck(): Promise<PoolHealthStats> {
  * @param agentRole - Role of the calling agent (e.g., `'Backend'`)
  * @param agentName - Name of the calling agent (e.g., `'Backend Engineer'`)
  * @param agentId - UUID of the calling agent
+ * @throws Error if any `SET LOCAL` query fails (e.g., connection lost)
+ *
+ * @example
+ * ```ts
+ * const client = await getPool().connect();
+ * try {
+ *   await client.query('BEGIN');
+ *   await setSessionContext(client, 'Backend', 'Backend Engineer', 'uuid-123');
+ *   await client.query('SELECT * FROM tickets');
+ *   await client.query('COMMIT');
+ * } finally {
+ *   client.release();
+ * }
+ * ```
  */
 export async function setSessionContext(
   client: pg.PoolClient,
@@ -209,6 +242,17 @@ export async function setSessionContext(
  * @param queryText - SQL query text with parameterized placeholders
  * @param params - Query parameter values
  * @returns Query result
+ * @throws Error if the query or transaction fails (automatic rollback)
+ *
+ * @example
+ * ```ts
+ * const result = await queryWithRLS(
+ *   'Backend',
+ *   'Backend Engineer',
+ *   'SELECT * FROM tickets WHERE stage = $1',
+ *   ['READY'],
+ * );
+ * ```
  */
 export async function queryWithRLS<T extends pg.QueryResultRow = pg.QueryResultRow>(
   agentRole: string,
@@ -256,6 +300,16 @@ export async function queryWithRLS<T extends pg.QueryResultRow = pg.QueryResultR
  * @param agentName - Name of the calling agent
  * @param fn - Async function receiving the client to execute queries
  * @returns Result of the transaction function
+ * @throws Error if the callback or transaction fails (automatic rollback)
+ *
+ * @example
+ * ```ts
+ * const count = await transactionWithRLS('QA', 'QA Engineer', async (client) => {
+ *   await client.query('UPDATE tickets SET stage = $1 WHERE id = $2', ['QA', id]);
+ *   const res = await client.query('SELECT COUNT(*) FROM tickets WHERE stage = $1', ['QA']);
+ *   return Number(res.rows[0]?.count);
+ * });
+ * ```
  */
 export async function transactionWithRLS<T>(
   agentRole: string,
@@ -297,6 +351,15 @@ export async function transactionWithRLS<T>(
  *
  * Resets the singleton so a fresh pool can be created on the next
  * {@link getPool} call (useful for tests and graceful restart).
+ *
+ * @example
+ * ```ts
+ * // Graceful shutdown handler
+ * process.on('SIGTERM', async () => {
+ *   await closePool();
+ *   process.exit(0);
+ * });
+ * ```
  */
 export async function closePool(): Promise<void> {
   if (_pool !== null) {
