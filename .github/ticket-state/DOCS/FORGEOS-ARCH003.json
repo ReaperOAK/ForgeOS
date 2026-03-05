@@ -34,10 +34,10 @@
     "ADR delivered at docs/architecture/adr/adr-002-mcp-protocol.md"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation Specialist",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-05T22:40:08.228296+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -80,6 +80,15 @@
       "from_stage": "ARCHITECT",
       "to_stage": "DOCS",
       "details": "Advanced from ARCHITECT to DOCS"
+    },
+    {
+      "timestamp": "2026-03-05T22:10:08.228313+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by reaperoak@pop-os via Documentation Specialist, lease until 2026-03-05T22:40:08.228296+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-architecture.md",
