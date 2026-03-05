@@ -3,7 +3,7 @@ title: PostgreSQL Transaction Isolation Levels for ForgeOS
 audience: Backend engineers implementing ForgeOS ticket state machine
 purpose: Evaluate PostgreSQL isolation levels for ForgeOS operation types and recommend per-operation isolation strategy
 diataxis: explanation
-last_reviewed: 2026-03-06T00:00:00Z
+last_reviewed: 2026-03-06T12:00:00Z
 ---
 
 # PostgreSQL Transaction Isolation Levels for ForgeOS
@@ -28,11 +28,28 @@ This report evaluates PostgreSQL's three transaction isolation levels — **READ
 | **Dependency Resolution** | READ COMMITTED (default) | Must see latest committed state of all dependency tickets. REPEATABLE READ's snapshot would read stale dependency status. |
 | **Bulk Sync** | READ COMMITTED (default) | Long-running operations benefit from seeing each ticket's latest state. Snapshot-based levels risk serialization failures on large batch updates. |
 
-**Core Insight:** ForgeOS's existing explicit locking strategy (`FOR UPDATE SKIP LOCKED` for claiming, `FOR UPDATE` for state transitions) already provides the concurrency guarantees needed. The explicit locks operate *within* READ COMMITTED and provide stronger per-row guarantees than isolation level upgrades would. Upgrading isolation levels would add serialization failure handling complexity without meaningful safety improvement, because ForgeOS's anomaly vectors are already closed by its lock-based design.
+**Core Insight:** ForgeOS already uses explicit locks (`FOR UPDATE SKIP LOCKED` for claiming, `FOR UPDATE` for state transitions). These locks operate within READ COMMITTED and provide stronger per-row guarantees than isolation level upgrades. Upgrading to higher isolation levels adds serialization failure complexity without closing any new anomaly vectors. The lock-based design already prevents all known concurrency issues.
 
 **Bayesian Confidence Update:**
 - *Prior:* 70% — READ COMMITTED is likely sufficient given explicit locking, but higher isolation might catch edge cases.
 - *Posterior:* 88% — PostgreSQL documentation confirms explicit locks (`FOR UPDATE`, `SKIP LOCKED`) provide row-level serializability within READ COMMITTED. All ForgeOS write operations already use explicit locks. The only theoretical benefit of higher isolation (preventing phantom reads in dependency queries) is addressed by ForgeOS's single-ticket-at-a-time dependency check pattern. Remaining 12% uncertainty: future operations with multi-row read-then-write patterns without explicit locks could benefit from SERIALIZABLE.
+
+---
+
+## Related Research
+
+This report is part of the ForgeOS PostgreSQL research series. Each report covers one aspect of the database layer design:
+
+| Report | Ticket | Focus | Link |
+|--------|--------|-------|------|
+| Distributed Locking Patterns | FORGEOS-RES005 | Row locks, advisory locks, `SKIP LOCKED` claim patterns | [pg-distributed-locking.md](pg-distributed-locking.md) |
+| Connection Pooling Strategies | FORGEOS-RES006 | PgBouncer vs application-level pooling, `SET LOCAL` compatibility | [pg-connection-pooling.md](pg-connection-pooling.md) |
+| **Transaction Isolation** (this) | **FORGEOS-RES007** | **Isolation levels, serialization failures, retry patterns** | — |
+| Event Sourcing Feasibility | FORGEOS-RES008 | Append-only events, hybrid state model, LISTEN/NOTIFY | [pg-event-sourcing.md](pg-event-sourcing.md) |
+
+**Key dependencies between reports:**
+- This report assumes the `FOR UPDATE SKIP LOCKED` claim pattern from [FORGEOS-RES005](pg-distributed-locking.md).
+- PgBouncer compatibility of `SET LOCAL` isolation overrides is validated in [FORGEOS-RES006](pg-connection-pooling.md).
 
 ---
 
@@ -85,9 +102,9 @@ This report evaluates PostgreSQL's three transaction isolation levels — **READ
 | [PostgreSQL 17 Docs — Transaction Isolation](https://www.postgresql.org/docs/17/transaction-iso.html) | 1.0 | Current (stable across versions) |
 | [PostgreSQL 17 Docs — Explicit Locking](https://www.postgresql.org/docs/17/explicit-locking.html) | 1.0 | Current |
 | [PostgreSQL 17 Docs — Serializable Isolation](https://www.postgresql.org/docs/17/transaction-iso.html#XACT-SERIALIZABLE) | 1.0 | Current |
-| ForgeOS codebase — `001_initial.sql` stored functions | 1.0 | Primary source |
-| FORGEOS-RES005 — PostgreSQL Distributed Locking Patterns | 0.9 | 2026-03-06 |
-| FORGEOS-RES006 — PostgreSQL Connection Pooling Strategies | 0.9 | 2026-03-06 |
+| ForgeOS codebase — [`001_initial.sql`](../../forgeos-server/src/db/migrations/001_initial.sql) stored functions | 1.0 | Primary source |
+| FORGEOS-RES005 — [Distributed Locking Patterns](pg-distributed-locking.md) | 0.9 | 2026-03-06 |
+| FORGEOS-RES006 — [Connection Pooling Strategies](pg-connection-pooling.md) | 0.9 | 2026-03-06 |
 | [Jepsen — PostgreSQL analysis](https://jepsen.io/analyses/postgresql-12.3) | 0.85 | 2020 (methodology sound, still applicable) |
 | [pgBoss — Production job queue patterns](https://github.com/timgit/pg-boss) | 0.9 | Active maintenance |
 | [Graphile Worker — SKIP LOCKED patterns](https://github.com/graphile/worker) | 0.9 | Active maintenance |
@@ -138,7 +155,7 @@ PostgreSQL implements three of the four SQL standard isolation levels. Notably, 
 
 **Source:** [PostgreSQL 17 Docs — Explicit Locking](https://www.postgresql.org/docs/17/explicit-locking.html) (weight: 1.0)
 
-This is the critical insight for ForgeOS:
+This is the critical insight for ForgeOS. Understanding this distinction prevents over-engineering the isolation strategy:
 
 > "Row-level locks do not affect data querying; they block only *writers and lockers* to the same row." — PostgreSQL Docs
 
@@ -328,9 +345,9 @@ Under contention-heavy ForgeOS claiming workload:
 
 ### 4.3 Performance Impact
 
-- **Longer snapshot lifetime:** Snapshot held from first statement to COMMIT. More MVCC versions must be retained.
-- **Serialization error overhead:** Each failure requires full transaction retry (re-acquiring connection, re-running all statements).
-- **Connection consumption:** Failed transactions consume connection time without producing work.
+- **Longer snapshot lifetime:** The snapshot persists from the first statement to COMMIT. PostgreSQL must retain more MVCC versions.
+- **Serialization error overhead:** Each failure requires a full transaction retry — re-acquiring the connection and re-running all statements.
+- **Connection consumption:** Failed transactions hold connections without producing useful work.
 - **Unnecessary for ForgeOS:** Explicit locking already provides the needed guarantees.
 
 ---
@@ -900,7 +917,7 @@ $$ LANGUAGE plpgsql;
 | Novel operation without explicit locks introduces anomaly | Medium | High | Code review checklist: "Does this write operation use FOR UPDATE?" |
 | Deadlock from lock ordering inconsistency | Low | Medium | All functions lock tickets by `ticket_id` (consistent ordering) |
 | Concurrent `resolve_dependencies()` double-unblocking | Low | None | UPDATE is idempotent — no data corruption |
-| PgBouncer incompatibility with session variables | Low | Medium | `SET LOCAL` compatible with transaction pooling (per RES006) |
+| **PgBouncer incompatibility with session variables** | Low | Medium | `SET LOCAL` compatible with transaction pooling (per [RES006](pg-connection-pooling.md)) |
 
 ### Validity Window
 
@@ -921,8 +938,8 @@ $$ LANGUAGE plpgsql;
 | 1 | [PostgreSQL 17 Docs — Transaction Isolation](https://www.postgresql.org/docs/17/transaction-iso.html) | 1.0 | Isolation level definitions, anomaly table, SSI description | ✅ |
 | 2 | [PostgreSQL 17 Docs — Explicit Locking](https://www.postgresql.org/docs/17/explicit-locking.html) | 1.0 | FOR UPDATE, SKIP LOCKED, advisory locks | ✅ |
 | 3 | ForgeOS `001_initial.sql` — stored functions | 1.0 | All function analysis, locking patterns | ✅ (codebase) |
-| 4 | FORGEOS-RES005 — Distributed Locking Research | 0.9 | SKIP LOCKED patterns, claim safety analysis | ✅ (internal) |
-| 5 | FORGEOS-RES006 — Connection Pooling Research | 0.9 | PgBouncer compatibility, SET LOCAL | ✅ (internal) |
+| 4 | FORGEOS-RES005 — [Distributed Locking Research](pg-distributed-locking.md) | 0.9 | SKIP LOCKED patterns, claim safety analysis | ✅ (internal) |
+| 5 | FORGEOS-RES006 — [Connection Pooling Research](pg-connection-pooling.md) | 0.9 | PgBouncer compatibility, SET LOCAL | ✅ (internal) |
 | 6 | [Jepsen — PostgreSQL 12.3 Analysis](https://jepsen.io/analyses/postgresql-12.3) | 0.85 | PostgreSQL anomaly testing methodology | ✅ |
 | 7 | Dan Ports, Kevin Grittner — "Serializable Snapshot Isolation in PostgreSQL" (VLDB 2012) | 0.85 | SSI false-positive analysis | ✅ |
 | 8 | [pgBoss source code](https://github.com/timgit/pg-boss) | 0.9 | Production SKIP LOCKED + READ COMMITTED patterns | ✅ |
