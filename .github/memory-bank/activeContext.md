@@ -733,3 +733,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/research/pg-event-sourcing.md, .github/agent-output/Documentation/FORGEOS-RES008.md
 - **Decisions:** Added §15 Glossary (14 terms: ES, CQRS, MVCC, WAL, GIN, etc.) for audience self-containment. Added §16 Quick Reference Card with implementation table and NOT-to-do list. Improved readability of dense Bayesian confidence paragraph. Updated frontmatter with reviewed status and docs review timestamp. Diátaxis classification confirmed as Explanation.
 - **Timestamp:** 2026-03-06T22:30:00Z
+
+### [FORGEOS-RES007] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-RES007.md
+- **Decisions:** APPROVED with HIGH confidence (95%). All 7 acceptance criteria verified against docs/research/pg-transaction-isolation.md (950 lines). DoD items: 6 PASS, 4 justified N/A (research ticket, no code). Report covers READ COMMITTED, REPEATABLE READ, and SERIALIZABLE with ForgeOS-specific analysis, PoC SQL examples, weighted comparison matrix (9.35 vs 7.30 vs 6.30), and 3 contradiction resolutions. Upstream verdicts verified: Research PASS (88%), Documentation PASS (HIGH).
+- **Timestamp:** 2026-03-06T23:00:00Z
