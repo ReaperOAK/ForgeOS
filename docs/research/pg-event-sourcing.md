@@ -3,7 +3,10 @@ title: Event Sourcing Feasibility in PostgreSQL for ForgeOS
 audience: Backend engineers and architects evaluating event sourcing for ForgeOS ticket lifecycle
 purpose: Assess append-only event table design, event replay, LISTEN/NOTIFY streaming, JSONB vs normalized storage, and storage growth for ForgeOS
 diataxis: explanation
-last_reviewed: 2026-03-06T00:00:00Z
+status: reviewed
+last_reviewed: 2026-03-06T12:00:00Z
+reviewed_by: Documentation Specialist
+ticket: FORGEOS-RES008
 ---
 
 # Event Sourcing Feasibility in PostgreSQL for ForgeOS
@@ -40,8 +43,8 @@ This report assesses the feasibility of event sourcing (ES) patterns in PostgreS
 5. Plan table partitioning by `created_at` when events exceed ~10M rows
 
 **Bayesian Confidence Update:**
-- *Prior:* 75% — The hybrid approach is likely sufficient; full ES probably overkill for ForgeOS's scale.
-- *Posterior:* 85% — Evidence confirms: full ES adds complexity (snapshot management, eventual consistency, replay latency) without proportional benefit at ForgeOS's scale (≤100K tickets, ≤15 event types). The existing hybrid model with minor enhancements provides 95% of ES benefits (full audit trail, time-travel debugging, causal ordering) with 20% of the complexity. Remaining 15% uncertainty: if ForgeOS scales beyond 500K tickets or requires multi-region replication, full ES with CQRS may become necessary.
+- *Prior:* 75% — The hybrid approach is likely sufficient. Full ES is probably overkill for ForgeOS's scale.
+- *Posterior:* 85% — Evidence confirms the hybrid model's superiority at ForgeOS's scale (≤100K tickets, ≤15 event types). Full ES adds complexity — snapshot management, eventual consistency, replay latency — without proportional benefit. The enhanced hybrid provides 95% of ES benefits (full audit trail, time-travel debugging, causal ordering) at 20% of the complexity. The remaining 15% uncertainty covers two scenarios: ForgeOS scales beyond 500K tickets, or multi-region replication becomes necessary.
 
 ---
 
@@ -61,6 +64,8 @@ This report assesses the feasibility of event sourcing (ES) patterns in PostgreS
 12. [Recommendation](#12-recommendation)
 13. [Risks & Validity](#13-risks--validity)
 14. [Sources & Evidence Chain](#14-sources--evidence-chain)
+15. [Glossary](#15-glossary)
+16. [Quick Reference Card](#16-quick-reference-card)
 
 ---
 
@@ -1073,4 +1078,59 @@ ForgeOS should enhance its existing hybrid model with the following changes, imp
 
 ---
 
-*Research conducted by Research Analyst for FORGEOS-RES008. All claims cite sources with weights. Confidence level: HIGH (85%). Bayesian update: Prior 75% → Posterior 85% (+10% based on evidence confirming hybrid model superiority at ForgeOS's scale).*
+## 15. Glossary
+
+| Term | Definition |
+|------|------------|
+| **ES (Event Sourcing)** | A pattern where application state is derived by replaying an ordered sequence of events rather than reading a mutable record. |
+| **CQRS** | Command Query Responsibility Segregation. Separates the write model (commands that produce events) from the read model (projections optimized for queries). |
+| **MVCC** | Multi-Version Concurrency Control. PostgreSQL's concurrency mechanism that creates a new version of a row on each UPDATE, allowing concurrent reads without blocking writes. |
+| **WAL** | Write-Ahead Log. PostgreSQL's durable transaction log. All changes are written to the WAL before being applied to data files. |
+| **GIN Index** | Generalized Inverted Index. A PostgreSQL index type optimized for composite values such as JSONB documents, arrays, and full-text search vectors. |
+| **HOT Update** | Heap-Only Tuple update. A PostgreSQL optimization that avoids index updates when the modified columns are not indexed. Not applicable to append-only tables. |
+| **RLS** | Row-Level Security. A PostgreSQL feature that restricts which rows a database role can SELECT, INSERT, UPDATE, or DELETE based on per-row policies. |
+| **CDC** | Change Data Capture. A pattern for tracking row-level changes in a database and streaming them to downstream consumers. |
+| **SSE** | Server-Sent Events. A unidirectional HTTP protocol where the server pushes real-time updates to the client over a persistent connection. |
+| **Aggregate** | In domain-driven design, a cluster of related objects treated as a single unit for data changes. In ForgeOS, each ticket is an aggregate. |
+| **Projection** | A read-optimized view built by processing ("projecting") events. In ForgeOS's hybrid model, the mutable `tickets` table serves as the projection. |
+| **Snapshot** | A stored copy of aggregate state at a specific event version, used to avoid replaying the full event history. ForgeOS's mutable `tickets` table effectively acts as a continuously updated snapshot. |
+| **Optimistic Concurrency** | A strategy that detects write conflicts at commit time rather than locking rows in advance. Implemented via `aggregate_version` unique constraints. |
+| **PgBouncer** | A lightweight connection pooler for PostgreSQL. Supports session mode (full feature compatibility) and transaction mode (higher throughput, no LISTEN support). |
+
+---
+
+## 16. Quick Reference Card
+
+> **For developers who need the answer, not the analysis.**
+
+### Verdict
+
+Use the **enhanced hybrid model**. Do NOT adopt full event sourcing.
+
+### What to implement (priority order)
+
+| # | Change | SQL | Effort |
+|---|--------|-----|--------|
+| 1 | Add global ordering | `ALTER TABLE events ADD COLUMN sequence_number BIGSERIAL;` | 1 hr |
+| 2 | Add per-ticket versioning | `ALTER TABLE events ADD COLUMN aggregate_version INTEGER;` + unique constraint on `(ticket_id, aggregate_version)` | 2 hr |
+| 3 | Enforce immutability | Add `BEFORE UPDATE` and `BEFORE DELETE` triggers that raise exceptions | 30 min |
+| 4 | Add replay function | `CREATE FUNCTION replay_ticket_state(TEXT, TIMESTAMPTZ)` — see §5.2 | 2 hr |
+| 5 | Add integrity check | `CREATE FUNCTION verify_ticket_integrity(TEXT)` — see §11 | 1 hr |
+| 6 | Add event NOTIFY | `CREATE TRIGGER trg_event_notify AFTER INSERT ON events` — see §6.3 | 1 hr |
+
+### What NOT to do
+
+- Do **not** derive state from events (keep the mutable `tickets` table).
+- Do **not** normalize event payloads (keep JSONB).
+- Do **not** add snapshot tables (the `tickets` table IS the snapshot).
+- Do **not** use an external event store.
+
+### When to revisit
+
+- Ticket count exceeds 500K.
+- Multi-region deployment is planned.
+- Event schema changes frequently enough to need formal upcasters.
+
+---
+
+*Research conducted by Research Analyst for FORGEOS-RES008. Documentation reviewed by Documentation Specialist. All claims cite sources with weights. Confidence level: HIGH (85%). Bayesian update: Prior 75% → Posterior 85% (+10% based on evidence confirming hybrid model superiority at ForgeOS's scale).*

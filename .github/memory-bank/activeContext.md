@@ -722,4 +722,14 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 ### [FORGEOS-RES010] — Documentation Summary
 - **Artifacts:** docs/research/protocol-comparison.md, .github/agent-output/Documentation/FORGEOS-RES010.md
 - **Decisions:** Fixed critical score inconsistency — executive summary and scored matrix cited 8.52/10 for MCP but calculation yields 8.00/10. Corrected all three protocol weighted totals to match calculations (8.00, 6.05, 5.63). Removed redundant "Corrected Weighted Totals" subsection. Updated last_reviewed freshness timestamp.
+
+### [FORGEOS-RES007] — Documentation Summary
+- **Artifacts:** docs/research/pg-transaction-isolation.md, .github/agent-output/Documentation/FORGEOS-RES007.md
+- **Decisions:** Added Related Research section linking all 4 PG research reports (RES005–RES008) with relative file links. Converted 8 plain-text cross-references to hyperlinks across §1, §12, §13. Simplified long sentences in Executive Summary and §4.3 for readability. Updated last_reviewed freshness metadata.
+- **Timestamp:** 2026-03-06T12:00:00Z
 - **Timestamp:** 2026-03-06T22:00:00Z
+
+### [FORGEOS-RES008] — Documentation Summary
+- **Artifacts:** docs/research/pg-event-sourcing.md, .github/agent-output/Documentation/FORGEOS-RES008.md
+- **Decisions:** Added §15 Glossary (14 terms: ES, CQRS, MVCC, WAL, GIN, etc.) for audience self-containment. Added §16 Quick Reference Card with implementation table and NOT-to-do list. Improved readability of dense Bayesian confidence paragraph. Updated frontmatter with reviewed status and docs review timestamp. Diátaxis classification confirmed as Explanation.
+- **Timestamp:** 2026-03-06T22:30:00Z
