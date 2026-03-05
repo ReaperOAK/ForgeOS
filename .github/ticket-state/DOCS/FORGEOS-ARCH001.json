@@ -4,7 +4,7 @@
   "description": "Produce the high-level system component architecture for the ForgeOS distributed orchestration platform. Create component diagrams showing the 6 major components (MCP Server, PostgreSQL, Git, Agent Clients, Dashboard, Webhook Processor), their interfaces, communication protocols, and boundary definitions. Define the component interaction patterns and data flow overview.",
   "type": "architecture",
   "priority": "critical",
-  "stage": "READY",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "ARCHITECT",
@@ -33,10 +33,10 @@
     "Architecture document delivered at docs/architecture/system-components.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Architect",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-05T21:06:27.194539+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -61,6 +61,24 @@
       "from_stage": "READY",
       "to_stage": "READY",
       "details": "Claimed by reaperoak@pop-os via Architect, lease until 2026-03-05T21:06:27.194539+00:00"
+    },
+    {
+      "timestamp": "2026-03-05T20:44:40.068648+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Architect",
+      "machine_id": "system",
+      "from_stage": "READY",
+      "to_stage": "ARCHITECT",
+      "details": "Advanced from READY to ARCHITECT"
+    },
+    {
+      "timestamp": "2026-03-05T20:44:46.844631+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Architect",
+      "machine_id": "system",
+      "from_stage": "ARCHITECT",
+      "to_stage": "DOCS",
+      "details": "Advanced from ARCHITECT to DOCS"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-architecture.md",
