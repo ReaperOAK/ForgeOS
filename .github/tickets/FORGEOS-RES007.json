@@ -4,7 +4,7 @@
   "description": "Analyze PostgreSQL transaction isolation levels (READ COMMITTED, REPEATABLE READ, SERIALIZABLE) for ForgeOS ticket operations. Determine appropriate isolation level for each operation type: ticket claiming (contention-heavy), state advancement (consistency-critical), dependency resolution (read-heavy), and bulk sync operations. Document serialization failure handling and retry patterns.",
   "type": "research",
   "priority": "high",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "RESEARCH",
@@ -29,10 +29,10 @@
     "Research report delivered at docs/research/pg-transaction-isolation.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-05T21:54:14.020778+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -107,6 +107,15 @@
       "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
       "details": "Claimed by reaperoak@pop-os via Validator, lease until 2026-03-05T21:54:14.020778+00:00"
+    },
+    {
+      "timestamp": "2026-03-05T21:25:49.313881+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-research.md",
