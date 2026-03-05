@@ -1,0 +1,60 @@
+{
+  "ticket_id": "TASK-FOS-01-002",
+  "title": "Database Connection Pool and Migration Runner",
+  "description": "Implement the PostgreSQL connection pool singleton using node-postgres (pg.Pool) with configurable pool size, idle timeout, and connection timeout. Include a health check query function that validates database connectivity. Build a migration runner that reads SQL files from the migrations directory, tracks applied migrations in a schema_migrations table, and supports both up and down migrations. The pool must set PostgreSQL session variables (app.agent_role, app.agent_name, app.agent_id) for RLS enforcement when executing queries on behalf of authenticated agents.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:05:37.896097+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-FOS-01-001",
+    "TASK-FOS-02-001"
+  ],
+  "blocked_by": [
+    "TASK-FOS-01-001",
+    "TASK-FOS-02-001"
+  ],
+  "file_paths": [
+    "forgeos-server/src/db/pool.ts",
+    "forgeos-server/src/db/migrate.ts",
+    "forgeos-server/src/db/index.ts"
+  ],
+  "acceptance_criteria": [
+    "pg.Pool singleton created with configurable max connections (default 20), idle timeout (30s), and connection timeout (10s)",
+    "getPool() function returns the singleton pool instance; pool is lazily initialized on first call",
+    "healthCheck() function executes SELECT 1 and returns pool stats (total, idle, waiting counts)",
+    "Migration runner reads .sql files from src/db/migrations/ in lexicographic order",
+    "schema_migrations table tracks migration name, applied_at timestamp, and checksum",
+    "Migration runner skips already-applied migrations (idempotent re-runs)",
+    "setSessionContext(client, agentRole, agentName, agentId) sets PostgreSQL session variables for RLS",
+    "Pool emits structured log events for connection errors, pool exhaustion, and slow queries"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:05:37.896102+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/01-database-foundation.md"
+    }
+  ],
+  "source_task_file": "TODO/tickets/01-database-foundation.md",
+  "tags": []
+}

@@ -1,0 +1,65 @@
+{
+  "ticket_id": "FORGEOS-BE056",
+  "title": "Implement Operator Machine-Scoped Permissions",
+  "description": "Implement operator permission scoping: operators can only perform operations on machines they are registered to. Create the operator-machine binding table and enforce that claim, advance, and rework operations via the REST API are constrained to the operator's registered machines. Admin operators bypass machine restrictions.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:06:45.283965+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE054",
+    "FORGEOS-BE052"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE054",
+    "FORGEOS-BE052"
+  ],
+  "file_paths": [
+    "mcp-server/src/auth/authorization.py",
+    "mcp-server/src/services/operator_service.py"
+  ],
+  "acceptance_criteria": [
+    "Operator-machine binding table created (operator_id, machine_id, registered_at)",
+    "REST operations validate that operator is bound to the machine_id in the request",
+    "Unbound operator-machine pair rejected with 403 Forbidden",
+    "Admin operators bypass machine binding checks",
+    "Operators can register to multiple machines",
+    "Binding management endpoints (add/remove machine binding) for admin use"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:06:45.283973+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase3-auth.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase3-auth.md",
+  "tags": [
+    "backend",
+    "auth",
+    "operator",
+    "permissions",
+    "machine",
+    "phase3",
+    "BLK-08-02"
+  ]
+}

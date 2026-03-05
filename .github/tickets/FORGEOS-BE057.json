@@ -1,0 +1,63 @@
+{
+  "ticket_id": "FORGEOS-BE057",
+  "title": "Implement Admin Force Operations",
+  "description": "Implement admin-only elevated operations: force-release (release any claim regardless of owner), force-advance (advance any ticket regardless of claim status), and system configuration updates (rate limits, lease duration). These operations require admin role authentication and produce audit log entries with elevated-operation flag.",
+  "type": "backend",
+  "priority": "medium",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:06:45.284472+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE055"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE055"
+  ],
+  "file_paths": [
+    "mcp-server/src/api/routes/admin.py",
+    "mcp-server/src/services/admin_service.py"
+  ],
+  "acceptance_criteria": [
+    "POST /api/admin/tickets/:id/force-release releases any active claim",
+    "POST /api/admin/tickets/:id/force-advance moves ticket to next stage regardless of claim",
+    "PATCH /api/admin/config updates configurable system parameters (lease duration, rate limits)",
+    "All admin operations require admin role; non-admin receives 403 Forbidden",
+    "Every admin operation creates an audit log entry with elevated_operation=true flag",
+    "Admin operations include a required reason field for audit trail"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:06:45.284480+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase3-auth.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase3-auth.md",
+  "tags": [
+    "backend",
+    "auth",
+    "admin",
+    "force",
+    "operations",
+    "phase3",
+    "BLK-08-02"
+  ]
+}

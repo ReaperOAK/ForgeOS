@@ -1,0 +1,61 @@
+{
+  "ticket_id": "FORGEOS-RES007",
+  "title": "Research PostgreSQL Transaction Isolation Levels",
+  "description": "Analyze PostgreSQL transaction isolation levels (READ COMMITTED, REPEATABLE READ, SERIALIZABLE) for ForgeOS ticket operations. Determine appropriate isolation level for each operation type: ticket claiming (contention-heavy), state advancement (consistency-critical), dependency resolution (read-heavy), and bulk sync operations. Document serialization failure handling and retry patterns.",
+  "type": "research",
+  "priority": "high",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "RESEARCH",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:51:09.808202+00:00",
+  "created_by": "TODO",
+  "dependencies": [],
+  "blocked_by": [],
+  "file_paths": [
+    "docs/research/pg-transaction-isolation.md"
+  ],
+  "acceptance_criteria": [
+    "READ COMMITTED analyzed for claim operations: phantom read risks, concurrent claim safety",
+    "REPEATABLE READ analyzed for state transitions: snapshot isolation benefits and trade-offs",
+    "SERIALIZABLE analyzed for dependency resolution: serialization failure rates, retry cost",
+    "Isolation level recommendation per operation type with justification",
+    "Serialization failure handling pattern documented with exponential backoff strategy",
+    "Performance impact of each isolation level assessed with expected contention scenarios",
+    "Research report delivered at docs/research/pg-transaction-isolation.md"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:51:09.808205+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase1-research.md"
+    },
+    {
+      "timestamp": "2026-03-05T17:51:09.839276+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase1-research.md",
+  "tags": [
+    "research",
+    "postgresql",
+    "transactions",
+    "phase1",
+    "BLK-01-02"
+  ]
+}

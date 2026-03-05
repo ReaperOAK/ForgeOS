@@ -1,0 +1,59 @@
+{
+  "ticket_id": "TASK-FOS-07-004",
+  "title": "Update tickets.py for Backward Compatibility Bridge",
+  "description": "Update the existing tickets.py to support dual-mode operation as a backward compatibility bridge. Add a FORGEOS_MODE environment variable with three values: \"filesystem\" (current behavior, default), \"dual\" (writes to both filesystem and PostgreSQL via MCP), and \"mcp\" (PostgreSQL-only via MCP). In dual mode, every claim/advance/release operation first executes against the filesystem (existing code) and then mirrors the operation to the MCP server via HTTP API calls. In mcp mode, all operations go through MCP and filesystem operations are skipped. Include a shadow mode that compares filesystem and MCP results and logs divergences without failing.",
+  "type": "backend",
+  "priority": "medium",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:05:37.906287+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-FOS-03-002",
+    "TASK-FOS-03-004"
+  ],
+  "blocked_by": [
+    "TASK-FOS-03-002",
+    "TASK-FOS-03-004"
+  ],
+  "file_paths": [
+    ".github/tickets.py"
+  ],
+  "acceptance_criteria": [
+    "FORGEOS_MODE env var controls behavior: \"filesystem\" (default), \"dual\", \"mcp\"",
+    "In filesystem mode, all existing behavior is preserved with zero changes",
+    "In dual mode, --claim calls both filesystem claim and MCP tickets.claim; logs any divergence",
+    "In dual mode, --advance calls both filesystem advance and MCP tickets.complete; logs any divergence",
+    "In mcp mode, --claim calls only MCP tickets.claim (skips filesystem operations)",
+    "In mcp mode, --advance calls only MCP tickets.complete (skips filesystem operations)",
+    "Shadow comparison logs: \"DIVERGENCE: filesystem={state} mcp={state} for ticket {id}\" on mismatch",
+    "MCP calls use FORGEOS_MCP_URL and FORGEOS_API_KEY environment variables",
+    "If MCP server is unreachable in dual mode, operation continues with filesystem-only and logs WARNING"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:05:37.906291+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/07-system-update.md"
+    }
+  ],
+  "source_task_file": "TODO/tickets/07-system-update.md",
+  "tags": []
+}

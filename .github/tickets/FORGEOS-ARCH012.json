@@ -1,0 +1,59 @@
+{
+  "ticket_id": "FORGEOS-ARCH012",
+  "title": "Design Fitness Functions and Verification Plan",
+  "description": "Design fitness functions and a verification plan for each quality attribute defined in ARCH011. For each performance target and correctness invariant, specify how it will be measured, what tooling is needed, acceptable thresholds, and how regressions will be detected. Include the zero-downtime migration fitness function that verifies the migration does not interrupt ongoing operations.",
+  "type": "architecture",
+  "priority": "medium",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "ARCHITECT",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:51:09.802942+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-ARCH011"
+  ],
+  "blocked_by": [
+    "FORGEOS-ARCH011"
+  ],
+  "file_paths": [
+    "docs/architecture/fitness-functions.md"
+  ],
+  "acceptance_criteria": [
+    "Fitness function defined for claim latency: benchmark setup, measurement tool, acceptable range, regression threshold",
+    "Fitness function defined for concurrent claim safety: test scenario (N agents claiming simultaneously), expected outcome",
+    "Fitness function defined for state transition integrity: property-based test specification",
+    "Fitness function defined for dependency resolution correctness: test scenario with complex dependency graphs",
+    "Fitness function for zero-downtime migration: what to measure during cutover, acceptable degradation",
+    "Verification tooling recommendations: load testing (locust/k6), property testing (hypothesis), monitoring (prometheus)",
+    "CI integration plan: which fitness functions run on every PR, which run nightly",
+    "Fitness functions document delivered at docs/architecture/fitness-functions.md"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:51:09.802944+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase1-architecture.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase1-architecture.md",
+  "tags": [
+    "architecture",
+    "fitness-functions",
+    "testing",
+    "phase1",
+    "BLK-02-04"
+  ]
+}

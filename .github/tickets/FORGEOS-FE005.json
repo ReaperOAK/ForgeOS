@@ -1,0 +1,71 @@
+{
+  "ticket_id": "FORGEOS-FE005",
+  "title": "Implement Interactive Dependency Graph",
+  "description": "Implement the interactive dependency graph (DAG visualization) following the UIDesigner mockup (FORGEOS-UID003). Render all tickets as nodes in a directed acyclic graph with dependency edges. Nodes are color-coded by current stage. Support zoom, pan, fit-to-view, and click-to-navigate-to-detail. Use a graph rendering library (e.g., react-flow, d3-dag, or cytoscape.js). Replace the static `todo_visual.py --dot` output with this interactive view.",
+  "type": "frontend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "UIDESIGNER",
+    "FRONTEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:13:46.597366+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-FE002",
+    "FORGEOS-UID003"
+  ],
+  "blocked_by": [
+    "FORGEOS-FE002",
+    "FORGEOS-UID003"
+  ],
+  "file_paths": [
+    "dashboard/src/app/graph/page.tsx",
+    "dashboard/src/components/graph/DependencyGraph.tsx",
+    "dashboard/src/components/graph/GraphControls.tsx",
+    "dashboard/src/lib/graph/layout.ts"
+  ],
+  "acceptance_criteria": [
+    "DAG visualization renders all tickets as nodes with dependency edges",
+    "Nodes display ticket ID and abbreviated title, colored by stage",
+    "Edges show directional arrows from dependency to dependent",
+    "Zoom in/out via mouse wheel or pinch gesture",
+    "Pan via mouse drag on empty canvas area",
+    "Fit-to-view button scales and centers the entire graph",
+    "Clicking a node navigates to that ticket's detail page",
+    "Graph layout algorithm produces readable, non-overlapping node placement"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:13:46.597368+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase4-dashboard.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase4-dashboard.md",
+  "tags": [
+    "frontend",
+    "dashboard",
+    "dag",
+    "graph",
+    "visualization",
+    "interactive",
+    "phase4",
+    "BLK-10-02"
+  ]
+}

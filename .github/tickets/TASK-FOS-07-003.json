@@ -1,0 +1,53 @@
+{
+  "ticket_id": "TASK-FOS-07-003",
+  "title": "Update Root Documentation Files",
+  "description": "Update the root-level documentation files to reflect the new ForgeOS architecture. agents.md should reference MCP tools in the Agent Execution Contract. copilot-instructions.md should update the repository structure section to include forgeos-server/ directory and the MCP architecture description. README.md should be updated with: new architecture overview, setup instructions (docker compose up), development workflow, and links to the new dashboard.",
+  "type": "docs",
+  "priority": "medium",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:05:37.905946+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-FOS-07-001"
+  ],
+  "blocked_by": [
+    "TASK-FOS-07-001"
+  ],
+  "file_paths": [
+    "agents.md",
+    ".github/copilot-instructions.md",
+    "README.md"
+  ],
+  "acceptance_criteria": [
+    "agents.md Updated Required Lifecycle section references MCP tools for claim/advance/release",
+    "agents.md Required Boot Sequence includes MCP server connectivity check",
+    "copilot-instructions.md Repository Structure section includes forgeos-server/ directory tree",
+    "copilot-instructions.md Architecture section describes MCP server + PostgreSQL + dashboard",
+    "README.md includes quick start: git clone, docker compose up, open dashboard",
+    "README.md architecture section describes the distributed MCP-based system",
+    "README.md links to dashboard URL (http://localhost:3000/dashboard)"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:05:37.905949+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/07-system-update.md"
+    }
+  ],
+  "source_task_file": "TODO/tickets/07-system-update.md",
+  "tags": []
+}

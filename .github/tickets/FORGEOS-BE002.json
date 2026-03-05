@@ -1,0 +1,65 @@
+{
+  "ticket_id": "FORGEOS-BE002",
+  "title": "Create Core Tables Migration",
+  "description": "Create the initial Alembic migration that implements the core tables from the database schema design (ARCH005). Tables include: tickets (with JSONB fields for dependencies, file_paths, acceptance_criteria), claims (linking tickets to agents with lease tracking), agents (agent identity registry), machines (machine identity registry), and operators (human operator registry). Include all primary keys, foreign keys, and NOT NULL constraints.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:59:13.979645+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE001",
+    "FORGEOS-ARCH005"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE001",
+    "FORGEOS-ARCH005"
+  ],
+  "file_paths": [
+    "database/alembic/versions/001_core_tables.py"
+  ],
+  "acceptance_criteria": [
+    "Tickets table created with columns: ticket_id (PK), title, description, type, priority, stage, sdlc_flow (JSONB), dependencies (JSONB), file_paths (JSONB), acceptance_criteria (JSONB), rework_count, created_at, created_by",
+    "Claims table created with columns: claim_id (PK), ticket_id (FK), agent_id (FK), machine_id (FK), operator, lease_expiry, claimed_at, released_at",
+    "Agents table created with columns: agent_id (PK), agent_name, role, created_at",
+    "Machines table created with columns: machine_id (PK), hostname, registered_at, last_seen",
+    "Operators table created with columns: operator_id (PK), name, created_at",
+    "All foreign key relationships correctly defined with appropriate ON DELETE behavior",
+    "Migration downgrades cleanly, dropping all created tables"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:59:13.979652+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase2-database.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase2-database.md",
+  "tags": [
+    "backend",
+    "database",
+    "schema",
+    "tickets",
+    "claims",
+    "phase2",
+    "BLK-05-01"
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "ticket_id": "FORGEOS-RES006",
+  "title": "Research PostgreSQL Connection Pooling Strategies",
+  "description": "Evaluate connection pooling strategies for the ForgeOS PostgreSQL deployment. Compare PgBouncer (external pooler) vs asyncpg application-level pooling vs SQLAlchemy async pool. Assess pool sizing for expected concurrent agent load, connection lifecycle management, transaction routing in pooled mode, and impact on advisory lock semantics.",
+  "type": "research",
+  "priority": "high",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "RESEARCH",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:51:09.807912+00:00",
+  "created_by": "TODO",
+  "dependencies": [],
+  "blocked_by": [],
+  "file_paths": [
+    "docs/research/pg-connection-pooling.md"
+  ],
+  "acceptance_criteria": [
+    "PgBouncer evaluated: transaction vs session pooling modes, advisory lock compatibility, operational overhead",
+    "asyncpg application-level pool evaluated: pool sizing, connection health checks, async integration",
+    "SQLAlchemy async pool evaluated: ORM integration benefits, pool configuration options",
+    "Advisory lock compatibility assessed for each pooling strategy (session-scoped locks + pooling conflicts)",
+    "Pool sizing recommendations for 10, 50, and 100 concurrent agent scenarios",
+    "Recommendation with justification for ForgeOS pooling strategy",
+    "Research report delivered at docs/research/pg-connection-pooling.md"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:51:09.807917+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase1-research.md"
+    },
+    {
+      "timestamp": "2026-03-05T17:51:09.838063+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase1-research.md",
+  "tags": [
+    "research",
+    "postgresql",
+    "pooling",
+    "phase1",
+    "BLK-01-02"
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "ticket_id": "TASK-FOS-06-002",
+  "title": "Husky Pre-Commit Hook \u2014 Blast Radius Validation",
+  "description": "Create a pre-commit hook that validates the blast radius of staged files against the ticket's declared file_paths scope as specified in Architecture \u00a77.5 and PRD FR-20. The hook extracts the ticket ID from the most recent commit message (or from a FORGEOS_TICKET_ID environment variable), queries the MCP server's REST API (GET /api/tickets/:id) to get the ticket's file_paths, then checks each staged file against the allowed paths using prefix matching. Files outside the ticket's scope cause the commit to be rejected. If the MCP server is unreachable, the hook warns but allows the commit (graceful degradation).",
+  "type": "infra",
+  "priority": "medium",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:05:37.904261+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-FOS-06-001"
+  ],
+  "blocked_by": [
+    "TASK-FOS-06-001"
+  ],
+  "file_paths": [
+    "forgeos-server/.husky/pre-commit",
+    "forgeos-server/scripts/validate-scope.sh"
+  ],
+  "acceptance_criteria": [
+    ".husky/pre-commit hook script is executable and committed to the repository",
+    "Hook extracts ticket ID from FORGEOS_TICKET_ID env var or from last commit message pattern",
+    "Hook queries FORGEOS_MCP_URL/api/tickets/{id} to get the ticket's file_paths",
+    "Each staged file (git diff --cached --name-only) is checked against file_paths using prefix matching",
+    "Out-of-scope files cause rejection with error listing the violating files and allowed paths",
+    "If MCP server is unreachable (curl fails), hook prints WARNING and allows commit (exit 0)",
+    "If no ticket context is available, hook allows commit with INFO message",
+    "--no-verify bypass available for emergency commits"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:05:37.904263+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/06-git-integration.md"
+    }
+  ],
+  "source_task_file": "TODO/tickets/06-git-integration.md",
+  "tags": []
+}

@@ -1,0 +1,63 @@
+{
+  "ticket_id": "FORGEOS-BE029",
+  "title": "Implement tickets.claim MCP Tool",
+  "description": "Implement the `tickets.claim` MCP tool that allows agents to claim a specific ticket by ID. Unlike `tickets.next` which auto-selects, this tool targets a known ticket. The tool validates that the ticket exists, is in the READY stage, and the requesting agent's role matches the ticket's current SDLC stage. Uses the same service layer as `tickets.next`.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:06:45.286181+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE028"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE028"
+  ],
+  "file_paths": [
+    "mcp-server/src/tools/ticket_tools.py",
+    "mcp-server/src/services/ticket_service.py"
+  ],
+  "acceptance_criteria": [
+    "`tickets.claim` MCP tool registered with the dynamic tool registry",
+    "Tool accepts ticket_id, agent_id, machine_id, and operator as input parameters",
+    "Tool validates that the target ticket exists and is in READY stage",
+    "Tool validates that the agent role matches the ticket's expected SDLC stage",
+    "Concurrent claim attempts on the same ticket result in exactly one winner",
+    "Returns claimed ticket data on success, MCP error on conflict or invalid state",
+    "Lease expiry set according to configurable lease_duration_minutes"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:06:45.286187+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase3-ticket-api.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase3-ticket-api.md",
+  "tags": [
+    "backend",
+    "mcp",
+    "tools",
+    "claim",
+    "phase3",
+    "BLK-06-01"
+  ]
+}

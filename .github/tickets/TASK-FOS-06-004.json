@@ -1,0 +1,64 @@
+{
+  "ticket_id": "TASK-FOS-06-004",
+  "title": "Webhook State Recovery Endpoint",
+  "description": "Implement the GitHub push webhook receiver and ghost commit recovery system as specified in Architecture \u00a710.2 and PRD FR-28 through FR-30. POST /api/webhooks/github accepts GitHub push event payloads, verifies the HMAC-SHA256 signature using WEBHOOK_SECRET, parses commit messages to extract ticket operations (CLAIM and WORK patterns), and reconciles DB state with Git state. Reconciliation rules: (1) Git CLAIM exists but DB has no claim \u2192 create claim in DB, (2) Git WORK complete but DB still CLAIMED \u2192 advance ticket, (3) DB has claim but no Git commit and lease expired \u2192 release claim, (4) ambiguous \u2192 log warning and flag for admin. All operations are idempotent. Includes periodic reconciliation sweep (configurable interval, default 5 minutes).",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:05:37.904896+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-FOS-02-001",
+    "TASK-FOS-01-002",
+    "TASK-FOS-02-003"
+  ],
+  "blocked_by": [
+    "TASK-FOS-02-001",
+    "TASK-FOS-01-002",
+    "TASK-FOS-02-003"
+  ],
+  "file_paths": [
+    "forgeos-server/src/webhooks/github.ts",
+    "forgeos-server/src/webhooks/parser.ts",
+    "forgeos-server/src/webhooks/reconciliation.ts"
+  ],
+  "acceptance_criteria": [
+    "POST /api/webhooks/github endpoint accepts GitHub push event payloads",
+    "HMAC-SHA256 signature verification using WEBHOOK_SECRET environment variable; rejects invalid signatures with 401",
+    "Commit message parser extracts ticket_id, agent, machine, operator from CLAIM format regex",
+    "Commit message parser extracts ticket_id, stage, agent, machine from WORK format regex",
+    "Ghost commit recovery: Git CLAIM without DB claim \u2192 creates claim in DB (idempotent via ON CONFLICT)",
+    "Ghost commit recovery: Git WORK complete without DB advance \u2192 advances ticket in DB",
+    "Ambiguous state divergence logged as WARNING; NOT auto-resolved; admin notification flag set",
+    "All reconciliation operations recorded as RECONCILED events in events table",
+    "Periodic reconciliation sweep runs every reconciliation_interval_seconds (from system_config, default 300s)",
+    "Reconciliation is idempotent \u2014 replaying the same webhook produces the same result"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:05:37.904899+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/06-git-integration.md"
+    }
+  ],
+  "source_task_file": "TODO/tickets/06-git-integration.md",
+  "tags": []
+}

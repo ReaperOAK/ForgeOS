@@ -1,0 +1,66 @@
+{
+  "ticket_id": "FORGEOS-BE079",
+  "title": "Implement agent-runner.py Migration Evolution",
+  "description": "Evolve `agent-runner.py` to support the three migration evolution stages. Phase 1: agent-runner.py unchanged (pure filesystem + git). Phase 2: CLAIM commit performed via MCP SDK (FORGEOS-BE050), WORK commit still via git. Phase 3: full MCP for claim/advance/release, git only for WORK commits (code changes). The runner adapter checks the current migration phase from feature flags and routes operations accordingly. This preserves the two-commit protocol while migrating the state management layer.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:13:46.609048+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE074",
+    "FORGEOS-BE050"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE074",
+    "FORGEOS-BE050"
+  ],
+  "file_paths": [
+    ".github/agent-runner.py",
+    "mcp-server/src/migration/runner_adapter.py"
+  ],
+  "acceptance_criteria": [
+    "agent-runner.py detects current migration phase from feature flag configuration",
+    "Phase 1 behavior: CLAIM via git push, WORK via git push (unchanged from current)",
+    "Phase 2 behavior: CLAIM via SDK (MCP), WORK via git push (hybrid)",
+    "Phase 3 behavior: CLAIM via SDK, ADVANCE via SDK, WORK via git push (code only)",
+    "Runner adapter maps agent-runner.py operations to SDK calls in Phase 2 and 3",
+    "Fallback: if SDK call fails in Phase 2, runner reverts to git-based claim",
+    "Migration phase transition does not require agent-runner.py code changes (config-driven)"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:13:46.609051+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase4-migration.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase4-migration.md",
+  "tags": [
+    "backend",
+    "migration",
+    "agentRunner",
+    "evolution",
+    "twoCommit",
+    "phase4",
+    "BLK-11-02"
+  ]
+}

@@ -1,0 +1,62 @@
+{
+  "ticket_id": "FORGEOS-BE021",
+  "title": "Implement Tool Input JSON Schema Validation",
+  "description": "Implement JSON Schema validation for MCP tool input parameters. Before a tool handler is invoked, the input arguments are validated against the tool's registered JSON Schema. Validation errors produce clear, structured error responses following MCP error semantics, including the specific validation failure (missing field, wrong type, invalid value).",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:59:14.007625+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE020"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE020"
+  ],
+  "file_paths": [
+    "mcp-server/src/tools/validation.py"
+  ],
+  "acceptance_criteria": [
+    "Tool inputs are validated against the registered JSON Schema before handler invocation",
+    "Validation errors include the specific field path and failure reason",
+    "Error responses follow MCP protocol error format with INVALID_PARAMS code",
+    "Type coercion is NOT performed; inputs must match schema types exactly",
+    "Missing required fields produce a clear error listing all missing fields",
+    "Validation performance is acceptable (< 1ms for typical tool inputs)"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:59:14.007637+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase2-mcp-server.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase2-mcp-server.md",
+  "tags": [
+    "backend",
+    "mcp",
+    "tools",
+    "validation",
+    "jsonschema",
+    "phase2",
+    "BLK-04-02"
+  ]
+}

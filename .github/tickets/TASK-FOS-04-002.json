@@ -1,0 +1,56 @@
+{
+  "ticket_id": "TASK-FOS-04-002",
+  "title": "Agent Registration and Identity Management",
+  "description": "Implement agent and machine registration endpoints. POST /api/admin/agents creates a new agent record with name, role, and permissions, generates an API key, and returns the agent identity with the plaintext key (shown once). POST /api/admin/agents/:id/revoke revokes an agent's API key. GET /api/admin/agents lists all registered agents (without key hashes). Include machine registration: each API call updates the agent's last_seen timestamp for staleness tracking. Admin endpoints require admin role authentication.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:05:37.902049+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-FOS-04-001"
+  ],
+  "blocked_by": [
+    "TASK-FOS-04-001"
+  ],
+  "file_paths": [
+    "forgeos-server/src/auth/registration.ts",
+    "forgeos-server/src/api/routes/admin.ts"
+  ],
+  "acceptance_criteria": [
+    "POST /api/admin/agents creates agent record, generates API key, returns {agent, api_key: plaintext}",
+    "API key plaintext is returned exactly once at creation time; never stored or logged in plaintext",
+    "POST /api/admin/agents/:id/revoke sets revoked_at timestamp; subsequent requests with that key return 401",
+    "GET /api/admin/agents returns paginated list of agents with id, name, role, is_active, created_at (no key hashes)",
+    "All admin endpoints require admin role authentication (403 for non-admin callers)",
+    "Machine last_seen updated on every authenticated API call for staleness detection",
+    "Agent sessions table updated with session_token matching MCP session ID"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:05:37.902052+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/04-auth-security.md"
+    }
+  ],
+  "source_task_file": "TODO/tickets/04-auth-security.md",
+  "tags": []
+}

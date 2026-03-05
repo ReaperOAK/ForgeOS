@@ -1,0 +1,78 @@
+{
+  "ticket_id": "TASK-FOS-06-001",
+  "title": "Husky Commit-Msg Hook",
+  "description": "Install Husky in the ForgeOS server project and create a commit-msg hook that validates commit message format as specified in Architecture \u00a77.5. The hook reads the commit message from the file passed as $1, validates it matches the required [TICKET-ID] prefix pattern using regex. Valid formats: \"[TICKET-ID] CLAIM by AGENT on MACHINE (OPERATOR)\" for claim commits and \"[TICKET-ID] STAGE complete by AGENT on MACHINE\" for work commits. Invalid messages are rejected with a clear error message showing the expected format. The hook is a shell script committed to the .husky/ directory.",
+  "type": "infra",
+  "priority": "medium",
+  "stage": "QA",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:05:37.903993+00:00",
+  "created_by": "TODO",
+  "dependencies": [],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/.husky/commit-msg",
+    "forgeos-server/scripts/validate-commit.sh"
+  ],
+  "acceptance_criteria": [
+    "Husky installed as devDependency in package.json with \"prepare\": \"husky\" script",
+    ".husky/commit-msg hook script is executable and committed to the repository",
+    "Hook validates commit message matches regex: ^\\[[A-Z0-9]+-[A-Z0-9]+-?[A-Z0-9]*\\]",
+    "Rejects non-matching messages with error showing expected CLAIM and WORK commit formats",
+    "Accepts valid CLAIM format: [FORGEOS-001] CLAIM by Backend on machine-1 (operator)",
+    "Accepts valid WORK format: [FORGEOS-001] BACKEND complete by Backend on machine-1",
+    "--no-verify bypass works for emergency commits (standard Git behavior)",
+    "Hook exits 0 on valid messages, exits 1 on invalid messages"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:05:37.903996+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/06-git-integration.md"
+    },
+    {
+      "timestamp": "2026-03-05T18:05:37.983715+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-05T18:27:41.715981+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "DevOps",
+      "machine_id": "system",
+      "from_stage": "READY",
+      "to_stage": "BACKEND",
+      "details": "Advanced from READY to BACKEND"
+    },
+    {
+      "timestamp": "2026-03-05T18:27:46.330676+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "DevOps",
+      "machine_id": "system",
+      "from_stage": "BACKEND",
+      "to_stage": "QA",
+      "details": "Advanced from BACKEND to QA"
+    }
+  ],
+  "source_task_file": "TODO/tickets/06-git-integration.md",
+  "tags": []
+}

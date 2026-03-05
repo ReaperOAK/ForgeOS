@@ -1,0 +1,62 @@
+{
+  "ticket_id": "FORGEOS-DO002",
+  "title": "Configure PostgreSQL Container with Init Scripts",
+  "description": "Configure the PostgreSQL container for the ForgeOS platform. Create a custom Dockerfile (or init script) that sets up the initial database and user, applies baseline configuration (connection limits, shared_buffers, work_mem for development), and includes a health check script. The container must initialize the forgeos database and forgeos_user on first startup.",
+  "type": "infra",
+  "priority": "critical",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:59:13.996472+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-DO001"
+  ],
+  "blocked_by": [
+    "FORGEOS-DO001"
+  ],
+  "file_paths": [
+    "infra/docker/postgres/Dockerfile",
+    "infra/docker/postgres/init.sql",
+    "infra/docker/postgres/pg-healthcheck.sh"
+  ],
+  "acceptance_criteria": [
+    "PostgreSQL container initializes forgeos database and forgeos_user on first startup",
+    "Health check script verifies PostgreSQL is accepting connections and database exists",
+    "PostgreSQL configuration tuned for development workloads (reasonable defaults)",
+    "Container logs are accessible via `docker compose logs postgres`",
+    "Data persists across container stop/start via named volume",
+    "Container passes health check within 30 seconds of startup"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:59:13.996481+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase2-infrastructure.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase2-infrastructure.md",
+  "tags": [
+    "infra",
+    "postgres",
+    "docker",
+    "phase2",
+    "BLK-12-01"
+  ]
+}

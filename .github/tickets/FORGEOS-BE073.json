@@ -1,0 +1,66 @@
+{
+  "ticket_id": "FORGEOS-BE073",
+  "title": "Implement Migration Phase A \u2014 Background Sync",
+  "description": "Implement Migration Phase A: agents continue using the filesystem (via `tickets.py` and `agent-runner.py`) as-is, but the bidirectional sync engine (FORGEOS-BE071) runs in the background, mirroring all filesystem changes to the database. This phase requires zero changes to agent behavior. The filesystem fallback mode from the SDK (FORGEOS-BE049) is the default. Phase A is the read-only validation period where database contents are verified against filesystem truth.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:13:46.601270+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE071",
+    "FORGEOS-BE049"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE071",
+    "FORGEOS-BE049"
+  ],
+  "file_paths": [
+    "mcp-server/src/migration/phases/phase_a.py",
+    "mcp-server/src/migration/phases/__init__.py"
+  ],
+  "acceptance_criteria": [
+    "Phase A configuration activates background sync with all feature flags set to `filesystem` mode",
+    "Sync engine mirrors every filesystem ticket change to the database within the sync interval",
+    "Agent behavior is completely unchanged during Phase A (no SDK required)",
+    "Validation script compares database state to filesystem state and reports discrepancies",
+    "Phase A can run indefinitely without interfering with agent operations",
+    "Phase transition gate: database matches filesystem state with zero discrepancies for 24+ hours",
+    "Phase A entry and exit logged with timestamp and validation results"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:13:46.601273+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase4-migration.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase4-migration.md",
+  "tags": [
+    "backend",
+    "migration",
+    "phaseA",
+    "backgroundSync",
+    "filesystem",
+    "phase4",
+    "BLK-11-02"
+  ]
+}

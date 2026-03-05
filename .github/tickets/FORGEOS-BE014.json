@@ -1,0 +1,62 @@
+{
+  "ticket_id": "FORGEOS-BE014",
+  "title": "Implement Connection Pool Health Monitoring",
+  "description": "Implement health monitoring for the asyncpg connection pool. Track pool statistics (active connections, idle connections, waiting requests), detect unhealthy connections via periodic ping, and trigger connection recycling when connections become stale. Expose pool health as a structured report for the health check endpoint.",
+  "type": "backend",
+  "priority": "medium",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:59:13.995073+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE011"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE011"
+  ],
+  "file_paths": [
+    "mcp-server/src/db/health.py"
+  ],
+  "acceptance_criteria": [
+    "Pool health monitor reports: total, active, idle, and waiting connection counts",
+    "Periodic ping detects and removes dead connections from the pool",
+    "Stale connections (exceeding max_lifetime) are recycled automatically",
+    "Health report includes pool saturation percentage and average wait time",
+    "Health data is exposed as a dict suitable for JSON serialization in the /health endpoint",
+    "Health monitoring runs as a lightweight background task without impacting pool performance"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:59:13.995082+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase2-database.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase2-database.md",
+  "tags": [
+    "backend",
+    "database",
+    "pool",
+    "health",
+    "monitoring",
+    "phase2",
+    "BLK-05-03"
+  ]
+}

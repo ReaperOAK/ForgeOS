@@ -1,0 +1,62 @@
+{
+  "ticket_id": "FORGEOS-BE052",
+  "title": "Implement Machine Registration and Verification",
+  "description": "Implement machine registration and identity verification. Each machine running agents registers with a unique machine_id (hostname or UUID). Machine registration records the hostname, first-seen timestamp, and last-seen timestamp. On each request, the machine_id is verified against the registry. Unknown machines can be auto-registered or rejected based on configuration.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:06:45.282017+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE051"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE051"
+  ],
+  "file_paths": [
+    "mcp-server/src/auth/machine_auth.py",
+    "mcp-server/src/services/machine_service.py"
+  ],
+  "acceptance_criteria": [
+    "Machine registration endpoint or MCP tool creates machine records in the machines table",
+    "Machine identity verified on each request by matching machine_id to registry",
+    "Auto-registration mode allows unknown machines to self-register (configurable)",
+    "Strict mode rejects requests from unregistered machines with 403 error",
+    "last_seen timestamp updated on each authenticated request from a machine",
+    "Machine identity includes machine_id, hostname, and registration timestamp"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:06:45.282023+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase3-auth.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase3-auth.md",
+  "tags": [
+    "backend",
+    "auth",
+    "machine",
+    "registration",
+    "phase3",
+    "BLK-08-01"
+  ]
+}

@@ -1,0 +1,63 @@
+{
+  "ticket_id": "FORGEOS-BE025",
+  "title": "Implement Health Check and Readiness Probes",
+  "description": "Implement health check and readiness probe endpoints for the MCP server. The health check reports overall server status including database connectivity, connection pool health, and active session count. The readiness probe indicates whether the server is ready to accept new requests (database connected, pool initialized, not shutting down). These endpoints are used by Docker health checks and monitoring systems.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:59:14.011962+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE015",
+    "FORGEOS-BE011"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE015",
+    "FORGEOS-BE011"
+  ],
+  "file_paths": [
+    "mcp-server/src/observability/health.py"
+  ],
+  "acceptance_criteria": [
+    "Health check endpoint returns JSON with server status, database status, pool stats, and uptime",
+    "Readiness probe returns 200 when server is fully initialized and accepting requests",
+    "Readiness probe returns 503 during startup initialization or shutdown draining",
+    "Database connectivity is verified via a lightweight query (SELECT 1)",
+    "Health check includes connection pool saturation metrics",
+    "Both endpoints respond within 500ms even under load"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:59:14.011978+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase2-mcp-server.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase2-mcp-server.md",
+  "tags": [
+    "backend",
+    "observability",
+    "health",
+    "readiness",
+    "phase2",
+    "BLK-04-03"
+  ]
+}

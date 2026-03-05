@@ -1,0 +1,63 @@
+{
+  "ticket_id": "FORGEOS-BE049",
+  "title": "Implement Filesystem Fallback Mode",
+  "description": "Implement a filesystem fallback mode that allows agents to operate when the MCP server is unavailable. In fallback mode, the SDK delegates operations to the existing `tickets.py` CLI. This enables a gradual migration from filesystem to MCP-based operations. The mode is controlled by a feature flag (environment variable FORGEOS_MODE=mcp|filesystem|auto).",
+  "type": "backend",
+  "priority": "medium",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:06:45.280245+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE045"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE045"
+  ],
+  "file_paths": [
+    "agent-sdk/src/forgeos_sdk/fallback.py",
+    "agent-sdk/src/forgeos_sdk/client.py"
+  ],
+  "acceptance_criteria": [
+    "Fallback mode delegates claim/advance/rework/status to tickets.py CLI subprocess calls",
+    "Mode selection via FORGEOS_MODE environment variable (mcp, filesystem, auto)",
+    "Auto mode attempts MCP connection first, falls back to filesystem on connection failure",
+    "Fallback operations parse tickets.py stdout for result data",
+    "Fallback mode is transparent to calling agent code (same API surface)",
+    "Mode switch logged at startup indicating which backend is active"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:06:45.280254+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase3-agent-sdk.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase3-agent-sdk.md",
+  "tags": [
+    "backend",
+    "sdk",
+    "fallback",
+    "filesystem",
+    "migration",
+    "phase3",
+    "BLK-07-02"
+  ]
+}

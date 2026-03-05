@@ -1,0 +1,65 @@
+{
+  "ticket_id": "FORGEOS-BE067",
+  "title": "Implement Retry Logic and Dead-Letter Handling",
+  "description": "Implement the notification processor that dequeues pending notifications, delivers them to configured channels, and handles failures. Implement exponential backoff retry logic (1min, 5min, 15min, 1hr) with configurable maximum retry count. Notifications exceeding max retries move to dead_letter status. Run as a background asyncio task.",
+  "type": "backend",
+  "priority": "medium",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:06:45.298807+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE064",
+    "FORGEOS-BE066"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE064",
+    "FORGEOS-BE066"
+  ],
+  "file_paths": [
+    "mcp-server/src/notifications/processor.py",
+    "mcp-server/src/notifications/queue.py"
+  ],
+  "acceptance_criteria": [
+    "Background processor dequeues and delivers pending notifications on a configurable interval",
+    "Successful delivery updates notification status to delivered with delivery timestamp",
+    "Failed delivery increments retry_count and schedules next_retry_at with exponential backoff",
+    "Backoff schedule: 1 min, 5 min, 15 min, 1 hour (configurable)",
+    "Notifications exceeding max retries (default 5) move to dead_letter status",
+    "Dead-letter notifications queryable via admin API for manual inspection and replay"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:06:45.298813+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase3-webhooks.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase3-webhooks.md",
+  "tags": [
+    "backend",
+    "notifications",
+    "retry",
+    "deadletter",
+    "reliability",
+    "phase3",
+    "BLK-09-02"
+  ]
+}
