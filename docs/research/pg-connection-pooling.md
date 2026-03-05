@@ -5,13 +5,20 @@
 > **PostgreSQL Version Basis:** 17 (target deployment version)  
 > **Node.js Runtime:** >=22.0.0 | **Driver:** pg (node-postgres) v8.13
 
+| Metadata | Value |
+|----------|-------|
+| **Document Type** | Reference (Diátaxis: Reference) |
+| **Audience** | Backend engineers, DevOps, and architects evaluating pooling for ForgeOS |
+| **Last Reviewed** | 2026-03-06T00:00:00Z |
+| **Owner** | Research Analyst → Documentation Specialist |
+
 ---
 
 ## Executive Summary
 
 This report evaluates three connection pooling strategies for ForgeOS's PostgreSQL deployment: **PgBouncer** (external proxy pooler), **asyncpg application-level pooling** (Python async driver), and **SQLAlchemy async pool** (Python ORM-integrated pool). Each is assessed for advisory lock compatibility, pool sizing under concurrent agent workloads, and operational characteristics.
 
-**Critical Context:** ForgeOS is a Node.js/TypeScript application using the `pg` (node-postgres) driver. asyncpg and SQLAlchemy are Python-specific libraries. This report evaluates them as requested for completeness and cross-platform knowledge, but translates findings to ForgeOS's actual stack — mapping asyncpg concepts to `pg` Pool and SQLAlchemy concepts to Node.js ORM alternatives (Drizzle, Prisma, TypeORM).
+**Critical Context:** ForgeOS is a Node.js/TypeScript application using the `pg` (node-postgres) driver. asyncpg and SQLAlchemy are Python-specific libraries. This report evaluates them for completeness and cross-platform knowledge. It maps asyncpg concepts to `pg` Pool and SQLAlchemy concepts to Node.js ORM alternatives (Drizzle, Prisma, TypeORM).
 
 **Key Findings:**
 
@@ -22,11 +29,11 @@ This report evaluates three connection pooling strategies for ForgeOS's PostgreS
 | **asyncpg Pool** | Full compatibility ✅ | N/A (Python) | Python-based agent implementations |
 | **SQLAlchemy async** | Full compatibility ✅ | N/A (Python) | Python ORMs with complex query patterns |
 
-**Recommendation:** Retain `pg` Pool as the primary pooling mechanism with tuned parameters. Add PgBouncer in transaction mode as a scaling layer when concurrent agents exceed 50. ForgeOS's short-lived transactions and `pg_advisory_xact_lock` usage are fully compatible with PgBouncer transaction mode.
+**Recommendation:** Retain `pg` Pool as the primary pooling mechanism with tuned parameters. Add PgBouncer in transaction mode when concurrent agents exceed 50. ForgeOS's short-lived transactions and `pg_advisory_xact_lock` usage are fully compatible with PgBouncer's transaction mode.
 
 **Bayesian Confidence Update:**
-- *Prior:* 75% — Application-level `pg` Pool is sufficient for moderate concurrency; PgBouncer compatibility with advisory locks is uncertain.
-- *Posterior:* 87% — PgBouncer transaction mode is confirmed compatible with transaction-scoped advisory locks (`pg_advisory_xact_lock`) and `SET LOCAL` (RLS). ForgeOS's workload pattern (short transactions, long AI processing outside DB) means high connection reuse, reducing pooler pressure. Minor uncertainty remains around LISTEN/NOTIFY requirements for future webhook/event features.
+- *Prior:* 75% — Application-level `pg` Pool is sufficient for moderate concurrency. PgBouncer compatibility with advisory locks is uncertain.
+- *Posterior:* 87% — PgBouncer transaction mode is confirmed compatible with `pg_advisory_xact_lock` and `SET LOCAL` (RLS). ForgeOS's workload pattern — short transactions with long AI processing outside the DB — yields high connection reuse. Minor uncertainty remains around LISTEN/NOTIFY for future webhook/event features.
 
 ---
 
@@ -93,7 +100,7 @@ This report evaluates three connection pooling strategies for ForgeOS's PostgreS
 
 **Source:** [PgBouncer Official Docs](https://www.pgbouncer.org/) (weight: 1.0)
 
-PgBouncer is a lightweight, single-process connection pooler for PostgreSQL. It sits between the application and PostgreSQL, multiplexing many client connections onto fewer server connections. Written in C, it has minimal memory overhead (~2KB per connection) and can handle thousands of client connections.
+PgBouncer is a lightweight, single-process connection pooler for PostgreSQL. It sits between the application and the database server. It multiplexes many client connections onto fewer server connections. Written in C, it has minimal memory overhead (~2KB per connection) and handles thousands of client connections.
 
 **Architecture:**
 ```
@@ -107,7 +114,7 @@ PgBouncer supports three pooling modes, each with different feature compatibilit
 
 #### Transaction Pooling (Recommended for ForgeOS)
 
-**Behavior:** Server connection is assigned to a client for the duration of a single transaction. After `COMMIT` or `ROLLBACK`, the connection returns to PgBouncer's pool and may be assigned to a different client.
+**Behavior:** A server connection is assigned to a client for one transaction. After `COMMIT` or `ROLLBACK`, the connection returns to PgBouncer's pool. It may then serve a different client.
 
 **Advantages:**
 - Maximum connection reuse — N server connections can serve M >> N clients
@@ -138,7 +145,7 @@ PgBouncer supports three pooling modes, each with different feature compatibilit
 
 #### Session Pooling
 
-**Behavior:** Server connection is assigned when the client connects and held for the entire client session. Released only when the client disconnects.
+**Behavior:** A server connection is assigned when the client connects. It is held for the entire session and released only on disconnect.
 
 **Advantages:**
 - Full PostgreSQL feature compatibility ✅
@@ -255,7 +262,7 @@ RELOAD;          -- Reload config without dropping connections
 
 **Source:** [asyncpg documentation](https://magicstack.github.io/asyncpg/current/) (weight: 0.9)
 
-asyncpg is a high-performance asynchronous PostgreSQL client library for Python, built on top of `asyncio`. It uses the PostgreSQL binary wire protocol directly (not libpq) for maximum performance.
+asyncpg is a high-performance asynchronous PostgreSQL client library for Python. It is built on `asyncio` and uses the PostgreSQL binary wire protocol directly (not libpq) for maximum performance.
 
 > **Applicability Note:** ForgeOS is a Node.js/TypeScript application. asyncpg is Python-only. This evaluation addresses the ticket's requirements and extracts principles applicable to ForgeOS's `pg` Pool (the Node.js equivalent).
 
@@ -422,7 +429,7 @@ pool.on('remove', () => {
 
 **Source:** [SQLAlchemy 2.0 Async Engine docs](https://docs.sqlalchemy.org/en/20/orm/extensions/asyncio.html) (weight: 0.9)
 
-SQLAlchemy is Python's most popular ORM/database toolkit. Its async engine (`create_async_engine`) provides ORM-integrated connection pooling with multiple pool implementations.
+SQLAlchemy is Python's most popular ORM and database toolkit. Its async engine (`create_async_engine`) provides ORM-integrated connection pooling with multiple pool implementations.
 
 > **Applicability Note:** ForgeOS is Node.js. This section evaluates SQLAlchemy's pooling patterns and maps them to Node.js ORM alternatives.
 
@@ -480,7 +487,7 @@ engine = create_async_engine(
 | Advisory lock support | Via raw SQL | Via `$queryRaw` | Via raw SQL |
 | RLS support | Via raw SQL / events | Via `$queryRaw` | Via subscriber |
 
-**ForgeOS Assessment:** ForgeOS uses raw SQL via `pg` for performance-critical operations (locking, claiming, stage transitions). The ORM-pool benefits (`pool_pre_ping`, `pool_recycle`, LIFO) can be replicated at the driver level. An ORM adds complexity without proportional benefit for ForgeOS's query patterns.
+**ForgeOS Assessment:** ForgeOS uses raw SQL via `pg` for performance-critical operations: locking, claiming, and stage transitions. The ORM-pool benefits (`pool_pre_ping`, `pool_recycle`, LIFO) can be replicated at the driver level. An ORM adds complexity without proportional benefit for ForgeOS's query patterns.
 
 ### 5.6 SQLAlchemy — Repo Health
 
@@ -499,7 +506,7 @@ engine = create_async_engine(
 
 ## 6. Advisory Lock Compatibility Matrix
 
-This is a critical evaluation criterion given ForgeOS's reliance on advisory locks for file-path mutexes (documented in FORGEOS-RES005).
+This is a critical evaluation criterion. ForgeOS relies on advisory locks for file-path mutexes, as documented in [FORGEOS-RES005](pg-distributed-locking.md).
 
 ### 6.1 Feature Compatibility by Pooling Strategy
 
@@ -563,7 +570,7 @@ Where $C_{\text{cores}}$ is the number of effective CPU cores and $D_{\text{disk
 
 For a typical ForgeOS deployment (2-4 cores, SSD): pool_size = 4-8 connections.
 
-**Key insight:** A smaller, correctly-sized pool outperforms a larger pool due to reduced context switching, cache thrashing, and lock contention at the PostgreSQL level.
+**Key insight:** A smaller, correctly-sized pool outperforms a larger pool. This is due to reduced context switching, less cache thrashing, and lower lock contention at the PostgreSQL level.
 
 ### 7.2 ForgeOS Workload Characteristics
 
@@ -577,7 +584,7 @@ ForgeOS's database access pattern is **bursty and short-lived:**
 | Health check | 1-3ms | Every 30 seconds |
 | Event logging | 2-5ms | Per operation |
 
-**Critical insight:** Agents spend 99%+ of their time doing AI work (code generation, analysis, testing) OUTSIDE the database. Database interactions are sub-second bursts. This means connection reuse is extremely high — a single connection can serve many agents sequentially.
+**Critical insight:** Agents spend 99%+ of their time on AI work (code generation, analysis, testing) outside the database. Database interactions are sub-second bursts. Connection reuse is therefore extremely high — a single connection can serve many agents sequentially.
 
 ### 7.3 Sizing by Concurrent Agent Count
 
@@ -592,7 +599,7 @@ ForgeOS's database access pattern is **bursty and short-lived:**
 | Estimated peak concurrent DB queries | 3-5 | 3-5 |
 | **Recommendation** | `pg` Pool alone ✅ | Overkill ❌ |
 
-**Rationale:** 10 agents with sub-second transactions will rarely exhaust even 5 connections simultaneously. PgBouncer adds operational complexity without benefit.
+**Rationale:** Ten agents with sub-second transactions rarely exhaust even 5 connections at once. PgBouncer adds operational complexity without benefit at this scale.
 
 #### Scenario B: 50 Concurrent Agents (Production/Medium Scale)
 
@@ -606,7 +613,7 @@ ForgeOS's database access pattern is **bursty and short-lived:**
 | Server instances | 1-2 | 1-3 |
 | **Recommendation** | `pg` Pool tuned ✅ | Optional ⚠️ |
 
-**Rationale:** With 1-2 server instances at `max: 20`, total connections = 20-40, well within PG defaults. PgBouncer becomes beneficial if multiple server instances are deployed (prevents connection count from scaling linearly with instances).
+**Rationale:** With 1–2 server instances at `max: 20`, total connections are 20–40 — well within PG defaults. PgBouncer becomes beneficial when multiple server instances are deployed. It prevents connection count from scaling linearly with instances.
 
 #### Scenario C: 100 Concurrent Agents (Large Scale)
 
@@ -620,7 +627,7 @@ ForgeOS's database access pattern is **bursty and short-lived:**
 | Server instances | 2-4 | 2-5 |
 | **Recommendation** | Risk of connection exhaustion ⚠️ | Recommended ✅ |
 
-**Rationale:** Without PgBouncer, 4 instances × 25 connections = 100, reaching PG defaults. With PgBouncer, all instances share 25 server connections, and PG defaults are sufficient. PgBouncer also provides connection queueing — requests wait for an available connection rather than failing.
+**Rationale:** Without PgBouncer, 4 instances × 25 connections = 100, reaching PG defaults. With PgBouncer, all instances share 25 server connections, and PG defaults suffice. PgBouncer also provides connection queueing — requests wait for a connection instead of failing.
 
 ### 7.4 Pool Sizing Summary Table
 
@@ -677,11 +684,11 @@ ForgeOS's database access pattern is **bursty and short-lived:**
 
 **Contradiction Type:** Contextual
 
-**Source FOR pooler:** Heroku, Supabase, and many PaaS providers mandate PgBouncer. Blog posts commonly state "you should always use PgBouncer in production."
+**Source FOR pooler:** Heroku, Supabase, and many PaaS providers mandate PgBouncer. Blog posts commonly advise "always use PgBouncer in production."
 
 **Source AGAINST pooler:** PostgreSQL official docs don't mention PgBouncer. Application-level pools (pg, asyncpg) handle connection management adequately for most workloads.
 
-**Resolution:** The "always use PgBouncer" advice applies to multi-tenant PaaS deployments where hundreds of application instances share one PostgreSQL. For single-tenant deployments with 1-3 application instances, application-level pooling is sufficient. The threshold is typically around **total_connections_across_instances > PostgreSQL max_connections × 0.8**.
+**Resolution:** The "always use PgBouncer" advice applies to multi-tenant PaaS deployments. In those cases, hundreds of application instances share one PostgreSQL server. For single-tenant deployments with 1–3 instances, application-level pooling is sufficient. The threshold is around **total_connections_across_instances > PostgreSQL max_connections × 0.8**.
 
 **ForgeOS Context:** Single-tenant deployment. PgBouncer becomes valuable at >50 concurrent agents with multiple server instances, not before.
 
@@ -691,11 +698,11 @@ ForgeOS's database access pattern is **bursty and short-lived:**
 
 **Contradiction Type:** Temporal
 
-**Pre-2024:** PgBouncer did NOT support server-side prepared statements in transaction mode. `pg` driver's implicit prepare-and-cache behavior caused failures.
+**Pre-2024:** PgBouncer did NOT support server-side prepared statements in transaction mode. The `pg` driver's implicit prepare-and-cache behavior caused failures.
 
-**Post-2024 (v1.21+):** PgBouncer added `max_prepared_statements` config option, tracking prepared statements per server connection and re-preparing them when connections are reassigned.
+**Post-2024 (v1.21+):** PgBouncer added the `max_prepared_statements` config option. It tracks prepared statements per server connection and re-prepares them when connections are reassigned.
 
-**Resolution:** Use PgBouncer ≥1.21 with `max_prepared_statements = 100` to enable prepared statement support. The `pg` library's default behavior (extended query protocol with implicit `PREPARE`) now works correctly.
+**Resolution:** Use PgBouncer ≥1.21 with `max_prepared_statements = 100`. The `pg` library's default behavior (extended query protocol with implicit `PREPARE`) now works correctly.
 
 **Confidence Impact:** Removes a major historical concern about PgBouncer compatibility (+3%).
 
@@ -707,13 +714,14 @@ ForgeOS's database access pattern is **bursty and short-lived:**
 
 **Source AGAINST larger pool:** HikariCP benchmarking (weight: 0.7), PostgreSQL mailing list discussions (weight: 0.6). A 600-thread application performed 100x better with a pool of 10 than a pool of 600.
 
-**Resolution:** PostgreSQL uses process-per-connection architecture. Each connection is a separate OS process with its own memory allocation. Beyond CPU core count × 2, additional connections cause:
+**Resolution:** PostgreSQL uses a process-per-connection architecture. Each connection is a separate OS process with its own memory. Beyond CPU core count × 2, additional connections cause:
+
 - CPU context switching overhead
 - L1/L2 cache thrashing
-- Lock contention on PostgreSQL's internal structures (WAL, buffer pool)
-- Memory pressure (each connection uses ~5-10MB resident)
+- Lock contention on PostgreSQL internals (WAL, buffer pool)
+- Memory pressure (each connection uses ~5–10 MB resident)
 
-ForgeOS's short transactions amplify this: 100 connections doing 15ms queries means each connection is 99% idle — wasting PostgreSQL resources.
+ForgeOS's short transactions amplify this effect. 100 connections doing 15 ms queries means each is 99% idle — wasting PostgreSQL resources.
 
 **Confidence Impact:** Reinforces conservative pool sizing recommendation (+2%).
 
@@ -817,10 +825,10 @@ Application connects to PgBouncer (port 6432) instead of PostgreSQL directly.
 
 ### 11.2 What Could Make This Recommendation Wrong
 
-1. **ForgeOS introduces session-scoped advisory locks** — Would require PgBouncer session mode or removal of PgBouncer. Currently no indication of this need.
-2. **LISTEN/NOTIFY becomes critical for real-time features** — PgBouncer transaction mode doesn't support it. Mitigation: dedicated subscriber connection bypassing PgBouncer.
-3. **Agent count exceeds 500** — PgBouncer itself would need tuning or multiple instances. External pooler like `pgpool-II` or cloud-native solutions (RDS Proxy, Supabase pooler) might be more appropriate.
-4. **Move from PostgreSQL to another database** — Entire pooling strategy would need revisiting. Low probability given ForgeOS's deep PostgreSQL integration.
+1. **ForgeOS introduces session-scoped advisory locks** — Would require PgBouncer session mode or removal of PgBouncer. There is currently no indication of this need.
+2. **LISTEN/NOTIFY becomes critical for real-time features** — PgBouncer transaction mode does not support it. Mitigation: use a dedicated subscriber connection that bypasses PgBouncer.
+3. **Agent count exceeds 500** — PgBouncer itself would need tuning or multiple instances. Cloud-native solutions (RDS Proxy, Supabase pooler) may be more appropriate.
+4. **Move from PostgreSQL to another database** — The entire pooling strategy would need revisiting. This is low probability given ForgeOS's deep PostgreSQL integration.
 
 ### 11.3 Validity Window
 
