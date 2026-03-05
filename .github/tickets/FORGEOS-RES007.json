@@ -29,10 +29,10 @@
     "Research report delivered at docs/research/pg-transaction-isolation.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Research",
+  "claimed_by": "Research Analyst",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-05T19:50:27+00:00",
+  "lease_expiry": "2026-03-05T21:26:42.523771+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -55,6 +55,22 @@
       "agent": "Research",
       "machine_id": "pop-os",
       "details": "Claimed by Research on pop-os (reaperoak)"
+    },
+    {
+      "timestamp": "2026-03-05T20:56:37.384977+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Research: Lease expired at 2026-03-05T19:50:27+00:00"
+    },
+    {
+      "timestamp": "2026-03-05T20:56:42.523787+00:00",
+      "event": "CLAIMED",
+      "agent": "Research Analyst",
+      "machine_id": "pop-os",
+      "from_stage": "RESEARCH",
+      "to_stage": "RESEARCH",
+      "details": "Claimed by reaperoak@pop-os via Research Analyst, lease until 2026-03-05T21:26:42.523771+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-research.md",
