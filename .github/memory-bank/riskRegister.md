@@ -157,3 +157,13 @@ _None_
 | SEC-DOCKER-001 | Low | Base image `node:22-alpine` uses mutable tag, not pinned to digest (CWE-829) | Risk Accepted | Official Docker Hub image; Alpine minimal surface; pin to digest in production hardening phase |
 | SEC-DOCKER-002 | Low | Runtime image includes devDependencies in node_modules/ (CWE-1104) | Risk Accepted | No known vulnerabilities; recommend `npm ci --omit=dev` in future optimization |
 | SEC-DOCKER-003 | Low | No `npm audit` executed during Docker build (CWE-1395) | Risk Accepted | CI pipeline handles dependency auditing; build-time audit is defense-in-depth enhancement |
+
+### [TASK-FOS-01-002] — Database Pool & Migration Security Risks (2026-03-07T05:00:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-POOL-001 | Medium | Direct `pool`/`getPool()` exports bypass RLS enforcement — queries via `pool.query()` have no session context (CWE-285) | Risk Accepted | `pool` export marked `@deprecated`; application code should use `queryWithRLS()`/`transactionWithRLS()`; recommend removing deprecated export in future cleanup ticket |
+| SEC-MIGRATE-001 | Medium | New migration files executed as raw SQL without pre-execution integrity verification; checksum only protects already-applied migrations (CWE-494) | Risk Accepted | Standard migration runner pattern; integrity relies on Git branch protection and code review; consider adding migration signing in production hardening phase |
+| SEC-POOL-002 | Low | `queryWithRLS()`/`transactionWithRLS()` pass empty string for `agentId` to `setSessionContext()` (CWE-276) | Risk Accepted | Current RLS policies use `agent_name`/`agent_role`, not `agent_id`; add `agentId` parameter when policies require it |
+| SEC-POOL-003 | Low | Pool error handler may serialize connection details (hostname/port/db) in pino error output (CWE-209) | Risk Accepted | Structured logging goes to server-side log aggregation only; recommend configuring pino error serializer to redact connection strings in production |
+| SEC-MIGRATE-002 | Low | CLI entry point uses loose `process.argv[1]?.includes('migrate')` heuristic (CWE-183) | Risk Accepted | Low risk — only affects CLI-mode activation; recommend `import.meta.url` comparison for precise detection |
