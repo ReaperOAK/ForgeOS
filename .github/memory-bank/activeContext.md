@@ -613,3 +613,18 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** Added document metadata table (Diátaxis: Reference, audience: backend/devops/architects, last_reviewed: 2026-03-06). Rewrote ~20 long sentences for Flesch-Kincaid grade ≤10. Added cross-reference link to FORGEOS-RES005 (pg-distributed-locking.md). Original 861-line report was comprehensive; changes were incremental readability and metadata improvements.
 - **Timestamp:** 2026-03-06T00:00:00Z
 - **Timestamp:** 2026-03-06T00:00:00Z
+
+### [FORGEOS-RES001] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-RES001.md
+- **Decisions:** APPROVED with HIGH confidence. All 6 acceptance criteria verified independently against 1031-line research report (docs/research/mcp-protocol-spec.md). 10/10 DoD items pass (6 verified, 4 justified N/A for research-type ticket). Upstream verdicts cross-verified: Research COMPLETE (92% confidence), Documentation COMPLETE. No blocking issues.
+- **Timestamp:** 2026-03-06T19:30:00Z
+
+### [FORGEOS-RES009] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-RES009.md
+- **Decisions:** APPROVED — All 7 acceptance criteria verified against docs/research/system-gap-analysis.md (529 lines). 10/10 DoD items pass (6 PASS, 4 justified N/A for research ticket). Research deliverable is comprehensive (32 capabilities inventoried, 38 gap mappings, 11 new capabilities), accurate, and actionable. Upstream verdicts verified: Research PASS (88%), Documentation PASS (HIGH).
+- **Timestamp:** 2026-03-06T00:00:00Z
+
+### [FORGEOS-RES005] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-RES005.md
+- **Decisions:** APPROVED — All 7 acceptance criteria verified against docs/research/pg-distributed-locking.md (959 lines). 10/10 DoD items pass (6 PASS, 4 justified N/A for research ticket). Research deliverable is comprehensive (SELECT FOR UPDATE SKIP LOCKED, advisory locks, row-level locking, deadlock prevention, PoC SQL snippets, git-push comparison). Upstream verdicts verified: Research PASS (91%), Documentation PASS (HIGH).
+- **Timestamp:** 2026-03-06T00:00:00Z
