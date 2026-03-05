@@ -607,4 +607,9 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 ### [FORGEOS-RES003] — Documentation Summary
 - **Artifacts:** docs/research/mcp-sdk-evaluation.md (modified), .github/agent-output/Documentation/FORGEOS-RES003.md (created)
 - **Decisions:** Added document metadata (Last Reviewed, Diátaxis: Reference, Audience). Added 18-item Table of Contents. Improved 9 assessment statements to active voice complete sentences. Added Related Research cross-references (3 links verified). Added freshness footer. Original report was comprehensive; changes were additive.
+
+### [FORGEOS-RES006] — Documentation Summary
+- **Artifacts:** docs/research/pg-connection-pooling.md (modified), .github/agent-output/Documentation/FORGEOS-RES006.md (created)
+- **Decisions:** Added document metadata table (Diátaxis: Reference, audience: backend/devops/architects, last_reviewed: 2026-03-06). Rewrote ~20 long sentences for Flesch-Kincaid grade ≤10. Added cross-reference link to FORGEOS-RES005 (pg-distributed-locking.md). Original 861-line report was comprehensive; changes were incremental readability and metadata improvements.
+- **Timestamp:** 2026-03-06T00:00:00Z
 - **Timestamp:** 2026-03-06T00:00:00Z
