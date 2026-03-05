@@ -3,14 +3,40 @@
 **Ticket:** FORGEOS-RES003
 **Agent:** Research Analyst
 **Date:** 2026-03-05
+**Last Reviewed:** 2026-03-06
+**Document Type:** Reference (Diátaxis)
+**Audience:** ForgeOS engineering team — architects and backend developers evaluating SDK adoption
 **Confidence:** 82% (HIGH — recommend with caveats)
 **Validity Window:** 3 months (refresh by 2026-06-05 or on v2.0 release)
 
 ---
 
+## Table of Contents
+
+1. [Executive Summary](#executive-summary)
+2. [Research Question](#1-research-question)
+3. [Methodology](#2-methodology)
+4. [SDK API Surface Catalog](#3-sdk-api-surface-catalog)
+5. [Async/Await Assessment](#4-asyncawait-assessment)
+6. [Error Handling Patterns](#5-error-handling-patterns)
+7. [Typing Coverage](#6-typing-coverage)
+8. [Test Coverage](#7-test-coverage)
+9. [Release Cadence & Stability](#8-release-cadence--stability)
+10. [Repository Health](#9-repository-health)
+11. [Known Issues & Limitations](#10-known-issues--limitations)
+12. [Gap Analysis: ForgeOS Requirements](#11-gap-analysis-forgeos-requirements)
+13. [Weighted Comparison Matrix](#12-weighted-comparison-matrix)
+14. [Contradiction Analysis](#13-contradiction-analysis)
+15. [Recommendation](#14-recommendation)
+16. [Risk Assessment](#15-risk-assessment)
+17. [Appendix A: Dependency Tree](#appendix-a-dependency-tree)
+18. [Appendix B: Protocol Version Alignment](#appendix-b-protocol-version-alignment)
+
+---
+
 ## Executive Summary
 
-The MCP Python SDK (`mcp` on PyPI, `modelcontextprotocol/python-sdk` on GitHub) is a **mature, well-maintained library** suitable for production use in ForgeOS with caveats. The SDK offers comprehensive API surface coverage, full async/await support via `anyio`, strict typing with Pyright, and 100% test coverage enforcement. However, the v1.x branch is now in **maintenance mode** (security and critical fixes only), with v2.0 in pre-alpha on `main`. ForgeOS should pin to `mcp>=1.25,<2` and plan for a v2 migration within 6-12 months.
+The MCP Python SDK (`mcp` on PyPI, `modelcontextprotocol/python-sdk` on GitHub) is a **mature, well-maintained library** suitable for production use in ForgeOS, with caveats. The SDK provides comprehensive API surface coverage, full async/await support via `anyio`, strict typing with Pyright, and 100% test coverage enforcement. The v1.x branch now operates in **maintenance mode** (security and critical fixes only), while v2.0 remains in pre-alpha on `main`. ForgeOS should pin to `mcp>=1.25,<2` and plan for a v2 migration within 6–12 months.
 
 **Prior Belief:** 65% confidence the SDK would be production-ready (mid-maturity open-source project risk).
 **Posterior Belief:** 82% confidence — evidence shows stronger maturity than expected (100% coverage, Pyright strict, Anthropic backing, 189 contributors).
@@ -89,7 +115,7 @@ async def call_tool(name: str, arguments: dict):
     ...
 ```
 
-**Assessment:** Full parity with TypeScript SDK's `McpServer`. FastMCP provides decorator-based registration identical to ForgeOS's current pattern. Low-level Server gives full control when needed.
+**Assessment:** The Python SDK achieves full parity with the TypeScript SDK's `McpServer`. FastMCP provides decorator-based registration identical to ForgeOS's current pattern. The low-level Server API gives full control when needed.
 
 ### 3.2 Tool Registration
 
@@ -103,7 +129,7 @@ async def call_tool(name: str, arguments: dict):
 | Progress reporting | `ctx.report_progress()` | Supported | ✅ Required |
 | Logging | `ctx.info/debug/warning/error()` | Supported | ✅ Required |
 
-**Assessment:** Python SDK auto-generates `inputSchema` from Python type annotations + Pydantic models, eliminating manual schema definition. This is more ergonomic than the TypeScript SDK's Zod-based approach. Structured output via return type annotations (Pydantic, TypedDict, dataclass) is a significant advantage.
+**Assessment:** The Python SDK auto-generates `inputSchema` from Python type annotations and Pydantic models, which eliminates manual schema definition. This approach is more ergonomic than the TypeScript SDK's Zod-based alternative. Structured output via return type annotations (Pydantic, TypedDict, dataclass) offers a significant advantage.
 
 ### 3.3 Transport Setup
 
@@ -120,7 +146,7 @@ async def call_tool(name: str, arguments: dict):
 - Mountable as ASGI sub-application
 - Host-based routing for multi-tenant deployments
 
-**Assessment:** Full transport parity with TypeScript SDK. ForgeOS currently uses `StreamableHTTPServerTransport` in TypeScript — direct equivalent exists in Python. Starlette-based ASGI architecture is production-grade.
+**Assessment:** The SDK achieves full transport parity with the TypeScript SDK. ForgeOS currently uses `StreamableHTTPServerTransport` in TypeScript, and a direct equivalent exists in Python. The Starlette-based ASGI architecture is production-grade.
 
 ### 3.4 Session Management
 
@@ -148,7 +174,7 @@ async with streamable_http_client("http://localhost:8080/mcp") as (r, w, _):
         result = await session.call_tool("tickets.next", {"agent_role": "Backend"})
 ```
 
-**Assessment:** Full client API for testing and inter-server communication. Pagination support included.
+**Assessment:** The SDK provides a full client API for testing and inter-server communication, with pagination support included.
 
 ### 3.6 Authentication & Authorization
 
@@ -186,7 +212,7 @@ async with streamable_http_client("http://localhost:8080/mcp") as (r, w, _):
 - **anyio vs raw asyncio:** anyio adds an abstraction layer. ForgeOS would need to use anyio patterns for concurrency rather than raw asyncio. This is generally positive (structured concurrency) but requires team familiarity.
 - **Trio support:** anyio supports trio as an alternative backend, but ForgeOS should standardize on asyncio to match the broader Python ecosystem.
 
-**Assessment:** Fully compatible with asyncio-based architectures. anyio provides superior structured concurrency patterns compared to raw asyncio.
+**Assessment:** The async model is fully compatible with asyncio-based architectures. anyio provides structured concurrency patterns that are superior to raw asyncio.
 
 ---
 
@@ -248,7 +274,7 @@ return CallToolResult(
 | Connection error handling | ⚠️ Limited | CONNECTION_CLOSED code exists but no auto-reconnect |
 | Validation errors | ✅ Good | Pydantic validation errors caught at deserialization |
 
-**Gap:** No built-in retry mechanism or circuit breaker pattern. ForgeOS will need to implement retry logic for transient failures (network errors, lease conflicts). This is consistent with the TypeScript SDK, which also lacks built-in retry.
+**Gap:** The SDK lacks a built-in retry mechanism or circuit breaker pattern. ForgeOS must implement retry logic for transient failures (network errors, lease conflicts). This gap is consistent with the TypeScript SDK, which also lacks built-in retry.
 
 ---
 
@@ -291,7 +317,7 @@ show_missing = true
 - **CI:** Runs across Python 3.10, 3.11, 3.12, 3.13
 
 ### Assessment
-**100% code coverage enforcement is exceptional** for an open-source project. This is significantly higher than most libraries and provides strong confidence in correctness. The exclusion rules are minimal and sensible (type-checking-only imports, unreachable code markers).
+**100% code coverage enforcement is exceptional** for an open-source project. This threshold significantly exceeds most libraries and provides strong confidence in correctness. The exclusion rules are minimal and sensible: type-checking-only imports and unreachable code markers.
 
 ---
 
@@ -359,7 +385,7 @@ The v1.x line is **stable and mature**. The move to maintenance mode is a positi
 
 ### Development Status
 - **PyPI classifier:** `Development Status :: 4 - Beta`
-- **Interpretation:** Despite "Beta" label, the 100% coverage enforcement, 53 releases, and production usage by Anthropic products suggest the SDK is more mature than the classifier indicates. The "Beta" may reflect the upcoming v2 transition rather than v1.x stability.
+- **Interpretation:** Despite the "Beta" label, the 100% coverage enforcement, 53 releases, and production usage by Anthropic products indicate the SDK is more mature than the classifier suggests. The "Beta" likely reflects the upcoming v2 transition rather than v1.x stability.
 
 ---
 
@@ -563,3 +589,15 @@ Optional:
 
 Default negotiated version: `2025-03-26` (when client doesn't specify).
 Latest protocol version constant: `2025-11-25`.
+
+---
+
+## Related Research
+
+- [MCP Protocol Specification](mcp-protocol-spec.md) — FORGEOS-RES009
+- [MCP Transport Comparison](mcp-transport-comparison.md) — FORGEOS-RES002
+- [System Gap Analysis](system-gap-analysis.md) — Cross-cutting analysis
+
+---
+
+*Last reviewed: 2026-03-06 | Next review due: 2026-06-05 or on v2.0 release*
