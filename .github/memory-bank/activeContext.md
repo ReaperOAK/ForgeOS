@@ -582,4 +582,9 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 ### [TASK-FOS-08-003] — Security Review
 - **Artifacts:** .github/agent-output/Security/TASK-FOS-08-003.md
 - **Decisions:** PASS — STRIDE on config.ts, Dockerfile, docker-compose.yml, .env.example. 1 medium finding: default ADMIN_API_KEY='forgeos_admin_CHANGE_ME' accepted in production (CWE-1188), mitigated by CHANGE_ME naming convention and operational documentation. 1 low: POSTGRES_PASSWORD hardcoded in docker-compose (CWE-798), standard for local dev. 0 critical/high. OWASP 10/10 checked. Confidence: HIGH.
+
+### [FORGEOS-RES001] — Documentation Summary
+- **Artifacts:** docs/research/mcp-protocol-spec.md (updated)
+- **Decisions:** Added YAML front matter (Diátaxis: Reference, audience: Architects/Backend/DevOps), Glossary section (12 terms), freshness metadata (last_reviewed: 2026-03-06). Tightened readability (active voice, shorter sentences). No structural changes — original 11-section layout was comprehensive.
+- **Timestamp:** 2026-03-06T00:00:00+00:00
 - **Timestamp:** 2026-03-07T01:30:00Z

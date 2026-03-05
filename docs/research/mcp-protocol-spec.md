@@ -1,21 +1,33 @@
+---
+title: MCP Protocol Core Specification — Research Report
+ticket: FORGEOS-RES001
+diátaxis: reference
+audience: Architects, Backend Engineers, and DevOps engineers building on ForgeOS
+purpose: Document the MCP protocol semantics and evaluate fitness for ForgeOS agent-to-server communication
+last_reviewed: 2026-03-06T00:00:00+00:00
+validity_window: 2026-09-05
+tags: [mcp, protocol, json-rpc, research, phase1]
+---
+
 # MCP Protocol Core Specification — Research Report
 
 > **Ticket:** FORGEOS-RES001 | **Agent:** Research Analyst | **Date:** 2026-03-05  
 > **Confidence:** HIGH (92%) | **Validity Window:** 6 months (until 2026-09-05)  
 > **Protocol Revision Analyzed:** 2025-03-26  
-> **SDK Version in ForgeOS:** `@modelcontextprotocol/sdk ^1.27.1`
+> **SDK Version in ForgeOS:** `@modelcontextprotocol/sdk ^1.27.1`  
+> **Last Reviewed:** 2026-03-06
 
 ---
 
 ## Executive Summary
 
-The Model Context Protocol (MCP) is an open, transport-agnostic protocol built on **JSON-RPC 2.0** that standardizes communication between AI/LLM host applications (clients) and context-providing servers. MCP defines three server-side primitives — **Tools**, **Resources**, and **Prompts** — along with a rigorous **session lifecycle** (initialize → operate → shutdown) with explicit capability negotiation.
+The Model Context Protocol (MCP) is an open, transport-agnostic protocol built on **JSON-RPC 2.0**. It standardizes communication between AI/LLM host applications (clients) and context-providing servers. MCP defines three server-side primitives — **Tools**, **Resources**, and **Prompts** — along with a rigorous **session lifecycle** (initialize → operate → shutdown) with explicit capability negotiation.
 
-This report documents the protocol's core semantics at spec revision `2025-03-26` and evaluates MCP's fitness for ForgeOS agent-to-server orchestration. **Conclusion: MCP is an excellent fit** for ForgeOS's distributed ticket management, with the existing `forgeos-server` already implementing Streamable HTTP transport and 10 MCP tools. The protocol's tool-centric design maps directly to ForgeOS's ticket operations, and capability negotiation allows incremental feature adoption.
+This report documents the protocol's core semantics at spec revision `2025-03-26`. It evaluates MCP's fitness for ForgeOS agent-to-server orchestration. **Conclusion: MCP is an excellent fit** for ForgeOS's distributed ticket management. The existing `forgeos-server` already implements Streamable HTTP transport and 10 MCP tools. The protocol's tool-centric design maps directly to ForgeOS's ticket operations. Capability negotiation allows incremental feature adoption.
 
 **Bayesian Confidence Update:**  
-- *Prior:* 75% — MCP is likely a good fit for agent-to-server communication based on its growing adoption and JSON-RPC foundation.  
-- *Posterior:* 92% — Multiple independent sources confirm strong alignment. Protocol semantics map cleanly to ForgeOS operations. The existing `forgeos-server` implementation validates the approach. Minor gaps exist in batch orchestration and multi-agent coordination, but these are addressable at the application layer.
+- *Prior:* 75% — MCP is likely a good fit based on its growing adoption and JSON-RPC foundation.  
+- *Posterior:* 92% — Multiple independent sources confirm strong alignment. Protocol semantics map cleanly to ForgeOS operations. The existing `forgeos-server` implementation validates the approach. Minor gaps exist in batch orchestration and multi-agent coordination. Both are addressable at the application layer.
 
 ---
 
@@ -32,6 +44,7 @@ This report documents the protocol's core semantics at spec revision `2025-03-26
 9. [Contradictions and Open Questions](#9-contradictions-and-open-questions)
 10. [Recommendations](#10-recommendations)
 11. [Sources and Evidence Chain](#11-sources-and-evidence-chain)
+12. [Glossary](#12-glossary)
 
 ---
 
@@ -89,7 +102,7 @@ All MCP messages are **JSON-RPC 2.0** and MUST be **UTF-8 encoded**. Three messa
 
 ### 2.1 Request
 
-A request initiates an operation. Either client or server can send requests.
+A request initiates an operation. Either the client or server can send requests.
 
 ```json
 {
@@ -115,7 +128,7 @@ A request initiates an operation. Either client or server can send requests.
 
 ### 2.2 Response
 
-A response replies to a request. Contains either `result` or `error`, never both.
+A response replies to a request. It contains either `result` or `error`, never both.
 
 **Successful response:**
 ```json
@@ -156,7 +169,7 @@ A response replies to a request. Contains either `result` or `error`, never both
 
 ### 2.3 Notification
 
-A one-way message. The receiver MUST NOT send a response.
+A notification is a one-way message. The receiver MUST NOT send a response.
 
 ```json
 {
@@ -543,13 +556,13 @@ Server sends update notifications:
 
 ### 4.8 Relevance to ForgeOS
 
-**HIGH RELEVANCE.** ForgeOS could expose:
+**HIGH RELEVANCE.** ForgeOS could expose ticket-related data as MCP resources:
 - **Ticket state** as resources (`ticket://forgeos/{id}`)
 - **Agent output summaries** as resources (`summary://forgeos/{agent}/{ticket_id}`)
 - **Memory bank entries** as subscribable resources
 - **Dependency graphs** as dynamic resources
 
-The resource subscription model aligns with ForgeOS's SSE-based event push (already implemented in `server.ts`). The current ForgeOS server does NOT yet use MCP resources — this is a gap that could provide significant value for agent context delivery.
+The resource subscription model aligns with ForgeOS's SSE-based event push (already implemented in `server.ts`). The current ForgeOS server does NOT use MCP resources yet. Adding them could provide significant value for agent context delivery.
 
 ---
 
@@ -664,7 +677,7 @@ Prompt messages support the same content types as tool results:
 - Rework instructions (with ticket context injected)
 - Code review prompts (for QA and Security agents)
 
-However, the current ForgeOS architecture uses filesystem-based agent definitions (`.github/agents/*.agent.md`), which serve a similar purpose. Prompt templates would add protocol-level formalization but would require migrating the agent instruction system. This is a **nice-to-have** rather than critical for the initial ForgeOS distributed platform.
+However, the current ForgeOS architecture uses filesystem-based agent definitions (`.github/agents/*.agent.md`). These serve a similar purpose. Prompt templates would add protocol-level formalization but would require migrating the agent instruction system. This is a **nice-to-have** rather than critical for the initial ForgeOS platform.
 
 ---
 
@@ -812,12 +825,12 @@ No specific shutdown messages are defined. Shutdown uses the transport mechanism
 
 ### 6.8 ForgeOS Session Model
 
-The current ForgeOS server operates in **stateless mode** (`sessionIdGenerator: undefined` in `server.ts`). Each HTTP request creates a new transport instance. This means:
-- No persistent sessions between agent interactions
-- Each tool call is independent
-- State is managed by the PostgreSQL database, not the MCP session
+The current ForgeOS server operates in **stateless mode** (`sessionIdGenerator: undefined` in `server.ts`). Each HTTP request creates a new transport instance. This design means:
+- No persistent sessions exist between agent interactions
+- Each tool call operates independently
+- The PostgreSQL database manages state, not the MCP session
 
-This is a valid design choice for the ticket management use case, but limits the ability to use server-initiated requests to agents (e.g., pushing notifications). The SSE endpoint (`/events`) provides an out-of-band notification channel that compensates for this.
+This is a valid design choice for ticket management. However, it limits server-initiated requests to agents (e.g., pushing notifications). The SSE endpoint (`/events`) provides an out-of-band notification channel that compensates for this limitation.
 
 ---
 
@@ -994,4 +1007,24 @@ The server also supports GET and DELETE on `/mcp` for SSE streaming and session 
 
 ---
 
-*Report generated by Research Analyst agent for ticket FORGEOS-RES001.*
+## 12. Glossary
+
+| Term | Definition |
+|------|-----------|
+| **MCP** | Model Context Protocol — an open, transport-agnostic protocol for AI/LLM-to-server communication built on JSON-RPC 2.0. |
+| **JSON-RPC 2.0** | A stateless, lightweight remote procedure call protocol using JSON encoding. Defines request, response, and notification message types. |
+| **Tool** | An MCP server-side primitive that exposes an executable action. The LLM discovers and invokes tools based on context. |
+| **Resource** | An MCP server-side primitive that provides read-only contextual data. Identified by URI. Application-controlled (the host decides how to use it). |
+| **Prompt** | An MCP server-side primitive that provides structured message templates for LLM interactions. User-controlled (exposed for explicit selection). |
+| **Capability** | A feature declared during session initialization. Both client and server negotiate which capabilities they support. |
+| **Streamable HTTP** | The current standard MCP transport. Uses HTTP POST for requests and supports SSE for streaming responses. |
+| **stdio** | A transport where the client launches the server as a subprocess and communicates via stdin/stdout. |
+| **SSE** | Server-Sent Events — a standard for servers to push real-time updates to clients over HTTP. |
+| **Lease** | A time-limited claim on a ticket. ForgeOS uses 30-minute leases to prevent deadlocks from crashed agents. |
+| **RFC 6570** | URI Template specification used by MCP for parameterized resource URIs. |
+| **Diátaxis** | A documentation framework with four quadrants: Tutorial, How-To, Explanation, and Reference. |
+
+---
+
+*Report generated by Research Analyst agent for ticket FORGEOS-RES001.*  
+*Documentation reviewed by Documentation Specialist — 2026-03-06.*
