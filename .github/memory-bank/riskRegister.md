@@ -140,3 +140,12 @@ append_only: true
 <!-- Risks that have been resolved or are no longer applicable -->
 
 _None_
+
+### [TASK-FOS-08-003] — Configuration Security Risks (2026-03-06T10:15:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-CFG-001 | Medium | docker-compose.yml hardcodes `POSTGRES_PASSWORD: forgeos` and embeds password in `DATABASE_URL` | Risk Accepted | Local dev only; production deployments must override via env vars. Pattern `${ADMIN_API_KEY:-...}` already used for API key. |
+| SEC-CFG-002 | Low | Root `.gitignore` does not exclude `.env` files — accidental secret commit possible | Open | Recommend adding `.env` and `!.env.example` to .gitignore in future housekeeping ticket |
+| SEC-CFG-003 | Low | `ADMIN_API_KEY` minimum length 8 chars (recommend 16+ for production) | Risk Accepted | Production validation rejects default value; convention guides longer keys |
+| SEC-CFG-004 | Low | Admin key comparison in auth middleware uses `===` (non-constant-time) | Risk Accepted | Network latency masks timing; admin key check is fallback before DB hash lookup |
