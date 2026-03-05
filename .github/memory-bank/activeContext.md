@@ -713,3 +713,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** Applied Object.freeze() to config return for runtime immutability (CI-CFG-001). Added .superRefine() production validation for WEBHOOK_SECRET and ADMIN_API_KEY default detection (CI-CFG-002). Used string literal 'custom' for Zod issue code to avoid false positive in schema-key sync test regex. Added 6 new tests covering freeze + production validation.
 - **Timestamp:** 2026-03-06T02:45:00Z
 - **Timestamp:** 2026-03-06T16:00:00Z
+
+### [FORGEOS-RES008] — Summary
+- **Artifacts:** docs/research/pg-event-sourcing.md, .github/agent-output/Research/FORGEOS-RES008.md
+- **Decisions:** Recommended Enhanced Hybrid model over Full Event Sourcing (85% confidence). Add sequence_number, aggregate_version, immutability triggers to existing events table. Keep JSONB payload, keep mutable tickets table as primary state source. Full ES overkill at ForgeOS scale (≤100K tickets). Storage sustainable at ~1.8GB for 100K tickets.
+- **Timestamp:** 2026-03-06T21:09:00Z
