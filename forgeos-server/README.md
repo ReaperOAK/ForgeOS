@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-06T14:00:00Z -->
+<!-- last_reviewed: 2026-03-06T18:00:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -155,6 +155,93 @@ On `SIGTERM` or `SIGINT` the server:
 2. Closes the HTTP server (drains in-flight requests)
 3. Closes the PostgreSQL connection pool
 4. Force-exits after 10 seconds if draining stalls
+
+## Docker
+
+The server ships with a multi-stage Dockerfile optimised for small image size
+and secure defaults.
+
+### Build the image
+
+```bash
+docker build -t forgeos-server .
+```
+
+### Run the container
+
+```bash
+docker run -d \
+  --name forgeos \
+  -p 3000:3000 \
+  -e DATABASE_URL="postgresql://user:pass@host:5432/forgeos" \
+  -e ADMIN_API_KEY="<your-admin-key>" \
+  -e WEBHOOK_SECRET="<your-webhook-secret>" \
+  forgeos-server
+```
+
+The container exposes port **3000** and includes a built-in health check that
+probes `/health` every 30 seconds (`HEALTHCHECK` instruction). Orchestrators
+such as Docker Compose, Kubernetes, or ECS use this signal to detect and
+restart unhealthy containers automatically.
+
+### Key Dockerfile details
+
+| Aspect | Detail |
+|--------|--------|
+| Base image | `node:22-alpine` (builder and runtime) |
+| Build tool | `npm ci` for reproducible installs |
+| Runtime user | `node` (non-root) |
+| Health check | `curl -f http://localhost:3000/health` every 30 s |
+| Entry point | `node dist/index.js` |
+| Expected size | < 200 MB |
+
+### .dockerignore
+
+The `.dockerignore` file keeps the build context small and prevents secrets
+from leaking into the image:
+
+| Pattern | Reason |
+|---------|--------|
+| `node_modules` | Rebuilt inside the image via `npm ci` |
+| `dist` | Rebuilt during the builder stage |
+| `*.md` (except `README.md`) | Not needed at runtime |
+| `.env` / `.env.*` (except `.env.example`) | Prevents secret leakage |
+| `.git` / `.gitignore` | VCS metadata not needed |
+| `secrets/` | Prevents secrets directory from entering the image |
+
+### Docker Compose example
+
+```yaml
+services:
+  forgeos:
+    build: .
+    ports:
+      - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://forgeos:forgeos@db:5432/forgeos
+      ADMIN_API_KEY: changeme
+      WEBHOOK_SECRET: changeme
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: forgeos
+      POSTGRES_PASSWORD: forgeos
+      POSTGRES_DB: forgeos
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U forgeos"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  pgdata:
+```
 
 ## TypeScript Configuration
 
