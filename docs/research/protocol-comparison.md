@@ -4,7 +4,7 @@ ticket: FORGEOS-RES010
 diataxis: reference
 audience: Architects, Backend Engineers, Product Managers evaluating communication protocols for ForgeOS
 purpose: Compare MCP, gRPC, and REST for agent-to-server communication in a distributed AI orchestration platform
-last_reviewed: 2026-03-06T00:00:00+00:00
+last_reviewed: 2026-03-06T18:00:00+00:00
 validity_window: 2026-09-06
 tags: [mcp, grpc, rest, protocol, comparison, research, phase1]
 ---
@@ -22,7 +22,7 @@ tags: [mcp, grpc, rest, protocol, comparison, research, phase1]
 
 This report evaluates three protocols — **MCP (Model Context Protocol)**, **gRPC**, and **REST** — as the agent-to-server communication layer for ForgeOS, a distributed multi-agent AI orchestration platform. The evaluation covers 11 weighted dimensions including latency, throughput, streaming, schema enforcement, AI-agent interaction fitness, tooling ecosystem, learning curve, debugging ease, security, browser support, and migration cost.
 
-**Recommendation:** Use **MCP** as the primary protocol (weighted score: 8.52/10) with **REST** as a fallback for external integrations and dashboard communication. Do **not** adopt gRPC for the agent-to-server path.
+**Recommendation:** Use **MCP** as the primary protocol (weighted score: 8.00/10) with **REST** as a fallback for external integrations and dashboard communication. Do **not** adopt gRPC for the agent-to-server path.
 
 **Key findings:**
 
@@ -693,7 +693,7 @@ Weights reflect ForgeOS's priorities as a distributed AI agent orchestration pla
 | Learning Curve | 5% | 7 | 5 | 10 |
 | Browser Support | 3% | 8 | 3 | 9 |
 | Tooling Ecosystem | 2% | 5 | 8 | 9 |
-| **Weighted Total** | **100%** | **8.52** | **5.51** | **5.13** |
+| **Weighted Total** | **100%** | **8.00** | **6.05** | **5.63** |
 
 ### Weighted Score Calculation
 
@@ -705,8 +705,6 @@ Weights reflect ForgeOS's priorities as a distributed AI agent orchestration pla
 
 **REST:**
 (3.5×0.25) + (4×0.15) + (4×0.10) + (5×0.10) + (9×0.10) + (7×0.08) + (6×0.07) + (8×0.05) + (10×0.05) + (9×0.03) + (9×0.02) = 0.875 + 0.60 + 0.40 + 0.50 + 0.90 + 0.56 + 0.42 + 0.40 + 0.50 + 0.27 + 0.18 = **5.63**
-
-### Corrected Weighted Totals
 
 | Protocol | Weighted Score | Rank |
 |----------|---------------|------|
