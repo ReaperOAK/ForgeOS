@@ -1,24 +1,39 @@
+---
+title: PostgreSQL Distributed Locking Patterns for ForgeOS
+audience: Backend engineers implementing ForgeOS ticket-claim system
+purpose: Evaluate PostgreSQL locking mechanisms for distributed ticket claiming, file-path mutex, and atomic state transitions
+diataxis: explanation
+last_reviewed: 2026-03-06T00:00:00Z
+---
+
 # PostgreSQL Distributed Locking Patterns for ForgeOS
 
 > **Ticket:** FORGEOS-RES005 | **Agent:** Research Analyst | **Date:** 2026-03-05  
 > **Confidence:** HIGH (91%) | **Validity Window:** 6 months (until 2026-09-05)  
-> **PostgreSQL Version Basis:** 14–17 (features stable across these versions)
+> **PostgreSQL Version Basis:** 14–17 (features stable across these versions)  
+> **Last Reviewed:** 2026-03-06
 
 ---
 
 ## Executive Summary
 
-This report evaluates three PostgreSQL locking mechanisms for ForgeOS's distributed ticket-claim system: **SELECT FOR UPDATE SKIP LOCKED** (queue semantics), **advisory locks** (file-path mutex), and **row-level locking** (atomic state transitions). Each pattern is analyzed with SQL examples, concurrency semantics, and applicability to ForgeOS's multi-agent architecture.
+This report evaluates three PostgreSQL locking mechanisms for ForgeOS's distributed ticket-claim system:
+
+1. **SELECT FOR UPDATE SKIP LOCKED** — queue semantics for ticket claiming
+2. **Advisory locks** — file-path mutex for concurrent edit prevention
+3. **Row-level locking** — atomic state transitions for stage advancement
+
+Each pattern includes SQL examples, concurrency analysis, and ForgeOS applicability assessment.
 
 **Key Findings:**
-- **SELECT FOR UPDATE SKIP LOCKED** provides fair, contention-free queue semantics — ideal for ticket claiming. Already implemented in ForgeOS's `claim_ticket()` function.
-- **Advisory locks** suit file-path-level mutexes. Transaction-scoped (`pg_advisory_xact_lock`) is strongly preferred over session-scoped for ForgeOS's stateless agent model.
-- **Row-level locking** via `FOR UPDATE` provides serializable atomic state transitions for stage advancement and rejection. Already implemented in `advance_ticket()` and `reject_ticket()`.
-- The PostgreSQL approach **eliminates all race conditions** inherent in the current git-push-based locking, providing true ACID guarantees.
+- **SELECT FOR UPDATE SKIP LOCKED** provides fair, contention-free queue semantics. Already implemented in ForgeOS's `claim_ticket()` function.
+- **Advisory locks** enable file-path-level mutexes. Use transaction-scoped (`pg_advisory_xact_lock`) for ForgeOS's stateless agent model.
+- **Row-level locking** via `FOR UPDATE` ensures serializable atomic state transitions. Already implemented in `advance_ticket()` and `reject_ticket()`.
+- PostgreSQL **eliminates all race conditions** from the current git-push-based locking and provides true ACID guarantees.
 
 **Bayesian Confidence Update:**
-- *Prior:* 80% — PostgreSQL locking primitives are well-suited for distributed claim queues based on established patterns in job-queue systems.
-- *Posterior:* 91% — Official PostgreSQL documentation, independently verified by production-grade libraries (Graphile Worker, pgBoss, Que), confirms strong alignment. Minor concern around advisory lock key collision is addressable with established hashing strategies.
+- *Prior:* 80% — PostgreSQL locking primitives suit distributed claim queues, based on established job-queue patterns.
+- *Posterior:* 91% — Official PostgreSQL docs and production libraries (Graphile Worker, pgBoss, Que) confirm strong alignment. Advisory lock key collision risk is addressable with established hashing strategies.
 
 ---
 
@@ -624,13 +639,13 @@ The aborted transaction can be retried by the application layer.
 
 ### 5.3 ForgeOS-Specific Deadlock Risk Assessment
 
-| Factor | Assessment |
-|--------|-----------|
+| Factor | Assessment | Risk Level |
+|--------|-----------|------------|
 | **Number of concurrent agents** | Typically 1–14 (one per agent role) | Low contention |
-| **File overlap frequency** | Low — tickets generally have distinct `file_paths` |
-| **Transaction duration** | Short — claim/advance operations are sub-second |
-| **Lock ordering** | Implementable — file paths can be sorted deterministically |
-| **Overall deadlock risk** | **VERY LOW** — ForgeOS's workload pattern is naturally deadlock-resistant |
+| **File overlap frequency** | Tickets generally have distinct `file_paths` | Low |
+| **Transaction duration** | Claim/advance operations complete in sub-second | Low |
+| **Lock ordering** | File paths can be sorted deterministically | Low |
+| **Overall deadlock risk** | ForgeOS's workload pattern is naturally deadlock-resistant | **VERY LOW** |
 
 ---
 
@@ -727,38 +742,38 @@ Agent A                         Git Remote                       Agent B
 ### 7.3 Architecture Recommendation
 
 ```
-┌──────────────────────────────────────────────────────────────────┐
-│                    ForgeOS Locking Architecture                   │
-├──────────────────────────────────────────────────────────────────┤
-│                                                                  │
-│  Layer 1: Ticket Queue                                           │
-│  ┌─────────────────────────────────────────────────────────┐     │
-│  │  SELECT FOR UPDATE SKIP LOCKED                           │     │
-│  │  → claim_ticket() / claim_ticket_by_id()                 │     │
-│  │  → Fair priority queue with automatic skip               │     │
-│  └─────────────────────────────────────────────────────────┘     │
-│                                                                  │
-│  Layer 2: File Mutex                                             │
-│  ┌─────────────────────────────────────────────────────────┐     │
-│  │  pg_try_advisory_xact_lock(file_path_lock_key(path))     │     │
-│  │  → Transaction-scoped, auto-release on crash             │     │
-│  │  + file_locks table for dashboard visibility              │     │
-│  └─────────────────────────────────────────────────────────┘     │
-│                                                                  │
-│  Layer 3: State Transitions                                      │
-│  ┌─────────────────────────────────────────────────────────┐     │
-│  │  SELECT ... FOR UPDATE (blocking, exclusive)              │     │
-│  │  → advance_ticket() / reject_ticket() / release_ticket()  │    │
-│  │  → Ownership-verified atomic transitions                  │     │
-│  └─────────────────────────────────────────────────────────┘     │
-│                                                                  │
-│  Layer 4: Background Maintenance                                 │
-│  ┌─────────────────────────────────────────────────────────┐     │
-│  │  release_expired_claims() — periodic CTE-based cleanup    │     │
-│  │  resolve_dependencies() — triggered on DONE transition    │     │
-│  └─────────────────────────────────────────────────────────┘     │
-│                                                                  │
-└──────────────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────┐
+│                  ForgeOS Locking Architecture                  │
+├────────────────────────────────────────────────────────────────┤
+│                                                                │
+│  Layer 1: Ticket Queue                                         │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  SELECT FOR UPDATE SKIP LOCKED                           │  │
+│  │  → claim_ticket() / claim_ticket_by_id()                 │  │
+│  │  → Fair priority queue with automatic skip               │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                │
+│  Layer 2: File Mutex                                           │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  pg_try_advisory_xact_lock(file_path_lock_key(path))     │  │
+│  │  → Transaction-scoped, auto-release on crash             │  │
+│  │  + file_locks table for dashboard visibility             │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                │
+│  Layer 3: State Transitions                                    │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  SELECT ... FOR UPDATE (blocking, exclusive)             │  │
+│  │  → advance_ticket() / reject_ticket() / release_ticket() │  │
+│  │  → Ownership-verified atomic transitions                 │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                │
+│  Layer 4: Background Maintenance                               │
+│  ┌──────────────────────────────────────────────────────────┐  │
+│  │  release_expired_claims() — periodic CTE-based cleanup   │  │
+│  │  resolve_dependencies() — triggered on DONE transition   │  │
+│  └──────────────────────────────────────────────────────────┘  │
+│                                                                │
+└────────────────────────────────────────────────────────────────┘
 ```
 
 ---
