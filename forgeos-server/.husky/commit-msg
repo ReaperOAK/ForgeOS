@@ -1,0 +1,12 @@
+#!/usr/bin/env bash
+# ──────────────────────────────────────────────────────
+# ForgeOS commit-msg hook (Husky v9)
+#
+# Delegates to scripts/validate-commit.sh for commit
+# message format validation.
+# ──────────────────────────────────────────────────────
+
+# Resolve the repo root (forgeos-server/) relative to .husky/
+SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+
+exec "${SCRIPT_DIR}/scripts/validate-commit.sh" "$1"
