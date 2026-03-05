@@ -28,10 +28,10 @@
     "Research report delivered at docs/research/mcp-transport-comparison.md"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Validator",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-05T20:50:13.469839+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -79,6 +79,31 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "Advanced from DOCS to VALIDATION"
+    },
+    {
+      "timestamp": "2026-03-05T20:19:59.477908+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by reaperoak@pop-os via Validator, lease until 2026-03-05T20:49:59.477885+00:00"
+    },
+    {
+      "timestamp": "2026-03-05T20:20:10.328486+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Validator: manual release"
+    },
+    {
+      "timestamp": "2026-03-05T20:20:13.469858+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by reaperoak@pop-os via Validator, lease until 2026-03-05T20:50:13.469839+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-research.md",
