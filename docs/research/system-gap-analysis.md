@@ -1,24 +1,47 @@
 # ForgeOS System Gap Analysis
 
 > **Ticket:** FORGEOS-RES009 | **Agent:** Research Analyst | **Date:** 2026-03-05  
-> **Confidence:** HIGH (88%) | **Validity Window:** 6 months (until 2026-09-05)
+> **Confidence:** HIGH (88%) | **Validity Window:** 6 months (until 2026-09-05)  
+> **Audience:** Architects, backend engineers, migration planners  
+> **Diátaxis:** Reference  
+> **last_reviewed:** 2026-03-06T00:00:00Z
+
+---
+
+## Table of Contents
+
+1. [Executive Summary](#executive-summary)
+2. [Capability Inventory: tickets.py](#1-capability-inventory-ticketspy-999-lines)
+3. [Capability Inventory: agent-runner.py](#2-capability-inventory-agent-runnerpy-673-lines)
+4. [Capability Inventory: todo_visual.py](#3-capability-inventory-todo_visualpy-1010-lines)
+5. [Gap Matrix: Current → Distributed Mapping](#4-gap-matrix-current--distributed-mapping)
+6. [New Capabilities (No File-Based Predecessor)](#5-new-capabilities-no-file-based-predecessor)
+7. [Risk Assessment](#6-risk-assessment)
+8. [Migration Complexity Ratings](#7-migration-complexity-ratings)
+9. [Recommended Migration Strategy](#8-recommended-migration-strategy)
+10. [Schema Comparison](#9-schema-comparison)
+11. [Bayesian Confidence Assessment](#10-bayesian-confidence-assessment)
+12. [Appendix A: Function Cross-Reference](#appendix-a-function-cross-reference)
+13. [Appendix B: Event Type Mapping](#appendix-b-event-type-mapping)
 
 ---
 
 ## Executive Summary
 
-This report provides a comprehensive gap analysis of the current ForgeOS file-based system (`tickets.py`, `agent-runner.py`, `todo_visual.py`) against the distributed platform requirements implemented in the `forgeos-server/` codebase (PostgreSQL + MCP Server). Every current capability is inventoried, mapped to its distributed equivalent, and rated for migration complexity. New capabilities in the distributed platform that have no file-based equivalent are also identified.
+This report analyzes the current ForgeOS file-based system against the distributed platform requirements. It covers three source files (`tickets.py`, `agent-runner.py`, `todo_visual.py`) and the target codebase in `forgeos-server/` (PostgreSQL + MCP Server). Every current capability is inventoried, mapped to its distributed equivalent, and rated for migration complexity. New capabilities with no file-based predecessor are also identified.
 
 **Key Findings:**
 - **32 current capabilities** across three files have been inventoried
 - **28 of 32** have direct or enhanced equivalents in the distributed platform
 - **4 capabilities** require new implementation approaches (L3 markdown parsing, DOT graph output, git two-commit protocol, summary handoff chain)
-- **8 new capabilities** exist in the distributed platform with no file-based predecessor
-- **Overall migration risk:** MEDIUM — most capabilities map cleanly; the primary risk is in the git-protocol migration path and the L3 parser's lack of distributed equivalent
+- **11 new capabilities** exist in the distributed platform with no file-based predecessor (see [Section 5](#5-new-capabilities-no-file-based-predecessor))
+- **Overall migration risk:** MEDIUM — most capabilities map cleanly; the primary risk is the git-protocol migration path and the L3 parser gap
 
 ---
 
 ## 1. Capability Inventory: tickets.py (999 lines)
+
+This section catalogs all public and internal functions in `tickets.py`, the CLI-driven ticket state machine manager.
 
 ### 1.1 Functions
 
@@ -81,6 +104,8 @@ This report provides a comprehensive gap analysis of the current ForgeOS file-ba
 ---
 
 ## 2. Capability Inventory: agent-runner.py (673 lines)
+
+This section catalogs the two-commit protocol runner that handles git-based distributed locking and ticket lifecycle commits.
 
 ### 2.1 Functions
 
@@ -158,6 +183,8 @@ This report provides a comprehensive gap analysis of the current ForgeOS file-ba
 
 ## 3. Capability Inventory: todo_visual.py (1010 lines)
 
+This section catalogs the visualization and dashboard tool that renders ticket state across terminal, HTML, and JSON formats.
+
 ### 3.1 Functions
 
 | # | Function | Lines | Purpose |
@@ -216,6 +243,8 @@ This report provides a comprehensive gap analysis of the current ForgeOS file-ba
 
 ## 4. Gap Matrix: Current → Distributed Mapping
 
+This section maps each current capability to its distributed equivalent. Every row includes a gap severity rating and migration complexity assessment. Use this matrix to plan migration priorities.
+
 ### 4.1 tickets.py Capabilities
 
 | # | Current Capability | Distributed Equivalent | Gap Severity | Migration Complexity | Notes |
@@ -273,7 +302,7 @@ This report provides a comprehensive gap analysis of the current ForgeOS file-ba
 
 ## 5. New Capabilities (No File-Based Predecessor)
 
-These capabilities exist in the distributed platform but have no equivalent in the current file-based system:
+The distributed platform introduces 11 capabilities that have no equivalent in the current file-based system. These represent net-new functionality available after migration.
 
 | # | New Capability | DB/Server Component | Impact | Priority |
 |---|---------------|---------------------|--------|----------|
@@ -292,6 +321,8 @@ These capabilities exist in the distributed platform but have no equivalent in t
 ---
 
 ## 6. Risk Assessment
+
+This section rates each migration risk by severity, likelihood, and impact. Use the blocking vs. additive classification (Section 6.2) to sequence migration work.
 
 ### 6.1 Migration Risk by Capability
 
@@ -323,6 +354,8 @@ These capabilities exist in the distributed platform but have no equivalent in t
 ---
 
 ## 7. Migration Complexity Ratings
+
+Effort estimates assume a single engineer familiar with both the file-based and distributed codebases.
 
 ### 7.1 Per-Component Summary
 
@@ -361,6 +394,8 @@ These capabilities exist in the distributed platform but have no equivalent in t
 
 ## 8. Recommended Migration Strategy
 
+The migration follows four phases. Each phase has a clear exit criterion before the next phase begins.
+
 ### Phase 1: Database + MCP Foundation (Week 1-2)
 - Deploy PostgreSQL with 001_initial.sql schema
 - Deploy forgeos-server MCP server
@@ -391,6 +426,8 @@ These capabilities exist in the distributed platform but have no equivalent in t
 ---
 
 ## 9. Schema Comparison
+
+This section maps every field between the file-based JSON schema and the PostgreSQL `tickets` table. Use this as a field-level migration reference.
 
 ### 9.1 Ticket Fields: File-Based vs Database
 
@@ -445,11 +482,13 @@ These capabilities exist in the distributed platform but have no equivalent in t
 
 **Delta:** +18% — Evidence showed cleaner mapping than expected for most capabilities. The SQL functions in the distributed platform closely mirror the Python functions. The main risk is the protocol-level change (git commits → DB transactions), not capability loss.
 
-**What could make this wrong:** If there are additional agents or tools that depend on the file-based state in ways not visible from the three analyzed files (e.g., custom scripts, CI/CD integrations reading ticket-state directories).
+**What could make this wrong:** Additional agents or tools may depend on file-based state in ways not visible from the three analyzed files (for example, custom scripts or CI/CD integrations that read `ticket-state/` directories).
 
 ---
 
 ## Appendix A: Function Cross-Reference
+
+This table provides a four-way lookup: Python function → agent-runner equivalent → MCP tool → SQL function. Use it to trace any current capability to its distributed replacement.
 
 | tickets.py Function | agent-runner.py Equivalent | MCP Tool | SQL Function |
 |---------------------|---------------------------|----------|-------------|
@@ -469,6 +508,8 @@ These capabilities exist in the distributed platform but have no equivalent in t
 | — | — | `tickets.extend` | `extend_lease()` |
 
 ## Appendix B: Event Type Mapping
+
+This table maps file-based history event strings to their distributed database event type equivalents. Events marked "(new)" have no file-based predecessor.
 
 | File-Based Event (history[].event) | DB Event Type (event_type ENUM) |
 |-----------------------------------|--------------------------------|
