@@ -519,3 +519,10 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/__tests__/server.test.ts, .github/agent-output/QA/TASK-FOS-02-001.md
 - **Decisions:** PASS verdict on MCP Server Scaffold. 394 new tests validate Express app factory, MCP endpoint registration (POST/GET/DELETE /mcp with StreamableHTTPServerTransport), SSE endpoint, NOTIFY/LISTEN, graceful shutdown, config validation (Zod), auth middleware (SHA-256, Bearer token, admin shortcut, public path bypass), logging middleware (Pino, X-Request-ID), all 10 tool registrations, types module, DB pool/migrate modules, Docker infrastructure, security baseline, and code quality. TypeScript compiles cleanly (zero errors, strict mode). Total: 543 tests (149 schema + 394 server), all passing. No blocking defects. Informational observations: healthCheck() returns object treated as boolean (works via truthiness), tools use pool.query() directly instead of queryWithRLS().
 - **Timestamp:** 2025-07-14T00:16:00Z
+
+## FORGEOS-RES005 — RESEARCH Stage
+
+### [FORGEOS-RES005] — Summary
+- **Artifacts:** docs/research/pg-distributed-locking.md, .github/agent-output/Research/FORGEOS-RES005.md
+- **Decisions:** Recommended three-layer PostgreSQL locking architecture: (1) SELECT FOR UPDATE SKIP LOCKED for ticket queue claiming — already implemented, (2) pg_try_advisory_xact_lock with MD5→bigint keying for file-path mutex — enhancement needed, (3) SELECT FOR UPDATE for atomic state transitions — already implemented. PostgreSQL locking scores 9.45/10 vs git-push 3.55/10. Confidence: HIGH (91%).
+- **Timestamp:** 2026-03-05T19:00:00Z
