@@ -698,3 +698,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/architecture/system-components.md, .github/agent-output/Documentation/FORGEOS-ARCH001.md
 - **Decisions:** Added Diátaxis quadrant (Explanation) to frontmatter. Hyperlinked all 6 research document cross-references (RES001–RES009). Expanded glossary from 10 to 17 terms (PgBouncer, JSON-RPC, ADR, DAG, ACID, Zod, Pino). Added Appendix links to ToC. Added Related Documents section. Improved readability with active voice and shorter sentences. Added Mermaid click handlers for DAG navigation.
 - **Timestamp:** 2026-03-06T14:30:00Z
+
+### [FORGEOS-RES010] — Summary
+- **Artifacts:** docs/research/protocol-comparison.md, .github/agent-output/Research/FORGEOS-RES010.md
+- **Decisions:** Recommend MCP as primary protocol (weighted score 8.00/10) over gRPC (6.05) and REST (5.63) with 89% confidence. MCP's AI-native primitives (tool discovery, invocation, progress reporting) and zero migration cost justify continuation. REST recommended as fallback for external integrations. gRPC not recommended — performance advantages irrelevant at ForgeOS scale, migration cost unjustified.
+- **Timestamp:** 2026-03-06T15:30:00Z
