@@ -28,10 +28,10 @@
     "Research report delivered at docs/research/mcp-transport-comparison.md"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation Specialist",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-05T20:38:07.738217+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -61,6 +61,15 @@
       "agent": "Research",
       "machine_id": "pop-os",
       "details": "Research complete. Streamable HTTP recommended as primary transport (88% confidence). Report at docs/research/mcp-transport-comparison.md"
+    },
+    {
+      "timestamp": "2026-03-05T20:08:07.738233+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by reaperoak@pop-os via Documentation Specialist, lease until 2026-03-05T20:38:07.738217+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-research.md",
