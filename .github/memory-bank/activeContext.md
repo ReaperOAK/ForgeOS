@@ -768,3 +768,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Security/TASK-FOS-08-003.md
 - **Decisions:** PASS — Zero critical/high findings. 1 medium (hardcoded dev credentials in docker-compose.yml, risk accepted for local dev), 3 low (missing .env gitignore, weak min key length, non-constant-time key comparison). Config module has strong security: Zod validation, production secret enforcement, Object.freeze immutability, fail-fast pattern. npm audit clean (0 vulnerabilities). STRIDE max score 8 (Low). OWASP 10/10 checked.
 - **Timestamp:** 2026-03-06T10:15:00Z
+
+### [TASK-FOS-01-002] — Backend Complete
+- **Artifacts:** forgeos-server/src/db/pool.ts, forgeos-server/src/db/migrate.ts, forgeos-server/src/db/index.ts, forgeos-server/src/__tests__/db/pool.test.ts, forgeos-server/src/__tests__/db/migrate.test.ts
+- **Decisions:** Used lazy singleton pattern for pg.Pool (getPool()) over eager initialization for test isolation. Chose SHA-256 for migration checksums. Used SET LOCAL inside BEGIN/COMMIT for RLS session variables to prevent cross-connection leaks. Renamed _migrations table to schema_migrations per AC. Individual transactions per migration for partial-failure isolation. Maintained backward-compatible `export const pool` for 11 existing consumer files.
+- **Timestamp:** 2026-03-06T03:25:00Z
