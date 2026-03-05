@@ -4,7 +4,7 @@
   "description": "Author an Architecture Decision Record documenting the decision to adopt MCP (Model Context Protocol) as the primary agent-to-platform communication protocol. Evaluate alternatives (gRPC, REST-only, custom WebSocket protocol), document trade-offs including maturity risk, and justify the selection based on AI-native tool semantics.",
   "type": "architecture",
   "priority": "high",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "ARCHITECT",
@@ -34,10 +34,10 @@
     "ADR delivered at docs/architecture/adr/adr-002-mcp-protocol.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-05T22:47:39.568689+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -116,6 +116,15 @@
       "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
       "details": "Claimed by reaperoak@pop-os via Validator, lease until 2026-03-05T22:47:39.568689+00:00"
+    },
+    {
+      "timestamp": "2026-03-05T22:20:01.331781+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-architecture.md",
