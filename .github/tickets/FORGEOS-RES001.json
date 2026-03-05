@@ -4,7 +4,7 @@
   "description": "Investigate the Model Context Protocol (MCP) specification in depth. Document the core protocol semantics including message format (JSON-RPC 2.0), tool registration and discovery mechanism, resource exposure model, prompt template system, and session lifecycle management (initialization, capability negotiation, operation, shutdown). Produce a comprehensive research report that the Architect agent can use to make architecture decisions.",
   "type": "research",
   "priority": "critical",
-  "stage": "RESEARCH",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "RESEARCH",
@@ -28,10 +28,10 @@
     "Research report delivered at docs/research/mcp-protocol-spec.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Research",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-05T19:03:53+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -54,6 +54,13 @@
       "agent": "Research",
       "machine_id": "pop-os",
       "details": "Claimed by Research on pop-os (reaperoak)"
+    },
+    {
+      "timestamp": "2026-03-05T18:45:00+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "Research",
+      "machine_id": "pop-os",
+      "details": "RESEARCH complete. Moved to DOCS. Confidence: HIGH (92%). Artifacts: docs/research/mcp-protocol-spec.md"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-research.md",

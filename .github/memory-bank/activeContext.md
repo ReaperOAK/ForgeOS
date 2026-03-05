@@ -492,3 +492,21 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/research/system-gap-analysis.md, .github/agent-output/Research/FORGEOS-RES009.md
 - **Decisions:** Comprehensive gap analysis of file-based system (tickets.py, agent-runner.py, todo_visual.py) vs distributed platform (PostgreSQL + MCP). 32 capabilities mapped, 28 have equivalents, 4 gaps identified (L3 parser, two-commit protocol, DOT graph, terminal dashboard). 11 new capabilities in distributed platform. Migration risk rated MEDIUM overall, two-commit protocol removal rated CRITICAL. Recommended 4-phase migration strategy. Bayesian confidence: 88% (prior 70% → posterior 88%).
 - **Timestamp:** 2026-03-05T18:30:12Z
+
+---
+
+## TASK-FOS-01-001 — QA Stage
+
+### [TASK-FOS-01-001] — Summary
+- **Artifacts:** forgeos-server/src/__tests__/db/schema.test.ts, .github/agent-output/QA/TASK-FOS-01-001.md
+- **Decisions:** PASS verdict on PostgreSQL schema (001_initial.sql). 149 static analysis tests cover all 7 tables, 5 enums, 18+ indexes, 6 RLS policies, 10 stored functions, 4 triggers, seed data, and TypeScript alignment. Three non-blocking defects documented: (1) priority ordering bug in claim_ticket (DESC should be ASC), (2) EventType enum mismatch (TS has HEARTBEAT/COMPLETED not in SQL), (3) missing INSERT RLS policy on tickets for non-admin agents. All 12 acceptance criteria satisfied.
+
+---
+
+## FORGEOS-RES001 — RESEARCH Stage
+
+### [FORGEOS-RES001] — Summary
+- **Artifacts:** docs/research/mcp-protocol-spec.md, .github/agent-output/Research/FORGEOS-RES001.md
+- **Decisions:** MCP protocol comprehensively documented (JSON-RPC 2.0 message format, tool registration/discovery, resource model, prompt templates, session lifecycle, transport options). Recommended continuing with MCP for ForgeOS agent-to-server communication with HIGH confidence (92%). Weighted evaluation score 8.2/10. Key growth opportunities: implement MCP resources for ticket state, consider prompt templates for agent delegation, evaluate stateful sessions. Prior 75% → Posterior 92%.
+- **Timestamp:** 2026-03-05T18:33:53+00:00
+- **Timestamp:** 2026-03-06T00:06:00Z
