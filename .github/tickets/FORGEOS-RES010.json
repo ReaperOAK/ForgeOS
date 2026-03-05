@@ -4,7 +4,7 @@
   "description": "Produce a comparative analysis of MCP, gRPC, and REST as the agent communication protocol for ForgeOS. Evaluate each protocol on: latency, throughput, streaming support, schema enforcement, tooling ecosystem, learning curve, debugging ease, and suitability for AI agent interaction patterns (tool calls, context exchange, session management).",
   "type": "research",
   "priority": "high",
-  "stage": "READY",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "RESEARCH",
@@ -29,10 +29,10 @@
     "Research report delivered at docs/research/protocol-comparison.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Research Analyst",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-05T21:25:57.948858+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -57,6 +57,24 @@
       "from_stage": "READY",
       "to_stage": "READY",
       "details": "Claimed by reaperoak@pop-os via Research Analyst, lease until 2026-03-05T21:25:57.948858+00:00"
+    },
+    {
+      "timestamp": "2026-03-05T21:03:55.249578+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Research Analyst",
+      "machine_id": "system",
+      "from_stage": "READY",
+      "to_stage": "RESEARCH",
+      "details": "Advanced from READY to RESEARCH"
+    },
+    {
+      "timestamp": "2026-03-05T21:04:00.289435+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Research Analyst",
+      "machine_id": "system",
+      "from_stage": "RESEARCH",
+      "to_stage": "DOCS",
+      "details": "Advanced from RESEARCH to DOCS"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-research.md",
