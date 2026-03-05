@@ -8,6 +8,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Dockerfile** — Multi-stage Docker build for the ForgeOS MCP server
+  (`forgeos-server/Dockerfile`). Builder stage compiles TypeScript with
+  `npm ci`; runtime stage runs as non-root `node` user on Alpine with a
+  built-in `HEALTHCHECK` on `/health`. Image expected under 200 MB.
+- **.dockerignore** — Build-context exclusion rules that prevent
+  `node_modules`, `.git`, `dist`, secrets, and env files from entering the
+  image while allowing `README.md` and `.env.example` through.
 - **Environment configuration** — Zod-validated config loader (`src/config.ts`)
   with typed `AppConfig` export, `Object.freeze()` immutability, sensible
   defaults (PORT=3000, LOG_LEVEL=info, DEFAULT_LEASE_MINUTES=30), production
