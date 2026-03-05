@@ -4,7 +4,7 @@
   "description": "Produce a comparative analysis of MCP, gRPC, and REST as the agent communication protocol for ForgeOS. Evaluate each protocol on: latency, throughput, streaming support, schema enforcement, tooling ecosystem, learning curve, debugging ease, and suitability for AI agent interaction patterns (tool calls, context exchange, session management).",
   "type": "research",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "RESEARCH",
@@ -29,10 +29,10 @@
     "Research report delivered at docs/research/protocol-comparison.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation Specialist",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-05T21:48:48.184673+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -84,6 +84,15 @@
       "from_stage": "DOCS",
       "to_stage": "DOCS",
       "details": "Claimed by reaperoak@pop-os via Documentation Specialist, lease until 2026-03-05T21:48:48.184673+00:00"
+    },
+    {
+      "timestamp": "2026-03-05T21:20:06.125288+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation Specialist",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-research.md",

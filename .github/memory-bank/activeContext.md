@@ -718,3 +718,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/research/pg-event-sourcing.md, .github/agent-output/Research/FORGEOS-RES008.md
 - **Decisions:** Recommended Enhanced Hybrid model over Full Event Sourcing (85% confidence). Add sequence_number, aggregate_version, immutability triggers to existing events table. Keep JSONB payload, keep mutable tickets table as primary state source. Full ES overkill at ForgeOS scale (≤100K tickets). Storage sustainable at ~1.8GB for 100K tickets.
 - **Timestamp:** 2026-03-06T21:09:00Z
+
+### [FORGEOS-RES010] — Documentation Summary
+- **Artifacts:** docs/research/protocol-comparison.md, .github/agent-output/Documentation/FORGEOS-RES010.md
+- **Decisions:** Fixed critical score inconsistency — executive summary and scored matrix cited 8.52/10 for MCP but calculation yields 8.00/10. Corrected all three protocol weighted totals to match calculations (8.00, 6.05, 5.63). Removed redundant "Corrected Weighted Totals" subsection. Updated last_reviewed freshness timestamp.
+- **Timestamp:** 2026-03-06T22:00:00Z
