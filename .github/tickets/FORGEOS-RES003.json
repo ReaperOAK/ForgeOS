@@ -4,7 +4,7 @@
   "description": "Evaluate the official MCP Python SDK for maturity, stability, and fitness for production use in the ForgeOS platform. Assess API surface completeness, error handling robustness, async support, typing coverage, test coverage, release cadence, known issues, and community adoption. Identify gaps that may require custom implementation or workarounds.",
   "type": "research",
   "priority": "high",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "RESEARCH",
@@ -29,10 +29,10 @@
     "Research report delivered at docs/research/mcp-sdk-evaluation.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-05T20:50:27.279706+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": null,
   "history": [
     {
@@ -87,6 +87,15 @@
       "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
       "details": "Claimed by reaperoak@pop-os via Validator, lease until 2026-03-05T20:50:27.279706+00:00"
+    },
+    {
+      "timestamp": "2026-03-05T20:21:25.440426+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-research.md",
