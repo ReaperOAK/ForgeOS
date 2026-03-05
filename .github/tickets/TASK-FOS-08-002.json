@@ -4,7 +4,7 @@
   "description": "Create Docker Compose configuration as specified in Architecture \u00a78.1 with three services: postgres (PostgreSQL 17 Alpine with healthcheck, persistent volume, init scripts mounted from migrations directory), pgbouncer (edoburu/pgbouncer in transaction mode with 50 default pool size and 200 max client connections), and mcp-server (built from Dockerfile, depends on postgres healthy + pgbouncer started, connects through pgbouncer, mounts workspace read-only). Include named volume for PostgreSQL data persistence, Docker secrets for database password, and configurable ports via environment variables. Every service has restart: unless-stopped policy.",
   "type": "infra",
   "priority": "critical",
-  "stage": "READY",
+  "stage": "BACKEND",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -76,6 +76,15 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Released claim from DevOps Engineer: manual release"
+    },
+    {
+      "timestamp": "2026-03-05T23:36:03.631774+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "DevOps Engineer",
+      "machine_id": "system",
+      "from_stage": "READY",
+      "to_stage": "BACKEND",
+      "details": "Advanced from READY to BACKEND"
     }
   ],
   "source_task_file": "TODO/tickets/08-infrastructure.md",

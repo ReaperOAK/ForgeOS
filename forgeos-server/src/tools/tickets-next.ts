@@ -2,6 +2,7 @@
 // Implements: Find Next Available Ticket (read-only peek)
 // Author: Backend Engineer (TASK-FOS-03-001)
 
+
 import { z } from 'zod';
 import { pool } from '../db/pool.js';
 import { TICKET_STAGES, TICKET_TYPES, TICKET_PRIORITIES } from '../types/index.js';
@@ -21,27 +22,32 @@ export const ticketsNextInputSchema = z.object({
  */
 export async function ticketsNext(input: z.infer<typeof ticketsNextInputSchema>) {
   const { stage, type, priority } = input;
-  // Build dynamic WHERE clause
-  const where = [
+
+  // Build dynamic WHERE clause and params
+  let where = [
     'stage = $1',
     "status = 'READY'",
     '(claimed_by IS NULL OR lease_expiry < NOW())',
-    type ? 'type = $2' : null,
-    priority ? 'priority >= $3' : null,
-  ].filter(Boolean).join(' AND ');
+  ];
+  const params: any[] = [stage];
+  let paramIdx = 2;
+  if (type) {
+    where.push(`type = $${paramIdx}`);
+    params.push(type);
+    paramIdx++;
+  }
+  if (priority) {
+    where.push(`priority >= $${paramIdx}`);
+    params.push(priority);
+    paramIdx++;
+  }
 
-  // Build params array
-  const params = [stage];
-  if (type) params.push(type);
-  if (priority) params.push(priority);
-
-  // Compose query
+  // Compose query (no FOR UPDATE SKIP LOCKED, just a peek)
   const query = `
     SELECT * FROM tickets
-    WHERE ${where}
+    WHERE ${where.join(' AND ')}
     ORDER BY priority DESC, created_at ASC
     LIMIT 1
-    FOR UPDATE SKIP LOCKED
   `;
 
   try {
