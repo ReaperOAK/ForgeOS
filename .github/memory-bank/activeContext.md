@@ -648,3 +648,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/README.md (created), forgeos-server/src/server.ts (JSDoc), forgeos-server/src/index.ts (JSDoc), .github/agent-output/Documentation/TASK-FOS-02-001.md
 - **Decisions:** Created module-level README (Reference/Diátaxis) covering prerequisites, setup, configuration, endpoints, MCP tools, architecture. Improved JSDoc on 7 exported functions in server.ts/index.ts with @param/@returns/@throws. Pre-existing docs in config.ts, pool.ts, migrate.ts, logging.ts, auth.ts, tools/index.ts were already adequate — no changes needed. No CHANGELOG entry for initial scaffold.
 - **Timestamp:** 2026-03-06T12:00:00Z
+
+### [TASK-FOS-02-002] — Documentation Summary
+- **Artifacts:** forgeos-server/src/types/index.ts (TSDoc enhanced), .github/agent-output/Documentation/TASK-FOS-02-002.md
+- **Decisions:** Added comprehensive TSDoc to all 38 exports (5 union types, 6 domain interfaces, 18 MCP tool I/O types, 1 auth type, 1 SSE type, 2 error types, 5 runtime constants). Every property on every interface documented individually (150+ fields). Documented CI findings CI-TYPE-001 (EventType TS-SQL mismatch) and CI-TYPE-002 (permissions string[]) inline via @remarks. Added @last_reviewed freshness tag. Diátaxis classification: Reference. No code logic changes.
+- **Timestamp:** 2026-03-06T00:30:00Z
