@@ -149,3 +149,11 @@ _None_
 | SEC-CFG-002 | Low | Root `.gitignore` does not exclude `.env` files — accidental secret commit possible | Open | Recommend adding `.env` and `!.env.example` to .gitignore in future housekeeping ticket |
 | SEC-CFG-003 | Low | `ADMIN_API_KEY` minimum length 8 chars (recommend 16+ for production) | Risk Accepted | Production validation rejects default value; convention guides longer keys |
 | SEC-CFG-004 | Low | Admin key comparison in auth middleware uses `===` (non-constant-time) | Risk Accepted | Network latency masks timing; admin key check is fallback before DB hash lookup |
+
+### [TASK-FOS-08-001] — Dockerfile Security Risks (2026-03-06T12:00:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-DOCKER-001 | Low | Base image `node:22-alpine` uses mutable tag, not pinned to digest (CWE-829) | Risk Accepted | Official Docker Hub image; Alpine minimal surface; pin to digest in production hardening phase |
+| SEC-DOCKER-002 | Low | Runtime image includes devDependencies in node_modules/ (CWE-1104) | Risk Accepted | No known vulnerabilities; recommend `npm ci --omit=dev` in future optimization |
+| SEC-DOCKER-003 | Low | No `npm audit` executed during Docker build (CWE-1395) | Risk Accepted | CI pipeline handles dependency auditing; build-time audit is defense-in-depth enhancement |
