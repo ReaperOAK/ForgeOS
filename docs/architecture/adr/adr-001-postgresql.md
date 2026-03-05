@@ -7,7 +7,7 @@ date: 2026-03-06T00:00:00Z
 status: ACCEPTED
 audience: All engineers, DevOps, and operators working on ForgeOS
 purpose: Document the decision to use PostgreSQL as the primary mutable state store for ForgeOS, replacing filesystem-based state directories
-last_reviewed: 2026-03-06T23:59:00Z
+last_reviewed: 2026-03-06T23:59:00Z  # Updated by Documentation Specialist 2026-03-06
 diataxis_quadrant: explanation
 tags: [architecture, adr, postgresql, state-management, phase1]
 ---

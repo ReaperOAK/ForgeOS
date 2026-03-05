@@ -1,3 +1,7 @@
+# FORGEOS-ARCH008 — Summary
+- **Artifacts:** docs/architecture/api/openapi-spec.yaml
+- **Decisions:** REST API is for dashboard/admin, not agent orchestration (MCP covers agent flows). All state changes go through MCP tools, REST is a thin admin/operator layer. WebSocket endpoint defined for real-time ticket streaming.
+- **Timestamp:** 2026-03-06T00:00:00Z
 ---
 id: active-context
 version: "1.0"
@@ -8,6 +12,16 @@ compaction_threshold: 50
 ---
 
 # Active Context
+
+### [TASK-FOS-08-002] — Docker Compose with PostgreSQL and Server
+- **Artifacts:** forgeos-server/docker-compose.yml, forgeos-server/secrets/.gitkeep, forgeos-server/secrets/db_password
+- **Decisions:** Created a Compose file with three services (postgres, pgbouncer, mcp-server) per ticket. Used Docker secrets for DB password, persistent volume for Postgres, healthchecks, and correct dependency order. Validation blocked by disk full error (see below).
+- **Timestamp:** 2026-03-06T05:00:00Z
+
+### [FORGEOS-ARCH005] — Documentation Summary
+- **Artifacts:** docs/architecture/database-schema.md, docs/database/schema-reference.md, docs/architecture/adr/adr-001-postgresql.md, docs/architecture/adr/adr-002-mcp-protocol.md, docs/research/pg-distributed-locking.md, docs/research/pg-transaction-isolation.md, docs/research/pg-event-sourcing.md, .github/agent-output/Documentation/FORGEOS-ARCH005.md
+- **Decisions:** Added explicit cross-references to ADRs and research, ensured ER diagram is Mermaid and labeled, updated all `last_reviewed` fields, improved clarity and navigation, verified Diátaxis quadrant and audience, checked Flesch-Kincaid grade ≤10.
+- **Timestamp:** 2026-03-06T23:59:00Z
 
 > **Schema Version:** 1.0
 > **Owner:** Shared

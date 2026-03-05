@@ -1,0 +1,539 @@
+openapi: 3.1.0
+info:
+  title: ForgeOS Orchestration Platform REST API
+  version: 1.0.0
+  description: |
+    REST API for ForgeOS dashboard, ticket operations, and health monitoring. This API complements the MCP JSON-RPC protocol for agent orchestration, providing administrative and operator endpoints for ticket management, pipeline overview, and real-time updates.
+  contact:
+    name: ForgeOS Team
+    url: https://github.com/forgeos
+    email: support@forgeos.dev
+servers:
+  - url: /api
+    description: Relative API root (behind reverse proxy)
+  - url: http://localhost:3000/api
+    description: Local development
+  - url: https://forgeos.example.com/api
+    description: Production
+
+security:
+  - BearerAuth: []
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    TicketId:
+      name: id
+      in: path
+      required: true
+      schema:
+        type: string
+        pattern: ^[A-Z0-9\-]+$
+      description: Ticket ID (e.g., FORGEOS-ARCH001)
+    Stage:
+      name: stage
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [READY, ARCHITECT, RESEARCH, BACKEND, FRONTEND, QA, SECURITY, CI, DOCS, VALIDATION, DONE]
+      description: Filter by ticket stage
+    Type:
+      name: type
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [backend, frontend, fullstack, infra, security, docs, research, architecture]
+      description: Filter by ticket type
+    Priority:
+      name: priority
+      in: query
+      required: false
+      schema:
+        type: string
+        enum: [low, medium, high, critical]
+      description: Filter by ticket priority
+    ClaimedBy:
+      name: claimed_by
+      in: query
+      required: false
+      schema:
+        type: string
+      description: Filter by agent name
+    Page:
+      name: page
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+      description: Page number for pagination
+    PageSize:
+      name: page_size
+      in: query
+      required: false
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 100
+        default: 20
+      description: Page size for pagination
+  schemas:
+    Ticket:
+      type: object
+      required:
+        - ticket_id
+        - title
+        - type
+        - stage
+        - status
+        - priority
+        - created_at
+        - updated_at
+      properties:
+        ticket_id:
+          type: string
+        title:
+          type: string
+        description:
+          type: string
+        type:
+          type: string
+        stage:
+          type: string
+        status:
+          type: string
+        priority:
+          type: string
+        claimed_by:
+          type: string
+          nullable: true
+        machine_id:
+          type: string
+          nullable: true
+        operator:
+          type: string
+          nullable: true
+        lease_expiry:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        file_paths:
+          type: array
+          items:
+            type: string
+        acceptance_criteria:
+          type: array
+          items:
+            type: string
+        rework_count:
+          type: integer
+        dependencies:
+          type: array
+          items:
+            type: string
+        blocked_by:
+          type: array
+          items:
+            type: string
+    TicketList:
+      type: object
+      required:
+        - tickets
+        - total
+        - page
+        - page_size
+      properties:
+        tickets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Ticket'
+        total:
+          type: integer
+        page:
+          type: integer
+        page_size:
+          type: integer
+    TicketHistoryEvent:
+      type: object
+      required:
+        - event_id
+        - ticket_id
+        - event_type
+        - created_at
+        - details
+      properties:
+        event_id:
+          type: string
+        ticket_id:
+          type: string
+        event_type:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+        details:
+          type: object
+    TicketHistory:
+      type: object
+      required:
+        - events
+      properties:
+        events:
+          type: array
+          items:
+            $ref: '#/components/schemas/TicketHistoryEvent'
+    ErrorResponse:
+      type: object
+      required:
+        - status
+        - error_code
+        - message
+      properties:
+        status:
+          type: integer
+        error_code:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          nullable: true
+    HealthStatus:
+      type: object
+      required:
+        - status
+        - timestamp
+      properties:
+        status:
+          type: string
+          enum: [ok, unhealthy, error]
+        timestamp:
+          type: string
+          format: date-time
+    StageList:
+      type: object
+      required:
+        - stages
+      properties:
+        stages:
+          type: array
+          items:
+            type: string
+    WebSocketTicketUpdate:
+      type: object
+      required:
+        - type
+        - ticket
+      properties:
+        type:
+          type: string
+          enum: [ticket_update, ticket_claimed, ticket_advanced, ticket_reworked, ticket_released]
+        ticket:
+          $ref: '#/components/schemas/Ticket'
+
+paths:
+  /tickets:
+    get:
+      summary: List tickets
+      description: List tickets with optional filters and pagination.
+      operationId: listTickets
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/Stage'
+        - $ref: '#/components/parameters/Type'
+        - $ref: '#/components/parameters/Priority'
+        - $ref: '#/components/parameters/ClaimedBy'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+      responses:
+        '200':
+          description: List of tickets
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketList'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /tickets/{id}:
+    get:
+      summary: Get ticket by ID
+      description: Retrieve a single ticket by its ID.
+      operationId: getTicket
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TicketId'
+      responses:
+        '200':
+          description: Ticket details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '404':
+          description: Ticket not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /tickets/{id}/claim:
+    post:
+      summary: Claim a ticket
+      description: Atomically claim a ticket for an agent and machine.
+      operationId: claimTicket
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TicketId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - agent_name
+                - machine_id
+                - operator
+              properties:
+                agent_name:
+                  type: string
+                machine_id:
+                  type: string
+                operator:
+                  type: string
+      responses:
+        '200':
+          description: Ticket claimed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '409':
+          description: Ticket already claimed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /tickets/{id}/advance:
+    post:
+      summary: Advance ticket to next stage
+      description: Advance a ticket to the next SDLC stage.
+      operationId: advanceTicket
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TicketId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - evidence
+              properties:
+                evidence:
+                  type: object
+                  description: Evidence for stage completion
+      responses:
+        '200':
+          description: Ticket advanced
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '409':
+          description: Ticket not in correct state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /tickets/{id}/rework:
+    post:
+      summary: Send ticket to rework
+      description: Mark a ticket as requiring rework, with reason.
+      operationId: reworkTicket
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TicketId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Ticket marked for rework
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '409':
+          description: Ticket not in correct state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /tickets/{id}/release:
+    post:
+      summary: Release a claimed ticket
+      description: Release a ticket claim (forcibly or voluntarily).
+      operationId: releaseTicket
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TicketId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - reason
+              properties:
+                reason:
+                  type: string
+      responses:
+        '200':
+          description: Ticket released
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Ticket'
+        '409':
+          description: Ticket not in correct state
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /tickets/{id}/history:
+    get:
+      summary: Get ticket event history
+      description: Retrieve the event log for a ticket.
+      operationId: getTicketHistory
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: '#/components/parameters/TicketId'
+      responses:
+        '200':
+          description: Ticket event history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TicketHistory'
+        '404':
+          description: Ticket not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /stages:
+    get:
+      summary: List pipeline stages
+      description: Retrieve the list of SDLC pipeline stages.
+      operationId: listStages
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: List of pipeline stages
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/StageList'
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /health:
+    get:
+      summary: Health check
+      description: Readiness and liveness probe for ForgeOS server and database.
+      operationId: healthCheck
+      responses:
+        '200':
+          description: Server is healthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+        '503':
+          description: Server is unhealthy
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HealthStatus'
+  /ws/tickets:
+    get:
+      summary: WebSocket for real-time ticket updates
+      description: WebSocket endpoint for streaming ticket state changes. Sends `WebSocketTicketUpdate` messages on ticket claim, advance, rework, or release.
+      operationId: wsTickets
+      responses:
+        '101':
+          description: Switching Protocols (WebSocket upgrade)

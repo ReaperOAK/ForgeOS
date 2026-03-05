@@ -22,8 +22,7 @@
     "FORGEOS-ARCH003"
   ],
   "blocked_by": [
-    "FORGEOS-ARCH009",
-    "FORGEOS-ARCH003"
+    "FORGEOS-ARCH009"
   ],
   "file_paths": [
     "mcp-server/src/server.py",
