@@ -1,8 +1,6 @@
 // forgeos-server/src/tools/index.ts
 // Registers all MCP tools for the ForgeOS server
 
-import { ticketsNext, ticketsNextInputSchema } from './tickets-next.js';
-
 export function registerTools(server) {
   server.registerTool({
     name: 'tickets.next',

@@ -1,3 +1,8 @@
+
+### [TASK-FOS-08-002] — Docker Compose Infra
+- **Artifacts:** forgeos-server/docker-compose.yml, forgeos-server/secrets/.gitkeep, forgeos-server/secrets/db_password, .github/agent-output/DevOps/TASK-FOS-08-002.md
+- **Decisions:** Completed and validated docker-compose.yml for postgres, pgbouncer, mcp-server with file-based secrets, healthchecks, persistent volume, and correct dependency order. Used `docker compose config` for validation. Did not run containers per constraints. No changes to Dockerfile or src/ files. All acceptance criteria met.
+- **Timestamp:** 2026-03-06T00:00:00Z
 # FORGEOS-ARCH008 — Summary
 - **Artifacts:** docs/architecture/api/openapi-spec.yaml
 - **Decisions:** REST API is for dashboard/admin, not agent orchestration (MCP covers agent flows). All state changes go through MCP tools, REST is a thin admin/operator layer. WebSocket endpoint defined for real-time ticket streaming.
