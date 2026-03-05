@@ -4,7 +4,7 @@
   "description": "Author an Architecture Decision Record (ADR) documenting the decision to use PostgreSQL as the primary mutable state store for ForgeOS, replacing filesystem-based state directories. Evaluate alternatives (SQLite, Redis, etcd, CockroachDB), document trade-offs, and justify the selection based on distributed locking capabilities, ACID guarantees, and operational maturity.",
   "type": "architecture",
   "priority": "high",
-  "stage": "ARCHITECT",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "ARCHITECT",
@@ -33,10 +33,10 @@
     "ADR delivered at docs/architecture/adr/adr-001-postgresql.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Architect",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-05T22:27:30.311131+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -61,6 +61,15 @@
       "from_stage": "READY",
       "to_stage": "READY",
       "details": "Claimed by reaperoak@pop-os via Architect, lease until 2026-03-05T22:27:30.311131+00:00"
+    },
+    {
+      "timestamp": "2026-03-05T22:07:46.767410+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Architect",
+      "machine_id": "system",
+      "from_stage": "ARCHITECT",
+      "to_stage": "DOCS",
+      "details": "Advanced from ARCHITECT to DOCS"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-architecture.md",

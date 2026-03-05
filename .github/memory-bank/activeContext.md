@@ -783,3 +783,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/architecture/adr/adr-002-mcp-protocol.md
 - **Decisions:** Adopted MCP (8.00/10) over gRPC (6.05/10), REST (5.63/10), and custom WebSocket (4.15/10) as primary agent-to-orchestrator protocol. Chose Streamable HTTP (8.65/10) as primary transport with stdio fallback. Documented REST fallback layer as maturity risk mitigation. Rejected gRPC due to disproportionate complexity and missing AI-agent primitives at ForgeOS's projected scale (10-100 agents).
 - **Timestamp:** 2026-03-06T14:00:00Z
+
+### [FORGEOS-ARCH002] — ADR: PostgreSQL as Primary State Store
+- **Artifacts:** docs/architecture/adr/adr-001-postgresql.md, .github/agent-output/Architect/FORGEOS-ARCH002.md
+- **Decisions:** Selected PostgreSQL 17 (weighted 9.15/10) over SQLite (5.85), Redis (5.60), etcd (5.65), CockroachDB (6.85) as primary state store. SQLite disqualified (single-writer). Redis rejected (no ACID/SQL). etcd rejected (KV-only, 2GB limit). CockroachDB rejected at current scale (no advisory locks, no LISTEN/NOTIFY). READ COMMITTED isolation sufficient per RES007. Enhanced hybrid model (not full ES) per RES008. Well-Architected score: 52/60 (87%). 7/7 acceptance criteria pass.
+- **Timestamp:** 2026-03-06T23:45:00Z
