@@ -4,7 +4,7 @@
   "description": "Assess the feasibility of using event sourcing patterns in PostgreSQL for the ForgeOS ticket audit trail. Evaluate append-only event table design, event replay for state reconstruction, LISTEN/NOTIFY for real-time event streaming, and JSONB vs normalized event storage. Compare with current JSON history array approach in ticket files.",
   "type": "research",
   "priority": "high",
-  "stage": "READY",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "RESEARCH",
@@ -30,10 +30,10 @@
     "Research report delivered at docs/research/pg-event-sourcing.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Research Analyst",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-05T21:39:01.608707+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -51,13 +51,31 @@
       "details": "Dependencies resolved, moved to READY"
     },
     {
-      "timestamp": "2026-03-05T21:09:01.608721+00:00",
+      "timestamp": "2026-03-05T21:07:33.254283+00:00",
       "event": "CLAIMED",
       "agent": "Research Analyst",
       "machine_id": "pop-os",
       "from_stage": "READY",
       "to_stage": "READY",
-      "details": "Claimed by reaperoak@pop-os via Research Analyst, lease until 2026-03-05T21:39:01.608707+00:00"
+      "details": "Claimed by reaperoak@pop-os via Research Analyst, lease until 2026-03-05T21:37:33.254266+00:00"
+    },
+    {
+      "timestamp": "2026-03-05T21:15:30.796599+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Research Analyst",
+      "machine_id": "system",
+      "from_stage": "READY",
+      "to_stage": "RESEARCH",
+      "details": "Advanced from READY to RESEARCH"
+    },
+    {
+      "timestamp": "2026-03-05T21:15:36.331746+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Research Analyst",
+      "machine_id": "system",
+      "from_stage": "RESEARCH",
+      "to_stage": "DOCS",
+      "details": "Advanced from RESEARCH to DOCS"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-research.md",
