@@ -510,3 +510,12 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** MCP protocol comprehensively documented (JSON-RPC 2.0 message format, tool registration/discovery, resource model, prompt templates, session lifecycle, transport options). Recommended continuing with MCP for ForgeOS agent-to-server communication with HIGH confidence (92%). Weighted evaluation score 8.2/10. Key growth opportunities: implement MCP resources for ticket state, consider prompt templates for agent delegation, evaluate stateful sessions. Prior 75% → Posterior 92%.
 - **Timestamp:** 2026-03-05T18:33:53+00:00
 - **Timestamp:** 2026-03-06T00:06:00Z
+
+---
+
+## TASK-FOS-02-001 — QA Stage
+
+### [TASK-FOS-02-001] — Summary
+- **Artifacts:** forgeos-server/src/__tests__/server.test.ts, .github/agent-output/QA/TASK-FOS-02-001.md
+- **Decisions:** PASS verdict on MCP Server Scaffold. 394 new tests validate Express app factory, MCP endpoint registration (POST/GET/DELETE /mcp with StreamableHTTPServerTransport), SSE endpoint, NOTIFY/LISTEN, graceful shutdown, config validation (Zod), auth middleware (SHA-256, Bearer token, admin shortcut, public path bypass), logging middleware (Pino, X-Request-ID), all 10 tool registrations, types module, DB pool/migrate modules, Docker infrastructure, security baseline, and code quality. TypeScript compiles cleanly (zero errors, strict mode). Total: 543 tests (149 schema + 394 server), all passing. No blocking defects. Informational observations: healthCheck() returns object treated as boolean (works via truthiness), tools use pool.query() directly instead of queryWithRLS().
+- **Timestamp:** 2025-07-14T00:16:00Z
