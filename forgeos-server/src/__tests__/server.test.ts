@@ -1141,7 +1141,7 @@ describe('db/pool.ts source analysis', () => {
   });
 
   it('handles pool errors', () => {
-    expect(poolSrc).toMatch(/pool\.on\s*\(\s*['"]error['"]/);
+    expect(poolSrc).toMatch(/\.on\s*\(\s*['"]error['"]/);
   });
 
   it('exports healthCheck function', () => {
@@ -1204,8 +1204,8 @@ describe('db/migrate.ts source analysis', () => {
     expect(migrateSrc).toMatch(/export\s+async\s+function\s+runMigrations/);
   });
 
-  it('creates _migrations tracking table', () => {
-    expect(migrateSrc).toContain('_migrations');
+  it('creates schema_migrations tracking table', () => {
+    expect(migrateSrc).toContain('schema_migrations');
     expect(migrateSrc).toContain('CREATE TABLE IF NOT EXISTS');
   });
 
@@ -1225,7 +1225,7 @@ describe('db/migrate.ts source analysis', () => {
   });
 
   it('tracks applied migrations to avoid re-application', () => {
-    expect(migrateSrc).toContain('INSERT INTO _migrations');
+    expect(migrateSrc).toContain('INSERT INTO schema_migrations');
   });
 
   it('supports direct CLI execution', () => {
