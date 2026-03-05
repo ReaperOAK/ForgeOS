@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-06T22:00:00Z -->
+<!-- last_reviewed: 2026-03-06T23:30:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -47,6 +47,7 @@ The server starts on `http://localhost:3000` by default.
 | `lint`          | `eslint src/`        | Run ESLint on source files             |
 | `test`          | `vitest run`         | Run test suite once                    |
 | `test:watch`    | `vitest`             | Run tests in watch mode                |
+| `prepare`       | `husky`              | Install Git hooks (runs on `npm install`) |
 
 ## Database
 
@@ -166,6 +167,56 @@ Ten ticket-management tools are registered under the `tickets.*` namespace:
 | `tickets.release`   | Release a claim without advancing                    |
 | `tickets.extend`    | Extend the lease on a claimed ticket                 |
 | `tickets.stats`     | Return aggregate ticket statistics                   |
+
+## Commit Message Convention
+
+The repository enforces a commit message format via a
+[Husky](https://typicode.github.io/husky/) `commit-msg` hook. Every commit
+message must begin with a ticket ID in square brackets.
+
+### Required Format
+
+```
+[TICKET-ID] Your message here
+```
+
+Where `TICKET-ID` matches the pattern
+`[A-Z0-9]+-[A-Z0-9]+(-[A-Z0-9]+)*` — for example `FORGEOS-001`,
+`TASK-FOS-01-001`.
+
+### Valid Examples
+
+| Type | Example |
+|------|---------|
+| CLAIM commit | `[TASK-FOS-01-001] CLAIM by Backend on machine-1 (operator)` |
+| WORK commit  | `[TASK-FOS-01-001] BACKEND complete by Backend on machine-1` |
+| General      | `[FORGEOS-001] Fix login bug` |
+
+### Rejection
+
+Commits that do not match the pattern are rejected with a clear error
+showing the expected format. To bypass the hook in an emergency:
+
+```bash
+git commit --no-verify -m "your message"
+```
+
+### Developer Setup
+
+The hook is installed automatically when you run `npm install` (via the
+`prepare` script). No manual setup is needed. If hooks are missing after
+cloning, run:
+
+```bash
+npm run prepare
+```
+
+Hook files:
+
+| File | Purpose |
+|------|---------|
+| `.husky/commit-msg` | Entry point — delegates to the validator script |
+| `scripts/validate-commit.sh` | Reads the first line and validates against the ticket ID regex |
 
 ## Architecture
 
