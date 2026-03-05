@@ -7,7 +7,7 @@ date: 2026-03-06T00:00:00Z
 status: ACCEPTED
 audience: All engineers, DevOps, and operators working on ForgeOS
 purpose: Document the decision to use PostgreSQL as the primary mutable state store for ForgeOS, replacing filesystem-based state directories
-last_reviewed: 2026-03-06T00:00:00Z
+last_reviewed: 2026-03-06T23:59:00Z
 diataxis_quadrant: explanation
 tags: [architecture, adr, postgresql, state-management, phase1]
 ---
@@ -21,18 +21,20 @@ tags: [architecture, adr, postgresql, state-management, phase1]
 
 ## Table of Contents
 
-1. [Status](#1-status)
-2. [Context](#2-context)
-3. [Decision](#3-decision)
-4. [Evaluation Criteria](#4-evaluation-criteria)
-5. [Alternatives Evaluated](#5-alternatives-evaluated)
-6. [Technology Selection Matrix](#6-technology-selection-matrix)
-7. [Evidence from Research Reports](#7-evidence-from-research-reports)
-8. [Consequences](#8-consequences)
-9. [Migration Impact Assessment](#9-migration-impact-assessment)
-10. [Well-Architected Pillar Assessment](#10-well-architected-pillar-assessment)
-11. [Fitness Functions](#11-fitness-functions)
-12. [References](#12-references)
+| # | Section | Purpose |
+|---|---------|--------|
+| 1 | [Status](#1-status) | Current decision state |
+| 2 | [Context](#2-context) | Problem, legacy state, requirements |
+| 3 | [Decision](#3-decision) | What we chose and core design principles |
+| 4 | [Evaluation Criteria](#4-evaluation-criteria) | Weighted scoring criteria |
+| 5 | [Alternatives Evaluated](#5-alternatives-evaluated) | Five candidates assessed |
+| 6 | [Technology Selection Matrix](#6-technology-selection-matrix) | Quantitative comparison |
+| 7 | [Evidence from Research Reports](#7-evidence-from-research-reports) | Backing data from RES005–RES008 |
+| 8 | [Consequences](#8-consequences) | Positive, negative, and risks |
+| 9 | [Migration Impact Assessment](#9-migration-impact-assessment) | What changes, what stays |
+| 10 | [Well-Architected Pillar Assessment](#10-well-architected-pillar-assessment) | Six-pillar quality review |
+| 11 | [Fitness Functions](#11-fitness-functions) | Measurable thresholds |
+| 12 | [References](#12-references) | Source documents and links |
 
 ---
 
@@ -76,10 +78,10 @@ The legacy system uses a **file-based state machine**:
 
 **Key failure modes of the file-based approach:**
 
-1. **Push-race claims:** Two agents can both read a ticket as unclaimed, modify the JSON locally, and race to `git push`. The loser must detect the push failure, pull, and retry. This adds 5–15 seconds per claim attempt and is fundamentally unfair (network-speed-dependent).
-2. **No transactional state transitions:** Moving a ticket from one stage directory to another requires a file delete + file create + git add + git commit + git push — five non-atomic operations with no rollback capability.
-3. **Stale reads:** `tickets.py --sync` reads all files sequentially. During the scan, another operator may commit changes that invalidate the dependency resolution results.
-4. **Scale ceiling:** File scanning is O(n) per operation. With 100+ tickets and 50+ events each, sync operations take multiple seconds.
+1. **Push-race claims:** Two agents can both read a ticket as unclaimed, modify the JSON locally, and race to `git push`. The loser must detect the failure, pull, and retry — adding 5–15 seconds per attempt with no fairness guarantee.
+2. **No transactional state transitions:** Moving a ticket between stage directories requires five non-atomic steps: file delete, file create, `git add`, `git commit`, `git push`. No rollback is possible on partial failure.
+3. **Stale reads:** `tickets.py --sync` reads files sequentially. Another operator may commit changes mid-scan, invalidating dependency resolution results.
+4. **Scale ceiling:** File scanning is O(n) per operation. With 100+ tickets and 50+ events each, sync takes multiple seconds.
 
 ### 2.3 Requirements for the New State Store
 
@@ -152,7 +154,7 @@ The following criteria were used to evaluate each alternative. Weights reflect F
 - Schema migrations required for structural changes
 - Not a distributed database natively (single-node unless using Citus or CockroachDB)
 
-**ForgeOS alignment:** Directly addresses all 10 requirements. Already implemented in `001_initial.sql` with 1011 lines of DDL, 8 stored functions, RLS policies, and optimized indexes.
+**ForgeOS alignment:** Addresses all 10 requirements. Already implemented in [`001_initial.sql`](../../../forgeos-server/src/db/migrations/001_initial.sql) with 1011 lines of DDL, 8 stored functions, RLS policies, and optimized indexes.
 
 ### 5.2 SQLite
 
@@ -173,7 +175,7 @@ The following criteria were used to evaluate each alternative. Weights reflect F
 - No stored procedures (only user-defined functions via application layer)
 - Network access requires wrapping in a server (e.g., Litestream, rqlite) — adding the complexity SQLite was meant to avoid
 
-**ForgeOS fit:** **DISQUALIFIED** — single-writer limitation is incompatible with multi-machine distributed agent coordination. ForgeOS's core use case (multiple agents on different machines claiming tickets simultaneously) is fundamentally unsupported.
+**ForgeOS fit:** **DISQUALIFIED.** The single-writer limitation is incompatible with multi-machine agent coordination. ForgeOS requires concurrent ticket claiming across machines — a use case SQLite cannot support.
 
 ### 5.3 Redis
 
@@ -195,7 +197,7 @@ The following criteria were used to evaluate each alternative. Weights reflect F
 - **No relational model:** No JOINs, no foreign keys, no referential integrity. Ticket-agent-event relationships must be maintained by application code.
 - **Redlock controversy:** The Redlock distributed locking algorithm has been [criticized by Martin Kleppmann](https://martin-kleppmann.com/2016/02/08/how-to-do-distributed-locking.html) for safety issues under clock skew and GC pauses.
 
-**ForgeOS fit:** Redis excels as a cache or pub/sub layer but is **not suitable as the primary state store**. The lack of ACID, relational modeling, and SQL querying makes it a poor fit for ForgeOS's stateful ticket lifecycle. Could complement PostgreSQL as a caching layer in the future but does not replace it.
+**ForgeOS fit:** Redis excels as a cache or pub/sub layer but is **not suitable as the primary state store**. It lacks ACID, relational modeling, and SQL querying — all critical for ForgeOS's stateful ticket lifecycle. Redis could complement PostgreSQL as a caching layer in the future.
 
 ### 5.4 etcd
 
@@ -216,7 +218,7 @@ The following criteria were used to evaluate each alternative. Weights reflect F
 - **Limited querying:** No dependency graph traversal, no array containment queries, no aggregation.
 - **No ecosystem for application databases:** No migration tooling, no ORM support, no backup ecosystem comparable to PostgreSQL.
 
-**ForgeOS fit:** **Poor fit.** etcd is brilliant for what it was designed for (distributed consensus on small metadata sets) but is the wrong tool for application state management. ForgeOS's ticket model (20+ columns, array fields, JSONB metadata, relational references) is fundamentally a relational workload that etcd cannot efficiently serve.
+**ForgeOS fit:** **Poor fit.** etcd is designed for distributed consensus on small metadata sets, not application state. ForgeOS's ticket model — 20+ columns, array fields, JSONB metadata, relational references — is a relational workload that etcd cannot efficiently serve.
 
 ### 5.5 CockroachDB
 
@@ -227,7 +229,7 @@ The following criteria were used to evaluate each alternative. Weights reflect F
 - Serializable isolation by default — strongest consistency guarantee
 - Automatic horizontal sharding — scales to arbitrary cluster size
 - Multi-region replication — geo-distributed deployments
-- Survivability — tolerates node failures without coordinationerror handling
+- Survivability — tolerates node failures without manual coordination
 - `SELECT FOR UPDATE` support (including `SKIP LOCKED` since v22.2)
 
 **Weaknesses:**
@@ -239,7 +241,7 @@ The following criteria were used to evaluate each alternative. Weights reflect F
 - **Cost:** CockroachDB's enterprise features (backup, incremental restore, geo-partitioning) require a commercial license.
 - **Overkill at ForgeOS scale:** ForgeOS targets ≤100K tickets and ≤50 concurrent agents. This does not require horizontal sharding or multi-region replication.
 
-**ForgeOS fit:** CockroachDB is a strong option at massive scale but introduces significant operational complexity and missing features (advisory locks, LISTEN/NOTIFY) that ForgeOS directly depends on. At ForgeOS's current and projected scale, single-node PostgreSQL provides equivalent functionality with far lower complexity. CockroachDB becomes relevant only if ForgeOS scales to multi-region deployments with 500+ concurrent agents.
+**ForgeOS fit:** CockroachDB offers strong distributed SQL at massive scale. However, it lacks advisory locks and LISTEN/NOTIFY — features ForgeOS depends on directly. At the current scale (≤50 agents), single-node PostgreSQL provides equivalent functionality with far lower complexity. Revisit if ForgeOS reaches 500+ concurrent agents or requires multi-region deployment.
 
 ---
 
@@ -515,7 +517,7 @@ The migration is **incremental, not big-bang:**
 | Document | Ticket | Relevance |
 |----------|--------|-----------|
 | [System Components Architecture](../system-components.md) | FORGEOS-ARCH001 | Component boundaries, data flow, deployment topology |
-| [Database Schema Reference](../../../docs/database/schema-reference.md) | N/A | Schema documentation |
+| [Database Schema Reference](../../database/schema-reference.md) | N/A | Schema documentation |
 | [001_initial.sql](../../../forgeos-server/src/db/migrations/001_initial.sql) | N/A | Implementation of this ADR's design decisions |
 
 ### External Sources
