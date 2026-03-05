@@ -29,10 +29,10 @@
     "Research report delivered at docs/research/pg-transaction-isolation.md"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation Specialist",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-05T21:48:31.778114+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -80,6 +80,15 @@
       "from_stage": "RESEARCH",
       "to_stage": "DOCS",
       "details": "Advanced from RESEARCH to DOCS"
+    },
+    {
+      "timestamp": "2026-03-05T21:18:31.778129+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by reaperoak@pop-os via Documentation Specialist, lease until 2026-03-05T21:48:31.778114+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-research.md",
