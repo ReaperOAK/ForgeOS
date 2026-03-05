@@ -34,10 +34,10 @@
     "Hook exits 0 on valid messages, exits 1 on invalid messages"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "CI Reviewer",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-05T21:06:33.297162+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -89,6 +89,15 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-05T20:36:33.297178+00:00",
+      "event": "CLAIMED",
+      "agent": "CI Reviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "CI",
+      "details": "Claimed by reaperoak@pop-os via CI Reviewer, lease until 2026-03-05T21:06:33.297162+00:00"
     }
   ],
   "source_task_file": "TODO/tickets/06-git-integration.md",
