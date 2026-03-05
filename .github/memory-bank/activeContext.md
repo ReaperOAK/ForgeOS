@@ -668,3 +668,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/TASK-FOS-08-003.md
 - **Decisions:** FAIL — Score 35/100, 2 critical, 3 warnings. Missing Object.freeze() on config return (AC#9). No production validation for WEBHOOK_SECRET (AC#7). ESLint not installed, missing .env.example vars (DB_PASSWORD, PGBOUNCER_PORT, MCP_PORT), file path mismatch. Rework #1 sent back to BACKEND.
 - **Timestamp:** 2026-03-06T02:45:00Z
+
+### [FORGEOS-ARCH001] — System Component Architecture
+- **Artifacts:** docs/architecture/system-components.md, .github/agent-output/Architect/FORGEOS-ARCH001.md
+- **Decisions:** Modular monolith over microservices (ADR-001). Streamable HTTP as primary MCP transport (ADR-002). PostgreSQL as single source of truth replacing git-push locking (ADR-003). Six components defined: MCP Server, PostgreSQL, Git Integration, Agent Clients, Dashboard, Webhook Processor. Well-Architected score: 48/60 across 6 pillars. 7 Mermaid diagrams, 3 ADRs, fitness functions, DAG task graph with critical path and parallelizable work groups.
+- **Timestamp:** 2026-03-06T13:00:00Z
