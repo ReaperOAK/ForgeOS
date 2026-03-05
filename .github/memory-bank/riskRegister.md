@@ -107,6 +107,32 @@ append_only: true
 - **Status:** Mitigated
 - **Evidence:** Subagent files define explicit boundaries
 
+### RISK-005: Overly Permissive RLS on agent_file_locks Table
+
+- **Date Identified:** 2026-03-07
+- **Identified By:** Security
+- **Severity:** Medium
+- **Likelihood:** Low
+- **Category:** Security
+- **Description:** The `agent_file_locks` table uses `USING(TRUE)` RLS policy, allowing any authenticated agent to read/modify any file lock regardless of ownership. CWE-285 (Improper Authorization).
+- **Impact:** An agent could release or modify another agent's file locks, potentially causing concurrent file access conflicts.
+- **Mitigation:** All file lock operations are mediated through stored functions (`acquire_file_lock`, `release_file_lock`) which enforce ownership checks. Direct table DML is prevented by application-level access patterns. Risk accepted for current internal-only deployment.
+- **Status:** Accepted
+- **Evidence:** TASK-FOS-01-001 Security Review — `.github/agent-output/Security/TASK-FOS-01-001.md`
+
+### RISK-006: Default Admin API Key Accepted in Production
+
+- **Date Identified:** 2026-03-07
+- **Identified By:** Security
+- **Severity:** Medium
+- **Likelihood:** Medium
+- **Category:** Security
+- **Description:** `config.ts` accepts the default `ADMIN_API_KEY='forgeos_admin_CHANGE_ME'` value in production mode without validation or warning. CWE-1188 (Initialization with Hard-Coded Network Resource Configuration Data).
+- **Impact:** If deployed without changing the default key, the admin API is accessible with a well-known credential.
+- **Mitigation:** The key is named with `CHANGE_ME` convention, `.env.example` documents the requirement to change it, and Dockerfile does not embed the value. Recommend adding a startup validation that rejects the default key when `NODE_ENV=production`.
+- **Status:** Open
+- **Evidence:** TASK-FOS-08-003 Security Review — `.github/agent-output/Security/TASK-FOS-08-003.md`
+
 ---
 
 ## Closed Risks

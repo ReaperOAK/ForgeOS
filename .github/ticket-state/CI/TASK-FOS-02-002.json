@@ -4,7 +4,7 @@
   "description": "Define all shared TypeScript interfaces and type aliases for ForgeOS as specified in Architecture \u00a74.1. This includes: domain model types (Ticket, TicketEvent, Agent, FileLock, Session, Project), enum-like union types (TicketStatus, TicketStage, TicketType, TicketPriority, EventType), MCP tool input/output types for all 10 tools (TicketsNextInput/Output, TicketsClaimInput/Output, etc.), authentication types (AgentIdentity, ApiKeyRecord), SSE event types (SSETicketEvent), error types (ForgeOSError enum, ErrorResponse), and SDLC flow type helpers. All types must be exported and usable across the codebase.",
   "type": "backend",
   "priority": "critical",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -81,6 +81,15 @@
       "from_stage": "QA",
       "to_stage": "SECURITY",
       "details": "Advanced from QA to SECURITY"
+    },
+    {
+      "timestamp": "2026-03-05T19:14:20.582134+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
     }
   ],
   "source_task_file": "TODO/tickets/02-mcp-server-core.md",
