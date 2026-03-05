@@ -1,0 +1,24 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "claim-file-v1",
+  "title": "Task Claim Schema",
+  "description": "Claim file created by agent before executing a delegation packet",
+  "type": "object",
+  "required": ["packet_id", "agent_id", "started_at", "token_cost_estimate", "status"],
+  "properties": {
+    "packet_id": { "type": "string" },
+    "agent_id": { "type": "string" },
+    "started_at": { "type": "string", "format": "date-time" },
+    "token_cost_estimate": { "type": "integer" },
+    "status": {
+      "type": "string",
+      "enum": ["CLAIMED", "IN_PROGRESS", "COMPLETED", "FAILED", "STALLED"]
+    },
+    "heartbeat_ts": { "type": "string", "format": "date-time" },
+    "tokens_consumed": { "type": "integer", "default": 0 },
+    "output_artifacts": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  }
+}

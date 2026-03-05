@@ -1,0 +1,596 @@
+[
+  {
+    "path": "./.github/instructions/ARCHITECTURE.instructions.md",
+    "title": "Vibecoding Multi-Agent System Architecture",
+    "token_estimate": 5062,
+    "first_512_chars_hash": "41e95a631c1751fb45ff56a7f690521612fdd8a03dee9fe9ea504615167a3878",
+    "category_guess": [
+      "general"
+    ]
+  },
+  {
+    "path": "./.github/VALIDATION-REPORT.md",
+    "title": "Multi-Agent Vibecoding System \u2014 Validation Report",
+    "token_estimate": 3290,
+    "first_512_chars_hash": "3d72146ff79662c674041630dfdc5e2a26ee6b1bdbc828e73b327140e82cd115",
+    "category_guess": [
+      "general"
+    ]
+  },
+  {
+    "path": "./.github/agents/Architect.agent.md",
+    "title": "Architect Subagent",
+    "token_estimate": 5996,
+    "first_512_chars_hash": "c5aac96fb78dcc02a761f8e3b224c3f77ffdeae87606f893bdac7fd0d11cda7f",
+    "category_guess": [
+      "agent"
+    ]
+  },
+  {
+    "path": "./.github/agents/Backend.agent.md",
+    "title": "Backend Subagent",
+    "token_estimate": 6230,
+    "first_512_chars_hash": "d4cad0d0da6f884e2bacae912bd364be86fb9e0165d4d675a1c6c2fc6abab135",
+    "category_guess": [
+      "agent"
+    ]
+  },
+  {
+    "path": "./.github/agents/CIReviewer.agent.md",
+    "title": "CI Reviewer Subagent",
+    "token_estimate": 5134,
+    "first_512_chars_hash": "66c36c4fe17c5916f7cb541571ab195d9ffd1babf1705d26fc51342608618aea",
+    "category_guess": [
+      "agent",
+      "ci"
+    ]
+  },
+  {
+    "path": "./.github/agents/DevOps.agent.md",
+    "title": "DevOps Engineer Subagent",
+    "token_estimate": 6767,
+    "first_512_chars_hash": "96e2bb105504b95ef812f827e6c7d3c9a6ffe8fe129dc3a7fb719d99e7c05253",
+    "category_guess": [
+      "agent",
+      "devops"
+    ]
+  },
+  {
+    "path": "./.github/agents/Documentation.agent.md",
+    "title": "Documentation Specialist Subagent",
+    "token_estimate": 6342,
+    "first_512_chars_hash": "cc864ecb07e000e83ae86346a2b22c52afe9b43f7d8ca5cc4683943bd9bd2b72",
+    "category_guess": [
+      "agent"
+    ]
+  },
+  {
+    "path": "./.github/agents/Frontend.agent.md",
+    "title": "Frontend Engineer Subagent",
+    "token_estimate": 6454,
+    "first_512_chars_hash": "b6e18568e2e0816bab9c4705bf6d687a762702480ba3ae4bb10a0d493ee247e7",
+    "category_guess": [
+      "agent"
+    ]
+  },
+  {
+    "path": "./.github/agents/ProductManager.agent.md",
+    "title": "Product Manager Subagent",
+    "token_estimate": 5313,
+    "first_512_chars_hash": "51e13d9a95d36853eef03d4e8658926cde9e60a3e30858b331658b8615e790fc",
+    "category_guess": [
+      "agent"
+    ]
+  },
+  {
+    "path": "./.github/agents/QA.agent.md",
+    "title": "QA Engineer Subagent",
+    "token_estimate": 6698,
+    "first_512_chars_hash": "2b1be06340d00941c6a99576c20b393193800e1c9d70feeec14485599a4f8575",
+    "category_guess": [
+      "agent",
+      "testing"
+    ]
+  },
+  {
+    "path": "./.github/agents/ReaperOAK.agent.md",
+    "title": "1. Core Identity & Operating Contract (ReaperOAK)",
+    "token_estimate": 11281,
+    "first_512_chars_hash": "094258aed80aea8182a9fabe313c6aa2e231a7f4bb12f2b0c66223f56e473e77",
+    "category_guess": [
+      "agent"
+    ]
+  },
+  {
+    "path": "./.github/agents/Research.agent.md",
+    "title": "Research Analyst Subagent",
+    "token_estimate": 5988,
+    "first_512_chars_hash": "a85dd05c733ef2f0a22cb8de415cc9e88607da5802d440d0c97458db09bfbf28",
+    "category_guess": [
+      "agent"
+    ]
+  },
+  {
+    "path": "./.github/agents/Security.agent.md",
+    "title": "Security Engineer Subagent",
+    "token_estimate": 7634,
+    "first_512_chars_hash": "49dc3bccabcf1d18a78919f61515fcce909cc086fe23eda9bb5415b010e310aa",
+    "category_guess": [
+      "agent",
+      "security"
+    ]
+  },
+  {
+    "path": "./.github/agents/_cross-cutting-protocols.md",
+    "title": "Cross-Cutting Agent Protocols v2.0",
+    "token_estimate": 4160,
+    "first_512_chars_hash": "9d4072cd128d7bd23438bab761d70280deceb912ae1e7e75db06b9eb0203e169",
+    "category_guess": [
+      "agent"
+    ]
+  },
+  {
+    "path": "./.github/instructions/CTO/CTO Playbook.md",
+    "title": "**The Chief Technology Officer\u2019s Codex: A First-Principles Playbook for Engineering Leadership, Architecture, and Organizational Scale**",
+    "token_estimate": 11953,
+    "first_512_chars_hash": "37316f70dac4c12f5aa18afbb45ee130f33fe9c6675745fd3ac294cf03f543c4",
+    "category_guess": [
+      "instruction",
+      "cto"
+    ]
+  },
+  {
+    "path": "./.github/instructions/CTO/SDLC.md",
+    "title": "**The 6 Phases of Production-Grade Software Development (Detailed Artifact Edition)**",
+    "token_estimate": 2323,
+    "first_512_chars_hash": "0356f5ed69163ac2f292b7947a8db777e07b1e46e450887b7708c6dd83301234",
+    "category_guess": [
+      "instruction",
+      "sdlc",
+      "cto"
+    ]
+  },
+  {
+    "path": "./.github/instructions/CTO/Startup Scalability_ Technical Foundations Playbook.md",
+    "title": "**Technical Foundations for High-Growth Startups: A Definitive Architecture and Governance Playbook**",
+    "token_estimate": 11655,
+    "first_512_chars_hash": "56bc7747bcbe9a011a8bba6e1086384051033e3eb13e41486355e3a207b964e3",
+    "category_guess": [
+      "instruction",
+      "cto"
+    ]
+  },
+  {
+    "path": "./.github/instructions/SDLC/1. SDLC.md",
+    "title": "**The 6 Phases of Production-Grade Software Development (Detailed Artifact Edition)**",
+    "token_estimate": 2323,
+    "first_512_chars_hash": "0356f5ed69163ac2f292b7947a8db777e07b1e46e450887b7708c6dd83301234",
+    "category_guess": [
+      "instruction",
+      "sdlc"
+    ]
+  },
+  {
+    "path": "./.github/instructions/SDLC/10. Implementation Phase Best Practices Guide.md",
+    "title": "**Mastering the Implementation Phase: A Guide to Professional Software Construction**",
+    "token_estimate": 11178,
+    "first_512_chars_hash": "d9c72d9be4a205e398750aa6703bb2d0dd9ebf6c7cd78673554eecfc289cbaa2",
+    "category_guess": [
+      "instruction",
+      "sdlc"
+    ]
+  },
+  {
+    "path": "./.github/instructions/SDLC/11. QA Best Practices and Strategy Guide.md",
+    "title": "**A Comprehensive Guide to Modern Software Verification and Quality Assurance**",
+    "token_estimate": 12001,
+    "first_512_chars_hash": "e4662607dbafdf34cf78e41f8f9795748265e34ddd409f305996562f48b4bc89",
+    "category_guess": [
+      "instruction",
+      "sdlc",
+      "testing"
+    ]
+  },
+  {
+    "path": "./.github/instructions/SDLC/2. Project Selection Tactics for Pre-Phase.md",
+    "title": "**A Strategic Framework for Software Project Selection: A Data-Driven Pre-Phase Analysis**",
+    "token_estimate": 17827,
+    "first_512_chars_hash": "bcda5871bd74917e24e81cf85c6b56c632d94b33f9ca70ce178b7943f6500e6c",
+    "category_guess": [
+      "instruction",
+      "sdlc"
+    ]
+  },
+  {
+    "path": "./.github/instructions/SDLC/3. PRD for Planning & Discovery.md",
+    "title": "**The Definitive Guide to Authoring a Product Requirements Document in the Planning & Discovery Phase**",
+    "token_estimate": 11004,
+    "first_512_chars_hash": "30e0fbd30c2ec5285c0d3375409ac44df82a125a44fa59fcf13bae85aca2fddd",
+    "category_guess": [
+      "instruction",
+      "sdlc"
+    ]
+  },
+  {
+    "path": "./.github/instructions/SDLC/4. SRS Creation for Planning & Discovery.md",
+    "title": "**A Comprehensive Guide to Crafting the Software Requirements Specification (SRS) in the Discovery Phase**",
+    "token_estimate": 11375,
+    "first_512_chars_hash": "9c1ca9e051b096bedffe3e6c0ec0436be055df43ebe4c0e672811983c2352746",
+    "category_guess": [
+      "instruction",
+      "sdlc"
+    ]
+  },
+  {
+    "path": "./.github/instructions/SDLC/5. User Stories in Planning & Discovery.md",
+    "title": "**A Strategic Guide to Crafting High-Value User Stories in the Planning & Discovery Phase**",
+    "token_estimate": 11778,
+    "first_512_chars_hash": "5e68a384cfc9c36cef001309a479c2060665bc15a2627f353de8ce2ddd6117c1",
+    "category_guess": [
+      "instruction",
+      "sdlc"
+    ]
+  },
+  {
+    "path": "./.github/instructions/SDLC/6. High-Level Project Plan Guide.md",
+    "title": "**The Strategic Blueprint: A Definitive Guide to Crafting the High-Level Project Plan in Discovery**",
+    "token_estimate": 10015,
+    "first_512_chars_hash": "52ffce1616c7e687ebe499c37bd56cdcdf881bcbf0f73e0b3c5ec9c4983a79eb",
+    "category_guess": [
+      "instruction",
+      "sdlc"
+    ]
+  },
+  {
+    "path": "./.github/instructions/SDLC/7. Figma Prototypes for Architecture & Design.md",
+    "title": "**Architecting the Visual Specification: A Masterclass in Production-Grade Figma Prototyping**",
+    "token_estimate": 8707,
+    "first_512_chars_hash": "5c867453743e9800f37ac920a2f595f1163424ea5ca9982c43db50ff191ef410",
+    "category_guess": [
+      "instruction",
+      "sdlc"
+    ]
+  },
+  {
+    "path": "./.github/instructions/SDLC/8. Technical Design Doc for ARCHITECTURE.instructions.md",
+    "title": "**The Architect's Blueprint: A Comprehensive Guide to Crafting Production-Grade Technical Design Documents**",
+    "token_estimate": 14318,
+    "first_512_chars_hash": "d772ac91b7b53f2173eacc1048cb5685c7d3b34d8b27a85e0e4d67522cdb107c",
+    "category_guess": [
+      "instruction",
+      "sdlc"
+    ]
+  },
+  {
+    "path": "./.github/instructions/SDLC/9. API Contract Definition in ARCHITECTURE.instructions.md",
+    "title": "**A Blueprint for Collaboration: Mastering the API Contract in the Architecture & Design Phase**",
+    "token_estimate": 8885,
+    "first_512_chars_hash": "694b5a2494d83105259a4b6289c88ac7a205bb637b69513f3946b1c759c5cd0c",
+    "category_guess": [
+      "instruction",
+      "sdlc"
+    ]
+  },
+  {
+    "path": "./.github/instructions/a11y.instructions.md",
+    "title": "Instructions for accessibility",
+    "token_estimate": 5898,
+    "first_512_chars_hash": "bf2e8d2cf92d5b5def8b0995c47b59a52c70d8325ef20372ca62922b7052d3b2",
+    "category_guess": [
+      "instruction",
+      "accessibility"
+    ]
+  },
+  {
+    "path": "./.github/instructions/agent-safety.instructions.md",
+    "title": "Agent Safety & Governance",
+    "token_estimate": 1065,
+    "first_512_chars_hash": "4220434f5bfb25a7a136d5f93d53f712693a17009892f6a7cb48ea305cd321ca",
+    "category_guess": [
+      "agent",
+      "instruction"
+    ]
+  },
+  {
+    "path": "./.github/instructions/ai-prompt-engineering-safety-best-practices.instructions.md",
+    "title": "AI Prompt Engineering & Safety Best Practices",
+    "token_estimate": 7034,
+    "first_512_chars_hash": "e59df606a344faef699d274c8f2f43873e0026e2aa33b85e57359beffbd67904",
+    "category_guess": [
+      "instruction",
+      "ai-safety"
+    ]
+  },
+  {
+    "path": "./.github/instructions/containerization-docker-best-practices.instructions.md",
+    "title": "Containerization & Docker Best Practices",
+    "token_estimate": 9109,
+    "first_512_chars_hash": "e6d534ceae412d96eb1969b10ed82098123978871ed48f1691c402b19f5b6a5c",
+    "category_guess": [
+      "instruction",
+      "container"
+    ]
+  },
+  {
+    "path": "./.github/instructions/context-engineering.instructions.md",
+    "title": "Context Engineering",
+    "token_estimate": 619,
+    "first_512_chars_hash": "7a312d930e5ec9501c8955b7864bf81ad9af5f53cc22a09f80737be4995515e9",
+    "category_guess": [
+      "instruction"
+    ]
+  },
+  {
+    "path": "./.github/instructions/copilot-thought-logging.instructions.md",
+    "title": "Copilot Process tracking Instructions",
+    "token_estimate": 811,
+    "first_512_chars_hash": "232b390efb835ffe82d3b584af133ad9322429f31300c41ea52b8cd4e6697051",
+    "category_guess": [
+      "instruction"
+    ]
+  },
+  {
+    "path": "./.github/instructions/devops-core-principles.instructions.md",
+    "title": "DevOps Core Principles",
+    "token_estimate": 4213,
+    "first_512_chars_hash": "ea75961f24624572868c1714164f98d6ccdab15decec2b59bf3fbc12d7ed1d66",
+    "category_guess": [
+      "instruction",
+      "ci",
+      "devops"
+    ]
+  },
+  {
+    "path": "./.github/instructions/gilfoyle-code-review.instructions.md",
+    "title": "Gilfoyle Code Review Instructions",
+    "token_estimate": 1402,
+    "first_512_chars_hash": "33aa7482b31ff1abbc064b72a41685633ab50af3cf96f28c8d1eca51fb0da3d8",
+    "category_guess": [
+      "instruction"
+    ]
+  },
+  {
+    "path": "./.github/instructions/github-actions-ci-cd-best-practices.instructions.md",
+    "title": "GitHub Actions CI/CD Best Practices",
+    "token_estimate": 13396,
+    "first_512_chars_hash": "d8cdf8a22a0b9ac6a0546598d7282a578576c9f9e9f66953809da413cf67910f",
+    "category_guess": [
+      "instruction",
+      "ci"
+    ]
+  },
+  {
+    "path": "./.github/instructions/markdown.instructions.md",
+    "title": "Markdown Content Rules",
+    "token_estimate": 940,
+    "first_512_chars_hash": "4c40079386e5ece3a3e210dcd17fc2e6b741fbfaacc0d2456a68015c3ec5fdf5",
+    "category_guess": [
+      "instruction"
+    ]
+  },
+  {
+    "path": "./.github/instructions/memory-bank.instructions.md",
+    "title": "Memory Bank",
+    "token_estimate": 2561,
+    "first_512_chars_hash": "9e477d4f43c3d4e52a34312a181280a9744338a22c97132a10bbd0d30954a9dd",
+    "category_guess": [
+      "instruction",
+      "memory-bank"
+    ]
+  },
+  {
+    "path": "./.github/instructions/mermaid.instructions.md",
+    "title": "Mermaid Diagram Standards (Execution-Grade)",
+    "token_estimate": 635,
+    "first_512_chars_hash": "089d38e614bcfd24ee44f22a88833137b7b422e1dcfbd6f977d989ff60c71dc7",
+    "category_guess": [
+      "instruction",
+      "diagram"
+    ]
+  },
+  {
+    "path": "./.github/instructions/nestjs.instructions.md",
+    "title": "NestJS Development Best Practices",
+    "token_estimate": 3037,
+    "first_512_chars_hash": "c0497b4033536c8c080461bea95e9932c03697789136497ad32e5c9d63d1c2a6",
+    "category_guess": [
+      "instruction"
+    ]
+  },
+  {
+    "path": "./.github/instructions/nextjs.instructions.md",
+    "title": "**Next.js Fullstack Best Practices (App Router \\+ Tailwind)**",
+    "token_estimate": 2052,
+    "first_512_chars_hash": "8dceac74616a96c56b5e9927908da390fd61b346d31cd78eeccd94edf41501c2",
+    "category_guess": [
+      "instruction"
+    ]
+  },
+  {
+    "path": "./.github/instructions/performance-optimization.instructions.md",
+    "title": "Performance Optimization Best Practices",
+    "token_estimate": 5343,
+    "first_512_chars_hash": "9f31f4eba728afdc55727b0ce495fd401e77eb7030604092ef8d006784c1c096",
+    "category_guess": [
+      "instruction",
+      "performance"
+    ]
+  },
+  {
+    "path": "./.github/instructions/playwright-typescript.instructions.md",
+    "title": "Test Writing Guidelines",
+    "token_estimate": 1026,
+    "first_512_chars_hash": "716f6d714d1d435259514ed56f7d9e3d61eecc4c6a0f70a91d1935c0aec38ab2",
+    "category_guess": [
+      "instruction",
+      "testing"
+    ]
+  },
+  {
+    "path": "./.github/instructions/react-native.instructions.md",
+    "title": "**React Native Architecture & Development Standards**",
+    "token_estimate": 2432,
+    "first_512_chars_hash": "9382556057f99260a63e0f78b4908602080443472a51ccfd9ea279f5c3a125f9",
+    "category_guess": [
+      "instruction"
+    ]
+  },
+  {
+    "path": "./.github/instructions/security-and-owasp.instructions.md",
+    "title": "Secure Coding and OWASP Guidelines",
+    "token_estimate": 1335,
+    "first_512_chars_hash": "e9ee77998e086e0341c55365fefa3f2bff3a9c6418d36cde710b46bf3becfb96",
+    "category_guess": [
+      "instruction",
+      "security"
+    ]
+  },
+  {
+    "path": "./.github/instructions/shell.instructions.md",
+    "title": "Shell Scripting Guidelines",
+    "token_estimate": 1202,
+    "first_512_chars_hash": "31ba88df48e084b520e90e52d0ce281af1fc6e3fcfe377160230bfc270b9ae88",
+    "category_guess": [
+      "instruction"
+    ]
+  },
+  {
+    "path": "./.github/instructions/spec-driven-workflow-v1.instructions.md",
+    "title": "Spec Driven Workflow v1",
+    "token_estimate": 3042,
+    "first_512_chars_hash": "12f08a49ce85edbe1ec2c4b66eb79b710b525d0d7ad2c0a9c386e69d456f1ffe",
+    "category_guess": [
+      "instruction",
+      "ci"
+    ]
+  },
+  {
+    "path": "./.github/instructions/taming-copilot.instructions.md",
+    "title": "Core Directives & Hierarchy",
+    "token_estimate": 1247,
+    "first_512_chars_hash": "73b73098bc71cec57dc1d71088e2c31de88500f18dee47a26b17fdb7c8101385",
+    "category_guess": [
+      "instruction"
+    ]
+  },
+  {
+    "path": "./.github/instructions/task-implementation.instructions.md",
+    "title": "Task Plan Implementation Instructions",
+    "token_estimate": 2078,
+    "first_512_chars_hash": "9f644d8d1e9d829568dcd2638e966ef16dd61bde997288adb3446b8661abc89d",
+    "category_guess": [
+      "instruction"
+    ]
+  },
+  {
+    "path": "./.github/instructions/terraform-sap-btp.instructions.md",
+    "title": "Terraform on SAP BTP \u2013 Best Practices & Conventions",
+    "token_estimate": 2124,
+    "first_512_chars_hash": "8cac38cc3cfba4286b1d7ddf79d6747f825fd9867f8d70db86fba606ab003691",
+    "category_guess": [
+      "instruction",
+      "terraform"
+    ]
+  },
+  {
+    "path": "./.github/instructions/todo.instructions.md",
+    "title": "Master Instruction: Todo Creation & Maintenance",
+    "token_estimate": 1062,
+    "first_512_chars_hash": "adf2940b0b54eceb0ef09c6ec00ba24263b539c6289f8b1d69a9e23649f80cea",
+    "category_guess": [
+      "instruction"
+    ]
+  },
+  {
+    "path": "./.github/instructions/typescript-5-es2022.instructions.md",
+    "title": "TypeScript Development",
+    "token_estimate": 1288,
+    "first_512_chars_hash": "e4879084a63a4133d6bb5fee8bd10db1e89dac0eb756e20d6374c92daecaab7c",
+    "category_guess": [
+      "instruction"
+    ]
+  },
+  {
+    "path": "./.github/instructions/update-docs-on-code-change.instructions.md",
+    "title": "Update Documentation on Code Change",
+    "token_estimate": 4559,
+    "first_512_chars_hash": "3840da20249f866573343302b3befeea9a752b3886a3b1ee855ec42dae8bb33a",
+    "category_guess": [
+      "instruction"
+    ]
+  },
+  {
+    "path": "./.github/memory-bank/activeContext.md",
+    "title": "Active Context",
+    "token_estimate": 657,
+    "first_512_chars_hash": "07344a4130afaa053f7790f1d2e45039f0cbb1b3635dc92b9d171fa46b3edb91",
+    "category_guess": [
+      "memory-bank"
+    ]
+  },
+  {
+    "path": "./.github/memory-bank/decisionLog.md",
+    "title": "Decision Log",
+    "token_estimate": 1344,
+    "first_512_chars_hash": "c2cfc0f0ceb47263794c7ef8762964baf7cbed3c1c9581510dad8e63df8c9bdb",
+    "category_guess": [
+      "memory-bank",
+      "ci"
+    ]
+  },
+  {
+    "path": "./.github/memory-bank/productContext.md",
+    "title": "Product Context",
+    "token_estimate": 356,
+    "first_512_chars_hash": "eac69a34463bde7a895f21c36325da6a45d02d86803eefccf0565430bf77a258",
+    "category_guess": [
+      "memory-bank"
+    ]
+  },
+  {
+    "path": "./.github/memory-bank/progress.md",
+    "title": "Progress",
+    "token_estimate": 620,
+    "first_512_chars_hash": "5ba9f9dcdf7919009a30c761bd2b3333de36bee6dd1cb70406204bd7f48d268b",
+    "category_guess": [
+      "memory-bank"
+    ]
+  },
+  {
+    "path": "./.github/memory-bank/riskRegister.md",
+    "title": "Risk Register",
+    "token_estimate": 961,
+    "first_512_chars_hash": "af875cdb3ba96970b38ff0ad4fb56f56bc3071be77bf4cc1e507907ba557dd0d",
+    "category_guess": [
+      "memory-bank"
+    ]
+  },
+  {
+    "path": "./.github/memory-bank/systemPatterns.md",
+    "title": "System Patterns",
+    "token_estimate": 747,
+    "first_512_chars_hash": "2fafe63900d652a8da30c99d768614bc7d1c551f9ca65d16c39496ace3534c69",
+    "category_guess": [
+      "memory-bank"
+    ]
+  },
+  {
+    "path": "./.github/instructions/orchestration.rules.instructions.md",
+    "title": "Orchestration Rules",
+    "token_estimate": 4494,
+    "first_512_chars_hash": "28e83db0bb7097ecf104187287683ee08e438e66337025c64a135ef57ab0b145",
+    "category_guess": [
+      "general"
+    ]
+  },
+  {
+    "path": "./.github/instructions/security.agentic-guardrails.instructions.md",
+    "title": "Agentic Security Guardrails",
+    "token_estimate": 6211,
+    "first_512_chars_hash": "8d5bec6ec6a6b0d3256011b3dac9ca35bc075ea1eb48d99b597d4a5536470139",
+    "category_guess": [
+      "agent",
+      "security"
+    ]
+  }
+]

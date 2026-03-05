@@ -1,0 +1,192 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "ticket-v1",
+  "title": "Distributed Ticket Schema",
+  "description": "Canonical schema for ticket files in the distributed Git-native SDLC engine. Each ticket exists as .github/tickets/<ticket-id>.json and its state is determined by its location in .github/ticket-state/<STAGE>/",
+  "type": "object",
+  "required": [
+    "ticket_id",
+    "title",
+    "type",
+    "priority",
+    "stage",
+    "sdlc_flow",
+    "created_at",
+    "created_by",
+    "dependencies",
+    "file_paths",
+    "acceptance_criteria",
+    "rework_count",
+    "history"
+  ],
+  "properties": {
+    "ticket_id": {
+      "type": "string",
+      "pattern": "^[A-Z0-9]+-[A-Z0-9]+-[A-Z0-9]+$",
+      "description": "Unique ticket identifier matching L3 task ID (e.g., TASK-001-01-01)"
+    },
+    "title": {
+      "type": "string",
+      "maxLength": 200,
+      "description": "Human-readable ticket title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Full ticket description and context"
+    },
+    "type": {
+      "type": "string",
+      "enum": ["backend", "frontend", "fullstack", "infra", "security", "docs", "research", "architecture"],
+      "description": "Ticket type determines SDLC flow routing"
+    },
+    "priority": {
+      "type": "string",
+      "enum": ["critical", "high", "medium", "low"],
+      "default": "medium"
+    },
+    "stage": {
+      "type": "string",
+      "enum": [
+        "READY",
+        "ARCHITECT",
+        "RESEARCH",
+        "BACKEND",
+        "FRONTEND",
+        "QA",
+        "SECURITY",
+        "CI",
+        "DOCS",
+        "VALIDATION",
+        "DONE"
+      ],
+      "description": "Current lifecycle stage. Must match directory location in .github/ticket-state/"
+    },
+    "sdlc_flow": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": [
+          "READY",
+          "ARCHITECT",
+          "RESEARCH",
+          "BACKEND",
+          "FRONTEND",
+          "UIDESIGNER",
+          "QA",
+          "SECURITY",
+          "CI",
+          "DOCS",
+          "VALIDATION",
+          "DONE"
+        ]
+      },
+      "minItems": 3,
+      "description": "Ordered list of stages this ticket must traverse. Determined by ticket type."
+    },
+    "created_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "created_by": {
+      "type": "string",
+      "description": "Operator or agent that created the ticket"
+    },
+    "dependencies": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of ticket IDs that must be DONE before this ticket can become READY"
+    },
+    "blocked_by": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": [],
+      "description": "Currently unresolved blocking ticket IDs (computed at sync time)"
+    },
+    "file_paths": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Files this ticket is allowed to modify (glob patterns)"
+    },
+    "acceptance_criteria": {
+      "type": "array",
+      "items": { "type": "string" },
+      "minItems": 1,
+      "description": "Verifiable conditions for ticket completion"
+    },
+    "rework_count": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 3,
+      "default": 0,
+      "description": "Combined rework counter. Max 3 before escalation."
+    },
+    "claimed_by": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "Agent/worker ID that currently holds the claim lock"
+    },
+    "machine_id": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "Machine hostname or identifier that holds the claim"
+    },
+    "operator": {
+      "type": ["string", "null"],
+      "default": null,
+      "description": "Human operator (e.g., Owais, Sujal) whose machine holds the claim"
+    },
+    "lease_expiry": {
+      "type": ["string", "null"],
+      "format": "date-time",
+      "default": null,
+      "description": "ISO8601 timestamp when this claim expires. Another machine may reclaim after this time."
+    },
+    "lease_duration_minutes": {
+      "type": "integer",
+      "minimum": 5,
+      "maximum": 120,
+      "default": 30,
+      "description": "Default lease duration in minutes"
+    },
+    "history": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["timestamp", "event", "agent"],
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "event": {
+            "type": "string",
+            "enum": [
+              "CREATED",
+              "MOVED_TO_READY",
+              "CLAIMED",
+              "CLAIM_RELEASED",
+              "STAGE_COMPLETED",
+              "STAGE_FAILED",
+              "REWORK",
+              "ESCALATED",
+              "DONE"
+            ]
+          },
+          "agent": { "type": "string" },
+          "machine_id": { "type": "string" },
+          "from_stage": { "type": "string" },
+          "to_stage": { "type": "string" },
+          "details": { "type": "string" }
+        }
+      },
+      "description": "Immutable audit trail of all state transitions"
+    },
+    "source_task_file": {
+      "type": ["string", "null"],
+      "description": "Path to the L3 markdown task file this ticket was generated from"
+    },
+    "tags": {
+      "type": "array",
+      "items": { "type": "string" },
+      "default": []
+    }
+  },
+  "additionalProperties": false
+}

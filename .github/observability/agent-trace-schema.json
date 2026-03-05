@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "agent-trace-v1",
+  "title": "Agent Trace Schema",
+  "description": "Observability trace format for agent prompt->response->toolcall sequences",
+  "type": "object",
+  "required": ["trace_id", "session_id", "agent_id", "started_at", "events"],
+  "properties": {
+    "trace_id": {
+      "type": "string",
+      "description": "Unique trace identifier"
+    },
+    "session_id": {
+      "type": "string",
+      "description": "Session this trace belongs to"
+    },
+    "agent_id": {
+      "type": "string",
+      "description": "Agent that produced this trace"
+    },
+    "packet_id": {
+      "type": ["string", "null"],
+      "description": "Delegation packet being executed, if any"
+    },
+    "started_at": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "ended_at": {
+      "type": ["string", "null"],
+      "format": "date-time"
+    },
+    "total_tokens": {
+      "type": "integer",
+      "description": "Total tokens consumed in this trace"
+    },
+    "events": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["event_type", "timestamp"],
+        "properties": {
+          "event_type": {
+            "type": "string",
+            "enum": [
+              "prompt_sent",
+              "response_received",
+              "tool_call_start",
+              "tool_call_end",
+              "file_read",
+              "file_write",
+              "test_run",
+              "error",
+              "escalation",
+              "confidence_check",
+              "self_reflection",
+              "lock_acquire",
+              "lock_release",
+              "claim_create",
+              "claim_complete",
+              "stall_detected",
+              "circuit_breaker_triggered"
+            ]
+          },
+          "timestamp": { "type": "string", "format": "date-time" },
+          "tool_name": { "type": "string" },
+          "input_summary": { "type": "string", "maxLength": 500 },
+          "output_summary": { "type": "string", "maxLength": 500 },
+          "tokens_used": { "type": "integer" },
+          "duration_ms": { "type": "integer" },
+          "error_message": { "type": "string" },
+          "metadata": { "type": "object" }
+        }
+      }
+    },
+    "outcome": {
+      "type": "string",
+      "enum": ["success", "failure", "stalled", "escalated", "circuit_broken"]
+    },
+    "self_reflection_score": {
+      "type": "object",
+      "properties": {
+        "correctness": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "completeness": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "convention": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "clarity": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "impact": { "type": "integer", "minimum": 0, "maximum": 10 },
+        "total": { "type": "integer", "minimum": 0, "maximum": 50 }
+      }
+    }
+  }
+}

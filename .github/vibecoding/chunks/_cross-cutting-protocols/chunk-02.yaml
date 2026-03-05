@@ -1,0 +1,28 @@
+---
+source: "./.github/agents/_cross-cutting-protocols.md"
+chunk_index: 2
+token_estimate: 219
+hash: "eb0947c299498a30eda50abfd30aceec33738450eaf3fe7447a59f06eee2bd9a"
+summary: "- API constraints or external gotchas    - Performance-critical sections (why this approach)    - Security-sensitive ..."
+---
+   - API constraints or external gotchas
+   - Performance-critical sections (why this approach)
+   - Security-sensitive code (what threat it mitigates)
+   - Workarounds with tracking references (HACK: upstream bug #N)
+```
+
+### Annotation Tags
+
+Use standardized annotation tags consistently across the swarm:
+
+| Tag | Meaning | Requires |
+|-----|---------|----------|
+| `TODO:` | Planned future work | Issue/ticket reference |
+| `FIXME:` | Known bug needing fix | Description of failure |
+| `HACK:` | Workaround for external bug | Issue link + removal condition |
+| `NOTE:` | Important non-obvious context | — |
+| `WARNING:` | Dangerous or fragile code | Description of risk |
+| `PERF:` | Performance-sensitive section | Metric or complexity |
+| `SECURITY:` | Security-critical code | Threat/OWASP reference |
+| `DEPRECATED:` | Scheduled for removal | Replacement + version |
+

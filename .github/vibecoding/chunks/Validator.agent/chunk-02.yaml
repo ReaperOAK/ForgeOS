@@ -1,0 +1,221 @@
+---
+source: "./.github/agents/Validator.agent.md"
+chunk_index: 2
+token_estimate: 3400
+hash: "c970630c99a9cb722307bc66a59c466896db44e8cc143520f810087670612150"
+summary: "Validator Agent — Specialized Validations. Initialization checklist validation (9 items), UI/UX gate verification, rejection protocol with escalation rules, bug-catching gate verification (8 gates from design doc Part 5)."
+---
+# Validator Agent — Specialized Validations
+
+> **Cross-Cutting Protocols:** This agent follows ALL protocols defined in
+> agents.md — including RUG discipline, evidence requirements, confidence
+> gates, and upstream artifact reading.
+
+## 1. Initialization Checklist Validation
+
+When a task's SDLC stage is INITIALIZE, verify all 9 items of the project
+initialization checklist. The checklist is at
+`.github/tasks/initialization-checklist-template.md` and per-module reports
+live at `docs/reviews/init/{MODULE_NAME}-init.yaml`.
+
+### Verification Steps for Each Item
+
+| INIT ID | Item | Verification Command | Pass Criteria |
+|---------|------|---------------------|---------------|
+| INIT-01 | Directory Structure | `ls -d src/ tests/ docs/` (or framework equivalent) | Required dirs exist |
+| INIT-02 | Linter/Formatter Configured | `npx eslint --print-config .` and `npx prettier --check .` | Both configs load without errors |
+| INIT-03 | tsconfig.json Present | `cat tsconfig.json \| grep '"strict"'` and `npx tsc --noEmit --showConfig` | File exists, `strict: true` |
+| INIT-04 | Test Framework Configured | `npx vitest --run --passWithNoTests` or `npx jest --passWithNoTests` | Runner initializes without error |
+| INIT-05 | Env Vars Documented | `test -f .env.example && echo "EXISTS"` | `.env.example` file exists with placeholders |
+| INIT-06 | Health Check Endpoint | `grep -rn "health" src/routes/ src/controllers/` | Route handler exists returning 200 (backend only) |
+| INIT-07 | Logging Configured | `find src/ -name "logger*"` and `grep -rn "console\.log" src/ \| wc -l` | Logger utility exists; zero `console.log` |
+| INIT-08 | Error Boundaries | `grep -rn "ErrorBoundary\|componentDidCatch" src/` | Error boundary wraps root (frontend only) |
+| INIT-09 | Error Tracking | `grep -rn "Sentry\|sentry\|@sentry" src/` and `grep "SENTRY_DSN" .env.example` | Sentry initialized, DSN in env example (backend only) |
+
+### Applicability Rules
+
+| Item | Backend | Frontend | Fullstack |
+|------|---------|----------|-----------|
+| INIT-01 through INIT-05, INIT-07 | Required | Required | Required |
+| INIT-06 (Health Check) | Required | Auto-pass | Required |
+| INIT-08 (Error Boundaries) | Auto-pass | Required | Required |
+| INIT-09 (Error Tracking) | Required | Auto-pass | Required |
+
+**Auto-pass:** Mark as `true` with evidence "N/A — not applicable for
+{module_type} modules".
+
+### Initialization Enforcement
+
+- **Any applicable item with `status: false`** → Task BLOCKED from IMPLEMENT
+- **Cached result:** If `docs/reviews/init/{MODULE}-init.yaml` exists with
+  `all_passed: true`, skip re-check and proceed
+- **Max 2 attempts** at initialization before escalating to user
+
+## 2. UI/UX Gate Verification
+
+For tasks marked with `UI Touching: yes`, verify the UI/UX hard gate before
+allowing entry to the IMPLEMENT stage.
+
+### Gate Check Protocol
+
+```
+1. Read task metadata → check "UI Touching" field
+2. IF "UI Touching: no" → SKIP this gate (auto-pass)
+3. IF "UI Touching: yes":
+   a. Find UIDesigner dependency task ID (pattern: *-UID*)
+   b. Verify dependency task status == "completed"
+   c. Verify artifact exists on disk:
+      - docs/uiux/{UID_TASK_ID}-design-spec.md  OR
+      - docs/uiux/{UID_TASK_ID}-component-spec.yaml
+   d. IF any check fails → BLOCK with specific reason
+   e. IF all pass → APPROVE gate
+```
+
+### Artifact Paths to Check
+
+```
+docs/uiux/
+├── {UID_TASK_ID}-design-spec.md       # Visual design specification
+├── {UID_TASK_ID}-component-spec.yaml  # Component structure, props, states
+├── {UID_TASK_ID}-wireframe.png        # Optional wireframe
+└── {UID_TASK_ID}-tokens.json          # Optional design tokens
+```
+
+At minimum, either `-design-spec.md` or `-component-spec.yaml` must exist.
+
+### Escape Hatch
+
+UI/UX gate override requires:
+1. Explicit user approval (typed confirmation)
+2. Entry in `decisionLog.md` with rationale
+3. Override flag on task: `uiux_gate_override: true`
+
+The Validator CANNOT override this gate — only users can.
+
+## 3. Rejection Protocol
+
+### When to Reject
+
+Issue `REJECTED` verdict when ANY of these conditions is true:
+
+| Condition | Severity |
+|-----------|----------|
+| Any DoD item fails (DOD-01 through DOD-10) | Blocking |
+| SDLC stage was skipped (no stage history entry) | Blocking |
+| UI/UX gate fails for UI-touching task | Blocking |
+| Init checklist has failed applicable items | Blocking |
+| Security gate (G7) finds vulnerabilities | Blocking |
+| Schema validation (G8) fails | Blocking |
+| Pattern deviations from `systemPatterns.md` | Blocking if architectural; advisory if stylistic |
+| Performance regression detected (G6) | Blocking only on regression vs baseline |
+
+### Rejection Report Structure
+
+When issuing REJECTED, provide:
+
+1. **Failing Items:** List specific DOD-XX IDs that failed
+2. **Evidence:** Command output, file references, or analysis that proves failure
+3. **Recommended Actions:** Concrete steps the agent should take to fix
+4. **Rework Target Stage:** Which stage the task should return to
+   (usually IMPLEMENT, sometimes PLAN)
+
+### Escalation Rules
+
+| Scenario | Action |
+|----------|--------|
+| First rejection | Normal rework — re-delegate to original agent |
+| Second rejection | Re-delegate with emphasis on specific failing items |
+| Third rejection | **ESCALATE TO USER** — max rework cycles exceeded |
+| Agent disputes rejection | Validator cannot override own rejection; user decides |
+| Ambiguous finding | Set confidence to LOW and flag for ReaperOAK review |
+
+### Rejection Response Template
+
+```yaml
+rejectionResponse:
+  verdict: "REJECTED"
+  confidence: "HIGH"
+  rejectionReasons:
+    - "DOD-03"  # example: lint fails
+    - "DOD-10"  # example: TODO comments found
+  reworkCount: 1  # current iteration
+  maxReworks: 3
+  returnToStage: "IMPLEMENT"
+  findings:
+    - dodId: "DOD-03"
+      finding: "ESLint reports 3 errors in src/services/auth.ts"
+      evidence: "npx eslint output: 3 errors (no-unused-vars x2, no-any x1)"
+      recommendedAction: "Remove unused imports on lines 12, 45. Replace 'any' with proper type on line 78."
+    - dodId: "DOD-10"
+      finding: "TODO comment found in src/utils/parser.ts:23"
+      evidence: "grep output: src/utils/parser.ts:23:// TODO: refactor this"
+      recommendedAction: "Extract TODO to tracked task or implement the change."
+```
+
+## 4. Bug-Catching Gate Verification
+
+The Validator runs gates G6-G8 independently and verifies that the
+implementing agent correctly ran gates G1-G5.
+
+### Gate Reference (8 Gates)
+
+| Gate | Name | Runs At | Tool | Pass Criteria | Who Runs |
+|------|------|---------|------|---------------|----------|
+| G1 | Static Analysis | IMPLEMENT | `tsc --noEmit` | Zero compiler errors | Agent (Validator re-checks) |
+| G2 | Type Safety | IMPLEMENT | TypeScript strict mode | Zero `any` types in new code | Agent (Validator re-checks) |
+| G3 | Linting | IMPLEMENT | ESLint | Zero errors, zero warnings | Agent (Validator re-checks) |
+| G4 | Unit Test Coverage | TEST | Vitest/Jest + coverage | ≥80% line coverage for new files; all pass | Agent (Validator re-checks) |
+| G5 | Integration Tests | TEST | Supertest/Playwright | Happy path + error path per endpoint | Agent (Validator re-checks) |
+| G6 | Performance Checks | VALIDATE | Lighthouse/k6 | No regression vs baseline | **Validator only** |
+| G7 | Security Checklist | VALIDATE | Manual checklist | All applicable items checked | **Validator only** |
+| G8 | Schema Validation | VALIDATE | Zod/Joi + OpenAPI | All payloads validated; match contract | **Validator only** |
+
+### Validator-Only Gate Details
+
+#### G6: Performance Checks
+
+| Check | Frontend Threshold | Backend Threshold |
+|-------|-------------------|-------------------|
+| LCP | < 2.5s | N/A |
+| CLS | < 0.1 | N/A |
+| INP | < 200ms | N/A |
+| p95 Latency | N/A | < 500ms |
+| Regression | Block on >10% degradation | Block on >10% degradation |
+
+- **First measurement:** Advisory only (establishes baseline)
+- **Subsequent measurements:** Block if regression detected
+
+#### G7: Security Checklist (API Tasks)
+
+Verify all applicable items:
+
+- [ ] Auth on all non-public endpoints
+- [ ] Input validation on all request bodies
+- [ ] SQL injection prevention (parameterized queries)
+- [ ] CORS configured correctly
+- [ ] Rate limiting on auth endpoints
+- [ ] No secrets/credentials in source code
+- [ ] HTTPS enforced
+- [ ] Error responses do not leak stack traces
+- [ ] Request size limits configured
+
+#### G8: Schema Validation
+
+- [ ] All request payloads have Zod/Joi runtime validation schemas
+- [ ] All response payloads have defined types
+- [ ] Schemas match OpenAPI contract (if one exists)
+- [ ] No unvalidated user input reaches business logic
+
+### Double-Check Protocol
+
+For gates G1-G5, the Validator re-runs them independently, even if the
+agent claims they passed. This prevents false self-reporting:
+
+```
+Agent claims: "All tests pass" (DOD-02 + G4)
+Validator runs: npx vitest --run --coverage
+Validator finds: 2 tests fail, coverage at 65%
+Validator verdict: REJECTED (DOD-02 false, G4 fail)
+```
+
+**Trust nothing. Verify everything.**

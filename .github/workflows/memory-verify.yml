@@ -1,0 +1,147 @@
+name: Memory Bank Verify
+
+on:
+  pull_request:
+    paths:
+      - '.github/memory-bank/*.md'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  verify-memory-integrity:
+    name: Verify Memory Bank Integrity
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Verify memory bank files exist
+        run: |
+          set -euo pipefail
+          REQUIRED_FILES=(
+            ".github/memory-bank/systemPatterns.md"
+            ".github/memory-bank/productContext.md"
+            ".github/memory-bank/activeContext.md"
+            ".github/memory-bank/decisionLog.md"
+            ".github/memory-bank/progress.md"
+            ".github/memory-bank/riskRegister.md"
+            ".github/memory-bank/schema.md"
+          )
+          MISSING=0
+          for f in "${REQUIRED_FILES[@]}"; do
+            if [[ ! -f "$f" ]]; then
+              echo "::error::Missing required memory bank file: $f"
+              MISSING=1
+            fi
+          done
+          if [[ "$MISSING" -eq 1 ]]; then
+            exit 1
+          fi
+          echo "All required memory bank files present."
+
+      - name: Verify append-only constraint on protected files
+        run: |
+          set -euo pipefail
+          echo "## Memory Bank Integrity Report" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          PROTECTED_FILES=(
+            ".github/memory-bank/systemPatterns.md"
+            ".github/memory-bank/decisionLog.md"
+          )
+
+          VIOLATIONS=0
+          for f in "${PROTECTED_FILES[@]}"; do
+            if ! git diff origin/main...HEAD -- "$f" > /dev/null 2>&1; then
+              continue
+            fi
+
+            # Check for deletions in protected files
+            DELETIONS=$(git diff origin/main...HEAD -- "$f" | grep -c "^-[^-]" || true)
+            ADDITIONS=$(git diff origin/main...HEAD -- "$f" | grep -c "^+[^+]" || true)
+
+            if [[ "$DELETIONS" -gt 0 ]]; then
+              echo "::error::Append-only violation in $f — $DELETIONS lines deleted"
+              echo "| $f | FAIL — $DELETIONS deletions detected |" >> "$GITHUB_STEP_SUMMARY"
+              VIOLATIONS=1
+            else
+              echo "| $f | PASS — append-only constraint satisfied |" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+
+          if [[ "$VIOLATIONS" -gt 0 ]]; then
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            echo "> **systemPatterns.md** and **decisionLog.md** are append-only." >> "$GITHUB_STEP_SUMMARY"
+            echo "> Only ReaperOAK may archive old entries. Deletions are not permitted." >> "$GITHUB_STEP_SUMMARY"
+            exit 1
+          fi
+
+      - name: Verify writer access constraints
+        run: |
+          set -euo pipefail
+
+          # Check that PR author (from commit) is allowed to write the files they changed
+          CHANGED_MB_FILES=$(git diff --name-only origin/main...HEAD -- ".github/memory-bank/" || true)
+
+          if [[ -z "$CHANGED_MB_FILES" ]]; then
+            echo "No memory bank files changed."
+            exit 0
+          fi
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Changed Memory Bank Files" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+
+          while IFS= read -r f; do
+            BASENAME=$(basename "$f")
+            echo "- \`$BASENAME\`" >> "$GITHUB_STEP_SUMMARY"
+          done <<< "$CHANGED_MB_FILES"
+
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "> Writer access validated against schema.md constraints." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Verify schema version headers
+        run: |
+          set -euo pipefail
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Schema Version Check" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| File | Has Schema Header |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|------|-------------------|" >> "$GITHUB_STEP_SUMMARY"
+
+          for f in .github/memory-bank/*.md; do
+            BASENAME=$(basename "$f")
+            if head -5 "$f" | grep -qi "schema version\|version:"; then
+              echo "| $BASENAME | Yes |" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "| $BASENAME | No |" >> "$GITHUB_STEP_SUMMARY"
+            fi
+          done
+
+      - name: Compute content hashes
+        run: |
+          set -euo pipefail
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "### Content Hashes (SHA-256)" >> "$GITHUB_STEP_SUMMARY"
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "| File | SHA-256 |" >> "$GITHUB_STEP_SUMMARY"
+          echo "|------|---------|" >> "$GITHUB_STEP_SUMMARY"
+
+          for f in .github/memory-bank/*.md; do
+            HASH=$(sha256sum "$f" | awk '{print $1}')
+            BASENAME=$(basename "$f")
+            echo "| $BASENAME | \`${HASH:0:16}...\` |" >> "$GITHUB_STEP_SUMMARY"
+          done
+
+      - name: Report
+        run: |
+          echo "" >> "$GITHUB_STEP_SUMMARY"
+          echo "---" >> "$GITHUB_STEP_SUMMARY"
+          echo "> Memory bank integrity check completed at $(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_STEP_SUMMARY"

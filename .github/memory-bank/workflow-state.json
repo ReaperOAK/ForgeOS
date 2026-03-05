@@ -1,0 +1,265 @@
+{
+  "$schema": "workflow-state-v1",
+  "version": "1.0.0",
+  "session_id": "shutdown-001",
+  "objective": "Legacy Repository Takeover — Systematic Shutdown",
+  "started_at": "2026-03-01T00:00:00Z",
+  "updated_at": "2026-03-06T00:00:00Z",
+  "current_phase": "SHUTDOWN",
+  "phase_iteration": 2,
+  "overall_status": "frozen",
+  "phases": {
+    "SPEC": {
+      "status": "completed",
+      "started_at": "2026-02-28T00:00:00Z",
+      "completed_at": "2026-02-28T00:00:00Z",
+      "agents": { "TODO": "L0-L3 decomposition complete" },
+      "artifacts_produced": [
+        "TODO/vision.md",
+        "TODO/capabilities.md",
+        "TODO/blocks/*.md",
+        "TODO/tasks/*.md"
+      ],
+      "gate_result": "PASS — 616 tasks across 33 files"
+    },
+    "BUILD": {
+      "status": "frozen",
+      "started_at": "2026-03-01T00:00:00Z",
+      "completed_at": null,
+      "frozen_at": "2026-03-06T00:00:00Z",
+      "agents": {
+        "wave1_completed": ["DevOps", "Backend", "Security"],
+        "wave2_completed": ["Backend", "DevOps", "QA", "Security"]
+      },
+      "artifacts_produced": [
+        ".gitignore",
+        "backend/.gitignore",
+        "backend/.env.example",
+        "backend/.env.test",
+        "mvp-todo.md",
+        "admin/Dockerfile.production",
+        "cornflakes-landing/Dockerfile.production",
+        "docs/security/secret-inventory.md",
+        "docker-compose.yml",
+        "cornflakes-landing/next.config.ts",
+        "docs/security/secret-rotation-runbook.md"
+      ],
+      "gate_result": null
+    },
+    "VALIDATE": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "agents": {},
+      "artifacts_produced": [],
+      "gate_result": null
+    },
+    "GATE": { "status": "pending" },
+    "DOCUMENT": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "agents": {},
+      "artifacts_produced": [],
+      "gate_result": null
+    },
+    "RETROSPECTIVE": {
+      "status": "pending",
+      "started_at": null,
+      "completed_at": null,
+      "agents": {},
+      "proposals": [],
+      "gate_result": null
+    }
+  },
+  "task_states": {
+    "TASK-001-01-01": {
+      "status": "DONE",
+      "rework_count": 0,
+      "blocker_reason": null,
+      "locked_by": null,
+      "worker_id": "DevOpsWorker-w1a001",
+      "locked_at": null,
+      "last_transition": "2026-03-01T00:00:00Z",
+      "commit": "c216298"
+    },
+    "TASK-001-01-02": {
+      "status": "DONE",
+      "rework_count": 0,
+      "blocker_reason": null,
+      "locked_by": null,
+      "worker_id": "DevOpsWorker-w1a002",
+      "locked_at": null,
+      "last_transition": "2026-03-01T00:00:00Z",
+      "commit": "e97bca0"
+    },
+    "TASK-001-01-03": {
+      "status": "DONE",
+      "rework_count": 0,
+      "blocker_reason": null,
+      "locked_by": null,
+      "worker_id": "BackendWorker-w1a003",
+      "locked_at": null,
+      "last_transition": "2026-03-01T00:00:00Z",
+      "commit": "0bbc97e",
+      "deviation": "Commit missing [TASK-ID] prefix — cannot amend without force push"
+    },
+    "TASK-001-01-04": {
+      "status": "DONE",
+      "rework_count": 0,
+      "blocker_reason": null,
+      "locked_by": null,
+      "worker_id": "BackendWorker-w1a004",
+      "locked_at": null,
+      "last_transition": "2026-03-01T00:00:00Z",
+      "commit": "34399e4"
+    },
+    "TASK-001-01-05": {
+      "status": "DONE",
+      "rework_count": 0,
+      "blocker_reason": null,
+      "locked_by": null,
+      "worker_id": "DevOpsWorker-w1a005",
+      "locked_at": null,
+      "last_transition": "2026-03-01T00:00:00Z",
+      "commit": "abbb22d"
+    },
+    "TASK-001-04-03": {
+      "status": "DONE",
+      "rework_count": 0,
+      "blocker_reason": null,
+      "locked_by": null,
+      "worker_id": "DevOpsWorker-w1a006",
+      "locked_at": null,
+      "last_transition": "2026-03-01T00:00:00Z",
+      "commit": "523e03e"
+    },
+    "TASK-001-04-04": {
+      "status": "DONE",
+      "rework_count": 0,
+      "blocker_reason": null,
+      "locked_by": null,
+      "worker_id": "DevOpsWorker-w1a007",
+      "locked_at": null,
+      "last_transition": "2026-03-01T00:00:00Z",
+      "commit": "d33cc03"
+    },
+    "TASK-001-06-03": {
+      "status": "DONE",
+      "rework_count": 0,
+      "blocker_reason": null,
+      "locked_by": null,
+      "worker_id": "DevOpsWorker-w1a008",
+      "locked_at": null,
+      "last_transition": "2026-03-01T00:00:00Z",
+      "commit": "1454490"
+    },
+    "TASK-002-01-01": {
+      "status": "DONE",
+      "rework_count": 0,
+      "blocker_reason": null,
+      "locked_by": null,
+      "worker_id": "SecurityWorker-w1a009",
+      "locked_at": null,
+      "last_transition": "2026-03-01T00:00:00Z",
+      "commit": "c1d284e"
+    },
+    "TASK-001-01-06": {
+      "status": "DONE",
+      "rework_count": 0,
+      "blocker_reason": null,
+      "locked_by": null,
+      "worker_id": "BackendWorker-w2a001",
+      "locked_at": null,
+      "last_transition": "2026-03-06T00:00:00Z",
+      "commit": "2fc7f42"
+    },
+    "TASK-001-02-01": {
+      "status": "DONE",
+      "rework_count": 0,
+      "blocker_reason": null,
+      "locked_by": null,
+      "worker_id": "BackendWorker-w2a002",
+      "locked_at": null,
+      "last_transition": "2026-03-06T00:00:00Z",
+      "commit": "ff31474"
+    },
+    "TASK-001-02-02": {
+      "status": "DONE",
+      "rework_count": 0,
+      "blocker_reason": null,
+      "locked_by": null,
+      "worker_id": "QAWorker-w2a003",
+      "locked_at": null,
+      "last_transition": "2026-03-06T00:00:00Z",
+      "commit": null,
+      "deviation": "Verification-only — existing code already compliant"
+    },
+    "TASK-001-02-03": {
+      "status": "DONE",
+      "rework_count": 0,
+      "blocker_reason": null,
+      "locked_by": null,
+      "worker_id": "BackendWorker-w2a004",
+      "locked_at": null,
+      "last_transition": "2026-03-06T00:00:00Z",
+      "commit": null,
+      "deviation": "Verification-only — existing code already compliant"
+    },
+    "TASK-001-02-04": {
+      "status": "DONE",
+      "rework_count": 0,
+      "blocker_reason": null,
+      "locked_by": null,
+      "worker_id": "DevOpsWorker-w2a005",
+      "locked_at": null,
+      "last_transition": "2026-03-06T00:00:00Z",
+      "commit": "0e413fe"
+    },
+    "TASK-001-02-05": {
+      "status": "DONE",
+      "rework_count": 0,
+      "blocker_reason": null,
+      "locked_by": null,
+      "worker_id": "DevOpsWorker-w2a006",
+      "locked_at": null,
+      "last_transition": "2026-03-06T00:00:00Z",
+      "commit": null,
+      "deviation": "Verification-only — existing code already compliant"
+    },
+    "TASK-001-04-01": {
+      "status": "DONE",
+      "rework_count": 0,
+      "blocker_reason": null,
+      "locked_by": null,
+      "worker_id": "DevOpsWorker-w2a007",
+      "locked_at": null,
+      "last_transition": "2026-03-06T00:00:00Z",
+      "commit": "36556aa"
+    },
+    "TASK-001-04-02": {
+      "status": "DONE",
+      "rework_count": 0,
+      "blocker_reason": null,
+      "locked_by": null,
+      "worker_id": "DevOpsWorker-w2a008",
+      "locked_at": null,
+      "last_transition": "2026-03-06T00:00:00Z",
+      "commit": null,
+      "deviation": "Verification-only — existing code already compliant"
+    },
+    "TASK-002-01-02": {
+      "status": "DONE",
+      "rework_count": 0,
+      "blocker_reason": null,
+      "locked_by": null,
+      "worker_id": "SecurityWorker-w2a009",
+      "locked_at": null,
+      "last_transition": "2026-03-06T00:00:00Z",
+      "commit": "1fb2a80"
+    }
+  },
+  "fix_loops": [],
+  "blockers": [],
+  "escalations": []
+}

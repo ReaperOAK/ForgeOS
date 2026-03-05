@@ -1,0 +1,102 @@
+---
+source: "./.github/instructions/SDLC/7. Figma Prototypes for Architecture & Design.md"
+chunk_index: 2
+token_estimate: 3820
+hash: "e4c40e000cdaf876719b45058fb20bd60c6665b1f24c6f70ff73627f83c22752"
+summary: "* **Direction:** Vertical or horizontal, corresponding to flex-direction: column or flex-direction: row. The "Wrap" o..."
+---
+* **Direction:** Vertical or horizontal, corresponding to flex-direction: column or flex-direction: row. The "Wrap" option introduces flex-wrap: wrap behavior.16  
+* **Gap:** The spacing between items, corresponding to the gap property.  
+* **Padding:** The space inside the container, corresponding to the padding property.  
+* **Distribution:** How items are spaced within the container (packed vs. space between), corresponding to justify-content.
+
+Within an Auto Layout frame, each child element must have its resizing behavior defined for both the horizontal and vertical axes. These settings are the core of the responsive specification 16:
+
+* **Hug contents:** The element sizes itself based on its content (e.g., a button's width grows with its text label). This is analogous to width: auto or width: fit-content.  
+* **Fill container:** The element stretches to fill the available space in its parent container. This is the equivalent of flex-grow: 1\.  
+* **Fixed width/height:** The element maintains a specific, unchanging size.
+
+By combining these properties, a designer can create components and layouts that are intrinsically responsive. For example, in a user profile card with a name and a "Follow" button, the name can be set to "Fill container" and the button to "Hug contents." When the card is resized, the name field will stretch to take up the available space while the button remains at its optimal size. This is not just a visual effect; it is a direct, interactive instruction to the developer on how to implement the component's layout logic in CSS.
+
+### **3.2 Building Interactive User Flows with Smart Animate and Overlays**
+
+A static collection of screens, even if perfectly designed, fails to communicate the user's journey through the application. The prototype must connect these screens to demonstrate navigation, transitions, and the flow of tasks.8
+
+Figma's prototyping mode allows designers to create interactive connections between frames, specifying a trigger (e.g., On click, On drag, While hovering) and an action (e.g., Navigate to).2 This creates a clickable path through the application that can be used for stakeholder demos and usability testing.
+
+To elevate the fidelity of these flows, **Smart Animate** should be used for transitions between screens where elements persist but change their properties (e.g., position, size, opacity).15 For Smart Animate to work, the corresponding layers on the start and end frames must have the same name. Figma then automatically interpolates the changes, creating a smooth animation. This provides a clear visual specification for the desired motion design, which can be difficult to communicate with static images or words alone.
+
+For UI elements that appear on top of the existing view, such as modals, dropdown menus, and tooltips, designers should use **Overlays**. This feature allows a separate frame to be displayed on top of the current one, with options to control its position and the appearance of the background (e.g., adding a dark scrim). Using overlays is far more efficient than duplicating an entire screen just to show a modal, keeping the prototype clean and easy to maintain.15
+
+### **3.3 Interactive Components in Practice: Crafting Complex Micro-interactions**
+
+While standard prototyping connects entire frames, **Interactive Components** allow designers to create self-contained interactions *within* a single component's variants.14 This is a powerful technique for modeling the internal state and behavior of complex UI elements.
+
+The core mechanism is the **Change to** action in prototype mode. Instead of linking to another frame, a connection is made from one variant to another within the same component set. For example, within a Button component set:
+
+* A connection can be made from the State=Default variant to the State=Hover variant.  
+* The trigger for this connection is set to While hovering.
+
+Now, any instance of this Button component placed in the design will automatically exhibit this hover behavior in the prototype, without needing any additional connections. This is invaluable for creating common interactive elements like checkboxes, radio buttons, toggles, and dropdowns.14 Prototyping a form with five checkboxes without interactive components would require creating $2^5 \= 32$ separate frames to represent every possible combination of states. With interactive components, only one frame is needed, and the state of each checkbox is managed within the component itself.14
+
+This approach drastically reduces the complexity of the prototype, eliminating the tangled web of connections often referred to as "noodle soup".14 More importantly, it provides a crystal-clear model of the component's internal logic. The interactive component becomes a miniature state machine, demonstrating exactly how it should respond to user input. This allows the designer to test the component's logic in isolation, ensuring its behavior is correct and predictable before it is handed off for implementation.
+
+## **Section 4: The Handoff Protocol: Delivering a Developer-Ready Specification**
+
+The final stage in creating the visual specification is the handoff—the formal process of delivering the prototype to the engineering team. A successful handoff is not a single event but a structured protocol designed to ensure a seamless, efficient, and unambiguous transition from design to code. This process formalizes the Figma prototype as a binding contract between design and engineering. Features within Figma, particularly Dev Mode, transform this handoff from an informal conversation into a traceable, version-controlled transaction within the SDLC, akin to the code review process in software development. This rigor creates a clear line of accountability and a shared understanding of what is to be built, directly fulfilling the goal of the Architecture & Design phase.
+
+### **4.1 The Pre-Handoff Sanity Checklist: Ensuring Technical Integrity**
+
+Before a design is marked as "Ready for development," it must undergo a thorough audit to ensure its technical integrity, clarity, and completeness. This quality assurance step is crucial for preventing downstream errors and reducing developer friction. The following checklist operationalizes the best practices discussed throughout this report into a systematic review process.
+
+| Check Item | Best Practice / Requirement | Why It Matters (Risk Reduced) |
+| :---- | :---- | :---- |
+| **File & Page Organization** | Pages are logically named, and sections are marked with a clear status (e.g., "Ready for Dev"). | Reduces developer time spent searching for the correct screens. Prevents implementation of outdated or work-in-progress designs. |
+| **Layer Naming** | All layers and groups are named semantically (e.g., btn-primary, card-header). No default names like "Frame 12" or "Rectangle 8". | Enables developers to easily navigate the layer hierarchy and understand the structure. Facilitates auto-generation of cleaner code in Dev Mode. |
+| **Style Application** | All colors, fonts, and effects are applied via a shared Style. No "detached" or one-off styles exist in the final designs. | Ensures visual consistency and allows for global changes. Maps directly to design tokens/CSS variables, reducing implementation errors. |
+| **Component Usage** | All reusable UI elements are instances of a main component. No "detached" or one-off component designs. | Guarantees consistency and ensures that updates to the main component propagate everywhere. Models the coded component architecture. |
+| **Responsiveness Checks** | All frames and components use Auto Layout correctly. Manually test resizing frames to ensure content reflows as expected. | Provides a clear, interactive specification for responsive behavior, removing ambiguity from CSS implementation. |
+| **Interaction & State Definition** | All component states (hover, focused, disabled, etc.) are defined as variants. All critical user flows are prototyped. | Explicitly defines all required UI states and behaviors, preventing them from being missed during development. |
+| **Asset Export Settings** | All icons, images, and other assets that need to be exported are configured with the correct format (SVG for icons, PNG/JPG for images) and resolution. | Streamlines the asset extraction process for developers and ensures assets are optimized for performance and quality. |
+| **Annotations & Documentation** | Complex interactions, non-obvious behaviors, or business logic rules are explained with on-canvas annotations. | Reduces ambiguity and the need for back-and-forth communication by providing context directly within the design file. |
+| **Accessibility Specification** | Keyboard navigation order, focus states, and screen reader content order are documented. Color contrast is verified. | Ensures the product is usable by everyone. Prevents costly accessibility refactoring post-launch. |
+
+### **4.2 Leveraging Dev Mode for a Seamless Design-to-Code Workflow**
+
+Figma's **Dev Mode** is a purpose-built environment that transforms the design file into an inspectable, developer-friendly specification.6 It is the primary interface through which the handoff should occur.
+
+To initiate the process, designers should group related content into **Sections** and mark them as **"Ready for development"**. This action serves as a formal signal to the engineering team, triggering notifications and making the designs appear in a dedicated view within Dev Mode, guiding developers to the exact content that requires their attention.4
+
+Once in Dev Mode, developers have access to a suite of tools designed to streamline implementation:
+
+* **Inspect Panel:** This is the core of Dev Mode. When a developer selects a layer, the panel displays its properties, measurements, and styles. It provides auto-generated code snippets in various languages (CSS, SwiftUI, XML/Compose) and units (px, rem), which serve as a starting point for implementation.6  
+* **Component Playground:** For complex components with many variants and properties, developers can use the component playground to experiment with different combinations and see how the component behaves without having to modify the design file itself.6  
+* **Compare Changes:** Dev Mode includes a powerful "diffing" tool that allows developers to visually compare the current version of a frame with previous versions, highlighting exactly what has been added, removed, or modified. This is crucial for understanding updates and ensuring changes are implemented correctly.6  
+* **Integrations:** Dev Mode can be linked to external development tools. Designers and developers can attach links to Jira tickets, GitHub issues, or Storybook documentation directly to components, providing essential context and connecting the design specification to the broader development workflow.6
+
+### **4.3 Communicating Accessibility Requirements Beyond the Visuals**
+
+A visually perfect prototype can still result in an unusable product if it fails to account for accessibility (A11y). Accessibility is not an optional feature; it is a core requirement of a production-grade specification and must be documented with the same rigor as visual design.15
+
+Since many accessibility requirements are non-visual, they must be explicitly communicated through annotations and documentation within the Figma file. Critical accessibility specifications include:
+
+* **Reading Order:** The order in which a screen reader announces content may not match the visual layout. Designers should use annotations with numbered labels to specify the intended reading order for screen reader users, especially for complex layouts.19  
+* **Keyboard Navigation:** The prototype should document the intended tab order for all interactive elements, ensuring a logical navigation path for users who rely on keyboards. Focus states (the visual indicator of which element is currently selected) must be designed as variants for all interactive components.15  
+* **Color Contrast:** All text and essential UI elements must have sufficient color contrast against their background to be legible for users with vision impairments. Designers should use plugins within Figma to test their color choices against Web Content Accessibility Guidelines (WCAG) standards and ensure compliance.11  
+* **Alternative Text:** While not directly implementable in Figma, annotations should be used to specify the alternative text for all meaningful images, which is essential for screen reader users.
+
+By including these specifications, the prototype ensures that the product is built to be inclusive from the ground up, preventing costly and time-consuming accessibility remediation after launch.
+
+## **Conclusion: The Prototype as a Catalyst for Quality**
+
+The methodology detailed in this report presents a fundamental shift in the perception and execution of UI prototyping. It advocates for treating the Figma prototype not as a disposable sketch or a mere visual aid, but as a core engineering artifact within a professional Software Development Life Cycle. By embracing this approach, the prototype becomes a declarative model of the UI, a precise visual specification, and a binding contract that aligns design and development around a single, unambiguous source of truth.
+
+The core philosophy is rooted in the principles of systemization, precision, and risk reduction. Through meticulous file architecture, a comprehensive component-based design system, the strategic use of advanced features like Auto Layout and Interactive Components, and a formal handoff protocol, the prototype becomes a powerful tool for quality assurance. The upfront investment in creating an architecturally sound prototype yields significant returns throughout the development process. It drastically reduces ambiguity, minimizes the need for clarification, prevents bugs stemming from misinterpretation, and accelerates the implementation phase. Ultimately, this rigor leads to a final product that is more consistent, scalable, maintainable, and accessible—directly addressing the primary risks that the Architecture & Design phase is intended to mitigate.1
+
+This approach elevates the role of the designer from a creator of screens to an architect of visual systems. It aligns the craft of design with the principles of modern software engineering, fostering a more collaborative and efficient relationship between design and development teams. The ultimate outcome is not just a better prototype, but a better product, built on a foundation of clarity, consistency, and shared understanding. The focus shifts from "designing screens" to "building smart, scalable visual systems" that are engineered for quality from their very inception.11
+
+#### **Works cited**
+
+1. 1\. SDLC.pdf  
+2. Figma Tutorial: The DO'S and DON'Ts of design handoffs \- YouTube, accessed October 29, 2025, [https://www.youtube.com/watch?v=Bm3WAUlcCQE](https://www.youtube.com/watch?v=Bm3WAUlcCQE)  
+3. 7 Best Practices for a Successful Figma Developer Handoff \- Valtira, accessed October 29, 2025, [https://www.valtira.com/blog/7-best-practices-for-a-successful-figma-developer-handoff](https://www.valtira.com/blog/7-best-practices-for-a-successful-figma-developer-handoff)  

@@ -1,0 +1,141 @@
+---
+source: "./.github/agents/CIReviewer.agent.md"
+chunk_index: 2
+token_estimate: 1172
+hash: "908394404ed45e9245a4d7e7a6dd89db4194c770f345c4dd217d7b6c4f18ad12"
+summary: "10. Write review summary (§9) 11. Issue verdict  ### Reflect  ``` <thought> VERIFICATION (with evidence): 1. "Files r..."
+---
+10. Write review summary (§9)
+11. Issue verdict
+
+### Reflect
+
+```
+<thought>
+VERIFICATION (with evidence):
+1. "Files reviewed: [N/N — all reviewed: Y/N]"
+2. "Findings: [🔴 N, 🟡 N, 🟢 N, 💬 N, 📝 N]"
+3. "Spec adherence: [N checks passed, N deviations found]"
+4. "Rule violations: [OC: N, CC: N, SEC: N, AF: N]"
+5. "Test coverage on changed files: [N%]"
+6. "Verdict: [APPROVE | CONDITIONAL | REQUEST_CHANGES]"
+7. "Quality score: [N/100]"
+8. "SARIF report generated: [Y/N, findings: N]"
+
+SELF-CHALLENGE:
+- "Did I review EVERY changed file, not just the interesting ones?"
+- "Are my findings actionable with specific fix guidance?"
+- "Am I being too strict (blocking for style) or too lenient (missing bugs)?"
+- "Did I acknowledge what was done WELL, not just problems?"
+- "Would a senior engineer agree with each critical finding?"
+
+QUALITY SCORE:
+Correctness: ?/10 | Completeness: ?/10 | Convention: ?/10
+Fairness: ?/10 | Actionability: ?/10 | TOTAL: ?/50
+</thought>
+```
+
+## 11. Tool Permissions
+
+### Allowed Tools
+
+| Tool | Purpose | Constraint |
+|------|---------|-----------|
+| `search/codebase` | Understand code context | Read-only |
+| `search/textSearch` | Find patterns and violations | Read-only |
+| `search/fileSearch` | Locate files in review | Read-only |
+| `search/listDirectory` | Explore project structure | Read-only |
+| `read/readFile` | Read files for review | Read-only |
+| `read/problems` | Check for existing issues | Read-only |
+| `edit/createFile` | Create SARIF review reports | Review output only |
+| `edit/editFile` | Update review reports | Review output only |
+| `execute/runInTerminal` | Run linters and tests | Analysis commands only |
+| `todo` | Track review tasks | Session-scoped |
+
+## 12. Delegation Input/Output Contract
+
+### Input (from ReaperOAK)
+
+```yaml
+taskId: string
+objective: string
+changedFiles: string[]    # Files to review
+prDescription: string     # PR description
+linkedIssues: string[]    # Related issues/specs
+apiContracts: string[]    # OpenAPI specs for adherence check
+acceptanceCriteria: string[] # GWT scenarios
+qualityGateThresholds:    # Configurable thresholds
+  minCoverage: number
+  maxCognitiveComplexity: number
+  maxWarnings: number
+targetFiles: string[]
+scopeBoundaries: { included: string[], excluded: string[] }
+autonomyLevel: "L1" | "L2" | "L3"
+dagNodeId: string
+dependencies: string[]
+```
+
+### Output (to ReaperOAK)
+
+```yaml
+taskId: string
+status: "complete" | "blocked" | "failed"
+qualityScore: { correctness: int, completeness: int, convention: int, fairness: int, actionability: int, total: int }
+confidence: { level: string, score: int, basis: string, remainingRisk: string }
+deliverable:
+  verdict: "APPROVE" | "REQUEST_CHANGES" | "CONDITIONAL_APPROVE"
+  overallScore: number  # 0-100
+  sarifReport: string   # SARIF file path
+  findings:
+    critical: { ruleId: string, file: string, line: int, message: string, fix: string }[]
+    warning: { ruleId: string, file: string, line: int, message: string, fix: string }[]
+    suggestion: { ruleId: string, file: string, line: int, message: string, fix: string }[]
+  specAdherence:
+    apiContract: { endpoint: string, status: string }[]
+    acceptanceCriteria: { criteria: string, covered: boolean }[]
+    deviations: { spec: string, deviation: string, severity: string }[]
+  metrics:
+    filesReviewed: int
+    linesChanged: int
+    testCoverage: string
+    maxCognitiveComplexity: int
+    calisthenicsScore: string
+  positiveObservations: string[]
+  conditions: string[]  # For CONDITIONAL_APPROVE
+evidence:
+  reviewDetails: string
+  sarifPath: string
+handoff:
+  forBackend:
+    criticalFixes: string[]
+    warningFixes: string[]
+  forFrontend:
+    criticalFixes: string[]
+    accessibilityIssues: string[]
+  forSecurity:
+    securityFindings: string[]
+  forQA:
+    testGaps: string[]
+    coverageIssues: string[]
+blockers: string[]
+```
+
+## 13. Escalation Triggers
+
+- Security vulnerability found (any severity) → Immediate escalation to Security
+- Architecture fitness function violation → Escalate to Architect
+- Test coverage below 60% → Escalate to QA with gap analysis
+- Pattern deviation detected → Escalate to Architect for ADR decision
+- PR scope too large (> 500 lines changed) → Request decomposition
+- Specification deviation on core feature → Escalate to ProductManager
+
+## 14. Memory Bank Access
+
+| File | Access | Purpose |
+|------|--------|---------|
+| `systemPatterns.md` | Read ONLY | Check coding conventions |
+| `activeContext.md` | Append ONLY | Log review findings |
+| `progress.md` | Append ONLY | Record review milestones |
+| `decisionLog.md` | Read ONLY | Understand allowed deviations |
+| `riskRegister.md` | Append ONLY | Log quality risks found |
+

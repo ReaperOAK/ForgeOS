@@ -1,0 +1,83 @@
+---
+source: "./.github/instructions/SDLC/5. User Stories in Planning & Discovery.md"
+chunk_index: 3
+token_estimate: 3774
+hash: "dabbf0e23d6d7f74fc9fa92187438b6ef9903e778c8ecf636964f8fad815b92b"
+summary: "* *Split Stories:* 1\. "As a customer, I want to search for available rooms by date and location." 2\. "As a customer..."
+---
+  * *Split Stories:* 1\. "As a customer, I want to search for available rooms by date and location." 2\. "As a customer, I want to view details and photos of a specific room." 3\. "As a customer, I want to enter my personal and payment information." 4\. "As a customer, I want to receive a booking confirmation."  
+* **Business Rule Variations:** If a feature involves complex or varying business rules, create a separate story for the simplest case and additional stories for each variation.25  
+  * *Example Epic:* "As a shopper, I want to see the correct shipping cost for my order."  
+  * *Split Stories:* 1\. "Calculate shipping for domestic standard delivery." 2\. "Calculate shipping for domestic express delivery." 3\. "Calculate shipping for international delivery."  
+* **CRUD Operations:** For features centered on managing a data entity, a natural way to split is by the core operations: Create, Read, Update, and Delete.32  
+  * *Example Epic:* "As an admin, I want to manage blog posts."  
+  * *Split Stories:* 1\. "Create a new blog post." 2\. "View a list of all blog posts." 3\. "Edit an existing blog post." 4\. "Delete a blog post."  
+* **The SPIDR Framework:** This mnemonic offers a more advanced set of heuristics for tackling complex splitting challenges.34  
+  * **S**pikes: Isolate uncertainty. If a story has a significant technical unknown, create a time-boxed research task (a Spike) to investigate it. This de-risks the functional story.  
+  * **P**aths: Split by the different paths a user can take through a feature. For example, a "Login" epic could be split into "Log in with email/password," "Log in with Google," and "Log in with Facebook."  
+  * **I**nterfaces: Deliver functionality for different interfaces or with varying levels of UI complexity. A simple, functional version can be one story, with a more polished, feature-rich UI as a subsequent story.  
+  * **D**ata: Split based on the different types of data the feature must handle.  
+  * **R**ules: Isolate complex business logic or validation rules into their own stories.
+
+### **Table 3: Epic Decomposition Techniques Matrix**
+
+| Technique | Description | When to Use It | Example Epic | Resulting Split Stories |
+| :---- | :---- | :---- | :---- | :---- |
+| **Workflow Steps** | Break a process into sequential user actions. | For features that involve a multi-step user journey or process. | "As a user, I want to publish a new article on the blog." | 1\. "Draft a new article." 2\. "Preview the article." 3\. "Submit the article for review." 4\. "Publish the approved article." |
+| **Business Rule Variations** | Isolate different business rules into separate stories. | When a feature has complex logic or handles many edge cases. | "As a premium member, I want to download content." | 1\. "Download content with a stable internet connection." 2\. "Queue downloads when offline." 3\. "Handle download failure due to insufficient storage." |
+| **CRUD Operations** | Split by Create, Read, Update, and Delete functions. | For features focused on managing a specific type of data or object. | "As a librarian, I want to manage the book catalog." | 1\. "Add a new book to the catalog." 2\. "Search for and view book details." 3\. "Update information for an existing book." 4\. "Remove a book from the catalog." |
+| **SPIDR \- Paths** | Split by alternative user flows or choices within a feature. | When a single user goal can be accomplished in multiple ways. | "As a customer, I want to pay for my order." | 1\. "Pay using a credit card." 2\. "Pay using PayPal." 3\. "Pay using a gift card." |
+
+## **VII. Synthesis: Integrating User Stories into a Formal Discovery Process**
+
+User Stories are a hallmark of agile methodologies, yet they can provide immense value within the more formal, gated SDLC described in the Planning & Discovery phase.1 The key is to view them not as a replacement for formal documentation like a Software Requirements Specification (SRS) or Product Requirements Document (PRD), but as a complementary artifact that enhances the process with user-centricity, collaboration, and validated priorities.
+
+### **7.1 Coexistence, Not Replacement: Stories and the SRS/PRD**
+
+The Planning & Discovery phase produces two key artifacts: a prioritized backlog of User Stories and a formal SRS or PRD.1 These documents serve different but related purposes. The User Story backlog is the dynamic, user-focused representation of what to build and why, prioritized by value. The SRS/PRD is the comprehensive, formal "source of truth" that provides the exhaustive detail needed for architecture, design, and quality assurance.
+
+The relationship should be symbiotic. The User Story backlog, developed through research and collaborative mapping, becomes the validated, user-centric core of the SRS's functional requirements section. The stories provide the essential context—the user, their intent, and their motivation—while the SRS provides the container for these stories, augmenting them with necessary formal details such as non-functional requirements, system context diagrams, data dictionaries, and regulatory constraints.1 This integrated approach creates a "living" requirements specification. The backlog can be flexibly re-prioritized to respond to new feedback, while the SRS is updated to reflect the rigorous details of the work that is currently prioritized for development.
+
+### **7.2 A Practical Workflow for Integration**
+
+To effectively merge these approaches within the Planning & Discovery phase, the following workflow is recommended:
+
+* **Step 1: Discover and Map:** Begin with foundational user research (interviews, feedback analysis) to understand user needs.1 Use this research to fuel collaborative User Story Mapping workshops, which will generate a comprehensive, visualized backlog of high-level User Stories and Epics, already arranged by user journey and initial priority.6  
+* **Step 2: Refine and Detail:** For the highest-priority stories slated for the upcoming development cycle, conduct backlog refinement sessions. In these meetings, the cross-functional team collaborates to apply the INVEST criteria, decompose epics, and write detailed, testable Acceptance Criteria for each story.25  
+* **Step 3: Document Formally:** Use the refined, high-priority stories and their Acceptance Criteria as the direct source material for the functional requirements sections of the SRS or PRD. An Epic from the story map might become a chapter in the SRS, with its child stories and their ACs forming the detailed subsections. This ensures the formal document is directly tied to the validated, prioritized backlog.  
+* **Step 4: The Handoff to Design:** The output of the Planning & Discovery phase is a powerful combination: a prioritized backlog of well-understood User Stories and a supporting SRS/PRD that provides deep context. This package becomes the primary input for the Architecture & Design phase. The User Stories directly inform the creation of subsequent artifacts; they are visualized in Use Case and Activity Diagrams, and they provide the scenarios that UI/UX designers will build into interactive prototypes.1
+
+This integrated model establishes the User Story as the central, unifying artifact that provides a traceable thread of user value throughout the entire SDLC. A story conceived in Phase 1 from a user interview is visualized in Phase 2, built in Phase 3, and its Acceptance Criteria become the basis for tests in Phase 4\. This traceability, from initial human need all the way to final verification, is invaluable in a professional, process-driven environment, ensuring that the ultimate goal—to solve the right problem for the user—remains the focus at every stage.
+
+#### **Works cited**
+
+1. SDLC.pdf  
+2. Agile User Story: Definition and Best 3 Examples of 2024 \- Agile By ..., accessed October 28, 2025, [https://www.agilebydesign.com/blog/agile-user-story](https://www.agilebydesign.com/blog/agile-user-story)  
+3. User story \- Wikipedia, accessed October 28, 2025, [https://en.wikipedia.org/wiki/User\_story](https://en.wikipedia.org/wiki/User_story)  
+4. 20 User story examples and best practices \- Justinmind, accessed October 28, 2025, [https://www.justinmind.com/blog/examples-user-story-best-practices/](https://www.justinmind.com/blog/examples-user-story-best-practices/)  
+5. Agile Requirements and User Stories \- what is the difference?, accessed October 28, 2025, [https://www.agilebusiness.org/dsdm-project-framework/requirements-and-user-stories.html](https://www.agilebusiness.org/dsdm-project-framework/requirements-and-user-stories.html)  
+6. How to Write User Stories in Agile Software Development | Easy Agile, accessed October 28, 2025, [https://www.easyagile.com/blog/how-to-write-good-user-stories-in-agile-software-development](https://www.easyagile.com/blog/how-to-write-good-user-stories-in-agile-software-development)  
+7. The 5 Key Components of an Agile User Story \- Digital Rebels, accessed October 28, 2025, [https://www.digitalrebels.co.uk/blog/2016/02/the-5-key-components-of-an-agile-user-story/](https://www.digitalrebels.co.uk/blog/2016/02/the-5-key-components-of-an-agile-user-story/)  
+8. How to Write User Stories in Agile Product Development \- UserTesting, accessed October 28, 2025, [https://www.usertesting.com/blog/what-are-user-stories](https://www.usertesting.com/blog/what-are-user-stories)  
+9. User stories — examples and templates \- Adobe for Business, accessed October 28, 2025, [https://business.adobe.com/blog/basics/user-story-examples](https://business.adobe.com/blog/basics/user-story-examples)  
+10. What Is a User Story in Agile Methodology, and How Do You Write ..., accessed October 28, 2025, [https://www.icagile.com/resources/what-is-a-user-story-in-agile-methodology-and-how-do-you-write-one](https://www.icagile.com/resources/what-is-a-user-story-in-agile-methodology-and-how-do-you-write-one)  
+11. What is User Story and Acceptance Criteria (Examples) \- Agilemania, accessed October 28, 2025, [https://agilemania.com/what-is-user-story-and-acceptance-criteria](https://agilemania.com/what-is-user-story-and-acceptance-criteria)  
+12. Analysis of user interviews | Userpeek.com, accessed October 28, 2025, [https://userpeek.com/blog/analysis-of-user-interviews/](https://userpeek.com/blog/analysis-of-user-interviews/)  
+13. The Power of User Interviews: A Guide for Marketers \- M1 Project, accessed October 28, 2025, [https://www.m1-project.com/blog/the-power-of-user-interviews-a-guide-for-marketers](https://www.m1-project.com/blog/the-power-of-user-interviews-a-guide-for-marketers)  
+14. User stories—how do I validate them with actual research? \- UX Stack Exchange, accessed October 28, 2025, [https://ux.stackexchange.com/questions/123575/user-stories-how-do-i-validate-them-with-actual-research](https://ux.stackexchange.com/questions/123575/user-stories-how-do-i-validate-them-with-actual-research)  
+15. Analyzing UX Research: Tips and Best Practices \- User Interviews, accessed October 28, 2025, [https://www.userinterviews.com/ux-research-field-guide-chapter/research-analysis](https://www.userinterviews.com/ux-research-field-guide-chapter/research-analysis)  
+16. How to Analyze User Interviews \[2025 Guide\] \- Dovetail, accessed October 28, 2025, [https://dovetail.com/ux/how-to-analyze-user-interviews/](https://dovetail.com/ux/how-to-analyze-user-interviews/)  
+17. From Personas to User Stories \- Roman Pichler, accessed October 28, 2025, [https://www.romanpichler.com/blog/personas-epics-user-stories/](https://www.romanpichler.com/blog/personas-epics-user-stories/)  
+18. User Stories and Personas \- Easy Agile, accessed October 28, 2025, [https://www.easyagile.com/best-practice/user-story-maps-user-stories](https://www.easyagile.com/best-practice/user-story-maps-user-stories)  
+19. User Stories | Examples and Template \- Atlassian, accessed October 28, 2025, [https://www.atlassian.com/agile/project-management/user-stories](https://www.atlassian.com/agile/project-management/user-stories)  
+20. User Story \= Persona \+ Need \+ Purpose | by MunnaPraWiN | Tilicho Labs | Medium, accessed October 28, 2025, [https://medium.com/tilicholabs/user-story-persona-need-purpose-d1c502ff7715](https://medium.com/tilicholabs/user-story-persona-need-purpose-d1c502ff7715)  
+21. How To Prepare For A Story Mapping Workshop? \- StoriesOnBoard, accessed October 28, 2025, [https://storiesonboard.com/blog/story-mapping-workshop](https://storiesonboard.com/blog/story-mapping-workshop)  
+22. Mastering the Agile INVEST Model for Effective User Stories \- Invensis Learning, accessed October 28, 2025, [https://www.invensislearning.com/blog/agile-invest-model-to-write-user-stories/](https://www.invensislearning.com/blog/agile-invest-model-to-write-user-stories/)  
+23. INVEST (mnemonic) \- Wikipedia, accessed October 28, 2025, [https://en.wikipedia.org/wiki/INVEST\_(mnemonic)](https://en.wikipedia.org/wiki/INVEST_\(mnemonic\))  
+24. www.alooba.com, accessed October 28, 2025, [https://www.alooba.com/skills/concepts/user-story-writing-399/invest-criteria/\#:\~:text=INVEST%20Criteria%20is%20a%20simple,guide%20development%20and%20improve%20communication.](https://www.alooba.com/skills/concepts/user-story-writing-399/invest-criteria/#:~:text=INVEST%20Criteria%20is%20a%20simple,guide%20development%20and%20improve%20communication.)  
+25. INVEST Criteria For User Stories In SAFe \- Leanwisdom, accessed October 28, 2025, [https://www.leanwisdom.com/blog/crafting-high-quality-user-stories-with-the-invest-criteria-in-safe/](https://www.leanwisdom.com/blog/crafting-high-quality-user-stories-with-the-invest-criteria-in-safe/)  
+26. Everything You Need to Know When Assessing INVEST Criteria Skills \- Alooba, accessed October 28, 2025, [https://www.alooba.com/skills/concepts/user-story-writing-399/invest-criteria/](https://www.alooba.com/skills/concepts/user-story-writing-399/invest-criteria/)  
+27. Writing meaningful user stories with the INVEST principle \- LogRocket Blog, accessed October 28, 2025, [https://blog.logrocket.com/product-management/writing-meaningful-user-stories-invest-principle/](https://blog.logrocket.com/product-management/writing-meaningful-user-stories-invest-principle/)  
+28. User Story Acceptance Criteria Explained with Examples | by IntelliSoft | Medium, accessed October 28, 2025, [https://medium.com/@IntelliSoft/user-story-acceptance-criteria-explained-with-examples-563dc9c4d3f8](https://medium.com/@IntelliSoft/user-story-acceptance-criteria-explained-with-examples-563dc9c4d3f8)  
+29. Acceptance Criteria Explained \[+ Examples & Tips\] | The Workstream \- Atlassian, accessed October 28, 2025, [https://www.atlassian.com/work-management/project-management/acceptance-criteria](https://www.atlassian.com/work-management/project-management/acceptance-criteria)  
+30. Understanding Acceptance Criteria: Examples and Best Practices \- StoriesOnBoard, accessed October 28, 2025, [https://storiesonboard.com/blog/acceptance-criteria-examples](https://storiesonboard.com/blog/acceptance-criteria-examples)  

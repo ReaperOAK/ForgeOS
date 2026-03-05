@@ -1,0 +1,105 @@
+---
+source: "./.github/instructions/SDLC/5. User Stories in Planning & Discovery.md"
+chunk_index: 2
+token_estimate: 3826
+hash: "a395372396baa88f86f3d4bc51cfcffb23d4e3f60fadbdee60719cae4b272ecb"
+summary: "* **Step 4: Slice for Releases (MVP):** Finally, the team draws horizontal lines across the map to group stories into..."
+---
+* **Step 4: Slice for Releases (MVP):** Finally, the team draws horizontal lines across the map to group stories into releases or sprints. The first and most important slice is the Minimum Viable Product (MVP).21 This slice must include a thin but complete cross-section of the map, containing the essential stories from each backbone activity needed to deliver a basic, end-to-end user journey. This "walking skeleton" ensures that the first version of the product is a viable, valuable whole, rather than a collection of disconnected, half-finished parts.3
+
+The collaborative act of building this map forces critical conversations and surfaces different perspectives early in the process. A Tech Lead can identify potential technical dependencies, a UX Researcher can highlight user pain points, and a Product Manager can clarify business priorities in real time.6 This shared creation process builds a powerful sense of team-wide ownership and preemptively resolves ambiguities, drastically reducing the risk of costly misunderstandings later in the SDLC.
+
+## **IV. Engineering High-Caliber Stories: The INVEST Quality Framework**
+
+Once a backlog of User Stories has been generated, it is essential to ensure each story is well-formed, clear, and ready for further refinement. The INVEST mnemonic, created by Bill Wake, provides a simple yet powerful set of criteria for assessing the quality of a User Story.22 It serves as a rigorous quality assurance checklist that helps teams craft stories that are Independent, Negotiable, Valuable, Estimable, Small, and Testable.20
+
+### **4.1 Introduction to INVEST**
+
+Applying the INVEST criteria is a core practice for refining the high-level stories identified during the Discovery phase into actionable items. It transforms vague ideas into well-defined units of value that can be clearly understood, prioritized, and eventually passed to the design and development phases.
+
+### **4.2 Deep Dive into Each Criterion**
+
+* **Independent:** A story should be self-contained, with minimal dependencies on other stories.26 This allows stories to be developed and delivered in any order, providing the Product Owner with maximum flexibility to prioritize based on value.25 If Story A must be completed before Story B can start, they are not independent, which introduces scheduling risk.22  
+* **Negotiable:** A User Story is not a rigid, unchangeable contract; it is an invitation to a conversation.26 The details should be open for negotiation between the Product Owner and the implementation team.9 The story should define the "what" and "why" (the user need and value), but leave the "how" (the technical solution) to be determined through collaborative discussion.23 This prevents premature commitment to a specific design and allows the team's expertise to surface the best possible solution.  
+* **Valuable:** Every story must deliver tangible value to an end-user or to the business.26 This value should be clearly articulated, typically in the "so that" clause of the story format.25 If a story provides no clear value, it should be questioned, reframed, or removed from the backlog. This criterion ensures that development effort is always focused on meaningful outcomes.  
+* **Estimable:** The team must have enough information and clarity to provide a reasonable estimate of the effort required to implement the story.26 If a story is too vague, too large, or not well understood, it cannot be estimated.9 An inability to estimate is a clear signal that the story requires more conversation and refinement. This acts as a critical quality gate in the Discovery phase, preventing ambiguous requirements from moving forward.  
+* **Small:** Stories should be small enough to be completed within a single development iteration (or sprint).22 Large stories, often called Epics, are difficult to estimate and track, and they delay the delivery of value. In the Discovery phase, the goal is to break down large ideas into small, manageable chunks of functionality that can be delivered incrementally.7  
+* **Testable:** A story must be verifiable. There must be clear, objective criteria to determine whether it has been implemented correctly.22 These are captured in the Acceptance Criteria. If a story's success cannot be tested, it is not a well-defined requirement.27 This ensures that quality is built into the requirement from the very beginning.
+
+These criteria are not isolated checks but a system of reinforcing principles. For example, making a story smaller often forces the clarification needed to make it more estimable and testable. During the Planning & Discovery phase, the "Negotiable" and "Estimable" criteria are particularly critical for risk management. "Negotiable" preserves the focus on defining *what* to build, not *how*, while "Estimable" serves as a check on clarity, ensuring that only well-understood requirements proceed to the next phase of the SDLC.
+
+### **Table 1: The INVEST Criteria Application Checklist**
+
+| Criterion | Core Principle | Discovery Phase Litmus Test | Common Anti-Pattern | How to Fix It |
+| :---- | :---- | :---- | :---- | :---- |
+| **I**ndependent | Story is self-contained and can be prioritized freely. | Can this story be moved to the top of the backlog and delivered on its own? | "As a user, I want to enter my address." (Story A) and "As a user, I want to validate my address." (Story B) | Combine into a single, valuable story: "As a user, I want to enter and validate my shipping address so that my package arrives correctly." |
+| **N**egotiable | Story is a conversation starter, not a contract. | Does the story describe the user's goal, or does it specify UI details and technical implementation? | "As a user, I want a 250x250px blue button that, when clicked, opens a modal with a dropdown for country selection." | Focus on the intent: "As a user, I want to select my country from a list so that I can see country-specific pricing." The implementation is negotiated later. |
+| **V**aluable | Story delivers clear value to a user or the business. | Does the "so that" clause articulate a meaningful benefit? Can the team explain why this story matters? | "As a developer, I want to refactor the database module." (This is a task, not a user story). | Frame it in terms of user value: "As a user, I want search results to load faster so that I can find what I need without waiting." The refactoring is *how* this is achieved. |
+| **E**stimable | Story is clear and scoped enough for the team to estimate effort. | Can the development team provide a rough size estimate (e.g., story points) for this story? | "As a user, I want to manage my account." (This is too large and vague; it's an Epic). | Break it down into smaller, estimable stories: "View my profile," "Edit my contact information," "Change my password," etc. |
+| **S**mall | Story can be completed within a single development iteration. | Does this story represent a few days of work, not several weeks? | "As a user, I want to complete the entire checkout process." (This is likely too large for one sprint). | Split by workflow steps: "View my cart," "Enter shipping details," "Enter payment details," "Confirm order." |
+| **T**estable | Story has clear, objective success criteria. | Can we write specific, pass/fail acceptance criteria for this story? | "As a user, I want the profile page to be user-friendly." (This is subjective and not testable). | Define objective criteria: "The page must load in under 2 seconds," "All form fields must have clear labels," "An error message is shown for invalid input." |
+
+## **V. Defining Success: Mastering Acceptance Criteria**
+
+The "Confirmation" element of the 3 Cs framework is realized through the creation of Acceptance Criteria (AC). These are the specific, testable conditions that a User Story must meet to be considered complete and to be accepted by the Product Owner.11 Writing effective AC during the Discovery phase is a critical activity that eliminates ambiguity, defines the precise scope of a story, and establishes a shared understanding of success for the entire team.29
+
+### **5.1 The Role of Acceptance Criteria**
+
+Acceptance Criteria serve as the formal bridge between the high-level user need expressed in the story and the detailed functional requirements that the development team will build.6 They provide the necessary detail to guide development and form the basis for both manual and automated testing in later phases.6 By defining these criteria upfront, the team answers the crucial question, "How will we know when we are done?".31 This preemptively clarifies the boundaries of the story, preventing "scope creep" and ensuring that the final implementation directly addresses the agreed-upon requirements.
+
+### **5.2 Formats for Writing Acceptance Criteria**
+
+There are two primary formats for writing Acceptance Criteria, each suited to different types of requirements. The choice of format should be driven by the nature of the criteria being defined.
+
+* **Rule-Oriented (Checklist Style):** This is the most straightforward format, presenting the criteria as a simple bulleted list of rules or constraints that the system must satisfy.7 This style is highly effective for capturing specific business rules, data validations, or UI constraints in a concise and easily scannable manner.  
+  * **Example for a "User Registration" story:**  
+    * The password must be a minimum of 12 characters.  
+    * The password must contain at least one uppercase letter, one number, and one special character.  
+    * The user must agree to the Terms of Service before the account can be created.  
+    * An error message is displayed if the chosen username is already taken.  
+* **Scenario-Oriented (Given-When-Then):** This format, derived from Behavior-Driven Development (BDD) and known as Gherkin syntax, describes system behavior through concrete examples or scenarios.3 It is exceptionally well-suited for describing user interactions, workflows, and complex conditional logic. The structure provides rich context for the requirement.  
+  * **Given**: Describes the initial context or precondition of the system.  
+  * **When**: Describes the action or event that occurs.  
+  * **Then**: Describes the expected outcome or result.  
+  * **Example for a "Login" story:**  
+    * **Scenario:** Successful Login  
+      * Given I am a registered user and I am on the login page  
+      * When I enter my correct username and password  
+      * And I click the "Log In" button  
+      * Then I should be redirected to my account dashboard.
+
+### **5.3 Functional vs. Non-Functional Criteria**
+
+It is essential to capture both functional and non-functional requirements within the Acceptance Criteria to ensure a holistic definition of quality.
+
+* **Functional ACs** define what the system does. They describe specific behaviors, user actions, and system functions.28 The majority of ACs typically fall into this category, as seen in the examples above.  
+* **Non-Functional ACs** define how the system performs. They specify the quality attributes of the system, such as performance, security, usability, and reliability.28 These are often overlooked but are critical to delivering a high-quality user experience. Capturing them during the Discovery phase ensures they are considered from the outset.  
+  * **Example (Performance):** "The search results page must load in under 2 seconds on a standard broadband connection." 28  
+  * **Example (Security):** "The user's session must time out after 30 minutes of inactivity."  
+  * **Example (Usability):** "The feature must be accessible and compliant with WCAG 2.1 AA standards."
+
+### **Table 2: Comparison of Acceptance Criteria Formats**
+
+| Format | Structure | Best Used For... | Pros | Cons | Concrete Example |
+| :---- | :---- | :---- | :---- | :---- | :---- |
+| **Rule-Oriented** | Bulleted list of statements. | Defining specific business rules, data validations, UI constraints, and non-functional requirements. | Concise, easy to write and scan, excellent for atomic and unambiguous rules. | Can lack user context and may not fully describe interaction flows. | **Story:** "As a shopper, I want to apply a discount code to my cart." **AC:** The discount code field accepts alphanumeric characters.An "Invalid Code" error is shown for non-existent codes.The cart total is updated immediately upon successful application.A single discount code can be applied per order. |
+| **Scenario-Oriented** | Given-When-Then format. | Describing user workflows, interaction outcomes, end-to-end behaviors, and complex conditional logic. | Rich in context, encourages thinking about the user journey, easily translatable to automated tests. | Can be verbose for simple rules, may require more effort to write. | **Story:** "As a shopper, I want to apply a discount code to my cart." **AC:** Given I have items in my cart When I enter a valid discount code And I click "Apply" Then the cart total should be reduced by the discount amount. |
+
+## **VI. Managing Complexity: Techniques for Decomposing Epics**
+
+During the Planning & Discovery phase, many initial requirements will be large, complex ideas that are too broad to fit the "Small" and "Estimable" criteria of INVEST. These large stories are known as Epics.3 A critical skill for Product Managers and Business Analysts is the ability to strategically decompose these epics into a set of smaller, well-defined User Stories that can be prioritized and delivered incrementally.32
+
+### **6.1 The Hierarchy: Epics, Stories, and Tasks**
+
+Understanding the relationship between these three artifacts is key to managing a clean and effective product backlog.
+
+* **Epic:** An Epic represents a large body of work, a major feature, or a significant component of the user journey that cannot be delivered in a single development iteration.32 It serves as a high-level container for a group of related User Stories.3 For example, "User Profile Management" would be an Epic.  
+* **User Story:** A User Story is a smaller, more focused requirement that delivers a specific slice of value to the user and is small enough to be completed within a single sprint.32 The Epic "User Profile Management" could be broken down into stories like "View my profile," "Edit my profile," etc.  
+* **Task:** A Task is a specific, technical action that the development team needs to perform to complete a story.6 Tasks break down the "how" of a story and are typically defined by the development team just before or during implementation, outside the scope of the Discovery phase. Examples include "Create API endpoint for profile update" or "Design the profile page UI."
+
+### **6.2 Strategic Story Splitting Techniques**
+
+The goal of splitting an epic is to create "vertical slices" of functionality—small, end-to-end features that deliver demonstrable value—rather than "horizontal slices" based on technical layers (e.g., a "database story" followed by a "UI story").34 Several established patterns can guide this decomposition process.
+
+* **Workflow Steps:** This is one of the most common and effective techniques. The epic is broken down based on the sequential steps a user takes to complete a process.32  
+  * *Example Epic:* "As a customer, I want to book a hotel room online."  
