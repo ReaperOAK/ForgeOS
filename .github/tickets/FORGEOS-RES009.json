@@ -4,7 +4,7 @@
   "description": "Perform a detailed gap analysis of the current ForgeOS file-based system (tickets.py, agent-runner.py, todo_visual.py) against the distributed platform requirements. Map every current capability to its distributed equivalent, identify gaps that create migration risk, and document features that have no current equivalent (new capabilities). Produce a gap matrix suitable for architecture planning.",
   "type": "research",
   "priority": "critical",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "RESEARCH",
@@ -29,10 +29,10 @@
     "Research report delivered at docs/research/system-gap-analysis.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-05T20:43:42.305266+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -89,6 +89,15 @@
       "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
       "details": "Claimed by reaperoak@pop-os via Validator, lease until 2026-03-05T20:43:42.305266+00:00"
+    },
+    {
+      "timestamp": "2026-03-05T20:14:57.777269+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-research.md",
