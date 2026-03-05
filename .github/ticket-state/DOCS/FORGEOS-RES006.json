@@ -4,7 +4,7 @@
   "description": "Evaluate connection pooling strategies for the ForgeOS PostgreSQL deployment. Compare PgBouncer (external pooler) vs asyncpg application-level pooling vs SQLAlchemy async pool. Assess pool sizing for expected concurrent agent load, connection lifecycle management, transaction routing in pooled mode, and impact on advisory lock semantics.",
   "type": "research",
   "priority": "high",
-  "stage": "RESEARCH",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "RESEARCH",
@@ -29,10 +29,10 @@
     "Research report delivered at docs/research/pg-connection-pooling.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Research",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-05T19:39:05+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -55,6 +55,13 @@
       "agent": "Research",
       "machine_id": "pop-os",
       "details": "Claimed by Research on pop-os (reaperoak)"
+    },
+    {
+      "timestamp": "2026-03-05T19:15:00+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "Research",
+      "machine_id": "pop-os",
+      "details": "RESEARCH complete, advancing to DOCS. Confidence: HIGH (87%)"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-research.md",
