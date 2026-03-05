@@ -272,8 +272,10 @@ describe('Config module — Zod schema', () => {
       expect(loadConfig().NODE_ENV).toBe('development');
     });
 
-    it('accepts production', async () => {
+    it('accepts production with required vars', async () => {
       process.env['NODE_ENV'] = 'production';
+      process.env['WEBHOOK_SECRET'] = 'whsec_prod_test_secret';
+      process.env['ADMIN_API_KEY'] = 'prod_secure_key_12345';
       const loadConfig = await importLoadConfig();
       expect(loadConfig().NODE_ENV).toBe('production');
     });
@@ -282,6 +284,35 @@ describe('Config module — Zod schema', () => {
       process.env['NODE_ENV'] = 'test';
       const loadConfig = await importLoadConfig();
       expect(loadConfig().NODE_ENV).toBe('test');
+    });
+
+    it('throws in production when WEBHOOK_SECRET is missing', async () => {
+      process.env['NODE_ENV'] = 'production';
+      process.env['ADMIN_API_KEY'] = 'prod_secure_key_12345';
+      delete process.env['WEBHOOK_SECRET'];
+      const err = await expectImportToThrow();
+      expect(err.message).toContain('Invalid configuration');
+      expect(err.message).toContain('WEBHOOK_SECRET');
+      expect(err.message).toContain('required in production');
+    });
+
+    it('throws in production when ADMIN_API_KEY is still default', async () => {
+      process.env['NODE_ENV'] = 'production';
+      process.env['WEBHOOK_SECRET'] = 'whsec_prod_test_secret';
+      delete process.env['ADMIN_API_KEY']; // falls back to default
+      const err = await expectImportToThrow();
+      expect(err.message).toContain('Invalid configuration');
+      expect(err.message).toContain('ADMIN_API_KEY');
+      expect(err.message).toContain('required in production');
+    });
+
+    it('lists all missing required vars in production error', async () => {
+      process.env['NODE_ENV'] = 'production';
+      delete process.env['WEBHOOK_SECRET'];
+      delete process.env['ADMIN_API_KEY']; // falls back to default
+      const err = await expectImportToThrow();
+      expect(err.message).toContain('WEBHOOK_SECRET');
+      expect(err.message).toContain('ADMIN_API_KEY');
     });
   });
 
@@ -470,6 +501,21 @@ describe('Config module — exports', () => {
     const mod = await import('../config.js');
     expect(mod.config).toBeDefined();
     expect(typeof mod.config).toBe('object');
+  });
+
+  it('config object is frozen (Object.freeze) to prevent mutation', async () => {
+    const mod = await import('../config.js');
+    expect(Object.isFrozen(mod.config)).toBe(true);
+  });
+
+  it('config properties cannot be mutated at runtime', async () => {
+    const mod = await import('../config.js');
+    const originalPort = mod.config.PORT;
+    expect(() => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (mod.config as any).PORT = 9999;
+    }).toThrow();
+    expect(mod.config.PORT).toBe(originalPort);
   });
 
   it('exports AppConfig type (indirectly via config object shape)', async () => {
