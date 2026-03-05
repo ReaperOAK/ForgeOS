@@ -4,7 +4,7 @@
   "description": "Create the initial PostgreSQL migration file containing the complete DDL for ForgeOS. This includes all 7 tables (projects, agents, sessions, tickets, file_locks, events, system_config), 5 enum types (ticket_status, ticket_stage, ticket_type, ticket_priority, event_type), all indexes (GIN on arrays/JSONB, composite on stage+status, partial indexes for claimable tickets and expired leases), Row-Level Security policies, 8 SQL functions (claim_ticket, claim_ticket_by_id, advance_ticket, reject_ticket, release_ticket, extend_lease, resolve_dependencies, release_expired_claims), the update_updated_at trigger, and the notify_ticket_change trigger for SSE real-time updates via pg_notify. Schema must match the Architecture document \u00a73 specification exactly.",
   "type": "backend",
   "priority": "critical",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -37,10 +37,10 @@
     "Migration is idempotent (uses CREATE IF NOT EXISTS, CREATE OR REPLACE where appropriate)"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-05T21:17:59.188694+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -119,6 +119,15 @@
       "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
       "details": "Claimed by reaperoak@pop-os via Validator, lease until 2026-03-05T21:17:59.188694+00:00"
+    },
+    {
+      "timestamp": "2026-03-05T20:51:19.527840+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tickets/01-database-foundation.md",
