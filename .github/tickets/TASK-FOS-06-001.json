@@ -34,10 +34,10 @@
     "Hook exits 0 on valid messages, exits 1 on invalid messages"
   ],
   "rework_count": 1,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "DevOps Engineer",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-05T22:54:05.278379+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -107,6 +107,15 @@
       "from_stage": "CI",
       "to_stage": "BACKEND",
       "details": "Rework #1: FAIL (Score 0/100): 5 critical spec violations \u2014 (1) Husky not installed as devDependency, no prepare script; (2) Files at wrong paths: src/hooks/ instead of .husky/ and scripts/; (3) Hook files not committed to git (untracked); (4) Hook files not executable (0644); (5) validate-commit.sh does not exist anywhere. See .github/agent-output/CIReviewer/TASK-FOS-06-001.md and .sarif for details."
+    },
+    {
+      "timestamp": "2026-03-05T22:24:05.278397+00:00",
+      "event": "CLAIMED",
+      "agent": "DevOps Engineer",
+      "machine_id": "pop-os",
+      "from_stage": "BACKEND",
+      "to_stage": "BACKEND",
+      "details": "Claimed by reaperoak@pop-os via DevOps Engineer, lease until 2026-03-05T22:54:05.278379+00:00"
     }
   ],
   "source_task_file": "TODO/tickets/06-git-integration.md",
