@@ -823,3 +823,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Security/TASK-FOS-08-001.md
 - **Decisions:** PASS with HIGH confidence. STRIDE threat model: max score 6 (LOW). OWASP Top 10: 10/10 categories reviewed, all applicable PASS. Secret scan: CLEAN. 3 low-severity advisories documented (image tag not pinned to digest, devDeps in runtime, no npm audit in build). Zero critical/high findings. Ticket advanced to CI.
 - **Timestamp:** 2026-03-06T12:00:00Z
+
+### [TASK-FOS-06-001] — Husky Commit-Msg Hook (Rework #1)
+- **Artifacts:** forgeos-server/.husky/commit-msg, forgeos-server/scripts/validate-commit.sh, forgeos-server/package.json, .github/agent-output/DevOps/TASK-FOS-06-001.md
+- **Decisions:** Fixed all 5 CI rejection findings: installed husky@9.1.7 as devDep with prepare script, created hooks at correct paths (.husky/commit-msg + scripts/validate-commit.sh), committed files to git with 100755 permissions via git update-index, used bash built-in [[ =~ ]] instead of grep subprocess. All 8 acceptance criteria verified passing.
+- **Timestamp:** 2026-03-06T04:00:00Z
