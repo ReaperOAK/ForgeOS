@@ -4,7 +4,7 @@
   "description": "Create the initial PostgreSQL migration file containing the complete DDL for ForgeOS. This includes all 7 tables (projects, agents, sessions, tickets, file_locks, events, system_config), 5 enum types (ticket_status, ticket_stage, ticket_type, ticket_priority, event_type), all indexes (GIN on arrays/JSONB, composite on stage+status, partial indexes for claimable tickets and expired leases), Row-Level Security policies, 8 SQL functions (claim_ticket, claim_ticket_by_id, advance_ticket, reject_ticket, release_ticket, extend_lease, resolve_dependencies, release_expired_claims), the update_updated_at trigger, and the notify_ticket_change trigger for SSE real-time updates via pg_notify. Schema must match the Architecture document \u00a73 specification exactly.",
   "type": "backend",
   "priority": "critical",
-  "stage": "QA",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -74,6 +74,24 @@
       "from_stage": "BACKEND",
       "to_stage": "QA",
       "details": "Advanced from BACKEND to QA"
+    },
+    {
+      "timestamp": "2026-03-05T19:08:02.574343+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
+    },
+    {
+      "timestamp": "2026-03-05T19:14:11.681497+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
     }
   ],
   "source_task_file": "TODO/tickets/01-database-foundation.md",

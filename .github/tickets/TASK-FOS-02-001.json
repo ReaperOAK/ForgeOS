@@ -4,7 +4,7 @@
   "description": "Initialize the ForgeOS MCP server project. Create package.json with all required dependencies: @modelcontextprotocol/server, @modelcontextprotocol/node, pg, zod (v4), express, @types/express, @types/pg, typescript, tsx, @octokit/webhooks, d3 (CDN \u2014 no npm install needed for dashboard). Create tsconfig.json with TypeScript strict mode enabled (strict: true, all strict flags). Create the entry point (index.ts) that boots Express, creates the MCP server via factory function, sets up Streamable HTTP transport with session management, registers the health endpoint, and starts listening on configurable PORT (default 3000). Create server.ts as the MCP server factory function that will later register all tools. Implement graceful shutdown that drains in-flight requests on SIGTERM/SIGINT.",
   "type": "backend",
   "priority": "critical",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -83,6 +83,15 @@
       "from_stage": "QA",
       "to_stage": "SECURITY",
       "details": "Advanced from QA to SECURITY"
+    },
+    {
+      "timestamp": "2026-03-05T19:14:16.166884+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
     }
   ],
   "source_task_file": "TODO/tickets/02-mcp-server-core.md",

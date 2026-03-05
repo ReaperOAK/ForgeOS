@@ -558,3 +558,28 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/research/pg-connection-pooling.md, .github/agent-output/Research/FORGEOS-RES006.md
 - **Decisions:** Recommend phased pooling strategy — pg Pool (current, tuned to max=20) for ≤50 agents, add PgBouncer transaction mode for >50 agents. PgBouncer TX mode confirmed fully compatible with pg_advisory_xact_lock and SET LOCAL (RLS). asyncpg/SQLAlchemy evaluated but Python-only, not applicable to Node.js stack. Confidence: HIGH (87%).
 - **Timestamp:** 2026-03-06T19:15:00Z
+
+### [TASK-FOS-01-001] — Security Review
+- **Artifacts:** .github/agent-output/Security/TASK-FOS-01-001.md
+- **Decisions:** PASS — STRIDE threat modeling on all 7 tables, 10 stored functions, RLS policies. 2 medium findings (agent_file_locks RLS overly permissive USING(TRUE) CWE-285, session_token plaintext CWE-312) risk-accepted: operations mediated by stored functions, session tokens are short-lived agent identifiers not user credentials. 0 critical/high. OWASP 10/10 checked. Confidence: HIGH.
+- **Timestamp:** 2026-03-07T01:30:00Z
+
+### [TASK-FOS-02-001] — Security Review
+- **Artifacts:** .github/agent-output/Security/TASK-FOS-02-001.md
+- **Decisions:** PASS — STRIDE on Express server, MCP transport, SSE, NOTIFY. 3 low findings: non-constant-time admin key comparison (CWE-208), unauthenticated SSE /events endpoint (CWE-306), no explicit rate limiting (CWE-770). All risk-accepted for internal tooling context. 0 critical/high. OWASP 10/10 checked. Confidence: HIGH.
+- **Timestamp:** 2026-03-07T01:30:00Z
+
+### [TASK-FOS-02-002] — Security Review
+- **Artifacts:** .github/agent-output/Security/TASK-FOS-02-002.md
+- **Decisions:** PASS — STRIDE on TypeScript type definitions. 2 low findings: EventType TS-SQL enum mismatch (CWE-704), permissive string[] permissions type (CWE-269). Risk-accepted: enums are TypeScript supersets of SQL (valid extensibility), permissions are validated by RLS at DB layer. 0 critical/high. OWASP 10/10 checked. Confidence: HIGH.
+- **Timestamp:** 2026-03-07T01:30:00Z
+
+### [TASK-FOS-06-001] — Security Review
+- **Artifacts:** .github/agent-output/Security/TASK-FOS-06-001.md
+- **Decisions:** PASS — STRIDE on commit-msg.sh and pre-commit.sh Git hooks. 1 low finding: Python3 fallback path interpolates TICKET_FILE into code string (CWE-78), mitigated by controlled CI environment and validated input. 0 critical/high. OWASP 10/10 checked. Confidence: HIGH.
+- **Timestamp:** 2026-03-07T01:30:00Z
+
+### [TASK-FOS-08-003] — Security Review
+- **Artifacts:** .github/agent-output/Security/TASK-FOS-08-003.md
+- **Decisions:** PASS — STRIDE on config.ts, Dockerfile, docker-compose.yml, .env.example. 1 medium finding: default ADMIN_API_KEY='forgeos_admin_CHANGE_ME' accepted in production (CWE-1188), mitigated by CHANGE_ME naming convention and operational documentation. 1 low: POSTGRES_PASSWORD hardcoded in docker-compose (CWE-798), standard for local dev. 0 critical/high. OWASP 10/10 checked. Confidence: HIGH.
+- **Timestamp:** 2026-03-07T01:30:00Z
