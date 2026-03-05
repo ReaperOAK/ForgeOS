@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-06T18:00:00Z -->
+<!-- last_reviewed: 2026-03-06T22:00:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -47,6 +47,60 @@ The server starts on `http://localhost:3000` by default.
 | `lint`          | `eslint src/`        | Run ESLint on source files             |
 | `test`          | `vitest run`         | Run test suite once                    |
 | `test:watch`    | `vitest`             | Run tests in watch mode                |
+
+## Database
+
+### Connection Pool
+
+The server uses a lazily-initialized `pg.Pool` singleton
+(`src/db/pool.ts`). The pool is created on the first call to `getPool()`
+and reused for the lifetime of the process.
+
+| Setting | Default | Description |
+|---------|---------|-------------|
+| Max connections | 20 | Maximum concurrent clients |
+| Idle timeout | 30 s | Time before idle clients are removed |
+| Connection timeout | 10 s | Maximum wait for a new connection |
+
+The pool emits structured pino log events for connection errors,
+pool exhaustion (clients waiting), and client lifecycle changes.
+
+#### Health Check
+
+`healthCheck()` executes `SELECT 1`, measures round-trip latency, and
+returns pool statistics (total, idle, waiting counts). Used by the
+`GET /health` endpoint.
+
+#### Row-Level Security Helpers
+
+Two query helpers enforce RLS by setting PostgreSQL session variables
+before each query:
+
+- **`queryWithRLS(agentRole, agentName, sql, params)`** — single query
+  in a transaction with automatic rollback on failure.
+- **`transactionWithRLS(agentRole, agentName, fn)`** — executes an
+  arbitrary async function inside a transaction with RLS context.
+
+Both log slow queries exceeding 1 second.
+
+### Migrations
+
+SQL migration files live in `src/db/migrations/` and are applied in
+lexicographic filename order. The runner (`src/db/migrate.ts`) tracks
+applied migrations in a `schema_migrations` table with SHA-256 checksum
+verification.
+
+```bash
+# Apply pending migrations
+npm run migrate
+```
+
+Key behaviors:
+- **Idempotent** — already-applied migrations are skipped.
+- **Checksum verification** — throws if a previously applied migration
+  file has been modified, preventing silent schema drift.
+- **Transactional** — each migration runs inside `BEGIN`/`COMMIT`; a
+  failure rolls back only the failing migration.
 
 ## Configuration
 

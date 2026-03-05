@@ -565,19 +565,35 @@ The `system_config` table is seeded with default operational parameters:
 
 ## Running Migrations
 
+<!-- last_reviewed: 2026-03-06T18:00:00Z -->
+
 The migration runner (`forgeos-server/src/db/migrate.ts`) handles schema setup.
 
 ```bash
 # Run all pending migrations
+npm run migrate
+# Or directly:
 npx tsx src/db/migrate.ts
 ```
 
 The runner:
-1. Creates a `_migrations` tracking table (if it does not already exist).
-2. Reads all `.sql` files from `src/db/migrations/` in alphabetical order.
-3. Skips files already recorded in `_migrations`.
-4. Executes each pending migration in a transaction (BEGIN → SQL → INSERT
+1. Creates a `schema_migrations` tracking table (if it does not already exist)
+   with columns: `id`, `name`, `checksum`, `applied_at`.
+2. Reads all `.sql` files from `src/db/migrations/` in lexicographic order.
+3. Verifies SHA-256 checksums of previously applied migrations — throws on
+   mismatch to prevent silent schema drift.
+4. Skips files already recorded in `schema_migrations`.
+5. Executes each pending migration in a transaction (BEGIN → SQL → INSERT
    tracking row → COMMIT). On failure, rolls back the individual migration.
 
 Migrations are idempotent: the schema uses `CREATE IF NOT EXISTS`,
 `CREATE OR REPLACE`, and `ON CONFLICT DO NOTHING` where appropriate.
+
+### schema_migrations Table
+
+| Column | Type | Description |
+|--------|------|-------------|
+| `id` | SERIAL | Auto-increment primary key |
+| `name` | TEXT | Migration filename (unique) |
+| `checksum` | TEXT | SHA-256 hex digest of file contents at apply time |
+| `applied_at` | TIMESTAMPTZ | Timestamp when the migration was executed |

@@ -100,6 +100,15 @@ function getMigrationFiles(): string[] {
  *
  * @returns Number of migrations applied
  * @throws Error if an applied migration's file has been modified (checksum mismatch)
+ * @throws Error if a migration SQL statement fails (transaction is rolled back)
+ *
+ * @example
+ * ```ts
+ * import { runMigrations } from './db/migrate.js';
+ *
+ * const applied = await runMigrations();
+ * console.log(`Applied ${applied} migration(s)`);
+ * ```
  */
 export async function runMigrations(): Promise<number> {
   await ensureMigrationsTable();

@@ -27,8 +27,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   Security policies, 10 stored functions (claim, advance, reject, release,
   extend lease, resolve dependencies, release expired claims, notify), and
   triggers for auto-updated timestamps and real-time SSE via `pg_notify`.
+- **Database connection pool** (`src/db/pool.ts`) — Lazily-initialized
+  `pg.Pool` singleton with configurable max connections (20), idle timeout
+  (30 s), and connection timeout (10 s). Includes `healthCheck()` for
+  connectivity verification, `setSessionContext()` for PostgreSQL RLS
+  session variables, `queryWithRLS()` and `transactionWithRLS()` helpers
+  with automatic rollback and slow-query logging (> 1 s threshold).
+  Structured pino log events for connection errors, pool exhaustion, and
+  client lifecycle.
 - **Migration runner** (`src/db/migrate.ts`) — Tracks applied migrations in a
-  `_migrations` table, executes pending `.sql` files in transactions.
+  `schema_migrations` table with SHA-256 checksum verification. Reads `.sql`
+  files in lexicographic order, skips already-applied migrations (idempotent),
+  and rolls back on failure. Runnable via `npm run migrate` or CLI.
+- **Database barrel exports** (`src/db/index.ts`) — Re-exports pool, health
+  check, RLS helpers, and migration runner from the `db` module.
 - **Schema reference documentation** (`docs/database/schema-reference.md`) —
   Complete reference for all database objects, indexes, functions, and
   relationships.
