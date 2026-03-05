@@ -688,3 +688,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/TASK-FOS-01-001.md
 - **Decisions:** APPROVED — All 10 DoD items pass. 12/12 acceptance criteria verified. 806 tests pass (149 schema-specific). tsc --noEmit clean. Zero console statements, zero TODO comments, zero unhandled promises in scope. All upstream verdicts confirmed: QA PASS, Security PASS (2 medium + 2 low, risk accepted), CI PASS (100/100), Documentation PASS (HIGH). 5 non-blocking known defects documented for future tickets (priority ordering, TS-SQL enum mismatch, missing INSERT RLS policy, file_locks RLS overly permissive, plaintext session tokens). ESLint not installed as devDependency (project-level gap).
 - **Timestamp:** 2026-03-06T14:00:00Z
+
+### [FORGEOS-ARCH001] — Documentation Review
+- **Artifacts:** docs/architecture/system-components.md, .github/agent-output/Documentation/FORGEOS-ARCH001.md
+- **Decisions:** Added Diátaxis quadrant (Explanation) to frontmatter. Hyperlinked all 6 research document cross-references (RES001–RES009). Expanded glossary from 10 to 17 terms (PgBouncer, JSON-RPC, ADR, DAG, ACID, Zod, Pino). Added Appendix links to ToC. Added Related Documents section. Improved readability with active voice and shorter sentences. Added Mermaid click handlers for DAG navigation.
+- **Timestamp:** 2026-03-06T14:30:00Z
