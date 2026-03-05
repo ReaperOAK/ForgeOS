@@ -4,7 +4,7 @@
   "description": "Install Husky in the ForgeOS server project and create a commit-msg hook that validates commit message format as specified in Architecture \u00a77.5. The hook reads the commit message from the file passed as $1, validates it matches the required [TICKET-ID] prefix pattern using regex. Valid formats: \"[TICKET-ID] CLAIM by AGENT on MACHINE (OPERATOR)\" for claim commits and \"[TICKET-ID] STAGE complete by AGENT on MACHINE\" for work commits. Invalid messages are rejected with a clear error message showing the expected format. The hook is a shell script committed to the .husky/ directory.",
   "type": "infra",
   "priority": "medium",
-  "stage": "CI",
+  "stage": "BACKEND",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -33,11 +33,11 @@
     "--no-verify bypass works for emergency commits (standard Git behavior)",
     "Hook exits 0 on valid messages, exits 1 on invalid messages"
   ],
-  "rework_count": 0,
-  "claimed_by": "CI Reviewer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-05T21:06:33.297162+00:00",
+  "rework_count": 1,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -98,6 +98,15 @@
       "from_stage": "CI",
       "to_stage": "CI",
       "details": "Claimed by reaperoak@pop-os via CI Reviewer, lease until 2026-03-05T21:06:33.297162+00:00"
+    },
+    {
+      "timestamp": "2026-03-05T20:39:35.192772+00:00",
+      "event": "REWORK",
+      "agent": "CI Reviewer",
+      "machine_id": "system",
+      "from_stage": "CI",
+      "to_stage": "BACKEND",
+      "details": "Rework #1: FAIL (Score 0/100): 5 critical spec violations \u2014 (1) Husky not installed as devDependency, no prepare script; (2) Files at wrong paths: src/hooks/ instead of .husky/ and scripts/; (3) Hook files not committed to git (untracked); (4) Hook files not executable (0644); (5) validate-commit.sh does not exist anywhere. See .github/agent-output/CIReviewer/TASK-FOS-06-001.md and .sarif for details."
     }
   ],
   "source_task_file": "TODO/tickets/06-git-integration.md",
