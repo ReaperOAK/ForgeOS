@@ -4,7 +4,7 @@
   "description": "Evaluate the official MCP Python SDK for maturity, stability, and fitness for production use in the ForgeOS platform. Assess API surface completeness, error handling robustness, async support, typing coverage, test coverage, release cadence, known issues, and community adoption. Identify gaps that may require custom implementation or workarounds.",
   "type": "research",
   "priority": "high",
-  "stage": "READY",
+  "stage": "RESEARCH",
   "sdlc_flow": [
     "READY",
     "RESEARCH",
@@ -29,10 +29,10 @@
     "Research report delivered at docs/research/mcp-sdk-evaluation.md"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Research",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-05T19:28:25Z",
   "lease_duration_minutes": 30,
   "history": [
     {
