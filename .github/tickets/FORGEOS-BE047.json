@@ -1,0 +1,65 @@
+{
+  "ticket_id": "FORGEOS-BE047",
+  "title": "Implement Background Lease Heartbeat in SDK",
+  "description": "Implement automatic lease heartbeat in the agent SDK. When an agent claims a ticket, a background asyncio task periodically sends heartbeat calls to extend the lease. The heartbeat interval is configurable (default: every 5 minutes for a 30-minute lease). Heartbeat integrates with the server-side lease heartbeat mechanism (FORGEOS-BE008). The heartbeat task is automatically started on claim and stopped on advance/release/rework.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:06:45.278964+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE045",
+    "FORGEOS-BE008"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE045",
+    "FORGEOS-BE008"
+  ],
+  "file_paths": [
+    "agent-sdk/src/forgeos_sdk/heartbeat.py",
+    "agent-sdk/src/forgeos_sdk/operations.py"
+  ],
+  "acceptance_criteria": [
+    "Background asyncio task sends periodic heartbeat to extend the active lease",
+    "Heartbeat interval configurable (default: lease_duration / 6, e.g., 5 min for 30 min lease)",
+    "Heartbeat automatically started when claim_next() or claim() succeeds",
+    "Heartbeat automatically stopped when advance(), release(), or rework() is called",
+    "Heartbeat failure (network error, lease already expired) raises LeaseExpiredError",
+    "Heartbeat runs as a non-blocking background task that does not interfere with agent work"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:06:45.278974+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase3-agent-sdk.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase3-agent-sdk.md",
+  "tags": [
+    "backend",
+    "sdk",
+    "heartbeat",
+    "lease",
+    "background",
+    "phase3",
+    "BLK-07-02"
+  ]
+}

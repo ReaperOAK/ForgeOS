@@ -1,0 +1,63 @@
+{
+  "ticket_id": "FORGEOS-BE007",
+  "title": "Implement File-Level Advisory Lock Mutex",
+  "description": "Implement file-level mutual exclusion using PostgreSQL advisory locks (pg_advisory_xact_lock) keyed on file path hashes. This prevents two agents from modifying the same file concurrently. The advisory lock is transaction-scoped, automatically releasing when the transaction commits or rolls back.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:59:13.991279+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE002",
+    "FORGEOS-BE011"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE002",
+    "FORGEOS-BE011"
+  ],
+  "file_paths": [
+    "mcp-server/src/locking/file_mutex.py"
+  ],
+  "acceptance_criteria": [
+    "Advisory lock function accepts a file path and acquires a transaction-scoped lock on its hash",
+    "Hash function produces consistent int64 keys from file paths using a deterministic algorithm",
+    "Try-lock variant (pg_try_advisory_xact_lock) returns immediately if lock is held by another session",
+    "Lock is automatically released when the transaction ends (commit or rollback)",
+    "File_locks table updated to track active locks for observability",
+    "Concurrent lock attempts on the same file path correctly serialize or fail-fast"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:59:13.991285+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase2-database.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase2-database.md",
+  "tags": [
+    "backend",
+    "locking",
+    "advisory",
+    "mutex",
+    "phase2",
+    "BLK-05-02"
+  ]
+}

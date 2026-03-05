@@ -1,0 +1,64 @@
+{
+  "ticket_id": "FORGEOS-BE046",
+  "title": "Implement SDK Error Handling and Configuration",
+  "description": "Implement structured exception hierarchy and centralized configuration for the agent SDK. Define exception classes: `ForgeOSError` (base), `ClaimConflictError`, `LeaseExpiredError`, `InvalidTransitionError`, `NetworkError`, `AuthenticationError`. Implement configuration class loading from environment variables with validation and sensible defaults.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:06:45.278484+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE044"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE044"
+  ],
+  "file_paths": [
+    "agent-sdk/src/forgeos_sdk/exceptions.py",
+    "agent-sdk/src/forgeos_sdk/config.py"
+  ],
+  "acceptance_criteria": [
+    "Base ForgeOSError exception with error_code and details attributes",
+    "ClaimConflictError raised when claim fails due to another agent holding the ticket",
+    "LeaseExpiredError raised when an operation fails because the claim lease has expired",
+    "InvalidTransitionError raised for invalid SDLC stage transitions",
+    "NetworkError raised for connection failures with retry hint",
+    "AuthenticationError raised for invalid or expired credentials",
+    "Configuration class loads FORGEOS_SERVER_URL, FORGEOS_AGENT_ID, FORGEOS_TRANSPORT, FORGEOS_API_KEY from env",
+    "Configuration validates required fields and provides clear error messages for missing values"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:06:45.278491+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase3-agent-sdk.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase3-agent-sdk.md",
+  "tags": [
+    "backend",
+    "sdk",
+    "errors",
+    "config",
+    "phase3",
+    "BLK-07-01"
+  ]
+}

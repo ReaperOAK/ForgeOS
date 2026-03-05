@@ -1,0 +1,62 @@
+{
+  "ticket_id": "FORGEOS-ARCH002",
+  "title": "ADR \u2014 PostgreSQL as Primary State Store",
+  "description": "Author an Architecture Decision Record (ADR) documenting the decision to use PostgreSQL as the primary mutable state store for ForgeOS, replacing filesystem-based state directories. Evaluate alternatives (SQLite, Redis, etcd, CockroachDB), document trade-offs, and justify the selection based on distributed locking capabilities, ACID guarantees, and operational maturity.",
+  "type": "architecture",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "ARCHITECT",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:51:09.798998+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-RES005",
+    "FORGEOS-RES006",
+    "FORGEOS-RES007"
+  ],
+  "blocked_by": [
+    "FORGEOS-RES005",
+    "FORGEOS-RES006",
+    "FORGEOS-RES007"
+  ],
+  "file_paths": [
+    "docs/architecture/adr/adr-001-postgresql.md"
+  ],
+  "acceptance_criteria": [
+    "ADR follows standard format: Title, Status, Context, Decision, Consequences",
+    "At least 4 alternatives evaluated: SQLite, Redis, etcd, CockroachDB",
+    "Evaluation criteria defined: ACID support, distributed locking, operational complexity, ecosystem",
+    "PostgreSQL selection justified with evidence from RES005, RES006, RES007 findings",
+    "Consequences documented: positive (locking, ACID), negative (operational overhead, hosting)",
+    "Migration impact assessed: what changes when moving from files to PostgreSQL",
+    "ADR delivered at docs/architecture/adr/adr-001-postgresql.md"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:51:09.799002+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase1-architecture.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase1-architecture.md",
+  "tags": [
+    "architecture",
+    "adr",
+    "postgresql",
+    "phase1",
+    "BLK-02-01"
+  ]
+}

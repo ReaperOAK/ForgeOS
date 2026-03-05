@@ -1,0 +1,62 @@
+{
+  "ticket_id": "FORGEOS-BE042",
+  "title": "Implement Per-Agent Rate Limiting",
+  "description": "Implement per-agent and per-machine rate limiting for MCP tool calls and REST API endpoints. Use a sliding window algorithm backed by PostgreSQL or in-memory storage. Different rate limits apply based on operation type: claim operations are more restrictive than status queries. Rate limit headers are included in responses.",
+  "type": "backend",
+  "priority": "medium",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:06:45.294220+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE028",
+    "FORGEOS-BE022"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE028",
+    "FORGEOS-BE022"
+  ],
+  "file_paths": [
+    "mcp-server/src/middleware/rate_limiter.py"
+  ],
+  "acceptance_criteria": [
+    "Rate limiter tracks requests per agent identity and per machine",
+    "Sliding window algorithm enforces configurable limits per time window",
+    "Claim/advance operations have stricter limits than read operations (status, list)",
+    "Rate limit exceeded returns MCP error or HTTP 429 with Retry-After header",
+    "Rate limit headers included in responses (X-RateLimit-Limit, X-RateLimit-Remaining)",
+    "Rate limits configurable via environment variables or server configuration"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:06:45.294223+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase3-ticket-api.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase3-ticket-api.md",
+  "tags": [
+    "backend",
+    "ratelimit",
+    "security",
+    "phase3",
+    "BLK-06-03"
+  ]
+}

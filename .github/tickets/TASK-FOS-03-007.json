@@ -1,0 +1,55 @@
+{
+  "ticket_id": "TASK-FOS-03-007",
+  "title": "tickets.graph \u2014 Dependency Graph",
+  "description": "Implement the tickets.graph MCP tool that returns the full ticket dependency DAG for visualization. Queries all tickets (optionally filtered by stage, type, or status), builds nodes (tickets) and edges (from depends_on relationships), and computes the critical path (longest path through the DAG). Must return within 500ms for up to 500 tickets.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:05:37.899817+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-FOS-03-001"
+  ],
+  "blocked_by": [
+    "TASK-FOS-03-001"
+  ],
+  "file_paths": [
+    "forgeos-server/src/tools/tickets-graph.ts"
+  ],
+  "acceptance_criteria": [
+    "Tool registered as 'tickets.graph' with Zod schema: filter (optional object with stage, type, status enums)",
+    "Returns {nodes: Ticket[], edges: {from: string, to: string}[], critical_path: string[]}",
+    "Nodes are full ticket objects; edges derived from each ticket's depends_on array",
+    "Critical path is computed as the longest path through the DAG from any root to any leaf",
+    "Optional filters narrow the node set by stage, type, or status",
+    "Query completes within 500ms for up to 500 tickets",
+    "Graph structure is valid \u2014 no cycles detected (DAG invariant preserved)"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:05:37.899822+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/03-ticket-tools.md"
+    }
+  ],
+  "source_task_file": "TODO/tickets/03-ticket-tools.md",
+  "tags": []
+}

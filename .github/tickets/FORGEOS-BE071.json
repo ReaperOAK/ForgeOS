@@ -1,0 +1,65 @@
+{
+  "ticket_id": "FORGEOS-BE071",
+  "title": "Implement Bidirectional Sync Engine",
+  "description": "Build the bidirectional synchronization engine that keeps filesystem and database in sync during the dual-mode period. Implement periodic sync (configurable interval, default 60s) that detects changes in either direction: new tickets in filesystem not in DB, stage changes in DB not reflected in filesystem, claim/lease updates. Implement conflict resolution with database-wins strategy: when both sides have diverged, the database state takes precedence. Log all resolved conflicts for audit.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:13:46.600632+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE070"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE070"
+  ],
+  "file_paths": [
+    "mcp-server/src/migration/sync_engine.py",
+    "mcp-server/src/migration/conflict_resolver.py"
+  ],
+  "acceptance_criteria": [
+    "Periodic sync runs at configurable interval (default 60 seconds)",
+    "Detects new tickets added to .github/tickets/ filesystem and imports to database",
+    "Detects stage changes in database and updates .github/ticket-state/ directories (moves JSON files)",
+    "Detects claim/lease updates in database and updates ticket JSON metadata",
+    "Conflict resolution uses database-wins strategy when both sides have diverged",
+    "All sync operations and conflict resolutions logged with structured entries",
+    "Sync engine can be started/stopped independently of the MCP server"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:13:46.600634+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase4-migration.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase4-migration.md",
+  "tags": [
+    "backend",
+    "migration",
+    "sync",
+    "bidirectional",
+    "conflict",
+    "reconciliation",
+    "phase4",
+    "BLK-11-01"
+  ]
+}

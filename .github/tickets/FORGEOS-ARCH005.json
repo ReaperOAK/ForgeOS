@@ -1,0 +1,61 @@
+{
+  "ticket_id": "FORGEOS-ARCH005",
+  "title": "Design Core Database Schema",
+  "description": "Design the complete PostgreSQL schema for the ForgeOS platform. Define all tables (tickets, claims, lease_heartbeats, stage_transitions, agents, machines, operators, file_locks), their columns, data types, relationships, primary keys, foreign keys, unique constraints, and NOT NULL constraints. Produce an ER diagram and document the rationale for schema design decisions.",
+  "type": "architecture",
+  "priority": "critical",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "ARCHITECT",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:51:09.800511+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-ARCH001",
+    "FORGEOS-ARCH002"
+  ],
+  "blocked_by": [
+    "FORGEOS-ARCH001",
+    "FORGEOS-ARCH002"
+  ],
+  "file_paths": [
+    "docs/architecture/database-schema.md"
+  ],
+  "acceptance_criteria": [
+    "All tables defined with columns, data types, and constraints: tickets, claims, lease_heartbeats, stage_transitions, agents, machines, operators, file_locks",
+    "Primary keys, foreign keys, and unique constraints documented per table",
+    "JSONB columns identified for flexible fields: dependencies, file_paths, acceptance_criteria, tags",
+    "ER diagram showing all table relationships",
+    "Data type rationale documented: why TEXT vs VARCHAR, TIMESTAMPTZ vs TIMESTAMP, etc.",
+    "Schema supports all SDLC operations: claim, advance, rework, sync, validate",
+    "Migration path from ticket JSON structure to relational schema documented",
+    "Schema document delivered at docs/architecture/database-schema.md"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:51:09.800514+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase1-architecture.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase1-architecture.md",
+  "tags": [
+    "architecture",
+    "database",
+    "schema",
+    "phase1",
+    "BLK-02-02"
+  ]
+}

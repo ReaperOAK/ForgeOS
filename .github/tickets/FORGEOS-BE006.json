@@ -1,0 +1,64 @@
+{
+  "ticket_id": "FORGEOS-BE006",
+  "title": "Implement Ticket Claim Queue with SKIP LOCKED",
+  "description": "Implement the ticket claim queue using PostgreSQL SELECT FOR UPDATE SKIP LOCKED for fair, non-blocking claim semantics. This replaces the git-push-based distributed lock. The claim queue allows agents to atomically claim the next available ticket matching their role criteria, without blocking other agents from claiming different tickets concurrently.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:59:13.990708+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE002",
+    "FORGEOS-BE011"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE002",
+    "FORGEOS-BE011"
+  ],
+  "file_paths": [
+    "mcp-server/src/locking/claim_queue.py",
+    "mcp-server/src/locking/__init__.py"
+  ],
+  "acceptance_criteria": [
+    "Claim function atomically selects and locks the next available ticket using SKIP LOCKED",
+    "Claim filters by ticket type and agent role compatibility",
+    "Claims respect ticket dependencies (only READY tickets are claimable)",
+    "Concurrent claim attempts on the same ticket result in exactly one winner, others transparently skip",
+    "Claim creates a record in the claims table with agent_id, machine_id, and lease_expiry",
+    "Function returns the claimed ticket data or None if no eligible tickets exist"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:59:13.990719+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase2-database.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase2-database.md",
+  "tags": [
+    "backend",
+    "locking",
+    "claims",
+    "skipLocked",
+    "phase2",
+    "BLK-05-02"
+  ]
+}

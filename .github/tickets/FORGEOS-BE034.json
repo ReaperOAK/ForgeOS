@@ -1,0 +1,68 @@
+{
+  "ticket_id": "FORGEOS-BE034",
+  "title": "Implement Ticket List REST Endpoint",
+  "description": "Implement the `GET /api/tickets` REST endpoint for listing tickets with filtering and pagination. The endpoint shares the ticket service layer created in FORGEOS-BE028. Supports filtering by stage, type, priority, claimed_by, and machine_id. Implement cursor-based or offset-based pagination. Create Pydantic response/request schemas. Mount the ASGI API routes on the HTTP transport from FORGEOS-BE017.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:06:45.288995+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE028",
+    "FORGEOS-BE017"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE028",
+    "FORGEOS-BE017"
+  ],
+  "file_paths": [
+    "mcp-server/src/api/routes/tickets.py",
+    "mcp-server/src/api/routes/__init__.py",
+    "mcp-server/src/api/__init__.py",
+    "mcp-server/src/api/schemas.py"
+  ],
+  "acceptance_criteria": [
+    "GET /api/tickets endpoint returns a paginated list of tickets",
+    "Filtering supported by query parameters: stage, type, priority, claimed_by, machine_id",
+    "Pagination via offset/limit or cursor with total count in response",
+    "Response schema defined with Pydantic models (TicketListResponse, TicketSummary)",
+    "API routes mounted on the existing HTTP/SSE transport server",
+    "Empty filter returns all tickets; invalid filter values return 400 Bad Request"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:06:45.289006+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase3-ticket-api.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase3-ticket-api.md",
+  "tags": [
+    "backend",
+    "rest",
+    "api",
+    "tickets",
+    "list",
+    "filtering",
+    "phase3",
+    "BLK-06-02"
+  ]
+}

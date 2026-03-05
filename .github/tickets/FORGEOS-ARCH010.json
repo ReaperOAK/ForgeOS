@@ -1,0 +1,59 @@
+{
+  "ticket_id": "FORGEOS-ARCH010",
+  "title": "Design Error Catalog and API Standards",
+  "description": "Design the error code catalog and API standards for the ForgeOS platform. Define error code taxonomy (claim conflicts, lease expiry, validation failures, dependency blocks), pagination contract for list endpoints, filtering syntax, idempotency key semantics for mutating operations, and rate limiting policy per agent/machine.",
+  "type": "architecture",
+  "priority": "medium",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "ARCHITECT",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:51:09.802266+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-ARCH008"
+  ],
+  "blocked_by": [
+    "FORGEOS-ARCH008"
+  ],
+  "file_paths": [
+    "docs/architecture/api/error-catalog.md"
+  ],
+  "acceptance_criteria": [
+    "Error code catalog with at least 20 error codes organized by category (claim, state, validation, auth, system)",
+    "Each error code has: numeric code, string code, HTTP status mapping, human-readable message template",
+    "Pagination contract defined: cursor-based vs offset-based, page size limits, response envelope",
+    "Filtering syntax defined for list endpoints: field operators (eq, in, gt, lt), combination logic",
+    "Idempotency key contract: header name, key format, deduplication window, response semantics",
+    "Rate limiting policy: per-agent, per-machine, per-endpoint limits with 429 response format",
+    "Error catalog document delivered at docs/architecture/api/error-catalog.md"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:51:09.802269+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase1-architecture.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase1-architecture.md",
+  "tags": [
+    "architecture",
+    "api",
+    "errors",
+    "standards",
+    "phase1",
+    "BLK-02-03"
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "ticket_id": "TASK-FOS-08-001",
+  "title": "Dockerfile for ForgeOS Server",
+  "description": "Create a multi-stage Dockerfile for the ForgeOS MCP server as specified in Architecture \u00a78.2. Stage 1 (builder): Node.js 22 Alpine base, install dependencies with npm ci, copy source and compile TypeScript with npm run build. Stage 2 (runtime): Node.js 22 Alpine base, copy compiled dist/ and node_modules/ from builder, copy dashboard static files, set NODE_ENV=production, run as non-root user (node), expose port 3000, add HEALTHCHECK instruction that curls /health endpoint, CMD to run the compiled entry point. Include a .dockerignore file that excludes node_modules, .git, dist, *.md, .env, and other non-essential files.",
+  "type": "infra",
+  "priority": "critical",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:05:37.906711+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-FOS-02-001"
+  ],
+  "blocked_by": [
+    "TASK-FOS-02-001"
+  ],
+  "file_paths": [
+    "forgeos-server/Dockerfile",
+    "forgeos-server/.dockerignore"
+  ],
+  "acceptance_criteria": [
+    "Multi-stage build: builder stage uses node:22-alpine, compiles TypeScript",
+    "Builder stage installs dependencies with npm ci (not npm install) for reproducible builds",
+    "Runtime stage uses node:22-alpine, copies only dist/, node_modules/, and dashboard static files",
+    "Runtime stage sets NODE_ENV=production and USER node (non-root)",
+    "EXPOSE 3000 directive present",
+    "HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD curl -f http://localhost:3000/health",
+    "CMD [\"node\", \"dist/index.js\"] as the entry point",
+    ".dockerignore excludes: node_modules, .git, dist, *.md (except README), .env, .env.*, secrets/",
+    "Built image size under 200MB"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:05:37.906719+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/08-infrastructure.md"
+    }
+  ],
+  "source_task_file": "TODO/tickets/08-infrastructure.md",
+  "tags": []
+}

@@ -1,0 +1,62 @@
+{
+  "ticket_id": "FORGEOS-DO007",
+  "title": "Create PostgreSQL Backup and Restore Scripts",
+  "description": "Create database backup and restore scripts for the ForgeOS PostgreSQL instance. Implement pg_dump-based backup with timestamped output files, a restore script that validates the backup before applying, and a strategy document describing backup frequency, retention, and WAL archiving recommendations for production.",
+  "type": "infra",
+  "priority": "medium",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:59:13.998838+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-DO002"
+  ],
+  "blocked_by": [
+    "FORGEOS-DO002"
+  ],
+  "file_paths": [
+    "infra/scripts/backup.sh",
+    "infra/scripts/restore.sh",
+    "docs/operations/backup-strategy.md"
+  ],
+  "acceptance_criteria": [
+    "Backup script creates timestamped pg_dump output files in a configurable directory",
+    "Restore script validates backup file integrity before applying to the database",
+    "Restore script requires explicit confirmation before overwriting existing data",
+    "Backup strategy document covers frequency, retention policy, and WAL archiving guidance",
+    "Scripts work with both local Docker and remote PostgreSQL instances",
+    "Backup and restore can be invoked via Makefile targets (`make backup`, `make restore`)"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:59:13.998841+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase2-infrastructure.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase2-infrastructure.md",
+  "tags": [
+    "infra",
+    "backup",
+    "postgres",
+    "phase2",
+    "BLK-12-02"
+  ]
+}

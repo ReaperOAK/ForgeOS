@@ -1,0 +1,65 @@
+{
+  "ticket_id": "FORGEOS-BE055",
+  "title": "Implement Role-Based Claim Restrictions",
+  "description": "Implement role-based claim restrictions that enforce stage ownership. Agents can only claim tickets matching their role's SDLC stage: Backend agent can only claim tickets in BACKEND stage, QA agent in QA stage, etc. The authorization layer checks the agent's role against the ticket's current stage before allowing a claim. Map the 14 agent roles to their authorized stages.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:06:45.283474+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE054",
+    "FORGEOS-BE028"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE054",
+    "FORGEOS-BE028"
+  ],
+  "file_paths": [
+    "mcp-server/src/auth/authorization.py",
+    "mcp-server/src/services/ticket_service.py"
+  ],
+  "acceptance_criteria": [
+    "Role-to-stage mapping defined for all 14 agent types (Backend\u2192BACKEND, QA\u2192QA, etc.)",
+    "Claim operations validate that the agent's role matches the ticket's current stage",
+    "Mismatched role-stage claim attempts rejected with descriptive authorization error",
+    "Operator role can claim on behalf of any agent role (with explicit role override)",
+    "Authorization check integrated into the claim service (both MCP and REST paths)",
+    "Role mapping is configurable (not hardcoded) for future role additions"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:06:45.283480+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase3-auth.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase3-auth.md",
+  "tags": [
+    "backend",
+    "auth",
+    "rbac",
+    "claims",
+    "restrictions",
+    "phase3",
+    "BLK-08-02"
+  ]
+}

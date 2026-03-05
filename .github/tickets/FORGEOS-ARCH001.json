@@ -1,0 +1,61 @@
+{
+  "ticket_id": "FORGEOS-ARCH001",
+  "title": "Design System Component Architecture",
+  "description": "Produce the high-level system component architecture for the ForgeOS distributed orchestration platform. Create component diagrams showing the 6 major components (MCP Server, PostgreSQL, Git, Agent Clients, Dashboard, Webhook Processor), their interfaces, communication protocols, and boundary definitions. Define the component interaction patterns and data flow overview.",
+  "type": "architecture",
+  "priority": "critical",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "ARCHITECT",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:51:09.798286+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-RES001",
+    "FORGEOS-RES005",
+    "FORGEOS-RES009"
+  ],
+  "blocked_by": [
+    "FORGEOS-RES001",
+    "FORGEOS-RES005",
+    "FORGEOS-RES009"
+  ],
+  "file_paths": [
+    "docs/architecture/system-components.md"
+  ],
+  "acceptance_criteria": [
+    "System component diagram created with all 6 major components and their interfaces",
+    "Component boundaries clearly defined: what each component owns and its responsibilities",
+    "Inter-component communication protocols specified (MCP, REST, WebSocket, SQL, Git)",
+    "Data flow overview diagram showing how a ticket operation traverses components",
+    "Deployment topology diagram showing single-machine and multi-machine configurations",
+    "Component dependency graph with startup order and health check dependencies",
+    "Architecture document delivered at docs/architecture/system-components.md"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:51:09.798299+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase1-architecture.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase1-architecture.md",
+  "tags": [
+    "architecture",
+    "components",
+    "phase1",
+    "BLK-02-01"
+  ]
+}

@@ -1,0 +1,56 @@
+{
+  "ticket_id": "FORGEOS-PM002",
+  "title": "Capture User Stories Across All Capabilities",
+  "description": "Capture user stories for the ForgeOS platform covering all capability domains. Produce at least 20 user stories across the 4 personas, covering ticket operations (claim, advance, rework), real-time monitoring, multi-machine coordination, authentication, webhook integration, and migration scenarios. Each story follows the format: As a [persona], I want to [action], so that [benefit].",
+  "type": "docs",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:51:09.803981+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-PM001"
+  ],
+  "blocked_by": [
+    "FORGEOS-PM001"
+  ],
+  "file_paths": [
+    "docs/product/user-stories.md"
+  ],
+  "acceptance_criteria": [
+    "At least 5 user stories for Human Operator persona covering: ticket status view, claim monitoring, manual intervention, dashboard interaction, migration control",
+    "At least 5 user stories for AI Agent persona covering: claim ticket, advance ticket, heartbeat lease, report results, handle rework",
+    "At least 5 user stories for ReaperOAK Dispatcher persona covering: scan ready tickets, dispatch agents, advance pipeline, handle escalations, sync state",
+    "At least 5 user stories for System Administrator persona covering: configure auth, monitor health, manage agents, handle failures, audit trail",
+    "Each user story has acceptance criteria (Given/When/Then format)",
+    "Stories prioritized using MoSCoW method (Must/Should/Could/Won't)",
+    "User stories document delivered at docs/product/user-stories.md"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:51:09.803985+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase1-product.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase1-product.md",
+  "tags": [
+    "product",
+    "user-stories",
+    "phase1",
+    "BLK-03-01"
+  ]
+}

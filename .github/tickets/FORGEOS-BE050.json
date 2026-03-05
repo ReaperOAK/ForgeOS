@@ -1,0 +1,65 @@
+{
+  "ticket_id": "FORGEOS-BE050",
+  "title": "Implement agent-runner.py Integration Hooks",
+  "description": "Implement integration hooks that connect the agent SDK to the existing `agent-runner.py` two-commit protocol. The SDK manages ticket state via MCP while `agent-runner.py` continues to handle git operations (git add, git commit, git push). Provide hook points: `pre_claim()`, `post_claim()`, `pre_commit()`, `post_commit()` that `agent-runner.py` can call at appropriate lifecycle stages.",
+  "type": "backend",
+  "priority": "medium",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:06:45.280778+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE049",
+    "FORGEOS-BE047"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE049",
+    "FORGEOS-BE047"
+  ],
+  "file_paths": [
+    "agent-sdk/src/forgeos_sdk/runner_hooks.py",
+    "agent-sdk/src/forgeos_sdk/__init__.py"
+  ],
+  "acceptance_criteria": [
+    "pre_claim() hook performs MCP claim before git CLAIM commit",
+    "post_claim() hook verifies MCP claim succeeded and returns ticket data",
+    "pre_commit() hook validates MCP lease is still active before git WORK commit",
+    "post_commit() hook calls MCP advance after successful git push",
+    "Hooks are optional \u2014 agent-runner.py works without them in filesystem mode",
+    "Hook interface documented with usage examples for agent-runner.py integration"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:06:45.280785+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase3-agent-sdk.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase3-agent-sdk.md",
+  "tags": [
+    "backend",
+    "sdk",
+    "agentrunner",
+    "integration",
+    "git",
+    "phase3",
+    "BLK-07-02"
+  ]
+}

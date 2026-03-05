@@ -1,0 +1,66 @@
+{
+  "ticket_id": "FORGEOS-BE074",
+  "title": "Implement Migration Phase B \u2014 SDK with Fallback",
+  "description": "Implement Migration Phase B: agents use the SDK (FORGEOS-BE050 integration hooks) for ticket operations, with automatic fallback to filesystem when the MCP server is unavailable. Feature flags transition per-operation from `filesystem` to `dual`. The CLAIM operation migrates first (via MCP), while WORK commits remain git-based. The SDK filesystem fallback (FORGEOS-BE049) activates transparently if the server is unreachable during an operation.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:13:46.601565+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE073",
+    "FORGEOS-BE050"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE073",
+    "FORGEOS-BE050"
+  ],
+  "file_paths": [
+    "mcp-server/src/migration/phases/phase_b.py",
+    "agent-sdk/src/forgeos_sdk/migration.py"
+  ],
+  "acceptance_criteria": [
+    "Phase B configuration sets claim operation to `dual` mode (MCP primary, filesystem secondary)",
+    "agent-runner.py CLAIM commit uses SDK when available, falls back to filesystem on failure",
+    "WORK commits remain purely git-based (no change from current behavior)",
+    "SDK fallback activates transparently on MCP connection failure",
+    "Operations succeeded via fallback are logged for manual sync verification",
+    "Phase transition gate: 95%+ operations succeed via MCP path for 48+ hours",
+    "Phase B entry and exit logged with timestamp and operation success ratios"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:13:46.601568+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase4-migration.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase4-migration.md",
+  "tags": [
+    "backend",
+    "migration",
+    "phaseB",
+    "sdkFallback",
+    "transition",
+    "phase4",
+    "BLK-11-02"
+  ]
+}

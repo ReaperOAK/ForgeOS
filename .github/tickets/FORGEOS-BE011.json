@@ -1,0 +1,64 @@
+{
+  "ticket_id": "FORGEOS-BE011",
+  "title": "Implement asyncpg Connection Pool",
+  "description": "Implement the database connection pool using asyncpg for the ForgeOS MCP server. Configure min/max connection limits, connection timeout, idle connection recycling, and pool lifecycle (initialize on server start, close on shutdown). The pool must be reusable across the entire server via dependency injection or a global accessor.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:59:13.993176+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE002",
+    "FORGEOS-DO002"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE002",
+    "FORGEOS-DO002"
+  ],
+  "file_paths": [
+    "mcp-server/src/db/pool.py",
+    "mcp-server/src/db/__init__.py"
+  ],
+  "acceptance_criteria": [
+    "asyncpg connection pool initializes with configurable min_size and max_size",
+    "Pool configuration loaded from environment variables (DATABASE_URL, POOL_MIN, POOL_MAX)",
+    "Pool provides async context manager for acquiring and releasing connections",
+    "Idle connections are recycled after a configurable timeout (default: 300 seconds)",
+    "Pool initialization verifies database connectivity and fails fast with a clear error",
+    "Pool exposes a close() method for clean shutdown"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:59:13.993180+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase2-database.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase2-database.md",
+  "tags": [
+    "backend",
+    "database",
+    "pool",
+    "asyncpg",
+    "phase2",
+    "BLK-05-03"
+  ]
+}

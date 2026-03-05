@@ -1,0 +1,62 @@
+{
+  "ticket_id": "FORGEOS-BE024",
+  "title": "Implement Structured JSON Logging",
+  "description": "Implement structured JSON logging for the MCP server. All log output must be machine-parseable JSON with consistent fields: timestamp, level, message, correlation_id, module, and optional context fields. Configure log levels per module. Ensure no PII (personally identifiable information) or secrets appear in any log output. Replace any print() statements with structured logger calls.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:59:14.010952+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE015"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE015"
+  ],
+  "file_paths": [
+    "mcp-server/src/observability/logging.py",
+    "mcp-server/src/observability/__init__.py"
+  ],
+  "acceptance_criteria": [
+    "All log output is valid JSON with fields: timestamp, level, message, logger, correlation_id",
+    "Log levels are configurable per module via environment variable (LOG_LEVEL)",
+    "No PII, secrets, API keys, or passwords appear in log output",
+    "Correlation ID from request context is automatically included in all log messages",
+    "Log format is consistent across all server modules (single formatter configuration)",
+    "Structured logger is importable as a shared utility for all server modules"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:59:14.010966+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase2-mcp-server.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase2-mcp-server.md",
+  "tags": [
+    "backend",
+    "observability",
+    "logging",
+    "structured",
+    "phase2",
+    "BLK-04-03"
+  ]
+}

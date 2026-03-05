@@ -1,0 +1,62 @@
+{
+  "ticket_id": "FORGEOS-BE040",
+  "title": "Implement Filtered WebSocket Subscriptions",
+  "description": "Extend the WebSocket streaming from FORGEOS-BE039 to support client-side filter subscriptions. Clients can subscribe to filtered streams (by stage, type, agent, or ticket_id) to receive only relevant events. Implement subscription management: clients send subscribe/unsubscribe messages to control their filter set.",
+  "type": "backend",
+  "priority": "medium",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:06:45.293256+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE039"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE039"
+  ],
+  "file_paths": [
+    "mcp-server/src/api/routes/websocket.py",
+    "mcp-server/src/services/event_broadcaster.py"
+  ],
+  "acceptance_criteria": [
+    "Clients can send subscribe messages with filter criteria (stage, type, agent_id, ticket_id)",
+    "Clients can send unsubscribe messages to remove filters",
+    "Filtered clients receive only events matching their subscription criteria",
+    "Multiple simultaneous filters are combined with OR logic (any match passes)",
+    "Default behavior (no subscription) receives all events",
+    "Backpressure management drops oldest events for slow consumers after buffer limit"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:06:45.293261+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase3-ticket-api.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase3-ticket-api.md",
+  "tags": [
+    "backend",
+    "websocket",
+    "filtering",
+    "subscriptions",
+    "phase3",
+    "BLK-06-03"
+  ]
+}

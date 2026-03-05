@@ -1,0 +1,69 @@
+{
+  "ticket_id": "FORGEOS-FE008",
+  "title": "Implement Active Claims Monitor",
+  "description": "Implement the active claims monitor view following the UIDesigner mockup (FORGEOS-UID004). Display a table of all currently claimed tickets with columns for ticket ID, agent, machine, operator, stage, and a real-time lease countdown timer. The countdown timer shows remaining lease time, turns yellow at <5 minutes, and red at <1 minute. Data updates in real-time via WebSocket. Support sorting by lease remaining and filtering by agent/machine.",
+  "type": "frontend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "UIDESIGNER",
+    "FRONTEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:13:46.598235+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-FE006",
+    "FORGEOS-UID004"
+  ],
+  "blocked_by": [
+    "FORGEOS-FE006",
+    "FORGEOS-UID004"
+  ],
+  "file_paths": [
+    "dashboard/src/app/claims/page.tsx",
+    "dashboard/src/components/claims/ClaimsTable.tsx",
+    "dashboard/src/components/claims/LeaseCountdown.tsx"
+  ],
+  "acceptance_criteria": [
+    "Claims table displays all actively claimed tickets with agent, machine, operator, and stage",
+    "LeaseCountdown component shows remaining time in MM:SS format",
+    "Countdown turns yellow (warning) when lease remaining < 5 minutes",
+    "Countdown turns red (critical) when lease remaining < 1 minute",
+    "Expired leases shown with \"EXPIRED\" badge in red",
+    "Table sortable by lease remaining (ascending to show expiring soonest first)",
+    "Real-time updates via WebSocket connection from FORGEOS-FE006"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:13:46.598237+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase4-dashboard.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase4-dashboard.md",
+  "tags": [
+    "frontend",
+    "dashboard",
+    "claims",
+    "monitor",
+    "lease",
+    "countdown",
+    "phase4",
+    "BLK-10-03"
+  ]
+}

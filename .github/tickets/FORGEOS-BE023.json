@@ -1,0 +1,61 @@
+{
+  "ticket_id": "FORGEOS-BE023",
+  "title": "Implement Concurrent Session Handling",
+  "description": "Implement concurrent session handling for the MCP server to support multiple agents connected simultaneously. Ensure session state is thread-safe (or async-safe), session operations do not block other sessions, and resource cleanup on session termination does not affect other active sessions. Implement session limits to prevent resource exhaustion.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:59:14.010007+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE022"
+  ],
+  "blocked_by": [
+    "FORGEOS-BE022"
+  ],
+  "file_paths": [
+    "mcp-server/src/sessions/concurrent.py"
+  ],
+  "acceptance_criteria": [
+    "Multiple agents can maintain simultaneous active sessions without interference",
+    "Session state access is async-safe using appropriate synchronization primitives",
+    "Session termination (timeout or disconnect) only affects the terminated session's resources",
+    "Maximum concurrent sessions is configurable (default: 50)",
+    "New connection attempts beyond the limit receive a clear rejection with retry guidance",
+    "Session manager performance does not degrade with increasing concurrent sessions (O(1) lookup)"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:59:14.010021+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase2-mcp-server.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase2-mcp-server.md",
+  "tags": [
+    "backend",
+    "mcp",
+    "sessions",
+    "concurrency",
+    "phase2",
+    "BLK-04-02"
+  ]
+}

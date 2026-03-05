@@ -1,0 +1,63 @@
+{
+  "ticket_id": "TASK-FOS-05-001",
+  "title": "Dashboard HTML/CSS Layout with Pipeline Visualization",
+  "description": "Build the main dashboard page as a vanilla HTML + CSS layout (no frontend framework, no build step) as specified in Architecture \u00a75 and PRD FR-22/FR-27. The page includes a Kanban-style pipeline board with columns for each active SDLC stage (READY, BACKEND, FRONTEND, QA, SECURITY, CI, DOCUMENTATION, VALIDATION). Each column displays ticket cards showing: ticket_id, title, type badge, priority indicator, claimed_by agent name, and lease countdown timer. Cards are color-coded by status (unclaimed=blue, claimed=yellow, expiring=orange, expired=red). The layout includes a header with system health summary, navigation tabs for Pipeline/Graph/Machines views, and filter controls for stage, type, priority, machine, and agent. Responsive layout, desktop-first. D3.js loaded via CDN script tag.",
+  "type": "frontend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "UIDESIGNER",
+    "FRONTEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:05:37.902720+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-FOS-05-002",
+    "TASK-FOS-03-010"
+  ],
+  "blocked_by": [
+    "TASK-FOS-05-002",
+    "TASK-FOS-03-010"
+  ],
+  "file_paths": [
+    "forgeos-server/src/dashboard/index.html",
+    "forgeos-server/src/dashboard/css/style.css"
+  ],
+  "acceptance_criteria": [
+    "Single HTML file served as static content by the Express server at GET /dashboard",
+    "Kanban board with 8+ stage columns; each column shows a ticket count badge",
+    "Ticket cards display: ticket_id, title (truncated), type badge (color-coded), priority dot, claimed_by, lease countdown",
+    "Cards color-coded: unclaimed blue (#3B82F6), claimed yellow (#EAB308), expiring (<5min) orange (#F97316), expired red (#EF4444)",
+    "Filter bar with dropdowns for stage, type, priority, machine, agent; filters update the board dynamically",
+    "Navigation tabs: Pipeline (active by default), Graph, Machines, Admin",
+    "Header shows: total tickets, active claims count, expired leases count, system uptime",
+    "CSS in separate style.css file; no inline styles except for dynamic values",
+    "Responsive layout: columns wrap on smaller screens; minimum readable at 1024px width",
+    "D3.js v7 loaded via CDN (<script src=\"https://d3js.org/d3.v7.min.js\">)",
+    "WCAG 2.2 AA compliance: 4.5:1 color contrast, ARIA labels on interactive elements, keyboard navigation"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:05:37.902722+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/05-dashboard.md"
+    }
+  ],
+  "source_task_file": "TODO/tickets/05-dashboard.md",
+  "tags": []
+}

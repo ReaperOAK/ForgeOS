@@ -1,0 +1,68 @@
+{
+  "ticket_id": "FORGEOS-FE006",
+  "title": "Implement WebSocket Real-Time Updates",
+  "description": "Implement WebSocket connectivity for real-time ticket state updates following BLK-06-03 output. Connect to the `/ws/tickets` WebSocket endpoint (FORGEOS-BE039) to receive live state change events. Create a React hook (`useTicketStream`) that manages the WebSocket connection lifecycle and dispatches updates to the pipeline board and ticket detail views. Handle reconnection on disconnect with exponential backoff.",
+  "type": "frontend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "UIDESIGNER",
+    "FRONTEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:13:46.597630+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-FE003",
+    "FORGEOS-BE039"
+  ],
+  "blocked_by": [
+    "FORGEOS-FE003",
+    "FORGEOS-BE039"
+  ],
+  "file_paths": [
+    "dashboard/src/lib/api/websocket.ts",
+    "dashboard/src/hooks/useTicketStream.ts",
+    "dashboard/src/components/pipeline/PipelineBoard.tsx"
+  ],
+  "acceptance_criteria": [
+    "WebSocket client connects to /ws/tickets endpoint on dashboard load",
+    "useTicketStream hook provides connection status (connected, connecting, disconnected)",
+    "Ticket state change events update the pipeline board in real-time (card moves between columns)",
+    "Ticket detail view updates in real-time when viewing a ticket that changes state",
+    "Automatic reconnection with exponential backoff (initial 1s, max 30s)",
+    "Connection status indicator visible in dashboard shell (green dot = connected)",
+    "WebSocket disconnection does not crash the application; falls back to manual refresh"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:13:46.597632+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase4-dashboard.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase4-dashboard.md",
+  "tags": [
+    "frontend",
+    "dashboard",
+    "websocket",
+    "realtime",
+    "streaming",
+    "phase4",
+    "BLK-10-02"
+  ]
+}

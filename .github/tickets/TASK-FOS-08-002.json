@@ -1,0 +1,63 @@
+{
+  "ticket_id": "TASK-FOS-08-002",
+  "title": "Docker Compose with PostgreSQL and Server",
+  "description": "Create Docker Compose configuration as specified in Architecture \u00a78.1 with three services: postgres (PostgreSQL 17 Alpine with healthcheck, persistent volume, init scripts mounted from migrations directory), pgbouncer (edoburu/pgbouncer in transaction mode with 50 default pool size and 200 max client connections), and mcp-server (built from Dockerfile, depends on postgres healthy + pgbouncer started, connects through pgbouncer, mounts workspace read-only). Include named volume for PostgreSQL data persistence, Docker secrets for database password, and configurable ports via environment variables. Every service has restart: unless-stopped policy.",
+  "type": "infra",
+  "priority": "critical",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:05:37.907074+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-FOS-08-001",
+    "TASK-FOS-01-001"
+  ],
+  "blocked_by": [
+    "TASK-FOS-08-001",
+    "TASK-FOS-01-001"
+  ],
+  "file_paths": [
+    "forgeos-server/docker-compose.yml",
+    "forgeos-server/secrets/.gitkeep"
+  ],
+  "acceptance_criteria": [
+    "Three services defined: postgres, pgbouncer, mcp-server",
+    "postgres uses image postgres:17-alpine with POSTGRES_DB=forgeos, POSTGRES_USER=forgeos, POSTGRES_PASSWORD_FILE=/run/secrets/db_password",
+    "postgres has healthcheck: pg_isready -U forgeos -d forgeos with interval=10s, retries=5, start_period=30s",
+    "postgres mounts migrations directory to /docker-entrypoint-initdb.d:ro for auto-schema setup",
+    "postgres has persistent named volume pgdata for /var/lib/postgresql/data",
+    "pgbouncer in transaction mode, depends_on postgres service_healthy, exposes port 6432",
+    "mcp-server built from local Dockerfile, depends_on postgres service_healthy + pgbouncer service_started",
+    "mcp-server DATABASE_URL points to pgbouncer:6432 (not postgres directly)",
+    "mcp-server mounts workspace path as read-only volume",
+    "Docker secrets configured for db_password (file-based secret)",
+    "docker compose up starts all services successfully with no manual intervention",
+    "All services have restart: unless-stopped policy"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:05:37.907078+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/08-infrastructure.md"
+    }
+  ],
+  "source_task_file": "TODO/tickets/08-infrastructure.md",
+  "tags": []
+}

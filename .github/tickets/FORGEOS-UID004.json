@@ -1,0 +1,66 @@
+{
+  "ticket_id": "FORGEOS-UID004",
+  "title": "Design Operator Workbench and Claims Monitor",
+  "description": "Design the operator workbench and active claims monitor views. The claims monitor shows all active claims with agent identity, machine ID, operator name, ticket info, and a real-time lease countdown timer. The operator workbench provides authenticated action buttons for claim, release, and advance operations. Design confirmation modals for destructive actions (force-release, force-advance). Define the multi-machine status panel showing connected machines and running agents.",
+  "type": "frontend",
+  "priority": "medium",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "UIDESIGNER",
+    "FRONTEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:13:46.595598+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-UID001"
+  ],
+  "blocked_by": [
+    "FORGEOS-UID001"
+  ],
+  "file_paths": [
+    "docs/uiux/mockups/FORGEOS-UID004.md",
+    "docs/uiux/components/claims-monitor.md",
+    "docs/uiux/components/operator-actions.md"
+  ],
+  "acceptance_criteria": [
+    "Claims monitor wireframe: table with columns (Ticket, Agent, Machine, Operator, Lease Remaining, Actions)",
+    "Lease countdown timer component: visual countdown with warning state at <5 minutes, critical at <1 minute",
+    "Operator action buttons: Claim (green), Release (orange), Advance (blue), Force-Release (red with lock icon)",
+    "Confirmation modal for destructive actions with reason text input and explicit confirm button",
+    "Multi-machine status panel: machine cards with hostname, status indicator, active agents list, last heartbeat",
+    "All operator actions gated behind authentication indicator (logged-in user badge)",
+    "Mockup approval status set to APPROVED in mockup document header"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:13:46.595601+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase4-dashboard.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase4-dashboard.md",
+  "tags": [
+    "frontend",
+    "uidesign",
+    "operator",
+    "claims",
+    "monitor",
+    "phase4",
+    "BLK-10-01"
+  ]
+}

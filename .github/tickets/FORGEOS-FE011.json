@@ -1,0 +1,72 @@
+{
+  "ticket_id": "FORGEOS-FE011",
+  "title": "Implement System Health Dashboard",
+  "description": "Implement the system health dashboard view following the UIDesigner mockup (FORGEOS-UID005). Display four health panels: Database (connection pool, query latency), MCP Server (uptime, connected agents, requests/minute), Webhooks (delivery rate, queue depth, failures), and Alerts (recent system warnings). Data sourced from the /api/health endpoint (FORGEOS-BE038). Each panel uses StatusIndicator (green/yellow/red) and MetricCard components.",
+  "type": "frontend",
+  "priority": "medium",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "UIDESIGNER",
+    "FRONTEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:13:46.599007+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-FE001",
+    "FORGEOS-BE038",
+    "FORGEOS-UID005"
+  ],
+  "blocked_by": [
+    "FORGEOS-FE001",
+    "FORGEOS-BE038",
+    "FORGEOS-UID005"
+  ],
+  "file_paths": [
+    "dashboard/src/app/health/page.tsx",
+    "dashboard/src/components/health/HealthPanel.tsx",
+    "dashboard/src/components/health/MetricCard.tsx",
+    "dashboard/src/components/health/StatusIndicator.tsx"
+  ],
+  "acceptance_criteria": [
+    "Database panel shows connection pool utilization gauge and query latency metrics",
+    "MCP Server panel shows uptime, connected agent count, and request rate",
+    "Webhook panel shows delivery success rate, pending queue count, and failure count",
+    "Alerts panel shows recent system warnings in chronological order",
+    "StatusIndicator component renders green (healthy), yellow (degraded), or red (critical) dot",
+    "MetricCard shows label, current value, and change direction indicator (up/down arrow)",
+    "Health data refreshes every 30 seconds automatically"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:13:46.599009+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase4-dashboard.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase4-dashboard.md",
+  "tags": [
+    "frontend",
+    "dashboard",
+    "health",
+    "monitoring",
+    "metrics",
+    "status",
+    "phase4",
+    "BLK-10-03"
+  ]
+}
