@@ -7,7 +7,8 @@ date: 2026-03-06T00:00:00Z
 status: APPROVED
 audience: All engineers, DevOps, and operators working on ForgeOS
 purpose: Define the high-level system component architecture, boundaries, interfaces, and communication protocols
-last_reviewed: 2026-03-06T00:00:00Z
+last_reviewed: 2026-03-06T14:30:00Z
+diataxis_quadrant: explanation
 tags: [architecture, components, phase1, ADR]
 ---
 
@@ -34,14 +35,16 @@ tags: [architecture, components, phase1, ADR]
 12. [ADR-003: PostgreSQL as Single Source of Truth](#12-adr-003-postgresql-as-single-source-of-truth)
 13. [Fitness Functions](#13-fitness-functions)
 14. [DAG Task Graph](#14-dag-task-graph)
+- [Appendix A: Technology Selection Matrix](#appendix-a-technology-selection-matrix)
+- [Appendix B: Glossary](#appendix-b-glossary)
 
 ---
 
 ## 1. Executive Summary
 
-ForgeOS is a **distributed multi-agent orchestration platform** that replaces a file-based ticket state machine with a PostgreSQL-backed, MCP-protocol-driven system. The platform coordinates AI agents performing software development tasks across multiple machines.
+ForgeOS is a **distributed multi-agent orchestration platform** that replaces a file-based ticket state machine with a PostgreSQL-backed, [MCP](../research/mcp-protocol-spec.md)-protocol-driven system. It coordinates AI agents that perform software development tasks across multiple machines.
 
-The architecture follows a **modular monolith** pattern: a single deployable Node.js/Express process (the ForgeOS MCP Server) encapsulates all server-side logic, exposing functionality via MCP tools over Streamable HTTP. PostgreSQL provides ACID-guaranteed state management, distributed locking, and audit trails. Agent clients connect over HTTP and interact exclusively through MCP JSON-RPC operations.
+The architecture follows a **modular monolith** pattern (see [ADR-001](#10-adr-001-modular-monolith-over-microservices)): a single Node.js/Express process (the ForgeOS MCP Server) contains all server-side logic. It exposes functionality via MCP tools over [Streamable HTTP](../research/mcp-transport-comparison.md). [PostgreSQL provides](../research/pg-distributed-locking.md) ACID-guaranteed state management, distributed locking, and audit trails. Agent clients connect over HTTP and interact only through MCP JSON-RPC operations.
 
 ### Six Major Components
 
@@ -303,7 +306,7 @@ graph TB
 | **State** | Git commit history (immutable append-only log) |
 | **Technology** | Git, GitHub |
 
-**Migration Note:** In the legacy system, git push served as the distributed locking mechanism (two-commit protocol). In the new architecture, this responsibility transfers entirely to PostgreSQL's `SELECT FOR UPDATE SKIP LOCKED`. Git remains solely for code delivery. The `agent-runner.py` two-commit protocol is superseded by MCP tool calls (`tickets.claim` → `tickets.complete`).
+**Migration Note:** In the legacy system, git push served as the distributed locking mechanism (two-commit protocol). The new architecture transfers this responsibility entirely to PostgreSQL's `SELECT FOR UPDATE SKIP LOCKED`. Git now serves solely for code delivery. The MCP tool calls (`tickets.claim` → `tickets.complete`) replace the `agent-runner.py` two-commit protocol.
 
 ### 4.4 Component 4: Agent Clients
 
@@ -817,11 +820,11 @@ MCP defines three transport options: stdio, HTTP+SSE (deprecated), and Streamabl
 
 ### Evidence
 
-From FORGEOS-RES002 (Transport Layer Comparison, 88% confidence):
-- Streamable HTTP is the current MCP specification standard (2025-03-26 revision)
-- Single endpoint design (`/mcp`) simplifies proxy and load balancer configuration
-- Session resumability via `Mcp-Session-Id` header enables reconnection without re-initialization
-- ForgeOS already implements this successfully (`StreamableHTTPServerTransport` in server.ts)
+From [FORGEOS-RES002 — Transport Layer Comparison](../research/mcp-transport-comparison.md) (88% confidence):
+- Streamable HTTP is the current MCP specification standard (2025-03-26 revision).
+- A single endpoint design (`/mcp`) simplifies proxy and load balancer configuration.
+- Session resumability via `Mcp-Session-Id` header enables reconnection without re-initialization.
+- ForgeOS already implements this successfully (`StreamableHTTPServerTransport` in server.ts).
 
 ### Consequences
 
@@ -862,16 +865,16 @@ The legacy ForgeOS system uses git-push-based locking and file-system directorie
 
 ### Evidence
 
-From FORGEOS-RES005 (PG Distributed Locking, 91% confidence):
-- `SELECT FOR UPDATE SKIP LOCKED` provides zero-contention work-stealing queue semantics
-- Advisory locks (`pg_advisory_xact_lock`) enable file-path-level mutual exclusion
-- Row-level locking ensures serializable atomic state transitions
-- Eliminates ALL race conditions from the git-push-based model
+From [FORGEOS-RES005 — PG Distributed Locking](../research/pg-distributed-locking.md) (91% confidence):
+- `SELECT FOR UPDATE SKIP LOCKED` provides zero-contention work-stealing queue semantics.
+- Advisory locks (`pg_advisory_xact_lock`) enable file-path-level mutual exclusion.
+- Row-level locking ensures serializable atomic state transitions.
+- This approach eliminates ALL race conditions from the git-push-based model.
 
-From FORGEOS-RES006 (PG Connection Pooling, 87% confidence):
-- `pg` Pool with 10-20 connections handles ≤50 concurrent agents
-- PgBouncer in transaction mode is fully compatible with `pg_advisory_xact_lock` and `SET LOCAL` for RLS
-- Scaling path is clear: pg Pool → PgBouncer → read replicas
+From [FORGEOS-RES006 — PG Connection Pooling](../research/pg-connection-pooling.md) (87% confidence):
+- A `pg` Pool with 10–20 connections handles up to 50 concurrent agents.
+- PgBouncer in transaction mode is fully compatible with `pg_advisory_xact_lock` and `SET LOCAL` for RLS.
+- The scaling path is clear: pg Pool → PgBouncer → read replicas.
 
 ### Consequences
 
@@ -891,7 +894,7 @@ From FORGEOS-RES006 (PG Connection Pooling, 87% confidence):
 **Mitigation:**
 - PostgreSQL in Docker — trivial to provision (`docker compose up`)
 - Migration tooling in `db/migrate.ts` — sequential SQL file execution
-- System gap analysis (FORGEOS-RES009) maps all 32 current capabilities to distributed equivalents
+- [System gap analysis (FORGEOS-RES009)](../research/system-gap-analysis.md) maps all 32 current capabilities to distributed equivalents.
 
 ---
 
@@ -924,6 +927,13 @@ graph TD
     classDef high fill:#FF9800,color:#fff
     classDef medium fill:#4CAF50,color:#fff
     classDef done fill:#9E9E9E,color:#fff
+
+    click RES001 "../research/mcp-protocol-spec.md" "View MCP Protocol Spec"
+    click RES002 "../research/mcp-transport-comparison.md" "View Transport Comparison"
+    click RES003 "../research/mcp-sdk-evaluation.md" "View SDK Evaluation"
+    click RES005 "../research/pg-distributed-locking.md" "View PG Distributed Locking"
+    click RES006 "../research/pg-connection-pooling.md" "View PG Connection Pooling"
+    click RES009 "../research/system-gap-analysis.md" "View System Gap Analysis"
 
     RES001["✅ RES001<br>MCP Protocol Spec"]:::done
     RES002["✅ RES002<br>Transport Comparison"]:::done
@@ -1015,3 +1025,28 @@ RES001/RES005/RES009 → ARCH001 → ARCH003 → DB → MCP_CORE → TOOLS → A
 | **SSE** | Server-Sent Events — HTTP-based one-way push from server to client |
 | **Modular Monolith** | Architecture pattern where a single deployable contains well-separated internal modules |
 | **Two-Commit Protocol** | Legacy ForgeOS distributed locking via git commit + push (being replaced by DB locking) |
+| **PgBouncer** | A lightweight connection pooler for PostgreSQL that reduces connection overhead at scale |
+| **JSON-RPC** | JSON Remote Procedure Call — a stateless, lightweight protocol for requesting services over HTTP |
+| **ADR** | Architecture Decision Record — a document that captures one significant architectural choice and its context |
+| **DAG** | Directed Acyclic Graph — a graph with directed edges and no cycles, used to model task dependencies |
+| **ACID** | Atomicity, Consistency, Isolation, Durability — the four guarantees of reliable database transactions |
+| **Zod** | A TypeScript-first schema validation library used for runtime input validation |
+| **Pino** | A high-performance structured JSON logger for Node.js |
+
+---
+
+## Related Documents
+
+| Document | Ticket | Relationship |
+|----------|--------|-------------|
+| [MCP Protocol Core Specification](../research/mcp-protocol-spec.md) | FORGEOS-RES001 | Protocol reference for MCP JSON-RPC implementation |
+| [MCP Transport Layer Comparison](../research/mcp-transport-comparison.md) | FORGEOS-RES002 | Evidence for ADR-002 (Streamable HTTP selection) |
+| [MCP SDK Evaluation](../research/mcp-sdk-evaluation.md) | FORGEOS-RES003 | SDK maturity assessment supporting technology choices |
+| [PG Distributed Locking Patterns](../research/pg-distributed-locking.md) | FORGEOS-RES005 | Evidence for ADR-003 (PostgreSQL SKIP LOCKED) |
+| [PG Connection Pooling Strategies](../research/pg-connection-pooling.md) | FORGEOS-RES006 | Scaling path analysis for database connections |
+| [System Gap Analysis](../research/system-gap-analysis.md) | FORGEOS-RES009 | Capability mapping from legacy to distributed system |
+| [Database Schema Reference](../database/schema-reference.md) | — | Detailed schema documentation for PostgreSQL tables |
+
+---
+
+*Document last reviewed: 2026-03-06. Diátaxis quadrant: Explanation. Next review due: 2026-06-06.*
