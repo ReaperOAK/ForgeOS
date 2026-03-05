@@ -4,7 +4,7 @@
   "description": "Create the environment configuration template and config loader module. The .env.example file documents all required and optional environment variables with descriptions and example values as specified in Architecture \u00a78.3. The config loader (config/index.ts) reads environment variables with validation and sensible defaults, exports a typed Config object, and fails fast on missing required variables in production mode. Variables include: database connection (POSTGRES_PORT, DB_PASSWORD), PgBouncer (PGBOUNCER_PORT), MCP server (MCP_PORT, NODE_ENV, LOG_LEVEL), authentication (ADMIN_API_KEY), webhooks (WEBHOOK_SECRET), workspace (WORKSPACE_PATH), rate limiting, and lease defaults.",
   "type": "infra",
   "priority": "high",
-  "stage": "CI",
+  "stage": "BACKEND",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,11 +34,11 @@
     "Config loader throws descriptive error on missing required variables listing all missing vars",
     "Config object is frozen (Object.freeze) after initialization to prevent mutation"
   ],
-  "rework_count": 0,
-  "claimed_by": "CI Reviewer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-05T21:05:53.771059+00:00",
+  "rework_count": 1,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -99,6 +99,15 @@
       "from_stage": "CI",
       "to_stage": "CI",
       "details": "Claimed by reaperoak@pop-os via CI Reviewer, lease until 2026-03-05T21:05:53.771059+00:00"
+    },
+    {
+      "timestamp": "2026-03-05T20:40:55.819448+00:00",
+      "event": "REWORK",
+      "agent": "CI Reviewer",
+      "machine_id": "system",
+      "from_stage": "CI",
+      "to_stage": "BACKEND",
+      "details": "Rework #1: FAIL (35/100): 2 critical spec violations \u2014 (1) Missing Object.freeze() on config return value per AC#9, (2) No production validation for WEBHOOK_SECRET per AC#7. Also 3 warnings: ESLint not installed, missing .env.example vars (DB_PASSWORD, PGBOUNCER_PORT, MCP_PORT), file path mismatch."
     }
   ],
   "source_task_file": "TODO/tickets/08-infrastructure.md",
