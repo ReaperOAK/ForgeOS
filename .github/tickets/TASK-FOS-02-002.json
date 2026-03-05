@@ -4,7 +4,7 @@
   "description": "Define all shared TypeScript interfaces and type aliases for ForgeOS as specified in Architecture \u00a74.1. This includes: domain model types (Ticket, TicketEvent, Agent, FileLock, Session, Project), enum-like union types (TicketStatus, TicketStage, TicketType, TicketPriority, EventType), MCP tool input/output types for all 10 tools (TicketsNextInput/Output, TicketsClaimInput/Output, etc.), authentication types (AgentIdentity, ApiKeyRecord), SSE event types (SSETicketEvent), error types (ForgeOSError enum, ErrorResponse), and SDLC flow type helpers. All types must be exported and usable across the codebase.",
   "type": "backend",
   "priority": "critical",
-  "stage": "CI",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -90,6 +90,24 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-05T20:25:31.455906+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by reaperoak@pop-os via Documentation Specialist, lease until 2026-03-05T20:55:31.455883+00:00"
+    },
+    {
+      "timestamp": "2026-03-05T20:29:45.368080+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation Specialist",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
     }
   ],
   "source_task_file": "TODO/tickets/02-mcp-server-core.md",
