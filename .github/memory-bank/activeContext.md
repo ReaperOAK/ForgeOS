@@ -628,3 +628,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-RES005.md
 - **Decisions:** APPROVED — All 7 acceptance criteria verified against docs/research/pg-distributed-locking.md (959 lines). 10/10 DoD items pass (6 PASS, 4 justified N/A for research ticket). Research deliverable is comprehensive (SELECT FOR UPDATE SKIP LOCKED, advisory locks, row-level locking, deadlock prevention, PoC SQL snippets, git-push comparison). Upstream verdicts verified: Research PASS (91%), Documentation PASS (HIGH).
 - **Timestamp:** 2026-03-06T00:00:00Z
+
+### [FORGEOS-RES006] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-RES006.md
+- **Decisions:** APPROVED — All 7 acceptance criteria verified against docs/research/pg-connection-pooling.md (861 lines). DoD items: 5 PASS, 6 justified N/A (research ticket, no code). Report covers PgBouncer (3 modes), asyncpg, SQLAlchemy, pg Pool with advisory lock compatibility matrix, pool sizing for 10/50/100 agents, and phased recommendation (pg Pool tuned → PgBouncer TX mode at scale). Upstream verdicts verified: Research PASS (87%), Documentation PASS (HIGH).
+- **Timestamp:** 2026-03-06T00:00:00Z
