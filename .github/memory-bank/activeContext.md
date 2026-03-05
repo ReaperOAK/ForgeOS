@@ -483,3 +483,12 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - Update ARCHITECTURE.instructions.md chunks (now 2227 lines with §34 OCF)
 - Test OCF scheduling loop with mixed Class A/B ticket scenarios
 - Verify preemption behavior under load
+
+---
+
+## FORGEOS-RES009 — Research Stage
+
+### [FORGEOS-RES009] — Summary
+- **Artifacts:** docs/research/system-gap-analysis.md, .github/agent-output/Research/FORGEOS-RES009.md
+- **Decisions:** Comprehensive gap analysis of file-based system (tickets.py, agent-runner.py, todo_visual.py) vs distributed platform (PostgreSQL + MCP). 32 capabilities mapped, 28 have equivalents, 4 gaps identified (L3 parser, two-commit protocol, DOT graph, terminal dashboard). 11 new capabilities in distributed platform. Migration risk rated MEDIUM overall, two-commit protocol removal rated CRITICAL. Recommended 4-phase migration strategy. Bayesian confidence: 88% (prior 70% → posterior 88%).
+- **Timestamp:** 2026-03-05T18:30:12Z
