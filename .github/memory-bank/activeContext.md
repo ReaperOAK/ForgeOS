@@ -734,6 +734,11 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** Added §15 Glossary (14 terms: ES, CQRS, MVCC, WAL, GIN, etc.) for audience self-containment. Added §16 Quick Reference Card with implementation table and NOT-to-do list. Improved readability of dense Bayesian confidence paragraph. Updated frontmatter with reviewed status and docs review timestamp. Diátaxis classification confirmed as Explanation.
 - **Timestamp:** 2026-03-06T22:30:00Z
 
+### [FORGEOS-RES010] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-RES010.md
+- **Decisions:** APPROVED with HIGH confidence (93%). 7/7 acceptance criteria pass. 4/4 applicable DoD items pass (6 N/A justified for research ticket). Upstream verdicts verified: Research PASS (89%), Documentation PASS (HIGH). Independent score recalculation confirmed MCP 8.00, gRPC 6.05; REST has minor rounding discrepancy (5.63 reported vs 5.61 calculated, Δ=0.025, non-impactful). Report quality: 1018 lines, 22 sections, 11 weighted dimensions, Bayesian methodology, contradiction analysis.
+- **Timestamp:** 2026-03-06T23:00:00Z
+
 ### [FORGEOS-RES007] — Validation Summary
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-RES007.md
 - **Decisions:** APPROVED with HIGH confidence (95%). All 7 acceptance criteria verified against docs/research/pg-transaction-isolation.md (950 lines). DoD items: 6 PASS, 4 justified N/A (research ticket, no code). Report covers READ COMMITTED, REPEATABLE READ, and SERIALIZABLE with ForgeOS-specific analysis, PoC SQL examples, weighted comparison matrix (9.35 vs 7.30 vs 6.30), and 3 contradiction resolutions. Upstream verdicts verified: Research PASS (88%), Documentation PASS (HIGH).
