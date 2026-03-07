@@ -111,6 +111,22 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "BACKEND complete (rework #1): auth middleware fully implemented, keys.ts and roles.ts committed, 64/64 tests passing."
+    },
+    {
+      "timestamp": "2026-03-07T15:25:31.251965+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Backend",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
+    },
+    {
+      "timestamp": "2026-03-07T15:25:45+00:00",
+      "event": "STAGE_CORRECTED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Corrected double-advance: moved back from SECURITY to QA for QA review"
     }
   ],
   "source_task_file": "TODO/tickets/04-auth-security.md",
