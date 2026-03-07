@@ -4,7 +4,7 @@
   Document Type: Reference (Diátaxis)
   Audience: ForgeOS architects, backend engineers, and decision-makers
   Purpose: Comprehensive risk assessment of MCP protocol adoption for ForgeOS
-  last_reviewed: 2026-03-07T00:00:00Z
+  last_reviewed: 2026-03-07T14:55:33Z
 -->
 
 > **Ticket:** FORGEOS-RES004 | **Agent:** Research Analyst | **Date:** 2026-03-07  
@@ -385,7 +385,7 @@ The evidence strongly supports adoption. MCP is already implemented in `forgeos-
 **Alternative Protocol Options:**
 
 | Protocol | Maturity | Multi-Agent Fit | Migration Effort | Key Trade-Off |
-|----------|---------|----------------|-----------------|-|
+|----------|---------|----------------|-----------------|---------------|
 | gRPC | High | Good (bidirectional streaming) | 8-12 weeks | Requires protobuf schema management, not browser-friendly |
 | REST/OpenAPI | Very High | Adequate (request-response) | 4-6 weeks | No streaming, no standard tool abstraction |
 | GraphQL | High | Limited (query-centric) | 6-8 weeks | Over-engineered for ticket CRUD, subscription complexity |
