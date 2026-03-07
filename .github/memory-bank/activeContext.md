@@ -985,3 +985,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/architecture/api/openapi-spec.yaml, .github/agent-output/Architect/FORGEOS-ARCH008.md
 - **Decisions:** Complete OpenAPI 3.1 rewrite — REST API for dashboard/admin, MCP for agents. All 28 Ticket fields, 14-field TicketEvent, 6 enum schemas aligned 1:1 with TypeScript. Dual auth (BearerAuth + ApiKeyAuth). Structured evidence in AdvanceRequest. ForgeOSErrorCode enum (14 codes) in ErrorResponse. WebSocket subscription filtering. Health endpoint with database/server sub-checks.
 - **Timestamp:** 2026-03-07T08:45:00Z
+
+### [FORGEOS-ARCH008] — Documentation Summary
+- **Artifacts:** docs/architecture/api/openapi-spec.yaml, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-ARCH008.md
+- **Decisions:** Added freshness metadata (x-last-reviewed, x-diataxis-quadrant, x-audience, x-related-docs) to OpenAPI spec info section. Verified 1:1 schema alignment with TypeScript types (28 Ticket fields, 14 TicketEvent fields, 5 enums). All 9 acceptance criteria confirmed. Added CHANGELOG entry. Classified as Reference quadrant (Diátaxis).
+- **Timestamp:** 2026-03-07T09:20:00Z

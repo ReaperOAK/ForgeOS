@@ -35,6 +35,15 @@ info:
   license:
     name: MIT
     url: https://opensource.org/licenses/MIT
+  x-last-reviewed: '2026-03-07T09:15:00Z'
+  x-diataxis-quadrant: reference
+  x-audience: Backend Engineers, Frontend Engineers, DevOps Engineers, Dashboard Developers
+  x-related-docs:
+    database-schema: docs/architecture/database-schema.md
+    system-components: docs/architecture/system-components.md
+    adr-postgresql: docs/architecture/adr/adr-001-postgresql.md
+    adr-mcp-protocol: docs/architecture/adr/adr-002-mcp-protocol.md
+    typescript-types: forgeos-server/src/types/index.ts
 
 servers:
   - url: /api
