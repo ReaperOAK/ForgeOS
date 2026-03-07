@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-07T08:01:00Z -->
+<!-- last_reviewed: 2026-03-07T10:00:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -167,6 +167,94 @@ Ten ticket-management tools are registered under the `tickets.*` namespace:
 | `tickets.release`   | Release a claim without advancing                    |
 | `tickets.extend`    | Extend the lease on a claimed ticket                 |
 | `tickets.stats`     | Return aggregate ticket statistics                   |
+
+### tickets.next — Find Next Available Ticket
+
+Peeks at the highest-priority unclaimed ticket for a given SDLC stage
+without claiming it. Read-only — does not modify ticket state.
+
+#### Input Schema
+
+| Parameter  | Type   | Required | Description                               |
+|------------|--------|----------|-------------------------------------------|
+| `stage`    | enum   | Yes      | SDLC stage to search (e.g. `READY`, `BACKEND`, `QA`) |
+| `type`     | enum   | No       | Filter by ticket type (e.g. `backend`, `frontend`, `fullstack`) |
+| `priority` | enum   | No       | Minimum priority filter using enum ordering |
+
+All enum values are validated via Zod at invocation time. Invalid values
+return a schema validation error before the handler executes.
+
+#### Query Behavior
+
+The handler builds a parameterized SQL query:
+
+```sql
+SELECT * FROM tickets
+WHERE stage = $1
+  AND status = 'READY'
+  AND (claimed_by IS NULL OR lease_expiry < NOW())
+  [AND type = $2]           -- if type filter provided
+  [AND priority >= $3]      -- if priority filter provided
+ORDER BY priority DESC, created_at ASC
+LIMIT 1
+```
+
+The query leverages the `idx_tickets_claimable` composite partial index
+for sub-50 ms response times.
+
+#### Response Format
+
+**Success — ticket found:**
+
+```json
+{
+  "ticket": { "ticket_id": "TASK-FOS-03-001", "stage": "READY", ... },
+  "message": "OK"
+}
+```
+
+**Success — no ticket available:**
+
+```json
+{
+  "ticket": null,
+  "message": "No tickets available"
+}
+```
+
+**Error:**
+
+```json
+{
+  "ticket": null,
+  "message": "Query error: <details>",
+  "error": "INTERNAL_ERROR",
+  "timestamp": "2026-03-07T10:00:00.000Z"
+}
+```
+
+#### MCP Invocation Example
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "tickets.next",
+    "arguments": {
+      "stage": "READY",
+      "type": "backend",
+      "priority": "high"
+    }
+  }
+}
+```
+
+#### Implementation Files
+
+| File | Purpose |
+|------|---------|
+| `src/tools/tickets-next.ts` | Zod schema, handler, types |
+| `src/tools/index.ts` | Tool registration on McpServer |
 
 ## Commit Message Convention
 

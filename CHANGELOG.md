@@ -8,6 +8,26 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`tickets.next` MCP tool** — Find the next available ticket for a given
+  SDLC stage (peek, not claim). Accepts `stage` (required), `type` (optional),
+  and `priority` (optional) filters. Returns the highest-priority unclaimed
+  ticket as JSON or a null result with descriptive message. Uses parameterized
+  SQL with the `idx_tickets_claimable` composite index for sub-50 ms queries.
+  Validated via Zod schema with structured pino logging
+  (`forgeos-server/src/tools/tickets-next.ts`,
+  `forgeos-server/src/tools/index.ts`).
+
+- **REST API OpenAPI 3.1 specification** — Complete OpenAPI 3.1.0 spec for the
+  ForgeOS REST API at `docs/architecture/api/openapi-spec.yaml`
+  (FORGEOS-ARCH008). Defines 9 endpoints: ticket list with pagination and
+  filters, ticket detail, claim, advance, rework, release, event history,
+  pipeline stage overview, and health check. Includes WebSocket contract for
+  real-time ticket state streaming, dual authentication (Bearer + API key),
+  structured error model with 14 machine-readable error codes, and full schema
+  alignment with TypeScript types (28-field Ticket, 14-field TicketEvent,
+  5 enums). Cross-referenced with database schema (FORGEOS-ARCH005) and
+  system architecture (FORGEOS-ARCH001).
+
 - **Docker Compose stack** — Production-ready `docker-compose.yml` with three
   services: `postgres` (PostgreSQL 17 Alpine with healthcheck, persistent
   volume, auto-applied migrations), `pgbouncer` (transaction mode, 50 pool
