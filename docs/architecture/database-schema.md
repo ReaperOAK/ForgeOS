@@ -24,6 +24,7 @@ evidence_base: [FORGEOS-RES005, FORGEOS-RES007, FORGEOS-RES008]
 **Related ADRs:**
 - [ADR-001: PostgreSQL as Primary State Store](adr/adr-001-postgresql.md)
 - [ADR-002: MCP as Agent Communication Protocol](adr/adr-002-mcp-protocol.md)
+- [MCP Tool Definition Schemas](api/mcp-tool-definitions.md) — tool schemas that invoke these stored functions
 
 **Key Research Reports:**
 - [PG Distributed Locking](../research/pg-distributed-locking.md)

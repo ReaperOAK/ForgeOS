@@ -351,6 +351,11 @@ Vibecoding is built on the Model Context Protocol (MCP) ecosystem. While
 core orchestration logic operates with minimal tooling, maximum value is
 achieved when connected to the full stack.
 
+The ForgeOS MCP Server exposes 11 ticket lifecycle tools via the MCP protocol.
+For complete input/output schemas, error codes, and usage examples, see the
+[MCP Tool Definition Schemas](docs/architecture/api/mcp-tool-definitions.md)
+reference document.
+
 ### Core (Required)
 
 | Tool | Purpose |

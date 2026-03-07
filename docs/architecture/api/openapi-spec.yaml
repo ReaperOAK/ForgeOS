@@ -39,6 +39,7 @@ info:
   x-diataxis-quadrant: reference
   x-audience: Backend Engineers, Frontend Engineers, DevOps Engineers, Dashboard Developers
   x-related-docs:
+    mcp-tool-definitions: docs/architecture/api/mcp-tool-definitions.md
     database-schema: docs/architecture/database-schema.md
     system-components: docs/architecture/system-components.md
     adr-postgresql: docs/architecture/adr/adr-001-postgresql.md

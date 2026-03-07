@@ -1,3 +1,8 @@
+### [FORGEOS-ARCH009] — Documentation Review: MCP Tool Definition Schemas
+- **Artifacts:** docs/architecture/api/mcp-tool-definitions.md, docs/architecture/system-components.md, docs/architecture/database-schema.md, docs/architecture/api/openapi-spec.yaml, README.md
+- **Decisions:** Added "Related Documents" cross-reference section with 7 links. Updated tool count 10→11 in system-components.md (5 locations). Added MCP tool definitions reference to README.md. Added cross-ref to database-schema.md and openapi-spec.yaml. All links verified on disk.
+- **Timestamp:** 2026-03-07T15:10:00Z
+
 ### [FORGEOS-DO001] — CI Review
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-DO001.md
 - **Decisions:** PASS — Score 98/100, 0 critical, 0 warnings, 2 suggestions, 2 notes. Both Docker Compose files validate cleanly. All 7 acceptance criteria verified. Upstream QA PASS and Security PASS confirmed.

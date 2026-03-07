@@ -7,7 +7,7 @@ date: 2026-03-07T08:34:00Z
 status: APPROVED
 audience: Backend Engineers, Agent Developers, Architect, QA
 purpose: Define MCP tool schemas (name, description, inputSchema, output format, error codes) for all ForgeOS ticket operations
-last_reviewed: 2026-03-07T08:34:00Z
+last_reviewed: 2026-03-07T15:00:00Z
 diataxis_quadrant: reference
 tags: [architecture, mcp, tools, api, phase1, schemas]
 ---
@@ -21,6 +21,7 @@ tags: [architecture, mcp, tools, api, phase1, schemas]
 
 ## Table of Contents
 
+0. [Related Documents](#related-documents)
 1. [Overview](#1-overview)
 2. [Context Map](#2-context-map)
 3. [MCP Tool Registration Pattern](#3-mcp-tool-registration-pattern)
@@ -44,6 +45,20 @@ tags: [architecture, mcp, tools, api, phase1, schemas]
 10. [ADR-ARCH009-02: Error Propagation Strategy](#10-adr-arch009-02-error-propagation-strategy)
 11. [DAG Task Graph](#11-dag-task-graph)
 12. [Fitness Functions](#12-fitness-functions)
+
+---
+
+## Related Documents
+
+| Document | Relationship |
+|----------|-------------|
+| [System Component Architecture](../system-components.md) | Defines the MCP Server component that hosts these tools |
+| [Database Schema Architecture](../database-schema.md) | Defines stored functions invoked by tool handlers |
+| [ADR-001: PostgreSQL as Primary State Store](../adr/adr-001-postgresql.md) | Explains why tools use PostgreSQL stored functions |
+| [ADR-002: MCP as Agent Communication Protocol](../adr/adr-002-mcp-protocol.md) | Justifies MCP as the protocol for tool invocation |
+| [OpenAPI REST Specification](./openapi-spec.yaml) | Complementary REST API for operators (non-MCP) |
+| [MCP Protocol Specification](../../research/mcp-protocol-spec.md) | Protocol research informing tool wire format |
+| [MCP SDK Evaluation](../../research/mcp-sdk-evaluation.md) | SDK comparison behind TypeScript SDK choice |
 
 ---
 
