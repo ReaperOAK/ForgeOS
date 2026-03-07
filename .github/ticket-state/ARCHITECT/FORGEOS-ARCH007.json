@@ -1,0 +1,73 @@
+{
+  "ticket_id": "FORGEOS-ARCH007",
+  "title": "Design Event Sourcing Audit Trail Schema",
+  "description": "Design the event sourcing schema for the ForgeOS ticket audit trail, replacing the in-JSON history array. Define the event_history table structure, event types, payload schemas per event type, sequence numbering, and the mechanism for reconstructing ticket state from events. Integrate findings from RES008 feasibility assessment.",
+  "type": "architecture",
+  "priority": "medium",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "ARCHITECT",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:51:09.801209+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-ARCH005",
+    "FORGEOS-RES008"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "docs/architecture/event-sourcing-schema.md"
+  ],
+  "acceptance_criteria": [
+    "Event history table designed: event_id, ticket_id, event_type, payload, agent, machine_id, timestamp, sequence_number",
+    "All event types cataloged: CREATED, CLAIMED, RELEASED, ADVANCED, REWORKED, ESCALATED, DONE (minimum)",
+    "Payload schema defined per event type (what data each event carries)",
+    "Sequence numbering strategy: per-ticket monotonic sequence for ordering guarantees",
+    "State reconstruction pattern documented: how to rebuild current ticket state from events",
+    "LISTEN/NOTIFY integration point identified for real-time event streaming",
+    "Event archival strategy for old events (partition by month, or retention policy)",
+    "Schema document delivered at docs/architecture/event-sourcing-schema.md"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:51:09.801212+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase1-architecture.md"
+    },
+    {
+      "timestamp": "2026-03-07T08:23:30.947502+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-07T12:55:05+00:00",
+      "event": "CLAIMED",
+      "agent": "Architect",
+      "machine_id": "pop-os",
+      "details": "Claimed by Architect on pop-os (ReaperOAK)"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase1-architecture.md",
+  "tags": [
+    "architecture",
+    "database",
+    "event-sourcing",
+    "audit",
+    "phase1",
+    "BLK-02-02"
+  ]
+}
