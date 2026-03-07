@@ -4,7 +4,7 @@
   "description": "Implement API key authentication middleware for the ForgeOS MCP server as specified in Architecture \u00a77.1. The middleware extracts the API key from the Authorization: Bearer header, computes its SHA-256 hash, and looks up the matching agent in the agents table. If found and active (is_active=true, revoked_at IS NULL), it populates the request context with the agent's identity (id, name, role, permissions, machine_id). Implement the role-based authorization matrix from Architecture \u00a77.2 \u2014 each agent role can only perform operations matching their SDLC stage ownership. Include a key generation utility that creates cryptographically secure API keys, hashes them, and stores the hash in the agents table.",
   "type": "backend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "BACKEND",
   "completed_at": "2026-03-07T18:35:00Z",
   "sdlc_flow": [
     "READY",
@@ -40,11 +40,11 @@
     "Middleware sets PostgreSQL session variables (app.agent_role, app.agent_name, app.agent_id) for RLS enforcement",
     "Health endpoint (/health) is exempt from authentication"
   ],
-  "rework_count": 0,
-  "claimed_by": "QA",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-07T14:52:57Z",
+  "rework_count": 1,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -88,6 +88,15 @@
       "agent": "QA",
       "machine_id": "pop-os",
       "details": "CLAIM by QA on pop-os (ReaperOAK)"
+    },
+    {
+      "timestamp": "2026-03-07T14:26:51.775412+00:00",
+      "event": "REWORK",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "BACKEND",
+      "details": "Rework #1: REJECT: Backend WORK commit never pushed. Auth middleware is still a pass-through stub (just calls next()). keys.ts and roles.ts exist locally but are untracked in git. 19/21 middleware tests fail. 0/9 acceptance criteria met. Two-commit protocol violated. See .github/agent-output/QA/TASK-FOS-04-001.md for full report."
     }
   ],
   "source_task_file": "TODO/tickets/04-auth-security.md",
