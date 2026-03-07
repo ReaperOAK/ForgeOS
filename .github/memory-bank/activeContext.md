@@ -1083,3 +1083,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/db/file-mutex.ts, forgeos-server/src/__tests__/db/file-mutex.test.ts, forgeos-server/src/db/index.ts
 - **Decisions:** Used INSERT ON CONFLICT DO NOTHING with post-insert row count check instead of pre-check to avoid TOCTOU races. FileConflictError extends Error with structured conflict details. Raw pool transactions used since file_locks has permissive RLS policies.
 - **Timestamp:** 2026-03-07T13:00:00Z
+
+### [TASK-FOS-03-010] — tickets.stats Dashboard Statistics
+- **Artifacts:** forgeos-server/src/tools/tickets-stats.ts
+- **Decisions:** Rewrote existing stub to match AC: time_range_hours schema, stages/statuses/claims/avg_stage_duration/rework_distribution/totals response. Used Promise.all for parallel queries, 5s cache for all-time stats, PostgreSQL FILTER clause for claim health, LAG window function for stage durations. Local type definitions following tickets-next.ts pattern.
+- **Timestamp:** 2026-03-07T12:58:00Z
