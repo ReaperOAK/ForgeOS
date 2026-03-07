@@ -4,7 +4,7 @@
   "description": "Capture user stories for the ForgeOS platform covering all capability domains. Produce at least 20 user stories across the 4 personas, covering ticket operations (claim, advance, rework), real-time monitoring, multi-machine coordination, authentication, webhook integration, and migration scenarios. Each story follows the format: As a [persona], I want to [action], so that [benefit].",
   "type": "docs",
   "priority": "high",
-  "stage": "READY",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "DOCS",
@@ -30,10 +30,10 @@
     "User stories document delivered at docs/product/user-stories.md"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-07T13:27:29.554345+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -49,6 +49,13 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-07T12:57:29.554345+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "details": "Claimed by Documentation Specialist for DOCS stage"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-product.md",
