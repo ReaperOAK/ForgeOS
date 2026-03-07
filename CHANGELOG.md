@@ -8,6 +8,38 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Environment configuration profiles** — Typed, profile-aware configuration
+  system for the ForgeOS platform (FORGEOS-DO004). Three files provide complete
+  environment management: `infra/.env.template` (canonical reference for 30+
+  variables across 9 categories), `infra/.env.test` (pre-configured test values
+  for CI), and `infra/config/settings.py` (frozen `Config` dataclass with
+  aggregate validation, profile-aware defaults per environment, production
+  enforcement for secrets, and zero external dependencies). A single
+  `ENVIRONMENT` variable (`development` | `test` | `production`) drives all
+  profile-specific behaviour. `infra/README.md` updated with full variable
+  reference, usage examples, and validation instructions.
+
+- **`tickets.graph` MCP tool** — Dependency graph visualization tool
+  (TASK-FOS-03-007). Returns the full ticket dependency DAG with nodes
+  (complete ticket objects), edges (from `depends_on` relationships), and
+  the critical path (longest path from any root to any leaf). Supports
+  optional filtering by stage, type, or status. Uses Kahn's BFS algorithm
+  (O(V+E)) for cycle detection and topological ordering with dynamic
+  programming for critical path computation. Parameterized SQL queries,
+  structured pino logging, and Zod schema validation. Performance target:
+  < 500 ms for up to 500 tickets
+  (`forgeos-server/src/tools/tickets-graph.ts`,
+  `forgeos-server/src/tools/index.ts`).
+
+- **`tickets.stats` MCP tool** — Dashboard statistics aggregator returning
+  per-stage ticket counts, per-status ticket counts, claim health breakdown
+  (healthy/expiring_soon/expired), average time-in-stage per stage, rework
+  count distribution, total tickets, and total done. Accepts optional
+  `time_range_hours` filter. Six parameterized SQL queries execute in parallel
+  via `Promise.all()` for sub-200 ms response time. All-time results cached
+  for 5 seconds. Structured error handling with pino logging
+  (`forgeos-server/src/tools/tickets-stats.ts`).
+
 - **Middleware Stack — Logging, Error Handling, Validation** — Express
   middleware pipeline for the ForgeOS MCP server (TASK-FOS-02-003). Includes:
   request ID middleware (`request-id.ts`) generating UUID v4 correlation IDs
