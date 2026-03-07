@@ -1,0 +1,4 @@
+# Backup files — never commit to version control
+*.dump
+*.sql.gz
+*.meta
