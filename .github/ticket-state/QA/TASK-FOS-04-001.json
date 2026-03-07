@@ -4,8 +4,8 @@
   "description": "Implement API key authentication middleware for the ForgeOS MCP server as specified in Architecture \u00a77.1. The middleware extracts the API key from the Authorization: Bearer header, computes its SHA-256 hash, and looks up the matching agent in the agents table. If found and active (is_active=true, revoked_at IS NULL), it populates the request context with the agent's identity (id, name, role, permissions, machine_id). Implement the role-based authorization matrix from Architecture \u00a77.2 \u2014 each agent role can only perform operations matching their SDLC stage ownership. Include a key generation utility that creates cryptographically secure API keys, hashes them, and stores the hash in the agents table.",
   "type": "backend",
   "priority": "high",
-  "stage": "BACKEND",
-  "completed_at": "2026-03-07T18:35:00Z",
+  "stage": "QA",
+  "completed_at": "2026-03-07T15:24:45.017605+00:00",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -41,10 +41,10 @@
     "Health endpoint (/health) is exempt from authentication"
   ],
   "rework_count": 1,
-  "claimed_by": "Backend",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-07T15:52:31.072717+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -104,6 +104,13 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "CLAIM by Backend on pop-os (ReaperOAK) \u2014 rework #1"
+    },
+    {
+      "timestamp": "2026-03-07T15:24:45.017605+00:00",
+      "event": "BACKEND_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "BACKEND complete (rework #1): auth middleware fully implemented, keys.ts and roles.ts committed, 64/64 tests passing."
     }
   ],
   "source_task_file": "TODO/tickets/04-auth-security.md",

@@ -1207,3 +1207,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-PM003.md
 - **Decisions:** APPROVED (HIGH confidence, 95%) — all 4 applicable DoD items pass (content implemented, docs updated, no TODOs, Validator reviewed). All 8 acceptance criteria met: comprehensive NFR document with 26 measurable requirements (NFR-P01 through MIG-04) covering performance, availability, scalability, security, and migration. Upstream Documentation verdict verified (PASS, 90% confidence).
 - **Timestamp:** 2026-03-07T15:17:00Z
+
+### [TASK-FOS-04-001] — Backend Rework #1 Complete
+- **Artifacts:** forgeos-server/src/middleware/auth.ts, forgeos-server/src/auth/keys.ts, forgeos-server/src/auth/roles.ts, forgeos-server/src/__tests__/middleware/auth.test.ts, forgeos-server/src/__tests__/auth/keys.test.ts, forgeos-server/src/__tests__/auth/roles.test.ts
+- **Decisions:** Replaced pass-through auth stub with full implementation. Used `unknown` intermediate cast for Express Request custom properties to satisfy strict TypeScript. Exported extractBearerToken and requirePermission from middleware barrel. Used wildcard `"*"` permission for admin role matching existing roles.ts pattern.
+- **Timestamp:** 2026-03-07T20:54:00Z
