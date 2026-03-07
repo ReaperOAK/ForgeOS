@@ -1133,3 +1133,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/api/routes/events.ts, forgeos-server/src/api/routes/tickets.ts, forgeos-server/src/api/routes/stages.ts, forgeos-server/src/api/index.ts
 - **Decisions:** Dedicated PG client for LISTEN (not released to pool) with auto-reconnect on error. SSE keepalive heartbeat every 30s. Events endpoint has no auth middleware (optionally authenticated); REST endpoints require auth. Zod validation on query params. Named SSE events (event: ticket-update) with JSON data payloads.
 - **Timestamp:** 2026-03-07T13:53:42Z
+
+### [TASK-FOS-03-007] — QA: tickets.graph Dependency Graph
+- **Artifacts:** .github/agent-output/QA/TASK-FOS-03-007.md, forgeos-server/src/__tests__/tools/tickets-graph.test.ts, forgeos-server/src/tools/tickets-graph.ts
+- **Decisions:** PASS verdict. 41/41 tests pass, 97.7% statement coverage, 82.9% branch coverage, 100% function coverage. Implementation uses Kahn's algorithm for O(V+E) cycle detection and DP longest-path for critical path computation. Tool registration in tools/index.ts pending (cross-ticket coordination — all tools except tickets.next await registration). No code quality issues found.
+- **Timestamp:** 2026-03-07T13:59:00Z
