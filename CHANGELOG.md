@@ -8,6 +8,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Docker Compose stack** — Production-ready `docker-compose.yml` with three
+  services: `postgres` (PostgreSQL 17 Alpine with healthcheck, persistent
+  volume, auto-applied migrations), `pgbouncer` (transaction mode, 50 pool
+  size, 200 max connections), and `mcp-server` (built from Dockerfile,
+  connects through PgBouncer). Uses Docker file-based secrets for the
+  database password. All services restart automatically
+  (`forgeos-server/docker-compose.yml`, `forgeos-server/secrets/.gitkeep`).
 - **Husky commit-msg hook** — Validates that every commit message starts
   with a ticket ID in `[TICKET-ID]` format
   (`forgeos-server/.husky/commit-msg`,

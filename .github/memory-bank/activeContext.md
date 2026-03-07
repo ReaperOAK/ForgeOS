@@ -1,3 +1,8 @@
+### [TASK-FOS-08-002] — Documentation Summary
+- **Artifacts:** forgeos-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/TASK-FOS-08-002.md
+- **Decisions:** Replaced outdated 2-service Docker Compose example with comprehensive 3-service reference documentation (postgres, pgbouncer, mcp-server). Used Reference quadrant (Diátaxis). Documented secrets, volumes, environment variables, dependency graph, and quick-start commands. Added CHANGELOG entry.
+- **Timestamp:** 2026-03-07T08:01:00Z
+
 ### [TASK-FOS-03-001] — Security Review
 - **Artifacts:** .github/agent-output/Security/TASK-FOS-03-001.md
 - **Decisions:** PASS (HIGH confidence) — Zero critical/high findings. 1 medium (SELECT * over-broad column selection, CWE-200) and 2 low (error message leakage CWE-209, missing per-tool authz CWE-862) documented with risk acceptance. STRIDE analysis on 4 trust boundaries. OWASP Top 10 all 10 categories checked. 0 dependency CVEs. 0 hardcoded secrets. Strong SQL injection prevention via Zod enum validation + parameterized queries.
