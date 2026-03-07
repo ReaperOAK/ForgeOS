@@ -1,3 +1,8 @@
+### [FORGEOS-UID001] — UIDesigner Summary
+- **Artifacts:** docs/uiux/design-tokens.json, docs/uiux/layout-spec.md, docs/uiux/mockups/FORGEOS-UID001.md, .github/stitch-project-id.txt
+- **Decisions:** Dark theme as default (cyan #06B6D4 primary) for DevOps operator eye-strain reduction; Light theme variant (blue #2563EB). Inter + JetBrains Mono fonts. Top-bar tab navigation on desktop, hamburger sidebar on mobile. 4px spacing grid. Stitch project created with 6 screens. Drag-to-rearrange deferred to P3.
+- **Timestamp:** 2026-03-07T00:00:00Z
+
 ### [FORGEOS-ARCH012] — Architect Summary
 - **Artifacts:** docs/architecture/fitness-functions.md, .github/agent-output/Architect/FORGEOS-ARCH012.md
 - **Decisions:** Selected k6 over Locust/Artillery for load testing (scored 57 vs 45 vs 34). Selected fast-check over hypothesis for property-based testing (native TypeScript). Selected prom-client over OpenTelemetry for metrics (minimal overhead). Designed 4-tier CI pipeline: PR Gate (blocking correctness), PR Extended (advisory latency), Nightly (sustained), Weekly (soak). Baseline-driven regression: 20% warn, 50% fail.

@@ -1,0 +1,213 @@
+{
+  "$schema": "design-tokens-v1",
+  "metadata": {
+    "project": "ForgeOS Dashboard",
+    "generated_by": "UIDesigner",
+    "date": "2026-03-07",
+    "ticket": "FORGEOS-UID001",
+    "stitch_project_id": "projects/17753507249462882723"
+  },
+  "themes": {
+    "dark": {
+      "colors": {
+        "primary": { "value": "#06B6D4", "usage": "Primary actions, active tabs, links, accent elements" },
+        "primaryHover": { "value": "#0891B2", "usage": "Primary hover state, focused elements" },
+        "primaryMuted": { "value": "#164E63", "usage": "Primary tinted backgrounds, active nav items" },
+        "secondary": { "value": "#94A3B8", "usage": "Secondary text, muted labels, column headers" },
+        "secondaryHover": { "value": "#CBD5E1", "usage": "Secondary hover state" },
+        "accent": { "value": "#8B5CF6", "usage": "Machine badges (dev-server), graph highlights, special indicators" },
+        "surface": { "value": "#1E293B", "usage": "Card backgrounds, table rows, sidebar, filter bar" },
+        "surfaceAlt": { "value": "#162032", "usage": "Alternating table rows, nested card backgrounds" },
+        "background": { "value": "#0F172A", "usage": "Page background, top bar, deeply nested containers" },
+        "border": { "value": "#334155", "usage": "Card borders, dividers, panel separators" },
+        "borderSubtle": { "value": "#1E293B", "usage": "Subtle separators, column dividers" },
+        "text": { "value": "#F8FAFC", "usage": "Primary text, headings, card titles" },
+        "textMuted": { "value": "#94A3B8", "usage": "Secondary text, timestamps, helper text" },
+        "textInverse": { "value": "#0F172A", "usage": "Text on light backgrounds (badges)" },
+        "error": { "value": "#EF4444", "usage": "Error states, destructive actions, expired claims, critical priority" },
+        "errorMuted": { "value": "#7F1D1D", "usage": "Error background tint" },
+        "warning": { "value": "#EAB308", "usage": "Warning states, expiring claims, rework badges" },
+        "warningMuted": { "value": "#713F12", "usage": "Warning background tint" },
+        "success": { "value": "#16A34A", "usage": "Success states, active claims, DONE stage, live indicator" },
+        "successMuted": { "value": "#14532D", "usage": "Success background tint" },
+        "info": { "value": "#3B82F6", "usage": "Informational badges, medium priority, BACKEND stage" },
+        "infoMuted": { "value": "#1E3A5F", "usage": "Info background tint" },
+        "scrim": { "value": "rgba(15, 23, 42, 0.6)", "usage": "Overlay backdrop behind slide-over panels and modals" },
+        "focus": { "value": "#06B6D4", "usage": "Focus ring color for keyboard navigation" }
+      },
+      "priority": {
+        "critical": { "value": "#EF4444", "usage": "Critical priority badge and left border" },
+        "high": { "value": "#F97316", "usage": "High priority badge and left border" },
+        "medium": { "value": "#3B82F6", "usage": "Medium priority badge and left border" },
+        "low": { "value": "#6B7280", "usage": "Low priority badge and left border" }
+      },
+      "stage": {
+        "ready": { "value": "#06B6D4", "usage": "READY column accent" },
+        "architect": { "value": "#8B5CF6", "usage": "ARCHITECT column accent" },
+        "research": { "value": "#A855F7", "usage": "RESEARCH column accent" },
+        "backend": { "value": "#3B82F6", "usage": "BACKEND column accent" },
+        "frontend": { "value": "#14B8A6", "usage": "FRONTEND column accent" },
+        "qa": { "value": "#F97316", "usage": "QA column accent" },
+        "security": { "value": "#EF4444", "usage": "SECURITY column accent" },
+        "ci": { "value": "#EAB308", "usage": "CI column accent" },
+        "docs": { "value": "#64748B", "usage": "DOCS column accent" },
+        "validation": { "value": "#16A34A", "usage": "VALIDATION column accent" },
+        "done": { "value": "#22C55E", "usage": "DONE column accent" },
+        "escalated": { "value": "#DC2626", "usage": "ESCALATED section accent" }
+      },
+      "machine": {
+        "palette": [
+          { "value": "#3B82F6", "usage": "Machine color 1 (e.g., pop-os)" },
+          { "value": "#8B5CF6", "usage": "Machine color 2 (e.g., dev-server)" },
+          { "value": "#16A34A", "usage": "Machine color 3 (e.g., staging-box)" },
+          { "value": "#F97316", "usage": "Machine color 4" },
+          { "value": "#EC4899", "usage": "Machine color 5" },
+          { "value": "#06B6D4", "usage": "Machine color 6" },
+          { "value": "#EAB308", "usage": "Machine color 7" },
+          { "value": "#14B8A6", "usage": "Machine color 8" }
+        ]
+      }
+    },
+    "light": {
+      "colors": {
+        "primary": { "value": "#2563EB", "usage": "Primary actions, active tabs, links, accent elements" },
+        "primaryHover": { "value": "#1D4ED8", "usage": "Primary hover state, focused elements" },
+        "primaryMuted": { "value": "#DBEAFE", "usage": "Primary tinted backgrounds, active nav items" },
+        "secondary": { "value": "#64748B", "usage": "Secondary text, muted labels, column headers" },
+        "secondaryHover": { "value": "#475569", "usage": "Secondary hover state" },
+        "accent": { "value": "#7C3AED", "usage": "Machine badges (dev-server), graph highlights, special indicators" },
+        "surface": { "value": "#FFFFFF", "usage": "Card backgrounds, table rows, panels" },
+        "surfaceAlt": { "value": "#F8FAFC", "usage": "Alternating table rows, nested containers" },
+        "background": { "value": "#F1F5F9", "usage": "Page background, filter bar" },
+        "border": { "value": "#E2E8F0", "usage": "Card borders, dividers, panel separators" },
+        "borderSubtle": { "value": "#F1F5F9", "usage": "Subtle separators, column dividers" },
+        "text": { "value": "#0F172A", "usage": "Primary text, headings, card titles" },
+        "textMuted": { "value": "#64748B", "usage": "Secondary text, timestamps, helper text" },
+        "textInverse": { "value": "#FFFFFF", "usage": "Text on dark backgrounds (badges)" },
+        "error": { "value": "#DC2626", "usage": "Error states, destructive actions, expired claims, critical priority" },
+        "errorMuted": { "value": "#FEE2E2", "usage": "Error background tint" },
+        "warning": { "value": "#D97706", "usage": "Warning states, expiring claims, rework badges" },
+        "warningMuted": { "value": "#FEF3C7", "usage": "Warning background tint" },
+        "success": { "value": "#16A34A", "usage": "Success states, active claims, DONE stage, live indicator" },
+        "successMuted": { "value": "#DCFCE7", "usage": "Success background tint" },
+        "info": { "value": "#2563EB", "usage": "Informational badges, medium priority" },
+        "infoMuted": { "value": "#DBEAFE", "usage": "Info background tint" },
+        "scrim": { "value": "rgba(15, 23, 42, 0.3)", "usage": "Overlay backdrop behind slide-over panels and modals" },
+        "focus": { "value": "#2563EB", "usage": "Focus ring color for keyboard navigation" }
+      },
+      "priority": {
+        "critical": { "value": "#DC2626", "usage": "Critical priority badge and left border" },
+        "high": { "value": "#EA580C", "usage": "High priority badge and left border" },
+        "medium": { "value": "#2563EB", "usage": "Medium priority badge and left border" },
+        "low": { "value": "#6B7280", "usage": "Low priority badge and left border" }
+      },
+      "stage": {
+        "ready": { "value": "#0891B2", "usage": "READY column accent" },
+        "architect": { "value": "#7C3AED", "usage": "ARCHITECT column accent" },
+        "research": { "value": "#9333EA", "usage": "RESEARCH column accent" },
+        "backend": { "value": "#2563EB", "usage": "BACKEND column accent" },
+        "frontend": { "value": "#0D9488", "usage": "FRONTEND column accent" },
+        "qa": { "value": "#EA580C", "usage": "QA column accent" },
+        "security": { "value": "#DC2626", "usage": "SECURITY column accent" },
+        "ci": { "value": "#CA8A04", "usage": "CI column accent" },
+        "docs": { "value": "#475569", "usage": "DOCS column accent" },
+        "validation": { "value": "#15803D", "usage": "VALIDATION column accent" },
+        "done": { "value": "#16A34A", "usage": "DONE column accent" },
+        "escalated": { "value": "#B91C1C", "usage": "ESCALATED section accent" }
+      },
+      "machine": {
+        "palette": [
+          { "value": "#2563EB", "usage": "Machine color 1 (e.g., pop-os)" },
+          { "value": "#7C3AED", "usage": "Machine color 2 (e.g., dev-server)" },
+          { "value": "#15803D", "usage": "Machine color 3 (e.g., staging-box)" },
+          { "value": "#EA580C", "usage": "Machine color 4" },
+          { "value": "#DB2777", "usage": "Machine color 5" },
+          { "value": "#0891B2", "usage": "Machine color 6" },
+          { "value": "#CA8A04", "usage": "Machine color 7" },
+          { "value": "#0D9488", "usage": "Machine color 8" }
+        ]
+      }
+    }
+  },
+  "typography": {
+    "fontFamily": {
+      "sans": { "value": "Inter, system-ui, -apple-system, sans-serif", "usage": "Body text, UI elements, labels" },
+      "mono": { "value": "JetBrains Mono, Fira Code, Consolas, monospace", "usage": "Ticket IDs, code blocks, file paths, session IDs" },
+      "heading": { "value": "Inter, system-ui, -apple-system, sans-serif", "usage": "Headings, page titles (same family, different weight)" }
+    },
+    "fontSize": {
+      "xs": { "value": "0.75rem", "px": "12px", "usage": "Captions, badges, rework indicators, time-in-stage" },
+      "sm": { "value": "0.875rem", "px": "14px", "usage": "Helper text, metadata values, table cells, filter labels" },
+      "base": { "value": "1rem", "px": "16px", "usage": "Body text, card content, form inputs" },
+      "lg": { "value": "1.125rem", "px": "18px", "usage": "Card titles, section subheadings" },
+      "xl": { "value": "1.25rem", "px": "20px", "usage": "Column headers, panel headings" },
+      "2xl": { "value": "1.5rem", "px": "24px", "usage": "Page headings, ticket ID in detail panel" },
+      "3xl": { "value": "1.875rem", "px": "30px", "usage": "Dashboard title, hero metrics" },
+      "4xl": { "value": "2.25rem", "px": "36px", "usage": "Large metric values (uptime, agent count)" }
+    },
+    "fontWeight": {
+      "normal": { "value": "400", "usage": "Body text, descriptions" },
+      "medium": { "value": "500", "usage": "Labels, metadata keys, navigation items" },
+      "semibold": { "value": "600", "usage": "Card titles, section headers, badge text" },
+      "bold": { "value": "700", "usage": "Page headings, dashboard title, metric values" }
+    },
+    "lineHeight": {
+      "tight": { "value": "1.25", "usage": "Headings, compact UI elements" },
+      "normal": { "value": "1.5", "usage": "Body text, descriptions, table cells" },
+      "relaxed": { "value": "1.75", "usage": "Long-form content, help text" }
+    }
+  },
+  "spacing": {
+    "0": { "value": "0", "px": "0px", "usage": "Reset" },
+    "xs": { "value": "0.25rem", "px": "4px", "usage": "Tight padding, badge internal spacing, icon gaps" },
+    "sm": { "value": "0.5rem", "px": "8px", "usage": "Card internal padding, form field spacing, compact gaps" },
+    "md": { "value": "1rem", "px": "16px", "usage": "Standard padding, card content spacing, column gaps" },
+    "lg": { "value": "1.5rem", "px": "24px", "usage": "Section spacing, filter bar padding, panel margins" },
+    "xl": { "value": "2rem", "px": "32px", "usage": "Large section gaps, main content padding" },
+    "2xl": { "value": "3rem", "px": "48px", "usage": "Page-level margins, major section separation" },
+    "3xl": { "value": "4rem", "px": "64px", "usage": "Maximum spacing, hero section padding" }
+  },
+  "breakpoints": {
+    "mobile": { "value": "768px", "query": "(max-width: 767px)", "usage": "Phone layouts, vertical stacking, hamburger nav" },
+    "tablet": { "value": "1024px", "query": "(min-width: 768px) and (max-width: 1023px)", "usage": "Tablet layouts, reduced columns, touch-optimized" },
+    "laptop": { "value": "1440px", "query": "(min-width: 1024px) and (max-width: 1439px)", "usage": "Standard desktop, full horizontal Kanban" },
+    "desktop": { "value": "1440px", "query": "(min-width: 1440px)", "usage": "Wide desktop, maximum information density" }
+  },
+  "borderRadius": {
+    "none": { "value": "0" },
+    "sm": { "value": "0.25rem", "px": "4px", "usage": "Badges, small pills" },
+    "md": { "value": "0.375rem", "px": "6px", "usage": "Buttons, inputs, dropdowns" },
+    "lg": { "value": "0.5rem", "px": "8px", "usage": "Cards, panels, ticket cards" },
+    "xl": { "value": "0.75rem", "px": "12px", "usage": "Large panels, modals" },
+    "full": { "value": "9999px", "usage": "Circular avatars, status dots, pill badges" }
+  },
+  "shadows": {
+    "none": { "value": "none", "usage": "No shadow (dark theme default)" },
+    "sm": { "value": "0 1px 2px rgba(0,0,0,0.05)", "usage": "Subtle elevation for light theme cards" },
+    "md": { "value": "0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1)", "usage": "Card elevation, dropdowns" },
+    "lg": { "value": "0 10px 15px -3px rgba(0,0,0,0.1), 0 4px 6px -4px rgba(0,0,0,0.1)", "usage": "Slide-over panels, modals, elevated menus" },
+    "xl": { "value": "0 20px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1)", "usage": "Floating panels, tooltips" },
+    "inner": { "value": "inset 0 2px 4px rgba(0,0,0,0.06)", "usage": "Inset inputs, pressed states" }
+  },
+  "zIndex": {
+    "base": { "value": "0", "usage": "Normal flow content" },
+    "dropdown": { "value": "10", "usage": "Dropdown menus, autocomplete panels" },
+    "sticky": { "value": "20", "usage": "Sticky headers, filter bar" },
+    "overlay": { "value": "30", "usage": "Scrim overlay behind panels" },
+    "slideOver": { "value": "40", "usage": "Ticket detail slide-over panel" },
+    "modal": { "value": "50", "usage": "Confirmation modals, dialogs" },
+    "toast": { "value": "60", "usage": "Toast notifications, error banners" },
+    "tooltip": { "value": "70", "usage": "Tooltips, popovers" }
+  },
+  "transitions": {
+    "fast": { "value": "150ms ease-in-out", "usage": "Hover states, focus rings, button feedback" },
+    "normal": { "value": "250ms ease-in-out", "usage": "Panel slides, card moves, tab switches" },
+    "slow": { "value": "500ms ease-in-out", "usage": "Page transitions, graph animations" }
+  },
+  "motion": {
+    "reducedMotion": {
+      "query": "(prefers-reduced-motion: reduce)",
+      "behavior": "Disable all transition animations, graph force simulations stop immediately, card movements are instant"
+    }
+  }
+}
