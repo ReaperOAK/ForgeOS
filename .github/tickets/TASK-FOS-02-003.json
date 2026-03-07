@@ -4,7 +4,7 @@
   "description": "Implement the Express middleware stack as specified in Architecture \u00a74.3. Request ID middleware generates or extracts X-Request-ID header for correlation across logs. Structured logging middleware logs every request/response with: timestamp, method, path, status code, duration_ms, request_id, agent_name (if authenticated), and user_agent. Error handling middleware catches all unhandled errors, maps PostgreSQL error codes to ForgeOSError codes, and returns structured ErrorResponse JSON. Include a withErrorHandling wrapper function for MCP tool handlers that catches errors and returns them as structured MCP text content responses.",
   "type": "backend",
   "priority": "high",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -125,6 +125,15 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "DOCS complete. README updated with Middleware section, CHANGELOG entry added, all JSDoc verified."
+    },
+    {
+      "timestamp": "2026-03-07T16:01:06.088423+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tickets/02-mcp-server-core.md",
