@@ -4,7 +4,7 @@
   "description": "Implement the tickets.stats MCP tool that returns aggregate system statistics for dispatcher decision-making and dashboard display. Queries the tickets and events tables to compute per-stage ticket counts, per-status ticket counts, claim health breakdown (healthy/expiring_soon/expired), average time-in-stage per stage, rework count distribution, total tickets, and total done tickets. May cache results for up to 5 seconds to reduce load.",
   "type": "backend",
   "priority": "medium",
-  "stage": "BACKEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
