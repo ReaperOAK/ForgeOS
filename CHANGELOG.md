@@ -8,6 +8,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Web Framework and ORM Evaluation** — Comprehensive research report at
+  `docs/research/framework-evaluation.md` (FORGEOS-RES011). Evaluates three
+  Python web frameworks (FastAPI, Flask, Litestar) and two database access
+  approaches (SQLAlchemy async, asyncpg raw) for the ForgeOS Python MCP
+  server. Weighted comparison matrices across 8 framework dimensions and
+  7 database dimensions. Recommends **FastAPI** (88% confidence) for native
+  Starlette/ASGI alignment with MCP Python SDK and **SQLAlchemy async +
+  asyncpg driver** (85% confidence) for Alembic migration tooling and hybrid
+  query approach. Includes contradiction analysis resolving 4 apparent
+  conflicts, 14-risk assessment, Bayesian confidence update (70% → 88%),
+  license compatibility matrix, recommended dependency tree, and repository
+  health scores for all evaluated libraries.
+
 - **MCP Protocol Adoption Risk Assessment** — Comprehensive risk assessment
   at `docs/research/mcp-risk-assessment.md` (FORGEOS-RES004). Synthesizes
   findings from RES001 (Protocol Spec, 92%), RES002 (Transport Layer, 88%),
