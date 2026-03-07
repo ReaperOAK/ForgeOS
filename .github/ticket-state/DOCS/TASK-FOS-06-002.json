@@ -93,9 +93,28 @@
       "machine_id": "pop-os",
       "from_stage": "CI",
       "to_stage": "DOCS",
-      "details": "CI PASS — Score 98/100, 0 critical, 0 warnings. Advanced to DOCS."
+      "details": "CI PASS \u2014 Score 98/100, 0 critical, 0 warnings. Advanced to DOCS."
+    },
+    {
+      "timestamp": "2026-03-07T16:56:52.730624+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security Engineer",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-07T17:03:35.659902+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "system",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "Advanced from CI to DOCS"
     }
   ],
   "source_task_file": "TODO/tickets/06-git-integration.md",
-  "tags": []
+  "tags": [],
+  "current_stage": "SECURITY"
 }
