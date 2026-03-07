@@ -4,7 +4,7 @@
   "description": "Implement the Express middleware stack as specified in Architecture \u00a74.3. Request ID middleware generates or extracts X-Request-ID header for correlation across logs. Structured logging middleware logs every request/response with: timestamp, method, path, status code, duration_ms, request_id, agent_name (if authenticated), and user_agent. Error handling middleware catches all unhandled errors, maps PostgreSQL error codes to ForgeOSError codes, and returns structured ErrorResponse JSON. Include a withErrorHandling wrapper function for MCP tool handlers that catches errors and returns them as structured MCP text content responses.",
   "type": "backend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -37,10 +37,10 @@
     "All middleware functions are exported and can be mounted on Express app in correct order"
   ],
   "rework_count": 0,
-  "claimed_by": "QA",
-  "machine_id": "ForgeOS-dev",
-  "operator": "Owais",
-  "lease_expiry": "2026-03-07T09:27:57Z",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -77,6 +77,15 @@
       "agent": "QA",
       "machine_id": "ForgeOS-dev",
       "details": "Claimed by QA on ForgeOS-dev (Owais)"
+    },
+    {
+      "timestamp": "2026-03-07T09:00:20.492064+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tickets/02-mcp-server-core.md",
