@@ -8,6 +8,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Database Migration Tooling Evaluation** — Comprehensive research report at
+  `docs/research/migration-tooling.md` (FORGEOS-RES012). Evaluates 5 database
+  migration tools for ForgeOS (TypeScript/Node.js + PostgreSQL): Alembic,
+  Flyway, custom migration runner, node-pg-migrate, and graphile-migrate.
+  Weighted comparison matrix across 7 dimensions (language alignment, rollback
+  safety, CI integration, JSON migration, PostgreSQL features, community
+  health, migration cost). Recommends **phased approach** at 87% confidence:
+  Phase 1 — enhance current custom runner with down-migration support (~200
+  LOC, 9-15 hours); Phase 2 — migrate to **node-pg-migrate** (score 8.70/10)
+  when schema complexity warrants it. Alembic rejected (Python mismatch in
+  TypeScript project), Flyway rejected (paywalled rollback, Java dependency).
+  Includes rollback safety assessment, CI integration patterns with pipeline
+  examples, JSON-to-PostgreSQL data migration compatibility scoring,
+  contradiction analysis resolving 3 industry claims, risk register, and
+  Bayesian confidence update (60% to 87%).
+
 - **Web Framework and ORM Evaluation** — Comprehensive research report at
   `docs/research/framework-evaluation.md` (FORGEOS-RES011). Evaluates three
   Python web frameworks (FastAPI, Flask, Litestar) and two database access

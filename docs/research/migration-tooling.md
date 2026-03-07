@@ -12,7 +12,7 @@ tags: [research, migration, alembic, flyway, postgresql, tooling, phase1, BLK-01
 confidence: HIGH (87%)
 validity_window: 6 months (until 2026-09-07)
 refresh_triggers: [new migration tool release, ForgeOS schema complexity exceeds 20 migrations, PostgreSQL upgrade to 18+]
-last_reviewed: 2026-03-07T12:55:00Z
+last_reviewed: 2026-03-07T15:06:00Z
 ---
 
 # Database Migration Tooling Evaluation for ForgeOS
@@ -41,7 +41,8 @@ last_reviewed: 2026-03-07T12:55:00Z
 10. [Recommendation](#10-recommendation)
 11. [Risks & Validity](#11-risks--validity)
 12. [Sources & Evidence Chain](#12-sources--evidence-chain)
-13. [Glossary](#13-glossary)
+13. [Related Documents](#13-related-documents)
+14. [Glossary](#14-glossary)
 
 ---
 
@@ -829,7 +830,21 @@ This approach works identically with both the enhanced custom runner and node-pg
 
 ---
 
-## 13. Glossary
+## 13. Related Documents
+
+| Document | Relevance |
+|----------|-----------|
+| [Database Schema Reference](../database/schema-reference.md) | Defines the PostgreSQL schema that migration tooling must manage |
+| [Database Schema Architecture](../architecture/database-schema.md) | Architecture-level schema design including migration strategy (§14) |
+| [PostgreSQL Connection Pooling](pg-connection-pooling.md) | Connection pool configuration relevant to migration runner connections |
+| [PostgreSQL Transaction Isolation](pg-transaction-isolation.md) | Transaction semantics critical for safe migration execution |
+| [PostgreSQL Event Sourcing](pg-event-sourcing.md) | Event sourcing patterns that future migrations must preserve |
+| [PostgreSQL Distributed Locking](pg-distributed-locking.md) | Advisory lock patterns used alongside migration locking |
+| [Web Framework and ORM Evaluation](framework-evaluation.md) | Framework choice (FastAPI + SQLAlchemy async) that informs Python-side migration considerations |
+
+---
+
+## 14. Glossary
 
 | Term | Definition |
 |------|-----------|

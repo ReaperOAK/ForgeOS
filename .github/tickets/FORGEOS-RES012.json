@@ -4,7 +4,7 @@
   "description": "Evaluate database migration tooling for the ForgeOS PostgreSQL schema. Compare Alembic (SQLAlchemy-based), Flyway, custom migration scripts, and yoyo-migrations. Assess auto-generation capability, rollback safety, CI integration, multi-environment support, and suitability for the ForgeOS dual-mode migration from JSON files to PostgreSQL.",
   "type": "research",
   "priority": "medium",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "RESEARCH",
@@ -30,10 +30,10 @@
     "Research report delivered at docs/research/migration-tooling.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-07T15:35:47.576330+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -70,6 +70,15 @@
       "agent": "Documentation",
       "machine_id": "pop-os",
       "details": "Claimed by Documentation on pop-os (ReaperOAK)"
+    },
+    {
+      "timestamp": "2026-03-07T15:07:44.195249+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-research.md",
