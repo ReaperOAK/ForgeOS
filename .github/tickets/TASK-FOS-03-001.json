@@ -4,7 +4,7 @@
   "description": "Implement the tickets.next MCP tool that returns the next available ticket for a given SDLC stage. Uses SELECT FOR UPDATE SKIP LOCKED to peek at the highest-priority unclaimed ticket without actually claiming it. Supports optional filters by ticket type and minimum priority. Returns the full ticket object or null with a descriptive message. This tool is read-only \u2014 it does not modify ticket state. Register the tool on the MCP server using registerTool() with Zod input schema validation.",
   "type": "backend",
   "priority": "critical",
-  "stage": "READY",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -81,6 +81,15 @@
       "from_stage": "READY",
       "to_stage": "READY",
       "details": "Claimed by reaperoak@forgeos-dev via Backend, lease until 2026-03-07T07:56:00.429814+00:00"
+    },
+    {
+      "timestamp": "2026-03-07T07:29:08.056013+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "Backend",
+      "machine_id": "forgeos-dev",
+      "from_stage": "BACKEND",
+      "to_stage": "QA",
+      "details": "BACKEND complete. tickets.next MCP tool implemented with Zod schema, parameterized SQL, structured logging, MCP response format."
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
