@@ -4,7 +4,7 @@
   "description": "Implement the GitHub push webhook receiver and ghost commit recovery system as specified in Architecture \u00a710.2 and PRD FR-28 through FR-30. POST /api/webhooks/github accepts GitHub push event payloads, verifies the HMAC-SHA256 signature using WEBHOOK_SECRET, parses commit messages to extract ticket operations (CLAIM and WORK patterns), and reconciles DB state with Git state. Reconciliation rules: (1) Git CLAIM exists but DB has no claim \u2192 create claim in DB, (2) Git WORK complete but DB still CLAIMED \u2192 advance ticket, (3) DB has claim but no Git commit and lease expired \u2192 release claim, (4) ambiguous \u2192 log warning and flag for admin. All operations are idempotent. Includes periodic reconciliation sweep (configurable interval, default 5 minutes).",
   "type": "backend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -46,15 +46,6 @@
   "operator": null,
   "lease_expiry": null,
   "lease_duration_minutes": 30,
-  "completed_at": "2026-03-07T22:01:00Z",
-  "artifacts": [
-    "forgeos-server/src/webhooks/parser.ts",
-    "forgeos-server/src/webhooks/reconciliation.ts",
-    "forgeos-server/src/webhooks/github.ts",
-    "forgeos-server/src/webhooks/parser.test.ts",
-    "forgeos-server/src/webhooks/reconciliation.test.ts",
-    "forgeos-server/src/webhooks/github.test.ts"
-  ],
   "history": [
     {
       "timestamp": "2026-03-05T18:05:37.904899+00:00",
@@ -76,8 +67,26 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "Implemented webhook receiver, commit parser, and reconciliation engine. 72 tests, 94.88% coverage."
+    },
+    {
+      "timestamp": "2026-03-07T16:44:57.984946+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tickets/06-git-integration.md",
-  "tags": []
+  "tags": [],
+  "completed_at": "2026-03-07T22:01:00Z",
+  "artifacts": [
+    "forgeos-server/src/webhooks/parser.ts",
+    "forgeos-server/src/webhooks/reconciliation.ts",
+    "forgeos-server/src/webhooks/github.ts",
+    "forgeos-server/src/webhooks/parser.test.ts",
+    "forgeos-server/src/webhooks/reconciliation.test.ts",
+    "forgeos-server/src/webhooks/github.test.ts"
+  ]
 }
