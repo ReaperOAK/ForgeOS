@@ -8,6 +8,38 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Initialize MCP Server with Python SDK** — Foundational Python MCP
+  server at `mcp-server/` (FORGEOS-BE015). Built on the official MCP Python
+  SDK (`mcp>=1.25`) using the FastMCP high-level API with decorator-based
+  tool registration. Server starts with Streamable HTTP transport in
+  stateless mode (`stateless_http=True`) for horizontal scaling. Includes:
+  `pyproject.toml` with Hatch build system, project metadata, 5 runtime
+  dependencies (`mcp`, `asyncpg`, `pydantic`, `pydantic-settings`, `uvicorn`),
+  and dev tooling (`pytest`, `ruff`, `pyright`); `server.py` with
+  `ServerConfig` (pydantic-settings, `FORGEOS_*` env prefix), lifespan-
+  managed asyncpg connection pool with graceful degradation, structured
+  JSON logging, 5-class domain error hierarchy (`ForgeOSError`,
+  `TicketNotFoundError`, `TicketAlreadyClaimedError`, `ValidationError`,
+  `DatabaseError`) mapping to JSON-RPC error codes, `raise_mcp_error()`
+  and `tool_error_response()` helpers, and a `health_check` tool;
+  `__main__.py` entry point for `python -m mcp_server`; `__init__.py`
+  package metadata. Entry point: `forgeos-mcp` script or `python -m
+  mcp_server`. 51 tests, 95% coverage, strict pyright type checking.
+
+- **Custom PostgreSQL container with init scripts** — Self-contained
+  PostgreSQL 17 Alpine image at `infra/docker/postgres/` (FORGEOS-DO002).
+  Dockerfile bundles an init script (`init.sql`) that creates `uuid-ossp`
+  and `pgcrypto` extensions, a least-privilege `forgeos_user` application
+  role (NOSUPERUSER, NOCREATEDB, NOCREATEROLE, CONNECTION LIMIT 40), schema
+  permissions with default privilege grants for future objects, and
+  database-level timeouts (statement 30 s, lock 10 s, idle-txn 5 min).
+  Includes a dual healthcheck script (`pg-healthcheck.sh`) that verifies
+  both connectivity (`pg_isready`) and query execution (`SELECT 1`).
+  Development-tuned PostgreSQL configuration: `shared_buffers=128MB`,
+  `work_mem=8MB`, `max_connections=50`, `wal_level=replica`, slow query
+  logging at 500 ms. Read-only init scripts (444) and execute-only
+  healthcheck (555) for runtime immutability.
+
 - **Environment configuration profiles** — Typed, profile-aware configuration
   system for the ForgeOS platform (FORGEOS-DO004). Three files provide complete
   environment management: `infra/.env.template` (canonical reference for 30+
@@ -26,7 +58,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   optional filtering by stage, type, or status. Uses Kahn's BFS algorithm
   (O(V+E)) for cycle detection and topological ordering with dynamic
   programming for critical path computation. Parameterized SQL queries,
-  structured pino logging, and Zod schema validation. Performance target:
+  stFile-Level Mutex Implementation** — Concurrent file lock management
+  module at `forgeos-server/src/db/file-mutex.ts` (TASK-FOS-04-003).
+  Provides `acquireFileLocks`, `checkFileConflicts`, `releaseFileLocks`,
+  `getActiveLocksForTicket`, and `getActiveLockForFile` functions backed
+  by the `file_locks` PostgreSQL table with a partial unique index for
+  database-level mutual exclusion. Uses `INSERT ... ON CONFLICT DO NOTHING`
+  for atomic lock acquisition with automatic conflict detection and
+  rollback. Emits `FILE_LOCKED` / `FILE_UNLOCKED` audit events.
+  `FileConflictError` class (HTTP 409) provides structured conflict
+  details. 21 tests, 100% statement/function/line coverage, 94% branch
+  coverage.
+
+- **ructured pino logging, and Zod schema validation. Performance target:
   < 500 ms for up to 500 tickets
   (`forgeos-server/src/tools/tickets-graph.ts`,
   `forgeos-server/src/tools/index.ts`).
