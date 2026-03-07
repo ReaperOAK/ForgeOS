@@ -1378,6 +1378,11 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** PASS — Score 85/100, 0 critical, 1 warning (importTickets CC=22), 3 suggestions (else blocks, file size, function size). TypeScript strict type-check clean. 21/21 tests pass. No ESLint config exists (project-wide gap). No dead code, no console.*, no TODO markers.
 - **Timestamp:** 2026-03-07T21:45:00Z
 
+### [TASK-FOS-06-002] — Security Review
+- **Artifacts:** .github/agent-output/Security/TASK-FOS-06-002.md
+- **Decisions:** PASS (HIGH confidence) — STRIDE threat model on 4 trust boundaries (Developer→Hook, Hook→MCP API, Env→Script, Git CLI→Script). Max threat score 6 (LOW). OWASP Top 10: 10/10 categories checked, all pass. 4 findings: SEC-001 (env var input validation, LOW/CWE-20, ACCEPTED), SEC-002 (HTTP default, LOW/CWE-319, ACCEPTED), SEC-003 (fail-open by design, LOW/CWE-636, ACCEPTED), SEC-004 (no API auth, LOW/CWE-306, ACCEPTED). Zero eval usage. All variables double-quoted. set -euo pipefail active. Strict regex on git-derived input. No hardcoded secrets. Zero dependencies (system tools only). Remediation for skipped SECURITY stage.
+- **Timestamp:** 2026-03-07T22:00:00Z
+
 ### [TASK-FOS-06-004] — Backend Summary
 - **Artifacts:** forgeos-server/src/webhooks/parser.ts, forgeos-server/src/webhooks/reconciliation.ts, forgeos-server/src/webhooks/github.ts, forgeos-server/src/webhooks/parser.test.ts, forgeos-server/src/webhooks/reconciliation.test.ts, forgeos-server/src/webhooks/github.test.ts
 - **Decisions:** Used DI interfaces (DatabasePool, StructuredLogger) instead of importing pg/pino directly for testability. Router factory pattern with express.raw() for HMAC verification. Conditional UPDATE with RETURNING for idempotent claim creation. Agent UUID lookup before FK claim; AMBIGUOUS if agent not found (avoids valid_lease constraint violation). Manual advance fallback when advance_ticket() stored function fails.
