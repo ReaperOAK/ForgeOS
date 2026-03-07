@@ -37,10 +37,10 @@
     "Query completes within 50ms (uses idx_tickets_claimable composite index)"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Validator",
+  "machine_id": "forgeos-dev",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-07T08:51:02.244471+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -225,6 +225,15 @@
       "from_stage": "BACKEND",
       "to_stage": "VALIDATION",
       "details": "Corrected double-advance from tickets.py. DOCS stage was already complete. Ticket should be in VALIDATION for Validator processing. Rework count reset to 0."
+    },
+    {
+      "timestamp": "2026-03-07T08:21:02.244494+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "forgeos-dev",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by reaperoak@forgeos-dev via Validator, lease until 2026-03-07T08:51:02.244471+00:00"
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
