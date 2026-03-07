@@ -926,3 +926,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/architecture/database-schema.md, .github/agent-output/Architect/FORGEOS-ARCH005.md
 - **Decisions:** Consolidated claims/lease_heartbeats/stage_transitions into tickets table + events table (hybrid model) rather than separate tables — reduces JOIN overhead, matches existing 001_initial.sql implementation. Chose TEXT[] arrays over junction tables for depends_on/file_paths (GIN-indexed, simpler schema). Chose partial unique index for file mutex over advisory locks (auditable, persistent). Documented 5 data type rationales (TEXT>VARCHAR, TIMESTAMPTZ>TIMESTAMP, UUID>SERIAL, TEXT[]>junction, JSONB>JSON). Produced ADR-003 with 5 design decisions.
 - **Timestamp:** 2026-03-07T00:00:00Z
+
+### [TASK-FOS-03-001] — tickets.next MCP Tool Implementation
+- **Artifacts:** forgeos-server/src/tools/tickets-next.ts, forgeos-server/src/tools/index.ts
+- **Decisions:** Used `pool` import (not deprecated `getPool`) to satisfy source analysis test regex; Used parameterized SQL with dynamic WHERE clause building for optional filters; Returned MCP content format `{ content: [{ type: 'text', text: JSON.stringify(result) }] }` per SDK convention
+- **Timestamp:** 2026-03-07T07:30:00+00:00
