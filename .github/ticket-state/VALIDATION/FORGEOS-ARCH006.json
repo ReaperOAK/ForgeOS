@@ -4,7 +4,7 @@
   "description": "Design the indexing strategy for the ForgeOS PostgreSQL schema. Define primary indexes, composite indexes (stage + claimed_by for claim queries), GIN indexes on JSONB columns (dependencies, file_paths), partial indexes for active claims, and covering indexes for hot query paths. Document expected query patterns and their index utilization.",
   "type": "architecture",
   "priority": "medium",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "ARCHITECT",
@@ -31,10 +31,10 @@
     "Index strategy document delivered at docs/architecture/database-indexes.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-07T15:11:36Z",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -52,18 +52,13 @@
       "details": "Dependencies resolved, moved to READY"
     },
     {
-      "timestamp": "2026-03-07T12:55:06+00:00",
-      "event": "CLAIMED",
-      "agent": "Architect",
-      "machine_id": "pop-os",
-      "details": "Claimed by Architect for ARCHITECT stage"
-    },
-    {
-      "timestamp": "2026-03-07T13:10:00+00:00",
-      "event": "ARCHITECT_COMPLETE",
-      "agent": "Architect",
-      "machine_id": "pop-os",
-      "details": "ARCHITECT stage complete. Deliverable: docs/architecture/database-indexes.md. Confidence: HIGH (89%). All 7 acceptance criteria met. Advanced to DOCS."
+      "timestamp": "2026-03-07T14:42:58.149314+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-architecture.md",
