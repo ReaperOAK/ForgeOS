@@ -1500,3 +1500,9 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/tools/tickets-claim.ts, forgeos-server/src/tools/index.ts, forgeos-server/src/__tests__/tools/tickets-claim.test.ts
 - **Decisions:** Added CallToolResult return type for consistency with tickets-next.ts pattern. Registered tickets.claim in index.ts barrel. Created 32 unit tests covering all 8 acceptance criteria. Existing implementation was functional — improvements focused on type safety and tool registration.
 - **Timestamp:** 2026-03-08T04:40:00Z
+
+
+### [FORGEOS-DO004] - BACKEND Rework #1
+- **Artifacts:** infra/config/settings.py, infra/config/test_settings.py
+- **Decisions:** Fixed all ruff lint errors (UP045, B904, E501, E741). Fixed all pyright type errors (object to Any for profile defaults). Created 64-test suite achieving 93% coverage. Extracted _build_config() and _prod_checks() helpers.
+- **Timestamp:** 2025-07-27T12:00:00Z
