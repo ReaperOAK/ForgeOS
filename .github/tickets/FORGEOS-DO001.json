@@ -36,10 +36,10 @@
     "Docker Compose validates cleanly with `docker compose config`"
   ],
   "rework_count": 0,
-  "claimed_by": "DevOps",
+  "claimed_by": "QA",
   "machine_id": "forgeos-dev",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-07T08:21:46Z",
+  "lease_expiry": "2026-03-07T08:50:47Z",
   "lease_duration_minutes": 30,
   "history": [
     {
