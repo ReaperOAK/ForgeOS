@@ -4,7 +4,7 @@
   "description": "Define the non-functional requirements (NFRs) and migration-specific acceptance criteria for the ForgeOS platform. Document measurable targets for performance, availability, scalability, security, and usability. Define the dual-mode migration acceptance criteria including rollback plan, data integrity verification, and cutover conditions.",
   "type": "docs",
   "priority": "high",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "DOCS",
@@ -32,10 +32,10 @@
     "NFR document delivered at docs/product/nfr-migration-reqs.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-07T15:46:54+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -65,6 +65,15 @@
       "agent": "Documentation",
       "machine_id": "pop-os",
       "details": "DOCS stage complete. Created docs/product/nfr-migration-reqs.md. Advancing to VALIDATION."
+    },
+    {
+      "timestamp": "2026-03-07T15:18:11.082867+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-product.md",
