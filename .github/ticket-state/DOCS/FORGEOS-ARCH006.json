@@ -50,6 +50,20 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-07T12:55:06+00:00",
+      "event": "CLAIMED",
+      "agent": "Architect",
+      "machine_id": "pop-os",
+      "details": "Claimed by Architect for ARCHITECT stage"
+    },
+    {
+      "timestamp": "2026-03-07T13:10:00+00:00",
+      "event": "ARCHITECT_COMPLETE",
+      "agent": "Architect",
+      "machine_id": "pop-os",
+      "details": "ARCHITECT stage complete. Deliverable: docs/architecture/database-indexes.md. Confidence: HIGH (89%). All 7 acceptance criteria met. Advanced to DOCS."
     }
   ],
   "source_task_file": "TODO/tasks/phase1-architecture.md",
