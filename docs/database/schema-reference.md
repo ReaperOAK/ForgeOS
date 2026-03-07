@@ -2,7 +2,7 @@
 title: ForgeOS Database Schema Reference
 type: Reference
 audience: Backend Engineers, DevOps Engineers, Architects
-last_reviewed: 2026-03-06  # Updated by Documentation Specialist 2026-03-06
+last_reviewed: 2026-03-07  # Updated by Documentation Specialist 2026-03-07
 migration_file: forgeos-server/src/db/migrations/001_initial.sql
 ---
 
@@ -13,6 +13,7 @@ This document describes the PostgreSQL schema for the ForgeOS distributed orches
 
 **See also:**
 - [Core Database Schema Architecture](../architecture/database-schema.md)
+- [Event Sourcing Audit Trail Schema](../architecture/event-sourcing-schema.md)
 - [ADR-001: PostgreSQL as Primary State Store](../architecture/adr/adr-001-postgresql.md)
 - [ADR-002: MCP as Agent Communication Protocol](../architecture/adr/adr-002-mcp-protocol.md)
 - [PG Distributed Locking](../research/pg-distributed-locking.md)
@@ -147,6 +148,8 @@ Audit trail event classification.
 | `RECONCILED` | State reconciliation applied |
 | `FILE_LOCKED` | File lock acquired |
 | `FILE_UNLOCKED` | File lock released |
+| `DONE` | Ticket completed final validation |
+| `REWORKED` | Ticket re-entered implementation after rejection |
 
 ---
 
@@ -279,7 +282,16 @@ reconstruction.
 | `previous_status` | ticket_status | | Status before change |
 | `new_status` | ticket_status | | Status after change |
 | `payload` | JSONB | NOT NULL, DEFAULT `'{}'` | Event-specific details |
+| `sequence_number` | BIGINT | NOT NULL, DEFAULT `nextval(...)` | Global monotonic ordering (added in Migration 002) |
+| `aggregate_version` | INTEGER | NOT NULL | Per-ticket monotonic sequence for optimistic concurrency (added in Migration 002) |
+| `correlation_id` | UUID | | Links related events across tickets (added in Migration 002) |
+| `causation_id` | UUID | | The event that caused this event (added in Migration 002) |
+| `schema_version` | INTEGER | NOT NULL, DEFAULT `1` | Payload schema version for evolution (added in Migration 002) |
 | `created_at` | TIMESTAMPTZ | NOT NULL, DEFAULT `NOW()` | Event timestamp |
+
+> **See also:** [Event Sourcing Audit Trail Schema](../architecture/event-sourcing-schema.md)
+> for full payload schemas, sequence numbering strategy, state reconstruction
+> patterns, LISTEN/NOTIFY integration, and archival strategy.
 
 ### system_config
 
@@ -337,6 +349,10 @@ GIN (Generalized Inverted Index) supports efficient containment operators
 | `idx_events_created_at` | events | (created_at) | Chronological queries |
 | `idx_events_event_type` | events | (event_type) | Event type filtering |
 | `idx_events_ticket_timeline` | events | (ticket_id, created_at) | Ticket timeline display |
+| `idx_events_sequence` | events | (sequence_number) | Global ordering, catch-up polling (added in Migration 002) |
+| `idx_events_aggregate_version` | events | (ticket_id, aggregate_version) UNIQUE | Per-ticket ordering, optimistic concurrency (added in Migration 002) |
+| `idx_events_correlation` | events | (correlation_id) WHERE NOT NULL | Event chain tracing (added in Migration 002) |
+| `idx_events_ticket_time` | events | (ticket_id, created_at) | Time-travel per ticket (added in Migration 002) |
 | `idx_file_locks_ticket_id` | file_locks | (ticket_id) | Ticket → lock join |
 
 ---
@@ -493,6 +509,67 @@ INSERT or UPDATE. The payload is a JSON object with `ticket_id`, `status`,
 The application server listens on the `ticket_changes` channel and pushes
 events to SSE clients for real-time dashboard updates.
 
+### prevent_event_mutation
+
+*(Added in Migration 002)*
+
+Trigger function that raises an exception on any UPDATE or DELETE against the
+`events` table. Enforces the append-only immutability invariant at the database
+level. The error message includes the attempted operation and directs users to
+create a RECONCILED event instead.
+
+**Applied to:** events table (via `trg_events_immutable_update` and
+`trg_events_immutable_delete`).
+
+### notify_event_created
+
+*(Added in Migration 002)*
+
+Trigger function that fires `pg_notify('ticket_events', ...)` on every event
+INSERT. The payload is a compact JSON object with `event_id`, `ticket_id`,
+`event_type`, `agent`, `machine`, stage transitions, `seq` (sequence_number),
+`version` (aggregate_version), and `ts` (timestamp). If the payload exceeds
+7,500 bytes, a truncated notification is sent and the consumer must fetch the
+full event by ID.
+
+### replay_ticket_state
+
+*(Added in Migration 002)*
+
+Reconstructs a ticket's state at any point in time by replaying its events in
+`aggregate_version` order.
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `p_ticket_id` | TEXT | — | Target ticket ID |
+| `p_as_of` | TIMESTAMPTZ | `NOW()` | Reconstruct state as of this timestamp |
+
+**Returns:** JSONB — reconstructed ticket state including status, stage,
+claimed_by, rework_count, and version.
+
+**Use cases:** Time-travel debugging, audit verification, incident
+investigation, migration validation.
+
+**Performance:** Sub-10ms for typical tickets (20 events). See
+[Event Sourcing Schema §8.4](../architecture/event-sourcing-schema.md#84-replay-performance)
+for benchmarks.
+
+### verify_ticket_integrity
+
+*(Added in Migration 002)*
+
+Compares the mutable `tickets` row against the state reconstructed by
+`replay_ticket_state()`. Returns a JSONB report with match status,
+discrepancies, current state, replayed state, and event count.
+
+| Parameter | Type | Description |
+|-----------|------|-------------|
+| `p_ticket_id` | TEXT | Target ticket ID |
+
+**Returns:** JSONB — integrity report with `integrity_match` (boolean),
+`current_state`, `replayed_state`, `discrepancies`, `event_count`, and
+`checked_at`.
+
 ---
 
 ## Triggers
@@ -503,6 +580,9 @@ events to SSE clients for real-time dashboard updates.
 | `trg_agents_updated_at` | agents | BEFORE UPDATE | `update_updated_at()` |
 | `trg_projects_updated_at` | projects | BEFORE UPDATE | `update_updated_at()` |
 | `trg_ticket_notify` | tickets | AFTER INSERT OR UPDATE | `notify_ticket_change()` |
+| `trg_events_immutable_update` | events | BEFORE UPDATE | `prevent_event_mutation()` — raises exception to enforce append-only immutability (added in Migration 002) |
+| `trg_events_immutable_delete` | events | BEFORE DELETE | `prevent_event_mutation()` — raises exception to enforce append-only immutability (added in Migration 002) |
+| `trg_event_notify` | events | AFTER INSERT | `notify_event_created()` — sends NOTIFY on `ticket_events` channel for real-time streaming (added in Migration 002) |
 
 ---
 

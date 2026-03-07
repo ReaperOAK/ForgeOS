@@ -8,6 +8,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Event sourcing audit trail schema** — Comprehensive event sourcing design
+  at `docs/architecture/event-sourcing-schema.md` (FORGEOS-ARCH007). Defines
+  enhanced hybrid model: mutable `tickets` table as primary state source with
+  append-only `events` table as complete audit trail. Adds 5 new columns
+  (sequence_number, aggregate_version, correlation_id, causation_id,
+  schema_version), 2 new event types (DONE, REWORKED) for 15 total, per-type
+  JSONB payload schemas, two-level sequence numbering (global BIGSERIAL +
+  per-ticket INTEGER with UNIQUE constraint), PL/pgSQL replay function for
+  time-travel debugging, integrity verification function, three-layer
+  immutability enforcement (app + RLS + trigger), event-based LISTEN/NOTIFY
+  trigger on `ticket_events` channel, 9 indexes, monthly range partition
+  strategy for archival, and Migration 002 DDL. Includes ADR-004, fitness
+  functions, DAG task graph, and Well-Architected assessment (8.7/10).
+  Schema reference updated with new columns, enum values, indexes, triggers,
+  and stored functions.
+
 - **Database index and performance strategy** — Comprehensive indexing strategy
   document at `docs/architecture/database-indexes.md` (FORGEOS-ARCH006).
   Covers 31 indexes across 7 tables: 12 explicit B-tree, 4 GIN (arrays and
