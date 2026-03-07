@@ -4,7 +4,7 @@
   "description": "Define the foundational design system for the ForgeOS dashboard. Establish design tokens for colors (dark and light theme), typography scale, spacing system (4px grid), border radius, shadow levels, and z-index layering. Specify responsive layout breakpoints (desktop-first: 1440px, 1024px, 768px). Define the overall dashboard shell layout: sidebar navigation, top bar, main content area, and notification panel. Produce the design token JSON file and layout specification document.",
   "type": "frontend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -76,6 +76,15 @@
       "agent": "Frontend",
       "machine_id": "pop-os",
       "details": "Frontend validation complete. All 7 AC verified. Design tokens validated for CSS custom property consumption. WCAG 2.2 AA compliance confirmed in specifications. 8 component specs reviewed. Responsive layout verified at 4 breakpoints. Moving to QA."
+    },
+    {
+      "timestamp": "2026-03-07T17:17:47.263088+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
