@@ -4,7 +4,7 @@
   "description": "Configure the PostgreSQL container for the ForgeOS platform. Create a custom Dockerfile (or init script) that sets up the initial database and user, applies baseline configuration (connection limits, shared_buffers, work_mem for development), and includes a health check script. The container must initialize the forgeos database and forgeos_user on first startup.",
   "type": "infra",
   "priority": "critical",
-  "stage": "QA",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -63,6 +63,24 @@
       "from_stage": "BACKEND",
       "to_stage": "QA",
       "details": "Advanced from BACKEND to QA"
+    },
+    {
+      "timestamp": "2026-03-07T15:58:56.615544+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
+    },
+    {
+      "timestamp": "2026-03-07T15:59:00.511870+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-infrastructure.md",
