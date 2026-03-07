@@ -1,0 +1,128 @@
+# =============================================================================
+# ForgeOS — Monitoring Stack (Optional Override)
+# =============================================================================
+# Adds Prometheus and Grafana for local observability.
+#
+# Usage:
+#   docker compose -f docker-compose.yml -f monitoring/docker-compose.monitoring.yml up
+#
+# Services:
+#   - Prometheus (metrics collection & alerting)
+#   - Grafana (dashboards & visualization)
+#
+# Endpoints:
+#   - Prometheus:  http://localhost:9090
+#   - Grafana:     http://localhost:3001 (admin/admin)
+#
+# Ticket:  FORGEOS-DO008
+# Author:  DevOps Engineer
+# Date:    2026-03-07
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # Prometheus — Metrics Collection & Alerting
+  # ---------------------------------------------------------------------------
+  # Scrapes /health endpoints from ForgeOS services at defined intervals.
+  # Alert rules trigger on SLO violations (error rate, latency, resource usage).
+  # ---------------------------------------------------------------------------
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: forgeos-prometheus
+    hostname: prometheus
+    command:
+      - "--config.file=/etc/prometheus/prometheus.yml"
+      - "--storage.tsdb.path=/prometheus"
+      - "--storage.tsdb.retention.time=7d"
+      - "--web.enable-lifecycle"
+      - "--web.console.libraries=/etc/prometheus/console_libraries"
+      - "--web.console.templates=/etc/prometheus/consoles"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./monitoring/prometheus/alert-rules.yml:/etc/prometheus/alert-rules.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - forgeos-net
+    ports:
+      - "9090:9090"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:9090/-/healthy"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+        tag: "forgeos-prometheus"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 512M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+
+  # ---------------------------------------------------------------------------
+  # Grafana — Dashboards & Visualization
+  # ---------------------------------------------------------------------------
+  # Pre-provisioned with Prometheus as a data source.
+  # Default login: admin / admin (change on first login).
+  # ---------------------------------------------------------------------------
+  grafana:
+    image: grafana/grafana:11.0.0
+    container_name: forgeos-grafana
+    hostname: grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: "${GRAFANA_ADMIN_USER:-admin}"
+      GF_SECURITY_ADMIN_PASSWORD: "${GRAFANA_ADMIN_PASSWORD:-admin}"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+      GF_SERVER_HTTP_PORT: "3001"
+      GF_LOG_MODE: "console"
+      GF_LOG_LEVEL: "warn"
+    volumes:
+      - ./monitoring/grafana/provisioning:/etc/grafana/provisioning:ro
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      prometheus:
+        condition: service_healthy
+    networks:
+      - forgeos-net
+    ports:
+      - "3001:3001"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:3001/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    logging:
+      driver: json-file
+      options:
+        max-size: "5m"
+        max-file: "3"
+        tag: "forgeos-grafana"
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 256M
+        reservations:
+          cpus: "0.10"
+          memory: 64M
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  prometheus-data:
+    name: forgeos-prometheus-data
+    driver: local
+  grafana-data:
+    name: forgeos-grafana-data
+    driver: local

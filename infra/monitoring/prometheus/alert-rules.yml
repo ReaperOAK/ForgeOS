@@ -1,0 +1,155 @@
+# =============================================================================
+# ForgeOS — Prometheus Alert Rules
+# =============================================================================
+# Defines alert thresholds aligned with ForgeOS SLO/SLI targets:
+#   - Availability:  >= 99.9%
+#   - Latency (p99): < 500ms
+#   - Error rate:    < 0.1% 5xx
+#
+# Alert severity levels:
+#   - critical: Requires immediate response (pages on-call)
+#   - warning:  Requires attention within business hours
+#   - info:     Informational, review in next standup
+#
+# Ticket:  FORGEOS-DO008
+# Author:  DevOps Engineer
+# Date:    2026-03-07
+# =============================================================================
+
+groups:
+  # ---------------------------------------------------------------------------
+  # Service Health Alerts
+  # ---------------------------------------------------------------------------
+  - name: forgeos_service_health
+    interval: 15s
+    rules:
+      # MCP Server down for > 1 minute
+      - alert: McpServerDown
+        expr: up{job="forgeos-mcp-server"} == 0
+        for: 1m
+        labels:
+          severity: critical
+          service: mcp-server
+        annotations:
+          summary: "ForgeOS MCP Server is down"
+          description: "The MCP server has been unreachable for more than 1 minute."
+          runbook: "Check container logs: docker logs forgeos-mcp"
+
+      # PostgreSQL unreachable for > 30 seconds
+      - alert: PostgresDown
+        expr: up{job="forgeos-postgres"} == 0
+        for: 30s
+        labels:
+          severity: critical
+          service: postgres
+        annotations:
+          summary: "PostgreSQL is unreachable"
+          description: "PostgreSQL has been unreachable for more than 30 seconds."
+          runbook: "Check container: docker logs forgeos-postgres; verify disk space"
+
+      # Prometheus self-monitor
+      - alert: PrometheusDown
+        expr: up{job="prometheus"} == 0
+        for: 1m
+        labels:
+          severity: warning
+          service: prometheus
+        annotations:
+          summary: "Prometheus self-scrape failing"
+          description: "Prometheus cannot scrape its own metrics."
+
+  # ---------------------------------------------------------------------------
+  # Error Rate Alerts
+  # ---------------------------------------------------------------------------
+  - name: forgeos_error_rate
+    interval: 30s
+    rules:
+      # Warning: error rate > 1% over 5 minutes
+      - alert: HighErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{job="forgeos-mcp-server",status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{job="forgeos-mcp-server"}[5m]))
+          ) * 100 > 1
+        for: 5m
+        labels:
+          severity: warning
+          service: mcp-server
+        annotations:
+          summary: "MCP Server error rate above 1%"
+          description: "Error rate is {{ $value | printf \"%.2f\" }}% (threshold: 1%)."
+
+      # Critical: error rate > 5% over 5 minutes
+      - alert: CriticalErrorRate
+        expr: |
+          (
+            sum(rate(http_requests_total{job="forgeos-mcp-server",status=~"5.."}[5m]))
+            /
+            sum(rate(http_requests_total{job="forgeos-mcp-server"}[5m]))
+          ) * 100 > 5
+        for: 5m
+        labels:
+          severity: critical
+          service: mcp-server
+        annotations:
+          summary: "MCP Server error rate above 5% — page on-call"
+          description: "Error rate is {{ $value | printf \"%.2f\" }}% (threshold: 5%)."
+
+  # ---------------------------------------------------------------------------
+  # Resource Usage Alerts
+  # ---------------------------------------------------------------------------
+  - name: forgeos_resources
+    interval: 30s
+    rules:
+      # Container restart detected
+      - alert: ContainerRestarted
+        expr: increase(container_restart_count[5m]) > 0
+        for: 0m
+        labels:
+          severity: warning
+        annotations:
+          summary: "Container {{ $labels.name }} restarted"
+          description: "Container {{ $labels.name }} has restarted in the last 5 minutes."
+
+  # ---------------------------------------------------------------------------
+  # SLO Burn Rate Alerts
+  # ---------------------------------------------------------------------------
+  - name: forgeos_slo
+    interval: 60s
+    rules:
+      # Error budget burn rate alert (fast burn — 2% in 1h)
+      - alert: ErrorBudgetFastBurn
+        expr: |
+          (
+            1 - (
+              sum(rate(http_requests_total{job="forgeos-mcp-server",status!~"5.."}[1h]))
+              /
+              sum(rate(http_requests_total{job="forgeos-mcp-server"}[1h]))
+            )
+          ) > 0.02
+        for: 5m
+        labels:
+          severity: critical
+          service: mcp-server
+        annotations:
+          summary: "Error budget burning fast — 2%+ consumed in 1 hour"
+          description: "At this rate, the monthly error budget will be exhausted in {{ $value | printf \"%.1f\" }} hours."
+
+      # Error budget low (< 10% remaining)
+      - alert: ErrorBudgetLow
+        expr: |
+          (
+            1 - (
+              sum(rate(http_requests_total{job="forgeos-mcp-server",status!~"5.."}[30d]))
+              /
+              sum(rate(http_requests_total{job="forgeos-mcp-server"}[30d]))
+            )
+          ) / 0.001 > 0.9
+        for: 1h
+        labels:
+          severity: warning
+          service: mcp-server
+        annotations:
+          summary: "Error budget below 10% — freeze non-critical deployments"
+          description: "Monthly error budget is {{ $value | printf \"%.1f\" }}% consumed."

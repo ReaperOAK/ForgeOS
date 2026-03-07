@@ -1,0 +1,83 @@
+# =============================================================================
+# ForgeOS — Prometheus Configuration
+# =============================================================================
+# Scrapes health and metric endpoints from ForgeOS services.
+#
+# Scrape targets:
+#   - MCP Server:  /health on port 3000
+#   - PostgreSQL:  pg_exporter (if added) or blackbox probe
+#   - Prometheus:  self-monitoring on /metrics
+#
+# Alert rules are loaded from alert-rules.yml.
+#
+# Ticket:  FORGEOS-DO008
+# Author:  DevOps Engineer
+# Date:    2026-03-07
+# =============================================================================
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  scrape_timeout: 10s
+
+  external_labels:
+    environment: "development"
+    cluster: "forgeos-local"
+
+# =============================================================================
+# Alert Rules
+# =============================================================================
+rule_files:
+  - "alert-rules.yml"
+
+# =============================================================================
+# Scrape Configuration
+# =============================================================================
+scrape_configs:
+  # ---------------------------------------------------------------------------
+  # Prometheus self-monitoring
+  # ---------------------------------------------------------------------------
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+        labels:
+          service: "prometheus"
+
+  # ---------------------------------------------------------------------------
+  # ForgeOS MCP Server — Health endpoint probe
+  # ---------------------------------------------------------------------------
+  # Probes the /health endpoint and records up/down status.
+  # The health endpoint returns JSON: { status: "ok", timestamp: "..." }
+  # ---------------------------------------------------------------------------
+  - job_name: "forgeos-mcp-server"
+    metrics_path: /health
+    scrape_interval: 10s
+    scrape_timeout: 5s
+    static_configs:
+      - targets: ["mcp-server:3000"]
+        labels:
+          service: "mcp-server"
+          component: "api"
+    # Relabel to mark probe success/failure
+    metric_relabel_configs:
+      - source_labels: [__name__]
+        regex: "up"
+        target_label: __name__
+        replacement: "forgeos_mcp_up"
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — pg_isready probe via blackbox-style check
+  # ---------------------------------------------------------------------------
+  # Uses a TCP connect check against the PostgreSQL port.
+  # For full PostgreSQL metrics, add postgres_exporter in the future.
+  # ---------------------------------------------------------------------------
+  - job_name: "forgeos-postgres"
+    metrics_path: /probe
+    scrape_interval: 15s
+    static_configs:
+      - targets: ["postgres:5432"]
+        labels:
+          service: "postgres"
+          component: "database"
+    # Note: This is a placeholder for when a postgres_exporter or
+    # blackbox_exporter is added. Currently monitors target availability.
