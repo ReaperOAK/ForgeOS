@@ -22,8 +22,7 @@
     "FORGEOS-ARCH005"
   ],
   "blocked_by": [
-    "FORGEOS-BE001",
-    "FORGEOS-ARCH005"
+    "FORGEOS-BE001"
   ],
   "file_paths": [
     "database/alembic/versions/001_core_tables.py"
