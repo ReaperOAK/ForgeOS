@@ -20,6 +20,7 @@ import { eventsRouter } from './routes/events.js';
 import { ticketsRouter } from './routes/tickets.js';
 import { stagesRouter } from './routes/stages.js';
 import { authMiddleware } from '../middleware/auth.js';
+import { adminRouter } from './routes/admin.js';
 
 /**
  * Create and return the top-level API router.
@@ -39,6 +40,9 @@ export function createApiRouter(): Router {
   // REST endpoints — require authentication
   router.use('/tickets', authMiddleware, ticketsRouter);
   router.use('/stages', authMiddleware, stagesRouter);
+
+  // Admin endpoints — require authentication
+  router.use('/admin', authMiddleware, adminRouter);
 
   return router;
 }

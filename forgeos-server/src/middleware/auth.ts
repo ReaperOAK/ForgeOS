@@ -16,6 +16,7 @@ import type { Request, Response, NextFunction } from 'express';
 import { validateApiKey } from '../auth/keys.js';
 import { hasPermission } from '../auth/roles.js';
 import { logger } from './logging.js';
+import { updateLastSeen } from '../auth/registration.js';
 import { ForgeOSErrorCode } from '../types/index.js';
 import type { AgentIdentity } from '../types/index.js';
 
@@ -162,6 +163,20 @@ export async function authMiddleware(
 
   // Populate request with agent identity
   (req as unknown as Record<string, unknown>).agent = identity;
+
+  // Fire-and-forget heartbeat — update agent last_seen for staleness detection
+  updateLastSeen(identity.id).catch((heartbeatErr: unknown) => {
+    logger.debug(
+      {
+        event: 'heartbeat_update_failed',
+        agentId: identity.id,
+        error: heartbeatErr instanceof Error ? heartbeatErr.message : String(heartbeatErr),
+        requestId: (req as unknown as Record<string, unknown>).requestId,
+        operation: 'authMiddleware.heartbeat',
+      },
+      'Non-critical: failed to update agent last_seen',
+    );
+  });
 
   logger.debug(
     {
