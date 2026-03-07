@@ -4,7 +4,7 @@
   "description": "Design the event sourcing schema for the ForgeOS ticket audit trail, replacing the in-JSON history array. Define the event_history table structure, event types, payload schemas per event type, sequence numbering, and the mechanism for reconstructing ticket state from events. Integrate findings from RES008 feasibility assessment.",
   "type": "architecture",
   "priority": "medium",
-  "stage": "READY",
+  "stage": "ARCHITECT",
   "sdlc_flow": [
     "READY",
     "ARCHITECT",
@@ -33,10 +33,10 @@
     "Schema document delivered at docs/architecture/event-sourcing-schema.md"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Architect",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-07T13:25:05+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
