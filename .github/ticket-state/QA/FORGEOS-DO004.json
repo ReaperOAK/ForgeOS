@@ -4,7 +4,7 @@
   "description": "Define environment configuration templates and profiles for the ForgeOS platform. Create .env.template with all required variables documented (database connection, MCP server ports, log levels, feature flags). Create a test environment configuration for CI. Implement a settings module that loads configuration from environment variables with sensible defaults for development.",
   "type": "infra",
   "priority": "high",
-  "stage": "BACKEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -20,7 +20,9 @@
   "dependencies": [
     "FORGEOS-DO001"
   ],
-  "blocked_by": [],
+  "blocked_by": [
+    "FORGEOS-DO001"
+  ],
   "file_paths": [
     "infra/.env.template",
     "infra/.env.test",
@@ -35,10 +37,10 @@
     "Development, test, and production profiles are distinguishable via a single ENVIRONMENT variable"
   ],
   "rework_count": 0,
-  "claimed_by": "DevOps",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-07T14:11:12Z",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -49,11 +51,13 @@
       "details": "Ticket created from TODO/tasks/phase2-infrastructure.md"
     },
     {
-      "timestamp": "2026-03-07T13:00:22.120288+00:00",
-      "event": "MOVED_TO_READY",
-      "agent": "tickets.py",
+      "timestamp": "2026-03-07T13:44:57.778015+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "DevOps",
       "machine_id": "system",
-      "details": "Dependencies resolved, moved to READY"
+      "from_stage": "BACKEND",
+      "to_stage": "QA",
+      "details": "Advanced from BACKEND to QA"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-infrastructure.md",
