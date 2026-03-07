@@ -4,7 +4,7 @@
   "description": "Define measurable quality attributes and performance targets for the ForgeOS distributed orchestration platform. Specify latency targets (p50, p95, p99 for claim, advance, sync operations), throughput targets (concurrent agents, tickets per second), availability goals (uptime SLA, recovery objectives), and correctness invariants (concurrent claim safety, state transition integrity).",
   "type": "architecture",
   "priority": "medium",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "ARCHITECT",
@@ -31,10 +31,10 @@
     "Quality attributes document delivered at docs/architecture/quality-attributes.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-07T15:21:53.000000+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -64,6 +64,24 @@
       "agent": "Architect",
       "machine_id": "pop-os",
       "details": "ARCHITECT stage complete. Advanced to DOCS."
+    },
+    {
+      "timestamp": "2026-03-07T14:53:22.236956+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation",
+      "machine_id": "system",
+      "from_stage": "ARCHITECT",
+      "to_stage": "DOCS",
+      "details": "Advanced from ARCHITECT to DOCS"
+    },
+    {
+      "timestamp": "2026-03-07T14:53:28.150372+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-architecture.md",
