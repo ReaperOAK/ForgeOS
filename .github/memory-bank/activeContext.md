@@ -1466,11 +1466,6 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** PASS verdict — all 7 AC met. JSON valid, theme parity confirmed (24/24 tokens), spacing on 4px grid, breakpoints at 768/1024/1440px. No defects. Design-only ticket, no runtime tests applicable.
 - **Timestamp:** 2026-03-07T18:30:00Z
 
-### [FORGEOS-UID001] — QA Summary
-- **Artifacts:** docs/uiux/design-tokens.json, docs/uiux/layout-spec.md, docs/uiux/mockups/FORGEOS-UID001.md
-- **Decisions:** PASS verdict — all 7 AC met. JSON valid, theme parity confirmed (24/24 tokens), spacing on 4px grid, breakpoints at 768/1024/1440px. No defects. Design-only ticket, no runtime tests applicable.
-- **Timestamp:** 2026-03-07T18:30:00Z
-
 ### [TASK-FOS-01-003] — Backend Rework #1 Summary
 - **Artifacts:** forgeos-server/README.md (architecture tree + Seed & Import section), CHANGELOG.md (new entry)
 - **Decisions:** Documentation-only rework; README updated with seed.ts/import.ts in tree, CLI usage section, programmatic API; CHANGELOG entry added
@@ -1506,3 +1501,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** infra/config/settings.py, infra/config/test_settings.py
 - **Decisions:** Fixed all ruff lint errors (UP045, B904, E501, E741). Fixed all pyright type errors (object to Any for profile defaults). Created 64-test suite achieving 93% coverage. Extracted _build_config() and _prod_checks() helpers.
 - **Timestamp:** 2025-07-27T12:00:00Z
+
+### [TASK-FOS-04-002] — Backend Summary
+- **Artifacts:** forgeos-server/src/auth/registration.ts, forgeos-server/src/api/routes/admin.ts, forgeos-server/src/__tests__/auth/registration.test.ts, forgeos-server/src/__tests__/api/admin.test.ts, forgeos-server/src/api/index.ts (modified), forgeos-server/src/middleware/auth.ts (modified)
+- **Decisions:** Fire-and-forget heartbeat in auth middleware (non-blocking updateLastSeen). Typed domain errors (AgentAlreadyExistsError 409, InvalidRoleError 400, AgentNotFoundError 404). Session UPSERT with ON CONFLICT for idempotent tracking. Thin controllers delegating to service layer.
+- **Timestamp:** 2026-03-08T04:00:00Z
