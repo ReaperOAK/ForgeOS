@@ -3,6 +3,11 @@
 - **Decisions:** Selected k6 over Locust/Artillery for load testing (scored 57 vs 45 vs 34). Selected fast-check over hypothesis for property-based testing (native TypeScript). Selected prom-client over OpenTelemetry for metrics (minimal overhead). Designed 4-tier CI pipeline: PR Gate (blocking correctness), PR Extended (advisory latency), Nightly (sustained), Weekly (soak). Baseline-driven regression: 20% warn, 50% fail.
 - **Timestamp:** 2026-03-07T16:30:00Z
 
+### [FORGEOS-ARCH004] — Architecture Summary
+- **Artifacts:** docs/architecture/adr/adr-003-migration-strategy.md, .github/agent-output/Architect/FORGEOS-ARCH004.md
+- **Decisions:** Chose Strangler Fig pattern over Big Bang or Blue-Green for migration. Four-phase strategy: Shadow Mode → Dual-Write → Database-Primary → File Decommission. Database is authoritative during dual-write (Phase 2+). Sync bridge propagates DB→files via pg_notify. 7-day rollback window per phase. Point of no return at Phase 4. Well-Architected score: 50/60 (83%).
+- **Timestamp:** 2026-03-07T23:30:00Z
+
 ### [TASK-FOS-04-003] — Documentation Summary
 - **Artifacts:** forgeos-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/TASK-FOS-04-003.md
 - **Decisions:** Source file had comprehensive JSDoc/TSDoc from Backend stage — no inline doc additions needed. Updated README: added File Locks subsection under Database with function table and behavior docs, added file-mutex.ts and index.ts to architecture tree, updated last_reviewed. CHANGELOG entry added with full feature description. Diátaxis: Reference.
