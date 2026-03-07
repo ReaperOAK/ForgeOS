@@ -46,6 +46,15 @@
   "operator": null,
   "lease_expiry": null,
   "lease_duration_minutes": 30,
+  "completed_at": "2026-03-07T22:01:00Z",
+  "artifacts": [
+    "forgeos-server/src/webhooks/parser.ts",
+    "forgeos-server/src/webhooks/reconciliation.ts",
+    "forgeos-server/src/webhooks/github.ts",
+    "forgeos-server/src/webhooks/parser.test.ts",
+    "forgeos-server/src/webhooks/reconciliation.test.ts",
+    "forgeos-server/src/webhooks/github.test.ts"
+  ],
   "history": [
     {
       "timestamp": "2026-03-05T18:05:37.904899+00:00",
@@ -70,14 +79,5 @@
     }
   ],
   "source_task_file": "TODO/tickets/06-git-integration.md",
-  "tags": [],
-  "completed_at": "2026-03-07T22:01:00Z",
-  "artifacts": [
-    "forgeos-server/src/webhooks/parser.ts",
-    "forgeos-server/src/webhooks/reconciliation.ts",
-    "forgeos-server/src/webhooks/github.ts",
-    "forgeos-server/src/webhooks/parser.test.ts",
-    "forgeos-server/src/webhooks/reconciliation.test.ts",
-    "forgeos-server/src/webhooks/github.test.ts"
-  ]
+  "tags": []
 }

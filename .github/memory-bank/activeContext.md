@@ -1357,3 +1357,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/TASK-FOS-01-003.md
 - **Decisions:** PASS — Score 85/100, 0 critical, 1 warning (importTickets CC=22), 3 suggestions (else blocks, file size, function size). TypeScript strict type-check clean. 21/21 tests pass. No ESLint config exists (project-wide gap). No dead code, no console.*, no TODO markers.
 - **Timestamp:** 2026-03-07T21:45:00Z
+
+### [TASK-FOS-06-004] — Backend Summary
+- **Artifacts:** forgeos-server/src/webhooks/parser.ts, forgeos-server/src/webhooks/reconciliation.ts, forgeos-server/src/webhooks/github.ts, forgeos-server/src/webhooks/parser.test.ts, forgeos-server/src/webhooks/reconciliation.test.ts, forgeos-server/src/webhooks/github.test.ts
+- **Decisions:** Used DI interfaces (DatabasePool, StructuredLogger) instead of importing pg/pino directly for testability. Router factory pattern with express.raw() for HMAC verification. Conditional UPDATE with RETURNING for idempotent claim creation. Agent UUID lookup before FK claim; AMBIGUOUS if agent not found (avoids valid_lease constraint violation). Manual advance fallback when advance_ticket() stored function fails.
+- **Timestamp:** 2026-03-07T22:01:00Z
