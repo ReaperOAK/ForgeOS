@@ -1,0 +1,169 @@
+# =============================================================================
+# ForgeOS — Base Docker Compose Configuration
+# =============================================================================
+# Defines the core services for the ForgeOS distributed orchestration platform:
+#   - PostgreSQL 17 (primary state store)
+#   - ForgeOS MCP Server (Node.js orchestration hub)
+#   - pgAdmin 4 (database administration UI)
+#
+# Usage:
+#   docker compose up            # Start all services
+#   docker compose up -d         # Start detached
+#   docker compose down          # Stop and remove containers
+#   docker compose down -v       # Stop and remove containers + volumes
+#
+# For development overrides (hot-reload, source mounts):
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# Ticket: FORGEOS-DO001
+# Reference: docs/architecture/system-components.md (Section 7)
+# Reference: docs/architecture/adr/adr-001-postgresql.md
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # PostgreSQL 17 — Primary State Store
+  # ---------------------------------------------------------------------------
+  # ACID-guaranteed state management, distributed locking (SKIP LOCKED),
+  # event-sourced audit trail, and row-level security (RLS).
+  # See ADR-001 for decision rationale.
+  # ---------------------------------------------------------------------------
+  postgres:
+    image: postgres:17-alpine
+    container_name: forgeos-postgres
+    hostname: postgres
+    environment:
+      POSTGRES_DB: forgeos
+      POSTGRES_USER: forgeos
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      # Performance tuning for development workloads
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "forgeos", "-d", "forgeos"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - ../forgeos-server/src/db/migrations:/docker-entrypoint-initdb.d:ro
+    secrets:
+      - db_password
+    networks:
+      - forgeos-net
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+
+  # ---------------------------------------------------------------------------
+  # ForgeOS MCP Server — Central Orchestration Hub
+  # ---------------------------------------------------------------------------
+  # Node.js/Express process exposing MCP tools over Streamable HTTP.
+  # Stateless design (sessionIdGenerator: undefined) enables horizontal scaling.
+  # ---------------------------------------------------------------------------
+  mcp-server:
+    build:
+      context: ../forgeos-server
+      dockerfile: Dockerfile
+    container_name: forgeos-mcp
+    hostname: mcp-server
+    environment:
+      DATABASE_URL: "postgresql://forgeos@postgres:5432/forgeos"
+      PORT: "3000"
+      NODE_ENV: production
+      LOG_LEVEL: info
+      ADMIN_API_KEY: "${ADMIN_API_KEY:-forgeos_admin_CHANGE_ME}"
+      DEFAULT_LEASE_MINUTES: "30"
+      MAX_LEASE_MINUTES: "120"
+      RECONCILIATION_INTERVAL: "300"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - forgeos-net
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.50"
+          memory: 256M
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+
+  # ---------------------------------------------------------------------------
+  # pgAdmin 4 — Database Administration UI
+  # ---------------------------------------------------------------------------
+  # Web-based PostgreSQL management. Pre-configured to connect to the
+  # forgeos-postgres instance via servers.json.
+  # Default login: admin@forgeos.local / admin (change in production).
+  # ---------------------------------------------------------------------------
+  pgadmin:
+    image: dpage/pgadmin4:8.14
+    container_name: forgeos-pgadmin
+    hostname: pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_EMAIL:-admin@forgeos.local}"
+      PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_PASSWORD:-admin}"
+      PGADMIN_LISTEN_PORT: "5050"
+      PGADMIN_CONFIG_SERVER_MODE: "True"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - forgeos-net
+    ports:
+      - "5050:5050"
+    volumes:
+      - pgadmin-data:/var/lib/pgadmin
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: "0.25"
+          memory: 256M
+        reservations:
+          cpus: "0.10"
+          memory: 64M
+
+# =============================================================================
+# Volumes
+# =============================================================================
+volumes:
+  # Named volume for PostgreSQL data persistence across container restarts.
+  # Data survives `docker compose down` but NOT `docker compose down -v`.
+  pgdata:
+    name: forgeos-pgdata
+    driver: local
+
+  # Named volume for pgAdmin session/config persistence.
+  pgadmin-data:
+    name: forgeos-pgadmin-data
+    driver: local
+
+# =============================================================================
+# Networks
+# =============================================================================
+networks:
+  # Dedicated bridge network isolating ForgeOS services from other containers.
+  # All inter-service communication uses container hostnames (postgres, mcp-server).
+  forgeos-net:
+    name: forgeos-net
+    driver: bridge
+
+# =============================================================================
+# Secrets
+# =============================================================================
+secrets:
+  db_password:
+    file: ../forgeos-server/secrets/db_password

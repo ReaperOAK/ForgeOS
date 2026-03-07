@@ -1,0 +1,73 @@
+# =============================================================================
+# ForgeOS — Development Overrides
+# =============================================================================
+# Layer this on top of the base docker-compose.yml for local development:
+#
+#   docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+#
+# What changes from base:
+#   - MCP server source code mounted as volume for live reloading (tsx watch)
+#   - NODE_ENV set to "development" with debug logging
+#   - Dockerfile build target overridden to use dev command
+#   - PostgreSQL port exposed for direct access from host tools
+#   - pgAdmin always starts (not gated behind profile)
+#
+# Ticket: FORGEOS-DO001
+# =============================================================================
+
+services:
+  # ---------------------------------------------------------------------------
+  # MCP Server — Development Mode
+  # ---------------------------------------------------------------------------
+  # Mounts the source directory and uses tsx watch for hot-reload on file
+  # changes. No need to rebuild the image on every code change.
+  # ---------------------------------------------------------------------------
+  mcp-server:
+    build:
+      context: ../forgeos-server
+      dockerfile: Dockerfile
+      target: builder
+    container_name: forgeos-mcp-dev
+    command: ["npx", "tsx", "watch", "src/index.ts"]
+    environment:
+      DATABASE_URL: "postgresql://forgeos@postgres:5432/forgeos"
+      PORT: "3000"
+      NODE_ENV: development
+      LOG_LEVEL: debug
+      ADMIN_API_KEY: "forgeos_dev_key_12345678"
+      DEFAULT_LEASE_MINUTES: "30"
+      MAX_LEASE_MINUTES: "120"
+      RECONCILIATION_INTERVAL: "60"
+    volumes:
+      # Mount source code for live reloading — changes on host are reflected
+      # immediately inside the container without rebuilding.
+      - ../forgeos-server/src:/app/src:ro
+      - ../forgeos-server/package.json:/app/package.json:ro
+      - ../forgeos-server/tsconfig.json:/app/tsconfig.json:ro
+    ports:
+      - "3000:3000"
+      # Node.js debugger port for attaching VS Code debugger
+      - "9229:9229"
+
+  # ---------------------------------------------------------------------------
+  # PostgreSQL — Development Overrides
+  # ---------------------------------------------------------------------------
+  # Adds verbose logging for query debugging during development.
+  # ---------------------------------------------------------------------------
+  postgres:
+    environment:
+      POSTGRES_DB: forgeos
+      POSTGRES_USER: forgeos
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+      # Enable verbose query logging for development debugging
+      POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
+    command:
+      - "postgres"
+      - "-c"
+      - "log_statement=all"
+      - "-c"
+      - "log_min_duration_statement=0"
+      - "-c"
+      - "log_connections=on"
+      - "-c"
+      - "log_disconnections=on"
