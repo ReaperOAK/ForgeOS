@@ -206,3 +206,28 @@ _None_
 | SEC-002 | Low | No length/format validation on `X-Request-ID` header. Accepts any non-empty string (CWE-20). | Risk Accepted | Node.js HTTP parser limits total headers to ~16KB. ID used for log correlation only, never for authorization. Industry standard practice. |
 | SEC-003 | Low | Validation middleware does not log validation failures server-side (CWE-778). | Risk Accepted | 400 status code is captured by request-level logging middleware. Validation failures are expected in normal operation. |
 | SEC-DO001-006 | Low | All service ports (5432, 3000, 5050) bind to 0.0.0.0 — accessible from LAN (CWE-668) | Risk Accepted | Standard local dev pattern; production should bind to 127.0.0.1 or use reverse proxy |
+
+### [FORGEOS-DO002] — PostgreSQL Container Init Script Security Risks (2026-03-07T16:10:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-DO002-001 | Medium | Hardcoded default password `changeme_db_password` in init.sql CREATE ROLE statement (CWE-1393) | Risk Accepted | Dev placeholder; PostgreSQL DDL lacks native env var substitution; comment documents Vault/secret for production; consistent with SEC-DO001-001 pattern |
+| SEC-DO002-002 | Medium | Password baked into Docker image layer via COPY of init.sql to /docker-entrypoint-initdb.d/ (CWE-798) | Risk Accepted | Docker network isolation; init runs once on empty volume; production should use entrypoint wrapper with psql -v variable substitution |
+| SEC-DO002-003 | Low | Base image `postgres:17-alpine` uses mutable tag, not pinned to digest (CWE-829) | Risk Accepted | Official Docker Hub image; Alpine minimal surface; pin to digest in production hardening phase |
+
+### [TASK-FOS-05-002] — SSE Endpoint Security Risks (2026-03-07T21:30:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-SSE-001 | Medium | SSE endpoint (`GET /api/events`) broadcasts all ticket data (titles, stages, assignments) to unauthenticated clients. No optional auth or data filtering implemented (CWE-200, OWASP A01). | Risk Accepted | Internal dashboard endpoint. Ticket metadata considered non-sensitive operational data. Recommend adding optional auth filtering before external exposure. |
+| SEC-SSE-002 | High→Medium | `sseClients` Set has no maximum size limit. Unbounded connections can exhaust file descriptors, memory, and event loop via timer accumulation (CWE-400, OWASP A04). | Risk Accepted (Internal) | Currently internal-only deployment limits practical likelihood. **MUST be addressed before any external exposure.** Recommend MAX_SSE_CLIENTS=100 cap + per-IP limit. |
+| SEC-SSE-003 | Medium | `RATE_LIMIT_PER_MINUTE=100` configured but no rate-limiting middleware installed or applied. Authenticated agents can flood REST endpoints (CWE-770). | Risk Accepted | Auth requirement limits abuse surface. Recommend installing `express-rate-limit` in follow-up ticket. |
+| SEC-SSE-004 | Low | Duplicate SSE implementations in `server.ts` (legacy) and `api/routes/events.ts` (new). Two separate `sseClients` Sets and two PG LISTEN clients create maintenance confusion and doubled resource usage (CWE-1127). | Open | Recommend consolidation in cleanup ticket. |
+
+### [FORGEOS-DO004] — Environment Configuration Security Risks (2026-03-07T18:22:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-DO004-001 | Medium | Project `.gitignore` does not exclude `.env` files. Real `.env` files with secrets could be committed to VCS history (CWE-200, CWE-540). | Risk Accepted | `.env.template` includes explicit warning "Never commit .env files containing real secrets." Recommend adding `.env` exclusion to `.gitignore` in follow-up. |
+| SEC-DO004-002 | Medium | `DATABASE_URL` template line contains placeholder password `changeme`: `postgresql://forgeos:changeme@localhost:5432/forgeos` (CWE-798). `DB_PASSWORD` field is correctly empty. | Risk Accepted | Template file only; `settings.py` composes URL from parts when `DATABASE_URL` not set. Recommend removing password from template URL. |
+| SEC-DO004-003 | Medium | No production validation requiring `DB_SSL_MODE` ≠ `disable`. Database connections in production should use SSL (CWE-319). | Risk Accepted | Default is `disable` for local dev. Recommend adding production guard in `settings.py`. |
