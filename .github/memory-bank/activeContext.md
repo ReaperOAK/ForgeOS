@@ -1,3 +1,8 @@
+### [FORGEOS-ARCH012] — Architect Summary
+- **Artifacts:** docs/architecture/fitness-functions.md, .github/agent-output/Architect/FORGEOS-ARCH012.md
+- **Decisions:** Selected k6 over Locust/Artillery for load testing (scored 57 vs 45 vs 34). Selected fast-check over hypothesis for property-based testing (native TypeScript). Selected prom-client over OpenTelemetry for metrics (minimal overhead). Designed 4-tier CI pipeline: PR Gate (blocking correctness), PR Extended (advisory latency), Nightly (sustained), Weekly (soak). Baseline-driven regression: 20% warn, 50% fail.
+- **Timestamp:** 2026-03-07T16:30:00Z
+
 ### [TASK-FOS-04-003] — Documentation Summary
 - **Artifacts:** forgeos-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/TASK-FOS-04-003.md
 - **Decisions:** Source file had comprehensive JSDoc/TSDoc from Backend stage — no inline doc additions needed. Updated README: added File Locks subsection under Database with function table and behavior docs, added file-mutex.ts and index.ts to architecture tree, updated last_reviewed. CHANGELOG entry added with full feature description. Diátaxis: Reference.
