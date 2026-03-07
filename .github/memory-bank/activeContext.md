@@ -1113,3 +1113,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/server.py, mcp-server/src/mcp_server/__init__.py, mcp-server/src/mcp_server/__main__.py, mcp-server/pyproject.toml, mcp-server/tests/test_server.py
 - **Decisions:** FastMCP high-level API over low-level Server for decorator-based tool registration. Streamable HTTP transport in stateless mode for horizontal scaling. Pydantic Settings for env-var config with FORGEOS_ prefix. Graceful DB degradation (server starts without DB). Host/port set via FastMCP constructor + settings override in main().
 - **Timestamp:** 2026-03-07T13:25:00Z
+
+### [FORGEOS-DO002] — Configure PostgreSQL Container with Init Scripts
+- **Artifacts:** infra/docker/postgres/Dockerfile, infra/docker/postgres/init.sql, infra/docker/postgres/pg-healthcheck.sh
+- **Decisions:** PostgreSQL 17 Alpine base with custom Dockerfile. Init script creates forgeos_user (least-privilege, CONNECTION LIMIT 40) and extensions (uuid-ossp, pgcrypto). Health check uses dual validation (pg_isready + SELECT 1). Dev-tuned config: shared_buffers=128MB, work_mem=8MB, max_connections=50. Init script prefixed 00_ to run before migration scripts.
+- **Timestamp:** 2026-03-07T13:38:00Z
