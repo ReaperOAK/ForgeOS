@@ -1,3 +1,8 @@
+### [FORGEOS-RES004] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-RES004.md
+- **Decisions:** APPROVED (HIGH confidence, 95%) — All 7 acceptance criteria verified independently. All 10 DoD items pass (6 verified, 4 justified N/A for research ticket). 819-line deliverable is well-structured with 12 risks, Bayesian confidence tracking, contradiction analysis, and GO recommendation at 87%. Upstream Documentation verdict cross-checked. CHANGELOG entry confirmed. Ticket advanced to DONE.
+- **Timestamp:** 2026-03-07T15:10:00Z
+
 ### [FORGEOS-PM004] — Documentation Summary
 - **Artifacts:** docs/product/dashboard-ux-reqs.md
 - **Decisions:** Created comprehensive dashboard UX requirements document covering 5 views (Pipeline Overview, Ticket Detail, Dependency Graph, Claim Monitor, Agent Status), 8 interaction patterns, SSE-based real-time updates, multi-machine visibility with conflict detection, and a 31×8 priority matrix mapping requirements to L1 capabilities. Chose SSE over WebSocket per CAP-05. Rejected drag-and-drop for stage transitions to preserve SDLC validation guards. D3.js force-directed graph with tiered performance degradation. Hash-based URL routing for static file deployment.
@@ -1217,3 +1222,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/middleware/auth.ts, forgeos-server/src/auth/keys.ts, forgeos-server/src/auth/roles.ts, forgeos-server/src/__tests__/middleware/auth.test.ts, forgeos-server/src/__tests__/auth/keys.test.ts, forgeos-server/src/__tests__/auth/roles.test.ts
 - **Decisions:** Replaced pass-through auth stub with full implementation. Used `unknown` intermediate cast for Express Request custom properties to satisfy strict TypeScript. Exported extractBearerToken and requirePermission from middleware barrel. Used wildcard `"*"` permission for admin role matching existing roles.ts pattern.
 - **Timestamp:** 2026-03-07T20:54:00Z
+
+### [FORGEOS-ARCH010] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-ARCH010.md
+- **Decisions:** APPROVED — All 7 acceptance criteria independently verified against 931-line error-catalog.md. 4/4 applicable DoD items pass (6 N/A for architecture doc ticket). Architect upstream summary verified. Memory gate confirmed.
+- **Timestamp:** 2026-03-07T21:10:00Z
+
+### [FORGEOS-ARCH011] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-ARCH011.md
+- **Decisions:** APPROVED — All 7 acceptance criteria independently verified. Document (639 lines) covers latency, throughput, availability, correctness, scalability, resource budgets with measurable targets. Upstream Documentation verdict confirmed. Memory gate present.
+- **Timestamp:** 2026-03-07T15:10:00Z
