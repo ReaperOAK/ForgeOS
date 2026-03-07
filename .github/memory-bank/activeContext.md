@@ -1,3 +1,8 @@
+### [TASK-FOS-02-003] — Documentation Summary
+- **Artifacts:** forgeos-server/README.md, CHANGELOG.md
+- **Decisions:** All 4 middleware source files already had comprehensive JSDoc/TSDoc from Backend stage — no inline doc additions needed. Updated README architecture tree to list all 6 middleware files (was missing error-handler.ts, request-id.ts, validation.ts, index.ts). Added new Middleware section documenting mount order, request ID generation, structured logging fields, error classification with PG error code mapping table, withErrorHandling wrapper, and Zod validation factories. Added CHANGELOG entry. Diátaxis classification: Reference.
+- **Timestamp:** 2026-03-07T15:10:00Z
+
 ### [FORGEOS-RES012] — Documentation Summary
 - **Artifacts:** docs/research/migration-tooling.md, CHANGELOG.md
 - **Decisions:** Research deliverable reviewed and approved for VALIDATION. Added §13 "Related Documents" with 7 internal cross-references, updated freshness metadata, renumbered TOC, added CHANGELOG entry. All 8 acceptance criteria verified: Alembic, Flyway, custom runner, node-pg-migrate, graphile-migrate evaluated; rollback safety assessed; CI patterns documented; JSON-to-PostgreSQL compatibility scored; phased recommendation (custom runner enhancement + node-pg-migrate upgrade path) at 87% confidence.
