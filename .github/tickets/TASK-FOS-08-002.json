@@ -4,7 +4,7 @@
   "description": "Create Docker Compose configuration as specified in Architecture \u00a78.1 with three services: postgres (PostgreSQL 17 Alpine with healthcheck, persistent volume, init scripts mounted from migrations directory), pgbouncer (edoburu/pgbouncer in transaction mode with 50 default pool size and 200 max client connections), and mcp-server (built from Dockerfile, depends on postgres healthy + pgbouncer started, connects through pgbouncer, mounts workspace read-only). Include named volume for PostgreSQL data persistence, Docker secrets for database password, and configurable ports via environment variables. Every service has restart: unless-stopped policy.",
   "type": "infra",
   "priority": "critical",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -41,10 +41,10 @@
     "All services have restart: unless-stopped policy"
   ],
   "rework_count": 0,
-  "claimed_by": "Security Engineer",
-  "machine_id": "forgeos-dev",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-07T08:09:04+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -137,6 +137,15 @@
       "from_stage": "SECURITY",
       "to_stage": "SECURITY",
       "details": "Claimed by reaperoak@forgeos-dev via Security Engineer, lease until 2026-03-07T08:09:04+00:00"
+    },
+    {
+      "timestamp": "2026-03-07T07:42:04.429790+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security Engineer",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
     }
   ],
   "source_task_file": "TODO/tickets/08-infrastructure.md",
