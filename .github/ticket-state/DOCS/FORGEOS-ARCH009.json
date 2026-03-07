@@ -35,10 +35,10 @@
     "Tool definitions document delivered at docs/architecture/api/mcp-tool-definitions.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Architect",
+  "claimed_by": "Documentation",
   "machine_id": "ForgeOS-dev",
   "operator": "Owais",
-  "lease_expiry": "2026-03-07T09:04:35.000000+00:00",
+  "lease_expiry": "2026-03-07T15:30:00.000000+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
