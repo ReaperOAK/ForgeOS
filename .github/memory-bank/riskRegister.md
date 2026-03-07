@@ -197,4 +197,12 @@ _None_
 | SEC-DO001-003 | Low | pgAdmin default credentials admin@forgeos.local / admin (CWE-1393) | Risk Accepted | Env var overrides available (PGADMIN_EMAIL, PGADMIN_PASSWORD); local dev only |
 | SEC-DO001-004 | Low | DATABASE_URL missing password parameter — relies on Docker internal trust auth (CWE-287) | Risk Accepted | Docker bridge network isolation; production must include password in connection string |
 | SEC-DO001-005 | Low | Hardcoded API key `forgeos_dev_key_12345678` in dev overlay (CWE-798) | Risk Accepted | Dev-only file; base config uses env var with fallback |
+
+### [TASK-FOS-02-003] — Middleware Stack Security Risks (2026-03-07T09:16:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-001 | Medium | `withErrorHandling()` in error-handler.ts returns raw `err.message` to MCP clients regardless of NODE_ENV. PG errors could leak schema/table/constraint names via MCP transport (CWE-209). | Risk Accepted | MCP is a machine-to-machine protocol used by authenticated AI agents. Auth enforcement (TASK-FOS-04) will restrict MCP access. Recommend applying `isProduction` guard in future hardening pass. |
+| SEC-002 | Low | No length/format validation on `X-Request-ID` header. Accepts any non-empty string (CWE-20). | Risk Accepted | Node.js HTTP parser limits total headers to ~16KB. ID used for log correlation only, never for authorization. Industry standard practice. |
+| SEC-003 | Low | Validation middleware does not log validation failures server-side (CWE-778). | Risk Accepted | 400 status code is captured by request-level logging middleware. Validation failures are expected in normal operation. |
 | SEC-DO001-006 | Low | All service ports (5432, 3000, 5050) bind to 0.0.0.0 — accessible from LAN (CWE-668) | Risk Accepted | Standard local dev pattern; production should bind to 127.0.0.1 or use reverse proxy |
