@@ -38,7 +38,7 @@
   "claimed_by": "DevOps",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-07T23:30:00+00:00"6-03-07T23:30:00+00:00",
+  "lease_expiry": "2026-03-07T23:30:00+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -49,11 +49,11 @@
       "details": "Ticket created from TODO/tasks/phase2-infrastructure.md"
     },
     {
-      "timestamp": "2026-03-07T16:42:13+00:00",
+      "timestamp": "2026-03-07T16:42:13.866201+00:00",
       "event": "MOVED_TO_READY",
       "agent": "tickets.py",
       "machine_id": "system",
-      "details": "Dependencies resolved"
+      "details": "Dependencies resolved, moved to READY"
     },
     {
       "timestamp": "2026-03-07T23:00:00+00:00",
@@ -67,7 +67,7 @@
       "event": "BACKEND_COMPLETE",
       "agent": "DevOps",
       "machine_id": "pop-os",
-      "details": "All acceptance criteria met"
+      "details": "Backup/restore scripts, Makefile targets, and strategy document created. All acceptance criteria met."
     }
   ],
   "source_task_file": "TODO/tasks/phase2-infrastructure.md",
