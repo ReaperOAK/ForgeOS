@@ -230,4 +230,16 @@ _None_
 |----|----------|-------------|--------|------------|
 | SEC-DO004-001 | Medium | Project `.gitignore` does not exclude `.env` files. Real `.env` files with secrets could be committed to VCS history (CWE-200, CWE-540). | Risk Accepted | `.env.template` includes explicit warning "Never commit .env files containing real secrets." Recommend adding `.env` exclusion to `.gitignore` in follow-up. |
 | SEC-DO004-002 | Medium | `DATABASE_URL` template line contains placeholder password `changeme`: `postgresql://forgeos:changeme@localhost:5432/forgeos` (CWE-798). `DB_PASSWORD` field is correctly empty. | Risk Accepted | Template file only; `settings.py` composes URL from parts when `DATABASE_URL` not set. Recommend removing password from template URL. |
+<<<<<<< Updated upstream
 | SEC-DO004-003 | Medium | No production validation requiring `DB_SSL_MODE` ≠ `disable`. Database connections in production should use SSL (CWE-319). | Risk Accepted | Default is `disable` for local dev. Recommend adding production guard in `settings.py`. |
+
+### [TASK-FOS-06-004] — Webhook State Recovery Security Risks (2026-03-07T22:45:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-06004-001 | Low | No webhook-specific rate limiting on `POST /api/webhooks/github`. Global 100/min limit may drop legitimate GitHub webhook bursts during high-activity periods (CWE-770). | Risk Accepted | Operational concern, not a vulnerability. GitHub retries failed webhooks. Recommend dedicated webhook rate limit in future ticket. |
+| SEC-06004-002 | Low | `WEBHOOK_SECRET` optional in non-production config (CWE-1188). Router factory `WebhookRouterConfig` requires non-optional `string`, so startup fails without it. Production guard via Zod `superRefine`. | Risk Accepted | Design-by-contract — type system prevents mounting without secret. |
+=======
+| SEC-DO004-003 | Medium | No production validation requiring `DB_SSL_MODE` ≠ `disable`. Database connections in production should use SSL (CWE-319). | Risk Accepted | Default is `disable` for local dev. Recommend adding production guard in `settings.py`. || SEC-06004-001 | Low | No webhook-specific rate limiting on POST /api/webhooks/github. Global 100/min limit may drop legitimate GitHub webhook bursts during high-activity periods (CWE-770). | Risk Accepted | Operational concern, not a vulnerability. GitHub retries failed webhooks. Recommend dedicated webhook rate limit in future ticket. |
+| SEC-06004-002 | Low | WEBHOOK_SECRET optional in non-production config (CWE-1188). Router factory requires non-optional string, so startup fails without it. Production guard via Zod superRefine. | Risk Accepted | Design-by-contract — type system prevents mounting without secret. |
+>>>>>>> Stashed changes
