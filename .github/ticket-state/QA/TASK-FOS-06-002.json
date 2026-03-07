@@ -36,10 +36,10 @@
     "--no-verify bypass available for emergency commits"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "QA",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-07T15:04:31.106196+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -57,18 +57,25 @@
       "details": "Dependencies resolved, moved to READY"
     },
     {
-      "timestamp": "2026-03-07T12:55:03.978516+00:00",
+      "timestamp": "2026-03-07T13:00:47.184905+00:00",
       "event": "CLAIMED",
       "agent": "DevOps",
       "machine_id": "pop-os",
       "details": "Claimed by DevOps for BACKEND stage"
     },
     {
-      "timestamp": "2026-03-07T12:57:43.626309+00:00",
-      "event": "STAGE_COMPLETED",
-      "agent": "DevOps",
+      "timestamp": "2026-03-07T13:13:00.202969+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from DevOps: manual release"
+    },
+    {
+      "timestamp": "2026-03-07T14:34:31.106196+00:00",
+      "event": "CLAIMED",
+      "agent": "QA",
       "machine_id": "pop-os",
-      "details": "BACKEND stage complete, advancing to QA"
+      "details": "Claimed by QA for QA stage"
     }
   ],
   "source_task_file": "TODO/tickets/06-git-integration.md",
