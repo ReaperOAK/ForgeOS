@@ -33,7 +33,7 @@
   "claimed_by": "Documentation",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-07T13:26:04.088043+00:00",
+  "lease_expiry": "2026-03-07T13:27:29.554345+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -51,7 +51,7 @@
       "details": "Dependencies resolved, moved to READY"
     },
     {
-      "timestamp": "2026-03-07T12:56:04.088043+00:00",
+      "timestamp": "2026-03-07T12:57:29.554345+00:00",
       "event": "CLAIMED",
       "agent": "Documentation",
       "machine_id": "pop-os",
