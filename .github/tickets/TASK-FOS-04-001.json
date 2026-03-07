@@ -4,7 +4,7 @@
   "description": "Implement API key authentication middleware for the ForgeOS MCP server as specified in Architecture \u00a77.1. The middleware extracts the API key from the Authorization: Bearer header, computes its SHA-256 hash, and looks up the matching agent in the agents table. If found and active (is_active=true, revoked_at IS NULL), it populates the request context with the agent's identity (id, name, role, permissions, machine_id). Implement the role-based authorization matrix from Architecture \u00a77.2 \u2014 each agent role can only perform operations matching their SDLC stage ownership. Include a key generation utility that creates cryptographically secure API keys, hashes them, and stores the hash in the agents table.",
   "type": "backend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "DONE",
   "completed_at": "2026-03-07T15:24:45.017605+00:00",
   "sdlc_flow": [
     "READY",
@@ -135,10 +135,19 @@
       "machine_id": "pop-os",
       "from_stage": "CI",
       "to_stage": "DOCS",
-      "details": "CI PASS — Score 84/100, 0 critical, 3 warnings (function length). Advanced to DOCS."
+      "details": "CI PASS \u2014 Score 84/100, 0 critical, 3 warnings (function length). Advanced to DOCS."
+    },
+    {
+      "timestamp": "2026-03-07T16:44:42.909683+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tickets/04-auth-security.md",
   "tags": [],
-  "current_stage": "DOCS"
+  "current_stage": "VALIDATION"
 }
