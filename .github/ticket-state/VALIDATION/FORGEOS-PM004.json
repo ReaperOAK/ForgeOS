@@ -4,7 +4,7 @@
   "description": "Define the dashboard UX requirements for the ForgeOS web interface, replacing the current static HTML dashboard (todo_visual.py). Document required views (pipeline overview, ticket detail, dependency graph, claim monitor, agent status), interaction patterns (filter, sort, search, drill-down), real-time update requirements (WebSocket feed), and multi-machine visibility. Create a priority matrix mapping all product requirements to L1 capabilities.",
   "type": "docs",
   "priority": "medium",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "DOCS",
@@ -32,10 +32,10 @@
     "Dashboard UX requirements document delivered at docs/product/dashboard-ux-reqs.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-07T15:57:49+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -46,11 +46,13 @@
       "details": "Ticket created from TODO/tasks/phase1-product.md"
     },
     {
-      "timestamp": "2026-03-07T15:15:40.859520+00:00",
-      "event": "MOVED_TO_READY",
-      "agent": "tickets.py",
+      "timestamp": "2026-03-07T15:33:31.299507+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation",
       "machine_id": "system",
-      "details": "Dependencies resolved, moved to READY"
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-product.md",
