@@ -1,0 +1,73 @@
+{
+  "ticket_id": "TASK-FOS-04-001",
+  "title": "API Key Authentication Middleware",
+  "description": "Implement API key authentication middleware for the ForgeOS MCP server as specified in Architecture \u00a77.1. The middleware extracts the API key from the Authorization: Bearer header, computes its SHA-256 hash, and looks up the matching agent in the agents table. If found and active (is_active=true, revoked_at IS NULL), it populates the request context with the agent's identity (id, name, role, permissions, machine_id). Implement the role-based authorization matrix from Architecture \u00a77.2 \u2014 each agent role can only perform operations matching their SDLC stage ownership. Include a key generation utility that creates cryptographically secure API keys, hashes them, and stores the hash in the agents table.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BACKEND",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:05:37.901704+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-FOS-02-001",
+    "TASK-FOS-01-002",
+    "TASK-FOS-02-002"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/middleware/auth.ts",
+    "forgeos-server/src/auth/keys.ts",
+    "forgeos-server/src/auth/roles.ts"
+  ],
+  "acceptance_criteria": [
+    "Middleware extracts API key from Authorization: Bearer <key> header",
+    "Key validated via SHA-256 hash lookup in agents table (api_key_hash column)",
+    "Returns 401 Unauthorized with UNAUTHORIZED error if key is missing, invalid, or revoked",
+    "Returns 403 Forbidden with FORBIDDEN error if agent role doesn't have permission for the requested operation",
+    "Role-based permission matrix enforced: Backend can only claim BACKEND stage, QA can reject, Admin has full access, etc.",
+    "Key validation latency under 5ms (indexed lookup on api_key_hash)",
+    "generateApiKey() creates a 32-byte cryptographically random key, returns plaintext once, stores SHA-256 hash",
+    "Middleware sets PostgreSQL session variables (app.agent_role, app.agent_name, app.agent_id) for RLS enforcement",
+    "Health endpoint (/health) is exempt from authentication"
+  ],
+  "rework_count": 0,
+  "claimed_by": "Backend",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-07T13:25:23Z",
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:05:37.901707+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/04-auth-security.md"
+    },
+    {
+      "timestamp": "2026-03-05T23:10:03.283514+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-07T12:55:23Z",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "CLAIM by Backend on pop-os (ReaperOAK)"
+    }
+  ],
+  "source_task_file": "TODO/tickets/04-auth-security.md",
+  "tags": []
+}
