@@ -1103,3 +1103,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/tools/tickets-graph.ts, forgeos-server/src/tools/index.ts, forgeos-server/src/__tests__/tools/tickets-graph.test.ts
 - **Decisions:** Chose Kahn's algorithm for cycle detection (O(V+E), natural topological ordering reuse). DP longest-path for critical path computation. Full SELECT * for nodes per AC requirement. Exported hasCycle and computeCriticalPath for direct unit testability. Edges filtered to node set when filters reduce results.
 - **Timestamp:** 2026-03-07T12:57:00Z
+
+### [FORGEOS-ARCH010] — Design Error Catalog and API Standards
+- **Artifacts:** docs/architecture/api/error-catalog.md
+- **Decisions:** 20 error codes in 6 categories (claim, state, validation, auth, rate_limit, system). Offset-based pagination (bounded dataset < 10k). Token bucket rate limiting (burst-friendly for agent patterns). Numeric+string dual error codes (strings authoritative in API). 24-hour idempotency key TTL in PostgreSQL. Bracket syntax for filter operators.
+- **Timestamp:** 2026-03-07T18:30:00Z
