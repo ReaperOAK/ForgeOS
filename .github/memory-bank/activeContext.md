@@ -1088,3 +1088,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/tools/tickets-stats.ts
 - **Decisions:** Rewrote existing stub to match AC: time_range_hours schema, stages/statuses/claims/avg_stage_duration/rework_distribution/totals response. Used Promise.all for parallel queries, 5s cache for all-time stats, PostgreSQL FILTER clause for claim health, LAG window function for stage durations. Local type definitions following tickets-next.ts pattern.
 - **Timestamp:** 2026-03-07T12:58:00Z
+
+### [FORGEOS-ARCH011] — Define Quality Attributes and Performance Targets
+- **Artifacts:** docs/architecture/quality-attributes.md, .github/agent-output/Architect/FORGEOS-ARCH011.md
+- **Decisions:** Correctness-first priority ordering (Correctness > Availability > Latency > Throughput > Scalability > Resource Efficiency). Claim p99 ≤ 100ms. 50+ concurrent agents target. 99.9% uptime SLA, RTO < 5 min, RPO < 1 min. 15 correctness invariants defined across claim, state transition, dependency, and data integrity categories. Horizontal scaling via PgBouncer at > 50 agents. Connection pool sized at 20 default with per-scale sizing table.
+- **Timestamp:** 2026-03-07T13:03:10Z
+
+### [TASK-FOS-03-007] — tickets.graph Dependency Graph
+- **Artifacts:** forgeos-server/src/tools/tickets-graph.ts, forgeos-server/src/tools/index.ts, forgeos-server/src/__tests__/tools/tickets-graph.test.ts
+- **Decisions:** Chose Kahn's algorithm for cycle detection (O(V+E), natural topological ordering reuse). DP longest-path for critical path computation. Full SELECT * for nodes per AC requirement. Exported hasCycle and computeCriticalPath for direct unit testability. Edges filtered to node set when filters reduce results.
+- **Timestamp:** 2026-03-07T12:57:00Z
