@@ -761,8 +761,10 @@ src/
 │       ├── tickets.ts  # GET /api/tickets, /:id, /:id/history
 │       └── stages.ts   # GET /api/stages — pipeline overview
 ├── db/
-│   ├── index.ts        # Barrel exports for pool, migrations, file mutex
+│   ├── index.ts        # Barrel exports for pool, migrations, seed, import, file mutex
 │   ├── pool.ts         # PostgreSQL connection pool, healthCheck, RLS helpers
+│   ├── seed.ts         # Database seed: default project + admin agent with API key
+│   ├── import.ts       # Filesystem ticket import: .github/tickets/*.json → PostgreSQL
 │   ├── file-mutex.ts   # File-level mutex for concurrent lock management
 │   ├── migrate.ts      # Migration runner
 │   └── migrations/     # SQL migration files (applied in filename order)
@@ -783,6 +785,13 @@ src/
     └── js/app.js
 ```
 
+### Scripts
+
+```
+scripts/
+└── import-tickets.ts  # CLI entry point: seed + import pipeline
+```
+
 ### Boot Sequence
 
 1. Validate environment configuration (Zod)
@@ -801,6 +810,68 @@ On `SIGTERM` or `SIGINT` the server:
 2. Closes the HTTP server (drains in-flight requests)
 3. Closes the PostgreSQL connection pool
 4. Force-exits after 10 seconds if draining stalls
+
+## Seed & Import
+
+The server includes a seed script and a filesystem import tool for
+bootstrapping the database with initial data and loading existing ticket
+JSON files.
+
+### Seed (`src/db/seed.ts`)
+
+Creates the default "ForgeOS" project and an admin agent with a
+cryptographically generated API key. The plaintext key is printed to
+stdout exactly once — it cannot be recovered afterwards (only the
+SHA-256 hash is stored in the `agents` table).
+
+| Action | Details |
+|--------|---------|
+| Upsert project | Name: `ForgeOS`, repo URL, lease defaults (30 / 120 min) |
+| Upsert admin agent | Role: `admin`, active, full permissions |
+| API key | `fos_<64 hex>` (32 random bytes), printed once if newly generated |
+
+Idempotent: uses `ON CONFLICT … DO UPDATE` so re-running is safe.
+
+### Import (`src/db/import.ts`)
+
+Reads `.github/tickets/*.json` files (excluding `ticket-schema.json`)
+and upserts them into the `tickets` table. For each ticket:
+
+1. Derives the current stage from the `.github/ticket-state/` directory tree.
+2. Maps filesystem stage names to database enum values
+   (e.g. `DOCS` → `DOCUMENTATION`, `VALIDATION` → `VALIDATOR`).
+3. Validates and maps the `sdlc_flow` array.
+4. Preserves the `history` array as `events` table rows with
+   duplicate detection.
+5. Produces a summary: `{ success, errors, skipped }`.
+
+Idempotent: uses `ON CONFLICT (ticket_id) DO UPDATE`.
+
+### CLI (`scripts/import-tickets.ts`)
+
+Runs all three steps in sequence: **migrations → seed → import**.
+
+```bash
+# Default workspace (repo root, two levels above scripts/)
+npx tsx scripts/import-tickets.ts
+
+# Explicit workspace path
+npx tsx scripts/import-tickets.ts /path/to/repo
+
+# Via WORKSPACE_PATH env var
+WORKSPACE_PATH=/path/to/repo npx tsx scripts/import-tickets.ts
+```
+
+Exit code is `0` on success, `1` if any ticket import errors occurred.
+
+### Programmatic API
+
+```typescript
+import { seed, importTickets } from './db/index.js';
+
+const { projectId, agentId, keyGenerated } = await seed();
+const { success, errors, skipped } = await importTickets(workspacePath, projectId);
+```
 
 ## Docker
 

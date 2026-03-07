@@ -37,7 +37,7 @@
     "Import produces a summary: {success: N, errors: N, skipped: N} printed to stdout",
     "scripts/import-tickets.ts is a CLI entry point that runs seed + import in sequence"
   ],
-  "rework_count": 0,
+  "rework_count": 1,
   "claimed_by": null,
   "machine_id": null,
   "operator": null,
@@ -87,8 +87,27 @@
       "from_stage": "BACKEND",
       "to_stage": "QA",
       "details": "Advanced from BACKEND to QA"
+    },
+    {
+      "timestamp": "2026-03-07T16:42:56.292917+00:00",
+      "event": "REWORK",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "BACKEND",
+      "details": "Rework #1: DoD #6 FAIL: README not updated (seed.ts, import.ts, import-tickets.ts missing from architecture tree, no seed/import section, no CLI docs). No CHANGELOG entry. DOCS stage did not complete. Remediation: run DOCS stage to update README and CHANGELOG."
+    },
+    {
+      "timestamp": "2026-03-07T22:40:00+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "BACKEND",
+      "to_stage": "QA",
+      "details": "BACKEND rework #1 complete. README updated: seed.ts, import.ts added to architecture tree; Seed & Import section with CLI docs added. CHANGELOG entry added. 21/21 tests pass."
     }
   ],
   "source_task_file": "TODO/tickets/01-database-foundation.md",
-  "tags": []
+  "tags": [],
+  "current_stage": "QA"
 }

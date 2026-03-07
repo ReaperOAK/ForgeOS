@@ -8,6 +8,35 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Seed Data and Filesystem Import Tool** — Database bootstrapping pipeline
+  at `forgeos-server/src/db/seed.ts`, `forgeos-server/src/db/import.ts`, and
+  `forgeos-server/scripts/import-tickets.ts` (TASK-FOS-01-003). Seed script
+  creates the default "ForgeOS" project with repo URL and lease settings,
+  plus an admin agent with a cryptographically generated API key (SHA-256
+  hashed, plaintext printed once to stdout). Import tool reads
+  `.github/tickets/*.json` files, derives current stage from
+  `.github/ticket-state/` directories, maps filesystem stage names to
+  database enum values, preserves ticket history as events, and uses
+  `ON CONFLICT DO UPDATE` for idempotency. CLI entry point
+  (`scripts/import-tickets.ts`) runs migrations → seed → import in
+  sequence. 21 tests (6 seed + 15 import).
+
+- **SSE Endpoint and REST API for Real-Time Updates** — Dashboard API routes
+  under `/api/` (TASK-FOS-05-002). SSE endpoint (`GET /api/events`) sends an
+  initial system snapshot (stage counts, 20 recent tickets) then listens on
+  PostgreSQL `ticket_changes` NOTIFY channel and broadcasts `ticket-update`
+  events to all connected clients with sub-1-second latency. Includes 30-second
+  keep-alive and automatic reconnection on PG listener error. REST endpoints:
+  `GET /api/tickets` (paginated with stage/type/status/priority/claimed_by
+  filters, Zod-validated query params), `GET /api/tickets/:id` (full ticket
+  with resolved dependency status), `GET /api/tickets/:id/history` (ordered
+  event timeline), `GET /api/stages` (pipeline overview with count/claimed/ready
+  per stage). REST endpoints require Bearer authentication; SSE endpoint is
+  optionally authenticated. Proper HTTP status codes (200, 400, 401, 404, 500).
+  All SQL queries parameterized. Route modules: `forgeos-server/src/api/routes/
+  events.ts`, `tickets.ts`, `stages.ts`; router factory:
+  `forgeos-server/src/api/index.ts`.
+
 - **Initialize MCP Server with Python SDK** — Foundational Python MCP
   server at `mcp-server/` (FORGEOS-BE015). Built on the official MCP Python
   SDK (`mcp>=1.25`) using the FastMCP high-level API with decorator-based
@@ -58,19 +87,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   optional filtering by stage, type, or status. Uses Kahn's BFS algorithm
   (O(V+E)) for cycle detection and topological ordering with dynamic
   programming for critical path computation. Parameterized SQL queries,
-  stFile-Level Mutex Implementation** — Concurrent file lock management
-  module at `forgeos-server/src/db/file-mutex.ts` (TASK-FOS-04-003).
-  Provides `acquireFileLocks`, `checkFileConflicts`, `releaseFileLocks`,
-  `getActiveLocksForTicket`, and `getActiveLockForFile` functions backed
-  by the `file_locks` PostgreSQL table with a partial unique index for
-  database-level mutual exclusion. Uses `INSERT ... ON CONFLICT DO NOTHING`
-  for atomic lock acquisition with automatic conflict detection and
-  rollback. Emits `FILE_LOCKED` / `FILE_UNLOCKED` audit events.
-  `FileConflictError` class (HTTP 409) provides structured conflict
-  details. 21 tests, 100% statement/function/line coverage, 94% branch
-  coverage.
-
-- **ructured pino logging, and Zod schema validation. Performance target:
+  structured pino logging, and Zod schema validation. Performance target:
   < 500 ms for up to 500 tickets
   (`forgeos-server/src/tools/tickets-graph.ts`,
   `forgeos-server/src/tools/index.ts`).
@@ -83,6 +100,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   via `Promise.all()` for sub-200 ms response time. All-time results cached
   for 5 seconds. Structured error handling with pino logging
   (`forgeos-server/src/tools/tickets-stats.ts`).
+
+- **File-Level Mutex Implementation** — Concurrent file lock management
+  module at `forgeos-server/src/db/file-mutex.ts` (TASK-FOS-04-003).
+  Provides `acquireFileLocks`, `checkFileConflicts`, `releaseFileLocks`,
+  `getActiveLocksForTicket`, and `getActiveLockForFile` functions backed
+  by the `file_locks` PostgreSQL table with a partial unique index for
+  database-level mutual exclusion. Uses `INSERT ... ON CONFLICT DO NOTHING`
+  for atomic lock acquisition with automatic conflict detection and
+  rollback. Emits `FILE_LOCKED` / `FILE_UNLOCKED` audit events.
+  `FileConflictError` class (HTTP 409) provides structured conflict
+  details. 21 tests, 100% statement/function/line coverage, 94% branch
+  coverage.
 
 - **Middleware Stack — Logging, Error Handling, Validation** — Express
   middleware pipeline for the ForgeOS MCP server (TASK-FOS-02-003). Includes:
