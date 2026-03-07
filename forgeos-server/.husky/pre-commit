@@ -1,0 +1,16 @@
+#!/usr/bin/env bash
+# ──────────────────────────────────────────────────────
+# ForgeOS pre-commit hook (Husky v9)
+#
+# Validates that staged files are within the ticket's
+# declared file_paths scope (blast radius validation).
+#
+# Delegates to scripts/validate-scope.sh.
+#
+# Bypass: git commit --no-verify
+# ──────────────────────────────────────────────────────
+
+# Resolve the repo root (forgeos-server/) relative to .husky/
+SCRIPT_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+
+exec "${SCRIPT_DIR}/scripts/validate-scope.sh"
