@@ -1123,3 +1123,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** infra/.env.template, infra/.env.test, infra/config/settings.py, infra/config/__init__.py
 - **Decisions:** Frozen dataclass Config with profile-aware defaults (dev/test/prod). Aggregate error validation reports all issues at once. Minimal built-in dotenv parser (zero deps). Production enforces ADMIN_API_KEY, WEBHOOK_SECRET, JWT_SECRET, DB_PASSWORD. DATABASE_URL composed from DB_* parts if not explicitly set.
 - **Timestamp:** 2026-03-07T13:42:00Z
+
+### [TASK-FOS-01-003] — Seed Data and Filesystem Import Tool
+- **Artifacts:** forgeos-server/src/db/seed.ts, forgeos-server/src/db/import.ts, forgeos-server/scripts/import-tickets.ts, forgeos-server/src/db/index.ts
+- **Decisions:** SHA-256 for API key hashing (high-entropy tokens, bcrypt unnecessary). Stage mapping DOCS→DOCUMENTATION, VALIDATION→VALIDATOR for DB enum compatibility. SELECT-before-INSERT for event idempotency (no unique constraint on events table). Barrel exports added to db/index.ts.
+- **Timestamp:** 2026-03-07T13:48:00Z
