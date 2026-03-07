@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-07T15:30:00Z -->
+<!-- last_reviewed: 2026-03-07T15:10:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -150,6 +150,122 @@ variables in the error output.
 Non-public endpoints require an `Authorization: Bearer <api-key>` header.
 The key is hashed with SHA-256 and looked up in the `agents` table.
 The admin key (`ADMIN_API_KEY`) bypasses the database lookup.
+
+## Middleware
+
+The Express middleware stack is mounted in a specific order. Each layer
+adds context or handles cross-cutting concerns before the request reaches
+a route handler.
+
+### Mount Order
+
+```
+1. requestIdMiddleware   — assigns UUID v4 correlation ID
+2. requestLogger         — structured JSON request/response logging
+3. authMiddleware        — Bearer token authentication
+4. Route handlers        — with optional validateBody / validateQuery / validateParams
+5. errorHandler          — catches unhandled errors (must be last)
+```
+
+### Request ID (`request-id.ts`)
+
+Generates or extracts a UUID v4 correlation ID for every HTTP request.
+If the incoming request has an `X-Request-ID` header, it is reused;
+otherwise `crypto.randomUUID()` creates a new one. The resolved ID is:
+
+- Attached to `req.requestId` for downstream middleware and handlers.
+- Echoed back in the `X-Request-ID` response header.
+
+### Structured Logging (`logging.ts`)
+
+Provides a pino-based singleton `logger` and the `requestLogger`
+middleware. Each completed request emits a JSON log line with:
+
+| Field           | Source                            |
+|-----------------|-----------------------------------|
+| `method`        | `req.method`                      |
+| `path`          | `req.path`                        |
+| `statusCode`    | `res.statusCode`                  |
+| `durationMs`    | `process.hrtime.bigint()` delta   |
+| `requestId`     | `req.requestId` (if present)      |
+| `userAgent`     | `User-Agent` header               |
+| `contentLength` | `Content-Length` response header   |
+
+In development, logs are pretty-printed via `pino-pretty`. In production,
+raw JSON lines are emitted for log aggregators.
+
+### Error Handler (`error-handler.ts`)
+
+Express 4-argument error middleware. Classifies errors in priority order:
+
+1. **ForgeOSAppError** — uses the embedded `errorCode` and `statusCode`.
+2. **PgDatabaseError** — maps PostgreSQL SQLSTATE codes to ForgeOS error codes.
+3. **Generic Error** — falls back to `INTERNAL_ERROR` / HTTP 500.
+
+In production (`NODE_ENV=production`), stack traces and internal details
+are never leaked. The response body follows the `ErrorResponse` schema:
+
+```json
+{
+  "error": "TICKET_NOT_FOUND",
+  "message": "An error occurred",
+  "timestamp": "2026-03-07T10:00:00.000Z"
+}
+```
+
+#### `withErrorHandling<T>`
+
+Async wrapper for MCP tool handlers. Catches thrown errors and returns
+them as structured MCP text content responses so that tool invocations
+never crash the transport.
+
+```typescript
+const result = await withErrorHandling(async () => {
+  const ticket = await ticketRepo.findById(id);
+  return { content: [{ type: 'text', text: JSON.stringify(ticket) }] };
+});
+```
+
+#### PostgreSQL Error Code Mapping
+
+| PG Class | SQLSTATE Codes | ForgeOS Error Code   |
+|----------|---------------|----------------------|
+| 08 — Connection | 08000–08006 | `DB_UNAVAILABLE`   |
+| 23 — Integrity  | 23502       | `INTERNAL_ERROR`   |
+| 23 — Integrity  | 23503       | `TICKET_NOT_FOUND` |
+| 23 — Integrity  | 23505       | `ALREADY_CLAIMED`  |
+| 40 — Transaction | 40001, 40P01 | `INTERNAL_ERROR`  |
+| 42 — Syntax     | 42P01       | `DB_UNAVAILABLE`   |
+| 57 — Operator   | 57P01–57P03 | `DB_UNAVAILABLE`   |
+
+### Validation (`validation.ts`)
+
+Factory functions that accept a Zod schema and return Express middleware
+validating the request body, query string, or URL parameters.
+
+| Factory           | Validates     | On Failure                    |
+|-------------------|---------------|-------------------------------|
+| `validateBody`    | `req.body`    | 400 with field-level errors   |
+| `validateQuery`   | `req.query`   | 400 with field-level errors   |
+| `validateParams`  | `req.params`  | 400 with field-level errors   |
+
+On success, the parsed (and potentially transformed) data replaces the
+original request property, so downstream handlers receive clean input.
+
+Validation error response:
+
+```json
+{
+  "error": "VALIDATION_ERROR",
+  "message": "Request validation failed",
+  "details": {
+    "fields": [
+      { "field": "title", "message": "Required", "code": "invalid_type" }
+    ]
+  },
+  "timestamp": "2026-03-07T10:00:00.000Z"
+}
+```
 
 ## MCP Tools
 
@@ -318,8 +434,12 @@ src/
 │   ├── migrate.ts      # Migration runner
 │   └── migrations/     # SQL migration files (applied in filename order)
 ├── middleware/
+│   ├── index.ts        # Barrel export with mount-order documentation
 │   ├── auth.ts         # Bearer token authentication middleware
-│   └── logging.ts      # Pino structured logger, request correlation IDs
+│   ├── error-handler.ts # Error classification, PG error mapping, MCP wrapper
+│   ├── logging.ts      # Pino structured logger, request logging
+│   ├── request-id.ts   # UUID v4 request correlation ID
+│   └── validation.ts   # Zod schema validation (body, query, params)
 ├── tools/
 │   └── index.ts        # MCP tool registration hub (10 tools)
 ├── types/

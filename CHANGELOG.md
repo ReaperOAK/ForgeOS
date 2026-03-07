@@ -8,6 +8,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Middleware Stack — Logging, Error Handling, Validation** — Express
+  middleware pipeline for the ForgeOS MCP server (TASK-FOS-02-003). Includes:
+  request ID middleware (`request-id.ts`) generating UUID v4 correlation IDs
+  via `X-Request-ID` header; structured JSON request logging (`logging.ts`)
+  with pino, measuring duration via `process.hrtime.bigint()`; error handling
+  middleware (`error-handler.ts`) mapping PostgreSQL SQLSTATE codes to 14
+  ForgeOS error codes with structured `ErrorResponse` JSON, production stack
+  trace suppression, and `withErrorHandling<T>` wrapper for MCP tool handlers;
+  Zod-based request validation (`validation.ts`) with `validateBody`,
+  `validateQuery`, and `validateParams` factory functions returning 400
+  responses with field-level error details. 72 tests, 96%+ coverage across
+  all middleware files. README updated with Middleware section documenting
+  mount order, request flow, error classification, PG error code mapping,
+  and validation response format.
+
 - **Database Migration Tooling Evaluation** — Comprehensive research report at
   `docs/research/migration-tooling.md` (FORGEOS-RES012). Evaluates 5 database
   migration tools for ForgeOS (TypeScript/Node.js + PostgreSQL): Alembic,
