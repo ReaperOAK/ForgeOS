@@ -4,7 +4,7 @@
   "description": "Evaluate Python web frameworks and ORM/query builder options for the ForgeOS REST API layer. Compare FastAPI vs Flask vs Litestar for async support, validation, OpenAPI generation, and middleware ecosystem. Compare SQLAlchemy (async) vs asyncpg (raw) vs Tortoise ORM for database access patterns required by ForgeOS.",
   "type": "research",
   "priority": "medium",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "RESEARCH",
@@ -30,10 +30,10 @@
     "Research report delivered at docs/research/framework-evaluation.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-07T15:30:25+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {

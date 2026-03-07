@@ -7,7 +7,7 @@ date: 2026-03-07T12:55:00Z
 status: COMPLETE
 audience: Architects, backend engineers, and DevOps engineers evaluating Python stack for ForgeOS
 purpose: Evaluate Python web frameworks and database access layers for ForgeOS MCP server
-last_reviewed: 2026-03-07T13:00:00Z
+last_reviewed: 2026-03-07T15:00:00Z
 diataxis_quadrant: reference
 tags: [research, framework, orm, python, fastapi, flask, litestar, sqlalchemy, asyncpg, phase1]
 validity_window: 6 months (refresh by 2026-09-07 or on major release of evaluated libraries)
@@ -94,7 +94,7 @@ This report evaluates three Python web frameworks (FastAPI, Flask, Litestar) and
 | asyncpg docs (magicstack.github.io/asyncpg) | Official docs | 1.0 | Current (2026) |
 | MCP Python SDK source (github.com/modelcontextprotocol/python-sdk) | Source code | 0.9 | Current (v1.x) |
 | TechEmpower Framework Benchmarks Round 22 | Benchmarks | 0.6 | 2024 |
-| ForgeOS internal research (RES001, RES003, RES005, RES006, RES009) | Internal | 0.85 | Mar 2026 |
+| ForgeOS internal research ([RES001](protocol-comparison.md), [RES003](mcp-sdk-evaluation.md), [RES005](pg-distributed-locking.md), [RES006](pg-connection-pooling.md), [RES009](system-gap-analysis.md)) | Internal | 0.85 | Mar 2026 |
 | GitHub repository metrics (stars, contributors, issues) | Community | 0.5 | Mar 2026 |
 | PyPI download statistics (pypistats.org) | Community | 0.4 | Mar 2026 |
 
@@ -115,7 +115,7 @@ This report evaluates three Python web frameworks (FastAPI, Flask, Litestar) and
 
 ## 4. ForgeOS Requirements Context
 
-From existing architecture docs and research (FORGEOS-ARCH001, FORGEOS-RES003, FORGEOS-RES009):
+From existing architecture docs and research ([FORGEOS-ARCH001](../architecture/system-components.md), [FORGEOS-RES003](mcp-sdk-evaluation.md), [FORGEOS-RES009](system-gap-analysis.md)):
 
 ### 4.1 System Architecture
 
@@ -656,7 +656,7 @@ async def run_async_migrations():
 - Data migrations alongside schema changes
 - Offline mode for SQL script generation
 
-**ForgeOS fit:** ForgeOS already has a migration system in Node.js (`src/db/migrate.ts` with raw SQL). Alembic provides equivalent or better tooling with auto-generation from model definitions. The 1011-line `001_initial.sql` migration maps directly to Alembic operations. Stored function management can use raw SQL within Alembic migration files.
+**ForgeOS fit:** ForgeOS already has a migration system in Node.js ([`src/db/migrate.ts`](../../forgeos-server/src/db/migrate.ts) with raw SQL). Alembic provides equivalent or better tooling with auto-generation from model definitions. The 1011-line `001_initial.sql` migration maps directly to Alembic operations. Stored function management can use raw SQL within Alembic migration files.
 
 ### 9.4 Query Builder Flexibility (Score: 9/10)
 
@@ -929,7 +929,7 @@ async with pool.acquire() as conn:
 
 4. **asyncpg as the driver**: SQLAlchemy uses asyncpg by default for PostgreSQL async. All of asyncpg's performance characteristics (binary protocol, prepared statements, connection pooling) are inherited. Where maximum performance is needed, `text()` provides near-raw-asyncpg throughput.
 
-5. **Advisory lock and RLS compatibility**: Confirmed compatible via `text()` calls within async sessions. `SET LOCAL` for RLS and `pg_advisory_xact_lock` for file-path mutex work through SQLAlchemy's session-scoped transactions (ref: FORGEOS-RES005, FORGEOS-RES006).
+5. **Advisory lock and RLS compatibility**: Confirmed compatible via `text()` calls within async sessions. `SET LOCAL` for RLS and `pg_advisory_xact_lock` for file-path mutex work through SQLAlchemy's session-scoped transactions (ref: [FORGEOS-RES005](pg-distributed-locking.md), [FORGEOS-RES006](pg-connection-pooling.md)).
 
 **Implementation guidance:**
 ```python
@@ -1042,10 +1042,10 @@ async with async_session() as session:
 | 4 | [SQLAlchemy 2.x docs](https://docs.sqlalchemy.org/) | Official docs | 1.0 | Mar 2026 | Native async, asyncpg backend, Alembic integration |
 | 5 | [asyncpg docs](https://magicstack.github.io/asyncpg/) | Official docs | 1.0 | Mar 2026 | Binary protocol, Cython, fastest Python PG driver |
 | 6 | [MCP Python SDK — python-sdk](https://github.com/modelcontextprotocol/python-sdk) | Source code | 0.9 | Mar 2026 | Uses Starlette, Pydantic v2, anyio, uvicorn |
-| 7 | FORGEOS-RES003 (MCP SDK Evaluation) | Internal research | 0.85 | Mar 2026 | SDK maturity confirmed, FastMCP API, Starlette transport |
-| 8 | FORGEOS-RES005 (PG Distributed Locking) | Internal research | 0.85 | Mar 2026 | Advisory locks, RLS via SET LOCAL |
-| 9 | FORGEOS-RES006 (PG Connection Pooling) | Internal research | 0.85 | Mar 2026 | asyncpg and SQLAlchemy pool evaluation |
-| 10 | FORGEOS-RES009 (System Gap Analysis) | Internal research | 0.85 | Mar 2026 | 32 capabilities mapped, migration feasibility |
+| 7 | [FORGEOS-RES003](mcp-sdk-evaluation.md) (MCP SDK Evaluation) | Internal research | 0.85 | Mar 2026 | SDK maturity confirmed, FastMCP API, Starlette transport |
+| 8 | [FORGEOS-RES005](pg-distributed-locking.md) (PG Distributed Locking) | Internal research | 0.85 | Mar 2026 | Advisory locks, RLS via SET LOCAL |
+| 9 | [FORGEOS-RES006](pg-connection-pooling.md) (PG Connection Pooling) | Internal research | 0.85 | Mar 2026 | asyncpg and SQLAlchemy pool evaluation |
+| 10 | [FORGEOS-RES009](system-gap-analysis.md) (System Gap Analysis) | Internal research | 0.85 | Mar 2026 | 32 capabilities mapped, migration feasibility |
 | 11 | [TechEmpower Benchmarks R22](https://www.techempower.com/benchmarks/) | Benchmarks | 0.6 | 2024 | Framework throughput comparisons |
 | 12 | [FastAPI GitHub](https://github.com/tiangolo/fastapi) | Repository | 0.5 | Mar 2026 | 82K stars, 700 contributors |
 | 13 | [Flask GitHub](https://github.com/pallets/flask) | Repository | 0.5 | Mar 2026 | 70K stars, 800 contributors |
