@@ -8,6 +8,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **MCP Protocol Adoption Risk Assessment** — Comprehensive risk assessment
+  at `docs/research/mcp-risk-assessment.md` (FORGEOS-RES004). Synthesizes
+  findings from RES001 (Protocol Spec, 92%), RES002 (Transport Layer, 88%),
+  and RES003 (SDK Evaluation, 82%) into a 12-risk register across five
+  categories: protocol maturity, SDK dependency, performance under load,
+  vendor lock-in, and operational concerns. Each risk includes likelihood,
+  impact, mitigation strategy, and residual risk. Go/No-Go recommendation:
+  **GO** at 87% confidence (weighted decision matrix score 8.40/10). Includes
+  SDK fallback strategy (fork, minimal reimplementation, or protocol migration),
+  vendor lock-in analysis (~410 LOC MCP-specific code, 3-5 week switch cost
+  with abstraction layer), performance thresholds (comfortable to 50 agents,
+  scale at 100+), Bayesian confidence update (70% → 87%), and contradiction
+  analysis resolving 4 apparent conflicts in upstream evidence.
+
 - **Quality attributes and performance targets** — Comprehensive quality
   attributes document at `docs/architecture/quality-attributes.md`
   (FORGEOS-ARCH011). Defines latency targets (p50/p95/p99 for 14 operations,

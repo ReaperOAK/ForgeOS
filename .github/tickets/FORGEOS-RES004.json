@@ -4,7 +4,7 @@
   "description": "Synthesize findings from RES001, RES002, and RES003 into a comprehensive risk assessment of adopting MCP as the agent communication protocol for ForgeOS. Evaluate protocol maturity risk, SDK stability risk, vendor lock-in risk, performance risk under load, and migration complexity. Produce a risk register with mitigation strategies and a go/no-go recommendation.",
   "type": "research",
   "priority": "medium",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "RESEARCH",
@@ -33,10 +33,10 @@
     "Research report delivered at docs/research/mcp-risk-assessment.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-07T15:25:33Z",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -73,6 +73,24 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Released claim from Research: manual release"
+    },
+    {
+      "timestamp": "2026-03-07T14:57:05.082319+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation",
+      "machine_id": "system",
+      "from_stage": "READY",
+      "to_stage": "RESEARCH",
+      "details": "Advanced from READY to RESEARCH"
+    },
+    {
+      "timestamp": "2026-03-07T14:57:31.961179+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-research.md",
