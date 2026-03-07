@@ -970,3 +970,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/TASK-FOS-08-002.md
 - **Decisions:** PASS — Score 82/100, 0 critical, 3 warnings (env var syntax inconsistency, unpinned pgbouncer:latest tag, hardcoded password in DATABASE_URL), 3 suggestions. YAML syntax valid, Docker Compose schema valid, TypeScript type check clean (strict mode). ESLint N/A (not installed — pre-existing). QA PASS and Security PASS verified.
 - **Timestamp:** 2026-03-07T07:56:00+00:00
+
+### [FORGEOS-ARCH008] — Architecture Summary
+- **Artifacts:** docs/architecture/api/openapi-spec.yaml, .github/agent-output/Architect/FORGEOS-ARCH008.md
+- **Decisions:** Complete OpenAPI 3.1 rewrite — REST API for dashboard/admin, MCP for agents. All 28 Ticket fields, 14-field TicketEvent, 6 enum schemas aligned 1:1 with TypeScript. Dual auth (BearerAuth + ApiKeyAuth). Structured evidence in AdvanceRequest. ForgeOSErrorCode enum (14 codes) in ErrorResponse. WebSocket subscription filtering. Health endpoint with database/server sub-checks.
+- **Timestamp:** 2026-03-07T08:45:00Z

@@ -3,11 +3,39 @@ info:
   title: ForgeOS Orchestration Platform REST API
   version: 1.0.0
   description: |
-    REST API for ForgeOS dashboard, ticket operations, and health monitoring. This API complements the MCP JSON-RPC protocol for agent orchestration, providing administrative and operator endpoints for ticket management, pipeline overview, and real-time updates.
+    REST API for the ForgeOS distributed multi-agent orchestration platform.
+    Provides administrative and operator endpoints for ticket management,
+    pipeline overview, health monitoring, and real-time updates.
+
+    This API complements the MCP JSON-RPC protocol used by agent clients.
+    While agents interact via MCP tools over Streamable HTTP (`/mcp`),
+    operators and dashboards consume these REST endpoints for visibility
+    and manual intervention.
+
+    ## Authentication
+
+    All endpoints (except `/health`) require authentication via one of:
+    - **Bearer token**: Session token obtained from agent login
+    - **API key**: Pre-provisioned key passed in `X-API-Key` header
+
+    ## Error Handling
+
+    All error responses follow the `ErrorResponse` schema with a machine-
+    readable `error_code` from the `ForgeOSErrorCode` enum, enabling
+    programmatic error handling by clients.
+
+    ## Rate Limiting
+
+    Clients exceeding the configured rate limit receive `429 Too Many Requests`
+    with a `Retry-After` header.
   contact:
     name: ForgeOS Team
     url: https://github.com/forgeos
     email: support@forgeos.dev
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
 servers:
   - url: /api
     description: Relative API root (behind reverse proxy)
@@ -18,13 +46,41 @@ servers:
 
 security:
   - BearerAuth: []
+  - ApiKeyAuth: []
 
+tags:
+  - name: Tickets
+    description: Ticket CRUD and lifecycle operations
+  - name: Stages
+    description: SDLC pipeline stage information
+  - name: Health
+    description: Server health and readiness probes
+  - name: WebSocket
+    description: Real-time ticket state streaming
+
+# ─────────────────────────────────────────────
+# Components
+# ─────────────────────────────────────────────
 components:
+
+  # ── Security Schemes ──
   securitySchemes:
     BearerAuth:
       type: http
       scheme: bearer
       bearerFormat: JWT
+      description: |
+        Session token obtained from agent authentication.
+        Pass as `Authorization: Bearer <token>`.
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-API-Key
+      description: |
+        Pre-provisioned API key for agent authentication.
+        Pass as `X-API-Key: <key>`.
+
+  # ── Reusable Parameters ──
   parameters:
     TicketId:
       name: id
@@ -33,38 +89,51 @@ components:
       schema:
         type: string
         pattern: ^[A-Z0-9\-]+$
-      description: Ticket ID (e.g., FORGEOS-ARCH001)
-    Stage:
+        examples:
+          - FORGEOS-ARCH001
+          - TASK-FOS-02-002
+      description: Human-readable ticket identifier (e.g., `FORGEOS-ARCH001`)
+
+    StageFilter:
       name: stage
       in: query
       required: false
       schema:
-        type: string
-        enum: [READY, ARCHITECT, RESEARCH, BACKEND, FRONTEND, QA, SECURITY, CI, DOCS, VALIDATION, DONE]
-      description: Filter by ticket stage
-    Type:
+        $ref: '#/components/schemas/TicketStage'
+      description: Filter tickets by SDLC pipeline stage
+
+    TypeFilter:
       name: type
       in: query
       required: false
       schema:
-        type: string
-        enum: [backend, frontend, fullstack, infra, security, docs, research, architecture]
-      description: Filter by ticket type
-    Priority:
+        $ref: '#/components/schemas/TicketType'
+      description: Filter tickets by classification type
+
+    PriorityFilter:
       name: priority
       in: query
       required: false
       schema:
-        type: string
-        enum: [low, medium, high, critical]
-      description: Filter by ticket priority
-    ClaimedBy:
+        $ref: '#/components/schemas/TicketPriority'
+      description: Filter tickets by priority level
+
+    StatusFilter:
+      name: status
+      in: query
+      required: false
+      schema:
+        $ref: '#/components/schemas/TicketStatus'
+      description: Filter tickets by operational status
+
+    ClaimedByFilter:
       name: claimed_by
       in: query
       required: false
       schema:
         type: string
-      description: Filter by agent name
+      description: Filter tickets by claiming agent name
+
     Page:
       name: page
       in: query
@@ -73,7 +142,8 @@ components:
         type: integer
         minimum: 1
         default: 1
-      description: Page number for pagination
+      description: Page number (1-indexed)
+
     PageSize:
       name: page_size
       in: query
@@ -83,78 +153,340 @@ components:
         minimum: 1
         maximum: 100
         default: 20
-      description: Page size for pagination
+      description: Number of items per page
+
+  # ── Schemas ──
   schemas:
+
+    # ── Enum Schemas ──
+
+    TicketStatus:
+      type: string
+      enum:
+        - READY
+        - BLOCKED
+        - CLAIMED
+        - IN_PROGRESS
+        - DONE
+        - FAILED
+        - ESCALATED
+      description: |
+        Ticket lifecycle status:
+        - `READY` — Unblocked, available for claim
+        - `BLOCKED` — Waiting on unresolved dependencies
+        - `CLAIMED` — Locked by an agent with active lease
+        - `IN_PROGRESS` — Agent actively working
+        - `DONE` — Completed successfully
+        - `FAILED` — Terminal failure
+        - `ESCALATED` — Rework limit exceeded; requires human intervention
+
+    TicketStage:
+      type: string
+      enum:
+        - READY
+        - RESEARCH
+        - ARCHITECT
+        - PRODUCT_MANAGER
+        - UI_DESIGN
+        - BACKEND
+        - FRONTEND
+        - QA
+        - SECURITY
+        - CI
+        - DOCUMENTATION
+        - VALIDATOR
+        - DONE
+      description: |
+        SDLC pipeline stage. Each ticket type traverses a defined subset
+        in strict order. Maps to specialized agents:
+        - `READY` — Entry point; ticket is unblocked
+        - `RESEARCH` — Research Analyst performs evidence-based analysis
+        - `ARCHITECT` — Architect produces ADRs and API contracts
+        - `PRODUCT_MANAGER` — Product Manager defines requirements
+        - `UI_DESIGN` — UIDesigner creates mockups and design specs
+        - `BACKEND` — Backend Engineer implements server-side logic
+        - `FRONTEND` — Frontend Engineer implements UI components
+        - `QA` — QA Engineer verifies test coverage and correctness
+        - `SECURITY` — Security Engineer runs STRIDE/OWASP review
+        - `CI` — CI Reviewer checks lint, types, and complexity
+        - `DOCUMENTATION` — Documentation Specialist writes docs
+        - `VALIDATOR` — Validator performs independent DoD review
+        - `DONE` — Terminal state; lifecycle complete
+
+    TicketType:
+      type: string
+      enum:
+        - backend
+        - frontend
+        - fullstack
+        - infra
+        - security
+        - docs
+        - research
+        - architecture
+        - product
+        - design
+      description: |
+        Ticket classification type. Determines which SDLC flow
+        (stage sequence) the ticket follows.
+
+    TicketPriority:
+      type: string
+      enum:
+        - critical
+        - high
+        - medium
+        - low
+      description: |
+        Ticket priority level. Higher-priority tickets are claimed first.
+        - `critical` — Blocking other work; process immediately
+        - `high` — Important; process before medium/low
+        - `medium` — Standard priority (default)
+        - `low` — Process when no higher-priority work is available
+
+    EventType:
+      type: string
+      enum:
+        - CREATED
+        - CLAIMED
+        - RELEASED
+        - STAGE_ADVANCED
+        - STAGE_REJECTED
+        - UPDATED
+        - SPAWNED
+        - ESCALATED
+        - LEASE_EXTENDED
+        - FORCE_RELEASED
+        - RECONCILED
+        - FILE_LOCKED
+        - FILE_UNLOCKED
+        - HEARTBEAT
+        - COMPLETED
+      description: |
+        Audit event type recorded in the events table.
+        Every state change emits an event with one of these types.
+
+    ForgeOSErrorCode:
+      type: string
+      enum:
+        - TICKET_NOT_FOUND
+        - ALREADY_CLAIMED
+        - NOT_CLAIM_OWNER
+        - FILE_CONFLICT
+        - INVALID_TRANSITION
+        - MISSING_EVIDENCE
+        - INVALID_SUBTASK
+        - LEASE_EXPIRED
+        - LEASE_TOO_LONG
+        - RATE_LIMITED
+        - UNAUTHORIZED
+        - FORBIDDEN
+        - INTERNAL_ERROR
+        - DB_UNAVAILABLE
+      description: |
+        Machine-readable error code for programmatic error handling.
+        - `TICKET_NOT_FOUND` — Requested ticket does not exist
+        - `ALREADY_CLAIMED` — Ticket is claimed by another agent
+        - `NOT_CLAIM_OWNER` — Caller does not own the claim
+        - `FILE_CONFLICT` — File is locked by another ticket
+        - `INVALID_TRANSITION` — Stage transition violates SDLC flow
+        - `MISSING_EVIDENCE` — Completion attempted without required evidence
+        - `INVALID_SUBTASK` — Spawned subtask violates parent constraints
+        - `LEASE_EXPIRED` — Agent's lease has expired
+        - `LEASE_TOO_LONG` — Requested lease exceeds project maximum
+        - `RATE_LIMITED` — API rate limit exceeded
+        - `UNAUTHORIZED` — Missing or invalid credentials
+        - `FORBIDDEN` — Insufficient permissions
+        - `INTERNAL_ERROR` — Unexpected server error
+        - `DB_UNAVAILABLE` — PostgreSQL database unreachable
+
+    # ── Domain Model Schemas ──
+
     Ticket:
       type: object
+      description: |
+        Ticket entity representing a unit of work in the ForgeOS orchestration
+        system. Maps 1:1 to the `tickets` PostgreSQL table (28 fields).
       required:
+        - id
         - ticket_id
         - title
         - type
-        - stage
-        - status
         - priority
+        - status
+        - stage
+        - sdlc_flow
+        - depends_on
+        - file_paths
+        - acceptance_criteria
+        - tags
+        - rework_count
+        - max_reworks
+        - lease_duration_minutes
+        - metadata
         - created_at
         - updated_at
       properties:
+        id:
+          type: string
+          format: uuid
+          description: UUID primary key (database-generated)
+          examples:
+            - 550e8400-e29b-41d4-a716-446655440000
         ticket_id:
           type: string
+          description: Human-readable ticket identifier (unique)
+          examples:
+            - FORGEOS-ARCH001
+            - TASK-FOS-02-002
+        project_id:
+          type: string
+          format: uuid
+          nullable: true
+          description: FK to the projects table. Null for unscoped tickets.
         title:
           type: string
+          description: Short summary of the work to be done
+          examples:
+            - Design REST API OpenAPI Specification
         description:
           type: string
+          nullable: true
+          description: Detailed description of requirements and context
         type:
-          type: string
-        stage:
-          type: string
-        status:
-          type: string
+          $ref: '#/components/schemas/TicketType'
         priority:
-          type: string
+          $ref: '#/components/schemas/TicketPriority'
+        status:
+          $ref: '#/components/schemas/TicketStatus'
+        stage:
+          $ref: '#/components/schemas/TicketStage'
+        sdlc_flow:
+          type: array
+          items:
+            $ref: '#/components/schemas/TicketStage'
+          description: |
+            Ordered sequence of stages this ticket must traverse.
+            Derived from the ticket type's SDLC flow definition.
+          examples:
+            - - READY
+              - ARCHITECT
+              - DOCUMENTATION
+              - VALIDATOR
+              - DONE
         claimed_by:
           type: string
+          format: uuid
           nullable: true
+          description: UUID of the agent holding the claim. Null if unclaimed.
+        claimed_by_name:
+          type: string
+          nullable: true
+          description: Human-readable name of the claiming agent
+          examples:
+            - Backend Engineer
         machine_id:
           type: string
           nullable: true
+          description: Hostname of the machine where the claiming agent runs
+          examples:
+            - forgeos-dev
         operator:
           type: string
           nullable: true
+          description: Human operator who initiated the agent
+          examples:
+            - reaperoak
         lease_expiry:
           type: string
           format: date-time
           nullable: true
-        created_at:
-          type: string
-          format: date-time
-        updated_at:
-          type: string
-          format: date-time
+          description: ISO 8601 timestamp when the current lease expires. Null if unclaimed.
+        lease_duration_minutes:
+          type: integer
+          minimum: 1
+          default: 30
+          description: Default lease duration in minutes (configurable per project)
+        depends_on:
+          type: array
+          items:
+            type: string
+          description: Array of ticket_id values that must reach DONE before this ticket unblocks
+          examples:
+            - - FORGEOS-ARCH001
+              - FORGEOS-RES005
         file_paths:
           type: array
           items:
             type: string
+          description: Workspace-relative file paths within this ticket's write scope
+          examples:
+            - - docs/architecture/api/openapi-spec.yaml
         acceptance_criteria:
           type: array
           items:
             type: string
+          description: Conditions that must be satisfied for the ticket to pass validation
+        tags:
+          type: array
+          items:
+            type: string
+          description: Free-form labels for filtering and categorization
+          examples:
+            - - architecture
+              - api
+              - phase1
         rework_count:
           type: integer
-        dependencies:
-          type: array
-          items:
-            type: string
-        blocked_by:
-          type: array
-          items:
-            type: string
-    TicketList:
+          minimum: 0
+          description: Number of times this ticket has been sent back to rework
+        max_reworks:
+          type: integer
+          minimum: 1
+          default: 3
+          description: Maximum allowed rework attempts before escalation
+        metadata:
+          type: object
+          additionalProperties: true
+          description: |
+            Arbitrary JSONB metadata (e.g., evidence, agent notes, stage artifacts).
+            Merged with stage evidence on advance.
+          examples:
+            - architecture_adr: ADR-005
+              coverage: 85
+        parent_id:
+          type: string
+          nullable: true
+          description: ticket_id of the parent ticket if this is a spawned subtask
+        source_task_file:
+          type: string
+          nullable: true
+          description: Path to the TODO task file that generated this ticket
+          examples:
+            - TODO/tasks/phase1-architecture.md
+        created_at:
+          type: string
+          format: date-time
+          description: ISO 8601 creation timestamp
+        updated_at:
+          type: string
+          format: date-time
+          description: ISO 8601 last-modified timestamp
+        completed_at:
+          type: string
+          format: date-time
+          nullable: true
+          description: ISO 8601 completion timestamp. Null until ticket reaches DONE.
+
+    TicketListResponse:
       type: object
+      description: Paginated list of tickets
       required:
         - tickets
         - total
         - page
         - page_size
+        - total_pages
       properties:
         tickets:
           type: array
@@ -162,123 +494,735 @@ components:
             $ref: '#/components/schemas/Ticket'
         total:
           type: integer
+          minimum: 0
+          description: Total number of tickets matching the filter criteria
         page:
           type: integer
+          minimum: 1
+          description: Current page number
         page_size:
           type: integer
-    TicketHistoryEvent:
+          minimum: 1
+          description: Number of items per page
+        total_pages:
+          type: integer
+          minimum: 0
+          description: Total number of pages
+
+    # ── Event Schemas ──
+
+    TicketEvent:
       type: object
+      description: |
+        Audit event entity matching the `events` PostgreSQL table.
+        Every state mutation produces a TicketEvent row forming an
+        immutable audit log.
       required:
-        - event_id
+        - id
         - ticket_id
         - event_type
+        - payload
         - created_at
-        - details
       properties:
-        event_id:
+        id:
           type: string
+          format: uuid
+          description: UUID primary key
         ticket_id:
           type: string
+          description: The ticket this event relates to
         event_type:
+          $ref: '#/components/schemas/EventType'
+        agent_id:
           type: string
+          format: uuid
+          nullable: true
+          description: UUID of the agent that triggered the event
+        agent_name:
+          type: string
+          nullable: true
+          description: Human-readable agent name at event time
+        machine_id:
+          type: string
+          nullable: true
+          description: Hostname of the machine that triggered the event
+        operator:
+          type: string
+          nullable: true
+          description: Human operator who initiated the action
+        previous_stage:
+          nullable: true
+          description: SDLC stage before the transition (null for non-stage events)
+          oneOf:
+            - $ref: '#/components/schemas/TicketStage'
+            - type: 'null'
+        new_stage:
+          nullable: true
+          description: SDLC stage after the transition (null for non-stage events)
+          oneOf:
+            - $ref: '#/components/schemas/TicketStage'
+            - type: 'null'
+        previous_status:
+          nullable: true
+          description: Ticket status before the change (null for non-status events)
+          oneOf:
+            - $ref: '#/components/schemas/TicketStatus'
+            - type: 'null'
+        new_status:
+          nullable: true
+          description: Ticket status after the change (null for non-status events)
+          oneOf:
+            - $ref: '#/components/schemas/TicketStatus'
+            - type: 'null'
+        payload:
+          type: object
+          additionalProperties: true
+          description: |
+            Arbitrary JSONB data attached to the event (e.g., rejection reason,
+            lease extension details, evidence summary).
+          examples:
+            - reason: "Tests failed coverage threshold"
+              rework_count: 2
         created_at:
           type: string
           format: date-time
-        details:
-          type: object
-    TicketHistory:
+          description: ISO 8601 timestamp when the event was recorded
+
+    TicketHistoryResponse:
       type: object
+      description: Complete event log for a ticket
       required:
+        - ticket_id
         - events
+        - total
       properties:
+        ticket_id:
+          type: string
+          description: The ticket these events belong to
         events:
           type: array
           items:
-            $ref: '#/components/schemas/TicketHistoryEvent'
-    ErrorResponse:
-      type: object
-      required:
-        - status
-        - error_code
-        - message
-      properties:
-        status:
+            $ref: '#/components/schemas/TicketEvent'
+        total:
           type: integer
-        error_code:
-          type: string
-        message:
-          type: string
-        details:
-          type: object
-          nullable: true
-    HealthStatus:
+          minimum: 0
+          description: Total number of events for this ticket
+
+    # ── Request Body Schemas ──
+
+    ClaimRequest:
       type: object
+      description: Request body for claiming a ticket
       required:
-        - status
-        - timestamp
+        - agent_name
+        - machine_id
       properties:
-        status:
+        agent_name:
           type: string
-          enum: [ok, unhealthy, error]
-        timestamp:
+          description: Name of the agent claiming the ticket
+          examples:
+            - Backend Engineer
+        machine_id:
+          type: string
+          description: Hostname of the machine the agent is running on
+          examples:
+            - forgeos-dev
+        operator:
+          type: string
+          description: Human operator who initiated the claim
+          examples:
+            - reaperoak
+        lease_minutes:
+          type: integer
+          minimum: 1
+          maximum: 120
+          description: |
+            Custom lease duration in minutes. Overrides the project default.
+            Must not exceed the project's `max_lease_minutes`.
+
+    AdvanceRequest:
+      type: object
+      description: Request body for advancing a ticket to the next SDLC stage
+      required:
+        - evidence
+      properties:
+        evidence:
+          type: object
+          description: |
+            Structured evidence proving the stage's work is complete.
+            Must include artifact paths, test results, and confidence level.
+          required:
+            - artifacts
+            - test_results
+            - confidence
+          properties:
+            artifacts:
+              type: array
+              items:
+                type: string
+              description: Workspace-relative paths of files created or modified
+              examples:
+                - - docs/architecture/api/openapi-spec.yaml
+            test_results:
+              type: string
+              description: Summary of test results or "N/A" with justification
+              examples:
+                - "N/A — architecture deliverable, no runtime tests"
+            confidence:
+              type: string
+              enum:
+                - HIGH
+                - MEDIUM
+                - LOW
+              description: Agent's self-assessed confidence in the deliverable
+            notes:
+              type: string
+              description: Optional free-text notes about the work completed
+
+    ReworkRequest:
+      type: object
+      description: Request body for sending a ticket back to rework
+      required:
+        - reason
+      properties:
+        reason:
+          type: string
+          description: Human-readable explanation of why the ticket was rejected
+          examples:
+            - "Test coverage below 80% threshold (actual: 62%)"
+        evidence:
+          type: object
+          additionalProperties: true
+          description: Optional structured evidence supporting the rejection
+          examples:
+            - failing_tests:
+                - test/unit/auth.test.ts
+              coverage_actual: 62
+              coverage_required: 80
+
+    ReleaseRequest:
+      type: object
+      description: Request body for releasing a ticket claim
+      properties:
+        reason:
+          type: string
+          description: Optional reason for releasing the claim
+          examples:
+            - "Unable to complete within lease window"
+        force:
+          type: boolean
+          default: false
+          description: |
+            If true, release even if the caller is not the claim owner.
+            Requires admin permissions.
+
+    # ── Response Schemas ──
+
+    ClaimResponse:
+      type: object
+      description: Response after successfully claiming a ticket
+      required:
+        - ticket
+        - lease_expiry
+        - file_locks
+      properties:
+        ticket:
+          $ref: '#/components/schemas/Ticket'
+        lease_expiry:
           type: string
           format: date-time
-    StageList:
+          description: ISO 8601 timestamp when the lease expires
+        file_locks:
+          type: array
+          items:
+            type: string
+          description: Array of file paths that were locked for this ticket
+
+    AdvanceResponse:
       type: object
+      description: Response after successfully advancing a ticket
+      required:
+        - ticket
+        - previous_stage
+        - new_stage
+        - dependencies_unblocked
+      properties:
+        ticket:
+          $ref: '#/components/schemas/Ticket'
+        previous_stage:
+          $ref: '#/components/schemas/TicketStage'
+        new_stage:
+          $ref: '#/components/schemas/TicketStage'
+        dependencies_unblocked:
+          type: array
+          items:
+            type: string
+          description: |
+            ticket_id values whose dependencies were fully resolved
+            as a result of this advancement
+
+    ReworkResponse:
+      type: object
+      description: Response after sending a ticket to rework
+      required:
+        - ticket
+        - rework_count
+        - escalated
+        - returned_to_stage
+      properties:
+        ticket:
+          $ref: '#/components/schemas/Ticket'
+        rework_count:
+          type: integer
+          description: Updated rework count after this rejection
+        escalated:
+          type: boolean
+          description: True if the ticket was escalated (rework limit reached)
+        returned_to_stage:
+          $ref: '#/components/schemas/TicketStage'
+
+    ReleaseResponse:
+      type: object
+      description: Response after releasing a ticket claim
+      required:
+        - ticket
+        - released
+      properties:
+        ticket:
+          $ref: '#/components/schemas/Ticket'
+        released:
+          type: boolean
+          description: True if the release was successful
+
+    # ── Stage Schemas ──
+
+    StageInfo:
+      type: object
+      description: Information about a single SDLC pipeline stage
+      required:
+        - name
+        - description
+        - agent
+        - ticket_count
+      properties:
+        name:
+          $ref: '#/components/schemas/TicketStage'
+        description:
+          type: string
+          description: Human-readable description of the stage's purpose
+          examples:
+            - "Backend Engineer implements server-side logic"
+        agent:
+          type: string
+          description: The agent role responsible for this stage
+          examples:
+            - Backend Engineer
+        ticket_count:
+          type: integer
+          minimum: 0
+          description: Number of tickets currently in this stage
+
+    StageOverviewResponse:
+      type: object
+      description: Pipeline stage overview with counts and SDLC flow definitions
       required:
         - stages
+        - sdlc_flows
+        - total_tickets
       properties:
         stages:
           type: array
           items:
-            type: string
-    WebSocketTicketUpdate:
+            $ref: '#/components/schemas/StageInfo'
+          description: All pipeline stages with current ticket counts
+        sdlc_flows:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              $ref: '#/components/schemas/TicketStage'
+          description: |
+            SDLC flow definitions per ticket type. Maps each TicketType
+            to its ordered stage sequence.
+          examples:
+            - backend:
+                - READY
+                - BACKEND
+                - QA
+                - SECURITY
+                - CI
+                - DOCUMENTATION
+                - VALIDATOR
+                - DONE
+              architecture:
+                - READY
+                - ARCHITECT
+                - DOCUMENTATION
+                - VALIDATOR
+                - DONE
+        total_tickets:
+          type: integer
+          minimum: 0
+          description: Total number of tickets across all stages
+
+    # ── Health Schemas ──
+
+    HealthResponse:
       type: object
+      description: |
+        Server health status with readiness and liveness semantics.
+        - **Liveness**: Server process is running and responding (HTTP 200)
+        - **Readiness**: Server can serve traffic (database connected, migrations applied)
+      required:
+        - status
+        - timestamp
+        - uptime_seconds
+        - checks
+      properties:
+        status:
+          type: string
+          enum:
+            - healthy
+            - degraded
+            - unhealthy
+          description: |
+            Overall health status:
+            - `healthy` — All checks pass; server is fully operational
+            - `degraded` — Server is running but some checks failed (e.g., high latency)
+            - `unhealthy` — Critical checks failed (e.g., database unreachable)
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp of the health check
+        uptime_seconds:
+          type: number
+          minimum: 0
+          description: Server uptime in seconds since process start
+        version:
+          type: string
+          description: Server version string
+          examples:
+            - 1.0.0
+        checks:
+          type: object
+          description: Individual health check results
+          required:
+            - database
+            - server
+          properties:
+            database:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - up
+                    - down
+                  description: Database connectivity status
+                latency_ms:
+                  type: number
+                  minimum: 0
+                  description: Database ping latency in milliseconds
+                pool_total:
+                  type: integer
+                  description: Total connections in the pool
+                pool_idle:
+                  type: integer
+                  description: Idle connections in the pool
+                pool_waiting:
+                  type: integer
+                  description: Clients waiting for a connection
+            server:
+              type: object
+              required:
+                - status
+              properties:
+                status:
+                  type: string
+                  enum:
+                    - up
+                    - down
+                memory_usage_mb:
+                  type: number
+                  description: Server memory usage in megabytes
+                active_connections:
+                  type: integer
+                  description: Number of active HTTP connections
+
+    # ── Error Response ──
+
+    ErrorResponse:
+      type: object
+      description: |
+        Structured error response returned by all endpoints on failure.
+        Clients can switch on `error_code` for programmatic handling and
+        display `message` for human-readable context.
+      required:
+        - status
+        - error_code
+        - message
+        - timestamp
+      properties:
+        status:
+          type: integer
+          description: HTTP status code
+          examples:
+            - 404
+            - 409
+            - 401
+        error_code:
+          $ref: '#/components/schemas/ForgeOSErrorCode'
+        message:
+          type: string
+          description: Human-readable error description
+          examples:
+            - "Ticket FORGEOS-ARCH001 not found"
+        details:
+          type: object
+          additionalProperties: true
+          nullable: true
+          description: Optional additional context (e.g., conflicting file paths)
+          examples:
+            - conflicting_files:
+                - src/server.ts
+              locked_by: TASK-FOS-02-002
+        ticket_id:
+          type: string
+          nullable: true
+          description: The ticket involved in the error, if applicable
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when the error occurred
+
+    # ── WebSocket Schemas ──
+
+    WebSocketMessage:
+      type: object
+      description: |
+        Message frame sent over the WebSocket connection at `/ws/tickets`.
+        Each message represents a real-time state change in the ticket system.
       required:
         - type
-        - ticket
+        - timestamp
       properties:
         type:
           type: string
-          enum: [ticket_update, ticket_claimed, ticket_advanced, ticket_reworked, ticket_released]
+          enum:
+            - ticket_created
+            - ticket_claimed
+            - ticket_released
+            - ticket_advanced
+            - ticket_rejected
+            - ticket_updated
+            - ticket_escalated
+            - ticket_completed
+            - system_alert
+            - heartbeat
+          description: |
+            Category of the WebSocket event:
+            - `ticket_created` — New ticket was created
+            - `ticket_claimed` — Agent claimed a ticket
+            - `ticket_released` — Agent released or lease expired
+            - `ticket_advanced` — Ticket moved to next SDLC stage
+            - `ticket_rejected` — Ticket sent back to rework
+            - `ticket_updated` — Ticket metadata was updated
+            - `ticket_escalated` — Rework limit exceeded
+            - `ticket_completed` — Ticket reached terminal DONE state
+            - `system_alert` — System-level notification (e.g., database reconnect)
+            - `heartbeat` — Server liveness ping (sent every 30s)
         ticket:
           $ref: '#/components/schemas/Ticket'
+          description: |
+            The ticket involved in the event. Present for all ticket_*
+            event types. Absent for system_alert and heartbeat.
+        event:
+          $ref: '#/components/schemas/TicketEvent'
+          description: |
+            The audit event associated with this state change.
+            Present for ticket_* events.
+        previous_stage:
+          nullable: true
+          description: Previous stage (present for ticket_advanced and ticket_rejected)
+          oneOf:
+            - $ref: '#/components/schemas/TicketStage'
+            - type: 'null'
+        new_stage:
+          nullable: true
+          description: New stage (present for ticket_advanced and ticket_rejected)
+          oneOf:
+            - $ref: '#/components/schemas/TicketStage'
+            - type: 'null'
+        alert:
+          type: object
+          additionalProperties: true
+          description: Alert details (present for system_alert events)
+          properties:
+            severity:
+              type: string
+              enum:
+                - info
+                - warning
+                - error
+            message:
+              type: string
+        timestamp:
+          type: string
+          format: date-time
+          description: ISO 8601 timestamp when the event occurred
 
+    WebSocketSubscription:
+      type: object
+      description: |
+        Subscription filter sent by the client after WebSocket connection
+        to limit which events are received. If not sent, all events are streamed.
+      properties:
+        stages:
+          type: array
+          items:
+            $ref: '#/components/schemas/TicketStage'
+          description: Only receive events for tickets in these stages
+        types:
+          type: array
+          items:
+            $ref: '#/components/schemas/TicketType'
+          description: Only receive events for tickets of these types
+        ticket_ids:
+          type: array
+          items:
+            type: string
+          description: Only receive events for specific ticket IDs
+        event_types:
+          type: array
+          items:
+            type: string
+          description: Only receive specific event types
+
+# ─────────────────────────────────────────────
+# Paths
+# ─────────────────────────────────────────────
 paths:
+
+  # ── Ticket List ──
   /tickets:
     get:
       summary: List tickets
-      description: List tickets with optional filters and pagination.
+      description: |
+        Retrieve a paginated list of tickets with optional filters.
+        Supports filtering by stage, type, priority, status, and claiming agent.
+        Results are ordered by priority (critical first), then by creation date.
       operationId: listTickets
+      tags:
+        - Tickets
       security:
         - BearerAuth: []
+        - ApiKeyAuth: []
       parameters:
-        - $ref: '#/components/parameters/Stage'
-        - $ref: '#/components/parameters/Type'
-        - $ref: '#/components/parameters/Priority'
-        - $ref: '#/components/parameters/ClaimedBy'
+        - $ref: '#/components/parameters/StageFilter'
+        - $ref: '#/components/parameters/TypeFilter'
+        - $ref: '#/components/parameters/PriorityFilter'
+        - $ref: '#/components/parameters/StatusFilter'
+        - $ref: '#/components/parameters/ClaimedByFilter'
         - $ref: '#/components/parameters/Page'
         - $ref: '#/components/parameters/PageSize'
       responses:
         '200':
-          description: List of tickets
+          description: Paginated list of tickets matching the filter criteria
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TicketList'
+                $ref: '#/components/schemas/TicketListResponse'
+              examples:
+                default:
+                  summary: Tickets in BACKEND stage
+                  value:
+                    tickets:
+                      - id: 550e8400-e29b-41d4-a716-446655440000
+                        ticket_id: TASK-FOS-02-002
+                        project_id: null
+                        title: Implement MCP Server Core
+                        description: null
+                        type: backend
+                        priority: high
+                        status: CLAIMED
+                        stage: BACKEND
+                        sdlc_flow:
+                          - READY
+                          - BACKEND
+                          - QA
+                          - SECURITY
+                          - CI
+                          - DOCUMENTATION
+                          - VALIDATOR
+                          - DONE
+                        claimed_by: 660e8400-e29b-41d4-a716-446655440001
+                        claimed_by_name: Backend Engineer
+                        machine_id: forgeos-dev
+                        operator: reaperoak
+                        lease_expiry: "2026-03-07T08:30:00Z"
+                        lease_duration_minutes: 30
+                        depends_on:
+                          - FORGEOS-ARCH001
+                        file_paths:
+                          - forgeos-server/src/server.ts
+                        acceptance_criteria:
+                          - MCP server starts and accepts connections
+                        tags:
+                          - backend
+                          - phase2
+                        rework_count: 0
+                        max_reworks: 3
+                        metadata: {}
+                        parent_id: null
+                        source_task_file: TODO/tasks/phase2-mcp-server.md
+                        created_at: "2026-03-05T17:51:09Z"
+                        updated_at: "2026-03-06T12:00:00Z"
+                        completed_at: null
+                    total: 1
+                    page: 1
+                    page_size: 20
+                    total_pages: 1
         '401':
-          description: Unauthorized
+          description: Authentication required
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    status: 401
+                    error_code: UNAUTHORIZED
+                    message: "Missing or invalid authentication credentials"
+                    details: null
+                    timestamp: "2026-03-07T08:00:00Z"
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+              description: Seconds until the rate limit resets
+
+  # ── Get Ticket ──
   /tickets/{id}:
     get:
       summary: Get ticket by ID
-      description: Retrieve a single ticket by its ID.
+      description: |
+        Retrieve a single ticket by its human-readable ticket_id.
+        Returns the full ticket object including all metadata.
       operationId: getTicket
+      tags:
+        - Tickets
       security:
         - BearerAuth: []
+        - ApiKeyAuth: []
       parameters:
         - $ref: '#/components/parameters/TicketId'
       responses:
@@ -288,25 +1232,46 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Ticket'
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Ticket not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                not_found:
+                  value:
+                    status: 404
+                    error_code: TICKET_NOT_FOUND
+                    message: "Ticket FORGEOS-NONEXIST not found"
+                    ticket_id: FORGEOS-NONEXIST
+                    timestamp: "2026-03-07T08:00:00Z"
+
+  # ── Claim Ticket ──
   /tickets/{id}/claim:
     post:
       summary: Claim a ticket
-      description: Atomically claim a ticket for an agent and machine.
+      description: |
+        Atomically claim a ticket for an agent and machine. Acquires file
+        locks for all paths in the ticket's `file_paths` array and sets
+        a lease expiry.
+
+        The ticket must be in `READY` status. If already claimed by another
+        agent, returns 409 Conflict.
+
+        This is the REST equivalent of the MCP `tickets.claim` tool.
       operationId: claimTicket
+      tags:
+        - Tickets
       security:
         - BearerAuth: []
+        - ApiKeyAuth: []
       parameters:
         - $ref: '#/components/parameters/TicketId'
       requestBody:
@@ -314,44 +1279,83 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - agent_name
-                - machine_id
-                - operator
-              properties:
-                agent_name:
-                  type: string
-                machine_id:
-                  type: string
-                operator:
-                  type: string
+              $ref: '#/components/schemas/ClaimRequest'
+            examples:
+              default:
+                value:
+                  agent_name: Backend Engineer
+                  machine_id: forgeos-dev
+                  operator: reaperoak
+                  lease_minutes: 30
       responses:
         '200':
-          description: Ticket claimed
+          description: Ticket claimed successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Ticket'
-        '409':
-          description: Ticket already claimed
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ClaimResponse'
         '401':
-          description: Unauthorized
+          description: Authentication required
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Ticket not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Ticket already claimed or file conflict
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                already_claimed:
+                  value:
+                    status: 409
+                    error_code: ALREADY_CLAIMED
+                    message: "Ticket TASK-FOS-02-002 is already claimed by Backend Engineer"
+                    ticket_id: TASK-FOS-02-002
+                    details:
+                      claimed_by: Backend Engineer
+                      lease_expiry: "2026-03-07T08:30:00Z"
+                    timestamp: "2026-03-07T08:00:00Z"
+                file_conflict:
+                  value:
+                    status: 409
+                    error_code: FILE_CONFLICT
+                    message: "File src/server.ts is locked by ticket TASK-FOS-02-002"
+                    ticket_id: TASK-FOS-02-002
+                    details:
+                      conflicting_files:
+                        - src/server.ts
+                      locked_by: TASK-FOS-02-002
+                    timestamp: "2026-03-07T08:00:00Z"
+
+  # ── Advance Ticket ──
   /tickets/{id}/advance:
     post:
       summary: Advance ticket to next stage
-      description: Advance a ticket to the next SDLC stage.
+      description: |
+        Marks the current SDLC stage as complete and advances the ticket
+        to the next stage in its `sdlc_flow`. Requires structured evidence
+        documenting what was accomplished.
+
+        The caller must own the claim on this ticket. Advancing the ticket
+        releases the current claim and file locks, allowing the next
+        stage's agent to pick it up.
+
+        If the ticket reaches the terminal `DONE` stage, any downstream
+        tickets whose dependencies are now fully resolved will be unblocked.
       operationId: advanceTicket
+      tags:
+        - Tickets
       security:
         - BearerAuth: []
+        - ApiKeyAuth: []
       parameters:
         - $ref: '#/components/parameters/TicketId'
       requestBody:
@@ -359,39 +1363,90 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - evidence
-              properties:
-                evidence:
-                  type: object
-                  description: Evidence for stage completion
+              $ref: '#/components/schemas/AdvanceRequest'
+            examples:
+              default:
+                value:
+                  evidence:
+                    artifacts:
+                      - docs/architecture/api/openapi-spec.yaml
+                    test_results: "N/A — architecture deliverable"
+                    confidence: HIGH
+                    notes: "Complete OpenAPI 3.1 spec with all endpoints"
       responses:
         '200':
-          description: Ticket advanced
+          description: Ticket advanced successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Ticket'
-        '409':
-          description: Ticket not in correct state
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/AdvanceResponse'
         '401':
-          description: Unauthorized
+          description: Authentication required
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Ticket not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Invalid state for advancement
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                not_owner:
+                  value:
+                    status: 409
+                    error_code: NOT_CLAIM_OWNER
+                    message: "You do not own the claim on ticket TASK-FOS-02-002"
+                    ticket_id: TASK-FOS-02-002
+                    timestamp: "2026-03-07T08:00:00Z"
+                missing_evidence:
+                  value:
+                    status: 409
+                    error_code: MISSING_EVIDENCE
+                    message: "Completion evidence is required to advance"
+                    ticket_id: TASK-FOS-02-002
+                    timestamp: "2026-03-07T08:00:00Z"
+        '422':
+          description: Invalid transition
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                invalid_transition:
+                  value:
+                    status: 422
+                    error_code: INVALID_TRANSITION
+                    message: "Cannot advance from QA to DOCUMENTATION; next stage is SECURITY"
+                    ticket_id: TASK-FOS-02-002
+                    timestamp: "2026-03-07T08:00:00Z"
+
+  # ── Rework Ticket ──
   /tickets/{id}/rework:
     post:
       summary: Send ticket to rework
-      description: Mark a ticket as requiring rework, with reason.
+      description: |
+        Sends a ticket back to its implementation stage for rework.
+        Requires a reason explaining the rejection.
+
+        If the ticket's `rework_count` reaches `max_reworks`, the ticket
+        is automatically escalated to `ESCALATED` status instead of
+        being reworked, requiring human intervention.
+
+        Only QA, Security, CI, and Validator agents typically reject tickets.
       operationId: reworkTicket
+      tags:
+        - Tickets
       security:
         - BearerAuth: []
+        - ApiKeyAuth: []
       parameters:
         - $ref: '#/components/parameters/TicketId'
       requestBody:
@@ -399,77 +1454,147 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - reason
-              properties:
-                reason:
-                  type: string
+              $ref: '#/components/schemas/ReworkRequest'
+            examples:
+              default:
+                value:
+                  reason: "Test coverage below 80% threshold (actual: 62%)"
+                  evidence:
+                    failing_tests:
+                      - test/unit/auth.test.ts
+                    coverage_actual: 62
+                    coverage_required: 80
       responses:
         '200':
-          description: Ticket marked for rework
+          description: Ticket sent to rework (or escalated)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Ticket'
-        '409':
-          description: Ticket not in correct state
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ReworkResponse'
+              examples:
+                reworked:
+                  summary: Ticket returned for rework
+                  value:
+                    ticket:
+                      ticket_id: TASK-FOS-02-002
+                      status: READY
+                      stage: BACKEND
+                      rework_count: 1
+                    rework_count: 1
+                    escalated: false
+                    returned_to_stage: BACKEND
+                escalated:
+                  summary: Rework limit reached — ticket escalated
+                  value:
+                    ticket:
+                      ticket_id: TASK-FOS-02-002
+                      status: ESCALATED
+                      rework_count: 3
+                    rework_count: 3
+                    escalated: true
+                    returned_to_stage: BACKEND
         '401':
-          description: Unauthorized
+          description: Authentication required
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Ticket not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Ticket not in correct state for rework
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  # ── Release Ticket ──
   /tickets/{id}/release:
     post:
       summary: Release a claimed ticket
-      description: Release a ticket claim (forcibly or voluntarily).
+      description: |
+        Releases a claim on a ticket, freeing it for other agents.
+        Releases all file locks held by this ticket.
+
+        An admin can force-release tickets owned by other agents by
+        setting `force: true` in the request body.
+
+        If no request body is provided, the claim is released voluntarily.
       operationId: releaseTicket
+      tags:
+        - Tickets
       security:
         - BearerAuth: []
+        - ApiKeyAuth: []
       parameters:
         - $ref: '#/components/parameters/TicketId'
       requestBody:
-        required: true
+        required: false
         content:
           application/json:
             schema:
-              type: object
-              required:
-                - reason
-              properties:
-                reason:
-                  type: string
+              $ref: '#/components/schemas/ReleaseRequest'
+            examples:
+              voluntary:
+                value:
+                  reason: "Unable to complete within lease window"
+              forced:
+                summary: Admin force-release
+                value:
+                  reason: "Agent appears stuck — admin cleanup"
+                  force: true
       responses:
         '200':
-          description: Ticket released
+          description: Ticket released successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Ticket'
-        '409':
-          description: Ticket not in correct state
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: '#/components/schemas/ReleaseResponse'
         '401':
-          description: Unauthorized
+          description: Authentication required
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+        '404':
+          description: Ticket not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '409':
+          description: Ticket not claimed or not owned by caller
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              examples:
+                not_owner:
+                  value:
+                    status: 409
+                    error_code: NOT_CLAIM_OWNER
+                    message: "You do not own the claim on ticket TASK-FOS-02-002"
+                    ticket_id: TASK-FOS-02-002
+                    timestamp: "2026-03-07T08:00:00Z"
+
+  # ── Ticket History ──
   /tickets/{id}/history:
     get:
       summary: Get ticket event history
-      description: Retrieve the event log for a ticket.
+      description: |
+        Retrieve the complete event log for a ticket, ordered chronologically.
+        Returns all audit events (claims, advances, rejections, releases, etc.)
+        that have occurred for this ticket.
       operationId: getTicketHistory
+      tags:
+        - Tickets
       security:
         - BearerAuth: []
+        - ApiKeyAuth: []
       parameters:
         - $ref: '#/components/parameters/TicketId'
       responses:
@@ -478,62 +1603,297 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/TicketHistory'
+                $ref: '#/components/schemas/TicketHistoryResponse'
+              examples:
+                default:
+                  value:
+                    ticket_id: TASK-FOS-02-002
+                    events:
+                      - id: 770e8400-e29b-41d4-a716-446655440010
+                        ticket_id: TASK-FOS-02-002
+                        event_type: CREATED
+                        agent_id: null
+                        agent_name: TODO
+                        machine_id: system
+                        operator: null
+                        previous_stage: null
+                        new_stage: READY
+                        previous_status: null
+                        new_status: BLOCKED
+                        payload:
+                          source: TODO/tasks/phase2-mcp-server.md
+                        created_at: "2026-03-05T17:51:09Z"
+                      - id: 770e8400-e29b-41d4-a716-446655440011
+                        ticket_id: TASK-FOS-02-002
+                        event_type: CLAIMED
+                        agent_id: 660e8400-e29b-41d4-a716-446655440001
+                        agent_name: Backend Engineer
+                        machine_id: forgeos-dev
+                        operator: reaperoak
+                        previous_stage: READY
+                        new_stage: BACKEND
+                        previous_status: READY
+                        new_status: CLAIMED
+                        payload:
+                          lease_expiry: "2026-03-06T12:30:00Z"
+                        created_at: "2026-03-06T12:00:00Z"
+                    total: 2
+        '401':
+          description: Authentication required
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
         '404':
           description: Ticket not found
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-        '401':
-          description: Unauthorized
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
+
+  # ── Pipeline Stages ──
   /stages:
     get:
-      summary: List pipeline stages
-      description: Retrieve the list of SDLC pipeline stages.
+      summary: Pipeline stage overview
+      description: |
+        Retrieve the list of all SDLC pipeline stages with current ticket
+        counts and the SDLC flow definitions per ticket type.
+
+        This endpoint provides the data needed for the dashboard's
+        pipeline visualization — a Kanban-style view of tickets moving
+        through stages.
       operationId: listStages
+      tags:
+        - Stages
       security:
         - BearerAuth: []
+        - ApiKeyAuth: []
       responses:
         '200':
-          description: List of pipeline stages
+          description: Pipeline stage overview
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/StageList'
+                $ref: '#/components/schemas/StageOverviewResponse'
+              examples:
+                default:
+                  value:
+                    stages:
+                      - name: READY
+                        description: Unblocked tickets available for claim
+                        agent: System
+                        ticket_count: 5
+                      - name: BACKEND
+                        description: Server-side implementation in progress
+                        agent: Backend Engineer
+                        ticket_count: 2
+                      - name: QA
+                        description: Test verification in progress
+                        agent: QA Engineer
+                        ticket_count: 1
+                      - name: DONE
+                        description: Lifecycle complete
+                        agent: System
+                        ticket_count: 12
+                    sdlc_flows:
+                      backend:
+                        - READY
+                        - BACKEND
+                        - QA
+                        - SECURITY
+                        - CI
+                        - DOCUMENTATION
+                        - VALIDATOR
+                        - DONE
+                      frontend:
+                        - READY
+                        - UI_DESIGN
+                        - FRONTEND
+                        - QA
+                        - SECURITY
+                        - CI
+                        - DOCUMENTATION
+                        - VALIDATOR
+                        - DONE
+                    total_tickets: 20
         '401':
-          description: Unauthorized
+          description: Authentication required
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
+
+  # ── Health Check ──
   /health:
     get:
       summary: Health check
-      description: Readiness and liveness probe for ForgeOS server and database.
+      description: |
+        Combined readiness and liveness probe for the ForgeOS server.
+
+        **Liveness**: Returns HTTP 200 if the server process is running
+        and responding. Use for container liveness probes.
+
+        **Readiness**: Returns HTTP 200 with `status: healthy` if the
+        server can serve traffic (database connected, migrations applied,
+        connection pool available). Returns HTTP 503 with `status: unhealthy`
+        if the server cannot serve traffic. Use for container readiness probes
+        and load balancer health checks.
+
+        This endpoint does NOT require authentication.
       operationId: healthCheck
+      tags:
+        - Health
+      security: []
       responses:
         '200':
-          description: Server is healthy
+          description: Server is healthy and ready to serve traffic
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthStatus'
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                healthy:
+                  value:
+                    status: healthy
+                    timestamp: "2026-03-07T08:00:00Z"
+                    uptime_seconds: 86400
+                    version: 1.0.0
+                    checks:
+                      database:
+                        status: up
+                        latency_ms: 2.3
+                        pool_total: 10
+                        pool_idle: 8
+                        pool_waiting: 0
+                      server:
+                        status: up
+                        memory_usage_mb: 128.5
+                        active_connections: 3
+                degraded:
+                  summary: Server running but database slow
+                  value:
+                    status: degraded
+                    timestamp: "2026-03-07T08:00:00Z"
+                    uptime_seconds: 86400
+                    version: 1.0.0
+                    checks:
+                      database:
+                        status: up
+                        latency_ms: 450.0
+                        pool_total: 10
+                        pool_idle: 0
+                        pool_waiting: 5
+                      server:
+                        status: up
+                        memory_usage_mb: 256.0
+                        active_connections: 15
         '503':
-          description: Server is unhealthy
+          description: Server is unhealthy — not ready to serve traffic
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/HealthStatus'
+                $ref: '#/components/schemas/HealthResponse'
+              examples:
+                unhealthy:
+                  value:
+                    status: unhealthy
+                    timestamp: "2026-03-07T08:00:00Z"
+                    uptime_seconds: 30
+                    version: 1.0.0
+                    checks:
+                      database:
+                        status: down
+                      server:
+                        status: up
+                        memory_usage_mb: 64.0
+                        active_connections: 0
+
+  # ── WebSocket ──
   /ws/tickets:
     get:
       summary: WebSocket for real-time ticket updates
-      description: WebSocket endpoint for streaming ticket state changes. Sends `WebSocketTicketUpdate` messages on ticket claim, advance, rework, or release.
+      description: |
+        WebSocket endpoint for streaming real-time ticket state changes.
+
+        ## Connection
+
+        Clients initiate a WebSocket upgrade request to this endpoint.
+        Authentication is required via the `Sec-WebSocket-Protocol` header
+        or a `token` query parameter.
+
+        ```
+        GET /api/ws/tickets?token=<bearer-token>
+        Connection: Upgrade
+        Upgrade: websocket
+        ```
+
+        ## Message Format
+
+        All messages are JSON-encoded `WebSocketMessage` objects. The server
+        sends events whenever ticket state changes occur (claims, advances,
+        rejections, releases, completions).
+
+        ## Subscription Filtering
+
+        After connection, clients may send a `WebSocketSubscription` message
+        to filter which events they receive. If no subscription is sent,
+        all events are streamed.
+
+        ## Heartbeat
+
+        The server sends a `heartbeat` message every 30 seconds to maintain
+        the connection. Clients that do not receive a heartbeat within 60
+        seconds should assume the connection is lost and reconnect.
+
+        ## Reconnection
+
+        Clients should implement exponential backoff reconnection with a
+        maximum interval of 30 seconds. On reconnect, re-send the
+        subscription filter.
+
+        ## Message Types
+
+        | Type | Description | Ticket Present | Event Present |
+        |------|-------------|:-:|:-:|
+        | `ticket_created` | New ticket was created | Yes | Yes |
+        | `ticket_claimed` | Agent claimed a ticket | Yes | Yes |
+        | `ticket_released` | Agent released or lease expired | Yes | Yes |
+        | `ticket_advanced` | Ticket moved to next stage | Yes | Yes |
+        | `ticket_rejected` | Ticket sent back to rework | Yes | Yes |
+        | `ticket_updated` | Ticket metadata updated | Yes | Yes |
+        | `ticket_escalated` | Rework limit exceeded | Yes | Yes |
+        | `ticket_completed` | Ticket reached DONE | Yes | Yes |
+        | `system_alert` | System notification | No | No |
+        | `heartbeat` | Server liveness ping | No | No |
       operationId: wsTickets
+      tags:
+        - WebSocket
+      parameters:
+        - name: token
+          in: query
+          required: false
+          schema:
+            type: string
+          description: |
+            Bearer token for WebSocket authentication (alternative to
+            Sec-WebSocket-Protocol header)
       responses:
         '101':
-          description: Switching Protocols (WebSocket upgrade)
+          description: |
+            Switching Protocols — WebSocket connection established.
+            Server will begin streaming `WebSocketMessage` frames.
+          headers:
+            Upgrade:
+              schema:
+                type: string
+                const: websocket
+            Connection:
+              schema:
+                type: string
+                const: Upgrade
+        '401':
+          description: Authentication failed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
