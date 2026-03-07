@@ -1128,3 +1128,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/db/seed.ts, forgeos-server/src/db/import.ts, forgeos-server/scripts/import-tickets.ts, forgeos-server/src/db/index.ts
 - **Decisions:** SHA-256 for API key hashing (high-entropy tokens, bcrypt unnecessary). Stage mapping DOCS→DOCUMENTATION, VALIDATION→VALIDATOR for DB enum compatibility. SELECT-before-INSERT for event idempotency (no unique constraint on events table). Barrel exports added to db/index.ts.
 - **Timestamp:** 2026-03-07T13:48:00Z
+
+### [TASK-FOS-05-002] — SSE Endpoint for Real-Time Updates
+- **Artifacts:** forgeos-server/src/api/routes/events.ts, forgeos-server/src/api/routes/tickets.ts, forgeos-server/src/api/routes/stages.ts, forgeos-server/src/api/index.ts
+- **Decisions:** Dedicated PG client for LISTEN (not released to pool) with auto-reconnect on error. SSE keepalive heartbeat every 30s. Events endpoint has no auth middleware (optionally authenticated); REST endpoints require auth. Zod validation on query params. Named SSE events (event: ticket-update) with JSON data payloads.
+- **Timestamp:** 2026-03-07T13:53:42Z
