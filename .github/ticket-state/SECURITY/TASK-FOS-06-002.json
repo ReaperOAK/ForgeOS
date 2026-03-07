@@ -4,7 +4,7 @@
   "description": "Create a pre-commit hook that validates the blast radius of staged files against the ticket's declared file_paths scope as specified in Architecture \u00a77.5 and PRD FR-20. The hook extracts the ticket ID from the most recent commit message (or from a FORGEOS_TICKET_ID environment variable), queries the MCP server's REST API (GET /api/tickets/:id) to get the ticket's file_paths, then checks each staged file against the allowed paths using prefix matching. Files outside the ticket's scope cause the commit to be rejected. If the MCP server is unreachable, the hook warns but allows the commit (graceful degradation).",
   "type": "infra",
   "priority": "medium",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -36,10 +36,10 @@
     "--no-verify bypass available for emergency commits"
   ],
   "rework_count": 0,
-  "claimed_by": "QA",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-07T15:04:31.106196+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -76,6 +76,15 @@
       "agent": "QA",
       "machine_id": "pop-os",
       "details": "Claimed by QA for QA stage"
+    },
+    {
+      "timestamp": "2026-03-07T14:38:58.975438+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tickets/06-git-integration.md",
