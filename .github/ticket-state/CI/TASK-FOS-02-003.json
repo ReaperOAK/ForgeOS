@@ -38,9 +38,9 @@
   ],
   "rework_count": 0,
   "claimed_by": "CIReviewer",
-  "machine_id": "ForgeOS-dev",
-  "operator": "Owais",
-  "lease_expiry": "2026-03-07T10:15:00Z",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-07T13:27:06Z",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -101,8 +101,13 @@
       "machine_id": "ForgeOS-dev",
       "from_stage": "SECURITY",
       "to_stage": "CI",
-      "details": "SECURITY PASS — 0 critical/high, 1 medium (risk accepted), 2 low. Advanced to CI."
-    }
+      "details": "SECURITY PASS — 0 critical/high, 1 medium (risk accepted), 2 low. Advanced to CI."    },
+    {
+      "timestamp": "2026-03-07T12:57:06Z",
+      "event": "CLAIMED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "details": "Claimed by CIReviewer on pop-os (ReaperOAK)"    }
   ],
   "source_task_file": "TODO/tickets/02-mcp-server-core.md",
   "tags": []
