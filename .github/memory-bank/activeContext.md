@@ -1108,3 +1108,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/architecture/api/error-catalog.md
 - **Decisions:** 20 error codes in 6 categories (claim, state, validation, auth, rate_limit, system). Offset-based pagination (bounded dataset < 10k). Token bucket rate limiting (burst-friendly for agent patterns). Numeric+string dual error codes (strings authoritative in API). 24-hour idempotency key TTL in PostgreSQL. Bracket syntax for filter operators.
 - **Timestamp:** 2026-03-07T18:30:00Z
+
+### [FORGEOS-BE015] — Initialize MCP Server with Python SDK
+- **Artifacts:** mcp-server/src/mcp_server/server.py, mcp-server/src/mcp_server/__init__.py, mcp-server/src/mcp_server/__main__.py, mcp-server/pyproject.toml, mcp-server/tests/test_server.py
+- **Decisions:** FastMCP high-level API over low-level Server for decorator-based tool registration. Streamable HTTP transport in stateless mode for horizontal scaling. Pydantic Settings for env-var config with FORGEOS_ prefix. Graceful DB degradation (server starts without DB). Host/port set via FastMCP constructor + settings override in main().
+- **Timestamp:** 2026-03-07T13:25:00Z
