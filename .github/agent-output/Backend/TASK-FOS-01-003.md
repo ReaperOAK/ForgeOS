@@ -1,53 +1,69 @@
-# TASK-FOS-01-003 — BACKEND Complete
+# TASK-FOS-01-003 — BACKEND Rework #1 Complete
 
 ## Summary
 
-Implemented seed data script, filesystem ticket import tool, and CLI entry point for the ForgeOS server database. All three deliverables are complete with comprehensive test coverage.
+Rework triggered by Validator rejection: DoD #6 (Documentation) failed. README
+was missing `seed.ts` and `import.ts` from the architecture tree, had no
+Seed & Import section, and CHANGELOG had no entry for this ticket.
+
+All code was already passing (21/21 tests, 0 TypeScript errors). This rework
+addresses documentation-only deficiencies.
+
+## Remediation Applied
+
+| # | Issue | Fix |
+|---|-------|-----|
+| 1 | Architecture tree missing seed.ts and import.ts | Added `seed.ts` and `import.ts` entries under `db/` in the tree; updated `index.ts` description to mention seed/import |
+| 2 | No Seed & Import section in README | Added full "Seed & Import" section with subsections for Seed, Import, CLI usage (3 invocation examples), and Programmatic API |
+| 3 | No scripts tree in Architecture | Added `### Scripts` subsection showing `scripts/import-tickets.ts` |
+| 4 | No CHANGELOG entry | Added entry under `[Unreleased] > Added` describing the full bootstrapping pipeline |
 
 ## Artifacts
 
-### Created/Modified Files
+### Modified Files
 
 | File | Action | Description |
 |------|--------|-------------|
-| `forgeos-server/src/db/seed.ts` | Created | Seed script: upserts default "ForgeOS" project with repo URL and lease settings, creates admin agent with generated API key (SHA-256 hashed, plaintext printed once to stdout) |
-| `forgeos-server/src/db/import.ts` | Created | Filesystem import tool: reads `.github/tickets/*.json`, derives stage from `ticket-state/` directories, upserts tickets with ON CONFLICT DO UPDATE, preserves history as events, produces summary |
-| `forgeos-server/scripts/import-tickets.ts` | Created | CLI entry point: runs migrations → seed → import in sequence, supports workspace path arg and env var |
-| `forgeos-server/src/db/index.ts` | Modified | Added barrel exports for `seed`, `SeedResult`, `importTickets`, `ImportSummary` |
-| `forgeos-server/src/__tests__/db/seed.test.ts` | Created | 6 unit tests for seed script |
-| `forgeos-server/src/__tests__/db/import.test.ts` | Created | 15 unit tests for import tool |
+| `forgeos-server/README.md` | Updated | Architecture tree: added seed.ts, import.ts under db/; added Scripts subsection; added Seed & Import section with CLI docs and programmatic API |
+| `CHANGELOG.md` | Updated | Added TASK-FOS-01-003 entry under [Unreleased] > Added |
 
-### Test Results
+### Unchanged Files (from original implementation)
 
-- **21 tests passing** (6 seed + 15 import)
-- **TypeScript typecheck**: zero errors
-- **Coverage areas**: project creation, API key generation, idempotent upserts, stage derivation from filesystem, SDLC flow mapping, history event preservation, error handling, summary output
+| File | Status |
+|------|--------|
+| `forgeos-server/src/db/seed.ts` | ✅ Unchanged, 6 tests pass |
+| `forgeos-server/src/db/import.ts` | ✅ Unchanged, 15 tests pass |
+| `forgeos-server/scripts/import-tickets.ts` | ✅ Unchanged |
+| `forgeos-server/src/db/index.ts` | ✅ Unchanged, barrel exports intact |
+
+## Test Results
+
+- **21/21 tests passing** (6 seed + 15 import)
+- **0 TypeScript errors** in ticket scope files
+- Pre-existing failures (64) in other tickets' source-analysis tests — unrelated to this ticket
 
 ## Acceptance Criteria Verification
 
-| # | Criterion | Status | Evidence |
-|---|-----------|--------|----------|
-| 1 | seed.ts creates default "ForgeOS" project with repo_url and lease settings | ✅ MET | `seed.ts` L84-108: ON CONFLICT upsert with project name, repo_url, default/max lease |
-| 2 | seed.ts creates admin agent with generated API key printed once to stdout | ✅ MET | `seed.ts` L110-160: generateApiKey() + hashApiKey() + process.stdout.write (one-time) |
-| 3 | import.ts reads all .github/tickets/*.json files excluding ticket-schema.json | ✅ MET | `import.ts` L278-283: readdirSync filter with EXCLUDED_FILES set |
-| 4 | Import derives current stage from .github/ticket-state/ directory location | ✅ MET | `import.ts` L151-183: deriveStageFromFilesystem() scans STAGE_DIRECTORIES |
-| 5 | Import preserves history array as events in events table | ✅ MET | `import.ts` L440-510: importHistoryEvents() with duplicate check |
-| 6 | Import is idempotent — uses ON CONFLICT (ticket_id) DO UPDATE | ✅ MET | `import.ts` L340-380: ON CONFLICT (ticket_id) DO UPDATE SET ... |
-| 7 | Import produces summary {success, errors, skipped} printed to stdout | ✅ MET | `import.ts` L420-430: process.stdout.write summary block |
-| 8 | scripts/import-tickets.ts is CLI entry point running seed + import in sequence | ✅ MET | `import-tickets.ts` L55-95: migrations → seed → importTickets |
+| # | Criterion | Status |
+|---|-----------|--------|
+| 1 | seed.ts creates default "ForgeOS" project with repo_url and lease settings | ✅ MET |
+| 2 | seed.ts creates admin agent with generated API key printed once to stdout | ✅ MET |
+| 3 | import.ts reads all .github/tickets/*.json files excluding ticket-schema.json | ✅ MET |
+| 4 | Import derives current stage from .github/ticket-state/ directory location | ✅ MET |
+| 5 | Import preserves history array as events in events table | ✅ MET |
+| 6 | Import is idempotent — uses ON CONFLICT (ticket_id) DO UPDATE | ✅ MET |
+| 7 | Import produces summary {success, errors, skipped} printed to stdout | ✅ MET |
+| 8 | scripts/import-tickets.ts is CLI entry point running seed + import in sequence | ✅ MET |
 
-## TDD Evidence
+## DoD Rework Verification
 
-- RED: Tests written first with mock database (vi.fn()) and mock filesystem
-- GREEN: Implementation satisfies all test assertions
-- REFACTOR: Clean separation — helpers, constants, typed interfaces, proper error boundaries
+| # | DoD Item | Status |
+|---|----------|--------|
+| 6 | Docs updated | ✅ FIXED — README architecture tree, Seed & Import section, CLI docs, CHANGELOG entry |
 
-## Decisions
+## Confidence
 
-- Used SHA-256 for API key hashing (not bcrypt) since keys are high-entropy random tokens
-- Stage mapping: DOCS→DOCUMENTATION, VALIDATION→VALIDATOR to match DB enum
-- History events use SELECT-before-INSERT for idempotency (no unique constraint on events table)
-- Fallback priority defaulting to 'medium' for unrecognized priority values
+**HIGH** — Documentation-only rework. All code unchanged. All 21 tests pass.
 
 ## Confidence
 
