@@ -121,13 +121,13 @@
       "details": "Claimed by reaperoak@pop-os via QA Engineer, lease until 2026-03-07T07:49:49+00:00"
     },
     {
-      "timestamp": "2026-03-07T07:23:01+00:00",
+      "timestamp": "2026-03-07T07:23:01.793192+00:00",
       "event": "STAGE_COMPLETED",
       "agent": "QA Engineer",
-      "machine_id": "pop-os",
+      "machine_id": "system",
       "from_stage": "QA",
       "to_stage": "SECURITY",
-      "details": "QA PASS — Advanced from QA to SECURITY"
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tickets/08-infrastructure.md",
