@@ -41,10 +41,10 @@
     "Health endpoint (/health) is exempt from authentication"
   ],
   "rework_count": 1,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Backend",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-07T15:52:31.072717+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -97,6 +97,13 @@
       "from_stage": "QA",
       "to_stage": "BACKEND",
       "details": "Rework #1: REJECT: Backend WORK commit never pushed. Auth middleware is still a pass-through stub (just calls next()). keys.ts and roles.ts exist locally but are untracked in git. 19/21 middleware tests fail. 0/9 acceptance criteria met. Two-commit protocol violated. See .github/agent-output/QA/TASK-FOS-04-001.md for full report."
+    },
+    {
+      "timestamp": "2026-03-07T15:22:31.072717+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "CLAIM by Backend on pop-os (ReaperOAK) \u2014 rework #1"
     }
   ],
   "source_task_file": "TODO/tickets/04-auth-security.md",
