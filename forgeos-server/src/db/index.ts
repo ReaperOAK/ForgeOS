@@ -21,6 +21,10 @@ export {
 
 export { runMigrations } from './migrate.js';
 
+export { seed, type SeedResult } from './seed.js';
+
+export { importTickets, type ImportSummary } from './import.js';
+
 export {
   acquireFileLocks,
   checkFileConflicts,
