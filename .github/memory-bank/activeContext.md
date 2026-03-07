@@ -1476,6 +1476,11 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** Root-level Makefile with dev compose overlay by default. Container-based migrate/seed to avoid local DB dependency. Graceful degradation for optional lint/format tools. 20+ targets covering full dev lifecycle.
 - **Timestamp:** 2026-03-07T23:30:00Z
 
+### [FORGEOS-DO007] — Backend (DevOps) Summary
+- **Artifacts:** infra/scripts/backup.sh, infra/scripts/restore.sh, infra/Makefile, infra/backups/.gitignore, docs/operations/backup-strategy.md
+- **Decisions:** Custom pg_dump format as default (supports selective/parallel restore); SHA-256 metadata sidecar for integrity verification; confirmation gate requires typing DB name; file-age-based retention rotation
+- **Timestamp:** 2026-03-07T23:05:00Z
+
 ### [TASK-FOS-06-002] — CI Review
 - **Artifacts:** .github/agent-output/CIReviewer/TASK-FOS-06-002.md
 - **Decisions:** PASS — Score 98/100, 0 critical, 0 warnings, 2 suggestions (SC2317 unused error() function, nested for-loop indentation). ShellCheck clean (0 errors, 0 warnings). All complexity thresholds met. QA PASS and Security PASS confirmed upstream.

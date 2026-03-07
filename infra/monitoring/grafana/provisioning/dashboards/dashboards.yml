@@ -1,0 +1,22 @@
+# =============================================================================
+# ForgeOS — Grafana Dashboard Provisioning
+# =============================================================================
+# Auto-loads dashboard JSON files from the provisioned directory.
+#
+# Ticket:  FORGEOS-DO008
+# Author:  DevOps Engineer
+# Date:    2026-03-07
+# =============================================================================
+
+apiVersion: 1
+
+providers:
+  - name: "ForgeOS"
+    orgId: 1
+    folder: "ForgeOS"
+    type: file
+    disableDeletion: false
+    editable: true
+    options:
+      path: /etc/grafana/provisioning/dashboards/json
+      foldersFromFilesStructure: false
