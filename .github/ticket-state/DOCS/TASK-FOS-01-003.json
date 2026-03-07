@@ -4,7 +4,7 @@
   "description": "Build a seed script that populates the database with initial data: default project entry, system configuration defaults, and an admin agent with a generated API key. Build an import tool that reads existing .github/tickets/*.json files and .github/ticket-state/ directory structure, maps directory location to current stage, preserves ticket history from JSON history arrays, validates imported data against the schema, and produces an import summary report. The import must be idempotent \u2014 re-running it does not create duplicates (uses ON CONFLICT DO UPDATE).",
   "type": "backend",
   "priority": "medium",
-  "stage": "SECURITY",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -91,5 +91,5 @@
   ],
   "source_task_file": "TODO/tickets/01-database-foundation.md",
   "tags": [],
-  "current_stage": "SECURITY"
+  "current_stage": "DOCS"
 }
