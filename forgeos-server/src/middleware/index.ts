@@ -16,7 +16,7 @@
 
 export { requestIdMiddleware } from './request-id.js';
 export { logger, requestLogger } from './logging.js';
-export { authMiddleware } from './auth.js';
+export { authMiddleware, extractBearerToken, requirePermission } from './auth.js';
 export {
   errorHandler,
   withErrorHandling,
