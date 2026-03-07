@@ -1143,3 +1143,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/QA/TASK-FOS-03-010.md, forgeos-server/src/__tests__/tools/tickets-stats-qa.test.ts, forgeos-server/src/tools/tickets-stats.ts
 - **Decisions:** PASS verdict. 59/59 tests pass. 100% line, branch, function, and statement coverage on tickets-stats.ts. All 8 acceptance criteria verified. Implementation uses 6 parallel SQL queries via Promise.all() for sub-200ms response, 5-second cache for all-time queries, structured logging, and Zod schema validation. No code quality issues (no console.log, no TODO, no any types, no unhandled promises). Pre-existing test failures in other files are unrelated. Tool registration in tools/index.ts pending (outside ticket scope).
 - **Timestamp:** 2025-07-15T19:49:00Z
+
+### [TASK-FOS-04-001] — QA: API Key Authentication Middleware
+- **Artifacts:** .github/agent-output/QA/TASK-FOS-04-001.md
+- **Decisions:** REJECT verdict. Backend WORK commit never pushed — only CLAIM commit exists in git. Auth middleware (forgeos-server/src/middleware/auth.ts) is still a pass-through stub. keys.ts and roles.ts exist locally but are untracked in git. 19/21 middleware tests fail (extractBearerToken and requirePermission not exported from stub). 0/9 acceptance criteria met. Two-commit protocol violated. Sent back to BACKEND for rework #1.
+- **Timestamp:** 2026-03-07T14:23:00Z
