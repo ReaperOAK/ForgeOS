@@ -1,3 +1,8 @@
+### [TASK-FOS-03-007] — Documentation Summary
+- **Artifacts:** forgeos-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/TASK-FOS-03-007.md
+- **Decisions:** JSDoc/TSDoc already comprehensive (verified via CI review). Added full tickets.graph reference section to README (input schema, query behavior, response format, graph algorithms table, MCP invocation example). CHANGELOG entry added. Diátaxis: Reference.
+- **Timestamp:** 2026-03-07T16:00:00Z
+
 ### [TASK-FOS-03-010] — Documentation Summary
 - **Artifacts:** forgeos-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/TASK-FOS-03-010.md
 - **Decisions:** JSDoc/TSDoc already comprehensive (no additions needed). Added tickets.stats reference section to README with input schema, response format, caching, query list, and MCP invocation example. CHANGELOG entry added. Freshness metadata updated. Diátaxis: Reference.
@@ -1297,6 +1302,11 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/TASK-FOS-03-007.md
 - **Decisions:** PASS — Score 82/100, 0 critical, 3 warnings (cyclomatic complexity in hasCycle=11, computeCriticalPath=22, ticketsGraphHandler=15 — all graph algorithm functions), 3 suggestions (OC-005 chaining, OC-007 function size). TypeScript clean. 97.7% statement coverage, 82.9% branch coverage. Parameterized SQL, structured logging, no dead code, no circular deps.
 - **Timestamp:** 2026-03-07T15:30:00Z
+
+### [FORGEOS-DO002] — Documentation Summary
+- **Artifacts:** infra/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-DO002.md
+- **Decisions:** Added "Custom PostgreSQL Container" section to infra/README.md documenting the Dockerfile, init.sql, and pg-healthcheck.sh. Covers build instructions, init script steps, forgeos_user privileges, dual healthcheck, config tuning (8 parameters), and security notes (default password, image layers, tag pinning). All 3 implementation files already had comprehensive inline comments — no additions needed. CHANGELOG entry added. Freshness metadata updated. Diátaxis: How-To.
+- **Timestamp:** 2026-03-07T18:00:00Z
 
 ### [TASK-FOS-02-003] — Validation Summary
 - **Artifacts:** .github/agent-output/Validator/TASK-FOS-02-003.md

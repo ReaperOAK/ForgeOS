@@ -754,6 +754,12 @@ src/
 ├── index.ts            # Boot sequence, graceful shutdown
 ├── server.ts           # Express app factory, MCP endpoint, SSE, NOTIFY
 ├── config.ts           # Zod-validated environment configuration
+├── api/
+│   ├── index.ts        # createApiRouter() — mounts REST + SSE sub-routers
+│   └── routes/
+│       ├── events.ts   # GET /api/events — SSE with snapshot + NOTIFY
+│       ├── tickets.ts  # GET /api/tickets, /:id, /:id/history
+│       └── stages.ts   # GET /api/stages — pipeline overview
 ├── db/
 │   ├── index.ts        # Barrel exports for pool, migrations, file mutex
 │   ├── pool.ts         # PostgreSQL connection pool, healthCheck, RLS helpers
