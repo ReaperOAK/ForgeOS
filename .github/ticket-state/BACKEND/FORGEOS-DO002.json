@@ -49,6 +49,13 @@
       "details": "Ticket created from TODO/tasks/phase2-infrastructure.md"
     },
     {
+      "timestamp": "2026-03-07T13:00:22.141991+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    },
+    {
       "timestamp": "2026-03-07T13:36:15+00:00",
       "event": "CLAIMED",
       "agent": "DevOps",
