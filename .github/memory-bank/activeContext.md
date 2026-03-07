@@ -1,3 +1,8 @@
+### [TASK-FOS-02-003] — Middleware Stack Implementation
+- **Artifacts:** forgeos-server/src/middleware/request-id.ts, forgeos-server/src/middleware/logging.ts, forgeos-server/src/middleware/error-handler.ts, forgeos-server/src/middleware/validation.ts, forgeos-server/src/middleware/index.ts
+- **Decisions:** Used process.hrtime.bigint() for sub-ms duration precision over Date.now(). Global Express type augmentation for req.requestId. Separate HTTP_STATUS_MAP for maintainability. Exported mapPgErrorCode for tool handler reuse. Validation returns string 'VALIDATION_ERROR' since ForgeOS enum lacks this code.
+- **Timestamp:** 2026-03-07T08:50:00Z
+
 ### [FORGEOS-ARCH009] — MCP Tool Definition Schemas
 - **Artifacts:** docs/architecture/api/mcp-tool-definitions.md, .github/agent-output/Architect/FORGEOS-ARCH009.md
 - **Decisions:** Designed 11 MCP tool schemas (10 existing + 1 new: tickets.sync). Used codebase names (complete/reject) over AC names (advance/rework) per ADR-ARCH009-01. Layered error propagation (JSON-RPC protocol + tool domain errors) per ADR-ARCH009-02. All schemas include JSON Schema inputSchema, Zod TypeScript schema, output schema, error codes, and MCP annotations.
