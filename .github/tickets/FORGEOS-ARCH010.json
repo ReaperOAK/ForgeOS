@@ -4,7 +4,7 @@
   "description": "Design the error code catalog and API standards for the ForgeOS platform. Define error code taxonomy (claim conflicts, lease expiry, validation failures, dependency blocks), pagination contract for list endpoints, filtering syntax, idempotency key semantics for mutating operations, and rate limiting policy per agent/machine.",
   "type": "architecture",
   "priority": "medium",
-  "stage": "DOCS",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "ARCHITECT",
@@ -80,6 +80,24 @@
       "from_stage": "ARCHITECT",
       "to_stage": "DOCS",
       "details": "Advanced from ARCHITECT to DOCS"
+    },
+    {
+      "timestamp": "2026-03-07T15:55:53.506118+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
+    },
+    {
+      "timestamp": "2026-03-07T15:55:56.642177+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-architecture.md",
