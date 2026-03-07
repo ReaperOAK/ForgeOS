@@ -1,3 +1,8 @@
+### [FORGEOS-ARCH009] — MCP Tool Definition Schemas
+- **Artifacts:** docs/architecture/api/mcp-tool-definitions.md, .github/agent-output/Architect/FORGEOS-ARCH009.md
+- **Decisions:** Designed 11 MCP tool schemas (10 existing + 1 new: tickets.sync). Used codebase names (complete/reject) over AC names (advance/rework) per ADR-ARCH009-01. Layered error propagation (JSON-RPC protocol + tool domain errors) per ADR-ARCH009-02. All schemas include JSON Schema inputSchema, Zod TypeScript schema, output schema, error codes, and MCP annotations.
+- **Timestamp:** 2026-03-07T08:41:42Z
+
 ### [FORGEOS-DO001] — Security Review
 - **Artifacts:** .github/agent-output/Security/FORGEOS-DO001.md
 - **Decisions:** PASS (HIGH confidence, 92%) — Zero critical/high findings. 2 medium (CWE-798 secrets placeholder in VCS, CWE-489 debug port on 0.0.0.0) and 4 low findings documented with risk acceptance. STRIDE on 5 trust boundaries. OWASP Top 10 all 10 categories checked. Good security posture: Docker secrets, non-root user, resource limits, pinned images, read-only mounts, bridge network isolation.
