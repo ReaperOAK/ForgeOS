@@ -4,7 +4,7 @@
   "description": "Design the event sourcing schema for the ForgeOS ticket audit trail, replacing the in-JSON history array. Define the event_history table structure, event types, payload schemas per event type, sequence numbering, and the mechanism for reconstructing ticket state from events. Integrate findings from RES008 feasibility assessment.",
   "type": "architecture",
   "priority": "medium",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "ARCHITECT",
@@ -79,7 +79,16 @@
       "event": "STAGE_ADVANCED",
       "agent": "Documentation",
       "machine_id": "pop-os",
-      "details": "DOCS complete. Advanced DOCS → VALIDATION"
+      "details": "DOCS complete. Advanced DOCS \u2192 VALIDATION"
+    },
+    {
+      "timestamp": "2026-03-07T15:55:55.321906+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-architecture.md",
