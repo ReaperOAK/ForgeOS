@@ -4,7 +4,7 @@
   "description": "Implement the tickets.next MCP tool that returns the next available ticket for a given SDLC stage. Uses SELECT FOR UPDATE SKIP LOCKED to peek at the highest-priority unclaimed ticket without actually claiming it. Supports optional filters by ticket type and minimum priority. Returns the full ticket object or null with a descriptive message. This tool is read-only \u2014 it does not modify ticket state. Register the tool on the MCP server using registerTool() with Zod input schema validation.",
   "type": "backend",
   "priority": "critical",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -37,10 +37,10 @@
     "Query completes within 50ms (uses idx_tickets_claimable composite index)"
   ],
   "rework_count": 0,
-  "claimed_by": "CIReviewer",
-  "machine_id": "forgeos-dev",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-07T08:30:06.350684+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -153,6 +153,15 @@
       "from_stage": "CI",
       "to_stage": "CI",
       "details": "Claimed by reaperoak@forgeos-dev via CIReviewer, lease until 2026-03-07T08:30:06.350684+00:00"
+    },
+    {
+      "timestamp": "2026-03-07T08:07:17.211339+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "forgeos-dev",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "CI PASS. Quality Score 93/100. 0 critical, 1 warning, 2 suggestions. TypeScript clean. Coverage 100%."
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
