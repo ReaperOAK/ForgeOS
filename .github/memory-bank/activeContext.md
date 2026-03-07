@@ -1094,6 +1094,11 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** Correctness-first priority ordering (Correctness > Availability > Latency > Throughput > Scalability > Resource Efficiency). Claim p99 ≤ 100ms. 50+ concurrent agents target. 99.9% uptime SLA, RTO < 5 min, RPO < 1 min. 15 correctness invariants defined across claim, state transition, dependency, and data integrity categories. Horizontal scaling via PgBouncer at > 50 agents. Connection pool sized at 20 default with per-scale sizing table.
 - **Timestamp:** 2026-03-07T13:03:10Z
 
+### [FORGEOS-RES011] — Web Framework and ORM Evaluation
+- **Artifacts:** docs/research/framework-evaluation.md, .github/agent-output/Research/FORGEOS-RES011.md
+- **Decisions:** Recommend FastAPI (88% confidence) for web framework — decisive factor is native Starlette alignment with MCP Python SDK. Recommend SQLAlchemy async + asyncpg driver (85% confidence) for database access — Alembic migrations and hybrid query approach (ORM + text() for stored functions). Flask disqualified due to WSGI async limitations. Litestar viable but suboptimal due to smaller ecosystem and manual MCP SDK integration.
+- **Timestamp:** 2026-03-07T13:10:00Z
+
 ### [TASK-FOS-03-007] — tickets.graph Dependency Graph
 - **Artifacts:** forgeos-server/src/tools/tickets-graph.ts, forgeos-server/src/tools/index.ts, forgeos-server/src/__tests__/tools/tickets-graph.test.ts
 - **Decisions:** Chose Kahn's algorithm for cycle detection (O(V+E), natural topological ordering reuse). DP longest-path for critical path computation. Full SELECT * for nodes per AC requirement. Exported hasCycle and computeCriticalPath for direct unit testability. Edges filtered to node set when filters reduce results.
