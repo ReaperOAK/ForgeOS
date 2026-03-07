@@ -29,6 +29,9 @@ dependencies = [
     "pydantic>=2.0,<3",
     "pydantic-settings>=2.0,<3",
     "uvicorn>=0.31.0",
+    "alembic>=1.13,<2",
+    "sqlalchemy[asyncio]>=2.0,<3",
+    "psycopg2-binary>=2.9,<3",
 ]
 
 [project.optional-dependencies]
