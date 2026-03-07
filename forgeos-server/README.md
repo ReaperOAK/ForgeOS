@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-06T23:30:00Z -->
+<!-- last_reviewed: 2026-03-07T08:01:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -314,39 +314,97 @@ from leaking into the image:
 | `.git` / `.gitignore` | VCS metadata not needed |
 | `secrets/` | Prevents secrets directory from entering the image |
 
-### Docker Compose example
+### Docker Compose
 
-```yaml
-services:
-  forgeos:
-    build: .
-    ports:
-      - "3000:3000"
-    environment:
-      DATABASE_URL: postgresql://forgeos:forgeos@db:5432/forgeos
-      ADMIN_API_KEY: changeme
-      WEBHOOK_SECRET: changeme
-    depends_on:
-      db:
-        condition: service_healthy
+The production Docker Compose file (`docker-compose.yml`) orchestrates a
+three-service stack: PostgreSQL, PgBouncer, and the MCP server.
 
-  db:
-    image: postgres:15-alpine
-    environment:
-      POSTGRES_USER: forgeos
-      POSTGRES_PASSWORD: forgeos
-      POSTGRES_DB: forgeos
-    volumes:
-      - pgdata:/var/lib/postgresql/data
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U forgeos"]
-      interval: 5s
-      timeout: 3s
-      retries: 5
+#### Start the stack
 
-volumes:
-  pgdata:
+```bash
+# Start all services in the background
+docker compose up -d
+
+# Follow logs
+docker compose logs -f
+
+# Stop the stack
+docker compose down
+
+# Stop and remove data volume
+docker compose down -v
 ```
+
+#### Services
+
+| Service | Image | Port | Description |
+|---------|-------|------|-------------|
+| `postgres` | `postgres:17-alpine` | 5432 (internal) | Primary database with healthcheck and persistent storage |
+| `pgbouncer` | `edoburu/pgbouncer` | 6432 (host-mapped) | Connection pooler in transaction mode |
+| `mcp-server` | Built from local `Dockerfile` | 3000 (internal) | ForgeOS MCP server |
+
+#### Service details
+
+**postgres** — Runs PostgreSQL 17 on Alpine. The database initialises with
+`POSTGRES_DB=forgeos` and `POSTGRES_USER=forgeos`. The password is loaded
+from a Docker secret (`/run/secrets/db_password`) rather than an environment
+variable. SQL migration files in `src/db/migrations/` are mounted read-only
+into `/docker-entrypoint-initdb.d/` so schemas are applied on first start.
+A `pg_isready` healthcheck runs every 10 seconds with 5 retries and a
+30-second start period. Data persists in the `pgdata` named volume.
+
+**pgbouncer** — Sits between the MCP server and PostgreSQL. Operates in
+**transaction** pooling mode with a default pool size of 50 and a maximum
+of 200 client connections. Depends on `postgres` being healthy before
+starting. Exposes port **6432** to the host for direct pool access during
+development.
+
+**mcp-server** — Built from the local Dockerfile. Connects to PostgreSQL
+**through PgBouncer** on port 6432, not directly. Depends on both `postgres`
+(healthy) and `pgbouncer` (started). Mounts the repository root as a
+read-only volume at `/workspace`.
+
+All three services use `restart: unless-stopped`.
+
+#### Dependency graph
+
+```
+mcp-server ──depends_on──▶ pgbouncer ──depends_on──▶ postgres
+              (started)                  (healthy)
+```
+
+#### Secrets
+
+The database password uses Docker's file-based secrets mechanism:
+
+```
+forgeos-server/secrets/db_password
+```
+
+Set the password in this file before running `docker compose up`. The
+default placeholder value must be changed in production.
+
+#### Volumes
+
+| Volume | Mount point | Purpose |
+|--------|-------------|----------|
+| `pgdata` | `/var/lib/postgresql/data` | Persistent PostgreSQL data |
+| `./src/db/migrations` | `/docker-entrypoint-initdb.d:ro` | Auto-apply schema on init |
+| `../` (repo root) | `/workspace:ro` | Workspace access for MCP server |
+
+#### Environment variables (docker-compose.yml)
+
+| Service | Variable | Value |
+|---------|----------|-------|
+| `postgres` | `POSTGRES_DB` | `forgeos` |
+| `postgres` | `POSTGRES_USER` | `forgeos` |
+| `postgres` | `POSTGRES_PASSWORD_FILE` | `/run/secrets/db_password` |
+| `pgbouncer` | `POOL_MODE` | `transaction` |
+| `pgbouncer` | `DEFAULT_POOL_SIZE` | `50` |
+| `pgbouncer` | `MAX_CLIENT_CONN` | `200` |
+| `mcp-server` | `DATABASE_URL` | `postgresql://forgeos:…@pgbouncer:6432/forgeos` |
+| `mcp-server` | `PORT` | `3000` |
+| `mcp-server` | `NODE_ENV` | `production` |
 
 ## TypeScript Configuration
 
