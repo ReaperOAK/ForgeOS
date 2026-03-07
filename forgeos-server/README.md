@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-07T15:10:00Z -->
+<!-- last_reviewed: 2026-03-07T23:00:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -84,6 +84,27 @@ before each query:
 
 Both log slow queries exceeding 1 second.
 
+### File Locks
+
+The file-level mutex system (`src/db/file-mutex.ts`) prevents two agents
+from modifying the same workspace file concurrently. It is backed by the
+`file_locks` PostgreSQL table with a partial unique index on
+`(file_path) WHERE released_at IS NULL` to guarantee mutual exclusion at
+the database level.
+
+| Function | Description |
+|----------|-------------|
+| `acquireFileLocks` | Lock files for a ticket using `INSERT ... ON CONFLICT DO NOTHING`. Rolls back atomically on conflict. |
+| `checkFileConflicts` | Return active locks held by other tickets for a set of file paths. |
+| `releaseFileLocks` | Set `released_at = NOW()` on all active locks for a ticket. |
+| `getActiveLocksForTicket` | List all active locks belonging to a ticket. |
+| `getActiveLockForFile` | Return the active lock for a single file path, if any. |
+
+All mutations run inside transactions and emit `FILE_LOCKED` /
+`FILE_UNLOCKED` audit events to the `events` table. On conflict,
+`acquireFileLocks` throws a `FileConflictError` (HTTP 409) with
+structured details of every conflicting file.
+
 ### Migrations
 
 SQL migration files live in `src/db/migrations/` and are applied in
@@ -136,20 +157,114 @@ variables in the error output.
 
 ## HTTP Endpoints
 
-| Method   | Path         | Auth     | Description                                |
-|----------|--------------|----------|--------------------------------------------|
-| `GET`    | `/health`    | Public   | Health check with DB connectivity status   |
-| `POST`   | `/mcp`       | Bearer   | MCP Streamable HTTP — tool invocation      |
-| `GET`    | `/mcp`       | Bearer   | MCP SSE-based transport (server-to-client) |
-| `DELETE` | `/mcp`       | Bearer   | MCP session teardown                       |
-| `GET`    | `/events`    | Public   | SSE stream of real-time ticket changes     |
-| `GET`    | `/dashboard` | Public   | Static dashboard UI                        |
+| Method   | Path                       | Auth     | Description                                          |
+|----------|----------------------------|----------|------------------------------------------------------|
+| `GET`    | `/health`                  | Public   | Health check with DB connectivity status             |
+| `POST`   | `/mcp`                     | Bearer   | MCP Streamable HTTP — tool invocation                |
+| `GET`    | `/mcp`                     | Bearer   | MCP SSE-based transport (server-to-client)           |
+| `DELETE` | `/mcp`                     | Bearer   | MCP session teardown                                 |
+| `GET`    | `/events`                  | Public   | SSE stream of real-time ticket changes (legacy)      |
+| `GET`    | `/dashboard`               | Public   | Static dashboard UI                                  |
+| `GET`    | `/api/events`              | Public   | SSE stream with snapshot + NOTIFY broadcasts         |
+| `GET`    | `/api/tickets`             | Bearer   | Paginated, filterable ticket list                    |
+| `GET`    | `/api/tickets/:id`         | Bearer   | Full ticket detail with resolved dependency status   |
+| `GET`    | `/api/tickets/:id/history` | Bearer   | Ordered event timeline for a ticket                  |
+| `GET`    | `/api/stages`              | Bearer   | Pipeline overview with counts per stage              |
 
 ### Authentication
 
 Non-public endpoints require an `Authorization: Bearer <api-key>` header.
 The key is hashed with SHA-256 and looked up in the `agents` table.
 The admin key (`ADMIN_API_KEY`) bypasses the database lookup.
+
+### REST API (`/api/*`)
+
+The REST API serves the dashboard and external consumers. Routes are
+defined in `src/api/` and mounted via `createApiRouter()` in
+`src/api/index.ts`. REST endpoints require Bearer authentication;
+the SSE endpoint is optionally authenticated.
+
+#### GET /api/events — Server-Sent Events
+
+Opens a persistent `text/event-stream` connection that:
+
+1. Sends a **snapshot** of current system state (stage counts + 20 recent
+   tickets) as the first event.
+2. Subscribes to the PostgreSQL `ticket_changes` NOTIFY channel.
+3. Broadcasts `ticket-update` events to all connected clients with
+   sub-1-second latency.
+4. Sends `:keepalive` comments every 30 seconds to prevent proxy timeouts.
+5. Cleans up the listener on client disconnection (`req.close`).
+
+SSE event format:
+
+```
+event: ticket-update
+data: {"ticket_id":"TASK-FOS-01-001","stage":"BACKEND",...}
+
+```
+
+#### GET /api/tickets — Paginated List
+
+Returns a paginated JSON array of tickets. Supports query-parameter filters:
+
+| Parameter    | Type   | Default | Description                        |
+|--------------|--------|---------|------------------------------------|
+| `stage`      | enum   | —       | Filter by SDLC stage               |
+| `type`       | enum   | —       | Filter by ticket type              |
+| `status`     | enum   | —       | Filter by ticket status            |
+| `claimed_by` | string | —       | Filter by claiming agent name      |
+| `priority`   | enum   | —       | Filter by priority level           |
+| `limit`      | int    | `20`    | Page size (1–100)                  |
+| `offset`     | int    | `0`     | Number of rows to skip             |
+
+Response shape:
+
+```json
+{
+  "data": [ { "ticket_id": "...", ... } ],
+  "pagination": { "total": 42, "limit": 20, "offset": 0, "has_more": true }
+}
+```
+
+#### GET /api/tickets/:id — Ticket Detail
+
+Returns the full ticket object plus a `dependency_status` array showing
+whether each entry in `depends_on` is resolved (`DONE`) or not.
+
+Returns `404` if the ticket does not exist.
+
+#### GET /api/tickets/:id/history — Event Timeline
+
+Returns all events from the `events` table for the given ticket, ordered
+chronologically (oldest first). Returns `404` if the ticket does not exist.
+
+#### GET /api/stages — Pipeline Overview
+
+Returns per-stage metrics for the ticket pipeline:
+
+```json
+{
+  "stages": {
+    "READY": { "count": 5, "claimed": 0, "ready": 5 },
+    "BACKEND": { "count": 3, "claimed": 2, "ready": 1 }
+  },
+  "total_tickets": 42,
+  "timestamp": "2026-03-07T..."
+}
+```
+
+#### Error Responses
+
+All REST endpoints return structured errors:
+
+| Status | Error Code         | Condition                    |
+|--------|--------------------|------------------------------|
+| `200`  | —                  | Success                      |
+| `400`  | `VALIDATION_ERROR` | Invalid query parameters     |
+| `401`  | `UNAUTHORIZED`     | Missing or invalid API key   |
+| `404`  | `TICKET_NOT_FOUND` | Ticket ID not in database    |
+| `500`  | `INTERNAL_ERROR`   | Unexpected server error      |
 
 ## Middleware
 
@@ -372,6 +487,216 @@ for sub-50 ms response times.
 | `src/tools/tickets-next.ts` | Zod schema, handler, types |
 | `src/tools/index.ts` | Tool registration on McpServer |
 
+### tickets.stats — Dashboard Statistics
+
+Returns aggregate system statistics for dispatcher decision-making and
+dashboard display. Computes per-stage ticket counts, per-status ticket
+counts, claim health breakdown, average time-in-stage, rework count
+distribution, and totals. All six database queries execute in parallel
+for sub-200 ms response time.
+
+#### Input Schema
+
+| Parameter          | Type   | Required | Description                                          |
+|--------------------|--------|----------|------------------------------------------------------|
+| `time_range_hours` | number | No       | Restrict stats to tickets created within the last N hours |
+
+When omitted, statistics cover all tickets (all-time). The value must be
+a positive number.
+
+#### Response Format
+
+**Success:**
+
+```json
+{
+  "stages": { "READY": 5, "BACKEND": 2, "QA": 1, "DONE": 12, "...": 0 },
+  "statuses": { "READY": 5, "IN_PROGRESS": 3, "DONE": 12, "...": 0 },
+  "claims": { "healthy": 3, "expiring_soon": 1, "expired": 0 },
+  "avg_stage_duration": { "READY": 120.5, "BACKEND": 3600.0, "...": 0 },
+  "rework_distribution": { "0": 15, "1": 3, "2": 1 },
+  "total_tickets": 20,
+  "total_done": 12
+}
+```
+
+| Field                | Type                      | Description                                           |
+|----------------------|---------------------------|-------------------------------------------------------|
+| `stages`             | `Record<TicketStage, number>` | Ticket count per SDLC stage, all stages included   |
+| `statuses`           | `Record<TicketStatus, number>` | Ticket count per operational status               |
+| `claims.healthy`     | `number`                  | Claims with more than 5 minutes remaining on lease    |
+| `claims.expiring_soon` | `number`                | Claims with less than 5 minutes remaining             |
+| `claims.expired`     | `number`                  | Claims with expired leases                            |
+| `avg_stage_duration` | `Record<TicketStage, number>` | Average seconds spent in each stage (from events) |
+| `rework_distribution` | `Record<string, number>` | Maps rework count values to number of tickets         |
+| `total_tickets`      | `number`                  | Total ticket count                                    |
+| `total_done`         | `number`                  | Total tickets in DONE status                          |
+
+**Error:**
+
+```json
+{
+  "message": "Query error: <details>",
+  "error": "INTERNAL_ERROR",
+  "timestamp": "2026-03-07T10:00:00.000Z"
+}
+```
+
+#### Caching
+
+All-time statistics (no `time_range_hours` filter) are cached in memory
+for 5 seconds. Filtered queries always hit the database. The cache
+reduces load when multiple agents or dashboard clients poll concurrently.
+
+#### Queries
+
+Six parameterized SQL queries execute in parallel via `Promise.all()`:
+
+1. Ticket count grouped by `stage`
+2. Ticket count grouped by `status`
+3. Claim health breakdown (healthy / expiring soon / expired)
+4. Average time-in-stage from `STAGE_ADVANCED` events
+5. Rework count distribution
+6. Total tickets and total done
+
+All queries use parameterized placeholders (`$1`) — no string
+interpolation of user input.
+
+#### MCP Invocation Example
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "tickets.stats",
+    "arguments": {
+      "time_range_hours": 24
+    }
+  }
+}
+```
+
+#### Implementation Files
+
+| File | Purpose |
+|------|---------|
+| `src/tools/tickets-stats.ts` | Zod schema, handler, types, caching |
+| `src/tools/index.ts` | Tool registration on McpServer |
+### tickets.graph — Dependency Graph
+
+Returns the full ticket dependency DAG for visualization. Builds a
+directed graph from ticket `depends_on` relationships, validates the
+DAG invariant (no cycles), and computes the critical path (longest
+path from any root to any leaf). Performance target: < 500 ms for
+up to 500 tickets.
+
+#### Input Schema
+
+| Parameter        | Type   | Required | Description                                  |
+|------------------|--------|----------|----------------------------------------------|
+| `filter`         | object | No       | Narrow the graph by stage, type, or status   |
+| `filter.stage`   | enum   | No       | Filter nodes by SDLC stage                   |
+| `filter.type`    | enum   | No       | Filter nodes by ticket type                  |
+| `filter.status`  | enum   | No       | Filter nodes by operational status           |
+
+All enum values are validated via Zod at invocation time.
+
+#### Query Behavior
+
+The handler builds a parameterized SQL query with optional `WHERE`
+clauses for each filter field:
+
+```sql
+SELECT * FROM tickets
+[WHERE stage = $1 [AND type = $2] [AND status = $3]]
+ORDER BY ticket_id
+```
+
+After fetching rows, the handler:
+
+1. Builds an adjacency list from each ticket's `depends_on` array.
+   Edge direction is dependency → dependent (if B depends on A, the
+   edge is A → B).
+2. Runs **cycle detection** via Kahn's BFS algorithm (O(V+E)). If a
+   cycle is found, returns an error response with `CYCLE_DETECTED`.
+3. Computes the **critical path** using topological ordering with
+   dynamic programming — the longest path through the DAG.
+
+#### Response Format
+
+**Success:**
+
+```json
+{
+  "nodes": [
+    { "ticket_id": "TASK-FOS-03-001", "stage": "DONE", "depends_on": [], ... },
+    { "ticket_id": "TASK-FOS-03-007", "stage": "CI", "depends_on": ["TASK-FOS-03-001"], ... }
+  ],
+  "edges": [
+    { "from": "TASK-FOS-03-001", "to": "TASK-FOS-03-007" }
+  ],
+  "critical_path": ["TASK-FOS-03-001", "TASK-FOS-03-007"]
+}
+```
+
+**Error — cycle detected:**
+
+```json
+{
+  "nodes": [],
+  "edges": [],
+  "critical_path": [],
+  "message": "Cycle detected in dependency graph — DAG invariant violated",
+  "error": "CYCLE_DETECTED",
+  "timestamp": "2026-03-07T10:00:00.000Z"
+}
+```
+
+**Error — internal failure:**
+
+```json
+{
+  "nodes": [],
+  "edges": [],
+  "critical_path": [],
+  "message": "Query error: <details>",
+  "error": "INTERNAL_ERROR",
+  "timestamp": "2026-03-07T10:00:00.000Z"
+}
+```
+
+#### Graph Algorithms
+
+| Function              | Algorithm              | Complexity | Purpose                              |
+|-----------------------|------------------------|------------|--------------------------------------|
+| `hasCycle`            | Kahn's BFS             | O(V+E)     | Detect cycles in the dependency DAG  |
+| `computeCriticalPath` | Kahn's BFS + DP        | O(V+E)     | Longest path from any root to leaf   |
+
+Both functions are pure (no I/O) and exported for direct unit testing.
+
+#### MCP Invocation Example
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "tickets.graph",
+    "arguments": {
+      "filter": {
+        "stage": "READY",
+        "type": "backend"
+      }
+    }
+  }
+}
+```
+
+#### Implementation Files
+
+| File | Purpose |
+|------|---------|
+| `src/tools/tickets-graph.ts` | Zod schema, graph algorithms, handler |
+| `src/tools/index.ts` | Tool registration on McpServer |
 ## Commit Message Convention
 
 The repository enforces a commit message format via a
@@ -430,7 +755,9 @@ src/
 ├── server.ts           # Express app factory, MCP endpoint, SSE, NOTIFY
 ├── config.ts           # Zod-validated environment configuration
 ├── db/
+│   ├── index.ts        # Barrel exports for pool, migrations, file mutex
 │   ├── pool.ts         # PostgreSQL connection pool, healthCheck, RLS helpers
+│   ├── file-mutex.ts   # File-level mutex for concurrent lock management
 │   ├── migrate.ts      # Migration runner
 │   └── migrations/     # SQL migration files (applied in filename order)
 ├── middleware/
