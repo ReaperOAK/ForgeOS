@@ -35,10 +35,10 @@
     "Response time under 200ms for up to 500 tickets"
   ],
   "rework_count": 0,
-  "claimed_by": "Backend",
+  "claimed_by": "QA",
   "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-07T13:25:58Z",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-07T14:38:44Z",
   "lease_duration_minutes": 30,
   "history": [
     {
