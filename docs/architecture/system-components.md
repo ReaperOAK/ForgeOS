@@ -7,7 +7,7 @@ date: 2026-03-06T00:00:00Z
 status: APPROVED
 audience: All engineers, DevOps, and operators working on ForgeOS
 purpose: Define the high-level system component architecture, boundaries, interfaces, and communication protocols
-last_reviewed: 2026-03-06T14:30:00Z
+last_reviewed: 2026-03-07T15:00:00Z
 diataxis_quadrant: explanation
 tags: [architecture, components, phase1, ADR]
 ---
@@ -50,7 +50,7 @@ The architecture follows a **modular monolith** pattern (see [ADR-001](#10-adr-0
 
 | # | Component | Technology | Role |
 |---|-----------|-----------|------|
-| 1 | **MCP Server** | Node.js / Express / `@modelcontextprotocol/sdk` | Central orchestration hub; exposes 10 MCP tools for ticket lifecycle |
+| 1 | **MCP Server** | Node.js / Express / `@modelcontextprotocol/sdk` | Central orchestration hub; exposes [11 MCP tools](api/mcp-tool-definitions.md) for ticket lifecycle |
 | 2 | **PostgreSQL Database** | PostgreSQL 17 | Persistent state, distributed locking (`SKIP LOCKED`), audit trail, RLS |
 | 3 | **Git Integration** | Git CLI / GitHub API | Code delivery, branch management, file-based legacy compatibility |
 | 4 | **Agent Clients** | LLM host applications (VS Code, CLI, custom) | Autonomous workers that claim and execute tickets via MCP |
@@ -69,7 +69,7 @@ The architecture follows a **modular monolith** pattern (see [ADR-001](#10-adr-0
 | `forgeos-server/src/index.ts` | Entry point; boot sequence, migrations, graceful shutdown |
 | `forgeos-server/src/config.ts` | Zod-validated environment configuration |
 | `forgeos-server/src/types/index.ts` | 835-line canonical type definitions (Ticket, Event, Agent, etc.) |
-| `forgeos-server/src/tools/index.ts` | MCP tool registration hub (10 tools) |
+| `forgeos-server/src/tools/index.ts` | MCP tool registration hub ([11 tools](api/mcp-tool-definitions.md)) |
 | `forgeos-server/src/tools/tickets-*.ts` | Individual tool handlers (claim, complete, reject, etc.) |
 | `forgeos-server/src/db/pool.ts` | pg Pool singleton, RLS helpers, health check |
 | `forgeos-server/src/db/migrate.ts` | Migration runner |
@@ -103,7 +103,7 @@ The architecture follows a **modular monolith** pattern (see [ADR-001](#10-adr-0
 
 | Type | Dependencies |
 |------|-------------|
-| **Internal** | 10 MCP tool modules, 1 migration, 2 middleware, 1 DB pool |
+| **Internal** | 11 MCP tool modules, 1 migration, 2 middleware, 1 DB pool |
 | **External** | `@modelcontextprotocol/sdk ^1.27.1`, `express ^4.21`, `pg ^8.13`, `pino ^9.6`, `zod ^3.24` |
 | **Infrastructure** | PostgreSQL 17, Docker, Node.js ≥22 |
 
@@ -261,7 +261,7 @@ graph TB
 
 | Module | Path | Responsibility |
 |--------|------|---------------|
-| Tool Layer | `src/tools/` | 10 MCP tool handlers with Zod validation |
+| Tool Layer | `src/tools/` | [11 MCP tool handlers](api/mcp-tool-definitions.md) with Zod validation |
 | Auth Middleware | `src/middleware/auth.ts` | API key hashing, bearer token validation |
 | Logging Middleware | `src/middleware/logging.ts` | Structured request/response logging (Pino) |
 | DB Pool | `src/db/pool.ts` | Connection pooling, RLS session variable injection |
@@ -325,7 +325,7 @@ graph TB
 
 ```
 1. Connect:    MCP Client → POST /mcp (initialize)
-2. Discover:   tools/list → receive 10 tool definitions
+2. Discover:   tools/list → receive 11 tool definitions
 3. Find Work:  tickets.next(stage) → get highest-priority ticket
 4. Claim:      tickets.claim(ticket_id, agent_name, machine_id) → atomic lock
 5. Execute:    Perform SDLC stage work (code, tests, review, docs)
