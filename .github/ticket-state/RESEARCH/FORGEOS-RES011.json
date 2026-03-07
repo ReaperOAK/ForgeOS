@@ -49,6 +49,13 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-07T12:55:04+00:00",
+      "event": "CLAIMED",
+      "agent": "Research",
+      "machine_id": "pop-os",
+      "details": "Claimed by Research on pop-os (ReaperOAK)"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-research.md",
