@@ -8,6 +8,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Database index and performance strategy** — Comprehensive indexing strategy
+  document at `docs/architecture/database-indexes.md` (FORGEOS-ARCH006).
+  Covers 31 indexes across 7 tables: 12 explicit B-tree, 4 GIN (arrays and
+  JSONB), 3 partial indexes for hot paths, plus implicit PK/UNIQUE. Documents
+  top 10 query patterns with EXPLAIN plan expectations, index sizing
+  projections (~764 MB at 100K tickets), maintenance strategy (auto-vacuum
+  tuning, REINDEX CONCURRENTLY via pg_cron), anti-patterns, and ADR-004
+  (partial indexes, GIN operator class, composite index decisions). Includes
+  Well-Architected pillar assessment and 10 fitness functions.
+
 - **Local development Docker Compose documentation** — Comprehensive setup
   guide at `infra/README.md` (FORGEOS-DO001). Covers three-service stack
   (PostgreSQL, MCP Server, pgAdmin), development overlay with hot-reload,
