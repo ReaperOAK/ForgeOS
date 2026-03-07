@@ -3,6 +3,11 @@
 - **Decisions:** GO recommendation (87% confidence) for MCP adoption. 12 risks identified across protocol maturity, SDK dependency, performance, vendor lock-in, and operational categories. All risks mitigatable. Key conditions: pin SDK versions, implement abstraction layer, add retry logic, fork SDKs as insurance. Switching cost: 7-11 weeks without abstraction, 3-5 weeks with. Vendor lock-in: Medium-Low (~410 LOC MCP-specific).
 - **Timestamp:** 2026-03-07T12:58:00Z
 
+### [FORGEOS-RES012] — Database Migration Tooling Evaluation
+- **Artifacts:** docs/research/migration-tooling.md, .github/agent-output/Research/FORGEOS-RES012.md
+- **Decisions:** Recommend enhancing custom TypeScript migration runner (Phase 1) + adopt node-pg-migrate when complexity warrants (Phase 2). Alembic rejected (Python mismatch), Flyway rejected (paywalled rollback, Java dep). Confidence: HIGH (87%).
+- **Timestamp:** 2026-03-07T13:00:00Z
+
 ### [FORGEOS-DO001] — Validation Summary
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-DO001.md
 - **Decisions:** APPROVED (HIGH confidence, 95%) — All 7 acceptance criteria verified independently. All 10 DoD items pass (6 verified, 4 justified N/A for YAML-only infra ticket). Upstream verdicts cross-checked: QA PASS, Security PASS (92%), CI PASS (98/100), Docs PASS (95%). Two-commit protocol verified (12 commits across 6 stages). docker compose config validates cleanly (exit 0). Memory gate entries confirmed. Ticket advanced to DONE.
@@ -1073,3 +1078,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/product/user-stories.md
 - **Decisions:** Created 24 user stories (6 per persona) exceeding the 5-per-persona minimum. MoSCoW distribution: 17 Must, 5 Should, 2 Could. Every story uses Given/When/Then format. Included traceability matrix mapping stories to persona pain points for requirements tracing.
 - **Timestamp:** 2026-03-07T13:30:00Z
+
+### [TASK-FOS-04-003] — File-Level Mutex Implementation
+- **Artifacts:** forgeos-server/src/db/file-mutex.ts, forgeos-server/src/__tests__/db/file-mutex.test.ts, forgeos-server/src/db/index.ts
+- **Decisions:** Used INSERT ON CONFLICT DO NOTHING with post-insert row count check instead of pre-check to avoid TOCTOU races. FileConflictError extends Error with structured conflict details. Raw pool transactions used since file_locks has permissive RLS policies.
+- **Timestamp:** 2026-03-07T13:00:00Z
