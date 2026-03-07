@@ -4,7 +4,7 @@
   "description": "Create the Docker Compose configuration for local development of the ForgeOS distributed orchestration platform. Define service containers for the MCP server (Python), PostgreSQL (with persistent volume), and database admin tooling (pgAdmin). Configure networking, volume mounts, and service dependencies so that all services start in the correct order. Support both development (with hot-reload/volume mounts) and production-like profiles.",
   "type": "infra",
   "priority": "critical",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -36,10 +36,10 @@
     "Docker Compose validates cleanly with `docker compose config`"
   ],
   "rework_count": 0,
-  "claimed_by": "Security",
-  "machine_id": "ForgeOS-dev",
-  "operator": "Owais",
-  "lease_expiry": "2026-03-07T14:30:00Z",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -78,6 +78,15 @@
       "from_stage": "QA",
       "to_stage": "SECURITY",
       "details": "Advanced from QA to SECURITY"
+    },
+    {
+      "timestamp": "2026-03-07T08:31:45.769273+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-infrastructure.md",

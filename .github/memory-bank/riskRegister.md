@@ -187,3 +187,14 @@ _None_
 | SEC-INFO-001 | Medium | `SELECT *` returns all ticket columns including internal operational fields (claimed_by, machine_id, operator, lease_expiry, history) to any MCP caller (CWE-200) | Risk Accepted | Ticket data is non-sensitive operational metadata; full ticket visibility is by design for MCP agents; column restriction to be added with field-level access control in TASK-FOS-04 |
 | SEC-INFO-002 | Low | Database error message forwarded to client in response payload via `Query error: ${errorMessage}` — may leak table/column/constraint names (CWE-209) | Risk Accepted | Development phase; production hardening will sanitize error messages to generic text; detailed errors logged server-side only |
 | SEC-AUTHZ-001 | Low | No per-tool authorization check — any authenticated MCP client can query any stage (CWE-862) | Risk Accepted | Auth is separate ticket (TASK-FOS-04); MCP transport provides auth boundary; tool is read-only peek with no state mutation |
+
+### [FORGEOS-DO001] — Docker Compose Local Dev Security Risks (2026-03-07T14:02:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-DO001-001 | Medium | Secrets placeholder file `forgeos-server/secrets/db_password` tracked in git with value `changeme_db_password`; secrets/ dir not in .gitignore (CWE-798) | Risk Accepted | Placeholder only with warning comments; recommend adding secrets/ to .gitignore in production hardening |
+| SEC-DO001-002 | Medium | Node.js debugger port 9229 exposed to 0.0.0.0 in dev overlay — allows remote code execution from LAN (CWE-489) | Risk Accepted | Dev overlay only, never in base config; recommend binding to 127.0.0.1:9229:9229 |
+| SEC-DO001-003 | Low | pgAdmin default credentials admin@forgeos.local / admin (CWE-1393) | Risk Accepted | Env var overrides available (PGADMIN_EMAIL, PGADMIN_PASSWORD); local dev only |
+| SEC-DO001-004 | Low | DATABASE_URL missing password parameter — relies on Docker internal trust auth (CWE-287) | Risk Accepted | Docker bridge network isolation; production must include password in connection string |
+| SEC-DO001-005 | Low | Hardcoded API key `forgeos_dev_key_12345678` in dev overlay (CWE-798) | Risk Accepted | Dev-only file; base config uses env var with fallback |
+| SEC-DO001-006 | Low | All service ports (5432, 3000, 5050) bind to 0.0.0.0 — accessible from LAN (CWE-668) | Risk Accepted | Standard local dev pattern; production should bind to 127.0.0.1 or use reverse proxy |
