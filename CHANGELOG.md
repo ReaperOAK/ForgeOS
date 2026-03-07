@@ -8,6 +8,13 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Local development Docker Compose documentation** — Comprehensive setup
+  guide at `infra/README.md` (FORGEOS-DO001). Covers three-service stack
+  (PostgreSQL, MCP Server, pgAdmin), development overlay with hot-reload,
+  VS Code debugger attachment, environment variables, secrets management,
+  common operations (logs, rebuild, psql access, database reset), and
+  troubleshooting. Root README updated with quick-start Docker section.
+
 - **`tickets.next` MCP tool** — Find the next available ticket for a given
   SDLC stage (peek, not claim). Accepts `stage` (required), `type` (optional),
   and `priority` (optional) filters. Returns the highest-priority unclaimed

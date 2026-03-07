@@ -1,3 +1,8 @@
+### [FORGEOS-DO001] — Documentation Summary
+- **Artifacts:** infra/README.md, README.md, CHANGELOG.md, forgeos-server/README.md, .github/agent-output/Documentation/FORGEOS-DO001.md
+- **Decisions:** Created new infra/README.md as How-To guide (Diátaxis). Added Docker quick-start section to root README. Cross-referenced infra/ stack from forgeos-server/README.md. JSDoc/TSDoc N/A (YAML config, not code). All 5 internal links verified.
+- **Timestamp:** 2026-03-07T15:35:00Z
+
 ### [FORGEOS-ARCH009] — Documentation Review: MCP Tool Definition Schemas
 - **Artifacts:** docs/architecture/api/mcp-tool-definitions.md, docs/architecture/system-components.md, docs/architecture/database-schema.md, docs/architecture/api/openapi-spec.yaml, README.md
 - **Decisions:** Added "Related Documents" cross-reference section with 7 links. Updated tool count 10→11 in system-components.md (5 locations). Added MCP tool definitions reference to README.md. Added cross-ref to database-schema.md and openapi-spec.yaml. All links verified on disk.
