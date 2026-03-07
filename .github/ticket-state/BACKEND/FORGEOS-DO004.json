@@ -20,9 +20,7 @@
   "dependencies": [
     "FORGEOS-DO001"
   ],
-  "blocked_by": [
-    "FORGEOS-DO001"
-  ],
+  "blocked_by": [],
   "file_paths": [
     "infra/.env.template",
     "infra/.env.test",
@@ -49,6 +47,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase2-infrastructure.md"
+    },
+    {
+      "timestamp": "2026-03-07T13:00:22.120288+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-infrastructure.md",
