@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-07T10:00:00Z -->
+<!-- last_reviewed: 2026-03-07T15:30:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -406,6 +406,10 @@ from leaking into the image:
 
 The production Docker Compose file (`docker-compose.yml`) orchestrates a
 three-service stack: PostgreSQL, PgBouncer, and the MCP server.
+
+> **Local development stack:** For the simpler three-service setup
+> (PostgreSQL + MCP Server + pgAdmin) with hot-reload, see
+> [`infra/README.md`](../infra/README.md).
 
 #### Start the stack
 

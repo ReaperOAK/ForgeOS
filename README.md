@@ -635,6 +635,31 @@ cat .github/guardian/STOP_ALL
    Terraform for infrastructure — each expands the system's operational
    surface.
 
+### Local Development with Docker
+
+The `infra/` directory contains a Docker Compose stack for running the full
+ForgeOS platform locally. Three services start with a single command:
+PostgreSQL 17, the MCP Server, and pgAdmin.
+
+```bash
+cd infra
+
+# Start all services
+docker compose up
+
+# Development mode (hot-reload, debug logging)
+docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+```
+
+| Service    | URL                    |
+|------------|------------------------|
+| MCP Server | http://localhost:3000   |
+| PostgreSQL | localhost:5432          |
+| pgAdmin    | http://localhost:5050   |
+
+See [`infra/README.md`](infra/README.md) for the full setup guide, including
+environment variables, secrets, debugging, and troubleshooting.
+
 ### Starting the Engine
 
 Invoke ReaperOAK in GitHub Copilot Agent Mode. The boot protocol
