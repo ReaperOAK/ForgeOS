@@ -4,7 +4,7 @@
   "description": "Design the error code catalog and API standards for the ForgeOS platform. Define error code taxonomy (claim conflicts, lease expiry, validation failures, dependency blocks), pagination contract for list endpoints, filtering syntax, idempotency key semantics for mutating operations, and rate limiting policy per agent/machine.",
   "type": "architecture",
   "priority": "medium",
-  "stage": "READY",
+  "stage": "ARCHITECT",
   "sdlc_flow": [
     "READY",
     "ARCHITECT",
@@ -31,10 +31,10 @@
     "Error catalog document delivered at docs/architecture/api/error-catalog.md"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Architect",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-07T17:30:00.000000+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -50,6 +50,13 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-07T17:00:00.000000+00:00",
+      "event": "CLAIMED",
+      "agent": "Architect",
+      "machine_id": "pop-os",
+      "details": "Claimed by Architect for ARCHITECT stage"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-architecture.md",
