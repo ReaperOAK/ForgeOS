@@ -167,3 +167,15 @@ _None_
 | SEC-POOL-002 | Low | `queryWithRLS()`/`transactionWithRLS()` pass empty string for `agentId` to `setSessionContext()` (CWE-276) | Risk Accepted | Current RLS policies use `agent_name`/`agent_role`, not `agent_id`; add `agentId` parameter when policies require it |
 | SEC-POOL-003 | Low | Pool error handler may serialize connection details (hostname/port/db) in pino error output (CWE-209) | Risk Accepted | Structured logging goes to server-side log aggregation only; recommend configuring pino error serializer to redact connection strings in production |
 | SEC-MIGRATE-002 | Low | CLI entry point uses loose `process.argv[1]?.includes('migrate')` heuristic (CWE-183) | Risk Accepted | Low risk — only affects CLI-mode activation; recommend `import.meta.url` comparison for precise detection |
+### [TASK-FOS-08-002] — Docker Compose Infrastructure Security Risks (2026-03-07T07:42:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-COMPOSE-001 | Medium | Hardcoded password in mcp-server DATABASE_URL env var bypasses Docker secrets pattern (CWE-798) | Risk Accepted | Dev placeholder; production MUST use secret injection or env file with restricted permissions |
+| SEC-COMPOSE-002 | Medium | pgbouncer image uses `:latest` tag — unpinned, supply chain risk (CWE-1104) | Risk Accepted | Initial setup; MUST pin to specific version before production deployment |
+| SEC-COMPOSE-003 | Medium | pgbouncer port 6432 exposed to all host interfaces (0.0.0.0) (CWE-284) | Risk Accepted | Dev convenience; production MUST bind to 127.0.0.1 or use internal-only networking |
+| SEC-COMPOSE-004 | Low | No container resource limits (mem_limit, cpus) on any service (CWE-770) | Risk Accepted | Dev environment; add deploy.resources.limits for production |
+| SEC-COMPOSE-005 | Low | Password mismatch between DATABASE_URL ("forgeos") and secrets/db_password ("changeme_db_password") (CWE-521) | Risk Accepted | Both are placeholders; must be synchronized before deployment |
+| SEC-COMPOSE-006 | Low | No TLS encryption between container services on Docker network (CWE-319) | Risk Accepted | Docker internal network is isolated; add TLS for production/multi-host deployments |
+| SEC-COMPOSE-007 | Low | Missing container hardening: no security_opt no-new-privileges, no read_only FS (CWE-250) | Risk Accepted | Dev environment; add hardening options for production |
+| SEC-COMPOSE-008 | Low | pgbouncer lacks healthcheck; mcp-server depends via service_started only (CWE-693) | Risk Accepted | pgbouncer starts quickly; add healthcheck for production reliability |
