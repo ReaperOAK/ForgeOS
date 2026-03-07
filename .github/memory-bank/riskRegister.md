@@ -179,3 +179,11 @@ _None_
 | SEC-COMPOSE-006 | Low | No TLS encryption between container services on Docker network (CWE-319) | Risk Accepted | Docker internal network is isolated; add TLS for production/multi-host deployments |
 | SEC-COMPOSE-007 | Low | Missing container hardening: no security_opt no-new-privileges, no read_only FS (CWE-250) | Risk Accepted | Dev environment; add hardening options for production |
 | SEC-COMPOSE-008 | Low | pgbouncer lacks healthcheck; mcp-server depends via service_started only (CWE-693) | Risk Accepted | pgbouncer starts quickly; add healthcheck for production reliability |
+
+### [TASK-FOS-03-001] — tickets.next MCP Tool Security Risks (2026-03-07T08:15:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-INFO-001 | Medium | `SELECT *` returns all ticket columns including internal operational fields (claimed_by, machine_id, operator, lease_expiry, history) to any MCP caller (CWE-200) | Risk Accepted | Ticket data is non-sensitive operational metadata; full ticket visibility is by design for MCP agents; column restriction to be added with field-level access control in TASK-FOS-04 |
+| SEC-INFO-002 | Low | Database error message forwarded to client in response payload via `Query error: ${errorMessage}` — may leak table/column/constraint names (CWE-209) | Risk Accepted | Development phase; production hardening will sanitize error messages to generic text; detailed errors logged server-side only |
+| SEC-AUTHZ-001 | Low | No per-tool authorization check — any authenticated MCP client can query any stage (CWE-862) | Risk Accepted | Auth is separate ticket (TASK-FOS-04); MCP transport provides auth boundary; tool is read-only peek with no state mutation |
