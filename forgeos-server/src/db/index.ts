@@ -20,3 +20,15 @@ export {
 } from './pool.js';
 
 export { runMigrations } from './migrate.js';
+
+export {
+  acquireFileLocks,
+  checkFileConflicts,
+  releaseFileLocks,
+  getActiveLocksForTicket,
+  getActiveLockForFile,
+  FileConflictError,
+  type FileConflictDetail,
+  type AcquireFileLocksResult,
+  type ReleaseFileLocksResult,
+} from './file-mutex.js';
