@@ -8,6 +8,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Quality attributes and performance targets** — Comprehensive quality
+  attributes document at `docs/architecture/quality-attributes.md`
+  (FORGEOS-ARCH011). Defines latency targets (p50/p95/p99 for 14 operations,
+  claim p99 ≤ 100ms), throughput targets (50+ concurrent agents, 1000+ active
+  tickets, 200 ops/s mixed workload), availability targets (99.9% SLA,
+  RTO < 5 min, RPO < 1 min), 15 correctness invariants across 5 categories
+  (claim, state transition, dependency, data integrity, concurrency safety),
+  vertical and horizontal scaling paths (up to 100+ agents with PgBouncer),
+  resource utilization budgets (memory, CPU, connection pool, storage, network),
+  5 quality attribute scenarios (SEI/CMU format), 15 fitness functions, monitoring
+  and observability plan, and ADR-011 (correctness-first prioritization). Includes
+  latency breakdown budget, scaling decision matrix, and derivation notes.
+
 - **Event sourcing audit trail schema** — Comprehensive event sourcing design
   at `docs/architecture/event-sourcing-schema.md` (FORGEOS-ARCH007). Defines
   enhanced hybrid model: mutable `tickets` table as primary state source with
