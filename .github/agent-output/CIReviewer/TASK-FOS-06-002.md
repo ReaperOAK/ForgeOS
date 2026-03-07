@@ -111,8 +111,8 @@ N/A — Shell scripts have no import system. The pre-commit hook delegates via `
 
 | Stage | Verdict | Evidence |
 |-------|---------|----------|
-| QA | ✅ PASS | `.github/agent-output/QA/TASK-FOS-06-002.md` — 9/9 functional tests passed, all 8 acceptance criteria met |
-| Security | ⚠️ Pending | Ticket currently in SECURITY stage — Security review not yet complete |
+| QA | ✅ PASS | 9/9 functional tests passed, all 8 acceptance criteria met |
+| Security | ✅ PASS | 0 critical, 0 high, 4 LOW risk-accepted (STRIDE + OWASP reviewed) |
 
 ## SARIF Summary
 
