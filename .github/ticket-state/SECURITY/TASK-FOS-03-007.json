@@ -4,7 +4,7 @@
   "description": "Implement the tickets.graph MCP tool that returns the full ticket dependency DAG for visualization. Queries all tickets (optionally filtered by stage, type, or status), builds nodes (tickets) and edges (from depends_on relationships), and computes the critical path (longest path through the DAG). Must return within 500ms for up to 500 tickets.",
   "type": "backend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Graph structure is valid \u2014 no cycles detected (DAG invariant preserved)"
   ],
   "rework_count": 0,
-  "claimed_by": "QA",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-07T14:28:55.934106Z",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -74,6 +74,15 @@
       "agent": "QA",
       "machine_id": "pop-os",
       "details": "CLAIM by QA on pop-os (ReaperOAK)"
+    },
+    {
+      "timestamp": "2026-03-07T14:06:19.163390+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
