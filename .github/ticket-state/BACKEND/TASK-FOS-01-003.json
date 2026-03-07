@@ -4,7 +4,7 @@
   "description": "Build a seed script that populates the database with initial data: default project entry, system configuration defaults, and an admin agent with a generated API key. Build an import tool that reads existing .github/tickets/*.json files and .github/ticket-state/ directory structure, maps directory location to current stage, preserves ticket history from JSON history arrays, validates imported data against the schema, and produces an import summary report. The import must be idempotent \u2014 re-running it does not create duplicates (uses ON CONFLICT DO UPDATE).",
   "type": "backend",
   "priority": "medium",
-  "stage": "READY",
+  "stage": "BACKEND",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -38,10 +38,10 @@
     "scripts/import-tickets.ts is a CLI entry point that runs seed + import in sequence"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Backend",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-07T13:27:03.820617+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -57,6 +57,13 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-07T12:57:03.820617+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-07T13:27:03.820617+00:00"
     }
   ],
   "source_task_file": "TODO/tickets/01-database-foundation.md",
