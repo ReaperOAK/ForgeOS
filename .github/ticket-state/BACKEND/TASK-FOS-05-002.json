@@ -44,7 +44,7 @@
   "claimed_by": "Backend",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-07T13:26:31.409275+00:00",
+  "lease_expiry": "2026-03-07T14:23:42Z",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -67,6 +67,20 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "Claimed by Backend for BACKEND stage"
+    },
+    {
+      "timestamp": "2026-03-07T13:13:00.624595+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: manual release"
+    },
+    {
+      "timestamp": "2026-03-07T13:53:42Z",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Claimed by Backend for BACKEND stage (ReaperOAK)"
     }
   ],
   "source_task_file": "TODO/tickets/05-dashboard.md",
