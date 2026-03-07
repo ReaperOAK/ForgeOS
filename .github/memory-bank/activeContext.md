@@ -1,3 +1,8 @@
+### [FORGEOS-PM004] — Documentation Summary
+- **Artifacts:** docs/product/dashboard-ux-reqs.md
+- **Decisions:** Created comprehensive dashboard UX requirements document covering 5 views (Pipeline Overview, Ticket Detail, Dependency Graph, Claim Monitor, Agent Status), 8 interaction patterns, SSE-based real-time updates, multi-machine visibility with conflict detection, and a 31×8 priority matrix mapping requirements to L1 capabilities. Chose SSE over WebSocket per CAP-05. Rejected drag-and-drop for stage transitions to preserve SDLC validation guards. D3.js force-directed graph with tiered performance degradation. Hash-based URL routing for static file deployment.
+- **Timestamp:** 2026-03-07T15:35:00Z
+
 ### [TASK-FOS-02-003] — Documentation Summary
 - **Artifacts:** forgeos-server/README.md, CHANGELOG.md
 - **Decisions:** All 4 middleware source files already had comprehensive JSDoc/TSDoc from Backend stage — no inline doc additions needed. Updated README architecture tree to list all 6 middleware files (was missing error-handler.ts, request-id.ts, validation.ts, index.ts). Added new Middleware section documenting mount order, request ID generation, structured logging fields, error classification with PG error code mapping table, withErrorHandling wrapper, and Zod validation factories. Added CHANGELOG entry. Diátaxis classification: Reference.
