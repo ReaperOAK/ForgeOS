@@ -1118,3 +1118,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** infra/docker/postgres/Dockerfile, infra/docker/postgres/init.sql, infra/docker/postgres/pg-healthcheck.sh
 - **Decisions:** PostgreSQL 17 Alpine base with custom Dockerfile. Init script creates forgeos_user (least-privilege, CONNECTION LIMIT 40) and extensions (uuid-ossp, pgcrypto). Health check uses dual validation (pg_isready + SELECT 1). Dev-tuned config: shared_buffers=128MB, work_mem=8MB, max_connections=50. Init script prefixed 00_ to run before migration scripts.
 - **Timestamp:** 2026-03-07T13:38:00Z
+
+### [FORGEOS-DO004] — Create Environment Configuration Profiles
+- **Artifacts:** infra/.env.template, infra/.env.test, infra/config/settings.py, infra/config/__init__.py
+- **Decisions:** Frozen dataclass Config with profile-aware defaults (dev/test/prod). Aggregate error validation reports all issues at once. Minimal built-in dotenv parser (zero deps). Production enforces ADMIN_API_KEY, WEBHOOK_SECRET, JWT_SECRET, DB_PASSWORD. DATABASE_URL composed from DB_* parts if not explicitly set.
+- **Timestamp:** 2026-03-07T13:42:00Z
