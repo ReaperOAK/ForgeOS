@@ -10,6 +10,7 @@
 
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ticketsNextSchema, ticketsNextHandler } from './tickets-next.js';
+import { ticketsClaimSchema, ticketsClaimHandler } from './tickets-claim.js';
 
 /**
  * Register all MCP tools on the server.
@@ -23,5 +24,13 @@ export function registerTools(server: McpServer): void {
     'Find the next available ticket for a given SDLC stage (peek, not claim)',
     ticketsNextSchema.shape,
     async (params) => ticketsNextHandler(params),
+  );
+
+  // ── tickets.claim ────────────────────────────────────────────────────────
+  server.tool(
+    'tickets.claim',
+    'Atomically claim a specific ticket by ID with file lock acquisition',
+    ticketsClaimSchema.shape,
+    async (params) => ticketsClaimHandler(params),
   );
 }
