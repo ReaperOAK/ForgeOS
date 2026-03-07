@@ -4,7 +4,7 @@
   "description": "Define the user personas for the ForgeOS distributed orchestration platform. Document 4 personas \u2014 Human Operator, AI Agent, ReaperOAK Dispatcher, and System Administrator \u2014 each with goals, constraints, interaction patterns, frequency of use, and pain points with the current filesystem-based system. These personas drive all subsequent user story and UX work.",
   "type": "docs",
   "priority": "critical",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "DOCS",
@@ -30,10 +30,10 @@
     "Personas document delivered at docs/product/user-personas.md"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation Specialist",
-  "machine_id": "forgeos-dev",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-07T07:49:58.838412+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -58,6 +58,15 @@
       "from_stage": "READY",
       "to_stage": "READY",
       "details": "Claimed by reaperoak@forgeos-dev via Documentation Specialist, lease until 2026-03-07T07:49:58.838412+00:00"
+    },
+    {
+      "timestamp": "2026-03-07T07:24:03.658007+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation Specialist",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-product.md",
