@@ -8,6 +8,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Development Tooling and Makefile** — Developer ergonomics tooling for the
+  ForgeOS platform (FORGEOS-DO003). Root `Makefile` provides 23 self-documenting
+  targets covering the full development lifecycle: service management (`up`,
+  `down`, `restart`, `ps`, `logs`), database operations (`migrate`, `seed`,
+  `db-shell`, `db-reset`), build (`build`, `build-server`), quality (`test`,
+  `test-watch`, `test-coverage`, `lint`, `typecheck`, `format`), and setup /
+  cleanup (`setup`, `clean`, `clean-all`). `make help` auto-extracts
+  descriptions from all targets. `infra/scripts/setup.sh` checks 7
+  prerequisites (Docker, Docker Compose, Node.js >= 22, npm, Python 3, Git,
+  Make) with version validation, creates `.env` from template, installs
+  Node.js dependencies, and provisions default Docker secrets.
+  `infra/scripts/seed.sh` wraps the TypeScript seed module with Docker and
+  local execution modes, service readiness checks, bounded DB wait loop, and
+  optional ticket JSON import.
+
 - **GitHub Actions CI Workflow for MCP Server** — Continuous integration
   pipeline at `.github/workflows/mcp-server-ci.yml` (FORGEOS-DO005). Triggers
   on push to `main` and pull requests with path filters for `forgeos-server/`,
