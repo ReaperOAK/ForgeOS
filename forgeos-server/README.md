@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-10T00:30:00Z -->
+<!-- last_reviewed: 2026-03-10T15:00:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -170,6 +170,11 @@ variables in the error output.
 | `GET`    | `/api/tickets/:id`         | Bearer   | Full ticket detail with resolved dependency status   |
 | `GET`    | `/api/tickets/:id/history` | Bearer   | Ordered event timeline for a ticket                  |
 | `GET`    | `/api/stages`              | Bearer   | Pipeline overview with counts per stage              |
+| `POST`   | `/api/admin/agents`            | Admin    | Register a new agent (returns one-time API key)      |
+| `GET`    | `/api/admin/agents`            | Admin    | List registered agents (paginated, no key hashes)    |
+| `POST`   | `/api/admin/agents/:id/revoke` | Admin    | Revoke an agent's API key                            |
+| `DELETE` | `/api/admin/agents/:id`        | Admin    | Deregister (soft-delete) an agent                    |
+| `POST`   | `/api/admin/agents/:id/sessions` | Admin  | Create or update an agent session                    |
 | `POST`   | `/api/webhooks/github`     | HMAC     | GitHub push webhook receiver with state reconciliation |
 | `POST`   | `/api/webhooks/github/recover` | HMAC | Replay missed commits for ghost commit recovery      |
 
