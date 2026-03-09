@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-09T18:30:00Z -->
+<!-- last_reviewed: 2026-03-10T00:30:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -170,6 +170,8 @@ variables in the error output.
 | `GET`    | `/api/tickets/:id`         | Bearer   | Full ticket detail with resolved dependency status   |
 | `GET`    | `/api/tickets/:id/history` | Bearer   | Ordered event timeline for a ticket                  |
 | `GET`    | `/api/stages`              | Bearer   | Pipeline overview with counts per stage              |
+| `POST`   | `/api/webhooks/github`     | HMAC     | GitHub push webhook receiver with state reconciliation |
+| `POST`   | `/api/webhooks/github/recover` | HMAC | Replay missed commits for ghost commit recovery      |
 
 ### Authentication
 
@@ -265,6 +267,94 @@ All REST endpoints return structured errors:
 | `401`  | `UNAUTHORIZED`     | Missing or invalid API key   |
 | `404`  | `TICKET_NOT_FOUND` | Ticket ID not in database    |
 | `500`  | `INTERNAL_ERROR`   | Unexpected server error      |
+
+### Webhooks (`/api/webhooks/*`)
+
+The webhook router handles GitHub push events and reconciles Git state
+with database ticket state. Mounted via `createGitHubWebhookRouter()`
+from `src/webhooks/github.ts`.
+
+#### POST /api/webhooks/github — Push Event Receiver
+
+Accepts GitHub push event payloads and reconciles ticket state:
+
+1. Verifies HMAC-SHA256 signature via `X-Hub-Signature-256` header
+   against `WEBHOOK_SECRET`. Rejects invalid signatures with `401`.
+2. Parses the push event payload to extract commit details.
+3. Matches commit messages against CLAIM and WORK patterns:
+   - **CLAIM:** `[TICKET-ID] CLAIM by AGENT on MACHINE (OPERATOR)`
+   - **WORK:** `[TICKET-ID] STAGE complete by AGENT on MACHINE`
+4. Reconciles each detected operation with database state.
+
+Reconciliation rules:
+
+| Git State | DB State | Action |
+|-----------|----------|--------|
+| CLAIM commit exists | No active claim | Create claim in DB |
+| WORK commit exists | Ticket still CLAIMED at stage | Advance ticket |
+| No Git commit | Claim exists, lease expired | Release claim |
+| Ambiguous | Any | Log warning, flag for admin |
+
+All operations are idempotent — replaying the same webhook produces the
+same result. Every action is recorded as a `RECONCILED` event in the
+`events` table.
+
+Success response:
+
+```json
+{
+  "status": "ok",
+  "branch": "main",
+  "commits": 3,
+  "operations": 2,
+  "reconciliation": {
+    "claims_created": 1,
+    "tickets_advanced": 1,
+    "claims_released": 0,
+    "already_reconciled": 0,
+    "ambiguous_states": 0
+  },
+  "timestamp": "2026-03-10T..."
+}
+```
+
+#### POST /api/webhooks/github/recover — Ghost Commit Recovery
+
+Replays reconciliation from missed commits. Accepts a JSON body with:
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `commits` | array | Yes | Array of commit objects (`id`, `message`, `timestamp`, etc.) |
+| `last_known_sha` | string | No | SHA of the last successfully processed commit |
+
+Parses commit messages from the provided array and runs the same
+reconciliation engine used by the push event handler. HMAC-SHA256
+signature verification is required.
+
+Response on success (HTTP 200):
+
+```json
+{
+  "status": "recovered",
+  "last_known_sha": "abc123",
+  "operations_processed": 2,
+  "reconciliation": {
+    "claims_created": 0,
+    "tickets_advanced": 1,
+    "claims_released": 0,
+    "already_reconciled": 1,
+    "ambiguous_states": 0
+  },
+  "timestamp": "2026-03-10T..."
+}
+```
+
+#### Periodic Reconciliation
+
+In addition to webhook-driven reconciliation, the server runs a periodic
+sweep at a configurable interval (`RECONCILIATION_INTERVAL`, default
+300 seconds). The sweep calls the `release_expired_claims()` stored
+function to release tickets with expired leases.
 
 ## Middleware
 

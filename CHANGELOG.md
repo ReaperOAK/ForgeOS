@@ -8,6 +8,23 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Webhook State Recovery Endpoint** — GitHub push webhook receiver and
+  ghost commit recovery system at `forgeos-server/src/webhooks/`
+  (TASK-FOS-06-004). `POST /api/webhooks/github` accepts GitHub push
+  event payloads, verifies HMAC-SHA256 signatures using `WEBHOOK_SECRET`,
+  parses commit messages to extract ticket operations (CLAIM and WORK
+  patterns via regex), and reconciles database state with Git state.
+  Four reconciliation rules: (1) Git CLAIM without DB claim creates
+  claim, (2) Git WORK without DB advance advances ticket, (3) expired
+  lease without Git commit releases claim, (4) ambiguous state logs
+  warning for admin. Recovery endpoint (`POST /api/webhooks/github/recover`)
+  replays reconciliation from missed commits. Periodic sweep releases
+  expired claims at configurable interval (default 300 s). All operations
+  are idempotent. Three modules: `github.ts` (router factory, HMAC
+  verification), `parser.ts` (pure commit message parsing), and
+  `reconciliation.ts` (state reconciliation engine). 72 tests, 94.88%
+  coverage.
+
 - **Husky Pre-Commit Hook — Blast Radius Validation** — Pre-commit hook
   at `.husky/pre-commit` delegating to `scripts/validate-scope.sh`
   (TASK-FOS-06-002). Resolves the current ticket ID from the
