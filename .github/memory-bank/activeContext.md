@@ -1521,3 +1521,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** Makefile, infra/scripts/setup.sh, infra/scripts/seed.sh, .github/agent-output/QA/FORGEOS-DO003.md
 - **Decisions:** PASS (HIGH confidence). All 7 acceptance criteria verified via dry-run validation, shell syntax checking, and manual code review. All 8 required Makefile targets present and functional. Setup script checks Docker, Docker Compose, and Python prerequisites. No hardcoded secrets. Mutation testing and unit test coverage N/A for infra/shell script tooling — validated via `make -n` dry-run (23/23 targets pass) and `bash -n` syntax checks (2/2 scripts pass).
 - **Timestamp:** 2026-03-09T23:45:00Z
+
+### [FORGEOS-DO007] — QA Summary
+- **Artifacts:** infra/scripts/backup.sh, infra/scripts/restore.sh, infra/Makefile, infra/backups/.gitignore, docs/operations/backup-strategy.md, .github/agent-output/QA/FORGEOS-DO007.md
+- **Decisions:** PASS (HIGH confidence). All 6 acceptance criteria verified. bash -n syntax check PASS (2/2 scripts). shellcheck PASS (SC1091 excluded — expected .env source). Functional tests: --help, invalid format, missing file, --list all produce correct behavior. Timestamped pg_dump with configurable directory. Restore validates SHA-256 + pg_restore --list before applying. Confirmation requires typing database name. Strategy doc covers frequency, retention, WAL archiving, PITR, RTO/RPO. Docker and remote modes supported. Makefile targets (backup, restore, restore-list, etc.) all working.
+- **Timestamp:** 2026-03-09T18:15:00Z
