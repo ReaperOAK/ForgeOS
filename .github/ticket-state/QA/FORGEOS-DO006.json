@@ -33,10 +33,10 @@
     "Workflow reports which migrations were applied and their execution time"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "QA",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-09T21:12:01.405603+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
