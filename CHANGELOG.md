@@ -8,6 +8,23 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **GitHub Actions CI Workflow for MCP Server** — Continuous integration
+  pipeline at `.github/workflows/mcp-server-ci.yml` (FORGEOS-DO005). Triggers
+  on push to `main` and pull requests with path filters for `forgeos-server/`,
+  `mcp-server/`, and the workflow file itself. Six parallel jobs: TypeScript
+  lint and type check (Node.js 22, `npm run lint` + `npm run typecheck`),
+  TypeScript tests with coverage (Vitest + PostgreSQL 17 Alpine service
+  container), Python lint and type check (ruff + pyright), Python tests with
+  coverage (pytest + PostgreSQL 17 Alpine service container), Docker build
+  verification (multi-stage build, no push), and a CI gate aggregation job
+  that fails the pipeline if any upstream job fails. Uses concurrency control
+  (`cancel-in-progress: true`), minimal permissions (`contents: read`),
+  deterministic installs (`npm ci`, `pip install -e ".[dev]"`), dependency
+  caching (npm, pip, Docker GHA layer cache), health-checked PostgreSQL
+  service containers with `pg_isready`, and 7-day coverage artifact retention.
+  All individual job timeouts under 10 minutes. CI gate job produces a
+  GitHub Step Summary with pass/fail status.
+
 - **Dashboard Design System and Layout Specification** — Foundational design
   token system and responsive dashboard layout for ForgeOS (FORGEOS-UID001).
   Design tokens (`docs/uiux/design-tokens.json`) define dark and light themes

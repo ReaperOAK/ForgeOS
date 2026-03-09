@@ -1,3 +1,8 @@
+### [FORGEOS-DO005] — Documentation Summary
+- **Artifacts:** CHANGELOG.md, README.md, .github/agent-output/Documentation/FORGEOS-DO005.md
+- **Decisions:** Added CI workflow CHANGELOG entry under [Unreleased]. Added GitHub Actions status badge to README top. Added Continuous Integration section to README with 6-job summary table. No code changes — documentation only.
+- **Timestamp:** 2026-03-10T14:00:00Z
+
 ### [FORGEOS-UID001] — Documentation Summary
 - **Artifacts:** docs/uiux/design-tokens.json, docs/uiux/layout-spec.md, docs/uiux/mockups/FORGEOS-UID001.md, CHANGELOG.md, README.md, .github/agent-output/Documentation/FORGEOS-UID001.md
 - **Decisions:** Added last_reviewed freshness metadata to all 3 design artifacts. Added CHANGELOG entry describing design token system, layout spec, and mockup doc. Added Design System Artifacts table and docs/ directory tree to README.md. No code changes — doc comments only.
@@ -1701,3 +1706,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-DO005.md
 - **Decisions:** PASS — Score 95/100, 0 critical, 1 warning (pyright vs mypy spec deviation, accepted by upstream). YAML valid, zero TODOs, all workflow best practices met.
 - **Timestamp:** 2026-03-10T13:00:00+00:00
+
+### [FORGEOS-DO004] — Validation Summary (Rework #1 → APPROVED)
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-DO004.md
+- **Decisions:** APPROVED — 10/10 DoD items pass. All 6 AC verified. 64 tests, 93% coverage. Lint (ruff) and type checks (pyright) clean. All upstream verdicts (QA, Security, CI, Docs) confirmed PASS. Previous rework issues fully resolved. Two non-blocking observations: garbled get_settings() docstring (cosmetic) and basic README env vars section.
+- **Timestamp:** 2026-03-10T14:00:00+00:00
