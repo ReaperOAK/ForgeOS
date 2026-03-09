@@ -29,3 +29,7 @@ semantic-kernel-main
 Building a Multi-Agent Vibecoding System.md
 CHAOS-DIAGNOSIS-REPORT.md
 forgeos-server/node_modules
+forgeos-server/coverage
+node_modules
+mcp-server/.venv
+.venv
