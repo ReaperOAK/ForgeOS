@@ -651,15 +651,38 @@ The `infra/` directory contains a Docker Compose stack for running the full
 ForgeOS platform locally. Three services start with a single command:
 PostgreSQL 17, the MCP Server, and pgAdmin.
 
+A root `Makefile` wraps all common operations. Run `make help` to list every
+available target.
+
 ```bash
-cd infra
+# First-time setup — checks prerequisites, installs deps, creates .env
+make setup
 
-# Start all services
-docker compose up
+# Start all services (Postgres, MCP server, pgAdmin)
+make up
 
-# Development mode (hot-reload, debug logging)
-docker compose -f docker-compose.yml -f docker-compose.dev.yml up
+# Apply database migrations and load sample data
+make migrate
+make seed
+
+# Run the full test suite
+make test
+
+# Show all available targets
+make help
 ```
+
+| Target | Purpose |
+|--------|---------|
+| `make up` | Start services in dev mode (detached) |
+| `make down` | Stop containers, preserve volumes |
+| `make restart` | Stop then start all services |
+| `make migrate` | Apply pending database migrations |
+| `make seed` | Load sample ticket data |
+| `make test` | Run vitest test suite |
+| `make logs` | Tail logs for all services |
+| `make lint` | Run ESLint + Ruff linters |
+| `make clean` | Remove build artefacts and stopped containers |
 
 | Service    | URL                    |
 |------------|------------------------|
