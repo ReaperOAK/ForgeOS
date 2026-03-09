@@ -1846,3 +1846,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/sdlc/flows.ts, forgeos-server/src/sdlc/transitions.ts, forgeos-server/src/tools/tickets-complete.ts, forgeos-server/src/tools/index.ts
 - **Decisions:** Re-exported SDLC_FLOWS from types/index.ts into sdlc/flows.ts for clean separation. Used advance_ticket SQL function directly rather than reimplementing stage logic in TypeScript. Evidence JSONB built at handler level and passed to SQL function.
 - **Timestamp:** 2026-03-09T21:13:14.080577+00:00
+
+### [FORGEOS-BE003] — Backend Implementation
+- **Artifacts:** mcp-server/alembic/versions/20260310_000000_002_event_tables.py, mcp-server/tests/test_002_event_tables.py
+- **Decisions:** Created Alembic migration 002 for event history and audit tables (ARCH007). event_history with JSONB state snapshots and immutability triggers. stage_transitions for SDLC transitions. Enhanced events table with sequence_number, aggregate_version, correlation/causation IDs, schema_version. file_locks already in migration 001 (not recreated). 70 structural TDD tests, 100% pass. Lint clean.
+- **Timestamp:** 2026-03-10T21:45:00Z
