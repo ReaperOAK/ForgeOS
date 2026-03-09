@@ -35,10 +35,10 @@
     "Backup and restore can be invoked via Makefile targets (`make backup`, `make restore`)"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "CIReviewer",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-09T19:38:22.159978+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
