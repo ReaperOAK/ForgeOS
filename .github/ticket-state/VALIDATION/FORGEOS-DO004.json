@@ -35,10 +35,10 @@
     "Development, test, and production profiles are distinguishable via a single ENVIRONMENT variable"
   ],
   "rework_count": 1,
-  "claimed_by": "Documentation",
+  "claimed_by": "Validator",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-09T19:39:57.839571+00:00",
+  "lease_expiry": "2026-03-09T20:05:54.780434+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
