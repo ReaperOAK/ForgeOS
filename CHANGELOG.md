@@ -8,6 +8,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Husky Pre-Commit Hook — Blast Radius Validation** — Pre-commit hook
+  at `.husky/pre-commit` delegating to `scripts/validate-scope.sh`
+  (TASK-FOS-06-002). Resolves the current ticket ID from the
+  `FORGEOS_TICKET_ID` environment variable or the last commit message
+  `[TICKET-ID]` pattern. Queries the MCP server REST API
+  (`GET /api/tickets/:id`) to retrieve the ticket's `file_paths`, then
+  validates each staged file against allowed paths using prefix matching.
+  Out-of-scope files cause the commit to be rejected with a clear error
+  listing violating files and allowed paths. Graceful degradation: if the
+  MCP server is unreachable or no ticket context is available, the hook
+  warns and allows the commit. Configurable via `FORGEOS_MCP_URL`,
+  `FORGEOS_TICKET_ID`, and `FORGEOS_CURL_TIMEOUT` environment variables.
+  Bypass with `git commit --no-verify`.
+
 - **Seed Data and Filesystem Import Tool** — Database bootstrapping pipeline
   at `forgeos-server/src/db/seed.ts`, `forgeos-server/src/db/import.ts`, and
   `forgeos-server/scripts/import-tickets.ts` (TASK-FOS-01-003). Seed script

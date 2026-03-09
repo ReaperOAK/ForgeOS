@@ -1552,6 +1552,11 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** Complete rewrite of dashboard HTML/CSS from design tokens. Vanilla HTML+CSS (no framework). Dark theme default with light theme variant via data-theme. Inter+JetBrains Mono fonts via CDN. 8 kanban columns + 4 compact. WCAG 2.2 AA: ARIA roles, keyboard nav, focus indicators, reduced motion, high contrast. Responsive 320-1440px. All 11 AC met.
 - **Timestamp:** 2026-03-09T18:16:54Z
 
+### [TASK-FOS-06-002] — Documentation Summary
+- **Artifacts:** forgeos-server/README.md, forgeos-server/scripts/validate-scope.sh, forgeos-server/.husky/pre-commit, CHANGELOG.md, .github/agent-output/Documentation/TASK-FOS-06-002.md
+- **Decisions:** Restructured README "Commit Message Convention" → unified "Git Hooks" section covering both pre-commit (blast radius) and commit-msg hooks. Added function-level docs to all 4 shell functions. Kept Diátaxis classification as Reference.
+- **Timestamp:** 2026-03-09T18:30:00Z
+
 ### [FORGEOS-BE015] — QA Summary
 - **Artifacts:** mcp-server/src/mcp_server/server.py, mcp-server/src/mcp_server/__init__.py, mcp-server/src/mcp_server/__main__.py, mcp-server/pyproject.toml, mcp-server/README.md, mcp-server/tests/test_server.py
 - **Decisions:** QA PASS — 80/80 tests pass, 96% coverage (97% server.py), ruff clean. All 6 acceptance criteria verified. Minor observation: duplicate deps in pyproject.toml (non-blocking).

@@ -7,15 +7,25 @@
 # retrieve allowed paths, then validates each staged
 # file using prefix matching.
 #
+# Implements Architecture §7.5 and PRD FR-20.
+#
 # Ticket ID resolution (priority order):
 #   1. FORGEOS_TICKET_ID environment variable
 #   2. Last commit message [TICKET-ID] pattern
 #
 # Graceful degradation:
 #   - MCP server unreachable → WARNING, allow commit
-#   - No ticket context → INFO, allow commit
+#   - No ticket context      → INFO, allow commit
+#   - Empty file_paths       → WARNING, allow commit
+#
+# Environment variables:
+#   FORGEOS_MCP_URL        — MCP server base URL (default: http://localhost:3000)
+#   FORGEOS_TICKET_ID      — Explicit ticket ID override
+#   FORGEOS_CURL_TIMEOUT   — API request timeout in seconds (default: 5)
 #
 # Bypass: git commit --no-verify
+#
+# last_reviewed: 2026-03-09T18:30:00Z
 # ──────────────────────────────────────────────────────
 
 set -euo pipefail
@@ -35,7 +45,11 @@ warn()    { echo "[WARNING] $*"; }
 error()   { echo "[ERROR]   $*"; }
 
 # ─── Step 1: Resolve Ticket ID ───────────────────────
-
+#
+# Outputs the ticket ID to stdout. Returns 0 on success, 1 if no ticket
+# context is available. Checks FORGEOS_TICKET_ID first, then parses the
+# last git commit message for a [TICKET-ID] prefix.
+#
 resolve_ticket_id() {
   # Priority 1: Environment variable
   if [[ -n "${FORGEOS_TICKET_ID:-}" ]]; then
@@ -60,7 +74,14 @@ resolve_ticket_id() {
 }
 
 # ─── Step 2: Query MCP Server for file_paths ─────────
-
+#
+# Arguments:
+#   $1 — ticket ID string
+#
+# Outputs each allowed file path on a separate line to stdout.
+# Returns 0 on success, 1 if the MCP server is unreachable or
+# the response cannot be parsed.
+#
 query_ticket_paths() {
   local ticket_id="$1"
   local api_url="${MCP_URL}/api/tickets/${ticket_id}"
@@ -88,7 +109,15 @@ except (json.JSONDecodeError, KeyError):
 }
 
 # ─── Step 3: Validate staged files ───────────────────
-
+#
+# Arguments:
+#   $1        — ticket ID string
+#   $2..$N    — allowed file paths
+#
+# Compares every staged file against the allowed paths using
+# prefix matching. Returns 0 if all files are in scope, 1 if
+# any violation is found (with a formatted rejection message).
+#
 validate_scope() {
   local ticket_id="$1"
   shift
@@ -150,7 +179,10 @@ validate_scope() {
 }
 
 # ─── Main ─────────────────────────────────────────────
-
+#
+# Entry point. Orchestrates ticket resolution, MCP query, and
+# scope validation. Exit codes: 0 = commit allowed, 1 = rejected.
+#
 main() {
   # Resolve ticket ID
   local ticket_id
