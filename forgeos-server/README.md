@@ -273,6 +273,96 @@ All REST endpoints return structured errors:
 | `404`  | `TICKET_NOT_FOUND` | Ticket ID not in database    |
 | `500`  | `INTERNAL_ERROR`   | Unexpected server error      |
 
+### Admin API (`/api/admin/*`)
+
+The admin router provides agent lifecycle management endpoints. All routes
+require `admin.manage_keys` permission enforced via `requirePermission()`
+middleware. Mounted via `adminRouter` from `src/api/routes/admin.ts`.
+
+Service logic lives in `src/auth/registration.ts` — Zod-validated inputs,
+SHA-256 key hashing, and structured pino logging throughout.
+
+#### POST /api/admin/agents — Register Agent
+
+Creates a new agent identity with a generated API key.
+
+**Request body** (JSON):
+
+| Field         | Type       | Required | Description                        |
+|---------------|------------|----------|----------------------------------  |
+| `name`        | `string`   | Yes      | Unique agent name (3–100 chars)    |
+| `role`        | `string`   | Yes      | One of the defined agent roles     |
+| `permissions` | `string[]` | No       | Additional permission strings      |
+| `machine_id`  | `string`   | No       | Machine identifier for the agent   |
+
+**Response** (201):
+
+```json
+{
+  "agent": { "id": "uuid", "name": "backend-01", "role": "backend", "is_active": true },
+  "api_key": "forgeos_agent_<plaintext>   <- shown once, never stored"
+}
+```
+
+#### GET /api/admin/agents — List Agents
+
+Returns a paginated list of registered agents. Key hashes are never exposed.
+
+**Query parameters:**
+
+| Param    | Type     | Default | Description                  |
+|----------|----------|---------|------------------------------|
+| `page`   | `number` | `1`     | Page number (1-based)        |
+| `limit`  | `number` | `50`    | Items per page (1–100)       |
+| `role`   | `string` | —       | Filter by agent role         |
+| `active` | `boolean`| —       | Filter by active status      |
+
+**Response** (200):
+
+```json
+{
+  "agents": [ { "id": "uuid", "name": "...", "role": "...", "is_active": true, "created_at": "..." } ],
+  "total": 42,
+  "page": 1,
+  "limit": 50
+}
+```
+
+#### POST /api/admin/agents/:id/revoke — Revoke API Key
+
+Sets `revoked_at` on the agent record. Subsequent requests using the revoked
+key receive `401 Unauthorized`.
+
+**Response** (200): `{ "success": true, "agent_id": "uuid", "revoked_at": "ISO8601" }`
+
+#### DELETE /api/admin/agents/:id — Deregister Agent
+
+Soft-deletes the agent by setting `is_active = false` and `deregistered_at`.
+
+**Response** (200): `{ "success": true, "agent_id": "uuid", "deregistered_at": "ISO8601" }`
+
+#### POST /api/admin/agents/:id/sessions — Create/Update Session
+
+Associates a session token (MCP session ID) with the agent.
+
+**Request body** (JSON):
+
+| Field           | Type     | Required | Description              |
+|-----------------|----------|----------|--------------------------|
+| `session_token` | `string` | Yes      | MCP session identifier   |
+| `machine_id`    | `string` | No       | Machine running session  |
+
+**Response** (200):
+
+```json
+{
+  "session_id": "uuid",
+  "agent_id": "uuid",
+  "session_token": "mcp-session-abc",
+  "created_at": "ISO8601"
+}
+```
+
 ### Webhooks (`/api/webhooks/*`)
 
 The webhook router handles GitHub push events and reconciles Git state
