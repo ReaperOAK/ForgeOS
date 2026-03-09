@@ -4,7 +4,7 @@
   "description": "Define health check scripts for all Docker containers and an optional monitoring stack. Create health check scripts for the MCP server (HTTP endpoint) and PostgreSQL (connection test). Provide an optional docker-compose override for monitoring tools (e.g., Prometheus, Grafana) that can be enabled for local observability.",
   "type": "infra",
   "priority": "medium",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
