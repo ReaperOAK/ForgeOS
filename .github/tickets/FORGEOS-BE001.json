@@ -4,7 +4,7 @@
   "description": "Set up the Alembic migration framework for the ForgeOS PostgreSQL database. Initialize the Alembic project structure, configure the database connection string to read from environment variables, set up the migration environment with async support (asyncpg), and create the migration script template. The framework must support both upgrade and downgrade operations.",
   "type": "backend",
   "priority": "critical",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
