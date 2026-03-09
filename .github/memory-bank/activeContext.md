@@ -1,4 +1,9 @@
-### [FORGEOS-BE4-002] — Security Review
+### [TASK-FOS-04-002] — Security Review
+- **Artifacts:** .github/agent-output/Security/TASK-FOS-04-002.md
+- **Decisions:** PASS — Zero critical/high findings. STRIDE threat model on 3 trust boundaries (Client→API, API→DB, Auth Middleware). OWASP Top 10 all passed. 3 findings: SEC-001 (LOW, session token in logs), SEC-002 (MEDIUM, rate limiting config not enforced), SEC-003 (LOW, no helmet headers). All mitigated by existing API key auth + admin permission gate.
+- **Timestamp:** 2026-03-10T12:00:00+00:00
+
+### [FORGEOS-DO4-002] — Security Review
 - **Artifacts:** .github/agent-output/Security/TASK-FOS-04-002.md
 - **Decisions:** PASS — Zero critical/high findings. STRIDE threat model on 3 trust boundaries (Client→API, API→DB, Auth Middleware). OWASP Top 10 all passed. 3 findings: SEC-001 (LOW, session token in logs), SEC-002 (MEDIUM, rate limiting config not enforced), SEC-003 (LOW, no helmet headers). All mitigated by existing API key auth + admin permission gate.
 - **Timestamp:** 2026-03-10T12:00:00+00:00
@@ -1636,3 +1641,28 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Security/TASK-FOS-04-002.md
 - **Decisions:** PASS (HIGH confidence) — Zero critical/high findings. 3 findings: SEC-002 MEDIUM (rate limiting configured but not enforced), SEC-001 LOW (MCP session token logged at debug), SEC-003 LOW (no helmet security headers). SHA-256 key hashing, parameterized SQL, Zod validation, RBAC enforcement all verified sound.
 - **Timestamp:** 2026-03-10T00:15:00Z
+
+### [FORGEOS-DO003] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-DO003.md
+- **Decisions:** PASS — Score 97/100, 0 critical, 0 warnings, 3 suggestions (SC2059 shellcheck notes)
+- **Timestamp:** 2026-03-10T12:00:00+00:00
+
+### [TASK-FOS-04-002] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/TASK-FOS-04-002.md
+- **Decisions:** PASS — Score 98/100, 0 critical, 0 warnings, 2 suggestions (ESLint not installed, coverage instrumentation gap). tsc --noEmit clean. No TODOs, no console.log, no else keywords, no circular imports. All functions CC <= 5.
+- **Timestamp:** 2026-03-10T14:30:00+00:00
+
+### [FORGEOS-BE001] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE001.md
+- **Decisions:** PASS — Score 86/100, 0 critical, 2 warnings (auto-fixable import style in env.py), 4 suggestions (Alembic template boilerplate). 101 tests passed, 100% coverage. Pyright strict: 0 errors. No TODOs, no dead code, no circular deps.
+- **Timestamp:** 2026-03-10T14:30:00+00:00
+
+### [FORGEOS-DO007] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-DO007.md
+- **Decisions:** PASS — Score 95/100, 0 critical, 0 warnings, 2 suggestions (OC-007 long functions in restore.sh, duplicated log helpers). ShellCheck clean (0 errors, 0 warnings). bash -n syntax pass. Zero TODO/FIXME. Upstream QA PASS and Security PASS verified.
+- **Timestamp:** 2026-03-10T19:10:00+00:00
+
+### [FORGEOS-DO008] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-DO008.md
+- **Decisions:** PASS — Score 100/100, 0 critical, 0 warnings. ShellCheck clean, YAML valid, no TODOs, proper conventions.
+- **Timestamp:** 2026-03-10T19:15:00+00:00
