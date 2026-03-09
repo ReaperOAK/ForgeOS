@@ -37,10 +37,10 @@
     "Mockup approval status set to APPROVED in mockup document header"
   ],
   "rework_count": 0,
-  "claimed_by": "UIDesigner",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-09T20:39:19.993103+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -63,6 +63,15 @@
       "agent": "UIDesigner",
       "machine_id": "pop-os",
       "details": "UI design complete. 5 Stitch screens, mockup APPROVED, 3 component specs. All 7 AC met."
+    },
+    {
+      "timestamp": "2026-03-09T20:33:35.348977+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "UIDesigner",
+      "machine_id": "system",
+      "from_stage": "FRONTEND",
+      "to_stage": "FRONTEND",
+      "details": "Advanced from FRONTEND to FRONTEND"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
