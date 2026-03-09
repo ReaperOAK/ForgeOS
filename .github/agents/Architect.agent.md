@@ -100,6 +100,48 @@ Every completion claim must include:
 - DAG task graph with critical path and parallel groups identified
 - Confidence level: HIGH / MEDIUM / LOW with basis
 
-## 10. References
+## 10. MCP Tool Integration
+
+### Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `FORGEOS_MCP_URL` | MCP server endpoint (e.g., `http://localhost:3000/mcp`) | Yes |
+| `FORGEOS_API_KEY` | Agent authentication key for MCP server | Yes |
+
+### Authorized MCP Tools
+
+| Tool | Purpose | Scope Constraint |
+|------|---------|------------------|
+| `tickets.next` | Find next claimable ticket | Stage: `ARCHITECT` only |
+| `tickets.claim` | Acquire distributed lock on a ticket | Stage: `ARCHITECT` only |
+| `tickets.complete` | Mark stage done, advance ticket | Own claimed tickets |
+| `tickets.spawn` | Create sub-tickets for decomposed work | Within ticket scope |
+| `tickets.release` | Release a claim without completing | Own claims only |
+| `tickets.extend` | Extend lease on claimed ticket | Own claims only |
+
+**Denied tools:** `tickets.reject`, `tickets.graph`, `tickets.sync`, `tickets.stats`.
+
+### MCP Workflow (Primary)
+
+1. `tickets.next({stage: "ARCHITECT"})` — discover available tickets.
+2. `tickets.claim({ticket_id, agent: "Architect", machine_id, operator})` — acquire distributed lock.
+3. Execute architecture work (git two-commit protocol still applies).
+4. `tickets.complete({ticket_id, evidence: {artifacts, adrs, api_specs}})` — advance to DOCS stage.
+
+### Fallback: CLI Mode
+
+If the MCP server is unreachable, fall back to direct CLI:
+
+```bash
+python3 .github/tickets.py --claim <id> Architect $(hostname) <operator>
+# ... execute work ...
+python3 .github/tickets.py --advance <id> Architect
+```
+
+See `docs/architecture/api/mcp-tool-definitions.md` for full tool schemas and error codes.
+
+## 11. References
 - `.github/instructions/*.instructions.md` (5 canonical rule files)
 - `.github/vibecoding/chunks/Architect.agent/` (domain expertise chunks)
+- `docs/architecture/api/mcp-tool-definitions.md`

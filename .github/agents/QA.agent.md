@@ -88,11 +88,13 @@ Execute in order before any work. No skips.
 
 **PASS** — All quality gates satisfied:
 - All tests pass, coverage ≥80%, mutation score meets targets, no critical defects
-- Advance ticket: `python3 .github/tickets.py --advance {ticket-id} QA`
+- Advance ticket via MCP: `tickets.complete({ticket_id, evidence: {verdict: "PASS", coverage, mutation_score}})`
+- Fallback CLI: `python3 .github/tickets.py --advance {ticket-id} QA`
 
 **FAIL** — Any gate fails:
 - Document specific failures: file, line, test name, expected vs actual
-- Send for rework: `python3 .github/tickets.py --rework {ticket-id} QA "{reason}"`
+- Reject ticket via MCP: `tickets.reject({ticket_id, reason: "<detailed failure>", evidence: {...}})`
+- Fallback CLI: `python3 .github/tickets.py --rework {ticket-id} QA "{reason}"`
 - Rework reason must include actionable fix guidance
 
 ## 7. Work Commit (Commit 2)
@@ -141,7 +143,51 @@ Every QA report must include:
 | Verdict: PASS or FAIL with justification | Always |
 | Confidence: HIGH / MEDIUM / LOW | Always |
 
-## 11. References
+## 11. MCP Tool Integration
+
+### Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `FORGEOS_MCP_URL` | MCP server endpoint (e.g., `http://localhost:3000/mcp`) | Yes |
+| `FORGEOS_API_KEY` | Agent authentication key for MCP server | Yes |
+
+### Authorized MCP Tools
+
+| Tool | Purpose | Scope Constraint |
+|------|---------|------------------|
+| `tickets.next` | Find next claimable ticket | Stage: `QA` only |
+| `tickets.claim` | Acquire distributed lock on a ticket | Stage: `QA` only |
+| `tickets.complete` | Mark QA PASS, advance to SECURITY | Own claimed tickets |
+| `tickets.reject` | Mark QA FAIL, send to rework | Own claimed tickets |
+| `tickets.release` | Release a claim without completing | Own claims only |
+| `tickets.extend` | Extend lease on claimed ticket | Own claims only |
+
+**Denied tools:** `tickets.spawn`, `tickets.graph`, `tickets.sync`, `tickets.stats`.
+
+### MCP Workflow (Primary)
+
+1. `tickets.next({stage: "QA"})` — discover available tickets.
+2. `tickets.claim({ticket_id, agent: "QA", machine_id, operator})` — acquire distributed lock.
+3. Execute QA analysis (git two-commit protocol still applies).
+4. On PASS: `tickets.complete({ticket_id, evidence: {verdict: "PASS", coverage, mutation_score}})` — advance to SECURITY.
+5. On FAIL: `tickets.reject({ticket_id, reason: "<failure details>", evidence: {defects, coverage}})` — rework.
+
+### Fallback: CLI Mode
+
+If the MCP server is unreachable, fall back to direct CLI:
+
+```bash
+python3 .github/tickets.py --claim <id> QA $(hostname) <operator>
+# ... execute QA ...
+python3 .github/tickets.py --advance <id> QA        # on PASS
+python3 .github/tickets.py --rework <id> QA "reason" # on FAIL
+```
+
+See `docs/architecture/api/mcp-tool-definitions.md` for full tool schemas and error codes.
+
+## 12. References
 
 - `.github/instructions/*.instructions.md` (core, sdlc, ticket-system, git-protocol, agent-behavior, terminal-management)
 - `.github/vibecoding/chunks/QA.agent/` (test strategy details, examples, report templates)
+- `docs/architecture/api/mcp-tool-definitions.md`

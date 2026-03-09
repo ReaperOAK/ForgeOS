@@ -16,8 +16,8 @@ Stateless ticket dispatcher. Scans READY tickets, dispatches exactly one subagen
 Execute in order before any work:
 1. Read `.github/guardian/STOP_ALL` — if contains `STOP`: halt immediately, zero edits, zero dispatches.
 2. Read all `.github/instructions/*.instructions.md` (core, sdlc, ticket-system, git-protocol, agent-behavior, terminal-management).
-3. Run `python3 .github/tickets.py --sync` — releases expired claims, evaluates deps, moves unblocked to READY.
-4. Run `python3 .github/tickets.py --status --json` — get machine-readable state of all tickets.
+3. Run `tickets.sync()` via MCP (or fallback: `python3 .github/tickets.py --sync`) — releases expired claims, evaluates deps, moves unblocked to READY.
+4. Run `tickets.stats()` via MCP (or fallback: `python3 .github/tickets.py --status --json`) — get machine-readable state of all tickets.
 
 ## 3. Execution Loop
 
@@ -26,8 +26,8 @@ Repeat until no READY tickets remain and no active workers:
 2. For each READY ticket: determine the correct agent from ticket type + current stage (see §4).
 3. Dispatch one `runSubagent` call per ticket with a full delegation packet (see §5).
 4. On subagent completion: verify summary written to `.github/agent-output/{Agent}/{ticket-id}.md`.
-5. Advance ticket to next stage via `python3 .github/tickets.py --advance <id> <agent>`.
-6. Re-run `python3 .github/tickets.py --sync` and repeat.
+5. Advance ticket to next stage via MCP: `tickets.complete({ticket_id, agent})` (or fallback: `python3 .github/tickets.py --advance <id> <agent>`).
+6. Re-run `tickets.sync()` via MCP (or fallback: `python3 .github/tickets.py --sync`) and repeat.
 
 ## 4. Agent Selection
 
@@ -129,7 +129,48 @@ If uncertain whether an action is destructive, treat it as destructive.
 - Maximum 3 rework attempts per ticket. After 3: escalate to human, do not retry.
 - Same failure strategy 3 times → switch approach or escalate.
 
-## 11. References
+## 11. MCP Tool Integration
+
+### Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `FORGEOS_MCP_URL` | MCP server endpoint (e.g., `http://localhost:3000/mcp`) | Yes |
+| `FORGEOS_API_KEY` | Dispatcher authentication key for MCP server | Yes |
+
+### Authorized MCP Tools
+
+| Tool | Purpose | Scope Constraint |
+|------|---------|------------------|
+| `tickets.next` | Find next claimable ticket | All stages (dispatcher privilege) |
+| `tickets.stats` | Get ticket state dashboard | Read-only, all tickets |
+| `tickets.graph` | Visualize dependency graph | Read-only, all tickets |
+| `tickets.sync` | Release expired claims, evaluate deps | System-wide operation |
+
+**Denied tools:** `tickets.claim`, `tickets.complete`, `tickets.reject`, `tickets.spawn`, `tickets.release`, `tickets.extend` — ReaperOAK dispatches agents, it does not claim or process tickets.
+
+### MCP Workflow (Primary)
+
+1. `tickets.sync()` — release expired claims, move unblocked tickets to READY.
+2. `tickets.stats()` — get machine-readable state of all tickets.
+3. `tickets.next({stage: "<stage>"})` — find claimable tickets per stage.
+4. Dispatch subagent per ticket (agents use their own MCP tools to claim/complete).
+5. On subagent completion: verify summary, then re-run `tickets.sync()`.
+6. `tickets.graph()` — inspect dependency graph when debugging blocked tickets.
+
+### Fallback: CLI Mode
+
+If the MCP server is unreachable, fall back to direct CLI:
+
+```bash
+python3 .github/tickets.py --sync
+python3 .github/tickets.py --status --json
+python3 .github/tickets.py --advance <id> <agent>
+```
+
+See `docs/architecture/api/mcp-tool-definitions.md` for full tool schemas and error codes.
+
+## 12. References
 
 - `.github/instructions/core.instructions.md`
 - `.github/instructions/sdlc.instructions.md`
@@ -138,3 +179,4 @@ If uncertain whether an action is destructive, treat it as destructive.
 - `.github/instructions/agent-behavior.instructions.md`
 - `.github/tickets.py` — ticket state machine manager
 - `.github/agent-runner.py` — two-commit protocol runner
+- `docs/architecture/api/mcp-tool-definitions.md`

@@ -81,6 +81,8 @@ After claiming, execute these checks against all files in the ticket's `file_pat
 
 - **PASS** → advance ticket to DOCS stage.
 - **FAIL** → reject with SARIF evidence:
+  - MCP: `tickets.reject({ticket_id, reason: "<finding summary>", evidence: {sarif, quality_score}})`
+  - Fallback CLI:
   ```bash
   python3 .github/tickets.py --rework {ticket-id} CIReviewer "{reason with finding summary}"
   ```
@@ -139,7 +141,50 @@ Every completion claim MUST include:
 | Verdict | PASS or FAIL with quality score and justification |
 | Confidence | HIGH / MEDIUM / LOW with basis |
 
-## 11. References
+## 11. MCP Tool Integration
+
+### Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `FORGEOS_MCP_URL` | MCP server endpoint (e.g., `http://localhost:3000/mcp`) | Yes |
+| `FORGEOS_API_KEY` | Agent authentication key for MCP server | Yes |
+
+### Authorized MCP Tools
+
+| Tool | Purpose | Scope Constraint |
+|------|---------|------------------|
+| `tickets.next` | Find next claimable ticket | Stage: `CI` only |
+| `tickets.claim` | Acquire distributed lock on a ticket | Stage: `CI` only |
+| `tickets.complete` | Mark CI PASS, advance to DOCS | Own claimed tickets |
+| `tickets.reject` | Mark CI FAIL, send to rework | Own claimed tickets |
+| `tickets.release` | Release a claim without completing | Own claims only |
+| `tickets.extend` | Extend lease on claimed ticket | Own claims only |
+
+**Denied tools:** `tickets.spawn`, `tickets.graph`, `tickets.sync`, `tickets.stats`.
+
+### MCP Workflow (Primary)
+
+1. `tickets.next({stage: "CI"})` — discover available tickets.
+2. `tickets.claim({ticket_id, agent: "CIReviewer", machine_id, operator})` — acquire distributed lock.
+3. Execute CI analysis (git two-commit protocol still applies).
+4. On PASS: `tickets.complete({ticket_id, evidence: {verdict: "PASS", quality_score, sarif}})` — advance to DOCS.
+5. On FAIL: `tickets.reject({ticket_id, reason: "<finding summary>", evidence: {sarif, quality_score}})` — rework.
+
+### Fallback: CLI Mode
+
+If the MCP server is unreachable, fall back to direct CLI:
+
+```bash
+python3 .github/tickets.py --claim <id> CIReviewer $(hostname) <operator>
+# ... execute CI review ...
+python3 .github/tickets.py --advance <id> CIReviewer    # on PASS
+python3 .github/tickets.py --rework <id> CIReviewer "reason" # on FAIL
+```
+
+See `docs/architecture/api/mcp-tool-definitions.md` for full tool schemas and error codes.
+
+## 12. References
 
 - `.github/instructions/core.instructions.md`
 - `.github/instructions/sdlc.instructions.md`
@@ -147,3 +192,4 @@ Every completion claim MUST include:
 - `.github/instructions/git-protocol.instructions.md`
 - `.github/instructions/agent-behavior.instructions.md`
 - `.github/vibecoding/chunks/CIReviewer.agent/`
+- `docs/architecture/api/mcp-tool-definitions.md`

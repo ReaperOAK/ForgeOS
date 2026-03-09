@@ -90,7 +90,8 @@ For every ticket, perform ALL of the following analyses on modified files:
 → Advance ticket to CI stage.
 
 **FAIL** — Any critical or high finding present.
-→ Reject ticket. Execute: `python3 .github/tickets.py --rework {ticket-id} Security "{finding summary}"`
+→ Reject ticket via MCP: `tickets.reject({ticket_id, reason: "<finding summary>", evidence: {sarif, threat_model}})`
+→ Fallback CLI: `python3 .github/tickets.py --rework {ticket-id} Security "{finding summary}"`
 → Append entry to `.github/memory-bank/riskRegister.md` with threat details, severity, and recommended fix.
 
 ## 7. Work Commit (Commit 2)
@@ -137,7 +138,51 @@ Every completion claim must include:
 - **Findings in SARIF format** with rule IDs, CWE references, severity, locations.
 - **Verdict:** PASS or FAIL with justification and confidence level (HIGH/MEDIUM/LOW).
 
-## 11. References
+## 11. MCP Tool Integration
+
+### Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `FORGEOS_MCP_URL` | MCP server endpoint (e.g., `http://localhost:3000/mcp`) | Yes |
+| `FORGEOS_API_KEY` | Agent authentication key for MCP server | Yes |
+
+### Authorized MCP Tools
+
+| Tool | Purpose | Scope Constraint |
+|------|---------|------------------|
+| `tickets.next` | Find next claimable ticket | Stage: `SECURITY` only |
+| `tickets.claim` | Acquire distributed lock on a ticket | Stage: `SECURITY` only |
+| `tickets.complete` | Mark security PASS, advance to CI | Own claimed tickets |
+| `tickets.reject` | Mark security FAIL, send to rework | Own claimed tickets |
+| `tickets.release` | Release a claim without completing | Own claims only |
+| `tickets.extend` | Extend lease on claimed ticket | Own claims only |
+
+**Denied tools:** `tickets.spawn`, `tickets.graph`, `tickets.sync`, `tickets.stats`.
+
+### MCP Workflow (Primary)
+
+1. `tickets.next({stage: "SECURITY"})` — discover available tickets.
+2. `tickets.claim({ticket_id, agent: "Security", machine_id, operator})` — acquire distributed lock.
+3. Execute security analysis (git two-commit protocol still applies).
+4. On PASS: `tickets.complete({ticket_id, evidence: {verdict: "PASS", stride_model, owasp_checklist}})` — advance to CI.
+5. On FAIL: `tickets.reject({ticket_id, reason: "<finding summary>", evidence: {sarif, cwe_refs}})` — rework.
+
+### Fallback: CLI Mode
+
+If the MCP server is unreachable, fall back to direct CLI:
+
+```bash
+python3 .github/tickets.py --claim <id> Security $(hostname) <operator>
+# ... execute security review ...
+python3 .github/tickets.py --advance <id> Security    # on PASS
+python3 .github/tickets.py --rework <id> Security "reason" # on FAIL
+```
+
+See `docs/architecture/api/mcp-tool-definitions.md` for full tool schemas and error codes.
+
+## 12. References
 
 - `.github/instructions/*.instructions.md` — canonical system rules.
 - `.github/vibecoding/chunks/Security.agent/` — detailed patterns, code examples, checklists.
+- `docs/architecture/api/mcp-tool-definitions.md`

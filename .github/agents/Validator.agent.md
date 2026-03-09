@@ -67,15 +67,17 @@ ELSE → verdict = REJECTED (list all failures with evidence)
 ```
 
 ## 6. Verdict Actions
-- **APPROVE:** `python3 .github/tickets.py --advance {ticket-id} Validator` → move to DONE.
-- **REJECT:** `python3 .github/tickets.py --rework {ticket-id} Validator "{reason}"` → back to implementation stage with evidence.
+- **APPROVE:** MCP: `tickets.complete({ticket_id, evidence: {verdict: "APPROVED", dod_checklist}})` → move to DONE.
+  Fallback CLI: `python3 .github/tickets.py --advance {ticket-id} Validator`
+- **REJECT:** MCP: `tickets.reject({ticket_id, reason: "{reason}", evidence: {failures}})` → back to implementation stage with evidence.
+  Fallback CLI: `python3 .github/tickets.py --rework {ticket-id} Validator "{reason}"`
 
 ## 7. Work Commit (Commit 2)
 1. Write validation report to `.github/agent-output/Validator/{ticket-id}.md`.
 2. Delete previous stage summary (Documentation's `{ticket-id}.md`).
 3. If APPROVED: move ticket JSON to `.github/ticket-state/DONE/{ticket-id}.json`.
 4. If REJECTED: ticket goes back for rework (tickets.py handles state).
-5. Run `python3 .github/tickets.py --sync` to unblock freed downstream tasks.
+5. Run `tickets.sync()` via MCP (or fallback: `python3 .github/tickets.py --sync`) to unblock freed downstream tasks.
 6. Write memory entry to `.github/memory-bank/activeContext.md`:
    ```
    ### [TICKET-ID] — Validation Summary
@@ -106,6 +108,53 @@ Every validation must produce:
 - Final verdict: **APPROVED** (with confidence level) or **REJECTED** (with failure evidence and remediation guidance).
 - Artifact paths for all files created/modified.
 
-## 11. References
+## 11. MCP Tool Integration
+
+### Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `FORGEOS_MCP_URL` | MCP server endpoint (e.g., `http://localhost:3000/mcp`) | Yes |
+| `FORGEOS_API_KEY` | Agent authentication key for MCP server | Yes |
+
+### Authorized MCP Tools
+
+| Tool | Purpose | Scope Constraint |
+|------|---------|------------------|
+| `tickets.next` | Find next claimable ticket | Stage: `VALIDATION` only |
+| `tickets.claim` | Acquire distributed lock on a ticket | Stage: `VALIDATION` only |
+| `tickets.complete` | Mark APPROVED, move to DONE | Own claimed tickets |
+| `tickets.reject` | Mark REJECTED, send to rework | Own claimed tickets |
+| `tickets.release` | Release a claim without completing | Own claims only |
+| `tickets.extend` | Extend lease on claimed ticket | Own claims only |
+
+**Denied tools:** `tickets.spawn`, `tickets.graph`, `tickets.stats`.
+**Limited tools:** `tickets.sync` — allowed post-approval to unblock downstream tasks.
+
+### MCP Workflow (Primary)
+
+1. `tickets.next({stage: "VALIDATION"})` — discover available tickets.
+2. `tickets.claim({ticket_id, agent: "Validator", machine_id, operator})` — acquire distributed lock.
+3. Execute validation (git two-commit protocol still applies).
+4. On APPROVE: `tickets.complete({ticket_id, evidence: {verdict: "APPROVED", dod_checklist}})` — move to DONE.
+5. On REJECT: `tickets.reject({ticket_id, reason: "<failure details>", evidence: {failures}})` — rework.
+6. Run `tickets.sync()` to unblock freed downstream tasks.
+
+### Fallback: CLI Mode
+
+If the MCP server is unreachable, fall back to direct CLI:
+
+```bash
+python3 .github/tickets.py --claim <id> Validator $(hostname) <operator>
+# ... execute validation ...
+python3 .github/tickets.py --advance <id> Validator    # on APPROVE
+python3 .github/tickets.py --rework <id> Validator "reason" # on REJECT
+python3 .github/tickets.py --sync                       # unblock downstream
+```
+
+See `docs/architecture/api/mcp-tool-definitions.md` for full tool schemas and error codes.
+
+## 12. References
 - `.github/instructions/*.instructions.md` (all 6 canonical files)
 - `.github/vibecoding/chunks/Validator.agent/` (chunk-01, chunk-02, chunk-03)
+- `docs/architecture/api/mcp-tool-definitions.md`

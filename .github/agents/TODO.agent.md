@@ -38,7 +38,7 @@ Execute in order before any work:
 
 - Only ReaperOAK may invoke TODO agent
 - TODO does NOT claim SDLC tickets via two-commit protocol
-- TODO outputs ticket JSON files via `python3 .github/tickets.py --parse TODO/`
+- TODO outputs ticket JSON files via MCP: `tickets.spawn({...})` (or fallback: `python3 .github/tickets.py --parse TODO/`)
 - Decomposition MUST follow L0→L1→L2→L3 strictly (no jumping L0→L3)
 - Each invocation handles exactly one mode; multi-mode requires sequential calls
 - On ambiguous scope: emit `REQUIRES_STRATEGIC_INPUT` and halt
@@ -73,6 +73,10 @@ Execute in order before any work:
 ## 6. Ticket Generation
 
 L3 tasks are written as markdown in `TODO/` then parsed into ticket JSON:
+
+**Primary (MCP):** `tickets.spawn({title, type, acceptance_criteria, file_paths, depends_on, ...})`
+
+**Fallback (CLI):**
 ```bash
 python3 .github/tickets.py --parse TODO/
 ```
@@ -123,7 +127,42 @@ Every completion must include:
 - **Confidence level:** HIGH / MEDIUM / LOW with justification
 - **Artifact paths:** All files created or modified
 
-## 11. References
+## 11. MCP Tool Integration
+
+### Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `FORGEOS_MCP_URL` | MCP server endpoint (e.g., `http://localhost:3000/mcp`) | Yes |
+| `FORGEOS_API_KEY` | Agent authentication key for MCP server | Yes |
+
+### Authorized MCP Tools
+
+| Tool | Purpose | Scope Constraint |
+|------|---------|------------------|
+| `tickets.spawn` | Create new tickets from L3 decomposition | Within delegation scope |
+| `tickets.stats` | View ticket state dashboard | Read-only |
+
+**Denied tools:** `tickets.next`, `tickets.claim`, `tickets.complete`, `tickets.reject`, `tickets.release`, `tickets.extend`, `tickets.graph`, `tickets.sync` — TODO creates tickets, it does not process SDLC stages.
+
+### MCP Workflow (Primary)
+
+1. Decompose work through L0→L1→L2→L3 layers.
+2. For each L3 task: `tickets.spawn({title, type, acceptance_criteria, file_paths, depends_on, estimated_effort, priority})`.
+3. Optionally: `tickets.stats()` to verify created tickets appear in state machine.
+
+### Fallback: CLI Mode
+
+If the MCP server is unreachable, fall back to direct CLI:
+
+```bash
+python3 .github/tickets.py --parse TODO/
+python3 .github/tickets.py --status
+```
+
+See `docs/architecture/api/mcp-tool-definitions.md` for full tool schemas and error codes.
+
+## 12. References
 
 - `.github/instructions/core.instructions.md`
 - `.github/instructions/sdlc.instructions.md`
@@ -131,3 +170,4 @@ Every completion must include:
 - `.github/instructions/git-protocol.instructions.md`
 - `.github/instructions/agent-behavior.instructions.md`
 - `.github/vibecoding/chunks/TODO.agent/`
+- `docs/architecture/api/mcp-tool-definitions.md`

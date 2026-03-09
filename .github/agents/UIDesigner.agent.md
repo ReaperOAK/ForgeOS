@@ -146,6 +146,47 @@ Every completion claim must include:
 - User flow diagrams covering happy path + error paths
 - Confidence level: HIGH / MEDIUM / LOW
 
-## 10. References
+## 10. MCP Tool Integration
+
+### Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `FORGEOS_MCP_URL` | MCP server endpoint (e.g., `http://localhost:3000/mcp`) | Yes |
+| `FORGEOS_API_KEY` | Agent authentication key for MCP server | Yes |
+
+### Authorized MCP Tools
+
+| Tool | Purpose | Scope Constraint |
+|------|---------|------------------|
+| `tickets.next` | Find next claimable ticket | Stage: `FRONTEND` only |
+| `tickets.claim` | Acquire distributed lock on a ticket | Stage: `FRONTEND` only |
+| `tickets.complete` | Mark stage done, advance ticket | Own claimed tickets |
+| `tickets.release` | Release a claim without completing | Own claims only |
+| `tickets.extend` | Extend lease on claimed ticket | Own claims only |
+
+**Denied tools:** `tickets.reject`, `tickets.spawn`, `tickets.graph`, `tickets.sync`, `tickets.stats`.
+
+### MCP Workflow (Primary)
+
+1. `tickets.next({stage: "FRONTEND"})` — discover available design tickets.
+2. `tickets.claim({ticket_id, agent: "UIDesigner", machine_id, operator})` — acquire distributed lock.
+3. Execute design work (git two-commit protocol still applies).
+4. `tickets.complete({ticket_id, evidence: {mockup_path, design_tokens, a11y_checks}})` — advance ticket.
+
+### Fallback: CLI Mode
+
+If the MCP server is unreachable, fall back to direct CLI:
+
+```bash
+python3 .github/tickets.py --claim <id> UIDesigner $(hostname) <operator>
+# ... execute work ...
+python3 .github/tickets.py --advance <id> UIDesigner
+```
+
+See `docs/architecture/api/mcp-tool-definitions.md` for full tool schemas and error codes.
+
+## 11. References
 - `.github/instructions/*.instructions.md` (all 6 canonical instruction files)
 - `.github/vibecoding/chunks/UIDesigner.agent/` (chunk-01, chunk-02)
+- `docs/architecture/api/mcp-tool-definitions.md`
