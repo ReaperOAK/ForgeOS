@@ -4,7 +4,7 @@
   "description": "Set up the foundational MCP server using the official Python MCP SDK (mcp package). Initialize the project structure with pyproject.toml (dependencies, scripts, metadata), create the main server module with the bootstrap sequence (configuration loading, SDK initialization, server start), and configure basic error handling following MCP protocol error semantics. The server must start, accept initialize requests, and respond with its capability list.",
   "type": "backend",
   "priority": "critical",
-  "stage": "VALIDATION",
+  "stage": "BACKEND",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -38,11 +38,11 @@
     "Server can be started via `python -m mcp_server` or the defined entry point",
     "README documents how to install dependencies and start the server locally"
   ],
-  "rework_count": 1,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-09T20:06:16.919935+00:00",
+  "rework_count": 2,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -126,6 +126,15 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "DOCS complete \u2014 docstrings enhanced, README freshness updated, CHANGELOG verified."
+    },
+    {
+      "timestamp": "2026-03-09T19:39:41.791774+00:00",
+      "event": "REWORK",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "BACKEND",
+      "details": "Rework #2: Security stage skipped (2nd occurrence) \u2014 after QA complete, CIReviewer was claimed directly without Security Engineer review. SDLC flow requires QA \u2192 SECURITY \u2192 CI \u2192 DOCS \u2192 VALIDATION. No Security summary, no Security commits, no Security stage events in history. Ticket must complete SECURITY stage before advancing."
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
