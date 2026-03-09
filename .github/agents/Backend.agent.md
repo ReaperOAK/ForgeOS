@@ -138,7 +138,50 @@ Before marking complete, verify all of the following:
 - [ ] Modified files are within declared ticket `file_paths` scope.
 - [ ] Memory gate entry written to `activeContext.md`.
 
-## 10. References
+## 10. MCP Tool Integration
+
+### Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `FORGEOS_MCP_URL` | MCP server endpoint (e.g., `http://localhost:3000/mcp`) | Yes |
+| `FORGEOS_API_KEY` | Agent authentication key for MCP server | Yes |
+
+### Authorized MCP Tools
+
+| Tool | Purpose | Scope Constraint |
+|------|---------|------------------|
+| `tickets.next` | Find next claimable ticket | Stage: `BACKEND` only |
+| `tickets.claim` | Acquire distributed lock on a ticket | Stage: `BACKEND` only |
+| `tickets.complete` | Mark stage done, advance ticket | Own claimed tickets |
+| `tickets.spawn` | Create sub-tickets during implementation | Within ticket scope |
+| `tickets.release` | Release a claim without completing | Own claims only |
+| `tickets.extend` | Extend lease on claimed ticket | Own claims only |
+
+**Denied tools:** `tickets.reject`, `tickets.graph`, `tickets.sync`, `tickets.stats` (read-only access denied — use CLI fallback for status queries).
+
+### MCP Workflow (Primary)
+
+Use MCP tool calls as the primary mechanism for ticket operations:
+
+1. `tickets.next({stage: "BACKEND"})` — discover available tickets.
+2. `tickets.claim({ticket_id, agent: "Backend", machine_id, operator})` — acquire distributed lock.
+3. Execute implementation work (git two-commit protocol still applies for code artifacts).
+4. `tickets.complete({ticket_id, evidence: {artifacts, tests, coverage}})` — advance to QA stage.
+
+### Fallback: CLI Mode
+
+If the MCP server is unreachable, fall back to direct CLI commands:
+
+```bash
+python3 .github/tickets.py --claim <id> Backend $(hostname) <operator>
+# ... execute work ...
+python3 .github/tickets.py --advance <id> Backend
+```
+
+See `docs/architecture/api/mcp-tool-definitions.md` for full tool schemas and error codes.
+
+## 11. References
 
 - `.github/instructions/core.instructions.md`
 - `.github/instructions/sdlc.instructions.md`
@@ -147,3 +190,4 @@ Before marking complete, verify all of the following:
 - `.github/instructions/agent-behavior.instructions.md`
 - `.github/vibecoding/chunks/Backend.agent/`
 - `.github/vibecoding/catalog.yml`
+- `docs/architecture/api/mcp-tool-definitions.md`

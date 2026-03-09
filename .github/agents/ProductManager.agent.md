@@ -37,7 +37,7 @@ ProductManager does NOT follow the standard two-commit SDLC protocol:
 - Produces PRDs, user stories, acceptance criteria, and task specs
 - Outputs feed into **TODO agent** for L1→L2→L3 ticket decomposition
 - Does NOT claim SDLC tickets — does NOT move tickets through stages
-- Does NOT run `tickets.py --claim` or `tickets.py --advance`
+- Does NOT run `tickets.py --claim` or `tickets.py --advance` (uses `tickets.stats` MCP tool for read-only dashboard access if needed)
 
 ## 5. Execution Workflow
 
@@ -127,7 +127,38 @@ Every completion must include:
 - **Assumptions list** with validation status
 - **Confidence level**: HIGH / MEDIUM / LOW with justification
 
-## 10. References
+## 10. MCP Tool Integration
+
+### Environment Variables
+
+| Variable | Description | Required |
+|----------|-------------|----------|
+| `FORGEOS_MCP_URL` | MCP server endpoint (e.g., `http://localhost:3000/mcp`) | Yes |
+| `FORGEOS_API_KEY` | Agent authentication key for MCP server | Yes |
+
+### Authorized MCP Tools
+
+| Tool | Purpose | Scope Constraint |
+|------|---------|------------------|
+| `tickets.stats` | View ticket state dashboard | Read-only |
+
+**Denied tools:** All write operations (`tickets.next`, `tickets.claim`, `tickets.complete`, `tickets.reject`, `tickets.spawn`, `tickets.release`, `tickets.extend`, `tickets.graph`, `tickets.sync`) — ProductManager defines requirements, does not process tickets.
+
+### MCP Usage
+
+ProductManager may use `tickets.stats()` to inspect ticket pipeline state when defining priorities or verifying requirement coverage. All ticket creation flows through the TODO agent.
+
+### Fallback: CLI Mode
+
+If the MCP server is unreachable:
+
+```bash
+python3 .github/tickets.py --status   # view dashboard
+```
+
+See `docs/architecture/api/mcp-tool-definitions.md` for full tool schemas.
+
+## 11. References
 
 - `.github/instructions/core.instructions.md`
 - `.github/instructions/sdlc.instructions.md`
@@ -135,3 +166,4 @@ Every completion must include:
 - `.github/instructions/git-protocol.instructions.md`
 - `.github/instructions/agent-behavior.instructions.md`
 - `.github/vibecoding/chunks/ProductManager.agent/`
+- `docs/architecture/api/mcp-tool-definitions.md`
