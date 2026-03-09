@@ -1806,3 +1806,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/uiux/mockups/FORGEOS-UID003.md, docs/uiux/components/dependency-graph.md, docs/uiux/components/search-bar.md, .github/agent-output/UIDesigner/FORGEOS-UID003.md
 - **Decisions:** D3.js force-directed DAG per PRD §5. Rounded-rectangle nodes (160×80px desktop) with stage color fill + priority left border. Edges distinguished by line style (solid=resolved, dashed=unresolved) not just color. Critical path highlighted with cyan glow + 3px line. Search bar with 300ms debounce per PRD §8.4, top-10 inline dropdown. Filter chips with dropdown variant for multi-select. Minimap navigator at bottom-right (200×120px). Mobile: pinch zoom + bottom sheet for node details. Light theme variant with blue primary (#2563EB).
 - **Timestamp:** 2025-07-17T15:00:00Z
+
+### [TASK-FOS-03-006] — tickets.spawn MCP Tool Implementation
+- **Artifacts:** forgeos-server/src/tools/tickets-spawn.ts, forgeos-server/src/tools/tickets-spawn.test.ts, forgeos-server/src/tools/index.ts
+- **Decisions:** Used COUNT-based sequential child ID generation ({parent_id}-SUB-{n}). Single transaction for child INSERT + parent SPAWNED event + child CREATED event. Raw SQL with pg pool consistent with existing tool patterns. Error codes from ForgeOSErrorCode enum (INVALID_SUBTASK, TICKET_NOT_FOUND, INTERNAL_ERROR).
+- **Timestamp:** 2025-07-17T15:30:00Z
+
+### [TASK-FOS-03-005] — tickets.reject MCP Tool Implementation
+- **Artifacts:** forgeos-server/src/tools/tickets-reject.ts, forgeos-server/src/__tests__/tools/tickets-reject.test.ts, forgeos-server/src/tools/index.ts
+- **Decisions:** Used auto-registration pattern for agent lookup (INSERT ON CONFLICT DO NOTHING + re-SELECT). Detection of escalation via status field check rather than rework_count comparison to keep SQL function as single source of truth. Minimum reason length of 10 chars enforced by Zod schema for meaningful rejection reasons.
+- **Timestamp:** 2026-03-09T20:56:54+00:00
