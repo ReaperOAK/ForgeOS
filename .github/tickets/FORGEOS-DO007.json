@@ -35,10 +35,10 @@
     "Backup and restore can be invoked via Makefile targets (`make backup`, `make restore`)"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Security",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-09T19:11:11.159120+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -74,7 +74,14 @@
       "event": "QA_COMPLETE",
       "agent": "QA",
       "machine_id": "pop-os",
-      "details": "PASS — All 6 acceptance criteria verified. Static analysis (bash -n, shellcheck) PASS. Functional tests PASS. Advanced to SECURITY."
+      "details": "PASS \u2014 All 6 acceptance criteria verified. Static analysis (bash -n, shellcheck) PASS. Functional tests PASS. Advanced to SECURITY."
+    },
+    {
+      "timestamp": "2026-03-09T18:41:11.159120+00:00",
+      "event": "CLAIMED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "details": "Claimed for SECURITY stage"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-infrastructure.md",
@@ -84,5 +91,6 @@
     "postgres",
     "phase2",
     "BLK-12-02"
-  ]
+  ],
+  "status": "in_progress"
 }
