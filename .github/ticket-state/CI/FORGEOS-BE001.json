@@ -1,0 +1,123 @@
+{
+  "ticket_id": "FORGEOS-BE001",
+  "title": "Initialize Alembic Migration Framework",
+  "description": "Set up the Alembic migration framework for the ForgeOS PostgreSQL database. Initialize the Alembic project structure, configure the database connection string to read from environment variables, set up the migration environment with async support (asyncpg), and create the migration script template. The framework must support both upgrade and downgrade operations.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "CI",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:59:13.979019+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-ARCH005",
+    "FORGEOS-DO002"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "mcp-server/alembic.ini",
+    "mcp-server/alembic/env.py",
+    "mcp-server/alembic/script.py.mako",
+    "mcp-server/alembic/versions/20260307_000000_001_initial_schema.py",
+    "mcp-server/src/mcp_server/db/__init__.py",
+    "mcp-server/src/mcp_server/db/connection.py",
+    "mcp-server/src/mcp_server/db/migration_helpers.py"
+  ],
+  "acceptance_criteria": [
+    "Alembic project initialized with alembic.ini, env.py, and script template",
+    "Database connection string loaded from DATABASE_URL environment variable",
+    "Migration environment supports async database connections via asyncpg",
+    "`alembic upgrade head` runs without errors on a clean database",
+    "`alembic downgrade -1` reverts the most recent migration",
+    "`alembic history` displays migration chain correctly",
+    "Migration script template includes both upgrade() and downgrade() functions"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "completed_at": "2026-03-07T23:55:00Z",
+  "status": "QA_COMPLETE",
+  "artifacts": [
+    "mcp-server/alembic.ini",
+    "mcp-server/alembic/env.py",
+    "mcp-server/alembic/script.py.mako",
+    "mcp-server/alembic/versions/20260307_000000_001_initial_schema.py",
+    "mcp-server/src/mcp_server/db/__init__.py",
+    "mcp-server/src/mcp_server/db/connection.py",
+    "mcp-server/src/mcp_server/db/migration_helpers.py",
+    "mcp-server/tests/test_db_connection.py",
+    "mcp-server/tests/test_migration_helpers.py",
+    "mcp-server/tests/test_alembic_config.py",
+    "mcp-server/tests/test_qa_forgeos_be001.py"
+  ],
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:59:13.979039+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase2-database.md"
+    },
+    {
+      "timestamp": "2026-03-07T16:42:13.863662+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-07T23:55:00Z",
+      "event": "BACKEND_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Alembic migration framework initialized. 45 new tests, 80/80 passing, 96% coverage. Initial migration with full schema (5 enums, 7 tables, triggers, indexes)."
+    },
+    {
+      "timestamp": "2026-03-09T18:23:12.146540+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA Engineer",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
+    },
+    {
+      "timestamp": "2026-03-09T18:44:31.958227+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
+    },
+    {
+      "timestamp": "2026-03-09T18:44:44.681044+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase2-database.md",
+  "tags": [
+    "backend",
+    "database",
+    "migrations",
+    "alembic",
+    "phase2",
+    "BLK-05-01"
+  ]
+}
