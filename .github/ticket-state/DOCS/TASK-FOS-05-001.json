@@ -4,7 +4,7 @@
   "description": "Build the main dashboard page as a vanilla HTML + CSS layout (no frontend framework, no build step) as specified in Architecture \u00a75 and PRD FR-22/FR-27. The page includes a Kanban-style pipeline board with columns for each active SDLC stage (READY, BACKEND, FRONTEND, QA, SECURITY, CI, DOCUMENTATION, VALIDATION). Each column displays ticket cards showing: ticket_id, title, type badge, priority indicator, claimed_by agent name, and lease countdown timer. Cards are color-coded by status (unclaimed=blue, claimed=yellow, expiring=orange, expired=red). The layout includes a header with system health summary, navigation tabs for Pipeline/Graph/Machines views, and filter controls for stage, type, priority, machine, and agent. Responsive layout, desktop-first. D3.js loaded via CDN script tag.",
   "type": "frontend",
   "priority": "high",
-  "stage": "VALIDATION",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -41,10 +41,10 @@
     "WCAG 2.2 AA compliance: 4.5:1 color contrast, ARIA labels on interactive elements, keyboard navigation"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-09T20:40:41.222228+00:00",
   "lease_duration_minutes": 30,
   "completed_at": "2026-03-09T18:16:54+00:00",
   "history": [
