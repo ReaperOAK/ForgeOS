@@ -4,7 +4,7 @@
   "description": "Implement the tickets.release MCP tool that releases a claim on a ticket, returning it to READY status. Uses the release_ticket SQL function. Normal release requires the caller to be the claim owner; forced release (admin only) can release any claim. Clears claimed_by, machine_id, operator, and lease_expiry. Releases all file locks associated with the ticket. Records a RELEASED or FORCE_RELEASED event.",
   "type": "backend",
   "priority": "high",
-  "stage": "BLOCKED",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -48,6 +48,29 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tickets/03-ticket-tools.md"
+    },
+    {
+      "timestamp": "2026-03-09T20:41:30.099308+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "READY",
+      "to_stage": "READY",
+      "details": "Claimed by reaperoak@pop-os via Backend, lease until 2026-03-09T21:11:30.099291+00:00"
+    },
+    {
+      "timestamp": "2026-03-09T20:41:47.801839+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Claimed by Backend on pop-os (reaperoak)"
+    },
+    {
+      "timestamp": "2026-03-09T20:56:00.396799+00:00",
+      "event": "BACKEND_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Backend implementation complete. tickets.release tool implemented with 17 passing tests."
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
