@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-07T23:00:00Z -->
+<!-- last_reviewed: 2026-03-09T18:15:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -872,6 +872,22 @@ import { seed, importTickets } from './db/index.js';
 const { projectId, agentId, keyGenerated } = await seed();
 const { success, errors, skipped } = await importTickets(workspacePath, projectId);
 ```
+
+**`SeedResult`** — returned by `seed()`:
+
+| Field          | Type      | Description                                              |
+|----------------|-----------|----------------------------------------------------------|
+| `projectId`    | `string`  | UUID of the created or updated project                   |
+| `agentId`      | `string`  | UUID of the created or updated admin agent               |
+| `keyGenerated` | `boolean` | `true` if a new API key was generated (first run only)   |
+
+**`ImportSummary`** — returned by `importTickets()`:
+
+| Field     | Type     | Description                                |
+|-----------|----------|--------------------------------------------|
+| `success` | `number` | Tickets successfully imported or updated   |
+| `errors`  | `number` | Tickets that failed to import              |
+| `skipped` | `number` | Tickets skipped (missing required fields)  |
 
 ## Docker
 
