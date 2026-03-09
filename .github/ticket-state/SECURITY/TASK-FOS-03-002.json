@@ -1,0 +1,66 @@
+{
+  "ticket_id": "TASK-FOS-03-002",
+  "title": "tickets.claim \u2014 Atomic Ticket Claiming",
+  "description": "Implement the tickets.claim MCP tool that atomically claims a specific ticket by ID. Uses the claim_ticket_by_id SQL function which performs SELECT FOR UPDATE SKIP LOCKED, checks for file_paths conflicts in file_locks table, updates the ticket with claimed_by/machine_id/operator/lease_expiry, inserts file locks for all file_paths, and records a CLAIMED event. Returns the claimed ticket with lease_expiry and list of acquired file locks, or an error if the ticket is already claimed, has file conflicts, or doesn't exist.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "SECURITY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:05:37.898285+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-FOS-03-001",
+    "TASK-FOS-04-003"
+  ],
+  "blocked_by": [
+    "TASK-FOS-04-003"
+  ],
+  "file_paths": [
+    "forgeos-server/src/tools/tickets-claim.ts"
+  ],
+  "acceptance_criteria": [
+    "Tool registered as 'tickets.claim' with Zod schema: ticket_id (string), agent_name (string), machine_id (string), operator (optional string), lease_minutes (int 5-120, default 30)",
+    "Calls claim_ticket_by_id SQL function within a transaction",
+    "Returns ALREADY_CLAIMED error if ticket is locked by another agent with active lease",
+    "Returns FILE_CONFLICT error if any file in ticket's file_paths is locked by another active ticket",
+    "On success, returns {ticket, lease_expiry, file_locks} with the claimed ticket and acquired locks",
+    "Concurrent claims from different machines never result in double-assignment (verified by SKIP LOCKED)",
+    "Claim event recorded in events table with agent_id, machine_id, operator, lease details",
+    "Claim latency under 100ms at p99"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:05:37.898288+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/03-ticket-tools.md"
+    },
+    {
+      "timestamp": "2026-03-09T18:13:33.736035+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA Engineer",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
+    }
+  ],
+  "source_task_file": "TODO/tickets/03-ticket-tools.md",
+  "tags": []
+}
