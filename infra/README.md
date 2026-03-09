@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-10T00:00:00Z -->
+<!-- last_reviewed: 2026-03-10T12:30:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: how-to -->
 
@@ -297,6 +297,86 @@ hostname) as the host, not `localhost`. Port is `5432`, user is `forgeos`.
 Alternatively, run `docker compose down -v` to remove stale volumes and
 restart fresh.
 
+## Makefile Quick Reference
+
+The root `Makefile` wraps Docker Compose and common operations into short
+targets. Run `make help` from the repository root to list all targets with
+descriptions.
+
+### Service Lifecycle
+
+| Target | Command | Description |
+|--------|---------|-------------|
+| `make up` | `docker compose up -d --build` | Start services in dev mode |
+| `make down` | `docker compose down` | Stop containers, keep volumes |
+| `make restart` | down + up | Restart all services |
+| `make logs` | `docker compose logs -f` | Tail logs |
+| `make ps` | `docker compose ps` | Show container status |
+
+### Database
+
+| Target | Description |
+|--------|-------------|
+| `make migrate` | Apply pending migrations inside the MCP server container |
+| `make seed` | Run the TypeScript seed script to load sample data |
+| `make db-shell` | Open an interactive `psql` session |
+| `make db-reset` | Drop and recreate the database (destructive, 3 s grace period) |
+
+### Quality
+
+| Target | Description |
+|--------|-------------|
+| `make test` | Run vitest suite |
+| `make test-watch` | Run tests in watch mode |
+| `make test-coverage` | Run tests with coverage report |
+| `make lint` | ESLint (TypeScript) + Ruff (Python) |
+| `make typecheck` | TypeScript type checking (no emit) |
+| `make format` | Auto-format with Prettier + Ruff |
+
+### Setup and Cleanup
+
+| Target | Description |
+|--------|-------------|
+| `make setup` | Check prerequisites, create `.env`, install npm deps |
+| `make clean` | Remove build artefacts and stopped containers |
+| `make clean-all` | Clean + remove Docker volumes (destructive) |
+
+## Helper Scripts
+
+### `scripts/setup.sh`
+
+First-time environment setup. Checks 7 prerequisites (Docker, Docker Compose,
+Node.js >= 22, npm, Python 3, Git, Make) with version validation. Creates
+`infra/.env` from template, installs Node.js dependencies, and provisions
+default Docker secrets.
+
+```bash
+# Via Makefile (recommended)
+make setup
+
+# Directly
+bash infra/scripts/setup.sh
+```
+
+### `scripts/seed.sh`
+
+Database seed wrapper. Runs the TypeScript seed module inside the MCP server
+container by default, or directly on the host with the `--local` flag.
+Checks service readiness, waits for the database with a bounded retry loop
+(30 attempts), and optionally imports ticket JSON files from
+`.github/tickets/`.
+
+```bash
+# Via Makefile (recommended)
+make seed
+
+# Via Docker container
+bash infra/scripts/seed.sh
+
+# Directly on host (requires DATABASE_URL)
+bash infra/scripts/seed.sh --local
+```
+
 ## File Reference
 
 | File                           | Purpose                                      |
@@ -306,9 +386,13 @@ restart fresh.
 | `../forgeos-server/Dockerfile` | Multi-stage Dockerfile for MCP server        |
 | `../forgeos-server/secrets/db_password` | Database password (Docker secret)   |
 | `../forgeos-server/src/db/migrations/`  | SQL migrations (auto-applied on init) |
+| `scripts/setup.sh`            | Prerequisite checks and environment setup     |
+| `scripts/seed.sh`             | Database seed wrapper (Docker + local modes)  |
+| `../Makefile`                  | Root Makefile with 23 development targets     |
 
 ## Related Documentation
 
+- [Root Makefile](../Makefile) — All development workflow targets.
 - [System Components Architecture](../docs/architecture/system-components.md)
   — Section 7 covers the deployment topology.
 - [ADR-001: PostgreSQL Decision](../docs/architecture/adr/adr-001-postgresql.md)
