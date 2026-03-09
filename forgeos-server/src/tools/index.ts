@@ -11,6 +11,7 @@
 import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ticketsNextSchema, ticketsNextHandler } from './tickets-next.js';
 import { ticketsClaimSchema, ticketsClaimHandler } from './tickets-claim.js';
+import { ticketsRejectSchema, ticketsRejectHandler } from './tickets-reject.js';
 
 /**
  * Register all MCP tools on the server.
@@ -32,5 +33,13 @@ export function registerTools(server: McpServer): void {
     'Atomically claim a specific ticket by ID with file lock acquisition',
     ticketsClaimSchema.shape,
     async (params) => ticketsClaimHandler(params),
+  );
+
+  // ── tickets.reject ───────────────────────────────────────────────────────
+  server.tool(
+    'tickets.reject',
+    'Reject a ticket and send it back to its implementation stage for rework. Requires a rejection reason. If rework count reaches max_reworks, the ticket is automatically escalated.',
+    ticketsRejectSchema.shape,
+    async (params) => ticketsRejectHandler(params),
   );
 }
