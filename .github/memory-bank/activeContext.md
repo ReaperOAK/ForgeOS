@@ -1,3 +1,8 @@
+### [FORGEOS-BE015] — QA PASS (Rework #2)
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE015.md, mcp-server/src/mcp_server/__init__.py, mcp-server/src/mcp_server/__main__.py
+- **Decisions:** QA PASS (HIGH confidence). 35/35 tests pass, ~94% ticket-scoped coverage (server.py 96%, __init__.py 100%). Restored missing __init__.py and __main__.py (never committed by Backend). ruff clean. All 6 AC verified. Advanced QA->SECURITY.
+- **Timestamp:** 2026-03-10T21:30:00Z
+
 ### [TASK-FOS-03-008] — Backend Implementation
 - **Artifacts:** forgeos-server/src/tools/tickets-release.ts, forgeos-server/src/tools/tickets-release.test.ts, forgeos-server/src/tools/index.ts
 - **Decisions:** Implemented tickets.release MCP tool using release_ticket SQL function. Added agent_name parameter for caller identity (required by SQL function and NOT_CLAIM_OWNER error semantics). Admin gate checks for '*' or 'admin_all' permissions. Auto-registers unknown agents with non-admin permissions. 17 unit tests cover all AC.
