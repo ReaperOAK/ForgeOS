@@ -1,3 +1,8 @@
+### [TASK-FOS-06-004] — Documentation Summary
+- **Artifacts:** forgeos-server/README.md, CHANGELOG.md
+- **Decisions:** Added webhooks subsection to README with reconciliation rules table, response examples, and recovery endpoint docs. HMAC auth label used in endpoints table to distinguish from Bearer auth. Changelog entry covers all 4 reconciliation rules.
+- **Timestamp:** 2026-03-10T00:30:00Z
+
 ### [FORGEOS-BE001] — Backend Summary
 - **Artifacts:** mcp-server/alembic.ini, mcp-server/alembic/env.py, mcp-server/alembic/script.py.mako, mcp-server/alembic/versions/20260307_000000_001_initial_schema.py, mcp-server/src/mcp_server/db/__init__.py, mcp-server/src/mcp_server/db/connection.py, mcp-server/src/mcp_server/db/migration_helpers.py
 - **Decisions:** Placed Alembic config in mcp-server/ (colocated with Python project). Used pydantic-settings for DatabaseConfig. Created migration helpers module for reusable DDL. Added psycopg2-binary for Alembic offline mode.
@@ -1581,3 +1586,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Security/FORGEOS-DO003.md
 - **Decisions:** PASS (HIGH confidence) — Zero critical/high findings. 3 low-severity findings (SEC-001: placeholder secret tracked in git, SEC-002: hardcoded dev API key, SEC-003: default pgAdmin creds). All acceptable for dev tooling. STRIDE analysis on 4 trust boundaries: max score 6 (Low). OWASP Top 10: 10/10 categories checked, 0 critical/high. No shell injection vectors. No privilege escalation. Strict shell mode (`set -euo pipefail`) in both scripts. Docker secrets pattern used correctly.
 - **Timestamp:** 2026-03-10T00:00:00Z
+
+### [FORGEOS-UID001] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-UID001.md
+- **Decisions:** PASS — Score 100/100, 0 critical, 0 warnings. Design tokens JSON valid, documentation standards met, no TODOs, upstream QA+Security PASS confirmed.
+- **Timestamp:** 2026-03-09T18:45:17.233818+00:00

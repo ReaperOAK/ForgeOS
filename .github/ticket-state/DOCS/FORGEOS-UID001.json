@@ -4,7 +4,7 @@
   "description": "Define the foundational design system for the ForgeOS dashboard. Establish design tokens for colors (dark and light theme), typography scale, spacing system (4px grid), border radius, shadow levels, and z-index layering. Specify responsive layout breakpoints (desktop-first: 1440px, 1024px, 768px). Define the overall dashboard shell layout: sidebar navigation, top bar, main content area, and notification panel. Produce the design token JSON file and layout specification document.",
   "type": "frontend",
   "priority": "high",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -37,10 +37,10 @@
     "Design token JSON file exported for consumption by frontend theming system"
   ],
   "rework_count": 0,
-  "claimed_by": "CIReviewer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-09T19:12:38.197519+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "completed_at": "2026-03-07T12:00:00Z",
   "artifacts": [
@@ -94,6 +94,15 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-09T18:45:17.233163+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "CI review PASS. Score 100/100. 0 critical, 0 warnings. Advanced from CI to DOCS."
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
