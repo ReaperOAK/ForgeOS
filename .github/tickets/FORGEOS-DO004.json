@@ -4,7 +4,7 @@
   "description": "Define environment configuration templates and profiles for the ForgeOS platform. Create .env.template with all required variables documented (database connection, MCP server ports, log levels, feature flags). Create a test environment configuration for CI. Implement a settings module that loads configuration from environment variables with sensible defaults for development.",
   "type": "infra",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Development, test, and production profiles are distinguishable via a single ENVIRONMENT variable"
   ],
   "rework_count": 1,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-09T20:05:54.780687+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -116,6 +116,15 @@
       "agent": "Documentation",
       "action": "complete",
       "timestamp": "2026-03-10T01:00:00Z"
+    },
+    {
+      "timestamp": "2026-03-09T19:41:45.115289+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-infrastructure.md",
