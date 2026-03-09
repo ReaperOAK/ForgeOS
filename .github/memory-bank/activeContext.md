@@ -1,3 +1,8 @@
+### [FORGEOS-DO006] — Database Migration CI Step
+- **Artifacts:** .github/workflows/database-ci.yml, .github/agent-output/DevOps/FORGEOS-DO006.md
+- **Decisions:** Created dedicated GitHub Actions workflow for migration CI. Uses postgres:17-alpine matching production. Validates schema objects (7 tables, 5 enums, 20 indexes, 3 triggers, 1 function). Tests rollback/reapply for reversibility.
+- **Timestamp:** 2026-03-10T20:10:00Z
+
 ### [FORGEOS-DO007] — Validation Summary
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-DO007.md
 - **Decisions:** APPROVED (HIGH confidence, 95%). All 6 AC verified. 10/10 DoD pass (3 N/A — shell scripts). Upstream: DevOps COMPLETE, QA PASS, Security PASS (0 critical), CI PASS (95/100), Docs COMPLETE. Ticket advanced to DONE.
