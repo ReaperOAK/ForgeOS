@@ -1771,3 +1771,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/uiux/mockups/FORGEOS-UID004.md, docs/uiux/components/claims-monitor.md, docs/uiux/components/operator-actions.md, .github/agent-output/UIDesigner/FORGEOS-UID004.md
 - **Decisions:** Dark-first design with semantic token references. Real-time SSE data flow for claims monitor with 3-tier urgency (>50% green, 25-50% amber, <25% red). Destructive actions require confirmation modal with typed confirmation. Machine status uses 3-column grid with connection quality indicators. Activity log as collapsible sidebar to preserve workspace focus.
 - **Timestamp:** 2025-07-17T14:30:00Z
+
+### [FORGEOS-UID003] — Dependency Graph and Search Interface UI Design
+- **Artifacts:** docs/uiux/mockups/FORGEOS-UID003.md, docs/uiux/components/dependency-graph.md, docs/uiux/components/search-bar.md, .github/agent-output/UIDesigner/FORGEOS-UID003.md
+- **Decisions:** D3.js force-directed DAG per PRD §5. Rounded-rectangle nodes (160×80px desktop) with stage color fill + priority left border. Edges distinguished by line style (solid=resolved, dashed=unresolved) not just color. Critical path highlighted with cyan glow + 3px line. Search bar with 300ms debounce per PRD §8.4, top-10 inline dropdown. Filter chips with dropdown variant for multi-select. Minimap navigator at bottom-right (200×120px). Mobile: pinch zoom + bottom sheet for node details. Light theme variant with blue primary (#2563EB).
+- **Timestamp:** 2025-07-17T15:00:00Z
