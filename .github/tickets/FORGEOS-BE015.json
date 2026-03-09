@@ -39,10 +39,10 @@
     "README documents how to install dependencies and start the server locally"
   ],
   "rework_count": 2,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Backend",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T20:40:00+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -146,5 +146,5 @@
     "phase2",
     "BLK-04-01"
   ],
-  "current_stage": "VALIDATION"
+  "current_stage": "BACKEND"
 }
