@@ -1,0 +1,104 @@
+{
+  "ticket_id": "TASK-FOS-01-003",
+  "title": "Seed Data and Filesystem Import Tool",
+  "description": "Build a seed script that populates the database with initial data: default project entry, system configuration defaults, and an admin agent with a generated API key. Build an import tool that reads existing .github/tickets/*.json files and .github/ticket-state/ directory structure, maps directory location to current stage, preserves ticket history from JSON history arrays, validates imported data against the schema, and produces an import summary report. The import must be idempotent \u2014 re-running it does not create duplicates (uses ON CONFLICT DO UPDATE).",
+  "type": "backend",
+  "priority": "medium",
+  "stage": "VALIDATION",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:05:37.896415+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-FOS-01-001",
+    "TASK-FOS-01-002"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/db/seed.ts",
+    "forgeos-server/src/db/import.ts",
+    "forgeos-server/scripts/import-tickets.ts"
+  ],
+  "acceptance_criteria": [
+    "seed.ts creates a default project named \"ForgeOS\" with repo_url and default lease settings",
+    "seed.ts creates an admin agent with a generated API key; the plaintext key is printed exactly once to stdout",
+    "import.ts reads all .github/tickets/*.json files (excluding ticket-schema.json) and inserts them into the tickets table",
+    "Import derives current stage from .github/ticket-state/ directory location for each ticket",
+    "Import preserves the history array from each ticket JSON as events in the events table",
+    "Import is idempotent \u2014 uses ON CONFLICT (ticket_id) DO UPDATE to avoid duplicates",
+    "Import produces a summary: {success: N, errors: N, skipped: N} printed to stdout",
+    "scripts/import-tickets.ts is a CLI entry point that runs seed + import in sequence"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:05:37.896419+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/01-database-foundation.md"
+    },
+    {
+      "timestamp": "2026-03-05T23:10:03.186356+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-07T12:57:03.820617+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-07T13:27:03.820617+00:00"
+    },
+    {
+      "timestamp": "2026-03-07T13:13:00.591807+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: manual release"
+    },
+    {
+      "timestamp": "2026-03-07T13:47:47+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-07T14:17:47+00:00"
+    },
+    {
+      "timestamp": "2026-03-07T13:49:24.863745+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Backend",
+      "machine_id": "system",
+      "from_stage": "BACKEND",
+      "to_stage": "QA",
+      "details": "Advanced from BACKEND to QA"
+    },
+    {
+      "timestamp": "2026-03-09T18:15:00+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "DOCS complete. README freshness updated, Programmatic API section enhanced with SeedResult/ImportSummary type tables. All JSDoc verified. CHANGELOG entry present."
+    }
+  ],
+  "source_task_file": "TODO/tickets/01-database-foundation.md",
+  "tags": [],
+  "current_stage": "VALIDATION"
+}
