@@ -4,7 +4,7 @@
   "description": "Implement the tickets.complete MCP tool that marks the current stage as complete and advances the ticket to the next stage in its SDLC flow. Uses the advance_ticket SQL function. Requires completion evidence (artifacts, test_results, confidence). Also implement the SDLC flow engine: flows.ts defines SDLC_FLOWS mapping each of 10 ticket types to their ordered stage array, transitions.ts provides getNextStage(), getImplementationStage(), and isValidTransition() helper functions. On ticket reaching DONE, calls resolve_dependencies to unblock dependent tickets.",
   "type": "backend",
   "priority": "critical",
-  "stage": "BACKEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -65,6 +65,13 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "CLAIM by Backend on pop-os (ReaperOAK)"
+    },
+    {
+      "timestamp": "2026-03-09T21:13:14.080577+00:00",
+      "event": "BACKEND_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "tickets.complete tool, SDLC flows, transitions -- 62 tests passing"
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
