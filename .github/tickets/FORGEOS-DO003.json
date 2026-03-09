@@ -37,10 +37,10 @@
     "All Makefile targets include help text accessible via `make help`"
   ],
   "rework_count": 0,
-  "claimed_by": "DevOps",
+  "claimed_by": "QA",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-07T23:30:00.000Z",
+  "lease_expiry": "2026-03-09T18:41:34.998525+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -69,7 +69,7 @@
       "event": "BACKEND_COMPLETE",
       "agent": "DevOps",
       "machine_id": "pop-os",
-      "details": "BACKEND stage complete — Makefile, setup.sh, seed.sh created"
+      "details": "BACKEND stage complete \u2014 Makefile, setup.sh, seed.sh created"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-infrastructure.md",
