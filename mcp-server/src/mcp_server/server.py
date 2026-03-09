@@ -43,7 +43,17 @@ logger = logging.getLogger("forgeos.mcp")
 
 
 def _configure_logging(level: str = "INFO") -> None:
-    """Configure structured JSON logging for the server."""
+    """Configure structured JSON logging for the server.
+
+    Sets up a stderr handler with JSON-formatted output on the ``forgeos``
+    logger hierarchy.  Called once during server startup.
+
+    Parameters
+    ----------
+    level : str
+        Python logging level name (e.g. ``"INFO"``, ``"DEBUG"``).  Defaults
+        to ``"INFO"`` if the provided string does not map to a valid level.
+    """
     handler = logging.StreamHandler(sys.stderr)
     handler.setFormatter(
         logging.Formatter(
@@ -184,6 +194,15 @@ class ForgeOSError(Exception):
     status_code: int = 500
 
     def __init__(self, message: str, *, details: dict[str, Any] | None = None) -> None:
+        """Create a new domain error.
+
+        Parameters
+        ----------
+        message : str
+            Human-readable error description.
+        details : dict[str, Any] | None
+            Optional structured data included in the MCP error response.
+        """
         super().__init__(message)
         self.message = message
         self.details = details or {}
