@@ -8,6 +8,40 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **PostgreSQL Backup and Restore Scripts** — Automated database backup
+  and restore tooling at `infra/scripts/` (FORGEOS-DO007). `backup.sh`
+  (353 lines) creates timestamped `pg_dump` backups in custom and SQL
+  formats with gzip compression, SHA-256 checksum sidecar files, and
+  configurable retention-based rotation (default 7 days). Supports local,
+  Docker container (`docker exec`), and remote PostgreSQL instances via
+  `PGHOST`/`PGPORT`/`PGUSER`/`PGDATABASE` environment variables.
+  `restore.sh` (492 lines) validates backup file existence, format
+  detection (custom vs SQL), checksum verification, and requires explicit
+  database-name confirmation before applying. Provides `--list` (archive
+  TOC), `--dry-run` (schema-only trial), and post-restore row-count
+  verification. `infra/Makefile` exposes 7 convenience targets: `backup`,
+  `backup-sql`, `backup-list`, `restore`, `restore-list`, `restore-dry-run`,
+  and `backup-verify`. Comprehensive strategy document at
+  `docs/operations/backup-strategy.md` covers backup frequency, 30-day
+  retention policy, WAL archiving guidance, point-in-time recovery (PITR),
+  and disaster recovery procedures.
+
+- **Dashboard Design System and Layout Specification** — Foundational design
+  token system and responsive dashboard layout for ForgeOS (FORGEOS-UID001).
+  Design tokens (`docs/uiux/design-tokens.json`) define dark and light themes
+  with 24 semantic color tokens each, Inter and JetBrains Mono typography,
+  4 px-grid spacing scale, 4 responsive breakpoints (768/1024/1440 px),
+  elevation shadows, 8-layer z-index stack, and transition presets with
+  reduced-motion support. Layout specification (`docs/uiux/layout-spec.md`)
+  defines a 56 px top-bar shell with 48 px filter bar and scrollable main
+  content area housing 11 SDLC Kanban columns, responsive behaviour matrix,
+  40+ component hierarchy, and WCAG 2.2 AA accessibility annotations. Mockup
+  document (`docs/uiux/mockups/FORGEOS-UID001.md`) covers 6 Stitch screens,
+  8 component specifications (TicketCard, StageColumn, FilterBar,
+  TicketDetailSlideOver, StatusDot, Badge, CountdownTimer,
+  CollapsibleSection), 4 user-flow diagrams, and a 10-item accessibility
+  checklist.
+
 - **Alembic Migration Framework** — PostgreSQL schema management for ForgeOS
   MCP server (FORGEOS-BE001). Initializes Alembic with async `asyncpg` support
   via `alembic/env.py`, `DATABASE_URL` environment variable as the single

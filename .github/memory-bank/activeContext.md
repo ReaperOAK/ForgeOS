@@ -1,3 +1,8 @@
+### [FORGEOS-DO007] — Documentation Summary
+- **Artifacts:** CHANGELOG.md, infra/README.md, docs/operations/backup-strategy.md, .github/agent-output/Documentation/FORGEOS-DO007.md
+- **Decisions:** Added Backup & Restore section to infra/README.md with quick-reference commands, script table, and configuration table. Added freshness metadata to backup-strategy.md. Added CHANGELOG entry for backup/restore scripts. No code changes — documentation only.
+- **Timestamp:** 2026-03-10T15:00:00Z
+
 ### [FORGEOS-UID001] — Validation Summary
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-UID001.md
 - **Decisions:** APPROVED (HIGH confidence, 95%). All 7 AC verified. 5/5 applicable DoD pass (5 N/A — design-only). Upstream: UIDesigner APPROVED, Frontend PASS, QA PASS, Security PASS, CI PASS (100/100), Docs PASS. Ticket advanced to DONE.
