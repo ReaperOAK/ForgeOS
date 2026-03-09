@@ -1,3 +1,8 @@
+### [FORGEOS-UID002] — Pipeline and Ticket Detail Views
+- **Artifacts:** docs/uiux/mockups/FORGEOS-UID002.md, docs/uiux/components/pipeline-board.md, docs/uiux/components/ticket-card.md, .github/agent-output/UIDesigner/FORGEOS-UID002.md
+- **Decisions:** 4-tab detail panel (Overview/History/Dependencies/Files) over single-scroll. 8+4 column layout with compact bottom row for CI/DOCS/VALIDATION/DONE. Type badge added to TicketCard (8 color-coded types). Claim indicator uses filled/empty circle for color independence. Mobile uses accordion over horizontal scroll. Newest-first timeline ordering. All 7 AC met. APPROVED.
+- **Timestamp:** 2026-03-10T21:00:00Z
+
 ### [FORGEOS-UID005] — System Health Dashboard UI Design
 - **Artifacts:** docs/uiux/mockups/FORGEOS-UID005.md, docs/uiux/components/health-panel.md, .github/agent-output/UIDesigner/FORGEOS-UID005.md
 - **Decisions:** Integrated health dashboard as sub-section of Agents view. Used 2x2 grid layout (Database Status, MCP Server Health, Webhook Delivery, Alert Feed). 6 reusable components with typed props. Dark theme primary. All 7 AC met. APPROVED.
