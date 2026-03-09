@@ -1532,6 +1532,11 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** PASS (HIGH confidence). All 6 acceptance criteria verified. 64/64 tests pass, 93% coverage (only CLI __main__ block missed). ruff: 0 errors. pyright: 0 errors, 0 warnings. Non-critical observation: garbled docstring in get_settings() lines 335-343 (cosmetic only).
 - **Timestamp:** 2026-03-09T18:20:00Z
 
+### [TASK-FOS-05-001] — Frontend Summary
+- **Artifacts:** forgeos-server/src/dashboard/index.html, forgeos-server/src/dashboard/css/style.css
+- **Decisions:** Complete rewrite of dashboard HTML/CSS from design tokens. Vanilla HTML+CSS (no framework). Dark theme default with light theme variant via data-theme. Inter+JetBrains Mono fonts via CDN. 8 kanban columns + 4 compact. WCAG 2.2 AA: ARIA roles, keyboard nav, focus indicators, reduced motion, high contrast. Responsive 320-1440px. All 11 AC met.
+- **Timestamp:** 2026-03-09T18:16:54Z
+
 ### [FORGEOS-BE015] — QA Summary
 - **Artifacts:** mcp-server/src/mcp_server/server.py, mcp-server/src/mcp_server/__init__.py, mcp-server/src/mcp_server/__main__.py, mcp-server/pyproject.toml, mcp-server/README.md, mcp-server/tests/test_server.py
 - **Decisions:** QA PASS — 80/80 tests pass, 96% coverage (97% server.py), ruff clean. All 6 acceptance criteria verified. Minor observation: duplicate deps in pyproject.toml (non-blocking).

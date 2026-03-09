@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>ForgeOS — Ticket Dashboard</title>
+  <meta name="description" content="ForgeOS distributed orchestration dashboard — pipeline monitoring, ticket management, and system health." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+</head>
+<body>
+  <!-- ═══ Skip Link ═══ -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <!-- ═══ Top Bar ═══ -->
+  <header class="top-bar" role="banner" aria-label="Main navigation">
+    <div class="top-bar__left">
+      <button class="hamburger" id="hamburgerBtn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="mobileSidebar">
+        <span class="hamburger__line"></span>
+        <span class="hamburger__line"></span>
+        <span class="hamburger__line"></span>
+      </button>
+      <h1 class="top-bar__title">
+        ForgeOS <span class="top-bar__subtitle">Dashboard</span>
+      </h1>
+    </div>
+
+    <nav class="tab-nav" role="tablist" aria-label="Dashboard views">
+      <button class="tab-nav__tab tab-nav__tab--active" role="tab" aria-selected="true" aria-controls="panel-pipeline" id="tab-pipeline" data-view="pipeline" tabindex="0">
+        Pipeline
+      </button>
+      <button class="tab-nav__tab" role="tab" aria-selected="false" aria-controls="panel-graph" id="tab-graph" data-view="graph" tabindex="-1">
+        Graph
+      </button>
+      <button class="tab-nav__tab" role="tab" aria-selected="false" aria-controls="panel-machines" id="tab-machines" data-view="machines" tabindex="-1">
+        Machines
+      </button>
+      <button class="tab-nav__tab" role="tab" aria-selected="false" aria-controls="panel-admin" id="tab-admin" data-view="admin" tabindex="-1">
+        Admin
+      </button>
+    </nav>
+
+    <div class="top-bar__right">
+      <div class="connection-status" id="connectionStatus" aria-live="polite">
+        <span class="status-dot status-dot--connected" aria-hidden="true"></span>
+        <span class="connection-status__label">Live</span>
+      </div>
+      <button class="top-bar__theme-toggle" id="themeToggle" aria-label="Toggle light/dark theme">
+        <svg class="icon-sun" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="5"/><path d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"/></svg>
+        <svg class="icon-moon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ═══ Filter Bar ═══ -->
+  <section class="filter-bar" role="search" aria-label="Filter tickets">
+    <div class="filter-bar__filters">
+      <div class="filter-group">
+        <label for="filter-stage" class="filter-group__label">Stage</label>
+        <select id="filter-stage" class="filter-group__select" aria-label="Filter by stage">
+          <option value="">All Stages</option>
+          <option value="READY">Ready</option>
+          <option value="ARCHITECT">Architect</option>
+          <option value="RESEARCH">Research</option>
+          <option value="BACKEND">Backend</option>
+          <option value="FRONTEND">Frontend</option>
+          <option value="QA">QA</option>
+          <option value="SECURITY">Security</option>
+          <option value="CI">CI</option>
+          <option value="DOCS">Docs</option>
+          <option value="VALIDATION">Validation</option>
+          <option value="DONE">Done</option>
+          <option value="ESCALATED">Escalated</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filter-type" class="filter-group__label">Type</label>
+        <select id="filter-type" class="filter-group__select" aria-label="Filter by type">
+          <option value="">All Types</option>
+          <option value="backend">Backend</option>
+          <option value="frontend">Frontend</option>
+          <option value="fullstack">Fullstack</option>
+          <option value="infra">Infra</option>
+          <option value="security">Security</option>
+          <option value="docs">Docs</option>
+          <option value="research">Research</option>
+          <option value="architecture">Architecture</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filter-priority" class="filter-group__label">Priority</label>
+        <select id="filter-priority" class="filter-group__select" aria-label="Filter by priority">
+          <option value="">All Priorities</option>
+          <option value="critical">Critical</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filter-machine" class="filter-group__label">Machine</label>
+        <select id="filter-machine" class="filter-group__select" aria-label="Filter by machine">
+          <option value="">All Machines</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <label for="filter-agent" class="filter-group__label">Agent</label>
+        <select id="filter-agent" class="filter-group__select" aria-label="Filter by agent">
+          <option value="">All Agents</option>
+          <option value="Architect">Architect</option>
+          <option value="Backend">Backend</option>
+          <option value="Frontend">Frontend</option>
+          <option value="QA">QA Engineer</option>
+          <option value="Security">Security</option>
+          <option value="DevOps">DevOps</option>
+          <option value="Documentation">Documentation</option>
+          <option value="CIReviewer">CI Reviewer</option>
+          <option value="Validator">Validator</option>
+          <option value="UIDesigner">UI Designer</option>
+          <option value="Research">Research</option>
+        </select>
+      </div>
+
+      <div class="filter-group filter-group--search">
+        <label for="filter-search" class="sr-only">Search tickets</label>
+        <input type="search" id="filter-search" class="filter-group__input" placeholder="Search tickets…" aria-label="Search tickets by ID or title" />
+      </div>
+    </div>
+
+    <button class="filter-bar__clear" id="clearFilters" aria-label="Clear all filters">
+      Clear All
+    </button>
+  </section>
+
+  <!-- ═══ Main Content ═══ -->
+  <main id="main-content">
+    <!-- Pipeline View -->
+    <div id="panel-pipeline" class="view-panel view-panel--active" role="tabpanel" aria-labelledby="tab-pipeline">
+
+      <!-- ── Metric Cards ── -->
+      <section class="metrics-row" aria-label="System metrics">
+        <div class="metric-card" id="metric-total">
+          <span class="metric-card__label">Total Tickets</span>
+          <span class="metric-card__value" id="metricTotalValue">—</span>
+        </div>
+        <div class="metric-card" id="metric-claims">
+          <span class="metric-card__label">Active Claims</span>
+          <span class="metric-card__value metric-card__value--success" id="metricClaimsValue">—</span>
+        </div>
+        <div class="metric-card" id="metric-expired">
+          <span class="metric-card__label">Expired Leases</span>
+          <span class="metric-card__value metric-card__value--error" id="metricExpiredValue">—</span>
+        </div>
+        <div class="metric-card" id="metric-uptime">
+          <span class="metric-card__label">System Uptime</span>
+          <span class="metric-card__value" id="metricUptimeValue">—</span>
+        </div>
+      </section>
+
+      <!-- ── Kanban Board ── -->
+      <section class="kanban" aria-label="Pipeline Kanban board">
+        <div class="kanban__columns" id="kanbanColumns">
+
+          <!-- READY -->
+          <div class="stage-column" data-stage="READY">
+            <div class="stage-column__header">
+              <div class="stage-column__accent" style="background-color: var(--stage-ready);" aria-hidden="true"></div>
+              <h2 class="stage-column__title">Ready</h2>
+              <span class="stage-column__count badge badge--count" aria-label="0 tickets">0</span>
+            </div>
+            <div class="stage-column__cards" role="list" aria-label="Ready stage, 0 tickets" id="col-READY">
+              <p class="stage-column__empty">No tickets in this stage</p>
+            </div>
+          </div>
+
+          <!-- ARCHITECT -->
+          <div class="stage-column" data-stage="ARCHITECT">
+            <div class="stage-column__header">
+              <div class="stage-column__accent" style="background-color: var(--stage-architect);" aria-hidden="true"></div>
+              <h2 class="stage-column__title">Architect</h2>
+              <span class="stage-column__count badge badge--count" aria-label="0 tickets">0</span>
+            </div>
+            <div class="stage-column__cards" role="list" aria-label="Architect stage, 0 tickets" id="col-ARCHITECT">
+              <p class="stage-column__empty">No tickets in this stage</p>
+            </div>
+          </div>
+
+          <!-- RESEARCH -->
+          <div class="stage-column" data-stage="RESEARCH">
+            <div class="stage-column__header">
+              <div class="stage-column__accent" style="background-color: var(--stage-research);" aria-hidden="true"></div>
+              <h2 class="stage-column__title">Research</h2>
+              <span class="stage-column__count badge badge--count" aria-label="0 tickets">0</span>
+            </div>
+            <div class="stage-column__cards" role="list" aria-label="Research stage, 0 tickets" id="col-RESEARCH">
+              <p class="stage-column__empty">No tickets in this stage</p>
+            </div>
+          </div>
+
+          <!-- BACKEND -->
+          <div class="stage-column" data-stage="BACKEND">
+            <div class="stage-column__header">
+              <div class="stage-column__accent" style="background-color: var(--stage-backend);" aria-hidden="true"></div>
+              <h2 class="stage-column__title">Backend</h2>
+              <span class="stage-column__count badge badge--count" aria-label="0 tickets">0</span>
+            </div>
+            <div class="stage-column__cards" role="list" aria-label="Backend stage, 0 tickets" id="col-BACKEND">
+              <p class="stage-column__empty">No tickets in this stage</p>
+            </div>
+          </div>
+
+          <!-- FRONTEND -->
+          <div class="stage-column" data-stage="FRONTEND">
+            <div class="stage-column__header">
+              <div class="stage-column__accent" style="background-color: var(--stage-frontend);" aria-hidden="true"></div>
+              <h2 class="stage-column__title">Frontend</h2>
+              <span class="stage-column__count badge badge--count" aria-label="0 tickets">0</span>
+            </div>
+            <div class="stage-column__cards" role="list" aria-label="Frontend stage, 0 tickets" id="col-FRONTEND">
+              <p class="stage-column__empty">No tickets in this stage</p>
+            </div>
+          </div>
+
+          <!-- QA -->
+          <div class="stage-column" data-stage="QA">
+            <div class="stage-column__header">
+              <div class="stage-column__accent" style="background-color: var(--stage-qa);" aria-hidden="true"></div>
+              <h2 class="stage-column__title">QA</h2>
+              <span class="stage-column__count badge badge--count" aria-label="0 tickets">0</span>
+            </div>
+            <div class="stage-column__cards" role="list" aria-label="QA stage, 0 tickets" id="col-QA">
+              <p class="stage-column__empty">No tickets in this stage</p>
+            </div>
+          </div>
+
+          <!-- SECURITY -->
+          <div class="stage-column" data-stage="SECURITY">
+            <div class="stage-column__header">
+              <div class="stage-column__accent" style="background-color: var(--stage-security);" aria-hidden="true"></div>
+              <h2 class="stage-column__title">Security</h2>
+              <span class="stage-column__count badge badge--count" aria-label="0 tickets">0</span>
+            </div>
+            <div class="stage-column__cards" role="list" aria-label="Security stage, 0 tickets" id="col-SECURITY">
+              <p class="stage-column__empty">No tickets in this stage</p>
+            </div>
+          </div>
+
+          <!-- CI -->
+          <div class="stage-column" data-stage="CI">
+            <div class="stage-column__header">
+              <div class="stage-column__accent" style="background-color: var(--stage-ci);" aria-hidden="true"></div>
+              <h2 class="stage-column__title">CI</h2>
+              <span class="stage-column__count badge badge--count" aria-label="0 tickets">0</span>
+            </div>
+            <div class="stage-column__cards" role="list" aria-label="CI stage, 0 tickets" id="col-CI">
+              <p class="stage-column__empty">No tickets in this stage</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── Bottom Compact Row ── -->
+        <div class="kanban__bottom-row" aria-label="Additional stages summary">
+          <button class="compact-stage" data-stage="DOCS" aria-label="Docs stage, 0 tickets">
+            <span class="compact-stage__name">DOCS</span>
+            <span class="compact-stage__count badge badge--count">0</span>
+          </button>
+          <button class="compact-stage" data-stage="VALIDATION" aria-label="Validation stage, 0 tickets">
+            <span class="compact-stage__name">VALIDATION</span>
+            <span class="compact-stage__count badge badge--count">0</span>
+          </button>
+          <button class="compact-stage" data-stage="DONE" aria-label="Done stage, 0 tickets">
+            <span class="compact-stage__name">DONE</span>
+            <span class="compact-stage__count badge badge--count">0</span>
+          </button>
+          <button class="compact-stage" data-stage="ESCALATED" aria-label="Escalated stage, 0 tickets">
+            <span class="compact-stage__name">ESCALATED</span>
+            <span class="compact-stage__count badge badge--count">0</span>
+          </button>
+        </div>
+      </section>
+    </div>
+
+    <!-- Graph View (placeholder) -->
+    <div id="panel-graph" class="view-panel" role="tabpanel" aria-labelledby="tab-graph" hidden>
+      <section class="graph-section">
+        <h2 class="section-heading">Dependency Graph</h2>
+        <div id="graphContainer" class="graph-container" aria-label="Ticket dependency graph visualization"></div>
+      </section>
+    </div>
+
+    <!-- Machines View (placeholder) -->
+    <div id="panel-machines" class="view-panel" role="tabpanel" aria-labelledby="tab-machines" hidden>
+      <section class="placeholder-section">
+        <h2 class="section-heading">Machines</h2>
+        <p class="placeholder-section__text">Machine monitoring view — coming soon.</p>
+      </section>
+    </div>
+
+    <!-- Admin View (placeholder) -->
+    <div id="panel-admin" class="view-panel" role="tabpanel" aria-labelledby="tab-admin" hidden>
+      <section class="placeholder-section">
+        <h2 class="section-heading">Admin</h2>
+        <p class="placeholder-section__text">Administration panel — coming soon.</p>
+      </section>
+    </div>
+  </main>
+
+  <!-- ═══ Ticket Detail Slide-over ═══ -->
+  <div class="scrim" id="scrim" hidden aria-hidden="true"></div>
+  <aside class="slide-over" id="ticketDetail" role="dialog" aria-modal="true" aria-labelledby="ticket-detail-title" hidden>
+    <div class="slide-over__header">
+      <h2 class="slide-over__title" id="ticket-detail-title">
+        <span class="slide-over__ticket-id" id="detailTicketId">—</span>
+      </h2>
+      <button class="slide-over__close" id="detailClose" aria-label="Close ticket detail">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="slide-over__body" id="detailBody">
+      <p class="slide-over__ticket-title" id="detailTitle">—</p>
+      <div class="slide-over__badges" id="detailBadges"></div>
+      <section class="slide-over__section">
+        <h3 class="slide-over__section-title">Metadata</h3>
+        <dl class="slide-over__meta" id="detailMeta">
+          <div class="meta-row">
+            <dt>Stage</dt>
+            <dd id="detailStage">—</dd>
+          </div>
+          <div class="meta-row">
+            <dt>Priority</dt>
+            <dd id="detailPriority">—</dd>
+          </div>
+          <div class="meta-row">
+            <dt>Type</dt>
+            <dd id="detailType">—</dd>
+          </div>
+          <div class="meta-row">
+            <dt>Claimed By</dt>
+            <dd id="detailClaimedBy">—</dd>
+          </div>
+          <div class="meta-row">
+            <dt>Machine</dt>
+            <dd id="detailMachine">—</dd>
+          </div>
+          <div class="meta-row">
+            <dt>Lease Remaining</dt>
+            <dd id="detailLease">—</dd>
+          </div>
+          <div class="meta-row">
+            <dt>Rework Count</dt>
+            <dd id="detailRework">—</dd>
+          </div>
+          <div class="meta-row">
+            <dt>Created</dt>
+            <dd id="detailCreated">—</dd>
+          </div>
+        </dl>
+      </section>
+      <section class="slide-over__section">
+        <h3 class="slide-over__section-title">Acceptance Criteria</h3>
+        <ul class="slide-over__ac-list" id="detailAC"></ul>
+      </section>
+      <section class="slide-over__section">
+        <h3 class="slide-over__section-title">Dependencies</h3>
+        <ul class="slide-over__deps" id="detailDeps">
+          <li>None</li>
+        </ul>
+      </section>
+      <section class="slide-over__section">
+        <h3 class="slide-over__section-title">File Paths</h3>
+        <ul class="slide-over__files" id="detailFiles"></ul>
+      </section>
+      <section class="slide-over__section">
+        <h3 class="slide-over__section-title">History</h3>
+        <ol class="slide-over__timeline" id="detailTimeline"></ol>
+      </section>
+    </div>
+  </aside>
+
+  <!-- ═══ Mobile Sidebar ═══ -->
+  <div class="mobile-scrim" id="mobileScrim" hidden aria-hidden="true"></div>
+  <nav class="mobile-sidebar" id="mobileSidebar" aria-label="Mobile navigation" hidden>
+    <div class="mobile-sidebar__header">
+      <span class="mobile-sidebar__title">ForgeOS Dashboard</span>
+      <button class="mobile-sidebar__close" id="sidebarClose" aria-label="Close navigation menu">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="mobile-sidebar__section">
+      <h3 class="mobile-sidebar__section-title">Views</h3>
+      <button class="mobile-sidebar__item mobile-sidebar__item--active" data-view="pipeline">Pipeline</button>
+      <button class="mobile-sidebar__item" data-view="graph">Graph</button>
+      <button class="mobile-sidebar__item" data-view="machines">Machines</button>
+      <button class="mobile-sidebar__item" data-view="admin">Admin</button>
+    </div>
+  </nav>
+
+  <!-- ═══ Live Announcer for screen readers ═══ -->
+  <div class="sr-only" id="liveAnnouncer" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- ═══ Ticket Card Template ═══ -->
+  <template id="ticket-card-template">
+    <article class="ticket-card" role="listitem" tabindex="0">
+      <div class="ticket-card__top">
+        <span class="ticket-card__id">—</span>
+        <span class="ticket-card__machine badge badge--machine">—</span>
+      </div>
+      <p class="ticket-card__title">—</p>
+      <div class="ticket-card__bottom">
+        <span class="ticket-card__priority badge badge--priority">—</span>
+        <span class="ticket-card__type badge badge--type">—</span>
+        <span class="ticket-card__agent">—</span>
+        <span class="ticket-card__time">—</span>
+        <span class="ticket-card__rework badge badge--rework" hidden>R0</span>
+      </div>
+    </article>
+  </template>
+
+  <script src="js/app.js"></script>
+</body>
+</html>

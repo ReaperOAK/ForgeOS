@@ -4,7 +4,7 @@
   "description": "Build the main dashboard page as a vanilla HTML + CSS layout (no frontend framework, no build step) as specified in Architecture \u00a75 and PRD FR-22/FR-27. The page includes a Kanban-style pipeline board with columns for each active SDLC stage (READY, BACKEND, FRONTEND, QA, SECURITY, CI, DOCUMENTATION, VALIDATION). Each column displays ticket cards showing: ticket_id, title, type badge, priority indicator, claimed_by agent name, and lease countdown timer. Cards are color-coded by status (unclaimed=blue, claimed=yellow, expiring=orange, expired=red). The layout includes a header with system health summary, navigation tabs for Pipeline/Graph/Machines views, and filter controls for stage, type, priority, machine, and agent. Responsive layout, desktop-first. D3.js loaded via CDN script tag.",
   "type": "frontend",
   "priority": "high",
-  "stage": "FRONTEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -41,11 +41,12 @@
     "WCAG 2.2 AA compliance: 4.5:1 color contrast, ARIA labels on interactive elements, keyboard navigation"
   ],
   "rework_count": 0,
-  "claimed_by": "Frontend",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-09T18:40:51+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
+  "completed_at": "2026-03-09T18:16:54+00:00",
   "history": [
     {
       "timestamp": "2026-03-05T18:05:37.902722+00:00",
@@ -60,6 +61,13 @@
       "agent": "UIDesigner",
       "machine_id": "pop-os",
       "details": "UIDesigner phase complete. Mockup approved at docs/uiux/mockups/TASK-FOS-05-001.md. 5 Stitch screens, 8 component specs, a11y review passed. Ready for Frontend Engineer."
+    },
+    {
+      "timestamp": "2026-03-09T18:16:54+00:00",
+      "event": "FRONTEND_COMPLETE",
+      "agent": "Frontend",
+      "machine_id": "pop-os",
+      "details": "FRONTEND complete. Dashboard HTML/CSS rewritten: index.html (429 lines), style.css (~900 lines). WCAG 2.2 AA, responsive 320-1440px, design tokens, 11/11 AC met."
     }
   ],
   "source_task_file": "TODO/tickets/05-dashboard.md",
