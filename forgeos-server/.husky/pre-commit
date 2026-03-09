@@ -4,10 +4,14 @@
 #
 # Validates that staged files are within the ticket's
 # declared file_paths scope (blast radius validation).
+# See Architecture §7.5 and PRD FR-20.
 #
-# Delegates to scripts/validate-scope.sh.
+# Delegates to scripts/validate-scope.sh for the actual
+# validation logic. This file is the Husky entry point.
 #
 # Bypass: git commit --no-verify
+#
+# last_reviewed: 2026-03-09T18:30:00Z
 # ──────────────────────────────────────────────────────
 
 # Resolve the repo root (forgeos-server/) relative to .husky/
