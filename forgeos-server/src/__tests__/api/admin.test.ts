@@ -1,3 +1,17 @@
+/**
+ * Admin Route Tests — TASK-FOS-04-002
+ *
+ * Tests for the admin REST endpoints:
+ * - POST /api/admin/agents            — register new agent
+ * - GET  /api/admin/agents            — list agents (paginated)
+ * - POST /api/admin/agents/:id/revoke — revoke agent API key
+ * - DELETE /api/admin/agents/:id      — deregister agent
+ * - POST /api/admin/agents/:id/sessions — create/update session
+ *
+ * @module __tests__/api/admin
+ * @ticket TASK-FOS-04-002
+ */
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { Request, Response, NextFunction } from 'express';
 
@@ -6,11 +20,13 @@ const {
   mockListAgents,
   mockRevokeAgent,
   mockDeregisterAgent,
+  mockCreateOrUpdateSession,
 } = vi.hoisted(() => ({
   mockRegisterAgent: vi.fn(),
   mockListAgents: vi.fn(),
   mockRevokeAgent: vi.fn(),
   mockDeregisterAgent: vi.fn(),
+  mockCreateOrUpdateSession: vi.fn(),
 }));
 
 vi.mock('../../db/pool.js', () => ({
@@ -48,6 +64,7 @@ vi.mock('../../auth/registration.js', () => ({
   listAgents: (...args: unknown[]) => mockListAgents(...args),
   revokeAgent: (...args: unknown[]) => mockRevokeAgent(...args),
   deregisterAgent: (...args: unknown[]) => mockDeregisterAgent(...args),
+  createOrUpdateSession: (...args: unknown[]) => mockCreateOrUpdateSession(...args),
   AgentAlreadyExistsError: class extends Error {
     public readonly code = 'AGENT_ALREADY_EXISTS' as const;
     constructor(name: string, role: string) {
@@ -73,13 +90,13 @@ vi.mock('../../auth/registration.js', () => ({
   listAgentsSchema: { safeParse: () => ({ success: true, data: {} }), omit: () => ({ safeParse: () => ({ success: true, data: {} }) }) },
   createSessionSchema: { safeParse: () => ({ success: true, data: {} }), omit: () => ({ safeParse: () => ({ success: true, data: {} }) }) },
   updateLastSeen: vi.fn().mockResolvedValue(undefined),
-  createOrUpdateSession: vi.fn(),
 }));
 
 const { adminRouter } = await import('../../api/routes/admin.js');
 const registrationMod = await import('../../auth/registration.js');
 const AgentAlreadyExistsError = registrationMod.AgentAlreadyExistsError;
 const InvalidRoleError = registrationMod.InvalidRoleError;
+const AgentNotFoundError = registrationMod.AgentNotFoundError;
 
 interface MockResponse {
   statusCode: number;
@@ -121,37 +138,50 @@ function findHandler(
 describe('Admin Routes', () => {
   beforeEach(() => { vi.clearAllMocks(); });
 
-  describe('POST /agents', () => {
+  describe('POST /agents (register agent)', () => {
     const handler = findHandler('post', '/agents');
-    it('handler exists', () => { expect(handler).toBeDefined(); });
-    it('returns 201 on success', async () => {
+
+    it('handler is registered on the router', () => {
+      expect(handler).toBeDefined();
+    });
+
+    it('returns 201 with agent and API key on success', async () => {
       const mockResult = {
-        agent: { id: 'a1', name: 'BE', role: 'backend', permissions: ['tickets.claim'], machine_id: null, is_active: true, revoked_at: null, created_at: '2026-03-07T00:00:00Z', updated_at: '2026-03-07T00:00:00Z' },
-        api_key: 'fos_key',
+        agent: {
+          id: 'agent-uuid-001', name: 'Backend Engineer', role: 'backend',
+          permissions: ['tickets.claim'], machine_id: null, is_active: true,
+          revoked_at: null, created_at: '2026-03-07T00:00:00Z', updated_at: '2026-03-07T00:00:00Z',
+        },
+        api_key: 'fos_plaintext_key_shown_once',
       };
       mockRegisterAgent.mockResolvedValueOnce(mockResult);
-      const req = createMockReq({ body: { name: 'BE', role: 'backend' } });
+      const req = createMockReq({ body: { name: 'Backend Engineer', role: 'backend' } });
       const res = createMockRes();
       await handler!(req as Request, res as unknown as Response, vi.fn());
       expect(res.statusCode).toBe(201);
-      expect(res._data).toHaveProperty('api_key', 'fos_key');
+      expect(res._data).toHaveProperty('agent');
+      expect(res._data).toHaveProperty('api_key', 'fos_plaintext_key_shown_once');
+      expect(mockRegisterAgent).toHaveBeenCalledWith(req.body);
     });
-    it('returns 409 on duplicate', async () => {
+
+    it('returns 409 when agent already exists', async () => {
       mockRegisterAgent.mockRejectedValueOnce(new AgentAlreadyExistsError('BE', 'backend'));
       const res = createMockRes();
       await handler!(createMockReq({ body: { name: 'BE', role: 'backend' } }) as Request, res as unknown as Response, vi.fn());
       expect(res.statusCode).toBe(409);
       expect(res._data).toHaveProperty('error', 'AGENT_ALREADY_EXISTS');
     });
-    it('returns 400 on invalid role', async () => {
-      mockRegisterAgent.mockRejectedValueOnce(new InvalidRoleError('bad'));
+
+    it('returns 400 for invalid role', async () => {
+      mockRegisterAgent.mockRejectedValueOnce(new InvalidRoleError('nonexistent'));
       const res = createMockRes();
-      await handler!(createMockReq({ body: { name: 'X', role: 'bad' } }) as Request, res as unknown as Response, vi.fn());
+      await handler!(createMockReq({ body: { name: 'Bad', role: 'nonexistent' } }) as Request, res as unknown as Response, vi.fn());
       expect(res.statusCode).toBe(400);
       expect(res._data).toHaveProperty('error', 'INVALID_ROLE');
     });
-    it('calls next on unexpected error', async () => {
-      const err = new Error('DB fail');
+
+    it('calls next(err) for unexpected errors', async () => {
+      const err = new Error('Database connection lost');
       mockRegisterAgent.mockRejectedValueOnce(err);
       const next = vi.fn();
       await handler!(createMockReq({ body: { name: 'A', role: 'b' } }) as Request, createMockRes() as unknown as Response, next);
@@ -159,46 +189,149 @@ describe('Admin Routes', () => {
     });
   });
 
-  describe('GET /agents', () => {
+  describe('GET /agents (list agents)', () => {
     const handler = findHandler('get', '/agents');
-    it('handler exists', () => { expect(handler).toBeDefined(); });
-    it('returns 200 with paginated list', async () => {
-      mockListAgents.mockResolvedValueOnce({
-        data: [{ id: 'a1', name: 'BE', role: 'backend', is_active: true }],
+
+    it('handler is registered on the router', () => {
+      expect(handler).toBeDefined();
+    });
+
+    it('returns 200 with paginated agent list', async () => {
+      const mockResult = {
+        data: [{ id: 'a1', name: 'BE', role: 'backend', is_active: true, created_at: '2026-03-07T00:00:00Z' }],
         pagination: { total: 1, limit: 20, offset: 0, has_more: false },
-      });
+      };
+      mockListAgents.mockResolvedValueOnce(mockResult);
       const res = createMockRes();
       await handler!(createMockReq({ query: {} }) as Request, res as unknown as Response, vi.fn());
       expect(res.statusCode).toBe(200);
       expect(res._data).toHaveProperty('data');
       expect(res._data).toHaveProperty('pagination');
     });
-  });
 
-  describe('POST /agents/:id/revoke', () => {
-    const handler = findHandler('post', '/agents/:id/revoke');
-    it('handler exists', () => { expect(handler).toBeDefined(); });
-    it('returns 200 on revoke', async () => {
-      const uuid = '550e8400-e29b-41d4-a716-446655440000';
-      mockRevokeAgent.mockResolvedValueOnce({ id: uuid, name: 'BE', is_active: false, revoked_at: '2026-03-07T12:00:00Z' });
-      const res = createMockRes();
-      await handler!(createMockReq({ params: { id: uuid } }) as Request, res as unknown as Response, vi.fn());
-      expect(res.statusCode).toBe(200);
-      expect(res._data).toHaveProperty('agent');
-      expect(mockRevokeAgent).toHaveBeenCalledWith(uuid);
+    it('calls next(err) for unexpected errors', async () => {
+      const err = new Error('DB fail');
+      mockListAgents.mockRejectedValueOnce(err);
+      const next = vi.fn();
+      await handler!(createMockReq({ query: {} }) as Request, createMockRes() as unknown as Response, next);
+      expect(next).toHaveBeenCalledWith(err);
     });
   });
 
-  describe('DELETE /agents/:id', () => {
-    const handler = findHandler('delete', '/agents/:id');
-    it('handler exists', () => { expect(handler).toBeDefined(); });
-    it('returns 200 on deregister', async () => {
+  describe('POST /agents/:id/revoke (revoke agent)', () => {
+    const handler = findHandler('post', '/agents/:id/revoke');
+
+    it('handler is registered on the router', () => {
+      expect(handler).toBeDefined();
+    });
+
+    it('returns 200 with revoked agent on success', async () => {
       const uuid = '550e8400-e29b-41d4-a716-446655440000';
-      mockDeregisterAgent.mockResolvedValueOnce({ id: uuid, name: 'BE', is_active: false });
+      mockRevokeAgent.mockResolvedValueOnce({
+        id: uuid, name: 'BE', role: 'backend', is_active: false, revoked_at: '2026-03-07T12:00:00Z',
+      });
       const res = createMockRes();
       await handler!(createMockReq({ params: { id: uuid } }) as Request, res as unknown as Response, vi.fn());
       expect(res.statusCode).toBe(200);
       expect(res._data).toHaveProperty('agent');
+      expect(res._data).toHaveProperty('message');
+      expect(mockRevokeAgent).toHaveBeenCalledWith(uuid);
+    });
+
+    it('returns 404 when agent not found', async () => {
+      const uuid = '550e8400-e29b-41d4-a716-446655440000';
+      mockRevokeAgent.mockRejectedValueOnce(new AgentNotFoundError(uuid));
+      const res = createMockRes();
+      await handler!(createMockReq({ params: { id: uuid } }) as Request, res as unknown as Response, vi.fn());
+      expect(res.statusCode).toBe(404);
+      expect(res._data).toHaveProperty('error', 'AGENT_NOT_FOUND');
+    });
+
+    it('calls next(err) for unexpected errors', async () => {
+      const err = new Error('DB fail');
+      mockRevokeAgent.mockRejectedValueOnce(err);
+      const next = vi.fn();
+      await handler!(createMockReq({ params: { id: '550e8400-e29b-41d4-a716-446655440000' } }) as Request, createMockRes() as unknown as Response, next);
+      expect(next).toHaveBeenCalledWith(err);
+    });
+  });
+
+  describe('DELETE /agents/:id (deregister agent)', () => {
+    const handler = findHandler('delete', '/agents/:id');
+
+    it('handler is registered on the router', () => {
+      expect(handler).toBeDefined();
+    });
+
+    it('returns 200 with deregistered agent on success', async () => {
+      const uuid = '550e8400-e29b-41d4-a716-446655440000';
+      mockDeregisterAgent.mockResolvedValueOnce({
+        id: uuid, name: 'BE', role: 'backend', is_active: false, revoked_at: '2026-03-07T12:00:00Z',
+      });
+      const res = createMockRes();
+      await handler!(createMockReq({ params: { id: uuid } }) as Request, res as unknown as Response, vi.fn());
+      expect(res.statusCode).toBe(200);
+      expect(res._data).toHaveProperty('agent');
+      expect(res._data).toHaveProperty('message');
+    });
+
+    it('returns 404 when agent not found', async () => {
+      const uuid = '550e8400-e29b-41d4-a716-446655440000';
+      mockDeregisterAgent.mockRejectedValueOnce(new AgentNotFoundError(uuid));
+      const res = createMockRes();
+      await handler!(createMockReq({ params: { id: uuid } }) as Request, res as unknown as Response, vi.fn());
+      expect(res.statusCode).toBe(404);
+      expect(res._data).toHaveProperty('error', 'AGENT_NOT_FOUND');
+    });
+
+    it('calls next(err) for unexpected errors', async () => {
+      const err = new Error('DB fail');
+      mockDeregisterAgent.mockRejectedValueOnce(err);
+      const next = vi.fn();
+      await handler!(createMockReq({ params: { id: '550e8400-e29b-41d4-a716-446655440000' } }) as Request, createMockRes() as unknown as Response, next);
+      expect(next).toHaveBeenCalledWith(err);
+    });
+  });
+
+  describe('POST /agents/:id/sessions (create/update session)', () => {
+    const handler = findHandler('post', '/agents/:id/sessions');
+
+    it('handler is registered on the router', () => {
+      expect(handler).toBeDefined();
+    });
+
+    it('returns 200 with session on success', async () => {
+      const uuid = '550e8400-e29b-41d4-a716-446655440000';
+      const mockSession = {
+        id: 'session-001', agent_id: uuid, session_token: 'mcp-token-123',
+        machine_id: 'pop-os', operator: 'reaperoak',
+        last_seen: '2026-03-07T12:00:00Z', expires_at: '2026-03-07T13:00:00Z',
+      };
+      mockCreateOrUpdateSession.mockResolvedValueOnce(mockSession);
+      const req = createMockReq({
+        params: { id: uuid },
+        body: { session_token: 'mcp-token-123', machine_id: 'pop-os', operator: 'reaperoak', expires_in_minutes: 60 },
+      });
+      const res = createMockRes();
+      await handler!(req as Request, res as unknown as Response, vi.fn());
+      expect(res.statusCode).toBe(200);
+      expect(res._data).toHaveProperty('session_token', 'mcp-token-123');
+      expect(mockCreateOrUpdateSession).toHaveBeenCalledWith(expect.objectContaining({
+        agent_id: uuid,
+        session_token: 'mcp-token-123',
+      }));
+    });
+
+    it('calls next(err) for unexpected errors', async () => {
+      const err = new Error('DB fail');
+      mockCreateOrUpdateSession.mockRejectedValueOnce(err);
+      const next = vi.fn();
+      const req = createMockReq({
+        params: { id: '550e8400-e29b-41d4-a716-446655440000' },
+        body: { session_token: 'x', machine_id: 'y' },
+      });
+      await handler!(req as Request, createMockRes() as unknown as Response, next);
+      expect(next).toHaveBeenCalledWith(err);
     });
   });
 });

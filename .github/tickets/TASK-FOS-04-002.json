@@ -4,7 +4,7 @@
   "description": "Implement agent and machine registration endpoints. POST /api/admin/agents creates a new agent record with name, role, and permissions, generates an API key, and returns the agent identity with the plaintext key (shown once). POST /api/admin/agents/:id/revoke revokes an agent's API key. GET /api/admin/agents lists all registered agents (without key hashes). Include machine registration: each API call updates the agent's last_seen timestamp for staleness tracking. Admin endpoints require admin role authentication.",
   "type": "backend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Agent sessions table updated with session_token matching MCP session ID"
   ],
   "rework_count": 0,
-  "claimed_by": "QA",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-09T18:40:42.624806+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -75,6 +75,15 @@
       "agent": "QA",
       "machine_id": "pop-os",
       "details": "Claimed for QA stage"
+    },
+    {
+      "timestamp": "2026-03-09T18:26:41.940798+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA Engineer",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tickets/04-auth-security.md",

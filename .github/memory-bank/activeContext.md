@@ -1542,6 +1542,11 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** PASS — Score 85/100, 0 critical, 3 warnings (OC-007 function length in reconciliation.ts). Type check clean, zero TODOs, zero console usage, no circular deps, 94.88% coverage.
 - **Timestamp:** 2026-03-09T18:20:00Z
 
+### [FORGEOS-DO008] — QA Summary
+- **Artifacts:** infra/docker/healthchecks/check-mcp.sh, infra/docker/healthchecks/check-postgres.sh, infra/monitoring/docker-compose.monitoring.yml, .github/agent-output/QA/FORGEOS-DO008.md
+- **Decisions:** PASS (HIGH confidence). All 6 acceptance criteria verified. Health check scripts pass syntax validation, all YAML/JSON configs valid, health checks wired in Docker Compose (postgres: 10s/5s/5/30s, mcp: 15s/5s/3/20s, pgadmin: 30s/10s/3/60s). Restart policy unless-stopped on all services. Monitoring stack: Prometheus v2.51.0 + Grafana v11.0.0 with auto-provisioned datasources, dashboards, and 7 alert rules. No hardcoded secrets.
+- **Timestamp:** 2026-03-09T18:30:00Z
+
 ### [TASK-FOS-05-001] — Frontend Summary
 - **Artifacts:** forgeos-server/src/dashboard/index.html, forgeos-server/src/dashboard/css/style.css
 - **Decisions:** Complete rewrite of dashboard HTML/CSS from design tokens. Vanilla HTML+CSS (no framework). Dark theme default with light theme variant via data-theme. Inter+JetBrains Mono fonts via CDN. 8 kanban columns + 4 compact. WCAG 2.2 AA: ARIA roles, keyboard nav, focus indicators, reduced motion, high contrast. Responsive 320-1440px. All 11 AC met.
@@ -1561,3 +1566,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/QA/FORGEOS-DO008.md, .github/ticket-state/SECURITY/FORGEOS-DO008.json
 - **Decisions:** QA PASS (HIGH confidence). Infrastructure-only ticket (no executable tests). Validated via static analysis: shell syntax (sh -n) 2/2 PASS, YAML validation 6/6 PASS, Grafana dashboard JSON VALID, 18-point configuration consistency check 0 errors/0 warnings, no hardcoded secrets. All 6 acceptance criteria verified: health check scripts, Docker Compose healthcheck directives, monitoring stack (Prometheus v2.51.0 + Grafana v11.0.0), Prometheus scrape configs, alert rules (7 alerts), Grafana dashboard provisioning.
 - **Timestamp:** 2026-03-09T18:25:00Z
+
+### [TASK-FOS-04-002] — QA Summary
+- **Artifacts:** forgeos-server/src/__tests__/api/admin.test.ts, .github/agent-output/QA/TASK-FOS-04-002.md
+- **Decisions:** QA PASS (HIGH confidence). All 7 acceptance criteria verified. 38 tests passing (19 registration + 19 admin). Coverage: admin.ts 100%, registration.ts 98.18%. Added 8 new tests covering 404 error paths, error forwarding, and sessions endpoint. No mutation testing configured — recommended as follow-up.
+- **Timestamp:** 2026-03-09T23:55:00Z

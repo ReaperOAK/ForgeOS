@@ -4,7 +4,7 @@
   "description": "Implement the GitHub push webhook receiver and ghost commit recovery system as specified in Architecture \u00a710.2 and PRD FR-28 through FR-30. POST /api/webhooks/github accepts GitHub push event payloads, verifies the HMAC-SHA256 signature using WEBHOOK_SECRET, parses commit messages to extract ticket operations (CLAIM and WORK patterns), and reconciles DB state with Git state. Reconciliation rules: (1) Git CLAIM exists but DB has no claim \u2192 create claim in DB, (2) Git WORK complete but DB still CLAIMED \u2192 advance ticket, (3) DB has claim but no Git commit and lease expired \u2192 release claim, (4) ambiguous \u2192 log warning and flag for admin. All operations are idempotent. Includes periodic reconciliation sweep (configurable interval, default 5 minutes).",
   "type": "backend",
   "priority": "high",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -41,10 +41,10 @@
     "Reconciliation is idempotent \u2014 replaying the same webhook produces the same result"
   ],
   "rework_count": 0,
-  "claimed_by": "CIReviewer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-09T01:00:00+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -85,6 +85,24 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-09T18:20:00+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "Advanced from CI to DOCSal, 3 warnings (OC-007 function length)"
+    },
+    {
+      "timestamp": "2026-03-09T18:20:35.948150+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CI Reviewer",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
     }
   ],
   "source_task_file": "TODO/tickets/06-git-integration.md",
