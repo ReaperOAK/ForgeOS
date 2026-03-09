@@ -1,3 +1,13 @@
+### [TASK-FOS-03-002] — Documentation Summary
+- **Artifacts:** forgeos-server/src/tools/tickets-claim.ts, forgeos-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/TASK-FOS-03-002.md
+- **Decisions:** Enhanced TSDoc on 3 public exports (module, schema, handler). Added full tickets.claim README section with input schema, query behaviour, response format, concurrency guarantees, MCP example. CHANGELOG entry added.
+- **Timestamp:** 2026-03-10T01:15:00Z
+
+### [FORGEOS-BE001] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE001.md
+- **Decisions:** Added Database Migrations section to mcp-server/README.md covering Alembic config, commands, schema overview, project structure, and API table. Added CHANGELOG entry. All 16 public APIs already had comprehensive NumPy-style docstrings. Root README.md unchanged (migration is mcp-server scoped).
+- **Timestamp:** 2026-03-10T20:30:00Z
+
 ### [FORGEOS-DO005] — Documentation Summary
 - **Artifacts:** CHANGELOG.md, README.md, .github/agent-output/Documentation/FORGEOS-DO005.md
 - **Decisions:** Added CI workflow CHANGELOG entry under [Unreleased]. Added GitHub Actions status badge to README top. Added Continuous Integration section to README with 6-job summary table. No code changes — documentation only.
