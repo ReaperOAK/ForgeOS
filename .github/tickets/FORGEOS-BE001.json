@@ -47,7 +47,7 @@
   "lease_expiry": "2026-03-10T02:30:00+05:30",
   "lease_duration_minutes": 30,
   "completed_at": "2026-03-07T23:55:00Z",
-  "status": "DOCS_COMPLETE",
+  "status": "CICS_COMPLETE",
   "artifacts": [
     "mcp-server/alembic.ini",
     "mcp-server/alembic/env.py",

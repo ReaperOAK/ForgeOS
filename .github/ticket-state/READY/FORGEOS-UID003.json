@@ -4,7 +4,7 @@
   "description": "Design the interactive dependency graph (DAG visualization) and global search interface. The dependency graph replaces `todo_visual.py --dot` output with an interactive, zoomable, pannable directed acyclic graph. Nodes represent tickets color-coded by stage, edges show dependency relationships. The search interface provides global search by ticket ID, title keyword, file path, agent, and stage with type-ahead suggestions and recent searches.",
   "type": "frontend",
   "priority": "medium",
-  "stage": "BLOCKED",
+  "stage": "READY",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -49,6 +49,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase4-dashboard.md"
+    },
+    {
+      "timestamp": "2026-03-09T19:38:16.031024+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",

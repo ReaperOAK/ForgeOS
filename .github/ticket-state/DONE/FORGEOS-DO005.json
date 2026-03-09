@@ -4,7 +4,7 @@
   "description": "Create a GitHub Actions workflow for continuous integration of the MCP server. The workflow should run on push and pull request events, set up Python, install dependencies, run linting (ruff), type checking (mypy), and execute unit tests with pytest. Use a PostgreSQL service container for integration tests.",
   "type": "infra",
   "priority": "high",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -88,6 +88,15 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "DOCS COMPLETE \u2014 CHANGELOG entry, README badge + CI section added. Advance to VALIDATION."
+    },
+    {
+      "timestamp": "2026-03-09T19:46:51.295316+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation Specialist",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-infrastructure.md",
