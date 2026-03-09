@@ -4,7 +4,7 @@
   "description": "Create database backup and restore scripts for the ForgeOS PostgreSQL instance. Implement pg_dump-based backup with timestamped output files, a restore script that validates the backup before applying, and a strategy document describing backup frequency, retention, and WAL archiving recommendations for production.",
   "type": "infra",
   "priority": "medium",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Backup and restore can be invoked via Makefile targets (`make backup`, `make restore`)"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-09T20:42:15.833120+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -107,6 +107,15 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "Documentation updated: CHANGELOG entry, infra/README Backup & Restore section, backup-strategy.md freshness metadata"
+    },
+    {
+      "timestamp": "2026-03-09T20:14:11.825764+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-infrastructure.md",
