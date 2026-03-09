@@ -230,7 +230,6 @@ _None_
 |----|----------|-------------|--------|------------|
 | SEC-DO004-001 | Medium | Project `.gitignore` does not exclude `.env` files. Real `.env` files with secrets could be committed to VCS history (CWE-200, CWE-540). | Risk Accepted | `.env.template` includes explicit warning "Never commit .env files containing real secrets." Recommend adding `.env` exclusion to `.gitignore` in follow-up. |
 | SEC-DO004-002 | Medium | `DATABASE_URL` template line contains placeholder password `changeme`: `postgresql://forgeos:changeme@localhost:5432/forgeos` (CWE-798). `DB_PASSWORD` field is correctly empty. | Risk Accepted | Template file only; `settings.py` composes URL from parts when `DATABASE_URL` not set. Recommend removing password from template URL. |
-<<<<<<< Updated upstream
 | SEC-DO004-003 | Medium | No production validation requiring `DB_SSL_MODE` ≠ `disable`. Database connections in production should use SSL (CWE-319). | Risk Accepted | Default is `disable` for local dev. Recommend adding production guard in `settings.py`. |
 
 ### [TASK-FOS-06-004] — Webhook State Recovery Security Risks (2026-03-07T22:45:00Z)
@@ -239,7 +238,12 @@ _None_
 |----|----------|-------------|--------|------------|
 | SEC-06004-001 | Low | No webhook-specific rate limiting on `POST /api/webhooks/github`. Global 100/min limit may drop legitimate GitHub webhook bursts during high-activity periods (CWE-770). | Risk Accepted | Operational concern, not a vulnerability. GitHub retries failed webhooks. Recommend dedicated webhook rate limit in future ticket. |
 | SEC-06004-002 | Low | `WEBHOOK_SECRET` optional in non-production config (CWE-1188). Router factory `WebhookRouterConfig` requires non-optional `string`, so startup fails without it. Production guard via Zod `superRefine`. | Risk Accepted | Design-by-contract — type system prevents mounting without secret. |
-=======
-| SEC-DO004-003 | Medium | No production validation requiring `DB_SSL_MODE` ≠ `disable`. Database connections in production should use SSL (CWE-319). | Risk Accepted | Default is `disable` for local dev. Recommend adding production guard in `settings.py`. || SEC-06004-001 | Low | No webhook-specific rate limiting on POST /api/webhooks/github. Global 100/min limit may drop legitimate GitHub webhook bursts during high-activity periods (CWE-770). | Risk Accepted | Operational concern, not a vulnerability. GitHub retries failed webhooks. Recommend dedicated webhook rate limit in future ticket. |
-| SEC-06004-002 | Low | WEBHOOK_SECRET optional in non-production config (CWE-1188). Router factory requires non-optional string, so startup fails without it. Production guard via Zod superRefine. | Risk Accepted | Design-by-contract — type system prevents mounting without secret. |
->>>>>>> Stashed changes
+
+### [FORGEOS-BE001] — Alembic Migration Framework Security Risks (2026-03-10T00:20:59+05:30)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-BE001-001 | Medium | Default fallback `DATABASE_URL` in `alembic/env.py:60` and `db/connection.py:45` contains hardcoded credentials `postgresql://forgeos:forgeos@localhost:5432/forgeos` (CWE-798). If `DATABASE_URL` env var is unset, the fallback exposes dev credentials in production. | Risk Accepted | Dev-only fallback. Production deployment must set `DATABASE_URL` env var. Recommend removing fallback and raising error if env var missing. |
+| SEC-BE001-002 | Low | `migration_helpers.py` uses f-string SQL construction in `create_enum_type()`, `drop_enum_type()`, `create_updated_at_trigger()`, `drop_updated_at_trigger()` (CWE-89). Only called with hardcoded `ENUM_DEFINITIONS` values — no user input reaches these paths. | Risk Accepted | Internal DDL helpers only. Values come from hardcoded dictionary. No injection vector present. Recommend parameterized DDL if helpers become public API. |
+| SEC-BE001-003 | Low | No SSL enforcement in database connection config. `DatabaseConfig` in `connection.py` defaults `db_ssl_mode` to empty string. Production PostgreSQL connections should require `sslmode=require` or `verify-full` (CWE-319). | Risk Accepted | Local dev configuration. Recommend adding SSL enforcement guard for production environments. |
+| SEC-BE001-004 | Low | Project `.gitignore` does not exclude `.env` files. If `.env` files with real `DATABASE_URL` credentials are created, they could be committed to version control (CWE-200). | Risk Accepted | No `.env` files exist in repo currently. Recommend adding `.env` exclusion to `.gitignore`. |
