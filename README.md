@@ -1,5 +1,7 @@
 # Vibecoding
 
+[![MCP Server CI](https://github.com/ReaperOAK/ForgeOS/actions/workflows/mcp-server-ci.yml/badge.svg)](https://github.com/ReaperOAK/ForgeOS/actions/workflows/mcp-server-ci.yml)
+
 **Autonomous Software Agency Engine**
 
 An adaptive, event-driven, elastic multi-worker orchestration system that
@@ -667,6 +669,27 @@ docker compose -f docker-compose.yml -f docker-compose.dev.yml up
 
 See [`infra/README.md`](infra/README.md) for the full setup guide, including
 environment variables, secrets, debugging, and troubleshooting.
+
+### Continuous Integration
+
+The MCP Server CI workflow (`.github/workflows/mcp-server-ci.yml`) runs
+automatically on every push to `main` and on pull requests. It validates
+both the TypeScript `forgeos-server` and the Python `mcp-server` in parallel.
+
+| Job | What it checks | Timeout |
+|-----|----------------|---------|  
+| TS Lint & Type Check | ESLint + TypeScript compiler (Node.js 22) | 5 min |
+| TS Tests | Vitest with coverage, PostgreSQL 17 service container | 8 min |
+| Python Lint & Type Check | ruff + pyright (Python 3.12) | 5 min |
+| Python Tests | pytest with coverage, PostgreSQL 17 service container | 8 min |
+| Docker Build | Multi-stage image build verification (no push) | 8 min |
+| CI Gate | Aggregation — fails if any upstream job fails | 1 min |
+
+Path filters restrict the workflow to changes in `forgeos-server/`,
+`mcp-server/`, or the workflow file itself. Concurrency control cancels
+in-progress runs when a newer commit is pushed to the same branch.
+
+Coverage artifacts (TypeScript and Python) are uploaded with 7-day retention.
 
 ### Starting the Engine
 
