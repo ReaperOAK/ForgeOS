@@ -8,6 +8,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Alembic Migration Framework** — PostgreSQL schema management for ForgeOS
+  MCP server (FORGEOS-BE001). Initializes Alembic with async `asyncpg` support
+  via `alembic/env.py`, `DATABASE_URL` environment variable as the single
+  connection source, and a timestamped migration template
+  (`alembic/script.py.mako`). Initial migration (revision 001) creates 5 enum
+  types (`ticket_status`, `ticket_type`, `ticket_priority`,
+  `sdlc_stage`, `agent_type`), 7 tables (`tickets`, `ticket_events`,
+  `agents`, `agent_assignments`, `sdlc_transitions`, `system_config`,
+  `audit_log`), auto-update triggers, and B-tree / GIN / partial indexes.
+  `DatabaseConfig` pydantic-settings model with URL-format converters for
+  asyncpg and psycopg2, async and sync engine factories, and migration helper
+  utilities for enum DDL, trigger DDL, and index DDL. Includes comprehensive
+  NumPy-style docstrings on all 16 public exports. 101 tests, 100% coverage
+  on new code.
+
 - **Development Tooling and Makefile** — Developer ergonomics tooling for the
   ForgeOS platform (FORGEOS-DO003). Root `Makefile` provides 23 self-documenting
   targets covering the full development lifecycle: service management (`up`,
