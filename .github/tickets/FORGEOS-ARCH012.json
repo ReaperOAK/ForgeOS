@@ -57,7 +57,7 @@
       "event": "ARCHITECT_COMPLETE",
       "agent": "Architect",
       "machine_id": "pop-os",
-      "details": "Fitness functions and verification plan designed — 18 fitness functions, CI/CD integration plan, ADR-012"
+      "details": "Fitness functions and verification plan designed \u2014 18 fitness functions, CI/CD integration plan, ADR-012"
     }
   ],
   "source_task_file": "TODO/tasks/phase1-architecture.md",

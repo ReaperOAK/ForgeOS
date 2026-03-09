@@ -22,8 +22,7 @@
     "FORGEOS-DO002"
   ],
   "blocked_by": [
-    "FORGEOS-BE002",
-    "FORGEOS-DO002"
+    "FORGEOS-BE002"
   ],
   "file_paths": [
     "mcp-server/src/db/pool.py",

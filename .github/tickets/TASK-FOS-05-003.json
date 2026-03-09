@@ -23,8 +23,7 @@
     "TASK-FOS-03-007"
   ],
   "blocked_by": [
-    "TASK-FOS-05-001",
-    "TASK-FOS-03-007"
+    "TASK-FOS-05-001"
   ],
   "file_paths": [
     "forgeos-server/src/dashboard/js/graph.js"

@@ -22,8 +22,7 @@
     "FORGEOS-ARCH007"
   ],
   "blocked_by": [
-    "FORGEOS-BE001",
-    "FORGEOS-ARCH007"
+    "FORGEOS-BE001"
   ],
   "file_paths": [
     "database/alembic/versions/002_event_tables.py"
