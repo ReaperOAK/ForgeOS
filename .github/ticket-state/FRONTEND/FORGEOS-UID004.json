@@ -4,7 +4,7 @@
   "description": "Design the operator workbench and active claims monitor views. The claims monitor shows all active claims with agent identity, machine ID, operator name, ticket info, and a real-time lease countdown timer. The operator workbench provides authenticated action buttons for claim, release, and advance operations. Design confirmation modals for destructive actions (force-release, force-advance). Define the multi-machine status panel showing connected machines and running agents.",
   "type": "frontend",
   "priority": "medium",
-  "stage": "READY",
+  "stage": "FRONTEND",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -37,10 +37,10 @@
     "Mockup approval status set to APPROVED in mockup document header"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "UIDesigner",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-09T20:37:14Z",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -51,11 +51,11 @@
       "details": "Ticket created from TODO/tasks/phase4-dashboard.md"
     },
     {
-      "timestamp": "2026-03-09T19:38:16.040725+00:00",
-      "event": "MOVED_TO_READY",
-      "agent": "tickets.py",
-      "machine_id": "system",
-      "details": "Dependencies resolved, moved to READY"
+      "timestamp": "2026-03-09T20:07:14Z",
+      "event": "CLAIMED",
+      "agent": "UIDesigner",
+      "machine_id": "pop-os",
+      "details": "Claimed by UIDesigner on pop-os (reaperoak)"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
