@@ -44,7 +44,7 @@
   "claimed_by": null,
   "machine_id": null,
   "operator": null,
-  "lease_expiry": null,,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "completed_at": "2026-03-09T18:16:54+00:00",
   "history": [
