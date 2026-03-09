@@ -4,7 +4,7 @@
   "description": "Create a GitHub Actions workflow (or job within the MCP server CI) that validates database migrations in CI. The workflow applies all migrations to a clean PostgreSQL instance, validates the resulting schema, tests rollback of the most recent migration, and re-applies it to verify idempotency.",
   "type": "infra",
   "priority": "high",
-  "stage": "BLOCKED",
+  "stage": "READY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -45,6 +45,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase2-infrastructure.md"
+    },
+    {
+      "timestamp": "2026-03-09T19:47:06.020509+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-infrastructure.md",

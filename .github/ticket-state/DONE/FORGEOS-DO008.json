@@ -4,7 +4,7 @@
   "description": "Define health check scripts for all Docker containers and an optional monitoring stack. Create health check scripts for the MCP server (HTTP endpoint) and PostgreSQL (connection test). Provide an optional docker-compose override for monitoring tools (e.g., Prometheus, Grafana) that can be enabled for local observability.",
   "type": "infra",
   "priority": "medium",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -80,6 +80,15 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "Documentation PASS. infra/README.md updated with health check and monitoring sections. CHANGELOG entry added."
+    },
+    {
+      "timestamp": "2026-03-09T19:56:21.597055+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation Specialist",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-infrastructure.md",

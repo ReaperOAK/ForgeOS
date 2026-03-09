@@ -4,7 +4,7 @@
   "description": "Design the stage pipeline view (Kanban board) and ticket detail view. The pipeline view shows columns for each SDLC stage (READY through DONE) with ticket cards showing ID, title, type badge, priority indicator, and claim status. The ticket detail view shows full metadata, acceptance criteria checklist, file paths, dependency tree, history timeline, and agent activity log. Define component specifications for TicketCard, StageColumn, MetadataPanel, HistoryTimeline, and DependencyTree.",
   "type": "frontend",
   "priority": "high",
-  "stage": "BLOCKED",
+  "stage": "READY",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -49,6 +49,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase4-dashboard.md"
+    },
+    {
+      "timestamp": "2026-03-09T19:38:16.029491+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
