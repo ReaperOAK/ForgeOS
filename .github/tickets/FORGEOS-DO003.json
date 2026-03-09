@@ -4,7 +4,7 @@
   "description": "Create developer ergonomics tooling for the ForgeOS platform. Build a Makefile with targets for common operations: start/stop services, run database migrations, seed test data, run tests, and show logs. Create setup and seed scripts that automate first-time environment setup and loading sample data respectively.",
   "type": "infra",
   "priority": "high",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -37,10 +37,10 @@
     "All Makefile targets include help text accessible via `make help`"
   ],
   "rework_count": 0,
-  "claimed_by": "CIReviewer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-09T19:37:53.841687+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -88,6 +88,15 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-09T19:11:09.359082+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "CI review PASS \u2014 Score 97/100, 0 critical, 0 warnings"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-infrastructure.md",
