@@ -13,6 +13,7 @@ import { ticketsNextSchema, ticketsNextHandler } from './tickets-next.js';
 import { ticketsClaimSchema, ticketsClaimHandler } from './tickets-claim.js';
 import { ticketsRejectSchema, ticketsRejectHandler } from './tickets-reject.js';
 import { ticketsSpawnSchema, ticketsSpawnHandler } from './tickets-spawn.js';
+import { ticketsCompleteSchema, ticketsCompleteHandler } from './tickets-complete.js';
 
 /**
  * Register all MCP tools on the server.
@@ -51,5 +52,13 @@ export function registerTools(server: McpServer): void {
     'Create a child ticket under an existing parent ticket with generated ticket_id, inherited project context, and parent_id linkage',
     ticketsSpawnSchema.shape,
     async (params) => ticketsSpawnHandler(params),
+  );
+
+  // -- tickets.complete -----------------------------------------------
+  server.tool(
+    'tickets.complete',
+    'Complete the current SDLC stage and advance the ticket to the next stage in its flow. Requires completion evidence including artifacts, test results, and confidence level.',
+    ticketsCompleteSchema.shape,
+    async (params) => ticketsCompleteHandler(params),
   );
 }
