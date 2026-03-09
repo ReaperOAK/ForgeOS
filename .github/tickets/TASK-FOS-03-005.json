@@ -4,7 +4,7 @@
   "description": "Implement the tickets.reject MCP tool that rejects a ticket during a review stage (QA, Security, CI, Validation), sending it back for rework. Uses the reject_ticket SQL function. Increments rework_count; if rework_count >= max_reworks (default 3), the ticket moves to ESCALATED status instead of rework. On rework, the ticket returns to its implementation stage (first non-READY stage in the SDLC flow) with status READY. File locks are released on rejection.",
   "type": "backend",
   "priority": "high",
-  "stage": "BLOCKED",
+  "stage": "BACKEND",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -37,10 +37,10 @@
     "Escalated tickets have status ESCALATED and claimed_by set to NULL"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Backend",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-09T21:13:32.025278+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
