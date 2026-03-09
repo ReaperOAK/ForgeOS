@@ -1816,3 +1816,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/tools/tickets-reject.ts, forgeos-server/src/__tests__/tools/tickets-reject.test.ts, forgeos-server/src/tools/index.ts
 - **Decisions:** Used auto-registration pattern for agent lookup (INSERT ON CONFLICT DO NOTHING + re-SELECT). Detection of escalation via status field check rather than rework_count comparison to keep SQL function as single source of truth. Minimum reason length of 10 chars enforced by Zod schema for meaningful rejection reasons.
 - **Timestamp:** 2026-03-09T20:56:54+00:00
+
+### [FORGEOS-BE002] — Core Tables Migration
+- **Artifacts:** mcp-server/alembic/versions/20260310_000000_002_core_tables.py, mcp-server/tests/test_core_tables_migration.py
+- **Decisions:** Created additive migration 002 (depends on 001) adding machines, operators, claims tables + tickets.created_by column. Used CASCADE on ticket FK, SET NULL on agent/machine FK for audit trail preservation. Added partial indexes for active claims and expired lease queries.
+- **Timestamp:** 2026-03-10T02:45:00+00:00
+
+### [TASK-FOS-07-001] — Documentation Summary
+- **Artifacts:** .github/agents/Backend.agent.md, .github/agents/Frontend.agent.md, .github/agents/QA.agent.md, .github/agents/Security.agent.md, .github/agents/Architect.agent.md, .github/agents/Research.agent.md, .github/agents/Documentation.agent.md, .github/agents/CIReviewer.agent.md, .github/agents/Validator.agent.md, .github/agents/DevOps.agent.md, .github/agents/UIDesigner.agent.md, .github/agents/ProductManager.agent.md, .github/agents/ReaperOAK.agent.md, .github/agents/TODO.agent.md, .github/agent-output/Documentation/TASK-FOS-07-001.md
+- **Decisions:** Added MCP Tool Integration sections to all 14 agent files. RBAC matrix derived from ticket AC + mcp-tool-definitions.md. MCP as primary mechanism with CLI fallback. Implementation agents get spawn, review agents get reject, dispatcher gets graph/sync/stats, ProductManager stats-only read access.
+- **Timestamp:** 2026-03-09T20:58:44Z
