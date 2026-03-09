@@ -93,16 +93,7 @@
       "machine_id": "pop-os",
       "from_stage": "CI",
       "to_stage": "DOCS",
-      "details": "Advanced from CI to DOCSal, 3 warnings (OC-007 function length)"
-    },
-    {
-      "timestamp": "2026-03-09T18:20:35.948150+00:00",
-      "event": "STAGE_COMPLETED",
-      "agent": "CI Reviewer",
-      "machine_id": "system",
-      "from_stage": "DOCS",
-      "to_stage": "VALIDATION",
-      "details": "Advanced from DOCS to VALIDATION"
+      "details": "CI PASS — Score 85/100, 0 critical, 3 warnings (OC-007 function length)"
     }
   ],
   "source_task_file": "TODO/tickets/06-git-integration.md",
