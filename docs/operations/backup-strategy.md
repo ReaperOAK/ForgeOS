@@ -1,3 +1,7 @@
+<!-- last_reviewed: 2026-03-10T15:00:00Z -->
+<!-- audience: developer, operator -->
+<!-- diataxis: reference -->
+
 # ForgeOS — Backup Strategy
 <!-- Ticket: FORGEOS-DO007 -->
 

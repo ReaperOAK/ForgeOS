@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-10T12:30:00Z -->
+<!-- last_reviewed: 2026-03-10T15:00:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: how-to -->
 
@@ -571,6 +571,59 @@ All monitoring services join the existing `forgeos-net` bridge network.
 Prometheus stores metrics in a named volume (`forgeos-prometheus-data`).
 Grafana stores dashboards and preferences in `forgeos-grafana-data`.
 
+## Backup & Restore
+
+ForgeOS includes automated PostgreSQL backup and restore scripts with
+checksum verification, retention rotation, and Docker-aware operation.
+
+### Quick Reference
+
+```bash
+# Full backup (custom format, compressed)
+make backup
+
+# SQL-only backup
+make backup-sql
+
+# List available backups
+make backup-list
+
+# Restore from latest backup
+make restore
+
+# Dry-run restore (validate without applying)
+make restore-dry-run
+
+# List contents of a backup file
+make restore-list BACKUP_FILE=path/to/backup.dump
+
+# Restore a specific backup
+make restore BACKUP_FILE=path/to/backup.dump
+```
+
+### Scripts
+
+| Script              | Purpose                                              |
+|---------------------|------------------------------------------------------|
+| `scripts/backup.sh` | Create compressed backups with SHA-256 checksums     |
+| `scripts/restore.sh`| Validate and restore backups with post-restore checks|
+
+### Configuration
+
+Backup behavior is controlled via environment variables:
+
+| Variable          | Default          | Description                        |
+|-------------------|------------------|------------------------------------|
+| `PGHOST`          | `localhost`      | PostgreSQL host                    |
+| `PGPORT`          | `5432`           | PostgreSQL port                    |
+| `PGUSER`          | `forgeos`        | PostgreSQL user                    |
+| `PGDATABASE`      | `forgeos`        | Target database                    |
+| `BACKUP_DIR`      | `./backups`      | Backup storage directory           |
+| `BACKUP_RETENTION`| `7`              | Days to keep old backups           |
+
+For the full strategy including WAL archiving, PITR, and disaster recovery,
+see the [Backup Strategy Guide](../docs/operations/backup-strategy.md).
+
 ## File Reference
 
 | File                           | Purpose                                      |
@@ -582,6 +635,9 @@ Grafana stores dashboards and preferences in `forgeos-grafana-data`.
 | `../forgeos-server/src/db/migrations/`  | SQL migrations (auto-applied on init) |
 | `scripts/setup.sh`            | Prerequisite checks and environment setup     |
 | `scripts/seed.sh`             | Database seed wrapper (Docker + local modes)  |
+| `scripts/backup.sh`           | PostgreSQL backup with checksums and rotation |
+| `scripts/restore.sh`          | Backup restore with validation and dry-run    |
+| `Makefile`                     | Build/backup/restore convenience targets      |
 | `../Makefile`                  | Root Makefile with 23 development targets     |
 
 ## Related Documentation
@@ -593,3 +649,5 @@ Grafana stores dashboards and preferences in `forgeos-grafana-data`.
   — Rationale for PostgreSQL as the state store.
 - [ForgeOS Server README](../forgeos-server/README.md) — Server-level docs
   including the `forgeos-server/docker-compose.yml` (PgBouncer stack).
+- [Backup Strategy](../docs/operations/backup-strategy.md) — Frequency,
+  retention policy, WAL archiving, PITR, and disaster recovery procedures.
