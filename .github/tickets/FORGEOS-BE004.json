@@ -24,8 +24,7 @@
   ],
   "blocked_by": [
     "FORGEOS-BE002",
-    "FORGEOS-BE003",
-    "FORGEOS-ARCH006"
+    "FORGEOS-BE003"
   ],
   "file_paths": [
     "database/alembic/versions/003_indexes_constraints.py"

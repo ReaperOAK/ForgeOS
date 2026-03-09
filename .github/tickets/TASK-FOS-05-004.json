@@ -23,8 +23,7 @@
     "TASK-FOS-05-002"
   ],
   "blocked_by": [
-    "TASK-FOS-05-001",
-    "TASK-FOS-05-002"
+    "TASK-FOS-05-001"
   ],
   "file_paths": [
     "forgeos-server/src/dashboard/js/app.js",

@@ -22,8 +22,7 @@
     "FORGEOS-ARCH009"
   ],
   "blocked_by": [
-    "FORGEOS-BE015",
-    "FORGEOS-ARCH009"
+    "FORGEOS-BE015"
   ],
   "file_paths": [
     "mcp-server/src/tools/registry.py",

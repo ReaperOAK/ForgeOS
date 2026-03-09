@@ -22,8 +22,7 @@
     "FORGEOS-ARCH007"
   ],
   "blocked_by": [
-    "FORGEOS-BE003",
-    "FORGEOS-ARCH007"
+    "FORGEOS-BE003"
   ],
   "file_paths": [
     "mcp-server/src/events/event_store.py",
