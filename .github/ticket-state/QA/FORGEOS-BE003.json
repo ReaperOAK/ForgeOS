@@ -4,7 +4,7 @@
   "description": "Create the Alembic migration for event sourcing and audit trail tables from the event sourcing schema design (ARCH007). Tables include: event_history (immutable append-only log of all ticket state changes), stage_transitions (records each SDLC stage transition with metadata), and file_locks (tracks which files are locked by which ticket/agent). These tables replace the embedded history array in ticket JSON.",
   "type": "backend",
   "priority": "critical",
-  "stage": "BACKEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
