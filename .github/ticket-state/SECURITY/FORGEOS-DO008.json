@@ -36,10 +36,10 @@
     "All health check scripts exit with code 0 (healthy) or 1 (unhealthy)"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Security",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-09T19:10:52.636009+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
