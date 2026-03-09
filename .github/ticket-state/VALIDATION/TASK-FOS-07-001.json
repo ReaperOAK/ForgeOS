@@ -4,7 +4,7 @@
   "description": "Update all 14 .github/agents/*.agent.md files to reference the new MCP-based ticket operations. Each agent file should document: (1) which MCP tools the agent is authorized to use (based on the RBAC matrix from Architecture \u00a77.2), (2) the MCP server URL configuration (FORGEOS_MCP_URL env var), (3) updated workflow steps using tickets.claim/tickets.complete instead of tickets.py CLI, (4) the filesystem fallback mechanism when MCP is unavailable. Agent files should retain their existing structure (role, stage, scope, forbidden actions) while adding MCP integration sections.",
   "type": "docs",
   "priority": "medium",
-  "stage": "DONE",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "DOCS",
