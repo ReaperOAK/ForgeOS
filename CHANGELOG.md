@@ -8,6 +8,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Container Health Checks and Monitoring Stack** — Health check scripts and
+  optional Prometheus + Grafana monitoring for all ForgeOS Docker containers
+  (FORGEOS-DO008). PostgreSQL health check verifies connection via pg_isready,
+  query execution via SELECT 1, and required extensions. MCP server health
+  check verifies the /health endpoint returns HTTP 200 with status ok. Both
+  scripts are POSIX-compatible, use configurable environment variables with
+  safe defaults, and exit with code 0 (healthy) or 1 (unhealthy). Optional
+  monitoring overlay adds Prometheus v2.51.0 and Grafana 11.0.0 with 8 alert
+  rules across 4 groups, resource limits, and pre-provisioned dashboards.
+
 - **PostgreSQL Backup and Restore Scripts** — Automated database backup
   and restore tooling at `infra/scripts/` (FORGEOS-DO007). `backup.sh`
   (353 lines) creates timestamped `pg_dump` backups in custom and SQL

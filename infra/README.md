@@ -377,6 +377,200 @@ bash infra/scripts/seed.sh
 bash infra/scripts/seed.sh --local
 ```
 
+## Health Checks
+
+Every container in the stack runs a periodic health check. Docker restarts
+unhealthy containers automatically via the `unless-stopped` restart policy.
+
+### PostgreSQL Health Check
+
+**Script:** `docker/healthchecks/check-postgres.sh`
+
+The script runs three checks in sequence. Any failure exits with code 1
+(unhealthy).
+
+| Check | Command | Purpose |
+|-------|---------|---------|
+| 1. Connection | `pg_isready` | Verifies PostgreSQL accepts connections |
+| 2. Query | `SELECT 1` via `psql` | Confirms query processing works |
+| 3. Extensions | Query `pg_extension` | Verifies `uuid-ossp` and `pgcrypto` are loaded |
+
+**Docker Compose wiring:**
+
+```yaml
+healthcheck:
+  test: ["CMD", "sh", "/usr/local/bin/check-postgres.sh"]
+  interval: 10s
+  timeout: 5s
+  retries: 5
+  start_period: 30s
+```
+
+**Environment variables** (all optional, with defaults):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `POSTGRES_USER` | `forgeos` | PostgreSQL user |
+| `POSTGRES_DB` | `forgeos` | Database name |
+| `PGHOST` | `localhost` | Host address |
+| `PGPORT` | `5432` | Port number |
+
+### MCP Server Health Check
+
+**Script:** `docker/healthchecks/check-mcp.sh`
+
+The script runs two checks. Any failure exits with code 1 (unhealthy).
+
+| Check | Method | Purpose |
+|-------|--------|---------|
+| 1. HTTP status | `curl` to `/health` | Verifies endpoint returns HTTP 200 |
+| 2. Response body | JSON grep | Confirms `"status": "ok"` in response |
+
+**Docker Compose wiring:**
+
+```yaml
+healthcheck:
+  test: ["CMD", "sh", "/app/check-mcp.sh"]
+  interval: 15s
+  timeout: 5s
+  retries: 3
+  start_period: 20s
+```
+
+**Environment variables** (all optional, with defaults):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `MCP_HOST` | `localhost` | MCP server hostname |
+| `MCP_PORT` | `3000` | MCP server port |
+| `TIMEOUT` | `5` | Request timeout in seconds |
+
+### Writing a Custom Health Check
+
+Follow this pattern when adding health checks for new services:
+
+1. Create a POSIX shell script (`#!/bin/sh`) under `docker/healthchecks/`.
+2. Use `set -e` and exit `0` for healthy or `1` for unhealthy.
+3. Accept configuration via environment variables with safe defaults
+   (`${VAR:-default}`).
+4. Print a descriptive status message before exiting (aids log diagnosis).
+5. Mount the script read-only into the container and wire it into the
+   `healthcheck` block in `docker-compose.yml`.
+
+## Monitoring Stack (Optional)
+
+An optional Prometheus + Grafana stack provides local observability. It runs
+as a Docker Compose override so it does not affect the base stack.
+
+### Starting the Monitoring Stack
+
+```bash
+cd infra
+docker compose -f docker-compose.yml \
+  -f monitoring/docker-compose.monitoring.yml up -d
+```
+
+### Stopping the Monitoring Stack
+
+```bash
+docker compose -f docker-compose.yml \
+  -f monitoring/docker-compose.monitoring.yml down
+```
+
+To remove monitoring data volumes as well:
+
+```bash
+docker compose -f docker-compose.yml \
+  -f monitoring/docker-compose.monitoring.yml down -v
+```
+
+### Access Points
+
+| Service    | URL                        | Default Login    |
+|------------|----------------------------|------------------|
+| Prometheus | http://localhost:9090       | N/A              |
+| Grafana    | http://localhost:3001       | `admin` / `admin` |
+
+Change the Grafana password on first login. Override defaults with
+`GRAFANA_ADMIN_USER` and `GRAFANA_ADMIN_PASSWORD` environment variables.
+
+### Prometheus
+
+**Image:** `prom/prometheus:v2.51.0`
+
+Prometheus scrapes two targets:
+
+| Job | Target | Interval | Description |
+|-----|--------|----------|-------------|
+| `prometheus` | `localhost:9090` | 15 s | Self-monitoring |
+| `forgeos-mcp-server` | `mcp-server:3000/health` | 10 s | MCP health probe |
+| `forgeos-postgres` | `postgres:5432` | 15 s | TCP availability check |
+
+Data retains for 7 days (`--storage.tsdb.retention.time=7d`).
+
+**Configuration files** (mounted read-only):
+
+- `monitoring/prometheus/prometheus.yml` — scrape config and target definitions.
+- `monitoring/prometheus/alert-rules.yml` — alert rules (see below).
+
+**Resource limits:** 0.50 CPU, 512 MB memory.
+
+### Alert Rules
+
+Alert rules live in `monitoring/prometheus/alert-rules.yml`. Four alert groups
+cover service health, error rates, resource usage, and SLO burn rate.
+
+| Alert | Severity | Condition | Duration |
+|-------|----------|-----------|----------|
+| `McpServerDown` | critical | MCP server unreachable | 1 min |
+| `PostgresDown` | critical | PostgreSQL unreachable | 30 s |
+| `PrometheusDown` | warning | Self-scrape failing | 1 min |
+| `HighErrorRate` | warning | 5xx rate > 1% | 5 min |
+| `CriticalErrorRate` | critical | 5xx rate > 5% | 5 min |
+| `ContainerRestarted` | warning | Restart count > 0 | immediate |
+| `ErrorBudgetFastBurn` | critical | 2%+ budget burned in 1 h | 5 min |
+| `ErrorBudgetLow` | warning | < 10% budget remaining | 1 h |
+
+### Grafana
+
+**Image:** `grafana/grafana:11.0.0`
+
+Grafana starts fully provisioned with zero manual setup:
+
+- **Datasource:** Prometheus auto-configured via
+  `monitoring/grafana/provisioning/datasources/prometheus.yml`.
+- **Dashboards:** Pre-loaded from
+  `monitoring/grafana/provisioning/dashboards/json/forgeos-health.json`.
+
+Grafana depends on Prometheus being healthy before starting.
+
+**Resource limits:** 0.25 CPU, 256 MB memory.
+
+### Monitoring Architecture
+
+```
++------------------------------------------------------+
+|                   forgeos-net                        |
+|                                                      |
+|  +---------+    scrape     +------------+            |
+|  |  MCP    +---------------+ Prometheus |            |
+|  | Server  |  /health:3000 |  :9090     |            |
+|  +---------+               +------+-----+            |
+|                                   |                  |
+|  +----------+   TCP probe         |  datasource      |
+|  |PostgreSQL+---------------------+                  |
+|  |  :5432   |                     |                  |
+|  +----------+               +-----+------+           |
+|                             |  Grafana   |           |
+|                             |  :3001     |           |
+|                             +------------+           |
++------------------------------------------------------+
+```
+
+All monitoring services join the existing `forgeos-net` bridge network.
+Prometheus stores metrics in a named volume (`forgeos-prometheus-data`).
+Grafana stores dashboards and preferences in `forgeos-grafana-data`.
+
 ## File Reference
 
 | File                           | Purpose                                      |
