@@ -1,0 +1,59 @@
+{
+  "ticket_id": "TASK-FOS-03-009",
+  "title": "tickets.extend \u2014 Extend Lease Duration",
+  "description": "Implement the tickets.extend MCP tool that extends the lease on a claimed ticket to prevent expiry during long operations. Uses the extend_lease SQL function. Validates that the caller is the claim owner, that the requested duration doesn't exceed the system's max_lease_minutes config (default 120), and updates lease_expiry to NOW() + duration. Records a LEASE_EXTENDED event.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:05:37.900945+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-FOS-03-002"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/tools/tickets-extend.ts"
+  ],
+  "acceptance_criteria": [
+    "Tool registered as 'tickets.extend' with Zod schema: ticket_id (string), duration_minutes (int 5-120, default 30)",
+    "Returns NOT_CLAIM_OWNER error if caller doesn't hold the claim",
+    "Returns LEASE_TOO_LONG error if duration_minutes exceeds max_lease_minutes from system_config",
+    "Updates lease_expiry to NOW() + duration_minutes interval",
+    "LEASE_EXTENDED event recorded with new_expiry and extension_minutes in payload",
+    "Returns {ticket, new_lease_expiry: ISO8601 string} on success"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:05:37.900949+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/03-ticket-tools.md"
+    },
+    {
+      "timestamp": "2026-03-09T20:23:57.998798+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tickets/03-ticket-tools.md",
+  "tags": []
+}
