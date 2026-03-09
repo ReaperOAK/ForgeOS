@@ -38,7 +38,7 @@
   "claimed_by": "Documentation",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-09T19:39:57.839271+00:00",
+  "lease_expiry": "2026-03-09T19:39:57.839571+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -110,6 +110,12 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "Advanced from CI to DOCS"
+    },
+    {
+      "stage": "DOCS",
+      "agent": "Documentation",
+      "action": "complete",
+      "timestamp": "2026-03-10T01:00:00Z"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-infrastructure.md",
@@ -120,5 +126,5 @@
     "phase2",
     "BLK-12-01"
   ],
-  "current_stage": "CI"
+  "current_stage": "VALIDATION"
 }
