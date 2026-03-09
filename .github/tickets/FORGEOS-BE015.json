@@ -39,10 +39,10 @@
     "README documents how to install dependencies and start the server locally"
   ],
   "rework_count": 2,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "QA Engineer",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-09T21:15:54.913568+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -144,6 +144,13 @@
       "from_stage": "BACKEND",
       "to_stage": "QA",
       "details": "Advanced from BACKEND to QA"
+    },
+    {
+      "timestamp": "2026-03-09T20:45:54.913568+00:00",
+      "event": "CLAIMED",
+      "agent": "QA Engineer",
+      "machine_id": "pop-os",
+      "details": "Claimed by QA Engineer on pop-os (ReaperOAK)"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
@@ -155,5 +162,5 @@
     "phase2",
     "BLK-04-01"
   ],
-  "current_stage": "BACKEND"
+  "current_stage": "QA"
 }
