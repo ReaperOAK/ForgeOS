@@ -9,6 +9,7 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
   <link rel="stylesheet" href="css/style.css" />
+  <link rel="stylesheet" href="css/health-dashboard.css" />
   <script src="https://d3js.org/d3.v7.min.js"></script>
 </head>
 <body>
@@ -44,6 +45,9 @@
     </nav>
 
     <div class="top-bar__right">
+      <button class="top-bar__search-btn" id="searchTrigger" aria-label="Search tickets (Ctrl+K)" title="Search (Ctrl+K)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+      </button>
       <div class="connection-status" id="connectionStatus" aria-live="polite">
         <span class="status-dot status-dot--connected" aria-hidden="true"></span>
         <span class="connection-status__label">Live</span>
@@ -287,11 +291,160 @@
       </section>
     </div>
 
-    <!-- Graph View (placeholder) -->
+    <!-- ═══ Graph View ═══ -->
     <div id="panel-graph" class="view-panel" role="tabpanel" aria-labelledby="tab-graph" hidden>
-      <section class="graph-section">
-        <h2 class="section-heading">Dependency Graph</h2>
-        <div id="graphContainer" class="graph-container" aria-label="Ticket dependency graph visualization"></div>
+      <section class="graph-section" aria-label="Dependency graph visualization">
+
+        <!-- Graph Toolbar -->
+        <div class="graph-toolbar" role="toolbar" aria-label="Graph controls">
+          <div class="graph-toolbar__zoom" role="group" aria-label="Zoom controls">
+            <button class="graph-toolbar__btn" id="zoomIn" aria-label="Zoom in" title="Zoom in">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M11 8v6M8 11h6"/></svg>
+            </button>
+            <input type="range" class="graph-toolbar__slider" id="zoomSlider" min="25" max="400" value="100" step="5" aria-label="Zoom level" title="Zoom: 100%" />
+            <button class="graph-toolbar__btn" id="zoomOut" aria-label="Zoom out" title="Zoom out">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/><path d="M8 11h6"/></svg>
+            </button>
+            <button class="graph-toolbar__btn" id="zoomFit" aria-label="Fit to view" title="Fit to view">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3m18 0V5a2 2 0 0 0-2-2h-3m0 18h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+            </button>
+          </div>
+
+          <div class="graph-toolbar__actions" role="group" aria-label="Graph actions">
+            <label for="layoutSelect" class="sr-only">Layout algorithm</label>
+            <select class="graph-toolbar__select" id="layoutSelect" aria-label="Layout algorithm">
+              <option value="force" selected>Force-Directed</option>
+              <option value="dagre">Dagre (Hierarchical)</option>
+              <option value="radial">Radial</option>
+            </select>
+
+            <div class="graph-toolbar__filters" role="group" aria-label="Node filters">
+              <div class="filter-chip" data-filter="stage">
+                <button class="filter-chip__btn" id="filterStageBtn" aria-expanded="false" aria-haspopup="listbox" aria-label="Filter by stage">
+                  Stage
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <ul class="filter-chip__dropdown" id="filterStageList" role="listbox" aria-label="Stage filter options" hidden>
+                  <li class="filter-chip__option" role="option" data-value="all" aria-selected="true">All Stages</li>
+                  <li class="filter-chip__option" role="option" data-value="READY" aria-selected="false">Ready</li>
+                  <li class="filter-chip__option" role="option" data-value="ARCHITECT" aria-selected="false">Architect</li>
+                  <li class="filter-chip__option" role="option" data-value="RESEARCH" aria-selected="false">Research</li>
+                  <li class="filter-chip__option" role="option" data-value="BACKEND" aria-selected="false">Backend</li>
+                  <li class="filter-chip__option" role="option" data-value="FRONTEND" aria-selected="false">Frontend</li>
+                  <li class="filter-chip__option" role="option" data-value="QA" aria-selected="false">QA</li>
+                  <li class="filter-chip__option" role="option" data-value="SECURITY" aria-selected="false">Security</li>
+                  <li class="filter-chip__option" role="option" data-value="CI" aria-selected="false">CI</li>
+                  <li class="filter-chip__option" role="option" data-value="DOCS" aria-selected="false">Docs</li>
+                  <li class="filter-chip__option" role="option" data-value="VALIDATION" aria-selected="false">Validation</li>
+                  <li class="filter-chip__option" role="option" data-value="DONE" aria-selected="false">Done</li>
+                </ul>
+              </div>
+
+              <div class="filter-chip" data-filter="type">
+                <button class="filter-chip__btn" id="filterTypeBtn" aria-expanded="false" aria-haspopup="listbox" aria-label="Filter by type">
+                  Type
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="6 9 12 15 18 9"/></svg>
+                </button>
+                <ul class="filter-chip__dropdown" id="filterTypeList" role="listbox" aria-label="Type filter options" hidden>
+                  <li class="filter-chip__option" role="option" data-value="all" aria-selected="true">All Types</li>
+                  <li class="filter-chip__option" role="option" data-value="backend" aria-selected="false">Backend</li>
+                  <li class="filter-chip__option" role="option" data-value="frontend" aria-selected="false">Frontend</li>
+                  <li class="filter-chip__option" role="option" data-value="fullstack" aria-selected="false">Fullstack</li>
+                  <li class="filter-chip__option" role="option" data-value="infra" aria-selected="false">Infra</li>
+                  <li class="filter-chip__option" role="option" data-value="security" aria-selected="false">Security</li>
+                  <li class="filter-chip__option" role="option" data-value="docs" aria-selected="false">Docs</li>
+                  <li class="filter-chip__option" role="option" data-value="research" aria-selected="false">Research</li>
+                  <li class="filter-chip__option" role="option" data-value="architecture" aria-selected="false">Architecture</li>
+                </ul>
+              </div>
+            </div>
+
+            <button class="graph-toolbar__btn" id="resetFilters" aria-label="Reset all filters" title="Reset filters">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"/></svg>
+            </button>
+          </div>
+        </div>
+
+        <!-- DAG SVG Container -->
+        <div id="graphContainer" class="graph-container" role="img" aria-label="Ticket dependency directed acyclic graph" tabindex="0">
+          <svg id="graphSvg" class="graph-svg" aria-hidden="true">
+            <defs>
+              <marker id="arrowResolved" viewBox="0 0 10 6" refX="10" refY="3" markerWidth="10" markerHeight="6" orient="auto-start-reverse">
+                <path d="M0,0 L10,3 L0,6 Z" fill="var(--graph-edge-resolved)" />
+              </marker>
+              <marker id="arrowUnresolved" viewBox="0 0 10 6" refX="10" refY="3" markerWidth="10" markerHeight="6" orient="auto-start-reverse">
+                <path d="M0,0 L10,3 L0,6 Z" fill="var(--graph-edge-unresolved)" />
+              </marker>
+              <marker id="arrowCritical" viewBox="0 0 10 6" refX="10" refY="3" markerWidth="10" markerHeight="6" orient="auto-start-reverse">
+                <path d="M0,0 L10,3 L0,6 Z" fill="var(--graph-edge-critical)" />
+              </marker>
+            </defs>
+            <g id="graphEdges" class="graph-edges"></g>
+            <g id="graphNodes" class="graph-nodes"></g>
+          </svg>
+
+          <!-- Loading State -->
+          <div class="graph-section__loading" id="graphLoading" role="status" aria-label="Loading graph data">
+            <div class="spinner" aria-hidden="true"></div>
+            <span>Loading dependency graph&hellip;</span>
+          </div>
+
+          <!-- Error State -->
+          <div class="graph-section__error" id="graphError" role="alert" hidden>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 8v4M12 16h.01"/></svg>
+            <span id="graphErrorMsg">Failed to load graph data</span>
+            <button class="graph-section__retry" id="graphRetry" aria-label="Retry loading graph">Retry</button>
+          </div>
+
+          <!-- Empty State -->
+          <div class="graph-section__empty" id="graphEmpty" hidden>
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>
+            <span>No tickets to display</span>
+          </div>
+        </div>
+
+        <!-- Minimap -->
+        <div class="graph-minimap" id="graphMinimap" aria-label="Graph overview minimap" role="img">
+          <canvas id="minimapCanvas" width="180" height="120" aria-hidden="true"></canvas>
+          <div class="graph-minimap__viewport" id="minimapViewport" role="slider" aria-label="Minimap viewport position" aria-valuetext="Pan the graph"></div>
+          <button class="graph-minimap__toggle" id="minimapToggle" aria-label="Toggle minimap" title="Toggle minimap">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="2"/><rect x="7" y="7" width="3" height="3"/></svg>
+          </button>
+        </div>
+
+        <!-- Node Tooltip (hover, 200ms delay) -->
+        <div class="graph-node-tooltip" id="graphTooltip" role="tooltip" hidden>
+          <span class="graph-node-tooltip__id" id="tooltipId"></span>
+          <span class="graph-node-tooltip__title" id="tooltipTitle"></span>
+          <span class="graph-node-tooltip__stage" id="tooltipStage"></span>
+        </div>
+
+        <!-- Node Popover (click) -->
+        <div class="graph-node-popover" id="graphPopover" role="dialog" aria-label="Node details" hidden>
+          <div class="graph-node-popover__header">
+            <span class="graph-node-popover__id" id="popoverId"></span>
+            <button class="graph-node-popover__close" id="popoverClose" aria-label="Close popover">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+          </div>
+          <p class="graph-node-popover__title" id="popoverTitle"></p>
+          <dl class="graph-node-popover__meta">
+            <dt>Stage</dt><dd id="popoverStage"></dd>
+            <dt>Type</dt><dd id="popoverType"></dd>
+            <dt>Priority</dt><dd id="popoverPriority"></dd>
+            <dt>Claimed</dt><dd id="popoverClaimed"></dd>
+          </dl>
+          <div class="graph-node-popover__deps">
+            <strong>Dependencies:</strong>
+            <ul id="popoverDeps"></ul>
+          </div>
+          <div class="graph-node-popover__deps">
+            <strong>Dependents:</strong>
+            <ul id="popoverDependents"></ul>
+          </div>
+          <button class="graph-node-popover__detail-btn" id="popoverDetailBtn" aria-label="View full ticket details">View Details</button>
+        </div>
+
       </section>
     </div>
 
@@ -301,6 +454,195 @@
         <h2 class="section-heading">Machines</h2>
         <p class="placeholder-section__text">Machine monitoring view — coming soon.</p>
       </section>
+    </div>
+
+
+    <--- Agents / Health View -->
+    <div id="panel-agents" class="view-panel" role="tabpanel" aria-labelledby="tab-agents" hidden>
+
+      <--- Mobile Health Status Banner -->
+      <div class="health-status-banner" role="navigation" aria-label="Health status summary">
+        <button class="health-status-banner__item" data-panel-target="healthDbPanel">
+          <span class="status-indicator status-indicator--unknown" aria-hidden="true"></span>
+          <span>Database</span>
+        </button>
+        <button class="health-status-banner__item" data-panel-target="healthMcpPanel">
+          <span class="status-indicator status-indicator--unknown" aria-hidden="true"></span>
+          <span>MCP Server</span>
+        </button>
+        <button class="health-status-banner__item" data-panel-target="healthWebhookPanel">
+          <span class="status-indicator status-indicator--unknown" aria-hidden="true"></span>
+          <span>Webhooks</span>
+        </button>
+        <button class="health-status-banner__item" data-panel-target="healthAlertsPanel">
+          <span class="status-indicator status-indicator--unknown" aria-hidden="true"></span>
+          <span>Alerts</span>
+          <span class="health-alert-count" id="alertBannerBadge" hidden>0</span>
+        </button>
+      </div>
+
+      <--- Health Panel Grid (2x2) -->
+      <div class="health-panel-grid" id="healthPanelGrid">
+
+        <--- Database Health -->
+        <section class="health-panel" id="healthDbPanel" tabindex="0" aria-label="Database Health">
+          <div class="health-panel__header" role="button" aria-expanded="true" tabindex="0">
+            <h2 class="health-panel__title">
+              <svg class="health-panel__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5"/><path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3"/></svg>
+              Database
+            </h2>
+            <span class="status-indicator status-indicator--unknown" id="dbStatusDot" aria-label="Database status: unknown">
+              <span class="status-indicator__label" id="dbStatusLabel">Unknown</span>
+            </span>
+          </div>
+          <div class="health-panel__body">
+            <div class="health-gauge" id="dbGauge" role="meter" aria-valuenow="0" aria-valuemin="0" aria-valuemax="20" aria-label="Connection pool: 0 of 20 active">
+              <svg viewBox="0 0 200 120" class="health-gauge__svg" aria-hidden="true">
+                <path class="health-gauge__track" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--health-gauge-track)" stroke-width="12" stroke-linecap="round" />
+                <path class="health-gauge__fill" id="dbGaugeFill" d="M 20 100 A 80 80 0 0 1 180 100" fill="none" stroke="var(--color-primary)" stroke-width="12" stroke-linecap="round" stroke-dasharray="251.33" stroke-dashoffset="251.33" />
+              </svg>
+              <div class="health-gauge__value" id="dbGaugeValue" aria-hidden="true">0 / 20</div>
+              <div class="health-gauge__label">Active Connections</div>
+            </div>
+
+            <div class="health-metric-pair">
+              <div class="health-metric-card" id="metricP50" aria-label="P50 Latency: -- ms">
+                <span class="health-metric-card__label">P50 Latency</span>
+                <span class="health-metric-card__value"><span id="metricP50Value">&mdash;</span> <span class="health-metric-card__unit">ms</span></span>
+                <div class="health-metric-card__change" id="metricP50Change" aria-label="No change data">
+                  <span class="change-arrow" aria-hidden="true">&rarr;</span>
+                  <span class="change-value">&mdash;</span>
+                </div>
+                <svg class="sparkline-chart" id="sparklineP50" viewBox="0 0 120 40" preserveAspectRatio="none" aria-hidden="true"></svg>
+              </div>
+              <div class="health-metric-card" id="metricP99" aria-label="P99 Latency: -- ms">
+                <span class="health-metric-card__label">P99 Latency</span>
+                <span class="health-metric-card__value"><span id="metricP99Value">&mdash;</span> <span class="health-metric-card__unit">ms</span></span>
+                <div class="health-metric-card__change" id="metricP99Change" aria-label="No change data">
+                  <span class="change-arrow" aria-hidden="true">&rarr;</span>
+                  <span class="change-value">&mdash;</span>
+                </div>
+                <svg class="sparkline-chart" id="sparklineP99" viewBox="0 0 120 40" preserveAspectRatio="none" aria-hidden="true"></svg>
+              </div>
+            </div>
+
+            <details class="slow-queries" id="slowQueriesDetails">
+              <summary class="slow-queries__summary">
+                Slow Queries <span class="health-count-badge" id="slowQueryCount">0</span>
+              </summary>
+              <div class="slow-queries__table-wrap">
+                <table class="slow-queries__table" aria-label="Recent slow queries">
+                  <thead>
+                    <tr>
+                      <th scope="col">Query</th>
+                      <th scope="col">Duration</th>
+                      <th scope="col">Time</th>
+                    </tr>
+                  </thead>
+                  <tbody id="slowQueriesBody">
+                    <tr class="slow-queries__empty-row">
+                      <td colspan="3">No slow queries detected</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </details>
+          </div>
+        </section>
+
+        <--- MCP Server Health -->
+        <section class="health-panel" id="healthMcpPanel" tabindex="0" aria-label="MCP Server Health">
+          <div class="health-panel__header" role="button" aria-expanded="true" tabindex="0">
+            <h2 class="health-panel__title">
+              <svg class="health-panel__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="2" y="2" width="20" height="8" rx="2" ry="2"/><rect x="2" y="14" width="20" height="8" rx="2" ry="2"/><line x1="6" y1="6" x2="6.01" y2="6"/><line x1="6" y1="18" x2="6.01" y2="18"/></svg>
+              MCP Server
+            </h2>
+            <span class="status-indicator status-indicator--unknown" id="mcpStatusDot" aria-label="MCP Server status: unknown">
+              <span class="status-indicator__label" id="mcpStatusLabel">Unknown</span>
+            </span>
+          </div>
+          <div class="health-panel__body">
+            <div class="health-uptime">
+              <span class="health-uptime__label">Uptime</span>
+              <span class="health-uptime__value" id="mcpUptimeValue">&mdash;</span>
+            </div>
+
+            <div class="health-metric-pair">
+              <div class="health-metric-card" aria-label="Connected Agents">
+                <span class="health-metric-card__label">Connected Agents</span>
+                <span class="health-metric-card__value"><span id="metricAgentsValue">&mdash;</span></span>
+              </div>
+              <div class="health-metric-card" aria-label="Requests per minute">
+                <span class="health-metric-card__label">Requests / min</span>
+                <span class="health-metric-card__value"><span id="metricReqMinValue">&mdash;</span></span>
+                <div class="health-metric-card__change" id="metricReqMinChange" aria-label="No change data">
+                  <span class="change-arrow" aria-hidden="true">&rarr;</span>
+                  <span class="change-value">&mdash;</span>
+                </div>
+                <svg class="sparkline-chart" id="sparklineReqMin" viewBox="0 0 120 40" preserveAspectRatio="none" aria-hidden="true"></svg>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <--- Webhook Delivery -->
+        <section class="health-panel" id="healthWebhookPanel" tabindex="0" aria-label="Webhook Delivery">
+          <div class="health-panel__header" role="button" aria-expanded="true" tabindex="0">
+            <h2 class="health-panel__title">
+              <svg class="health-panel__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+              Webhook Delivery
+            </h2>
+            <span class="status-indicator status-indicator--unknown" id="webhookStatusDot" aria-label="Webhook status: unknown">
+              <span class="status-indicator__label" id="webhookStatusLabel">Unknown</span>
+            </span>
+          </div>
+          <div class="health-panel__body">
+            <div class="health-donut" id="webhookDonut" role="meter" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100" aria-label="Webhook success rate: 0% over last 24h">
+              <svg viewBox="0 0 130 130" class="health-donut__svg" aria-hidden="true">
+                <circle class="health-donut__track" cx="65" cy="65" r="55" fill="none" stroke="var(--health-gauge-track)" stroke-width="10" />
+                <circle class="health-donut__fill" id="webhookDonutFill" cx="65" cy="65" r="55" fill="none" stroke="var(--color-success)" stroke-width="10" stroke-linecap="round" stroke-dasharray="259.18" stroke-dashoffset="259.18" transform="rotate(-225 65 65)" />
+              </svg>
+              <div class="health-donut__value" id="webhookDonutValue" aria-hidden="true">&mdash;</div>
+              <div class="health-donut__label">Success Rate (24h)</div>
+            </div>
+
+            <div class="health-metric-pair">
+              <div class="health-metric-card" aria-label="Pending webhook deliveries">
+                <span class="health-metric-card__label">Pending</span>
+                <span class="health-metric-card__value"><span id="metricPendingValue">&mdash;</span></span>
+              </div>
+              <div class="health-metric-card" aria-label="Failed webhook deliveries">
+                <span class="health-metric-card__label">Failed</span>
+                <span class="health-metric-card__value health-metric-card__value--error"><span id="metricFailedValue">&mdash;</span></span>
+              </div>
+            </div>
+
+            <button class="health-retry-btn" id="retryFailedBtn" disabled aria-label="Retry all failed webhook deliveries">
+              Retry Failed
+            </button>
+          </div>
+        </section>
+
+        <--- System Alerts -->
+        <section class="health-panel" id="healthAlertsPanel" tabindex="0" aria-label="System Alerts">
+          <div class="health-panel__header" role="button" aria-expanded="true" tabindex="0">
+            <h2 class="health-panel__title">
+              <svg class="health-panel__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+              Alerts
+              <span class="health-alert-count" id="alertCountBadge" aria-label="0 active alerts">0</span>
+            </h2>
+            <span class="status-indicator status-indicator--unknown">
+              <span class="status-indicator__label">&mdash;</span>
+            </span>
+          </div>
+          <div class="health-panel__body">
+            <ul class="health-alert-list" id="alertList" role="log" aria-label="System alerts" aria-live="polite">
+            </ul>
+            <p class="health-alert-empty" id="alertEmpty" role="status">No active alerts &mdash; all systems nominal.</p>
+          </div>
+        </section>
+
+      </div>
     </div>
 
     <!-- Admin View (placeholder) -->
@@ -398,6 +740,7 @@
       <button class="mobile-sidebar__item mobile-sidebar__item--active" data-view="pipeline">Pipeline</button>
       <button class="mobile-sidebar__item" data-view="graph">Graph</button>
       <button class="mobile-sidebar__item" data-view="machines">Machines</button>
+      <button class="mobile-sidebar__item" data-view="agents">Agents</button>
       <button class="mobile-sidebar__item" data-view="admin">Admin</button>
     </div>
   </nav>
@@ -423,6 +766,72 @@
     </article>
   </template>
 
+
+  <!-- ═══ Search Overlay (Ctrl+K / /) ═══ -->
+  <div class="search-overlay" id="searchOverlay" role="dialog" aria-modal="true" aria-label="Search tickets" hidden>
+    <div class="search-overlay__backdrop" id="searchBackdrop" aria-hidden="true"></div>
+    <div class="search-overlay__panel" role="combobox" aria-expanded="false" aria-owns="searchResults" aria-haspopup="listbox">
+      <div class="search-overlay__input-row">
+        <svg class="search-overlay__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+        <input type="search" class="search-overlay__input" id="searchInput" placeholder="Search tickets by ID, title, or keyword…" autocomplete="off" aria-label="Search tickets" aria-autocomplete="list" aria-controls="searchResults" />
+        <kbd class="search-overlay__kbd" aria-hidden="true">Esc</kbd>
+      </div>
+
+      <div class="search-overlay__filters" role="group" aria-label="Search filters">
+        <button class="search-overlay__filter-btn search-overlay__filter-btn--active" data-search-filter="all" aria-pressed="true">All</button>
+        <button class="search-overlay__filter-btn" data-search-filter="id" aria-pressed="false">By ID</button>
+        <button class="search-overlay__filter-btn" data-search-filter="title" aria-pressed="false">By Title</button>
+        <button class="search-overlay__filter-btn" data-search-filter="stage" aria-pressed="false">By Stage</button>
+        <button class="search-overlay__filter-btn" data-search-filter="type" aria-pressed="false">By Type</button>
+      </div>
+
+      <div class="search-overlay__results" id="searchResults" role="listbox" aria-label="Search results">
+        <!-- Results populated dynamically -->
+      </div>
+
+      <div class="search-overlay__recent" id="searchRecent">
+        <h3 class="search-overlay__recent-title">Recent Searches</h3>
+        <ul class="search-overlay__recent-list" id="recentSearchList" role="list" aria-label="Recent searches">
+          <!-- Populated by JS -->
+        </ul>
+      </div>
+
+      <div class="search-overlay__footer">
+        <span class="search-overlay__hint">
+          <kbd>&uarr;</kbd><kbd>&darr;</kbd> Navigate
+          <kbd>Enter</kbd> Select
+          <kbd>Esc</kbd> Close
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ Graph Bottom Sheet (Mobile) ═══ -->
+  <div class="graph-bottom-sheet" id="graphBottomSheet" role="dialog" aria-modal="true" aria-label="Node details" hidden>
+    <div class="graph-bottom-sheet__handle" aria-hidden="true"></div>
+    <div class="graph-bottom-sheet__header">
+      <span class="graph-bottom-sheet__id" id="bottomSheetId"></span>
+      <button class="graph-bottom-sheet__close" id="bottomSheetClose" aria-label="Close bottom sheet">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="graph-bottom-sheet__body">
+      <p class="graph-bottom-sheet__title" id="bottomSheetTitle"></p>
+      <dl class="graph-bottom-sheet__meta">
+        <dt>Stage</dt><dd id="bottomSheetStage"></dd>
+        <dt>Type</dt><dd id="bottomSheetType"></dd>
+        <dt>Priority</dt><dd id="bottomSheetPriority"></dd>
+      </dl>
+      <button class="graph-bottom-sheet__detail-btn" id="bottomSheetDetailBtn" aria-label="View full ticket details">View Details</button>
+    </div>
+  </div>
+
+  <!-- ═══ Graph FAB (Mobile) ═══ -->
+  <button class="graph-fab" id="graphFab" aria-label="Open graph filters" title="Filters" hidden>
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
+  </button>
+
   <script src="js/app.js"></script>
+  <script src="js/health-dashboard.js"></script>
 </body>
 </html>
