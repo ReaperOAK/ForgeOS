@@ -4,7 +4,7 @@
   "description": "Set up the foundational MCP server using the official Python MCP SDK (mcp package). Initialize the project structure with pyproject.toml (dependencies, scripts, metadata), create the main server module with the bootstrap sequence (configuration loading, SDK initialization, server start), and configure basic error handling following MCP protocol error semantics. The server must start, accept initialize requests, and respond with its capability list.",
   "type": "backend",
   "priority": "critical",
-  "stage": "BACKEND",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -39,10 +39,10 @@
     "README documents how to install dependencies and start the server locally"
   ],
   "rework_count": 1,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "CIReviewer",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-09T19:11:51.220108+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
