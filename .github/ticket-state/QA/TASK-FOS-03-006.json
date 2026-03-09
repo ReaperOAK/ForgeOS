@@ -4,7 +4,7 @@
   "description": "Implement the tickets.spawn MCP tool that creates a child ticket linked to the current ticket, enabling self-expanding workflows. The child ticket gets a generated ticket_id, inherits the parent's project context, and has parent_id set to the parent ticket_id. The child starts in BLOCKED status if it has dependencies, or READY if not. Records a SPAWNED event on the parent ticket.",
   "type": "backend",
   "priority": "high",
-  "stage": "BACKEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -61,6 +61,13 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "Claimed by Backend on pop-os (reaperoak)"
+    },
+    {
+      "timestamp": "2026-03-09T20:57:32.762098+00:00",
+      "event": "BACKEND_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "BACKEND stage completed. tickets.spawn MCP tool implemented with tests."
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",

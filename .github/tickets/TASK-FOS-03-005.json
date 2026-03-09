@@ -4,7 +4,7 @@
   "description": "Implement the tickets.reject MCP tool that rejects a ticket during a review stage (QA, Security, CI, Validation), sending it back for rework. Uses the reject_ticket SQL function. Increments rework_count; if rework_count >= max_reworks (default 3), the ticket moves to ESCALATED status instead of rework. On rework, the ticket returns to its implementation stage (first non-READY stage in the SDLC flow) with status READY. File locks are released on rejection.",
   "type": "backend",
   "priority": "high",
-  "stage": "BACKEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -20,9 +20,7 @@
   "dependencies": [
     "TASK-FOS-03-002"
   ],
-  "blocked_by": [
-    "TASK-FOS-03-002"
-  ],
+  "blocked_by": [],
   "file_paths": [
     "forgeos-server/src/tools/tickets-reject.ts"
   ],
@@ -49,8 +47,23 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tickets/03-ticket-tools.md"
+    },
+    {
+      "timestamp": "2026-03-09T20:56:54.714115+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-09T20:56:54.714115+00:00",
+      "event": "BACKEND_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Implementation complete: tickets.reject MCP tool with 25 tests (100% stmt, 90.9% branch coverage)"
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
-  "tags": []
+  "tags": [],
+  "completed_at": "2026-03-09T20:56:54.714115+00:00"
 }

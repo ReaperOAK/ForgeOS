@@ -12,6 +12,7 @@ import type { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { ticketsNextSchema, ticketsNextHandler } from './tickets-next.js';
 import { ticketsClaimSchema, ticketsClaimHandler } from './tickets-claim.js';
 import { ticketsRejectSchema, ticketsRejectHandler } from './tickets-reject.js';
+import { ticketsSpawnSchema, ticketsSpawnHandler } from './tickets-spawn.js';
 
 /**
  * Register all MCP tools on the server.
@@ -41,5 +42,14 @@ export function registerTools(server: McpServer): void {
     'Reject a ticket and send it back to its implementation stage for rework. Requires a rejection reason. If rework count reaches max_reworks, the ticket is automatically escalated.',
     ticketsRejectSchema.shape,
     async (params) => ticketsRejectHandler(params),
+  );
+
+
+  // ── tickets.spawn ────────────────────────────────────────────────────────
+  server.tool(
+    'tickets.spawn',
+    'Create a child ticket under an existing parent ticket with generated ticket_id, inherited project context, and parent_id linkage',
+    ticketsSpawnSchema.shape,
+    async (params) => ticketsSpawnHandler(params),
   );
 }
