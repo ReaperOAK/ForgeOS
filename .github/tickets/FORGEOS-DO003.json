@@ -37,10 +37,10 @@
     "All Makefile targets include help text accessible via `make help`"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T13:00:00Z",
   "lease_duration_minutes": 30,
   "history": [
     {
