@@ -41,10 +41,10 @@
     "Migration script template includes both upgrade() and downgrade() functions"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Security",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-09T19:10:38.335704+00:00",
   "lease_duration_minutes": 30,
   "completed_at": "2026-03-07T23:55:00Z",
   "status": "QA_COMPLETE",
@@ -91,24 +91,6 @@
       "from_stage": "QA",
       "to_stage": "SECURITY",
       "details": "Advanced from QA to SECURITY"
-    },
-    {
-      "timestamp": "2026-03-09T18:44:31.958227+00:00",
-      "event": "STAGE_COMPLETED",
-      "agent": "Security",
-      "machine_id": "system",
-      "from_stage": "QA",
-      "to_stage": "SECURITY",
-      "details": "Advanced from QA to SECURITY"
-    },
-    {
-      "timestamp": "2026-03-09T18:44:44.681044+00:00",
-      "event": "STAGE_COMPLETED",
-      "agent": "Security",
-      "machine_id": "system",
-      "from_stage": "SECURITY",
-      "to_stage": "CI",
-      "details": "Advanced from SECURITY to CI"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
