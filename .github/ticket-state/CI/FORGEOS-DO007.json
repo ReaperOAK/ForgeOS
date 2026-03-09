@@ -4,7 +4,7 @@
   "description": "Create database backup and restore scripts for the ForgeOS PostgreSQL instance. Implement pg_dump-based backup with timestamped output files, a restore script that validates the backup before applying, and a strategy document describing backup frequency, retention, and WAL archiving recommendations for production.",
   "type": "infra",
   "priority": "medium",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Backup and restore can be invoked via Makefile targets (`make backup`, `make restore`)"
   ],
   "rework_count": 0,
-  "claimed_by": "Security",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-09T19:11:11.159120+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -70,13 +70,11 @@
       "details": "All acceptance criteria met"
     },
     {
-      "timestamp": "2026-03-09T18:14:35.525382+00:00",
-      "event": "STAGE_COMPLETED",
-      "agent": "QA Engineer",
-      "machine_id": "system",
-      "from_stage": "QA",
-      "to_stage": "SECURITY",
-      "details": "Advanced from QA to SECURITY"
+      "timestamp": "2026-03-09T18:15:00+00:00",
+      "event": "QA_COMPLETE",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "PASS \u2014 All 6 acceptance criteria verified. Static analysis (bash -n, shellcheck) PASS. Functional tests PASS. Advanced to SECURITY."
     },
     {
       "timestamp": "2026-03-09T18:41:11.159120+00:00",
@@ -84,6 +82,15 @@
       "agent": "Security",
       "machine_id": "pop-os",
       "details": "Claimed for SECURITY stage"
+    },
+    {
+      "timestamp": "2026-03-09T18:42:58.405293+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security Engineer",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-infrastructure.md",
