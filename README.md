@@ -343,6 +343,14 @@ them with Playwright for visual regression. Design tokens, component specs,
 and responsive breakpoints are delivered as structured artifacts that Frontend
 workers consume directly.
 
+### Design System Artifacts
+
+| Artifact | Path | Description |
+|----------|------|-------------|
+| Design Tokens | `docs/uiux/design-tokens.json` | Dark/light themes, typography, spacing, breakpoints, shadows, z-index, transitions |
+| Layout Specification | `docs/uiux/layout-spec.md` | Shell architecture, responsive matrix, 40+ component hierarchy, WCAG 2.2 AA |
+| Mockup Specification | `docs/uiux/mockups/` | Screen-level mockups, component props, user flows, accessibility checklist |
+
 ---
 
 ## Required MCP and Tooling

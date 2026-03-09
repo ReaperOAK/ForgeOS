@@ -8,6 +8,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Dashboard Design System and Layout Specification** — Foundational design
+  token system and responsive dashboard layout for ForgeOS (FORGEOS-UID001).
+  Design tokens (`docs/uiux/design-tokens.json`) define dark and light themes
+  with 24 semantic color tokens each, Inter and JetBrains Mono typography,
+  4 px-grid spacing scale, 4 responsive breakpoints (768/1024/1440 px),
+  elevation shadows, 8-layer z-index stack, and transition presets with
+  reduced-motion support. Layout specification (`docs/uiux/layout-spec.md`)
+  defines a 56 px top-bar shell with 48 px filter bar and scrollable main
+  content area housing 11 SDLC Kanban columns, responsive behaviour matrix,
+  40+ component hierarchy, and WCAG 2.2 AA accessibility annotations. Mockup
+  document (`docs/uiux/mockups/FORGEOS-UID001.md`) covers 6 Stitch screens,
+  8 component specifications (TicketCard, StageColumn, FilterBar,
+  TicketDetailSlideOver, StatusDot, Badge, CountdownTimer,
+  CollapsibleSection), 4 user-flow diagrams, and a 10-item accessibility
+  checklist.
+
 - **Webhook State Recovery Endpoint** — GitHub push webhook receiver and
   ghost commit recovery system at `forgeos-server/src/webhooks/`
   (TASK-FOS-06-004). `POST /api/webhooks/github` accepts GitHub push
