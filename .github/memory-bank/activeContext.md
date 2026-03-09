@@ -1,3 +1,8 @@
+### [TASK-FOS-03-008] — Backend Implementation
+- **Artifacts:** forgeos-server/src/tools/tickets-release.ts, forgeos-server/src/tools/tickets-release.test.ts, forgeos-server/src/tools/index.ts
+- **Decisions:** Implemented tickets.release MCP tool using release_ticket SQL function. Added agent_name parameter for caller identity (required by SQL function and NOT_CLAIM_OWNER error semantics). Admin gate checks for '*' or 'admin_all' permissions. Auto-registers unknown agents with non-admin permissions. 17 unit tests cover all AC.
+- **Timestamp:** 2026-03-09T20:56:00.396799+00:00
+
 ### [FORGEOS-DO006] — QA Review
 - **Artifacts:** .github/agent-output/QA/FORGEOS-DO006.md
 - **Decisions:** PASS (HIGH confidence). All 6 AC verified. Workflow YAML valid. Schema validation cross-referenced against initial migration: 7 tables, 5 enums, 20 indexes, 3 triggers, 1 function confirmed. PostgreSQL 17-alpine matches production. No defects found. Structural review only (CI workflow artifact). Ticket advanced to SECURITY.
