@@ -1841,3 +1841,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/sdlc/flows.ts, forgeos-server/src/sdlc/transitions.ts, forgeos-server/src/tools/tickets-complete.ts, forgeos-server/src/tools/index.ts
 - **Decisions:** Re-exported SDLC_FLOWS from types/index.ts into sdlc/flows.ts for clean separation. Used advance_ticket SQL function directly rather than reimplementing stage logic in TypeScript. Evidence JSONB built at handler level and passed to SQL function.
 - **Timestamp:** 2026-03-09T21:07:29.205936+00:00
+
+### [TASK-FOS-03-004] -- tickets.complete MCP Tool
+- **Artifacts:** forgeos-server/src/sdlc/flows.ts, forgeos-server/src/sdlc/transitions.ts, forgeos-server/src/tools/tickets-complete.ts, forgeos-server/src/tools/index.ts
+- **Decisions:** Re-exported SDLC_FLOWS from types/index.ts into sdlc/flows.ts for clean separation. Used advance_ticket SQL function directly rather than reimplementing stage logic in TypeScript. Evidence JSONB built at handler level and passed to SQL function.
+- **Timestamp:** 2026-03-09T21:13:14.080577+00:00
