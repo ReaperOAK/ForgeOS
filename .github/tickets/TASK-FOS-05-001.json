@@ -4,7 +4,7 @@
   "description": "Build the main dashboard page as a vanilla HTML + CSS layout (no frontend framework, no build step) as specified in Architecture \u00a75 and PRD FR-22/FR-27. The page includes a Kanban-style pipeline board with columns for each active SDLC stage (READY, BACKEND, FRONTEND, QA, SECURITY, CI, DOCUMENTATION, VALIDATION). Each column displays ticket cards showing: ticket_id, title, type badge, priority indicator, claimed_by agent name, and lease countdown timer. Cards are color-coded by status (unclaimed=blue, claimed=yellow, expiring=orange, expired=red). The layout includes a header with system health summary, navigation tabs for Pipeline/Graph/Machines views, and filter controls for stage, type, priority, machine, and agent. Responsive layout, desktop-first. D3.js loaded via CDN script tag.",
   "type": "frontend",
   "priority": "high",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -91,6 +91,13 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-10T02:00:00+00:00",
+      "event": "CI_COMPLETE",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "details": "CI PASS. Score 97/100. 0 critical, 0 warnings, 3 suggestions. HTML/CSS quality verified: BEM convention, 73 ARIA attrs, 21 roles, zero TODO/FIXME, zero inline JS, zero duplicate IDs. Upstream QA PASS and Security PASS confirmed. Confidence HIGH."
     }
   ],
   "source_task_file": "TODO/tickets/05-dashboard.md",
