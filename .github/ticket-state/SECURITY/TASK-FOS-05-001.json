@@ -70,11 +70,13 @@
       "details": "FRONTEND complete. Dashboard HTML/CSS rewritten: index.html (429 lines), style.css (~900 lines). WCAG 2.2 AA, responsive 320-1440px, design tokens, 11/11 AC met."
     },
     {
-      "timestamp": "2026-03-10T01:15:00+00:00",
-      "event": "QA_COMPLETE",
-      "agent": "QA",
-      "machine_id": "pop-os",
-      "details": "QA PASS. All 11 AC verified. WCAG 2.2 AA compliant. 65 ARIA attributes, 21 role attributes, skip link, keyboard nav, responsive breakpoints verified. Confidence HIGH."
+      "timestamp": "2026-03-09T18:48:43.314340+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA Engineer",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tickets/05-dashboard.md",
