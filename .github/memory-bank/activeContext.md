@@ -1826,3 +1826,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agents/Backend.agent.md, .github/agents/Frontend.agent.md, .github/agents/QA.agent.md, .github/agents/Security.agent.md, .github/agents/Architect.agent.md, .github/agents/Research.agent.md, .github/agents/Documentation.agent.md, .github/agents/CIReviewer.agent.md, .github/agents/Validator.agent.md, .github/agents/DevOps.agent.md, .github/agents/UIDesigner.agent.md, .github/agents/ProductManager.agent.md, .github/agents/ReaperOAK.agent.md, .github/agents/TODO.agent.md, .github/agent-output/Documentation/TASK-FOS-07-001.md
 - **Decisions:** Added MCP Tool Integration sections to all 14 agent files. RBAC matrix derived from ticket AC + mcp-tool-definitions.md. MCP as primary mechanism with CLI fallback. Implementation agents get spawn, review agents get reject, dispatcher gets graph/sync/stats, ProductManager stats-only read access.
 - **Timestamp:** 2026-03-09T20:58:44Z
+
+### [TASK-FOS-03-004] -- tickets.complete MCP Tool
+- **Artifacts:** forgeos-server/src/sdlc/flows.ts, forgeos-server/src/sdlc/transitions.ts, forgeos-server/src/tools/tickets-complete.ts, forgeos-server/src/tools/index.ts
+- **Decisions:** Re-exported SDLC_FLOWS from types/index.ts into sdlc/flows.ts for clean separation. Used advance_ticket SQL function directly rather than reimplementing stage logic in TypeScript. Evidence JSONB built at handler level and passed to SQL function.
+- **Timestamp:** 2026-03-09T21:07:29.205936+00:00
