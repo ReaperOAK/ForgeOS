@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-09T18:15:00Z -->
+<!-- last_reviewed: 2026-03-09T18:30:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -697,10 +697,59 @@ Both functions are pure (no I/O) and exported for direct unit testing.
 |------|---------|
 | `src/tools/tickets-graph.ts` | Zod schema, graph algorithms, handler |
 | `src/tools/index.ts` | Tool registration on McpServer |
-## Commit Message Convention
+## Git Hooks
 
-The repository enforces a commit message format via a
-[Husky](https://typicode.github.io/husky/) `commit-msg` hook. Every commit
+The repository uses [Husky](https://typicode.github.io/husky/) to enforce
+two pre-commit validations automatically. Both hooks are installed when you
+run `npm install` (via the `prepare` script).
+
+### Blast Radius Validation (pre-commit)
+
+A `pre-commit` hook validates that every staged file falls within the
+current ticket's declared `file_paths` scope. This prevents accidental
+changes to files outside the ticket boundary.
+
+#### How It Works
+
+1. **Resolve ticket ID** — reads `FORGEOS_TICKET_ID` environment variable,
+   or falls back to the `[TICKET-ID]` pattern in the most recent commit
+   message.
+2. **Query the MCP server** — sends `GET /api/tickets/:id` to retrieve
+   the ticket's `file_paths` array.
+3. **Prefix match** — each staged file (`git diff --cached --name-only`)
+   is checked against the allowed paths. A file matches if it equals an
+   allowed path or starts with an allowed path followed by `/`.
+4. **Verdict** — if any file is out of scope, the commit is rejected with
+   a clear list of violating files and allowed paths.
+
+#### Graceful Degradation
+
+| Condition | Behavior |
+|-----------|----------|
+| MCP server unreachable | WARNING printed, commit allowed |
+| No ticket ID found | INFO printed, commit allowed |
+| `file_paths` empty | WARNING printed, commit allowed |
+
+#### Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FORGEOS_TICKET_ID` | — | Override ticket ID (skips commit-message parsing) |
+| `FORGEOS_MCP_URL` | `http://localhost:3000` | MCP server base URL for scope lookup |
+| `FORGEOS_CURL_TIMEOUT` | `5` | Seconds before the API request times out |
+
+#### Bypass
+
+```bash
+git commit --no-verify -m "your message"
+```
+
+Use `--no-verify` only for emergency commits. The hook is a safety net —
+bypassing it means no scope validation occurs.
+
+### Commit Message Convention (commit-msg)
+
+The `commit-msg` hook enforces a commit message format. Every commit
 message must begin with a ticket ID in square brackets.
 
 ### Required Format
@@ -732,7 +781,7 @@ git commit --no-verify -m "your message"
 
 ### Developer Setup
 
-The hook is installed automatically when you run `npm install` (via the
+Hooks are installed automatically when you run `npm install` (via the
 `prepare` script). No manual setup is needed. If hooks are missing after
 cloning, run:
 
@@ -740,12 +789,14 @@ cloning, run:
 npm run prepare
 ```
 
-Hook files:
+### Hook Files
 
-| File | Purpose |
-|------|---------|
-| `.husky/commit-msg` | Entry point — delegates to the validator script |
-| `scripts/validate-commit.sh` | Reads the first line and validates against the ticket ID regex |
+| File | Hook | Purpose |
+|------|------|---------|
+| `.husky/pre-commit` | `pre-commit` | Delegates to `scripts/validate-scope.sh` for blast radius validation |
+| `.husky/commit-msg` | `commit-msg` | Delegates to `scripts/validate-commit.sh` for message format validation |
+| `scripts/validate-scope.sh` | — | Resolves ticket ID, queries MCP server, validates staged files against allowed paths |
+| `scripts/validate-commit.sh` | — | Reads the first line and validates against the ticket ID regex |
 
 ## Architecture
 
