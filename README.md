@@ -366,6 +366,12 @@ For complete input/output schemas, error codes, and usage examples, see the
 [MCP Tool Definition Schemas](docs/architecture/api/mcp-tool-definitions.md)
 reference document.
 
+The **Agent Registration API** (`/api/admin/*`) enables programmatic agent
+lifecycle management — registration with one-time API key generation, key
+revocation, deregistration, and MCP session association. See the
+[Admin API](forgeos-server/README.md#admin-api-apiadmin) section in the
+ForgeOS Server documentation for endpoint details.
+
 ### Core (Required)
 
 | Tool | Purpose |

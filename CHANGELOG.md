@@ -8,6 +8,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Agent Registration and Identity Management** — Admin API endpoints
+  for agent lifecycle management (TASK-FOS-04-002). `POST /api/admin/agents`
+  creates agent records with generated API keys (plaintext shown once).
+  `GET /api/admin/agents` returns paginated agent list (no key hashes).
+  `POST /api/admin/agents/:id/revoke` revokes an agent’s API key.
+  `DELETE /api/admin/agents/:id` soft-deletes an agent.
+  `POST /api/admin/agents/:id/sessions` manages MCP session association.
+  All endpoints require `admin.manage_keys` permission. Implementation in
+  `forgeos-server/src/auth/registration.ts` (6 functions, 3 Zod schemas,
+  3 error classes) and `forgeos-server/src/api/routes/admin.ts` (5 routes).
+  30/30 tests passing, tsc strict clean.
+
 - **Container Health Checks and Monitoring Stack** — Health check scripts and
   optional Prometheus + Grafana monitoring for all ForgeOS Docker containers
   (FORGEOS-DO008). PostgreSQL health check verifies connection via pg_isready,

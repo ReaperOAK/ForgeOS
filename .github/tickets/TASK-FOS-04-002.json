@@ -4,7 +4,7 @@
   "description": "Implement agent and machine registration endpoints. POST /api/admin/agents creates a new agent record with name, role, and permissions, generates an API key, and returns the agent identity with the plaintext key (shown once). POST /api/admin/agents/:id/revoke revokes an agent's API key. GET /api/admin/agents lists all registered agents (without key hashes). Include machine registration: each API call updates the agent's last_seen timestamp for staleness tracking. Admin endpoints require admin role authentication.",
   "type": "backend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -102,6 +102,15 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "PASS \u2014 Score 98/100, 0 critical, 0 warnings, 2 suggestions. Advanced from CI to DOCS"
+    },
+    {
+      "timestamp": "2026-03-10T15:00:00+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "COMPLETE - TSDoc verified, Admin API docs added, CHANGELOG entry, root README cross-reference. Confidence: HIGH."
     }
   ],
   "source_task_file": "TODO/tickets/04-auth-security.md",
