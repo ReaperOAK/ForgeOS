@@ -4,7 +4,7 @@
   "description": "Implement a background task that periodically scans for expired leases and releases them, making the associated tickets available for reclaim. This replaces the `--release-expired` CLI command in tickets.py. The cleanup task runs on a configurable interval and logs all automatic releases for audit.",
   "type": "backend",
   "priority": "high",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -104,6 +104,15 @@
       "from_stage": "SECURITY",
       "to_stage": "SECURITY",
       "details": "Claimed by ReaperOAK@pop-os via Security Engineer, lease until 2026-03-10T21:58:35.412568+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T23:45:00+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "SECURITY PASS \u2014 zero critical/high findings, STRIDE all LOW, OWASP 10/10"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
