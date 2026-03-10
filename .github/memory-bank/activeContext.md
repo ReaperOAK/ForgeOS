@@ -1,3 +1,8 @@
+### [FORGEOS-BE012] — Validation: APPROVED
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE012.md
+- **Decisions:** APPROVED — 10/10 DoD items pass. 53 tests, 97% coverage, lint clean, type checks clean. All 6 acceptance criteria verified. All upstream verdicts (QA, Security, CI, Docs) confirmed PASS. Ticket moved to DONE.
+- **Timestamp:** 2026-03-10T23:45:00Z
+
 ### [FORGEOS-BE011] — Documentation Summary
 - **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE011.md
 - **Decisions:** Docstrings already complete (no additions needed). Added Connection Pool reference section to README. Classified as Reference (Diataxis).
@@ -2548,3 +2553,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE017.md
 - **Decisions:** Expanded README Transport section from 4 lines to ~120 lines covering transport selection, Streamable HTTP config/endpoints/usage, SSE config/endpoints/connection lifecycle/usage, and API reference. Inline docstrings already comprehensive — no additions needed. CHANGELOG entry added.
 - **Timestamp:** 2026-03-11T00:30:00Z
+
+### [TASK-FOS-05-003] — Documentation (Re-documentation)
+- **Artifacts:** forgeos-server/src/dashboard/js/graph.js, CHANGELOG.md, .github/agent-output/Documentation/TASK-FOS-05-003.md
+- **Decisions:** Added 21 JSDoc annotations to graph.js public API and key internal functions. Added CHANGELOG entry. README already covered tickets.graph. Re-documentation needed after state regression from DONE due to concurrent agent conflict.
+- **Timestamp:** 2026-03-10T21:00:00Z
