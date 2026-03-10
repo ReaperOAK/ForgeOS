@@ -4,7 +4,7 @@
   "description": "Design the operator workbench and active claims monitor views. The claims monitor shows all active claims with agent identity, machine ID, operator name, ticket info, and a real-time lease countdown timer. The operator workbench provides authenticated action buttons for claim, release, and advance operations. Design confirmation modals for destructive actions (force-release, force-advance). Define the multi-machine status panel showing connected machines and running agents.",
   "type": "frontend",
   "priority": "medium",
-  "stage": "QA",
+  "stage": "UIDESIGNER",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -36,11 +36,11 @@
     "All operator actions gated behind authentication indicator (logged-in user badge)",
     "Mockup approval status set to APPROVED in mockup document header"
   ],
-  "rework_count": 0,
-  "claimed_by": "QA",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T08:54:10Z",
+  "rework_count": 1,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -78,7 +78,7 @@
       "event": "CLAIMED",
       "agent": "Frontend",
       "machine_id": "pop-os",
-      "details": "Claimed by Frontend on pop-os (reaperoak) — re-claim after lease expiry"
+      "details": "Claimed by Frontend on pop-os (reaperoak) \u2014 re-claim after lease expiry"
     },
     {
       "timestamp": "2026-03-10T14:30:00+00:00",
@@ -87,7 +87,16 @@
       "machine_id": "pop-os",
       "from_stage": "FRONTEND",
       "to_stage": "QA",
-      "details": "FRONTEND complete — Claims Monitor, Operator Workbench, Machine Status, Auth Badge, Confirmation Modal implemented. All 7 acceptance criteria met. WCAG 2.2 AA compliant. Advanced to QA."
+      "details": "FRONTEND complete \u2014 Claims Monitor, Operator Workbench, Machine Status, Auth Badge, Confirmation Modal implemented. All 7 acceptance criteria met. WCAG 2.2 AA compliant. Advanced to QA."
+    },
+    {
+      "timestamp": "2026-03-10T08:26:19.233058+00:00",
+      "event": "REWORK",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "FRONTEND",
+      "details": "Rework #1: AC#3 FAIL: Claim button uses blue (should be green), Advance button uses green (should be blue), Release button uses yellow (should be orange #F97316), Force-Release icon is lightning bolt (should be lock). 4 CSS/HTML defects in style.css L2049-2089 and index.html L593."
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
