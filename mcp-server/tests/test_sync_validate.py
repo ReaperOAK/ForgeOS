@@ -450,3 +450,200 @@ class TestToolRegistrationCount:
         register_ticket_tools(registry, svc)
         # next, claim, release, status, sync, validate, advance = 7
         assert registry.register.call_count >= 6
+
+
+# ===================================================================
+# Gap tests: SyncEngine direct paths (QA coverage additions)
+# ===================================================================
+
+
+class TestSyncEngineLeaseRelease:
+    """Cover SyncEngine.sync() when scan_and_release_expired returns releases."""
+
+    @pytest.mark.asyncio
+    async def test_sync_logs_released_tickets(self) -> None:
+        """Covers lines 232-242: released_tickets non-empty path."""
+        pool = _mock_pool()
+        conn = await pool.acquire().__aenter__()
+        # No blocked tickets — skip dependency resolution
+        conn.fetch = AsyncMock(return_value=[])
+
+        release_mock = MagicMock()
+        release_mock.ticket_id = "T-EXPIRED-001"
+        release_mock2 = MagicMock()
+        release_mock2.ticket_id = "T-EXPIRED-002"
+
+        with patch(
+            "mcp_server.locking.lease_cleanup.scan_and_release_expired",
+            new_callable=AsyncMock,
+            return_value=[release_mock, release_mock2],
+        ):
+            engine = SyncEngine(pool)
+            result = await engine.sync()
+
+        assert result.released_count == 2
+        assert "T-EXPIRED-001" in result.released_tickets
+        assert "T-EXPIRED-002" in result.released_tickets
+        assert result.errors == []
+
+
+class TestSyncEngineDependencyError:
+    """Cover SyncEngine.sync() when _resolve_dependencies raises."""
+
+    @pytest.mark.asyncio
+    async def test_dependency_resolution_error_captured(self) -> None:
+        """Covers lines 255-258: exception in _resolve_dependencies."""
+        pool = _mock_pool()
+        conn = await pool.acquire().__aenter__()
+        # Make fetch raise on the dependency query
+        conn.fetch = AsyncMock(side_effect=RuntimeError("DB connection lost"))
+
+        with patch(
+            "mcp_server.locking.lease_cleanup.scan_and_release_expired",
+            new_callable=AsyncMock,
+            return_value=[],
+        ):
+            engine = SyncEngine(pool)
+            result = await engine.sync()
+
+        assert result.unblocked_count == 0
+        assert len(result.errors) == 1
+        assert "Failed to resolve dependencies" in result.errors[0]
+
+
+class TestSyncEngineNoBlockedTickets:
+    """Cover _resolve_dependencies early return when no BLOCKED tickets."""
+
+    @pytest.mark.asyncio
+    async def test_no_blocked_tickets_returns_empty(self) -> None:
+        """Covers lines 304-305: empty blocked_rows early return."""
+        pool = _mock_pool()
+        conn = await pool.acquire().__aenter__()
+        # First fetch (BLOCKED tickets) returns empty
+        conn.fetch = AsyncMock(return_value=[])
+
+        with patch(
+            "mcp_server.locking.lease_cleanup.scan_and_release_expired",
+            new_callable=AsyncMock,
+            return_value=[],
+        ):
+            engine = SyncEngine(pool)
+            result = await engine.sync()
+
+        assert result.unblocked_count == 0
+        assert result.unblocked_tickets == []
+
+
+class TestValidateUnknownTicketType:
+    """Cover validate() unknown_ticket_type and flow_mismatch checks."""
+
+    @pytest.mark.asyncio
+    async def test_unknown_ticket_type_detected(self) -> None:
+        """Covers line 408: unknown ticket type check."""
+        pool = _mock_pool()
+        conn = await pool.acquire().__aenter__()
+        conn.fetch = AsyncMock(return_value=[
+            {
+                "ticket_id": "T-UNK",
+                "ticket_type": "nonexistent_type",
+                "stage": "READY",
+                "status": "READY",
+                "sdlc_flow": ["READY", "DONE"],
+            },
+        ])
+
+        engine = SyncEngine(pool)
+        result = await engine.validate()
+        assert not result.is_clean
+        assert any(e.error_type == "unknown_ticket_type" for e in result.errors)
+        assert any("T-UNK" in e.ticket_id for e in result.errors)
+
+    @pytest.mark.asyncio
+    async def test_flow_mismatch_detected(self) -> None:
+        """Covers lines 414-420: sdlc_flow doesn't match expected for type."""
+        pool = _mock_pool()
+        conn = await pool.acquire().__aenter__()
+        conn.fetch = AsyncMock(return_value=[
+            {
+                "ticket_id": "T-MISMATCH",
+                "ticket_type": "backend",
+                "stage": "READY",
+                "status": "READY",
+                # Wrong flow for backend type
+                "sdlc_flow": ["READY", "DONE"],
+            },
+        ])
+
+        engine = SyncEngine(pool)
+        result = await engine.validate()
+        assert not result.is_clean
+        assert any(e.error_type == "flow_mismatch" for e in result.errors)
+
+    @pytest.mark.asyncio
+    async def test_multiple_errors_same_ticket(self) -> None:
+        """A ticket can have multiple integrity errors simultaneously."""
+        pool = _mock_pool()
+        conn = await pool.acquire().__aenter__()
+        conn.fetch = AsyncMock(return_value=[
+            {
+                "ticket_id": "T-MULTI",
+                "ticket_type": "backend",
+                "stage": "NONEXISTENT",
+                "status": "IN_PROGRESS",
+                "sdlc_flow": ["READY", "DONE"],
+            },
+        ])
+
+        engine = SyncEngine(pool)
+        result = await engine.validate()
+        # Should have invalid_stage + stage_not_in_flow + flow_mismatch
+        assert len(result.errors) >= 3
+        error_types = {e.error_type for e in result.errors}
+        assert "invalid_stage" in error_types
+        assert "stage_not_in_flow" in error_types
+        assert "flow_mismatch" in error_types
+
+
+class TestSyncEngineLeaseReleaseError:
+    """Cover SyncEngine.sync() when scan_and_release_expired raises."""
+
+    @pytest.mark.asyncio
+    async def test_lease_release_error_captured(self) -> None:
+        """Covers lines 240-242: exception in scan_and_release_expired."""
+        pool = _mock_pool()
+        conn = await pool.acquire().__aenter__()
+        conn.fetch = AsyncMock(return_value=[])
+
+        with patch(
+            "mcp_server.locking.lease_cleanup.scan_and_release_expired",
+            new_callable=AsyncMock,
+            side_effect=RuntimeError("Lease cleanup failed"),
+        ):
+            engine = SyncEngine(pool)
+            result = await engine.sync()
+
+        assert result.released_count == 0
+        assert len(result.errors) == 1
+        assert "Failed to release expired leases" in result.errors[0]
+
+
+class TestTicketServiceDelegation:
+    """Cover TicketService.sync() and validate() delegation methods."""
+
+    @pytest.mark.asyncio
+    async def test_sync_requires_pool(self) -> None:
+        """TicketService.sync() raises RuntimeError without pool."""
+        from mcp_server.services.ticket_service import TicketService
+
+        svc = TicketService(claim_queue=MagicMock(), pool=None)
+        with pytest.raises(RuntimeError, match="Pool not configured"):
+            await svc.sync()
+
+    @pytest.mark.asyncio
+    async def test_validate_requires_pool(self) -> None:
+        """TicketService.validate() raises RuntimeError without pool."""
+        from mcp_server.services.ticket_service import TicketService
+
+        svc = TicketService(claim_queue=MagicMock(), pool=None)
+        with pytest.raises(RuntimeError, match="Pool not configured"):
+            await svc.validate()
