@@ -1,3 +1,18 @@
+### [FORGEOS-BE016] — Implement stdio Transport for Local Agents
+- **Artifacts:** mcp-server/src/mcp_server/transport/stdio.py, mcp-server/tests/test_stdio_transport.py
+- **Decisions:** Fixed StdioMessageReader to store async iterator once in __init__ instead of re-creating via async-for on each _read_chunk call. Added _exhausted flag for clean EOF-to-StopAsyncIteration transition. Fixed FakeAsyncTextStream test helper to use proper async iterator protocol (__aiter__ returns self, __anext__ tracks index).
+- **Timestamp:** 2026-03-10T17:45:00Z
+
+### [TASK-FOS-06-003] — Agent-Runner Wrapper for Safe Git Operations
+- **Artifacts:** forgeos-server/src/sdk/agent-runner.ts, forgeos-server/src/sdk/config.ts, forgeos-server/src/sdk/agent-runner.test.ts, forgeos-server/src/sdk/config.test.ts
+- **Decisions:** MCP-first with CLI fallback via FORGEOS_FALLBACK_ENABLED toggle. JSON-RPC 2.0 POST to MCP server with AbortController timeout. Typed error hierarchy (ForbiddenGitAddError, ScopeViolationError, TicketOperationError). System paths whitelist for scope validation.
+- **Timestamp:** 2026-03-10T12:44:00Z
+
+### [FORGEOS-BE005] — Database Seed Script for JSON Import
+- **Artifacts:** database/seed.py, database/seed_data/sample_tickets.json, database/tests/test_seed.py, database/__init__.py, database/tests/__init__.py
+- **Decisions:** Used psycopg2 (sync) over asyncpg for CLI tool; ON CONFLICT DO NOTHING for duplicate handling; stage mapping table to handle JSON↔DB enum mismatches (DOCS↔DOCUMENTATION, VALIDATION↔VALIDATOR, UIDESIGNER↔UI_DESIGN, BLOCKED→READY)
+- **Timestamp:** 2026-03-10T12:45:00+00:00
+
 ### [FORGEOS-BE012] — Event Sourcing Subsystem
 - **Artifacts:** mcp-server/src/mcp_server/events/event_store.py, mcp-server/src/mcp_server/events/__init__.py, mcp-server/tests/test_event_store.py
 - **Decisions:** Chose frozen dataclass for immutable Event objects; InMemoryEventBackend as default (pluggable via Protocol); alias enum values (ADVANCED/SYNCED/LEASE_EXPIRED) to map ticket AC naming to ARCH007 schema naming; two-level ordering (sequence_number global + aggregate_version per-ticket)
