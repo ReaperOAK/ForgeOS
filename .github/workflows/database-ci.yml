@@ -15,14 +15,16 @@
 
 name: Database Migration CI
 
+# Trigger configuration: runs only when migration-relevant files change.
+# Path filters prevent unnecessary CI runs when unrelated code is modified.
 on:
   push:
     branches: [main]
     paths:
-      - 'mcp-server/alembic/**'
-      - 'mcp-server/alembic.ini'
-      - 'mcp-server/pyproject.toml'
-      - '.github/workflows/database-ci.yml'
+      - 'mcp-server/alembic/**'          # Migration scripts (versions/, env.py)
+      - 'mcp-server/alembic.ini'          # Alembic configuration
+      - 'mcp-server/pyproject.toml'       # Python deps (may affect alembic)
+      - '.github/workflows/database-ci.yml'  # This workflow itself
   pull_request:
     branches: [main]
     paths:
@@ -31,10 +33,13 @@ on:
       - 'mcp-server/pyproject.toml'
       - '.github/workflows/database-ci.yml'
 
+# Concurrency: one run per branch. Cancel in-progress runs on new pushes
+# to avoid wasting CI minutes during rapid iteration.
 concurrency:
   group: db-migration-ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Minimal permissions: read-only. The workflow validates, never mutates.
 permissions:
   contents: read
 
@@ -47,6 +52,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
+    # Service container: ephemeral PostgreSQL 17-alpine for migration testing.
+    # Credentials are CI-only — never shared with production environments.
+    # Health check ensures the database accepts connections before steps run.
     services:
       postgres:
         # Same version as production: postgres:17-alpine (infra/docker-compose.yml)
@@ -54,7 +62,7 @@ jobs:
         env:
           POSTGRES_DB: forgeos_migration_test
           POSTGRES_USER: forgeos
-          POSTGRES_PASSWORD: forgeos_migration_ci
+          POSTGRES_PASSWORD: forgeos_migration_ci   # CI-only ephemeral credential
         ports:
           - 5432:5432
         options: >-
@@ -64,6 +72,8 @@ jobs:
           --health-retries 5
           --health-start-period 15s
 
+    # DATABASE_URL connects to the ephemeral service container above.
+    # Same format used by Alembic env.py for connection configuration.
     env:
       DATABASE_URL: "postgresql://forgeos:forgeos_migration_ci@localhost:5432/forgeos_migration_test"
 
@@ -91,6 +101,9 @@ jobs:
       # -----------------------------------------------------------------------
       # Step 1: Apply all migrations from scratch
       # -----------------------------------------------------------------------
+      # Runs `alembic upgrade head` on a clean database. Measures apply duration
+      # and captures head revision as output variables for the summary report.
+      # Error handling: PIPESTATUS[0] after `tee` captures alembic exit code.
       - name: Apply all migrations to clean database
         id: apply_migrations
         run: |
@@ -151,8 +164,10 @@ jobs:
           echo "head_revision=${HEAD_REV}" >> $GITHUB_OUTPUT
 
       # -----------------------------------------------------------------------
-      # Step 2: Validate schema — tables, indexes, enums, triggers
+      # Step 2: Validate schema — 7 tables, 5 enums, 20 indexes, 3 triggers — tables, indexes, enums, triggers
       # -----------------------------------------------------------------------
+      # Queries pg_catalog and information_schema to verify all expected objects.
+      # Fails with ::error:: annotation if any expected object is missing.
       - name: Validate database schema
         run: |
           echo "## Schema Validation Report" >> $GITHUB_STEP_SUMMARY
@@ -285,6 +300,8 @@ jobs:
       # -----------------------------------------------------------------------
       # Step 3: Rollback most recent migration and reapply
       # -----------------------------------------------------------------------
+      # Tests reversibility: downgrades latest migration then re-applies to head.
+      # For single-migration stacks, downgrades to "base".
       - name: Test migration rollback and reapply
         run: |
           echo "## Rollback & Reapply Report" >> $GITHUB_STEP_SUMMARY
@@ -371,6 +388,8 @@ jobs:
       # -----------------------------------------------------------------------
       # Step 4: Summary report with timing
       # -----------------------------------------------------------------------
+      # Runs unconditionally (if: always()) so a report is produced even when
+      # earlier steps fail. Consumes output variables from Step 1.
       - name: Generate migration report
         if: always()
         run: |
