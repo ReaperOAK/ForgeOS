@@ -8,6 +8,7 @@ logging integration, error enrichment, and database metadata propagation.
    :last_reviewed: 2026-03-11T00:00:00Z
 """
 
+from mcp_server.middleware.audit_middleware import AuditMiddleware
 from mcp_server.middleware.auth_middleware import (
     AuthContext,
     AuthMiddleware,
@@ -29,6 +30,7 @@ from mcp_server.middleware.correlation import (
 )
 
 __all__ = [
+    "AuditMiddleware",
     "AuthContext",
     "AuthMiddleware",
     "CorrelationIdFilter",
