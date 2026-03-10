@@ -3165,3 +3165,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/QA/FORGEOS-BE009.md
 - **Decisions:** PASS — 38/38 tests, 99% coverage (2 defensive async lines missed), all 6 ACs verified with test evidence, ruff clean, mypy clean, no defects found.
 - **Timestamp:** 2026-03-11T23:30:00Z
+
+### [FORGEOS-BE028] — QA PASS
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE028.md
+- **Decisions:** PASS — 52/52 tests pass, 100% coverage (64 stmts), ruff clean. All 7 ACs verified. No defects. tickets.next tool correctly registered, schema validated, claim queue invoked atomically, success/error responses well-structured, TicketService shared module properly exported.
+- **Timestamp:** 2026-03-11T22:30:00Z
+
+### [FORGEOS-BE010] — QA PASS (post-REWORK)
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE010.md
+- **Decisions:** PASS — 49/49 tests pass, 100% coverage (66 stmts), ruff clean on BE010's own files. All 6 ACs verified. No defects. 1 pre-existing I001 lint error in __init__.py attributed to FORGEOS-BE009 merge (commit bf33032a), not BE010 code. Rework lint fixes confirmed resolved.
+- **Timestamp:** 2026-03-11T22:45:00Z
