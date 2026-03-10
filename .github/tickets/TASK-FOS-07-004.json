@@ -37,10 +37,10 @@
     "If MCP server is unreachable in dual mode, operation continues with filesystem-only and logs WARNING"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Security",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T13:29:53.369938+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -88,6 +88,13 @@
       "from_stage": "QA",
       "to_stage": "SECURITY",
       "details": "Advanced from QA to SECURITY \u2014 PASS verdict"
+    },
+    {
+      "timestamp": "2026-03-10T12:59:53.369944+00:00",
+      "event": "CLAIMED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "details": "CLAIM by Security on pop-os (reaperoak)"
     }
   ],
   "source_task_file": "TODO/tickets/07-system-update.md",
