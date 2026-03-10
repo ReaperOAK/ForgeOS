@@ -20,7 +20,9 @@
   "dependencies": [
     "TASK-FOS-03-002"
   ],
-  "blocked_by": [],
+  "blocked_by": [
+    "TASK-FOS-03-002"
+  ],
   "file_paths": [
     "forgeos-server/src/tools/tickets-release.ts"
   ],
