@@ -253,3 +253,5 @@ Ticket returned to BACKEND for rework.
 - `mcp-server/src/mcp_server/services/ticket_service.py` — reviewed (read-only, SEC-001 found)
 - `mcp-server/src/mcp_server/tools/ticket_tools.py` — reviewed (read-only, confirms attack path)
 - `mcp-server/src/mcp_server/auth/__init__.py` — verified exports
+
+**Report timestamp:** 2026-03-11T00:00:00Z
