@@ -37,10 +37,10 @@
     "Pydantic models define Ticket, Claim, OperationResult with proper field types"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Security Engineer",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T23:56:27.732154+00:00",
   "lease_duration_minutes": 30,
   "completed_at": "2026-03-10T22:38:21+00:00",
   "artifacts": [
@@ -139,6 +139,15 @@
       "from_stage": "QA",
       "to_stage": "SECURITY",
       "details": "Advanced from QA to SECURITY"
+    },
+    {
+      "timestamp": "2026-03-10T23:26:27.732170+00:00",
+      "event": "CLAIMED",
+      "agent": "Security Engineer",
+      "machine_id": "pop-os",
+      "from_stage": "SECURITY",
+      "to_stage": "SECURITY",
+      "details": "Claimed by ReaperOAK@pop-os via Security Engineer, lease until 2026-03-10T23:56:27.732154+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-agent-sdk.md",
