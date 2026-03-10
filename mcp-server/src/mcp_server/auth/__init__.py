@@ -1,7 +1,7 @@
-"""ForgeOS Authentication — agent API keys and operator token auth.
+"""ForgeOS Authentication — agent API keys, machine registration, and operator token auth.
 
-Provides API key authentication for agents and JWT-based token
-authentication for human operators.
+Provides API key authentication for agents, machine identity registration
+and verification, and JWT-based token authentication for human operators.
 
 Public API
 ----------
@@ -11,6 +11,18 @@ Agent auth (FORGEOS-BE051):
 - :func:`validate_api_key` — validate a key and return agent identity.
 - :func:`generate_api_key` — create a new API key for an agent.
 - :func:`hash_api_key` — SHA-256 hash a raw API key.
+
+Machine auth (FORGEOS-BE052) — via ``mcp_server.auth.machine_auth``:
+- :class:`~machine_auth.MachineIdentity` — immutable machine descriptor.
+- :class:`~machine_auth.MachineRegistrationMode` — AUTO or STRICT mode enum.
+- :class:`~machine_auth.MachineAuthError` — raised on verification failure (403).
+- :func:`~machine_auth.register_machine` — register or upsert a machine.
+- :func:`~machine_auth.verify_machine` — verify identity with auto/strict mode.
+- :func:`~machine_auth.get_machine` — look up a machine by ID.
+- :func:`~machine_auth.deactivate_machine` — soft-deactivate a machine.
+
+Machine service (FORGEOS-BE052) — via ``mcp_server.services.machine_service``:
+- :class:`~machine_service.MachineService` — high-level service wrapper.
 
 Operator auth (FORGEOS-BE053):
 - :class:`OperatorIdentity` — authenticated operator descriptor.
@@ -27,8 +39,8 @@ Operator auth (FORGEOS-BE053):
 - :func:`extract_bearer_token` — parse Authorization header.
 
 .. meta::
-   :ticket: FORGEOS-BE051, FORGEOS-BE053
-   :last_reviewed: 2026-03-10T00:00:00Z
+   :ticket: FORGEOS-BE051, FORGEOS-BE052, FORGEOS-BE053
+   :last_reviewed: 2026-03-11T00:00:00Z
 """
 
 from mcp_server.auth.agent_auth import (
