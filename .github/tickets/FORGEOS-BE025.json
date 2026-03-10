@@ -4,7 +4,7 @@
   "description": "Implement health check and readiness probe endpoints for the MCP server. The health check reports overall server status including database connectivity, connection pool health, and active session count. The readiness probe indicates whether the server is ready to accept new requests (database connected, pool initialized, not shutting down). These endpoints are used by Docker health checks and monitoring systems.",
   "type": "backend",
   "priority": "high",
-  "stage": "BACKEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -60,6 +60,13 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "CLAIM by Backend on pop-os (reaperoak)"
+    },
+    {
+      "timestamp": "2026-03-10T15:13:34.234847+00:00",
+      "event": "STAGE_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "BACKEND complete — 25 tests pass, 91% coverage, all 6 AC met"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",

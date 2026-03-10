@@ -110,10 +110,13 @@ class AppContext:
         The ``asyncpg.Pool`` instance (or ``None`` when DB is unavailable).
     config : ServerConfig
         Validated server configuration.
+    health_checker : object | None
+        The :class:`HealthChecker` instance for health/readiness probes.
     """
 
     db_pool: Any = field(default=None)
     config: ServerConfig = field(default_factory=ServerConfig)
+    health_checker: Any = field(default=None)
 
 
 # ---------------------------------------------------------------------------
@@ -145,7 +148,10 @@ async def _app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
         config.port,
     )
 
+    from mcp_server.observability.health import HealthChecker
+
     db_pool: Any = None
+    health_checker: HealthChecker | None = None
     try:
         # Attempt to connect asyncpg pool — gracefully degrade if DB is
         # unavailable (e.g. during CI or initial bootstrap).
@@ -164,8 +170,18 @@ async def _app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
                 "Database connection unavailable — server will start without DB"
             )
 
-        yield AppContext(db_pool=db_pool, config=config)
+        # Initialize the health checker with pool reference (if available).
+        health_checker = HealthChecker(pool=db_pool)
+        health_checker.mark_ready()
+
+        yield AppContext(
+            db_pool=db_pool,
+            config=config,
+            health_checker=health_checker,
+        )
     finally:
+        if health_checker is not None:
+            health_checker.mark_draining()
         if db_pool is not None:
             await db_pool.close()
             logger.info("Database pool closed")
@@ -309,22 +325,26 @@ tool modules (e.g. ``mcp_server.tools.tickets_next``).
 
 
 @mcp_server.tool()
-async def health_check() -> dict[str, str]:
+async def health_check(ctx: Any = None) -> dict[str, Any]:
     """Return health status of the ForgeOS MCP server.
 
-    Checks server liveness and database connectivity.
-    Returns a dictionary with component statuses.
+    Checks server liveness, database connectivity, pool saturation,
+    and uptime.  Uses the :class:`HealthChecker` instance from the
+    application lifespan context when available.
     """
-    status: dict[str, str] = {
+    # Attempt to use the HealthChecker from the app context.
+    if ctx is not None and hasattr(ctx, "request_context"):
+        app_ctx = ctx.request_context.lifespan_context
+        if hasattr(app_ctx, "health_checker") and app_ctx.health_checker is not None:
+            return await app_ctx.health_checker.health_check()
+
+    # Fallback: basic liveness response when no context is available.
+    return {
+        "status": "healthy",
         "server": "ok",
         "version": __version__,
+        "database": {"status": "not_configured"},
     }
-
-    # DB connectivity is verified via the lifespan context when available.
-    # For now, report server-level health.
-    status["database"] = "not_configured"
-
-    return status
 
 
 # ---------------------------------------------------------------------------
