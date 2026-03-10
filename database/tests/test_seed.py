@@ -434,3 +434,333 @@ class TestStageMapping:
         assert STAGE_JSON_TO_DB["UIDESIGNER"] == "UI_DESIGN"
         assert STAGE_JSON_TO_DB["DOCUMENTATION"] == "DOCUMENTATION"
         assert STAGE_JSON_TO_DB["VALIDATOR"] == "VALIDATOR"
+
+
+# ── Database Seed Tests (mocked psycopg2) ────────────────────────────
+
+
+class TestSeedTicketsDB:
+    """Tests for seed_tickets() with mocked database connection."""
+
+    def _mock_conn(self) -> MagicMock:
+        """Create a mock psycopg2 connection with cursor context manager."""
+        mock_cursor = MagicMock()
+        mock_cursor.__enter__ = MagicMock(return_value=mock_cursor)
+        mock_cursor.__exit__ = MagicMock(return_value=False)
+        mock_conn = MagicMock()
+        mock_conn.cursor.return_value = mock_cursor
+        return mock_conn
+
+    @patch("database.seed.psycopg2")
+    def test_successful_import(self, mock_pg: MagicMock) -> None:
+        mock_conn = self._mock_conn()
+        mock_pg.connect.return_value = mock_conn
+        cur = mock_conn.cursor.return_value.__enter__.return_value
+        cur.rowcount = 1  # new row inserted
+
+        tickets = [make_ticket(ticket_id="DB-001"), make_ticket(ticket_id="DB-002")]
+        result = seed_tickets("postgresql://test", tickets, dry_run=False)
+
+        assert result.imported == 2
+        assert result.skipped == 0
+        assert result.failed == 0
+        assert cur.execute.call_count == 2
+        mock_conn.commit.assert_called_once()
+        mock_conn.close.assert_called_once()
+
+    @patch("database.seed.psycopg2")
+    def test_duplicate_skipped(self, mock_pg: MagicMock) -> None:
+        mock_conn = self._mock_conn()
+        mock_pg.connect.return_value = mock_conn
+        cur = mock_conn.cursor.return_value.__enter__.return_value
+        cur.rowcount = 0  # ON CONFLICT DO NOTHING
+
+        tickets = [make_ticket(ticket_id="DB-DUP")]
+        result = seed_tickets("postgresql://test", tickets, dry_run=False)
+
+        assert result.imported == 0
+        assert result.skipped == 1
+        assert result.failed == 0
+
+    @patch("database.seed.psycopg2")
+    def test_db_error_on_insert(self, mock_pg: MagicMock) -> None:
+        mock_conn = self._mock_conn()
+        mock_pg.connect.return_value = mock_conn
+        mock_pg.Error = Exception  # make isinstance checks work
+        cur = mock_conn.cursor.return_value.__enter__.return_value
+
+        db_err = Exception("unique_violation")
+        db_err.pgerror = "ERROR: unique violation"
+        cur.execute.side_effect = db_err
+
+        tickets = [make_ticket(ticket_id="DB-ERR")]
+        result = seed_tickets("postgresql://test", tickets, dry_run=False)
+
+        assert result.failed == 1
+        assert len(result.errors) == 1
+        assert "DB-ERR" in result.errors[0]
+        mock_conn.rollback.assert_called()
+
+    @patch("database.seed.psycopg2")
+    def test_mixed_import_and_duplicate(self, mock_pg: MagicMock) -> None:
+        mock_conn = self._mock_conn()
+        mock_pg.connect.return_value = mock_conn
+        cur = mock_conn.cursor.return_value.__enter__.return_value
+
+        # Track call count to alternate rowcount values
+        call_count = 0
+        original_execute = cur.execute
+
+        def execute_side_effect(*args: Any, **kwargs: Any) -> None:
+            nonlocal call_count
+            call_count += 1
+            if call_count == 1:
+                cur.rowcount = 1  # new row
+            else:
+                cur.rowcount = 0  # duplicate
+
+        cur.execute = MagicMock(side_effect=execute_side_effect)
+
+        tickets = [make_ticket(ticket_id="DB-NEW"), make_ticket(ticket_id="DB-DUP")]
+        result = seed_tickets("postgresql://test", tickets, dry_run=False)
+
+        assert result.imported == 1
+        assert result.skipped == 1
+
+    @patch("database.seed.psycopg2")
+    def test_invalid_ticket_not_sent_to_db(self, mock_pg: MagicMock) -> None:
+        mock_conn = self._mock_conn()
+        mock_pg.connect.return_value = mock_conn
+        cur = mock_conn.cursor.return_value.__enter__.return_value
+        cur.rowcount = 1
+
+        tickets = [
+            make_ticket(ticket_id="DB-VALID"),
+            make_ticket(ticket_id="DB-BAD", type="nonexistent"),
+        ]
+        result = seed_tickets("postgresql://test", tickets, dry_run=False)
+
+        assert result.imported == 1
+        assert result.failed == 1
+        # Only the valid ticket should hit the DB
+        assert cur.execute.call_count == 1
+
+
+# ── resolve_source Tests ─────────────────────────────────────────────
+
+
+class TestResolveSource:
+    """Tests for resolve_source()."""
+
+    def test_explicit_source_returned_as_is(self) -> None:
+        assert resolve_source("/some/custom/path") == "/some/custom/path"
+
+    def test_default_finds_github_tickets(self) -> None:
+        # When run from the repo root, .github/tickets/ should be found
+        original_cwd = os.getcwd()
+        try:
+            os.chdir("/home/reaperoak/Documents/ForgeOS")
+            result = resolve_source(None)
+            assert result.endswith(".github/tickets")
+        finally:
+            os.chdir(original_cwd)
+
+    def test_missing_directory_exits(self, tmp_path: Path) -> None:
+        # Temporarily change cwd to a dir without .github/tickets/
+        original_cwd = os.getcwd()
+        try:
+            os.chdir(str(tmp_path))
+            with pytest.raises(SystemExit):
+                # Monkey-patch __file__ resolution to avoid finding the real dir
+                with patch("database.seed.Path") as mock_path:
+                    mock_path.return_value.resolve.return_value.parent = tmp_path
+                    mock_path.return_value.is_dir.return_value = False
+                    mock_path.cwd.return_value = tmp_path
+                    # Create a mock that returns a path that doesn't exist
+                    mock_candidate = MagicMock()
+                    mock_candidate.is_dir.return_value = False
+                    mock_path.__truediv__ = MagicMock(return_value=mock_candidate)
+                    resolve_source(None)
+        finally:
+            os.chdir(original_cwd)
+
+
+# ── CLI main() Tests ─────────────────────────────────────────────────
+
+
+class TestMain:
+    """Tests for main() CLI entry point."""
+
+    @patch("database.seed.seed_tickets")
+    @patch("database.seed.load_tickets_from_file")
+    def test_main_dry_run_with_file(
+        self, mock_load: MagicMock, mock_seed: MagicMock, tmp_path: Path
+    ) -> None:
+        from database.seed import main
+
+        # Create a temp file
+        sample = tmp_path / "tickets.json"
+        sample.write_text(json.dumps([make_ticket()]))
+
+        mock_load.return_value = [make_ticket()]
+        mock_seed.return_value = SeedResult(imported=1)
+
+        with patch("sys.argv", ["seed", "--source", str(sample), "--dry-run"]):
+            exit_code = main()
+
+        assert exit_code == 0
+        mock_seed.assert_called_once()
+        _, kwargs = mock_seed.call_args
+        assert kwargs.get("dry_run") is True or mock_seed.call_args[0][2] is True
+
+    @patch("database.seed.seed_tickets")
+    @patch("database.seed.load_tickets_from_directory")
+    def test_main_with_directory(
+        self, mock_load: MagicMock, mock_seed: MagicMock, tmp_path: Path
+    ) -> None:
+        from database.seed import main
+
+        (tmp_path / "test.json").write_text(json.dumps(make_ticket()))
+        mock_load.return_value = [make_ticket()]
+        mock_seed.return_value = SeedResult(imported=1)
+
+        with patch("sys.argv", ["seed", "--source", str(tmp_path)]):
+            exit_code = main()
+
+        assert exit_code == 0
+        mock_load.assert_called_once()
+
+    @patch("database.seed.seed_tickets")
+    def test_main_source_not_found(self, mock_seed: MagicMock) -> None:
+        from database.seed import main
+
+        with patch("sys.argv", ["seed", "--source", "/nonexistent/path/12345"]):
+            exit_code = main()
+
+        assert exit_code == 1
+        mock_seed.assert_not_called()
+
+    @patch("database.seed.seed_tickets")
+    @patch("database.seed.load_tickets_from_directory")
+    def test_main_no_tickets_returns_zero(
+        self, mock_load: MagicMock, mock_seed: MagicMock, tmp_path: Path
+    ) -> None:
+        from database.seed import main
+
+        mock_load.return_value = []
+
+        with patch("sys.argv", ["seed", "--source", str(tmp_path)]):
+            exit_code = main()
+
+        assert exit_code == 0
+        mock_seed.assert_not_called()
+
+    @patch("database.seed.seed_tickets")
+    @patch("database.seed.load_tickets_from_file")
+    def test_main_returns_one_on_failures(
+        self, mock_load: MagicMock, mock_seed: MagicMock, tmp_path: Path
+    ) -> None:
+        from database.seed import main
+
+        sample = tmp_path / "tickets.json"
+        sample.write_text(json.dumps([make_ticket()]))
+
+        mock_load.return_value = [make_ticket()]
+        mock_seed.return_value = SeedResult(failed=2, errors=["err1", "err2"])
+
+        with patch("sys.argv", ["seed", "--source", str(sample)]):
+            exit_code = main()
+
+        assert exit_code == 1
+
+    @patch("database.seed.seed_tickets")
+    @patch("database.seed.load_tickets_from_file")
+    def test_main_verbose_sets_debug(
+        self, mock_load: MagicMock, mock_seed: MagicMock, tmp_path: Path
+    ) -> None:
+        from database.seed import main
+
+        sample = tmp_path / "tickets.json"
+        sample.write_text(json.dumps([make_ticket()]))
+
+        mock_load.return_value = [make_ticket()]
+        mock_seed.return_value = SeedResult(imported=1)
+
+        with patch("sys.argv", ["seed", "--source", str(sample), "-v", "--dry-run"]):
+            exit_code = main()
+
+        assert exit_code == 0
+
+    @patch("database.seed.seed_tickets")
+    @patch("database.seed.load_tickets_from_file")
+    def test_main_db_url_from_env(
+        self, mock_load: MagicMock, mock_seed: MagicMock, tmp_path: Path
+    ) -> None:
+        from database.seed import main
+
+        sample = tmp_path / "tickets.json"
+        sample.write_text(json.dumps([make_ticket()]))
+
+        mock_load.return_value = [make_ticket()]
+        mock_seed.return_value = SeedResult(imported=1)
+
+        with patch("sys.argv", ["seed", "--source", str(sample), "--dry-run"]):
+            with patch.dict(os.environ, {"DATABASE_URL": "postgresql://envtest"}):
+                exit_code = main()
+
+        assert exit_code == 0
+
+
+# ── Edge Case Validation Tests ───────────────────────────────────────
+
+
+class TestValidationEdgeCases:
+    """Additional edge case tests for validation."""
+
+    def test_empty_ticket_id(self) -> None:
+        ticket = make_ticket(ticket_id="")
+        errors = validate_ticket(ticket)
+        assert any("non-empty" in e for e in errors)
+
+    def test_sdlc_flow_not_list(self) -> None:
+        ticket = make_ticket(sdlc_flow="not-a-list")
+        errors = validate_ticket(ticket)
+        assert any("at least 3" in e for e in errors)
+
+    def test_missing_priority(self) -> None:
+        ticket = make_ticket()
+        del ticket["priority"]
+        errors = validate_ticket(ticket)
+        assert any("priority" in e for e in errors)
+
+    def test_missing_stage(self) -> None:
+        ticket = make_ticket()
+        del ticket["stage"]
+        errors = validate_ticket(ticket)
+        assert any("stage" in e for e in errors)
+
+    def test_missing_sdlc_flow(self) -> None:
+        ticket = make_ticket()
+        del ticket["sdlc_flow"]
+        errors = validate_ticket(ticket)
+        assert any("sdlc_flow" in e for e in errors)
+
+
+# ── File Loading Edge Cases ──────────────────────────────────────────
+
+
+class TestFileLoadingEdgeCases:
+    """Edge cases for file loading functions."""
+
+    def test_directory_skips_non_object_json(self, tmp_path: Path) -> None:
+        (tmp_path / "array.json").write_text(json.dumps([1, 2, 3]))
+        (tmp_path / "good.json").write_text(json.dumps(make_ticket()))
+        result = load_tickets_from_directory(str(tmp_path))
+        # The array [1,2,3] is not a dict so it should be skipped
+        assert len(result) == 1
+
+    def test_file_with_unexpected_json_type(self, tmp_path: Path) -> None:
+        filepath = tmp_path / "string.json"
+        filepath.write_text(json.dumps("just a string"))
+        result = load_tickets_from_file(str(filepath))
+        assert result == []
