@@ -1,3 +1,8 @@
+### [FORGEOS-BE017] — Validation: APPROVED
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE017.md
+- **Decisions:** APPROVED (HIGH confidence) — 9/10 DoD items PASS (1 advisory: 3 ruff stylistic lint findings, pre-existing codebase pattern). 6/6 ACs verified. 58/58 tests pass. http.py 82% coverage, sse.py 76% coverage (gap in infrastructure integration methods). All upstream verdicts confirmed: QA PASS, Security PASS, CI PASS (95/100), Docs PASS. mypy clean. Ticket moved to DONE.
+- **Timestamp:** 2026-03-11T01:00:00Z
+
 ### [FORGEOS-BE020] — Validation: APPROVED
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE020.md
 - **Decisions:** APPROVED (HIGH confidence, 95%) — 10/10 DoD items pass, 6/6 ACs independently verified. 37/37 tests pass, 97% coverage. All upstream verdicts confirmed: Backend PASS, QA PASS, Security PASS, CI PASS (85/100), Docs PASS. 1 cosmetic observation: unused noqa directive (L353). Ticket moved to DONE.
@@ -2608,3 +2613,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE005.md
 - **Decisions:** APPROVED (HIGH confidence) — 10/10 DoD items pass. 68/68 tests, 95% coverage, ruff lint clean on main code. All 6 acceptance criteria verified. All upstream verdicts (QA, Security, CI, Docs) confirmed PASS.
 - **Timestamp:** 2026-03-10T23:55:00Z
+
+### [FORGEOS-BE027] — BACKEND complete
+- **Artifacts:** mcp-server/src/mcp_server/observability/metrics.py, mcp-server/tests/test_metrics.py, mcp-server/src/mcp_server/observability/__init__.py
+- **Decisions:** Zero-dependency stdlib-only metrics (no Prometheus client). Thread-safe primitives with bounded histograms (10k samples). Singleton registry with module-level convenience functions and context managers.
+- **Timestamp:** 2026-03-10T22:00:00Z
