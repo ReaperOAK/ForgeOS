@@ -4,7 +4,7 @@
   "description": "Implement the database connection pool using asyncpg for the ForgeOS MCP server. Configure min/max connection limits, connection timeout, idle connection recycling, and pool lifecycle (initialize on server start, close on shutdown). The pool must be reusable across the entire server via dependency injection or a global accessor.",
   "type": "backend",
   "priority": "critical",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -108,7 +108,16 @@
       "machine_id": "pop-os",
       "from_stage": "SECURITY",
       "to_stage": "CI",
-      "details": "SECURITY PASS \u2014 0 critical/high findings, STRIDE max score 6 (LOW), OWASP 10/10 checked"
+      "details": "SECURITY PASS — 0 critical/high findings, STRIDE max score 6 (LOW), OWASP 10/10 checked"
+    },
+    {
+      "timestamp": "2026-03-10T23:55:00+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "CI PASS — Quality Score 93/100, 0 critical, 1 warning, 100% coverage"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
