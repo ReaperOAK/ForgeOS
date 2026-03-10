@@ -33,11 +33,11 @@
     "Returns {ticket, new_lease_expiry: ISO8601 string} on success"
   ],
   "rework_count": 1,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
-  "lease_duration_minutes": null,
+  "claimed_by": "CIReviewer",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T11:00:00.000000+00:00",
+  "lease_duration_minutes": 30,
   "history": [
     {
       "timestamp": "2026-03-05T18:05:37.900949+00:00",
