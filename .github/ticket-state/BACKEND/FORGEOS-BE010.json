@@ -4,7 +4,7 @@
   "description": "Configure appropriate PostgreSQL transaction isolation levels for different operation types. Claim operations use READ COMMITTED (with SKIP LOCKED for non-blocking semantics). State transitions (advance, rework) use SERIALIZABLE to prevent concurrent state corruption. Provide a transaction context manager that sets the isolation level per operation type.",
   "type": "backend",
   "priority": "high",
-  "stage": "BACKEND",
+  "stage": "BLOCKED",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -20,9 +20,11 @@
   "dependencies": [
     "FORGEOS-BE006"
   ],
-  "blocked_by": [],
+  "blocked_by": [
+    "FORGEOS-BE006"
+  ],
   "file_paths": [
-    "mcp-server/src/mcp_server/locking/transaction_config.py"
+    "mcp-server/src/locking/transaction_config.py"
   ],
   "acceptance_criteria": [
     "Transaction context manager accepts an isolation level parameter",
@@ -33,10 +35,10 @@
     "Transaction wrapper integrates with the asyncpg connection pool"
   ],
   "rework_count": 0,
-  "claimed_by": "Backend",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T01:00:00+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
