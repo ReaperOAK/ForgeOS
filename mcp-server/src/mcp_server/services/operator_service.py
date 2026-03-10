@@ -26,6 +26,12 @@ from __future__ import annotations
 
 from typing import Any
 
+from mcp_server.auth.authorization import (
+    add_binding,
+    list_bindings,
+    remove_binding,
+    require_operator_machine_access,
+)
 from mcp_server.auth.operator_auth import (
     OperatorAuthenticationError,
     OperatorIdentity,
@@ -33,13 +39,6 @@ from mcp_server.auth.operator_auth import (
     hash_password,
     refresh_token,
     verify_password,
-)
-from mcp_server.auth.authorization import (
-    MachineScopeError,
-    add_binding,
-    list_bindings,
-    remove_binding,
-    require_operator_machine_access,
 )
 from mcp_server.observability import get_logger
 
