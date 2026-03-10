@@ -318,7 +318,68 @@ signed int64 advisory lock key:
   PostgreSQL subsystems.
 
 
-## Repository Pattern — Data Access Layer
+
+
+## Connection Pool Health Monitoring
+
+<--- last_reviewed: 2026-03-10T00:00:00Z -->
+
+The `mcp_server.db.health` module provides a background health monitor for the
+asyncpg connection pool. It tracks pool statistics, pings the database to detect
+dead connections, and recycles stale connections that exceed a configurable
+maximum lifetime. Health data is exposed as a frozen dataclass suitable for JSON
+serialization in the `/health` endpoint.
+
+### Quick Start
+
+```python
+from mcp_server.db.pool import ConnectionPool
+from mcp_server.db.health import PoolHealthMonitor
+
+pool = ConnectionPool()
+await pool.initialize()
+
+monitor = PoolHealthMonitor(pool, check_interval=30.0, max_lifetime=3600.0)
+monitor.start()
+
+report = monitor.health_report()
+print(report.saturation_pct, report.is_healthy)
+await monitor.stop()
+```
+
+### Configuration
+
+| Parameter | Default | Description |
+|---|---|---|
+| `check_interval` | `30.0` | Seconds between background health checks |
+| `max_lifetime` | `3600.0` | Maximum connection lifetime in seconds |
+
+### Health Report Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `total_connections` | `int` | Total connections in the pool |
+| `active_connections` | `int` | Connections currently in use |
+| `idle_connections` | `int` | Connections available for use |
+| `waiting_requests` | `int` | Acquire requests waiting |
+| `saturation_pct` | `float` | Pool capacity percentage in active use |
+| `avg_wait_time_ms` | `float` | Average acquire wait time in ms |
+| `max_lifetime_seconds` | `float` | Configured max connection lifetime |
+| `is_healthy` | `bool` | True if last ping succeeded |
+| `last_check_epoch` | `float` | Monotonic timestamp of last check |
+
+### PoolHealthMonitor Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `start()` | `None` | Start the background health check loop |
+| `stop()` | `None` | Stop the background loop |
+| `health_report()` | `HealthReport` | Build a snapshot from current pool state |
+| `to_dict()` | `dict` | Return health report as JSON-serializable dict |
+| `record_acquire_wait(wait_ms)` | `None` | Record wait time for a connection acquire |
+| `increment_waiting()` | `None` | Increment waiting-request counter |
+| `decrement_waiting()` | `None` | Decrement waiting-request counter |
+| `is_running` | `bool` | Property: True if background task is active |\n\n\n## Repository Pattern — Data Access Layer
 
 <!-- last_reviewed: 2026-03-10T18:00:00Z -->
 <!-- audience: developers -->
@@ -350,6 +411,7 @@ event_repo = EventRepository(pool)
 # Fetch a ticket
 ticket = await ticket_repo.get_by_id("FORGEOS-BE013")
 
+- **`mcp_server/repositories/`** — Repository pattern data access layer (TicketRepository, ClaimRepository, EventRepository)
 # List tickets in a stage
 ready_tickets = await ticket_repo.list_by_stage("READY", limit=10)
 
@@ -823,6 +885,111 @@ by `configure_logging()` — no extra setup needed.
 | `get_correlation_id()` | function | Retrieve current correlation ID |
 | `StructuredJsonFormatter` | class | JSON formatter for log records |
 | `SensitiveDataFilter` | class | PII / secret redaction filter |
+
+
+
+## Health Check & Readiness Probes
+
+<!-- last_reviewed: 2025-07-14T23:45:00Z -->
+<!-- audience: developers, operators -->
+<!-- diataxis: reference -->
+
+The `mcp_server.observability.health` module provides server-level health and
+readiness probes. The health check aggregates server status, database
+connectivity, connection-pool saturation, and uptime into a single JSON report.
+The readiness probe indicates whether the server is accepting requests.
+
+### Health Check
+
+Returns a comprehensive health report with overall status, version, uptime, and
+database details including pool saturation metrics.
+
+```python
+from mcp_server.observability.health import HealthChecker
+
+checker = HealthChecker(pool=pool)
+report = await checker.health_check()
+# {
+#   "status": "healthy",
+#   "version": "0.1.0",
+#   "uptime_seconds": 3600.123,
+#   "database": {
+#     "status": "ok",
+#     "pool": {
+#       "size": 10, "free_size": 8, "used_size": 2,
+#       "min_size": 2, "max_size": 10, "saturation_pct": 20.0
+#     }
+#   }
+# }
+```
+
+**Overall status values:**
+
+| Status | Condition |
+|---|---|
+| `healthy` | Database reachable, pool OK |
+| `degraded` | No database configured (DB-less mode) |
+| `unhealthy` | Database unreachable or pool error |
+
+### Readiness Probe
+
+Returns a `(is_ready, status_dict)` tuple. The server is ready only when the
+state is `READY` and the database is reachable.
+
+```python
+checker.mark_ready()  # call after server initialization
+
+is_ready, status = await checker.readiness_check()
+# is_ready: True
+# status: {"ready": True, "state": "ready"}
+```
+
+**Readiness state machine:**
+
+```
+STARTING  ──mark_ready()──▸  READY  ──mark_draining()──▸  DRAINING
+```
+
+| State | `is_ready` | Use case |
+|---|---|---|
+| `starting` | `False` | Server is initializing |
+| `ready` | `True` | Accepting requests |
+| `draining` | `False` | Shutdown in progress |
+
+The readiness probe also returns `False` if the connection pool is not
+initialized or the database is unreachable, even when state is `READY`.
+
+### Integration with Graceful Shutdown
+
+`HealthChecker` works with `GracefulShutdownManager` — call `mark_ready()`
+after the pool initializes and `mark_draining()` when shutdown begins:
+
+```python
+checker = HealthChecker(pool=pool)
+await pool.initialize()
+checker.mark_ready()
+
+# On shutdown:
+checker.mark_draining()
+await manager.initiate_shutdown()
+```
+
+### API Reference
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `HealthChecker` | class | Aggregates server health and readiness probes |
+| `HealthStatus` | enum | `HEALTHY`, `DEGRADED`, `UNHEALTHY` |
+| `ReadinessState` | enum | `STARTING`, `READY`, `DRAINING` |
+
+**HealthChecker methods:**
+
+| Method | Returns | Description |
+|---|---|---|
+| `health_check()` | `dict[str, Any]` | Full health report with status, version, uptime, database info |
+| `readiness_check()` | `tuple[bool, dict]` | `(is_ready, status_dict)` — readiness with reason |
+| `mark_ready()` | `None` | Transition to `READY` state |
+| `mark_draining()` | `None` | Transition to `DRAINING` state |
 
 
 ## Authentication — Agent API Keys
