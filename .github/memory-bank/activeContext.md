@@ -3,6 +3,11 @@
 - **Decisions:** Implementation docstrings already comprehensive (module, class, function level with last_reviewed metadata). Added Observability section to mcp-server/README.md (log schema, config, correlation IDs, redaction, public API table). Added CHANGELOG entry. No docstring additions needed — source already met standards.
 - **Timestamp:** 2026-03-10T13:45:00Z
 
+### [FORGEOS-BE017] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE017.md
+- **Decisions:** PASS — Score 95/100, 0 critical, 1 warning (OC-007: create_app() 66 lines). 86%/82% coverage, 0 TODO/FIXME, 0 unused imports, max CC=4, clean type annotations.
+- **Timestamp:** 2025-07-14T15:30:00Z
+
 ### [FORGEOS-BE020] — CI Review
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE020.md
 - **Decisions:** PASS — Score 85/100, 0 critical, 3 warnings (unused noqa, ToolRegistry 178 lines, register() 70 lines). 96% coverage, 37/37 tests, clean mypy.
