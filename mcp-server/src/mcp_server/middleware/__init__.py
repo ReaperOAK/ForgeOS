@@ -28,6 +28,11 @@ from mcp_server.middleware.correlation import (
     get_db_correlation_metadata,
     set_correlation_id,
 )
+from mcp_server.middleware.rate_limiter import (
+    RateLimitConfig,
+    RateLimitMiddleware,
+    SlidingWindowLimiter,
+)
 
 __all__ = [
     "AuditMiddleware",
@@ -35,6 +40,9 @@ __all__ = [
     "AuthMiddleware",
     "CorrelationIdFilter",
     "IdentityType",
+    "RateLimitConfig",
+    "RateLimitMiddleware",
+    "SlidingWindowLimiter",
     "build_correlated_tool_error",
     "clear_auth_context",
     "configure_correlation_logging",
