@@ -2860,3 +2860,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** tests/test_health_probes.py (lint fix only)
 - **Decisions:** Fixed 2 ruff lint errors (I001 unsorted imports, F401 unused Any import) that caused Validator rejection
 - **Timestamp:** 2026-03-11T12:00:00+05:30
+
+### [FORGEOS-BE064] — BACKEND Rework #1 Complete
+- **Artifacts:** mcp-server/tests/test_notification_queue.py (lint fix only)
+- **Decisions:** Fixed 4 ruff lint errors (F401 unused math/timedelta imports, I001 unsorted imports, B007 unused loop var nid→_nid) that caused Validator rejection
+- **Timestamp:** 2026-03-11T00:15:00+00:00

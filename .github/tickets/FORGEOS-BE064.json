@@ -4,7 +4,7 @@
   "description": "Build the in-database notification event queue for reliable delivery. Create a notification_queue table via Alembic migration with columns for event_type, payload, status (pending, processing, delivered, failed, dead_letter), retry_count, next_retry_at, and created_at. Implement enqueue and dequeue operations with proper locking to prevent duplicate processing.",
   "type": "backend",
   "priority": "high",
-  "stage": "BACKEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -147,6 +147,13 @@
       "from_stage": "VALIDATION",
       "to_stage": "BACKEND",
       "details": "Rework #1: DoD #3 FAIL: 4 ruff lint errors in tests/test_notification_queue.py \u2014 F401 unused imports (math, timedelta), I001 unsorted imports, B007 unused loop var. Run: ruff check --fix tests/test_notification_queue.py, rename nid to _nid on line 104."
+    },
+    {
+      "timestamp": "2026-03-11T00:15:00+00:00",
+      "event": "BACKEND_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Rework #1 complete. Fixed 4 ruff lint errors in tests/test_notification_queue.py (F401 x2, I001, B007). 44/44 tests pass, 0 lint errors."
     }
   ],
   "source_task_file": "TODO/tasks/phase3-webhooks.md",
