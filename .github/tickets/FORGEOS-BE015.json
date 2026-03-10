@@ -4,7 +4,7 @@
   "description": "Set up the foundational MCP server using the official Python MCP SDK (mcp package). Initialize the project structure with pyproject.toml (dependencies, scripts, metadata), create the main server module with the bootstrap sequence (configuration loading, SDK initialization, server start), and configure basic error handling following MCP protocol error semantics. The server must start, accept initialize requests, and respond with its capability list.",
   "type": "backend",
   "priority": "critical",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -39,10 +39,10 @@
     "README documents how to install dependencies and start the server locally"
   ],
   "rework_count": 2,
-  "claimed_by": "Security",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T08:32:21.188612+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -167,6 +167,15 @@
       "agent": "Security",
       "machine_id": "pop-os",
       "details": "Claimed by Security on pop-os (ReaperOAK)"
+    },
+    {
+      "timestamp": "2026-03-10T08:04:48.122281+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "SECURITY PASS \u2014 0 critical/high findings. STRIDE clear, OWASP 10/10, pip-audit clean (0 CVEs). Advancing to CI."
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
@@ -178,5 +187,5 @@
     "phase2",
     "BLK-04-01"
   ],
-  "current_stage": "QA"
+  "current_stage": "CI"
 }

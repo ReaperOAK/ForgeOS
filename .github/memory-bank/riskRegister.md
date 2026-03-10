@@ -254,3 +254,13 @@ _None_
 |----|----------|-------------|--------|------------|
 | SEC-DO006-001 | Medium | `actions/checkout@v4` and `actions/setup-python@v5` pinned by major version tag, not commit SHA (CWE-829). Tag-based pinning allows potential supply chain attacks via tag mutation. | Risk Accepted | First-party GitHub-maintained actions with strong provenance and signed releases. SHA pinning recommended as defense-in-depth for future hardening. |
 | SEC-DO006-002 | Low | Schema object names (7 tables, 5 enums, 20 indexes, 3 triggers, 1 function) logged in `GITHUB_STEP_SUMMARY` (CWE-200). Reveals internal database design to repository readers. | Risk Accepted | Intentional CI transparency. Ephemeral test database only. No production data or credentials exposed. |
+
+### [FORGEOS-BE015] — SEC-001: .env not in .gitignore
+- **Severity:** Medium
+- **CWE:** CWE-312
+- **Component:** Repository root .gitignore
+- **Description:** .env files are not excluded from version control. Accidental credential commit risk if developer creates .env with production secrets.
+- **Recommended Fix:** Add `.env` and `*.env` patterns to root `.gitignore`
+- **Status:** Documented risk acceptance — no .env files currently exist
+- **Agent:** Security Engineer
+- **Timestamp:** 2026-03-10T08:04:48.122281+00:00
