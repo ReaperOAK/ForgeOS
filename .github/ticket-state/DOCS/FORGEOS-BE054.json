@@ -35,10 +35,10 @@
     "Request context includes identity_type (agent/operator/admin), identity_id, role, and machine_id"
   ],
   "rework_count": 1,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation Specialist",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T21:11:43.167418+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -152,6 +152,15 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-10T20:41:43.167434+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-10T21:11:43.167418+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",

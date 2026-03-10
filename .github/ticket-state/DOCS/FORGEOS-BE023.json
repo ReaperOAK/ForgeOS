@@ -33,10 +33,10 @@
     "Session manager performance does not degrade with increasing concurrent sessions (O(1) lookup)"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation Specialist",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T21:11:43.061870+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -88,6 +88,15 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "Advanced from CI to DOCS"
+    },
+    {
+      "timestamp": "2026-03-10T20:41:43.061883+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-10T21:11:43.061870+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
