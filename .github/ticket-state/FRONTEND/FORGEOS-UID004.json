@@ -4,7 +4,7 @@
   "description": "Design the operator workbench and active claims monitor views. The claims monitor shows all active claims with agent identity, machine ID, operator name, ticket info, and a real-time lease countdown timer. The operator workbench provides authenticated action buttons for claim, release, and advance operations. Design confirmation modals for destructive actions (force-release, force-advance). Define the multi-machine status panel showing connected machines and running agents.",
   "type": "frontend",
   "priority": "medium",
-  "stage": "UIDESIGNER",
+  "stage": "FRONTEND",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -37,10 +37,10 @@
     "Mockup approval status set to APPROVED in mockup document header"
   ],
   "rework_count": 1,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Frontend",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T09:23:15Z",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -97,6 +97,13 @@
       "from_stage": "QA",
       "to_stage": "FRONTEND",
       "details": "Rework #1: AC#3 FAIL: Claim button uses blue (should be green), Advance button uses green (should be blue), Release button uses yellow (should be orange #F97316), Force-Release icon is lightning bolt (should be lock). 4 CSS/HTML defects in style.css L2049-2089 and index.html L593."
+    },
+    {
+      "timestamp": "2026-03-10T08:53:15Z",
+      "event": "CLAIMED",
+      "agent": "Frontend",
+      "machine_id": "pop-os",
+      "details": "Claimed by Frontend on pop-os (reaperoak) - REWORK 1"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
