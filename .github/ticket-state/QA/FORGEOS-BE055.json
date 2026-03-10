@@ -35,10 +35,10 @@
     "Role mapping is configurable (not hardcoded) for future role additions"
   ],
   "rework_count": 0,
-  "claimed_by": "Backend",
+  "claimed_by": "QA Engineer",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T22:57:49.948459+00:00",
+  "lease_expiry": "2026-03-10T23:36:12.368146+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -63,6 +63,54 @@
       "from_stage": "READY",
       "to_stage": "READY",
       "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-10T22:57:49.948459+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T23:04:34.237997+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: Lease expired at 2026-03-10T22:57:49.948459+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T23:05:39.177210+00:00",
+      "event": "CLAIMED",
+      "agent": "QA Engineer",
+      "machine_id": "pop-os",
+      "from_stage": "QA",
+      "to_stage": "QA",
+      "details": "Claimed by ReaperOAK@pop-os via QA Engineer, lease until 2026-03-10T23:35:39.177195+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T23:05:51.711437+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from QA Engineer: manual release"
+    },
+    {
+      "timestamp": "2026-03-10T23:05:52.554535+00:00",
+      "event": "CLAIMED",
+      "agent": "QA Engineer",
+      "machine_id": "pop-os",
+      "from_stage": "QA",
+      "to_stage": "QA",
+      "details": "Claimed by ReaperOAK@pop-os via QA Engineer, lease until 2026-03-10T23:35:52.554518+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T23:06:02.084898+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from QA Engineer: manual release"
+    },
+    {
+      "timestamp": "2026-03-10T23:06:12.368168+00:00",
+      "event": "CLAIMED",
+      "agent": "QA Engineer",
+      "machine_id": "pop-os",
+      "from_stage": "QA",
+      "to_stage": "QA",
+      "details": "Claimed by ReaperOAK@pop-os via QA Engineer, lease until 2026-03-10T23:36:12.368146+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
