@@ -50,6 +50,16 @@ from mcp_server.auth.agent_auth import (
     hash_api_key,
     validate_api_key,
 )
+from mcp_server.auth.authorization import (
+    ADMIN_ROLE,
+    MachineScopeError,
+    OperatorMachineBinding,
+    add_binding,
+    check_operator_machine_binding,
+    list_bindings,
+    remove_binding,
+    require_operator_machine_access,
+)
 from mcp_server.auth.operator_auth import (
     OperatorAuthenticationError,
     OperatorIdentity,
@@ -72,6 +82,15 @@ __all__ = [
     "generate_api_key",
     "hash_api_key",
     "validate_api_key",
+    # Authorization (FORGEOS-BE056)
+    "ADMIN_ROLE",
+    "MachineScopeError",
+    "OperatorMachineBinding",
+    "add_binding",
+    "check_operator_machine_binding",
+    "list_bindings",
+    "remove_binding",
+    "require_operator_machine_access",
     # Operator auth
     "OperatorAuthenticationError",
     "OperatorIdentity",

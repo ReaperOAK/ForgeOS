@@ -1,18 +1,25 @@
-"""Operator service — login, credential verification, and token management.
+"""Operator service — login, credential verification, token and binding management.
 
 Orchestrates operator authentication by coordinating database lookups,
 password verification, and JWT token issuance.  This service layer
 separates business logic from the token mechanics in
 :mod:`mcp_server.auth.operator_auth`.
 
+Also provides machine binding management for operator machine-scoped
+permissions (FORGEOS-BE056).
+
 Public API
 ----------
 * :func:`authenticate_operator` — verifies credentials, returns a token.
 * :func:`refresh_operator_token` — extends a valid session.
 * :func:`register_operator` — creates a new operator with hashed password.
+* :func:`bind_operator_to_machine` — add an operator-machine binding (admin).
+* :func:`unbind_operator_from_machine` — remove a binding (admin).
+* :func:`get_operator_bindings` — list bindings for an operator.
+* :func:`validate_operator_machine_access` — enforce machine scope.
 
 .. meta::
-   :ticket: FORGEOS-BE053
+   :ticket: FORGEOS-BE053, FORGEOS-BE056
 """
 
 from __future__ import annotations
@@ -26,6 +33,13 @@ from mcp_server.auth.operator_auth import (
     hash_password,
     refresh_token,
     verify_password,
+)
+from mcp_server.auth.authorization import (
+    MachineScopeError,
+    add_binding,
+    list_bindings,
+    remove_binding,
+    require_operator_machine_access,
 )
 from mcp_server.observability import get_logger
 
@@ -281,3 +295,136 @@ async def _insert_operator(
     async with db_pool.acquire() as conn:
         row = await conn.fetchrow(query, name, password_hash, role)
         return dict(row)
+
+
+# ---------------------------------------------------------------------------
+# Machine binding management (FORGEOS-BE056)
+# ---------------------------------------------------------------------------
+
+
+async def bind_operator_to_machine(
+    db_pool: Any,
+    operator_id: str,
+    machine_id: str,
+) -> dict[str, str]:
+    """Bind an operator to a machine.
+
+    Parameters
+    ----------
+    db_pool :
+        asyncpg connection pool.
+    operator_id : str
+        UUID of the operator.
+    machine_id : str
+        Machine identifier string.
+
+    Returns
+    -------
+    dict[str, str]
+        ``{"operator_id": "...", "machine_id": "...", "registered_at": "..."}``
+    """
+    binding = await add_binding(db_pool, operator_id, machine_id)
+    logger.info(
+        "operator_bound_to_machine",
+        extra={"operator_id": operator_id, "machine_id": machine_id},
+    )
+    return {
+        "operator_id": binding.operator_id,
+        "machine_id": binding.machine_id,
+        "registered_at": binding.registered_at.isoformat(),
+    }
+
+
+async def unbind_operator_from_machine(
+    db_pool: Any,
+    operator_id: str,
+    machine_id: str,
+) -> dict[str, Any]:
+    """Remove an operator-machine binding.
+
+    Parameters
+    ----------
+    db_pool :
+        asyncpg connection pool.
+    operator_id : str
+        UUID of the operator.
+    machine_id : str
+        Machine identifier string.
+
+    Returns
+    -------
+    dict[str, Any]
+        ``{"removed": True/False, "operator_id": "...", "machine_id": "..."}``
+    """
+    removed = await remove_binding(db_pool, operator_id, machine_id)
+    logger.info(
+        "operator_unbound_from_machine",
+        extra={
+            "operator_id": operator_id,
+            "machine_id": machine_id,
+            "removed": removed,
+        },
+    )
+    return {
+        "removed": removed,
+        "operator_id": operator_id,
+        "machine_id": machine_id,
+    }
+
+
+async def get_operator_bindings(
+    db_pool: Any,
+    operator_id: str,
+) -> list[dict[str, str]]:
+    """List all machine bindings for an operator.
+
+    Parameters
+    ----------
+    db_pool :
+        asyncpg connection pool.
+    operator_id : str
+        UUID of the operator.
+
+    Returns
+    -------
+    list[dict[str, str]]
+        List of binding dicts with ``machine_id`` and ``registered_at``.
+    """
+    bindings = await list_bindings(db_pool, operator_id)
+    return [
+        {
+            "machine_id": b.machine_id,
+            "registered_at": b.registered_at.isoformat(),
+        }
+        for b in bindings
+    ]
+
+
+async def validate_operator_machine_access(
+    db_pool: Any,
+    operator_id: str,
+    machine_id: str,
+    role: str,
+) -> None:
+    """Validate that an operator may act on the given machine.
+
+    Admin operators bypass binding checks.  Non-admin operators
+    must have a binding in the ``operator_machine_bindings`` table.
+
+    Parameters
+    ----------
+    db_pool :
+        asyncpg connection pool.
+    operator_id : str
+        UUID of the operator.
+    machine_id : str
+        Machine identifier string from the request.
+    role : str
+        Operator role (e.g. ``"admin"``, ``"operator"``).
+
+    Raises
+    ------
+    MachineScopeError
+        If the operator is not bound and is not an admin.
+    """
+    await require_operator_machine_access(db_pool, operator_id, machine_id, role)
