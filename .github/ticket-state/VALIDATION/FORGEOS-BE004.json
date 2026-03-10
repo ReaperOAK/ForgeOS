@@ -4,7 +4,7 @@
   "description": "Create the Alembic migration implementing the index strategy from the database index design (ARCH006). Add GIN indexes on JSONB columns (dependencies, file_paths) for containment queries, composite indexes on (stage, claimed_by) for efficient claim lookups, unique constraints on active claims, and partial indexes for common query patterns (e.g., tickets in READY stage only). Include CHECK constraints for enum-like columns.",
   "type": "backend",
   "priority": "high",
-  "stage": "DONE",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -36,10 +36,10 @@
     "Migration downgrades cleanly, removing all added indexes and constraints"
   ],
   "rework_count": 0,
-  "claimed_by": null,
+  "claimed_by": "Validator",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": null,
+  "lease_expiry": "2026-03-10T14:48:05.348454+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -111,13 +111,6 @@
       "agent": "Documentation",
       "machine_id": "pop-os",
       "details": "Claimed by Documentation on pop-os (reaperoak)"
-    },
-    {
-      "timestamp": "2026-03-10T14:25:30.602241+00:00",
-      "event": "STAGE_ADVANCED",
-      "agent": "Validator",
-      "machine_id": "pop-os",
-      "details": "VALIDATION APPROVED, advancing to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
