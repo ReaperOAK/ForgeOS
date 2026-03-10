@@ -4,7 +4,7 @@
   "description": "Update the root-level documentation files to reflect the new ForgeOS architecture. agents.md should reference MCP tools in the Agent Execution Contract. copilot-instructions.md should update the repository structure section to include forgeos-server/ directory and the MCP architecture description. README.md should be updated with: new architecture overview, setup instructions (docker compose up), development workflow, and links to the new dashboard.",
   "type": "docs",
   "priority": "medium",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "DOCS",
@@ -34,10 +34,10 @@
     "README.md links to dashboard URL (http://localhost:3000/dashboard)"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T09:22:01+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -64,6 +64,15 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "Documentation updates complete. Updated README.md, agents.md, copilot-instructions.md, CHANGELOG.md."
+    },
+    {
+      "timestamp": "2026-03-10T08:55:00+00:00",
+      "event": "VALIDATION_COMPLETE",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "APPROVED - 7/7 AC pass, 4/4 DoD pass. HIGH confidence."
     }
   ],
   "source_task_file": "TODO/tickets/07-system-update.md",
