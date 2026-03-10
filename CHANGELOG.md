@@ -8,6 +8,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Agent-Runner SDK** (TASK-FOS-06-003) — TypeScript wrapper for the
+  two-commit Git protocol at `forgeos-server/src/sdk/agent-runner.ts`.
+  `AgentRunner` class provides `claimTicket()`, `completeStage()`,
+  `releaseTicket()`, `pushWork()`, `validateGitAddPatterns()`, and
+  `validateScope()`. Calls MCP tools over HTTP first; automatically falls
+  back to `tickets.py` CLI when the server is unreachable
+  (`FORGEOS_FALLBACK_ENABLED`). Git safety guards reject `git add .`,
+  `git add -A`, `git add --all`, and `git add -a` via
+  `ForbiddenGitAddError`. Scope enforcement via `ScopeViolationError`
+  ensures staged files stay within ticket `file_paths`. Zod-validated SDK
+  configuration in `src/sdk/config.ts`. 32 tests (81% coverage).
+
 - **Event Sourcing Subsystem** (FORGEOS-BE012) — Append-only event store at
   `mcp-server/src/mcp_server/events/` implementing the FORGEOS-ARCH007
   architecture specification. Provides `EventType` enum with 15 lifecycle
