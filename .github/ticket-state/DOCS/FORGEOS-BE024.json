@@ -120,7 +120,7 @@
       "details": "Advanced from CI to DOCS"
     },
     {
-      "timestamp": "2026-03-10T13:02:15.435501+00:00",
+      "timestamp": "2026-03-10T13:02:15.435015+00:00",
       "event": "STAGE_ADVANCED",
       "agent": "CIReviewer",
       "machine_id": "pop-os",
