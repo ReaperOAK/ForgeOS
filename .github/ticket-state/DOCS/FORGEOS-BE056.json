@@ -35,10 +35,10 @@
     "Binding management endpoints (add/remove machine binding) for admin use"
   ],
   "rework_count": 1,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation Specialist",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T23:36:12.081967+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -176,6 +176,47 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "Advanced from CI to DOCS"
+    },
+    {
+      "timestamp": "2026-03-10T23:05:38.763351+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-10T23:35:38.763324+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T23:05:51.403365+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Documentation Specialist: manual release"
+    },
+    {
+      "timestamp": "2026-03-10T23:05:52.122921+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-10T23:35:52.122904+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T23:06:01.803889+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Documentation Specialist: manual release"
+    },
+    {
+      "timestamp": "2026-03-10T23:06:12.081983+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-10T23:36:12.081967+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
