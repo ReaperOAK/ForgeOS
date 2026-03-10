@@ -1,4 +1,4 @@
-"""ForgeOS locking subsystem — distributed claim queue, lease management, file mutex.
+"""ForgeOS locking subsystem — distributed claim queue, lease management, file mutex, transaction isolation.
 
 This package provides:
 
@@ -6,6 +6,9 @@ This package provides:
   ``SELECT FOR UPDATE SKIP LOCKED`` for fair, non-blocking claim semantics.
 * **File mutex** — file-level advisory lock mutex using PostgreSQL
   ``pg_advisory_xact_lock`` for preventing concurrent file modifications.
+* **Transaction isolation** — per-operation isolation level mapping with an
+  async context manager that sets the isolation level on each transaction
+  and retries on serialization failure.
 
 Public API
 ----------
@@ -31,8 +34,16 @@ Public API
 * :exc:`LeaseNotActiveError` — lease is no longer active.
 * :exc:`MaxLeaseDurationExceededError` — max duration exceeded.
 
+* :class:`IsolationLevel` — PostgreSQL isolation levels (enum).
+* :class:`OperationType` — ForgeOS operation categories (enum).
+* :class:`OperationIsolation` — frozen dataclass mapping operation to isolation level.
+* :func:`isolation_for` — look up the isolation level for an operation type.
+* :func:`transactional` — async context manager with per-operation isolation and retry.
+* :exc:`SerializationError` — retries exhausted on serialization failure.
+* :exc:`TransactionError` — non-retryable transaction error.
+
 .. meta::
-   :ticket: FORGEOS-BE006, FORGEOS-BE007, FORGEOS-BE008
+   :ticket: FORGEOS-BE006, FORGEOS-BE007, FORGEOS-BE008, FORGEOS-BE010
 """
 
 from mcp_server.locking.claim_queue import (

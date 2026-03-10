@@ -737,6 +737,102 @@ A claim is stale when:
   correlation context.
 
 
+## Transaction Isolation
+
+<!-- last_reviewed: 2026-03-11T00:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.locking.transaction_config` module maps ForgeOS operations to
+PostgreSQL transaction isolation levels and provides an async context manager
+that enforces the correct isolation level per transaction. Serialization
+failures (SQLSTATE `40001`) are retried automatically with exponential back-off.
+
+### Isolation Level Strategy
+
+ForgeOS uses two isolation levels, chosen per operation type:
+
+| Operation | Isolation Level | Rationale |
+|---|---|---|
+| `CLAIM` | `READ COMMITTED` | Claims use `SELECT FOR UPDATE SKIP LOCKED`. Non-blocking semantics skip locked rows, so `SERIALIZABLE` is unnecessary. |
+| `ADVANCE` | `SERIALIZABLE` | State transitions must see a consistent snapshot. Concurrent advance/rework on the same ticket is detected and rolled back. |
+| `REWORK` | `SERIALIZABLE` | Same consistency requirements as advance — a ticket must not be advanced and reworked simultaneously. |
+| `RELEASE` | `READ COMMITTED` | Idempotent operation with no conflicting state. |
+| `SPAWN` | `READ COMMITTED` | Inserts a new row with no conflicting state. |
+| `READ` | `READ COMMITTED` | Read-only queries for dashboard and status. |
+
+### Usage
+
+```python
+from mcp_server.locking import transactional, OperationType
+
+async with transactional(pool, OperationType.ADVANCE) as conn:
+    # conn is inside a SERIALIZABLE transaction
+    await conn.execute("UPDATE tickets SET stage = $1 WHERE id = $2", new_stage, tid)
+```
+
+The context manager acquires a connection from the pool, starts a transaction
+at the mapped isolation level, and yields the connection. On success the
+transaction commits; on exception it rolls back. The connection is always
+released back to the pool.
+
+### Serialization Failure Retry
+
+When PostgreSQL detects a serialization conflict under `SERIALIZABLE` isolation,
+it raises SQLSTATE `40001`. The `transactional()` context manager catches this
+and retries the entire block with exponential back-off:
+
+```
+attempt 1 → fail → sleep 50ms
+attempt 2 → fail → sleep 100ms
+attempt 3 → fail → sleep 200ms
+attempt 4 → fail → raise SerializationError
+```
+
+| Parameter | Default | Description |
+|---|---|---|
+| `max_retries` | `3` | Maximum retry attempts after the initial try |
+| `base_delay` | `0.05` | Base delay in seconds (doubles each retry) |
+
+After exhausting retries, `SerializationError` is raised with the operation
+type and total attempt count.
+
+### API Reference
+
+| Symbol | Type | Description |
+|---|---|---|
+| `IsolationLevel` | enum | `READ_COMMITTED`, `REPEATABLE_READ`, `SERIALIZABLE` |
+| `OperationType` | enum | `CLAIM`, `ADVANCE`, `REWORK`, `RELEASE`, `SPAWN`, `READ` |
+| `OperationIsolation` | frozen dataclass | Maps an operation to its isolation level with a justification string |
+| `OPERATION_ISOLATION_MAP` | dict | Canonical mapping of all operation types to isolation configs |
+| `isolation_for(operation)` | function | Look up the isolation level for an operation type |
+| `transactional(pool, operation, ...)` | async context manager | Execute a block inside a correctly-isolated transaction |
+| `SerializationError` | exception | Raised after retries are exhausted on `40001` |
+| `TransactionError` | exception | Non-retryable transaction failure |
+| `PoolLike` | Protocol | Minimal async pool interface (`acquire()` / `release()`) |
+
+### Error Handling
+
+| Scenario | Behavior |
+|---|---|
+| Serialization failure (`40001`) | Retries with exponential back-off up to `max_retries` |
+| Retries exhausted | Raises `SerializationError(operation, attempts)` |
+| Non-serialization exception | Propagates immediately, no retry |
+| Exception in user block | Transaction rolls back; connection released |
+| Successful completion | Transaction commits; connection released |
+
+### Design Constraints
+
+- **No business logic** — this module is purely infrastructure. Business
+  operations import `transactional()` and pass a pool + operation type.
+- **Enum-driven mapping** — the `OPERATION_ISOLATION_MAP` dict is the single
+  source of truth for which operations use which isolation level.
+- **Justification-required** — every entry in the map includes a human-readable
+  justification string explaining the isolation level choice.
+- **Protocol-based pool** — `PoolLike` uses structural subtyping so any pool
+  with `acquire()` and `release()` methods works without inheritance.
+
+
 ## Graceful Shutdown
 
 <!-- last_reviewed: 2026-03-11T00:30:00Z -->

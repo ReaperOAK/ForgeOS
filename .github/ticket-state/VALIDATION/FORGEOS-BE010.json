@@ -4,7 +4,7 @@
   "description": "Configure appropriate PostgreSQL transaction isolation levels for different operation types. Claim operations use READ COMMITTED (with SKIP LOCKED for non-blocking semantics). State transitions (advance, rework) use SERIALIZABLE to prevent concurrent state corruption. Provide a transaction context manager that sets the isolation level per operation type.",
   "type": "backend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",

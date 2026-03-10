@@ -3050,3 +3050,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/README.md (added Lease Heartbeat reference section), .github/agent-output/Documentation/FORGEOS-BE008.md
 - **Decisions:** Implementation docstrings already high quality — no source changes needed. Added ~130-line README reference section with config, usage, API tables, error handling, and design constraints. Diátaxis: Reference.
 - **Timestamp:** 2026-03-11T18:50:00Z
+
+### [FORGEOS-BE010] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, mcp-server/src/mcp_server/locking/__init__.py, mcp-server/src/mcp_server/locking/transaction_config.py, .github/agent-output/Documentation/FORGEOS-BE010.md
+- **Decisions:** Implementation docstrings already comprehensive. Updated __init__.py module docstring with transaction_config public API. Added ~100-line README reference section covering isolation strategy, usage, retry behavior, API reference, and error handling. Diátaxis: Reference.
+- **Timestamp:** 2026-03-11T19:00:00Z
