@@ -4,7 +4,7 @@
   "description": "Create unified authentication middleware that intercepts both MCP tool calls and REST API requests. For MCP, extract the API key from the request metadata and validate agent identity. For REST, extract the bearer token from the Authorization header and validate operator identity. The middleware populates a request context with the authenticated identity for downstream use by authorization and audit layers.",
   "type": "backend",
   "priority": "critical",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Request context includes identity_type (agent/operator/admin), identity_id, role, and machine_id"
   ],
   "rework_count": 1,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T21:28:16.923909+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -179,6 +179,15 @@
       "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
       "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-10T21:28:16.923909+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T21:03:37.158372+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
