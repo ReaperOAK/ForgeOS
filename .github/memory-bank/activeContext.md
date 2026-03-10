@@ -1,3 +1,8 @@
+### [FORGEOS-BE002] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE002.md
+- **Decisions:** PASS (HIGH confidence). STRIDE threat model on 4 components (machines, operators, claims, tickets ALTER): all scores ≤6 (Low). OWASP 10/10 reviewed, 0 findings. All SQL is static DDL — zero injection risk. No privilege escalation vectors. No sensitive data exposure. FK constraints correct (CASCADE on claims→tickets, SET NULL on claims→agents/machines). 0 secrets found. 0 critical/high CVEs in dependencies. 3 informational notes: trigger column mismatch (functional bug, not security), non-FK operator field (by design), no temporal CHECK on claims (app-layer validation). Advanced to CI.
+- **Timestamp:** 2026-03-10T08:30:00Z
+
 ### [FORGEOS-UID003] — Frontend Implementation Review (Dependency Graph & Search)
 - **Artifacts:** docs/uiux/mockups/FORGEOS-UID003.md, docs/uiux/components/dependency-graph.md, docs/uiux/components/search-bar.md
 - **Decisions:** Enhanced UIDesigner specs with Frontend implementation mapping sections. Added CSS class ↔ component mapping tables, HTML element ID inventories, ARIA role verification, D3.js integration architecture notes, responsive breakpoint verification, and accessibility implementation checklist. All 7/7 acceptance criteria verified met. Graph-search.css (781 lines) fully implements all spec components. Zero hardcoded colors — 100% design-token-driven.
@@ -1936,6 +1941,11 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/dashboard/js/app.js, forgeos-server/src/dashboard/js/pipeline.js, forgeos-server/src/dashboard/js/admin.js
 - **Decisions:** IIFE pattern (not ES modules) to match existing codebase convention. window.ForgeOS global exposes shared API for module communication. SSE exponential backoff: 1s→2s→4s→8s→16s→30s cap. Handler registration pattern decouples SSE dispatch from view modules. Individual card DOM updates (no full re-render). Single global setInterval for all lease countdowns. Admin panel built via buildDOM() replacing HTML placeholder — no HTML modification required. Vanilla JS only, no external dependencies.
 - **Timestamp:** 2026-03-10T14:30:00+05:30
+
+### [FORGEOS-DO006] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-DO006.md
+- **Decisions:** PASS — Score 88/100, 0 critical, 2 warnings (unused START_TIME variable, unquoted test bracket variables), 2 suggestions (ls|grep pattern, action tag pinning). Upstream QA PASS and Security PASS confirmed. Workflow is well-structured with proper error handling, minimal permissions, and scoped triggers.
+- **Timestamp:** 2026-03-10T09:00:00Z
 
 ### [FORGEOS-BE003] — Security Review
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE003.md
