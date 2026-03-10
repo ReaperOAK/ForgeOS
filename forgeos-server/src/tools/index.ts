@@ -14,6 +14,7 @@ import { ticketsClaimSchema, ticketsClaimHandler } from './tickets-claim.js';
 import { ticketsRejectSchema, ticketsRejectHandler } from './tickets-reject.js';
 import { ticketsSpawnSchema, ticketsSpawnHandler } from './tickets-spawn.js';
 import { ticketsCompleteSchema, ticketsCompleteHandler } from './tickets-complete.js';
+import { ticketsExtendSchema, ticketsExtendHandler } from './tickets-extend.js';
 
 /**
  * Register all MCP tools on the server.
@@ -60,5 +61,13 @@ export function registerTools(server: McpServer): void {
     'Complete the current SDLC stage and advance the ticket to the next stage in its flow. Requires completion evidence including artifacts, test results, and confidence level.',
     ticketsCompleteSchema.shape,
     async (params) => ticketsCompleteHandler(params),
+  );
+
+  // ── tickets.extend ───────────────────────────────────────────────────────
+  server.tool(
+    'tickets.extend',
+    'Extend the lease on a claimed ticket to prevent expiry during long operations',
+    ticketsExtendSchema.shape,
+    async (params) => ticketsExtendHandler(params),
   );
 }
