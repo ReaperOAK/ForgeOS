@@ -1876,3 +1876,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/alembic/versions/20260310_000000_002_core_tables.py, mcp-server/tests/test_core_tables_migration.py, .github/agent-output/QA/FORGEOS-BE002.md
 - **Decisions:** QA PASS (HIGH confidence). 41/41 tests pass, 242/247 full suite pass (5 pre-existing async failures unrelated). All 7 ACs verified: machines, operators, claims tables created; created_by column added to tickets; FK with ON DELETE CASCADE/SET NULL; clean downgrade. Mutation testing N/A. No TODO, no print(), ruff clean.
 - **Timestamp:** 2026-03-10T12:00:00Z
+
+### [TASK-FOS-03-009] — QA REJECT (Rework #1)
+- **Artifacts:** .github/agent-output/QA/TASK-FOS-03-009.md, forgeos-server/src/tools/tickets-extend.ts, forgeos-server/src/__tests__/tools/tickets-extend.test.ts
+- **Decisions:** QA REJECT. Handler+tests correct (24/24 pass, 100% stmt coverage). Tool NOT registered in forgeos-server/src/tools/index.ts — no import, no server.tool() call. AC1 partially fails. Sent back to BACKEND for registration fix.
+- **Timestamp:** 2026-03-10T13:28:00Z
