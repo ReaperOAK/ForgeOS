@@ -773,17 +773,22 @@ export const ticketsRejectSchema = z.object({
 }
 ```
 
-**Stored Function:** `reject_ticket(p_ticket_id, p_reason, p_evidence)`
+**Stored Function:** `reject_ticket(p_ticket_id TEXT, p_agent_id UUID, p_agent_name TEXT, p_reason TEXT, p_evidence JSONB DEFAULT '{}')`
+
+**Handler Workflow:**
+
+1. Resolve agent name (`'system'`) to UUID via `agents` table. Auto-register with wildcard permissions if absent.
+2. Call `reject_ticket()` with five parameters. The function acquires a `SELECT FOR UPDATE` lock.
+3. If the function returns zero rows, return `NOT_CLAIM_OWNER` (ticket not found or not claimed by caller).
+4. If `ticket.status === 'ESCALATED'`, set `escalated: true` in the output.
+5. Return `{ ticket, rework_count, escalated, returned_to_stage }`.
 
 **Error Codes:**
 
 | Error Code | Condition | Description |
 |------------|-----------|-------------|
-| `TICKET_NOT_FOUND` | No ticket with given ID | Ticket does not exist |
-| `NOT_CLAIM_OWNER` | Caller ≠ claim owner | Only the reviewing agent can reject |
-| `INVALID_TRANSITION` | Not in a rejectable stage | Ticket is not in QA/SECURITY/CI/VALIDATOR stage |
-| `LEASE_EXPIRED` | Lease has lapsed | Reviewer's lease expired |
-| `INTERNAL_ERROR` | Database error | Unexpected failure |
+| `NOT_CLAIM_OWNER` | Caller ≠ claim owner or ticket not found | The SQL function raises this via exception, or the handler returns it when zero rows are returned |
+| `INTERNAL_ERROR` | Database error | Unexpected failure (catch-all) |
 
 **Annotations:**
 ```json

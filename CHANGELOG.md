@@ -8,6 +8,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **tickets.spawn Tool Documentation** — Corrected and expanded reference
+  documentation for the `tickets.spawn` MCP tool (TASK-FOS-03-006). Fixed
+  6 inaccuracies in `docs/architecture/api/mcp-tool-definitions.md` section 4.7:
+  `title.minLength` 5→1, `acceptance_criteria` item `minLength` 5→1,
+  `priority` default changed from "parent's priority" to `medium`,
+  Zod `priority` changed from `.optional()` to `.default('medium')`,
+  removed undocumented `NOT_CLAIM_OWNER` and `FILE_CONFLICT` error codes.
+  Added child ID generation pattern, initial status logic table, events
+  recorded table, and implementation link. New `tickets.spawn` subsection
+  in `forgeos-server/README.md` with input parameters, error codes, and
+  MCP invocation example.
+
 - **tickets.complete Tool Documentation** — Added complete reference
   documentation for the `tickets.complete` MCP tool (TASK-FOS-03-004).
   New `tickets.complete` section in `forgeos-server/README.md` with input/output

@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-10T15:00:00Z -->
+<!-- last_reviewed: 2026-03-10T16:30:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -672,6 +672,90 @@ for sub-50 ms response times.
 | `src/tools/tickets-next.ts` | Zod schema, handler, types |
 | `src/tools/index.ts` | Tool registration on McpServer |
 
+### tickets.complete — Complete Stage and Advance
+
+Marks the current SDLC stage as complete and advances the ticket to the
+next stage in its type-specific flow. Requires completion evidence
+(artifacts, test results, confidence level). On reaching DONE, resolves
+dependencies to unblock downstream tickets.
+
+#### Input Schema
+
+| Parameter      | Type   | Required | Description                                      |
+|----------------|--------|----------|--------------------------------------------------|
+| `ticket_id`    | string | Yes      | Ticket identifier (e.g. `TASK-FOS-03-004`)       |
+| `evidence`     | object | Yes      | Completion evidence payload                      |
+| `evidence.artifacts`     | string[] | Yes | File paths created or modified          |
+| `evidence.test_results`  | string   | Yes | Test summary (pass/fail counts, coverage) |
+| `evidence.confidence`    | enum     | Yes | `HIGH`, `MEDIUM`, or `LOW`               |
+| `evidence.notes`         | string   | No  | Optional free-text notes                  |
+
+#### Output Schema
+
+| Field                    | Type     | Description                                  |
+|--------------------------|----------|----------------------------------------------|
+| `ticket`                 | object   | Updated ticket record (ticket_id, stage, status) |
+| `previous_stage`         | string   | The SDLC stage the ticket was in             |
+| `new_stage`              | string   | The SDLC stage the ticket advanced to        |
+| `dependencies_unblocked` | string[] | Ticket IDs whose dependencies are now resolved |
+
+#### Error Codes
+
+| Error Code            | Condition                 | Description                           |
+|-----------------------|---------------------------|---------------------------------------|
+| `TICKET_NOT_FOUND`    | No ticket with given ID   | Ticket does not exist                 |
+| `NOT_CLAIM_OWNER`     | Caller ≠ claim owner      | Only the claiming agent can complete  |
+| `INVALID_TRANSITION`  | Stage violation            | Ticket is not at an advanceable stage |
+| `MISSING_EVIDENCE`    | Empty or invalid evidence  | Evidence payload fails Zod validation |
+
+#### MCP Invocation Example
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "tickets.complete",
+    "arguments": {
+      "ticket_id": "TASK-FOS-03-004",
+      "evidence": {
+        "artifacts": [
+          "forgeos-server/src/tools/tickets-complete.ts",
+          "forgeos-server/src/sdlc/flows.ts",
+          "forgeos-server/src/sdlc/transitions.ts"
+        ],
+        "test_results": "62 tests passed, 0 failed. Coverage: 92%",
+        "confidence": "HIGH"
+      }
+    }
+  }
+}
+```
+
+#### Example Response
+
+```json
+{
+  "ticket": {
+    "ticket_id": "TASK-FOS-03-004",
+    "status": "READY",
+    "stage": "QA"
+  },
+  "previous_stage": "BACKEND",
+  "new_stage": "QA",
+  "dependencies_unblocked": []
+}
+```
+
+#### Implementation Files
+
+| File | Purpose |
+|------|---------|
+| `src/tools/tickets-complete.ts` | Zod schema, handler, types |
+| `src/sdlc/flows.ts` | SDLC_FLOWS constant (10 ticket types → stage arrays) |
+| `src/sdlc/transitions.ts` | `getNextStage()`, `getImplementationStage()`, `isValidTransition()` |
+| `src/types/index.ts` | `TicketsCompleteOutput`, `TicketType`, `TicketStage` types |
+| `src/tools/index.ts` | Tool registration on McpServer |
+
 ### tickets.stats — Dashboard Statistics
 
 Returns aggregate system statistics for dispatcher decision-making and
@@ -767,6 +851,73 @@ interpolation of user input.
 |------|---------|
 | `src/tools/tickets-stats.ts` | Zod schema, handler, types, caching |
 | `src/tools/index.ts` | Tool registration on McpServer |
+
+### tickets.spawn — Create Child Ticket
+
+Creates a child ticket linked to an existing parent ticket, enabling
+self-expanding workflows and task decomposition. The child receives a
+generated `ticket_id` following the pattern `{parent_id}-SUB-{n}`,
+inherits the parent's `project_id`, and enters the SDLC flow for its
+own ticket type.
+
+#### Input Parameters
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `parent_id` | `string` | Yes | — | `ticket_id` of the parent ticket |
+| `title` | `string` | Yes | — | Title for the child ticket (1–200 chars) |
+| `type` | `enum` | Yes | — | Ticket type determining the SDLC flow |
+| `priority` | `enum` | No | `medium` | `critical`, `high`, `medium`, or `low` |
+| `acceptance_criteria` | `string[]` | Yes | — | At least one criterion (min 1 char each) |
+| `file_paths` | `string[]` | Yes | — | Workspace-relative paths in the child's write scope |
+| `description` | `string` | No | — | Detailed description of the child ticket |
+| `depends_on` | `string[]` | No | — | `ticket_id` values the child depends on |
+
+#### Child Ticket ID Generation
+
+The handler queries existing children of the parent and assigns an
+incremented suffix:
+
+```
+{parent_id}-SUB-1, {parent_id}-SUB-2, ...
+```
+
+If the child has `depends_on` entries, the initial status is `BLOCKED`.
+Otherwise the child starts in `READY` status.
+
+#### Error Codes
+
+| Code | Condition |
+|------|-----------|
+| `INVALID_SUBTASK` | Title, type, or `acceptance_criteria` missing or empty |
+| `TICKET_NOT_FOUND` | Parent ticket does not exist |
+| `INTERNAL_ERROR` | Unexpected database or runtime error |
+
+#### Example MCP Invocation
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "tickets.spawn",
+    "arguments": {
+      "parent_id": "TASK-FOS-03-001",
+      "title": "Add input validation for spawn handler",
+      "type": "backend",
+      "acceptance_criteria": ["Validate all required fields before DB insert"],
+      "file_paths": ["forgeos-server/src/tools/tickets-spawn.ts"]
+    }
+  }
+}
+```
+
+#### Implementation Files
+
+| File | Purpose |
+|------|---------|
+| `src/tools/tickets-spawn.ts` | Zod schema, handler, error builder |
+| `src/tools/index.ts` | Tool registration on McpServer |
+
 ### tickets.graph — Dependency Graph
 
 Returns the full ticket dependency DAG for visualization. Builds a
