@@ -4,7 +4,7 @@
   "description": "Implement machine registration and identity verification. Each machine running agents registers with a unique machine_id (hostname or UUID). Machine registration records the hostname, first-seen timestamp, and last-seen timestamp. On each request, the machine_id is verified against the registry. Unknown machines can be auto-registered or rejected based on configuration.",
   "type": "backend",
   "priority": "high",
-  "stage": "SECURITY",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Machine identity includes machine_id, hostname, and registration timestamp"
   ],
   "rework_count": 0,
-  "claimed_by": "Security",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T18:00:00+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -76,6 +76,33 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-10T17:07:06.390430+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-10T17:07:17.358642+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "Advanced from CI to DOCS"
+    },
+    {
+      "timestamp": "2026-03-10T17:07:29.577235+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
