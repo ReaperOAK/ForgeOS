@@ -1,3 +1,13 @@
+### [FORGEOS-BE023] — BACKEND Complete
+- **Artifacts:** mcp-server/src/mcp_server/sessions/concurrent.py, mcp-server/tests/test_concurrent_sessions.py, mcp-server/src/mcp_server/sessions/__init__.py (modified)
+- **Decisions:** asyncio.Lock over threading.Lock for event-loop-safe concurrency; composition over inheritance (reuses AgentSession/SessionState, separate class); MaxSessionsExceededError with retry_after_seconds for programmatic retry handling; default 50 max sessions
+- **Timestamp:** 2026-03-11T00:00:00Z
+
+### [FORGEOS-BE010] — QA PASS
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE010.md
+- **Decisions:** PASS — 49/49 tests pass, 100% coverage (66 stmts), mypy clean. All 6 ticket JSON ACs verified. Lint: 2 source issues (UP035 AsyncIterator import, F401 unused TYPE_CHECKING), 15 test style issues (F841 unused conn vars, I001 unsorted imports). Non-blocking for QA — CI Reviewer scope.
+- **Timestamp:** 2026-03-11T00:00:00Z
+
 ### [FORGEOS-BE006] — DOCS Complete
 - **Artifacts:** CHANGELOG.md, mcp-server/README.md, .github/agent-output/Documentation/FORGEOS-BE006.md
 - **Decisions:** Docstrings comprehensive (9 symbols). Added CHANGELOG entry and README Claim Queue section.
@@ -2865,6 +2875,11 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/tests/test_notification_queue.py (lint fix only)
 - **Decisions:** Fixed 4 ruff lint errors (F401 unused math/timedelta imports, I001 unsorted imports, B007 unused loop var nid→_nid) that caused Validator rejection
 - **Timestamp:** 2026-03-11T00:15:00+00:00
+
+### [FORGEOS-BE054] — Validation REJECTED (Rework #1)
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE054.md
+- **Decisions:** REJECTED — Lint fails with 4 errors: F401 unused RateLimiter import, TC002 x2 (Request/ASGIApp not in TYPE_CHECKING block), RUF100 unused noqa directive. 9/10 DoD items pass; only DoD #3 (lint) fails. Functionally correct — all 6 ACs met, 52 tests at 98% coverage, mypy clean, all upstream verdicts PASS.
+- **Timestamp:** 2026-03-11T00:00:00Z
 
 ### [FORGEOS-BE052] — QA PASS (Rework #1)
 - **Artifacts:** mcp-server/src/mcp_server/auth/machine_auth.py, mcp-server/src/mcp_server/services/machine_service.py, mcp-server/tests/test_machine_auth.py
