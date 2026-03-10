@@ -1,53 +1,34 @@
-# FORGEOS-BE025 — BACKEND Stage Complete
+# FORGEOS-BE025 — BACKEND Rework Complete
 
 ## Summary
 
-Implemented server-level health check and readiness probe system for the
-ForgeOS MCP Server (Python). The implementation provides a `HealthChecker`
-class that integrates with the asyncpg `ConnectionPool` to report server
-status, database connectivity, pool saturation, and readiness state.
+Rework #1 for health check and readiness probes. Fixed 2 lint errors in the
+test file that caused Validator rejection (DoD #3 — lint passes).
 
-## Acceptance Criteria Coverage
+## Rejection Resolution
 
-| # | Criterion | Status | Evidence |
-|---|-----------|--------|----------|
-| AC1 | Health check returns JSON with server status, DB status, pool stats, uptime | PASS | `HealthChecker.health_check()` returns dict with `status`, `version`, `uptime_seconds`, `database` (with pool metrics) |
-| AC2 | Readiness probe returns 200 when fully initialized | PASS | `readiness_check()` returns `(True, {...})` when state is READY and pool responds to ping |
-| AC3 | Readiness probe returns 503 during startup/shutdown | PASS | Returns `(False, {...})` when state is STARTING or DRAINING |
-| AC4 | DB connectivity verified via SELECT 1 | PASS | Uses `ConnectionPool.ping()` which executes `SELECT 1` |
-| AC5 | Health check includes pool saturation metrics | PASS | `saturation_pct = used_size / max_size * 100` in pool stats |
-| AC6 | Both endpoints respond within 500ms | PASS | Tests verify < 0.5s response time; implementation is O(1) with single SELECT 1 query |
+| Issue | Fix Applied |
+|-------|-------------|
+| I001: Import block un-sorted (line 9) | Ran `ruff check --fix` to auto-sort imports |
+| F401: `typing.Any` imported but unused (line 14) | Removed unused `Any` import |
+
+## Verification
+
+- **Lint (test file):** `ruff check tests/test_health_probes.py` → All checks passed
+- **Lint (source):** `ruff check src/mcp_server/observability/health.py` → All checks passed
+- **Tests:** 25/25 passed in 0.07s
+- **Coverage:** 91% on health.py (unchanged — no logic changes)
 
 ## Artifacts
 
-### Created
-- `mcp-server/src/mcp_server/observability/health.py` — `HealthChecker`, `HealthStatus`, `ReadinessState`
-- `mcp-server/tests/test_health_probes.py` — 25 tests covering all 6 acceptance criteria
-
 ### Modified
-- `mcp-server/src/mcp_server/observability/__init__.py` — Added lazy exports for `HealthChecker`, `HealthStatus`, `ReadinessState`
-- `mcp-server/src/mcp_server/server.py` — Integrated `HealthChecker` into `AppContext`, lifespan (`mark_ready`/`mark_draining`), and `health_check` MCP tool
+- `mcp-server/tests/test_health_probes.py` — Fixed import sorting and removed unused `Any` import
 
-## TDD Evidence
-
-- **RED**: 25 tests written first in `test_health_probes.py`, all failing with `ImportError` (module did not exist)
-- **GREEN**: `observability/health.py` implemented — 25/25 tests pass (0.63s)
-- **REFACTOR**: Integrated into `server.py` lifespan and tool; verified all tests still pass
-
-## Test Results
-
-```
-25 passed in 0.63s
-Coverage: 91% (68 statements, 6 missed — defensive error paths)
-```
-
-## Architecture Decisions
-
-- **Separate from pool-level health (BE014)**: `PoolHealthMonitor` (BE014) handles pool-level background monitoring. This `HealthChecker` is server-level, combining pool status with server state machine (STARTING → READY → DRAINING).
-- **State machine for readiness**: `ReadinessState` enum drives the readiness probe. `mark_ready()` called after pool init, `mark_draining()` in lifespan finally block.
-- **No separate HTTP endpoint**: Readiness is exposed via the existing `health_check` MCP tool rather than a separate `/readyz` HTTP route, since the transport layer doesn't have access to lifespan context.
-- **Lazy imports in `__init__.py`**: Used `__getattr__` to avoid circular import issues between observability and server modules.
+### Unchanged (from original implementation)
+- `mcp-server/src/mcp_server/observability/health.py`
+- `mcp-server/src/mcp_server/observability/__init__.py`
+- `mcp-server/src/mcp_server/server.py`
 
 ## Confidence
 
-**HIGH** — All acceptance criteria met, 91% coverage, clean integration with existing server architecture.
+**HIGH** — Minimal rework (2 auto-fixable lint errors). All 25 tests pass, zero lint errors, zero type errors.

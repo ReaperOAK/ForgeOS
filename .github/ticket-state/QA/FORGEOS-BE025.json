@@ -4,7 +4,7 @@
   "description": "Implement health check and readiness probe endpoints for the MCP server. The health check reports overall server status including database connectivity, connection pool health, and active session count. The readiness probe indicates whether the server is ready to accept new requests (database connected, pool initialized, not shutting down). These endpoints are used by Docker health checks and monitoring systems.",
   "type": "backend",
   "priority": "high",
-  "stage": "BACKEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Both endpoints respond within 500ms even under load"
   ],
   "rework_count": 1,
-  "claimed_by": "Backend",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T19:18:16.863614+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -120,6 +120,13 @@
       "from_stage": "VALIDATION",
       "to_stage": "BACKEND",
       "details": "Rework #1: DoD #3 FAIL: 2 ruff lint errors in tests/test_health_probes.py \u2014 I001 (import unsorted at line 9), F401 (unused import Any at line 14). Fix: ruff check --fix tests/test_health_probes.py"
+    },
+    {
+      "timestamp": "2026-03-10T18:51:13.527335+00:00",
+      "event": "STAGE_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "BACKEND rework complete \u2014 fixed 2 lint errors (I001 unsorted imports, F401 unused Any import) in test file. 25 tests pass, 0 lint errors."
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
