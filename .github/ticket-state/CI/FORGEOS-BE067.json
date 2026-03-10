@@ -35,10 +35,10 @@
     "Dead-letter notifications queryable via admin API for manual inspection and replay"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "CI Reviewer",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-11T00:11:44.088043+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -124,6 +124,15 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-10T23:41:44.088060+00:00",
+      "event": "CLAIMED",
+      "agent": "CI Reviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "CI",
+      "details": "Claimed by ReaperOAK@pop-os via CI Reviewer, lease until 2026-03-11T00:11:44.088043+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-webhooks.md",
