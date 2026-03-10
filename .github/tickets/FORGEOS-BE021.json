@@ -36,7 +36,7 @@
   "claimed_by": "QA",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T16:45:30.575539+00:00",
+  "lease_expiry": "2026-03-10T17:12:54.383361+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -62,6 +62,13 @@
     },
     {
       "timestamp": "2026-03-10T16:15:30.575556+00:00",
+      "event": "CLAIMED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "Claimed for QA stage review"
+    },
+    {
+      "timestamp": "2026-03-10T16:42:54.383368+00:00",
       "event": "CLAIMED",
       "agent": "QA",
       "machine_id": "pop-os",
