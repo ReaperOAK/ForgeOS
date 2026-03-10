@@ -4,7 +4,7 @@
   "description": "Create the initial Alembic migration that implements the core tables from the database schema design (ARCH005). Tables include: tickets (with JSONB fields for dependencies, file_paths, acceptance_criteria), claims (linking tickets to agents with lease tracking), agents (agent identity registry), machines (machine identity registry), and operators (human operator registry). Include all primary keys, foreign keys, and NOT NULL constraints.",
   "type": "backend",
   "priority": "critical",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Migration downgrades cleanly, dropping all created tables"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T23:30:00+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -142,6 +142,24 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "DOCS PASS \u2014 Documented machines, operators, claims tables and tickets.created_by in schema-reference.md. Enhanced migration docstrings. CHANGELOG updated. Confidence HIGH."
+    },
+    {
+      "timestamp": "2026-03-10T23:00:00+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by reaperoak@pop-os via Validator, lease until 2026-03-10T23:30:00+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T23:15:00+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "VALIDATION APPROVED (HIGH confidence, 95%). 10/10 DoD pass. 7/7 AC verified. All upstream PASS. 41/41 tests. Ticket advanced to DONE."
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
@@ -154,7 +172,7 @@
     "phase2",
     "BLK-05-01"
   ],
-  "status": "DOCS_COMPLETE",
+  "status": "VALIDATION_APPROVED",
   "completed_at": "2026-03-09T21:02:13.244517+00:00",
   "artifacts": [
     "mcp-server/alembic/versions/20260310_000000_002_core_tables.py",
