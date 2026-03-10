@@ -2845,3 +2845,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE014.md
 - **Decisions:** REJECTED — Lint fails (F401 unused import Any, SIM105 try-except-pass); Type checks fail (3 pyright errors in strict mode: unused import, reportPrivateUsage on _pool._pool, reportUnusedCoroutine). Sent back to BACKEND for remediation.
 - **Timestamp:** 2026-03-10T18:05:00+00:00
+
+### [FORGEOS-BE008] — Lease Heartbeat Mechanism
+- **Artifacts:** mcp-server/src/mcp_server/locking/lease_heartbeat.py, mcp-server/tests/test_lease_heartbeat.py, mcp-server/src/mcp_server/locking/__init__.py
+- **Decisions:** Used _now parameter injection for testability over datetime mocking; PoolLike Protocol for DI consistency with claim_queue; frozen dataclasses with slots=True per codebase convention; error hierarchy under ForgeOSError
+- **Timestamp:** 2026-03-10T18:15:23.349244+00:00
