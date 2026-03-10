@@ -8,6 +8,51 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Notification Channel Configuration** (FORGEOS-BE066) — Configurable
+  notification channels at `mcp-server/src/mcp_server/notifications/channels.py`
+  and `config.py`. Supports webhook (generic HTTP POST) and Slack (Block Kit
+  formatted incoming webhooks) delivery types. `ChannelStore` provides CRUD
+  operations for the `notification_channels` PostgreSQL table with UUID primary
+  keys, JSONB config, and text-array event filters. `ChannelDispatcher` routes
+  notifications to all enabled channels whose event filter matches the event
+  type; delivery failures are isolated per-channel and never block queue
+  processing. `ChannelEnvConfig` loader bootstraps channels from
+  `FORGEOS_CHANNEL_*` environment variables (JSON format) without database
+  access. `ChannelType` enum, `DeliveryResult` class, `WebhookDelivery` and
+  `SlackDelivery` protocol implementations. Alembic migration 006 creates the
+  `notification_channels` table and `channel_type` enum. 62 tests with 93%
+  coverage.
+
+- **Webhook HTTP Receiver Endpoint** (FORGEOS-BE059) — Inbound webhook
+  endpoint at `mcp-server/src/mcp_server/transport/webhooks.py` exposing
+  `POST /api/webhooks/{source}` for external system integration. Validates
+  Content-Type, parses JSON, and runs source-specific payload validation via
+  `WebhookService` at `mcp-server/src/mcp_server/services/webhook_service.py`.
+  Two built-in sources: `github` (requires `action` field, reads
+  `X-GitHub-Event` header) and `custom` (requires `event_type` field).
+  Returns 202 Accepted immediately and dispatches processing as a background
+  `asyncio.Task`. Handler registry maps (source, event_type) pairs to async
+  handlers with per-source default fallbacks. Domain types: `WebhookEvent`
+  frozen dataclass, `WebhookSource` enum, `WebhookHandler` type alias.
+  Error hierarchy: `WebhookValidationError`, `UnknownSourceError`. 48 tests
+  with 98% coverage. Added Webhook Receiver section to `mcp-server/README.md`.
+
+- **Comprehensive Audit Logging** (FORGEOS-BE058) — Append-only audit trail
+  for all authenticated MCP tool calls and REST API requests at
+  `mcp-server/src/mcp_server/services/audit_service.py`,
+  `mcp-server/src/mcp_server/repositories/audit_repo.py`, and
+  `mcp-server/src/mcp_server/middleware/audit_middleware.py`. Each entry
+  records identity (agent/operator/admin), operation, target resource,
+  result (success/failure), source machine, and JSONB metadata (HTTP status,
+  duration). `AuditMiddleware` (Starlette) auto-logs every authenticated
+  request; `AuditService` provides explicit logging for tool handlers.
+  `AuditRepository` enforces append-only semantics — no UPDATE or DELETE.
+  Alembic migration 006 creates the `audit_log` table with indexes on
+  `identity_id`, `identity_type`, `operation`, and `timestamp`. Query and
+  count methods support filters by identity, operation, and time range with
+  a 1000-row limit cap. 49 tests with 92% coverage. Added Audit Logging
+  section to `mcp-server/README.md`.
+
 - **Ticket Tools — `tickets.next` MCP Tool** (FORGEOS-BE028) — MCP tool
   handler at `mcp-server/src/mcp_server/tools/ticket_tools.py` that allows
   agents to claim the next available ticket matching their role. Accepts

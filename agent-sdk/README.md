@@ -21,6 +21,7 @@ The SDK reads configuration from environment variables with the `FORGEOS_` prefi
 | `FORGEOS_SERVER_URL` | MCP server endpoint | `http://localhost:8080/mcp` |
 | `FORGEOS_AGENT_ID` | Agent identifier | `unknown-agent` |
 | `FORGEOS_TRANSPORT` | Transport type (`streamable-http`, `sse`, `stdio`) | `streamable-http` |
+| `FORGEOS_API_KEY` | API key for authentication | `None` (optional) |
 
 ## Usage
 
@@ -118,6 +119,10 @@ All exceptions inherit from `ForgeOSError`:
 | `ConfigurationError` | Invalid or missing configuration |
 | `AuthenticationError` | Agent authentication failed |
 | `ToolCallError` | MCP tool call failed |
+| `ClaimConflictError` | Claim failed — another agent holds the ticket |
+| `LeaseExpiredError` | Operation failed — claim lease expired |
+| `InvalidTransitionError` | Invalid SDLC stage transition |
+| `NetworkError` | Connection failure with optional retry hint |
 
 ## Development
 
