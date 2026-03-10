@@ -14,19 +14,20 @@ from __future__ import annotations
 import enum
 from contextvars import ContextVar
 from dataclasses import dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 from starlette.middleware.base import BaseHTTPMiddleware
-from starlette.requests import Request
 from starlette.responses import JSONResponse
-from starlette.types import ASGIApp
 
 from mcp_server.auth.agent_auth import (
     AgentIdentity,
     AuthenticationError,
-    RateLimiter,
     validate_api_key,
 )
+
+if TYPE_CHECKING:
+    from starlette.requests import Request
+    from starlette.types import ASGIApp
 from mcp_server.observability import get_logger
 
 logger = get_logger("auth_middleware")
@@ -216,7 +217,7 @@ class AuthMiddleware(BaseHTTPMiddleware):
         """Set the database connection pool."""
         self._db_pool = pool
 
-    async def dispatch(self, request: Request, call_next):  # noqa: ANN001
+    async def dispatch(self, request: Request, call_next):  # type: ignore[override]
         """Process authentication for each request."""
         path = request.url.path.rstrip("/")
         if not path:
