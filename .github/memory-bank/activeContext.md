@@ -2705,3 +2705,28 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/tests/test_health.py (expanded 30→56 tests), .github/agent-output/QA/FORGEOS-BE014.md
 - **Decisions:** Added 26 mutation-killing tests covering arithmetic, boundary, state transition, and exception handler mutations. Manual mutation analysis (22/22 killed) due to mutmut v3 infra incompatibility. Coverage improved 96%→99%.
 - **Timestamp:** 2026-03-10T16:00:00Z
+
+### [FORGEOS-BE064] — QA PASS
+- **Artifacts:** mcp-server/tests/test_notification_queue.py (44 tests), .github/agent-output/QA/FORGEOS-BE064.md
+- **Decisions:** PASS verdict — 44 tests passing, 94% branch coverage (109 stmts, 22 branches). All 6 acceptance criteria verified: Alembic migration with all columns, enqueue with pending+JSONB, dequeue with FOR UPDATE SKIP LOCKED, status transition enforcement via _VALID_TRANSITIONS, exponential backoff retry (10*2^n capped 3600s) with dead-letter, partial index on (status, next_retry_at). 4 uncovered lines are defensive TOCTOU guards (acceptable). No TODO, no print(), no sleep(), parameterized SQL only.
+- **Timestamp:** 2026-03-10T17:00:00Z
+
+### FORGEOS-BE025 — QA PASS: Health Check and Readiness Probes
+- **Artifacts:** mcp-server/src/mcp_server/observability/health.py, mcp-server/tests/test_health_probes.py
+- **Decisions:** QA PASS — 25/25 tests pass, 91% coverage, 0 defects. All 6 AC verified.
+- **Timestamp:** 2026-03-10T16:47:17.671764+00:00
+
+### [FORGEOS-BE014] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE014.md
+- **Decisions:** PASS — STRIDE max score 4 (LOW), OWASP 10/10 categories clear, zero critical/high/medium findings. Health metrics are standard operational telemetry (no PII/creds). Frozen dataclass ensures immutability. O(1) in-memory health endpoint, no DoS vectors. Zero external deps introduced.
+- **Timestamp:** 2026-03-10T18:30:00+00:00
+
+### [FORGEOS-BE013] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE013.md
+- **Decisions:** PASS (HIGH confidence) — STRIDE max score 6 (LOW), OWASP 10/10 PASS, 0 SARIF findings. All 14 SQL queries use parameterized $N placeholders — zero injection vectors. Atomic claim via UPDATE WHERE claimed_by IS NULL prevents races. Frozen dataclasses prevent post-read mutation. No mass assignment, no IDOR, no information disclosure. 1 external dep (asyncpg), 0 CVEs.
+- **Timestamp:** 2026-03-10T22:00:00Z
+
+### [FORGEOS-BE043] — QA PASS: forgeos-agent-sdk Package Structure
+- **Artifacts:** agent-sdk/pyproject.toml, agent-sdk/src/forgeos_sdk/__init__.py, client.py, config.py, exceptions.py, agent-sdk/tests/test_client.py, test_config.py, test_exceptions.py
+- **Decisions:** QA PASS — 44/44 tests pass, 100% coverage (64 stmts, 0 missed). All 6 ACs verified. No defects found. 1 cosmetic ruff warning (UP045 Optional→union). Structured logging only, no TODO/FIXME. Clean exception hierarchy. Ticket advanced to SECURITY.
+- **Timestamp:** 2026-03-10T22:00:00Z
