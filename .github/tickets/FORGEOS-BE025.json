@@ -4,7 +4,7 @@
   "description": "Implement health check and readiness probe endpoints for the MCP server. The health check reports overall server status including database connectivity, connection pool health, and active session count. The readiness probe indicates whether the server is ready to accept new requests (database connected, pool initialized, not shutting down). These endpoints are used by Docker health checks and monitoring systems.",
   "type": "backend",
   "priority": "high",
-  "stage": "VALIDATION",
+  "stage": "BACKEND",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -33,11 +33,11 @@
     "Health check includes connection pool saturation metrics",
     "Both endpoints respond within 500ms even under load"
   ],
-  "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T18:31:44.199302+00:00",
+  "rework_count": 1,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -111,6 +111,15 @@
       "agent": "Validator",
       "machine_id": "pop-os",
       "details": "CLAIM by Validator on pop-os (ReaperOAK)"
+    },
+    {
+      "timestamp": "2026-03-10T18:09:19.605395+00:00",
+      "event": "REWORK",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "BACKEND",
+      "details": "Rework #1: DoD #3 FAIL: 2 ruff lint errors in tests/test_health_probes.py \u2014 I001 (import unsorted at line 9), F401 (unused import Any at line 14). Fix: ruff check --fix tests/test_health_probes.py"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
