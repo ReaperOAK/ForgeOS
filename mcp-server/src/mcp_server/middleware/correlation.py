@@ -23,7 +23,7 @@ Architecture
 
 .. meta::
    :ticket: FORGEOS-BE019
-   :last_reviewed: 2025-07-18T10:30:00Z
+   :last_reviewed: 2026-03-10T23:00:00Z
 """
 
 from __future__ import annotations
