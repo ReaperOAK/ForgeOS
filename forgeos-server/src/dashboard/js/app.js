@@ -33,24 +33,24 @@ const STAGES_BOTTOM = ['DOCS', 'VALIDATION', 'DONE', 'ESCALATED'];
 const ALL_STAGES = [...STAGES_MAIN, ...STAGES_BOTTOM];
 
 const TYPE_COLORS = {
-  backend:      '#3B82F6',
-  frontend:     '#14B8A6',
-  fullstack:    '#8B5CF6',
-  infra:        '#64748B',
-  security:     '#EF4444',
-  docs:         '#64748B',
-  research:     '#A855F7',
+  backend: '#3B82F6',
+  frontend: '#14B8A6',
+  fullstack: '#8B5CF6',
+  infra: '#64748B',
+  security: '#EF4444',
+  docs: '#64748B',
+  research: '#A855F7',
   architecture: '#8B5CF6'
 };
 
 const TYPE_LABELS = {
-  backend:      'backend',
-  frontend:     'frontend',
-  fullstack:    'fullstack',
-  infra:        'infra',
-  security:     'security',
-  docs:         'docs',
-  research:     'research',
+  backend: 'backend',
+  frontend: 'frontend',
+  fullstack: 'fullstack',
+  infra: 'infra',
+  security: 'security',
+  docs: 'docs',
+  research: 'research',
   architecture: 'arch'
 };
 
@@ -62,12 +62,12 @@ const MACHINE_PALETTE = [
 ];
 
 const EVENT_DOT_COLORS = {
-  CLAIM:    'var(--color-warning)',
-  ADVANCE:  'var(--color-success)',
-  REWORK:   'var(--color-error)',
-  RELEASE:  'var(--color-info)',
-  CREATE:   'var(--color-primary)',
-  UPDATE:   'var(--color-secondary)'
+  CLAIM: 'var(--color-warning)',
+  ADVANCE: 'var(--color-success)',
+  REWORK: 'var(--color-error)',
+  RELEASE: 'var(--color-info)',
+  CREATE: 'var(--color-primary)',
+  UPDATE: 'var(--color-secondary)'
 };
 
 /** SSE backoff cap in ms */
@@ -216,6 +216,10 @@ function cacheDom() {
    UTILITIES
    ═══════════════════════════════════════════════════════════ */
 
+/**
+ * Announce a message to screen readers via ARIA live region.
+ * @param {string} message - Text content for the announcement.
+ */
 function announce(message) {
   if (dom.liveAnnouncer) {
     dom.liveAnnouncer.textContent = '';
@@ -225,6 +229,11 @@ function announce(message) {
   }
 }
 
+/**
+ * Generate a simple numeric hash from a string (DJB2 algorithm).
+ * @param {string} str - The input string to hash.
+ * @returns {number} A positive integer hash value.
+ */
 function hashString(str) {
   let hash = 0;
   for (let i = 0; i < str.length; i++) {
@@ -234,17 +243,32 @@ function hashString(str) {
   return Math.abs(hash);
 }
 
+/**
+ * Derive a consistent HSL color from a machine hostname.
+ * @param {string} hostname - The machine hostname.
+ * @returns {string} An HSL color string.
+ */
 function getMachineColor(hostname) {
   if (!hostname) return MACHINE_PALETTE[0];
   return MACHINE_PALETTE[hashString(hostname) % MACHINE_PALETTE.length];
 }
 
+/**
+ * Escape HTML special characters to prevent XSS.
+ * @param {string} str - Raw string that may contain HTML.
+ * @returns {string} Escaped string safe for innerHTML.
+ */
 function escapeHtml(str) {
   const div = document.createElement('div');
   div.textContent = str || '';
   return div.innerHTML;
 }
 
+/**
+ * Format a duration in milliseconds to a human-readable string.
+ * @param {number} ms - Duration in milliseconds.
+ * @returns {string} Formatted duration (e.g. "2h 15m", "45s").
+ */
 function formatDuration(ms) {
   if (!ms || ms < 0) return '—';
   const totalSeconds = Math.floor(ms / 1000);
@@ -258,6 +282,11 @@ function formatDuration(ms) {
   return `${seconds}s`;
 }
 
+/**
+ * Format an ISO 8601 timestamp as a relative time string.
+ * @param {string} isoString - ISO 8601 date string.
+ * @returns {string} Relative time (e.g. "5m ago", "2h ago").
+ */
 function formatRelativeTime(isoString) {
   if (!isoString) return '—';
   const date = new Date(isoString);
@@ -266,6 +295,11 @@ function formatRelativeTime(isoString) {
   return formatDuration(diff) + ' ago';
 }
 
+/**
+ * Calculate and format lease time remaining from an expiry timestamp.
+ * @param {string} leaseExpiry - ISO 8601 lease expiry timestamp.
+ * @returns {string} Formatted remaining time or "EXPIRED".
+ */
 function formatLeaseRemaining(leaseExpiry) {
   if (!leaseExpiry) return '—';
   const expiry = new Date(leaseExpiry).getTime();
@@ -275,6 +309,11 @@ function formatLeaseRemaining(leaseExpiry) {
   return formatDuration(remaining);
 }
 
+/**
+ * Format an ISO 8601 timestamp for display with date and time.
+ * @param {string} isoString - ISO 8601 date string.
+ * @returns {string} Formatted date string (e.g. "Mar 10, 2026, 2:30 PM").
+ */
 function formatTimestamp(isoString) {
   if (!isoString) return '—';
   const date = new Date(isoString);
@@ -288,6 +327,11 @@ function formatTimestamp(isoString) {
   });
 }
 
+/**
+ * Determine the claim status of a ticket based on lease expiry.
+ * @param {Object} ticket - Ticket object with lease metadata.
+ * @returns {string} Status string: "active", "expiring", "expired", or "unclaimed".
+ */
 function getClaimStatus(ticket) {
   if (!ticket.claimed_by) return 'unclaimed';
   if (!ticket.lease_expiry) return 'claimed';
@@ -299,6 +343,12 @@ function getClaimStatus(ticket) {
   return 'claimed';
 }
 
+/**
+ * Create a debounced version of a function that delays invocation.
+ * @param {Function} fn - The function to debounce.
+ * @param {number} ms - Delay in milliseconds.
+ * @returns {Function} Debounced function.
+ */
 function debounce(fn, ms) {
   let timer;
   return function (...args) {
@@ -311,6 +361,12 @@ function debounce(fn, ms) {
    API
    ═══════════════════════════════════════════════════════════ */
 
+/**
+ * Fetch JSON data from a URL with error handling.
+ * @param {string} url - The API endpoint URL.
+ * @returns {Promise<Object>} Parsed JSON response.
+ * @throws {Error} If the fetch fails or response is not OK.
+ */
 async function fetchJSON(url) {
   const response = await fetch(url);
   if (!response.ok) {
@@ -319,6 +375,11 @@ async function fetchJSON(url) {
   return response.json();
 }
 
+/**
+ * Fetch tickets from the REST API with optional query filters.
+ * @param {Object} [filters] - Filter parameters (stage, type, priority).
+ * @returns {Promise<Array>} Array of ticket objects.
+ */
 async function fetchTickets(filters) {
   const params = new URLSearchParams();
   if (filters.stage) params.set('stage', filters.stage);
@@ -332,15 +393,29 @@ async function fetchTickets(filters) {
   return result.data || [];
 }
 
+/**
+ * Fetch stage definitions and statistics from the REST API.
+ * @returns {Promise<Array>} Array of stage objects with ticket counts.
+ */
 async function fetchStages() {
   const result = await fetchJSON('/api/stages');
   return result.stages || {};
 }
 
+/**
+ * Fetch detailed information for a single ticket.
+ * @param {string} ticketId - The ticket identifier.
+ * @returns {Promise<Object>} Detailed ticket object.
+ */
 async function fetchTicketDetail(ticketId) {
   return fetchJSON(`/api/tickets/${encodeURIComponent(ticketId)}`);
 }
 
+/**
+ * Fetch the event history for a single ticket.
+ * @param {string} ticketId - The ticket identifier.
+ * @returns {Promise<Array>} Array of history event objects.
+ */
 async function fetchTicketHistory(ticketId) {
   const result = await fetchJSON(`/api/tickets/${encodeURIComponent(ticketId)}/history`);
   return result.events || [];
@@ -483,6 +558,10 @@ function reconnectSSE() {
   connectSSE();
 }
 
+/**
+ * Process an incoming ticket update from SSE and merge into local state.
+ * @param {Object} data - Ticket update payload from SSE event.
+ */
 function handleTicketUpdate(data) {
   var ticket = data.ticket || data;
   if (!ticket.id) return;
@@ -502,6 +581,10 @@ function handleTicketUpdate(data) {
   }
 }
 
+/**
+ * Update the connection status indicator in the UI.
+ * @param {string} status - Connection status: "connected", "connecting", or "disconnected".
+ */
 function updateConnectionStatus(status) {
   if (!dom.statusDot || !dom.statusLabel) return;
 
@@ -551,6 +634,11 @@ function ensureBannerElement() {
   dom.connectionBanner = banner;
 }
 
+/**
+ * Display a notification banner with auto-dismiss delay.
+ * @param {Object} bannerState - Banner configuration with message and type.
+ * @param {number} [delaySec] - Auto-dismiss delay in seconds.
+ */
 function showBanner(bannerState, delaySec) {
   ensureBannerElement();
   var banner = dom.connectionBanner;
@@ -615,6 +703,11 @@ function syncFiltersToDOM() {
   if (dom.filterSearch) dom.filterSearch.value = state.filters.search;
 }
 
+/**
+ * Filter an array of tickets based on currently active filter selections.
+ * @param {Array} tickets - Array of ticket objects to filter.
+ * @returns {Array} Filtered array of tickets matching all active filters.
+ */
 function applyFilters(tickets) {
   return tickets.filter(t => {
     if (state.filters.stage && t.stage !== state.filters.stage) return false;
@@ -632,6 +725,9 @@ function applyFilters(tickets) {
   });
 }
 
+/**
+ * Handle filter control changes by re-rendering the board with filtered data.
+ */
 function onFilterChange() {
   state.filters.stage = dom.filterStage?.value || '';
   state.filters.type = dom.filterType?.value || '';
@@ -657,6 +753,11 @@ function clearAllFilters() {
    RENDERING — TICKET CARDS
    ═══════════════════════════════════════════════════════════ */
 
+/**
+ * Create a DOM element representing a ticket card for the Kanban board.
+ * @param {Object} ticket - Ticket data object.
+ * @returns {HTMLElement} The constructed card element.
+ */
 function createTicketCard(ticket) {
   const template = dom.ticketTemplate;
   if (!template) return null;
@@ -798,6 +899,9 @@ function createSkeletonCard() {
    RENDERING — KANBAN BOARD
    ═══════════════════════════════════════════════════════════ */
 
+/**
+ * Render the full Kanban board by applying filters and populating all stage columns.
+ */
 function renderBoard() {
   const filtered = applyFilters(state.tickets);
 
@@ -809,6 +913,11 @@ function renderBoard() {
   updateBottomRow(filtered);
 }
 
+/**
+ * Render a single stage column with its filtered ticket cards.
+ * @param {string} stage - The stage name (e.g. "READY", "BACKEND").
+ * @param {Array} filteredTickets - Tickets to display in this column.
+ */
 function renderColumn(stage, filteredTickets) {
   const col = document.getElementById(`col-${stage}`);
   if (!col) return;
@@ -902,6 +1011,10 @@ function updateMetrics() {
    TICKET DETAIL — SLIDE-OVER
    ═══════════════════════════════════════════════════════════ */
 
+/**
+ * Open the slide-over detail panel for a specific ticket.
+ * @param {string} ticketId - The ticket identifier to display.
+ */
 async function openTicketDetail(ticketId) {
   if (!ticketId) return;
 
@@ -941,6 +1054,11 @@ async function loadTicketDetail(ticketId) {
   }
 }
 
+/**
+ * Render the ticket detail panel content with tabs.
+ * @param {Object} ticket - Full ticket data object.
+ * @param {Array} history - Array of ticket history events.
+ */
 function renderDetailPanel(ticket, history) {
   if (!dom.detailTicketId) return;
 
@@ -1335,6 +1453,10 @@ async function copyToClipboard(text) {
   }
 }
 
+/**
+ * Display a temporary toast notification at the bottom of the screen.
+ * @param {string} message - Toast message text.
+ */
 function showToast(message) {
   let toast = document.querySelector('.toast');
   if (toast) toast.remove();
@@ -1502,6 +1624,10 @@ function handleSlideOverKeyDown(e) {
    TAB NAVIGATION — TOP BAR VIEWS
    ═══════════════════════════════════════════════════════════ */
 
+/**
+ * Switch between dashboard views (pipeline, graph, admin).
+ * @param {string} viewName - Target view name to activate.
+ */
 function switchView(viewName) {
   dom.tabButtons.forEach(tab => {
     const isActive = tab.dataset.view === viewName;
@@ -1826,6 +1952,12 @@ function initAuthBadge() {
    CONFIRMATION MODAL
    ═══════════════════════════════════════════════════════════ */
 
+/**
+ * Open a confirmation dialog with accept/cancel actions.
+ * @param {string} title - Modal title text.
+ * @param {string} description - Descriptive body text.
+ * @param {Function} callback - Function invoked on confirmation.
+ */
 function openConfirmationModal(title, description, callback) {
   if (!dom.confirmModal || !dom.confirmScrim) return;
   state.workbench.previousFocus = document.activeElement;
@@ -1887,6 +2019,11 @@ function initConfirmationModal() {
    CLAIMS MONITOR — UTILITIES
    ═══════════════════════════════════════════════════════════ */
 
+/**
+ * Format a lease countdown value as MM:SS or EXPIRED.
+ * @param {number} totalSeconds - Remaining seconds on the lease.
+ * @returns {string} Formatted countdown string.
+ */
 function formatLeaseCountdown(totalSeconds) {
   if (totalSeconds <= 0) return 'EXPIRED';
   const m = Math.floor(totalSeconds / 60);
@@ -1894,6 +2031,11 @@ function formatLeaseCountdown(totalSeconds) {
   return `${m < 10 ? '0' : ''}${m}:${s < 10 ? '0' : ''}${s}`;
 }
 
+/**
+ * Determine urgency level based on remaining lease seconds.
+ * @param {number} seconds - Remaining lease time in seconds.
+ * @returns {string} Urgency level: "ok", "warning", or "critical".
+ */
 function getLeaseUrgency(seconds) {
   if (seconds <= 0) return 'expired';
   if (seconds <= 60) return 'critical';
