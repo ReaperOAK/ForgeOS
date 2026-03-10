@@ -4,7 +4,7 @@
   "description": "Create unified authentication middleware that intercepts both MCP tool calls and REST API requests. For MCP, extract the API key from the request metadata and validate agent identity. For REST, extract the bearer token from the Authorization header and validate operator identity. The middleware populates a request context with the authenticated identity for downstream use by authorization and audit layers.",
   "type": "backend",
   "priority": "critical",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -143,6 +143,15 @@
       "from_stage": "QA",
       "to_stage": "SECURITY",
       "details": "Advanced from QA to SECURITY"
+    },
+    {
+      "timestamp": "2026-03-10T19:36:49.848041+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
