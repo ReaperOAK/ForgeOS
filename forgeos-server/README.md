@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-10T18:10:00Z -->
+<!-- last_reviewed: 2026-03-11T01:00:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -1217,6 +1217,89 @@ is clamped to 5–120 and defaults to 30 when omitted.
 | `src/tools/tickets-extend.ts` | Zod schema, handler, types |
 | `src/tools/index.ts` | Tool registration on McpServer |
 
+## Agent-Runner SDK
+
+TypeScript wrapper that agents import to execute the two-commit protocol
+safely. Calls MCP tools over HTTP first; falls back to `tickets.py` CLI
+when the server is unreachable.
+
+### Quick Start
+
+```ts
+import { AgentRunner } from './sdk/agent-runner.js';
+
+const runner = new AgentRunner();
+
+// 1. Claim
+const claim = await runner.claimTicket(
+  'TASK-001', 'Backend', 'pop-os', 'reaperoak'
+);
+
+// 2. Do work ...
+
+// 3. Complete
+await runner.completeStage('TASK-001', 'Backend', {
+  artifacts: ['src/api/handler.ts'],
+  test_results: '32 passed',
+  confidence: 'HIGH',
+});
+```
+
+### Configuration
+
+All values are read from environment variables and validated with Zod on first use.
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FORGEOS_MCP_URL` | `http://localhost:3000/mcp` | MCP server endpoint |
+| `FORGEOS_API_KEY` | *(required)* | Bearer token for MCP auth |
+| `FORGEOS_FALLBACK_ENABLED` | `true` | Enable `tickets.py` CLI fallback |
+| `FORGEOS_TICKETS_PY_PATH` | `.github/tickets.py` | Path to CLI script |
+| `FORGEOS_MCP_TIMEOUT_MS` | `10000` | HTTP timeout (1000-60000 ms) |
+| `FORGEOS_WORKSPACE_PATH` | `process.cwd()` | Workspace root for CLI |
+
+### Public API
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `claimTicket(id, agent, machine, operator)` | `ClaimResult` | Acquire distributed lock |
+| `completeStage(id, agent, evidence)` | `CompleteResult` | Mark stage done, advance |
+| `releaseTicket(id, agent)` | `ReleaseResult` | Release claim without completing |
+| `pushWork(files)` | `void` | Stage files explicitly (rejects forbidden patterns) |
+| `validateGitAddPatterns(args)` | `void` | Throw if args match `git add .` / `-A` / `--all` |
+| `validateScope(files, allowed)` | `void` | Throw if any file is outside allowed paths |
+
+Each result carries a `source` field (`'mcp'` or `'fallback'`) so callers know which path was taken.
+
+### Error Classes
+
+| Class | Trigger |
+|-------|---------|
+| `ForbiddenGitAddError` | `git add .`, `git add -A`, `git add --all`, `git add -a` |
+| `ScopeViolationError` | Staged file outside ticket `file_paths` |
+| `TicketOperationError` | Both MCP call and CLI fallback failed |
+
+### Fallback Behavior
+
+When `FORGEOS_FALLBACK_ENABLED` is `true` (default) and the MCP server is
+unreachable or returns an error, the runner shells out to `tickets.py`:
+
+```
+claimTicket   -> python3 tickets.py --claim <id> <agent> <machine> <operator>
+completeStage -> python3 tickets.py --advance <id> <agent>
+releaseTicket -> python3 tickets.py --release <id>
+```
+
+If fallback is disabled or the CLI also fails, a `TicketOperationError` is
+thrown with details from both attempts.
+
+### Implementation Files
+
+| File | Purpose |
+|------|---------|
+| `src/sdk/agent-runner.ts` | AgentRunner class, error classes, result types |
+| `src/sdk/config.ts` | `loadSdkConfig()`, `FORBIDDEN_GIT_ADD_PATTERNS` |
+
 ## Git Hooks
 
 The repository uses [Husky](https://typicode.github.io/husky/) to enforce
@@ -1348,6 +1431,9 @@ src/
 │   └── validation.ts   # Zod schema validation (body, query, params)
 ├── tools/
 │   └── index.ts        # MCP tool registration hub (10 tools)
+├── sdk/
+│   ├── agent-runner.ts # Agent-Runner wrapper
+│   └── config.ts       # Zod-validated SDK configuration
 ├── types/
 │   └── index.ts        # TypeScript interfaces matching the PostgreSQL schema
 └── dashboard/
