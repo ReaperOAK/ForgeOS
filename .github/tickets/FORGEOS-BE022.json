@@ -4,7 +4,7 @@
   "description": "Implement agent session management for the MCP server. Each connecting agent establishes a session that tracks its identity (agent name, role, machine_id), connection state, and associated claims. Sessions support heartbeat tracking (is the agent still connected?), timeout handling (auto-cleanup after disconnect), and resumption after transient disconnects.",
   "type": "backend",
   "priority": "critical",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Session manager tracks all active sessions and provides listing for admin/monitoring"
   ],
   "rework_count": 0,
-  "claimed_by": "CIReviewer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T18:02:53.802937+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -131,5 +131,6 @@
     "lifecycle",
     "phase2",
     "BLK-04-02"
-  ]
+  ],
+  "claimed_at": null
 }
