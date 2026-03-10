@@ -4,7 +4,7 @@
   "description": "Implement the dashboard's JavaScript logic as vanilla JS (no framework). app.js initializes the SSE connection (EventSource), handles reconnection on disconnect, and dispatches events to view modules. pipeline.js renders and updates the Kanban pipeline board: fetches initial state from REST API, builds card DOM elements, updates cards on SSE events, manages lease countdown timers (updating every second), and implements filter logic. admin.js provides admin panel functionality: force-release button with confirmation dialog, machine status list with health indicators (active/stale/offline based on last_seen), and system health metrics display. All modules use event delegation for performance.",
   "type": "frontend",
   "priority": "high",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -41,10 +41,10 @@
     "No external JavaScript dependencies (except D3.js via CDN for graph view)"
   ],
   "rework_count": 0,
-  "claimed_by": "CIReviewer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T09:59:32.536116+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -126,6 +126,15 @@
       "agent": "CIReviewer",
       "machine_id": "pop-os",
       "details": "Claimed by CIReviewer for CI review stage"
+    },
+    {
+      "timestamp": "2026-03-10T12:45:00Z",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "CI PASS — Score 81/100, 0 critical, 3 warnings, 4 suggestions. Advanced CI → DOCS."
     }
   ],
   "source_task_file": "TODO/tickets/05-dashboard.md",
