@@ -33,10 +33,10 @@
     "Returns {ticket, new_lease_expiry: ISO8601 string} on success"
   ],
   "rework_count": 1,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Validator",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T13:11:44.374657+00:00",
   "lease_duration_minutes": null,
   "history": [
     {
@@ -149,7 +149,14 @@
       "machine_id": "pop-os",
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
-      "details": "DOCS PASS — Fixed 6 inaccuracies in mcp-tool-definitions.md §4.9, added tickets.extend README section, CHANGELOG entry. Advanced DOCS -> VALIDATION."
+      "details": "DOCS PASS \u2014 Fixed 6 inaccuracies in mcp-tool-definitions.md \u00a74.9, added tickets.extend README section, CHANGELOG entry. Advanced DOCS -> VALIDATION."
+    },
+    {
+      "timestamp": "2026-03-10T12:41:44.374677+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "details": "Claimed by Validator on pop-os (reaperoak)"
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
