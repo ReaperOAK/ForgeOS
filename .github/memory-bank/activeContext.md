@@ -3420,3 +3420,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/api/schemas.py, mcp-server/src/mcp_server/api/routes/__init__.py, mcp-server/src/mcp_server/api/routes/tickets.py, mcp-server/tests/test_ticket_list_api.py
 - **Decisions:** Chose offset/limit pagination over cursor-based for simplicity. Validated filter enums against DB schema values client-side before query. Used same late-binding repo ref pattern as audit endpoint.
 - **Timestamp:** 2026-03-11T04:15:00Z
+
+### [FORGEOS-BE055] — BACKEND Complete
+- **Artifacts:** mcp-server/src/mcp_server/auth/authorization.py (RoleStagePolicy, check_role_stage_authorization, RoleStageMismatchError, OPERATOR_ROLE), mcp-server/src/mcp_server/services/ticket_service.py (claim_next role_override/target_stage), mcp-server/src/mcp_server/auth/__init__.py (exports), mcp-server/tests/test_role_stage_authorization.py (54 tests)
+- **Decisions:** Configurable RoleStagePolicy with 14-role default map; operator/admin bypass without override; 403 RoleStageMismatchError on mismatch; role_override param for cross-stage claims; integrated at TicketService layer for MCP+REST coverage
+- **Timestamp:** 2025-07-18T12:00:00Z
