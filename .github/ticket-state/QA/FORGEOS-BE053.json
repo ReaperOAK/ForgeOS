@@ -4,7 +4,7 @@
   "description": "Implement operator (human) authentication using token-based auth (JWT or simple bearer tokens). Operators authenticate via the REST API to perform dashboard actions. Implement token generation on login, token validation on each request, token expiry, and token refresh. Operator records are stored in the operators table from FORGEOS-BE002.",
   "type": "backend",
   "priority": "high",
-  "stage": "BACKEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -60,6 +60,13 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "Claimed by Backend agent for BACKEND stage"
+    },
+    {
+      "timestamp": "2026-03-10T15:33:08+00:00",
+      "event": "STAGE_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "BACKEND complete — operator token auth implemented with JWT/bcrypt, 62 tests, 97% coverage"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
