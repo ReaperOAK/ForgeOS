@@ -8,6 +8,45 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Database Seed Script** (FORGEOS-BE005) — Standalone Python CLI at
+  `database/seed.py` that imports ticket JSON files from `.github/tickets/`
+  (or a custom source) into the PostgreSQL `tickets` table.  Features
+  include multi-field validation against the ticket schema, JSON-to-DB
+  stage mapping (e.g. `DOCS` to `DOCUMENTATION`), upsert semantics that
+  skip duplicates with a warning, `--dry-run` mode for validation without
+  writes, configurable `--source` (file or directory) and `--database-url`,
+  and structured logging with per-ticket import/skip/fail reporting.
+  Sample data at `database/seed_data/sample_tickets.json` provides 7
+  representative tickets across 6 types for development environments.
+  68 tests with 95 percent coverage.
+
+- **Tri-Modal Backward Compatibility Bridge** (TASK-FOS-07-004) — Added
+  `FORGEOS_MODE` environment variable to `.github/tickets.py` enabling three
+  operational modes for gradual migration from filesystem to MCP server:
+  `"filesystem"` (default, preserves existing behavior), `"dual"` (writes to
+  both filesystem and MCP, logs divergences), and `"mcp"` (MCP-only). New
+  `MCPClient` class provides HTTP JSON-RPC communication with the ForgeOS MCP
+  Server for `tickets.claim`, `tickets.complete`, and `tickets.release`
+  operations. Mode-aware dispatch functions (`dispatch_claim`,
+  `dispatch_advance`, `dispatch_release`) route operations based on
+  `FORGEOS_MODE`. In dual mode, shadow comparison logs divergences at WARNING
+  level without failing the operation. MCP unreachability in dual mode falls
+  back to filesystem-only with a warning.
+
+- **Agent API Key Authentication** (FORGEOS-BE051) — API key validation,
+  generation, and identity resolution for MCP agents
+  (`mcp_server/auth/agent_auth.py`). Keys use `fgos_` prefix with 256-bit
+  entropy, stored as SHA-256 hashes with prefix-indexed lookups. Validation
+  flow: format check → in-memory rate limiting (60 req/min token bucket) →
+  prefix DB lookup → constant-time hash comparison (`hmac.compare_digest`) →
+  revocation/expiry/agent-status checks. Returns `AgentIdentity` dataclass
+  with `agent_id`, `agent_name`, `role`, and `permissions`. Includes
+  `create_api_key_for_agent()` for key provisioning, `revoke_api_key()` for
+  revocation, and structured audit logging for all auth events. Added
+  Authentication section to `mcp-server/README.md` with authentication flow
+  diagram, key storage schema, rate limiting configuration, key management
+  examples, audit log events, and public API reference.
+
 - **Structured JSON Logging** (FORGEOS-BE024) — Production-grade structured
   logging module for the Python MCP server (`mcp_server/observability/`). All
   log output is machine-parseable JSON with consistent fields: `timestamp`,
