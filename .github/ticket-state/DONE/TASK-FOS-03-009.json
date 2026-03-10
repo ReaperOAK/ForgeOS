@@ -159,16 +159,23 @@
       "details": "Claimed by Validator on pop-os (reaperoak)"
     },
     {
-      "timestamp": "2026-03-10T12:43:05.232654+00:00",
+      "timestamp": "2026-03-10T12:46:33.897408+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "details": "Claimed by Validator on pop-os (reaperoak)"
+    },
+    {
+      "timestamp": "2026-03-10T12:46:33.897417+00:00",
       "event": "STAGE_COMPLETED",
       "agent": "Validator",
       "machine_id": "pop-os",
       "from_stage": "VALIDATION",
       "to_stage": "DONE",
-      "details": "APPROVED \u2014 All DoD items pass. Advanced VALIDATION -> DONE."
+      "details": "APPROVED - All DoD items pass. Advanced VALIDATION -> DONE."
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
   "tags": [],
-  "completed_at": "2026-03-10T12:43:05.232641+00:00"
+  "completed_at": "2026-03-10T12:46:33.897391+00:00"
 }

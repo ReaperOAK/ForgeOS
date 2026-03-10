@@ -4,7 +4,7 @@
   "description": "Implement the tickets.extend MCP tool that extends the lease on a claimed ticket to prevent expiry during long operations. Uses the extend_lease SQL function. Validates that the caller is the claim owner, that the requested duration doesn't exceed the system's max_lease_minutes config (default 120), and updates lease_expiry to NOW() + duration. Records a LEASE_EXTENDED event.",
   "type": "backend",
   "priority": "high",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -33,10 +33,10 @@
     "Returns {ticket, new_lease_expiry: ISO8601 string} on success"
   ],
   "rework_count": 1,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T13:11:44.374657+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": null,
   "history": [
     {
@@ -157,8 +157,25 @@
       "agent": "Validator",
       "machine_id": "pop-os",
       "details": "Claimed by Validator on pop-os (reaperoak)"
+    },
+    {
+      "timestamp": "2026-03-10T12:46:33.897408+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "details": "Claimed by Validator on pop-os (reaperoak)"
+    },
+    {
+      "timestamp": "2026-03-10T12:46:33.897417+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "APPROVED - All DoD items pass. Advanced VALIDATION -> DONE."
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
-  "tags": []
+  "tags": [],
+  "completed_at": "2026-03-10T12:46:33.897391+00:00"
 }
