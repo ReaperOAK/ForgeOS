@@ -4,7 +4,7 @@
   "description": "Create the Alembic migration implementing the index strategy from the database index design (ARCH006). Add GIN indexes on JSONB columns (dependencies, file_paths) for containment queries, composite indexes on (stage, claimed_by) for efficient claim lookups, unique constraints on active claims, and partial indexes for common query patterns (e.g., tickets in READY stage only). Include CHECK constraints for enum-like columns.",
   "type": "backend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -36,10 +36,10 @@
     "Migration downgrades cleanly, removing all added indexes and constraints"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T14:06:47.087885+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -106,11 +106,18 @@
       "details": "CI PASS (97/100), advancing to DOCS"
     },
     {
-      "timestamp": "2026-03-10T13:36:47.087892+00:00",
+      "timestamp": "2026-03-10T13:36:47.087574+00:00",
       "event": "CLAIMED",
       "agent": "Documentation",
       "machine_id": "pop-os",
       "details": "Claimed by Documentation on pop-os (reaperoak)"
+    },
+    {
+      "timestamp": "2026-03-10T13:42:00.907715+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "details": "DOCS complete, advancing to VALIDATION"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",

@@ -2,16 +2,17 @@
 title: ForgeOS Database Schema Reference
 type: Reference
 audience: Backend Engineers, DevOps Engineers, Architects
-last_reviewed: 2026-03-10  # Updated by Documentation Specialist 2026-03-10
+last_reviewed: 2026-03-10T14:00:00Z  # Updated by Documentation Specialist 2026-03-10
 migration_file: forgeos-server/src/db/migrations/001_initial.sql
 migration_002: mcp-server/alembic/versions/20260310_000000_002_event_tables.py
-migration_003: mcp-server/alembic/versions/20260310_000000_002_core_tables.py
+migration_003_core: mcp-server/alembic/versions/20260310_000000_002_core_tables.py
+migration_003_indexes: mcp-server/alembic/versions/20260310_000000_003_indexes_constraints.py
 ---
 
 # ForgeOS Database Schema Reference
 
 
-This document describes the PostgreSQL schema for the ForgeOS distributed orchestration engine. It covers all tables, enums, indexes, stored functions, triggers, Row-Level Security policies, and seed data defined in the initial migration ([001_initial.sql](../../forgeos-server/src/db/migrations/001_initial.sql)), the event sourcing migration ([002_event_tables.py](../../mcp-server/alembic/versions/20260310_000000_002_event_tables.py)), and the core tables migration ([002_core_tables.py](../../mcp-server/alembic/versions/20260310_000000_002_core_tables.py)).
+This document describes the PostgreSQL schema for the ForgeOS distributed orchestration engine. It covers all tables, enums, indexes, stored functions, triggers, Row-Level Security policies, and seed data defined in the initial migration ([001_initial.sql](../../forgeos-server/src/db/migrations/001_initial.sql)), the event sourcing migration ([002_event_tables.py](../../mcp-server/alembic/versions/20260310_000000_002_event_tables.py)), the core tables migration ([002_core_tables.py](../../mcp-server/alembic/versions/20260310_000000_002_core_tables.py)), and the indexes and constraints migration ([003_indexes_constraints.py](../../mcp-server/alembic/versions/20260310_000000_003_indexes_constraints.py)).
 
 **See also:**
 - [Core Database Schema Architecture](../architecture/database-schema.md)
@@ -253,6 +254,8 @@ Central entity of the ForgeOS state machine. Each row is one unit of work.
 - `valid_lease` — Claim fields are all-or-nothing: either both `claimed_by` and
   `lease_expiry` are NULL, or both are set.
 - `valid_rework` — `rework_count` cannot exceed `max_reworks + 1`.
+- `chk_tickets_lease_duration_positive` — `lease_duration_minutes > 0` (added in Migration 003).
+- `chk_tickets_max_reworks_non_negative` — `max_reworks >= 0` (added in Migration 003).
 
 ### file_locks
 
@@ -502,6 +505,46 @@ GIN (Generalized Inverted Index) supports efficient containment operators
 |-------|-------|---------|-----------|---------|
 | `idx_claims_active` | claims | (ticket_id) | `released_at IS NULL` | Fast lookup of currently held claims |
 | `idx_claims_expired_leases` | claims | (lease_expiry) | `released_at IS NULL AND lease_expiry < NOW()` | Expired lease cleanup |
+
+### Indexes and Constraints (Migration 003 — FORGEOS-BE004)
+
+*(Added by Migration 003 — FORGEOS-BE004)*
+
+**New composite indexes:**
+
+| Index | Table | Columns | Type | Purpose |
+|-------|-------|---------|------|----------|
+| `idx_tickets_stage_type_priority` | tickets | (stage, type, priority) | B-tree | Filtered ticket listing by stage, type, and priority |
+| `idx_tickets_status_stage` | tickets | (status, stage) | B-tree | Dashboard pipeline view and stage counts |
+| `idx_tickets_stage_claimed_by` | tickets | (stage, claimed_by) | B-tree | Claim queue and agent workload queries |
+| `idx_tickets_parent_id` | tickets | (parent_id) | B-tree | Sub-ticket tree traversal |
+
+**New partial index:**
+
+| Index | Table | Columns | Condition | Purpose |
+|-------|-------|---------|-----------|----------|
+| `idx_tickets_active_claims` | tickets | (claimed_by, stage, lease_expiry) | `WHERE claimed_by IS NOT NULL` | Active claim monitoring and lease tracking |
+
+**Upgraded indexes:**
+
+| Index | Table | Change | New Definition |
+|-------|-------|--------|----------------|
+| `idx_tickets_claimable` | tickets | Added `stage` as leading column | `(stage, priority DESC, created_at ASC) WHERE status = 'READY' AND claimed_by IS NULL` |
+| `idx_claims_active` | claims | Upgraded to UNIQUE partial | `UNIQUE ON claims(ticket_id) WHERE released_at IS NULL` — enforces one active claim per ticket |
+
+**FK coverage indexes:**
+
+| Index | Table | Columns | Type | Purpose |
+|-------|-------|---------|------|----------|
+| `idx_file_locks_locked_by` | file_locks | (locked_by) | B-tree | FK coverage for agent deletion cascade |
+| `idx_file_locks_ticket_id` | file_locks | (ticket_id) | B-tree | Ticket-scoped lock release |
+
+**CHECK constraints:**
+
+| Constraint | Table | Expression | Purpose |
+|------------|-------|------------|----------|
+| `chk_tickets_lease_duration_positive` | tickets | `lease_duration_minutes > 0` | Prevents zero or negative lease durations |
+| `chk_tickets_max_reworks_non_negative` | tickets | `max_reworks >= 0` | Prevents negative rework limits |
 
 ### Event Indexes
 
@@ -953,3 +996,4 @@ alembic history
 | 001 | `001_initial_schema.py` | Core tables (projects, agents, sessions, tickets, file_locks, events, system_config) |
 | 002 | `20260310_000000_002_event_tables.py` | Event history, stage transitions, event sourcing enhancements (FORGEOS-BE003) |
 | 002 | `20260310_000000_002_core_tables.py` | Machines, operators, claims tables; tickets.created_by column (FORGEOS-BE002) |
+| 003 | `20260310_000000_003_indexes_constraints.py` | Composite indexes, upgraded partial indexes, CHECK constraints, FK coverage indexes (FORGEOS-BE004) |
