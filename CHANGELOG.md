@@ -8,6 +8,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **File-Level Advisory Lock Mutex** (FORGEOS-BE007) — PostgreSQL advisory lock
+  mutex for file-level concurrency control (`mcp_server/locking/file_mutex.py`).
+  Provides `FileMutex` with blocking (`acquire`) and non-blocking (`try_acquire`)
+  modes, deterministic CRC32-based int64 path hashing with "FORG" namespace,
+  observability via `file_locks` table, and conflict detection. Exports
+  `FileLockRecord`, `LockAcquireResult`, and `FileConflictError` domain types.
+  48 tests with 100% coverage. README documentation added.
+
 - **Connection Pool Health Monitoring** (FORGEOS-BE014) — Background health
   monitor for the asyncpg connection pool (`mcp_server/db/health.py`). Provides
   `PoolHealthMonitor` with configurable check interval and max connection
@@ -32,6 +40,11 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   section to `mcp-server/README.md` with quick-start, method reference,
   data classes, error handling, and design constraints.
 
+- **Health Check and Readiness Probes** (FORGEOS-BE025) — `HealthChecker` class with
+  aggregated health reports (status, version, uptime, database pool saturation),
+  readiness state machine (`STARTING` / `READY` / `DRAINING`), health status
+  classification (`HEALTHY` / `DEGRADED` / `UNHEALTHY`), and database connectivity
+  checks with pool metrics. Includes 25 tests at 91% coverage.
 - **Repository Pattern Data Access Layer** (FORGEOS-BE013) — Three repository
   classes in `mcp-server/src/mcp_server/repositories/` implementing the
   repository pattern for all database access. `TicketRepository` provides
