@@ -223,6 +223,81 @@ await monitor.stop()
 
 
 
+## Dependency Injection — Server-to-Database Wiring
+
+<!-- last_reviewed: 2026-03-11T14:30:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.dependencies` module provides a frozen dataclass container
+that holds the connection pool and all repository instances. The server
+lifespan creates this container on startup and tears it down on shutdown.
+Tool handlers access repositories through the container — never touching
+the pool directly.
+
+### How It Works
+
+1. On server startup, the `_app_lifespan` context manager creates a
+   `Dependencies` instance via the async `Dependencies.create()` factory.
+2. The factory initialises the `ConnectionPool`, then builds
+   `TicketRepository`, `ClaimRepository`, and `EventRepository`.
+3. The `Dependencies` instance is stored in an `AppContext` dataclass
+   and yielded to all tool handlers via the FastMCP lifespan protocol.
+4. On shutdown, `Dependencies.close()` drains and closes the pool.
+
+### Quick Start
+
+```python
+from mcp_server.dependencies import Dependencies
+
+# Create — initialises pool + repositories
+deps = await Dependencies.create(
+    dsn="postgresql://forgeos:forgeos@localhost:5432/forgeos",
+    min_size=2,
+    max_size=10,
+)
+
+# Access repositories (never the pool)
+ticket = await deps.ticket_repo.get_by_id("FORGEOS-BE018")
+claim  = await deps.claim_repo.get_active_claim("FORGEOS-BE018")
+events = await deps.event_repo.get_events_by_ticket("FORGEOS-BE018")
+
+# Teardown — drains active connections, then closes
+await deps.close()
+```
+
+### Degraded Mode
+
+When `FORGEOS_DB_REQUIRED` is `false` (the default), the server starts
+even if PostgreSQL is unreachable. In this case `AppContext.dependencies`
+is `None` and database-dependent tools return appropriate error responses.
+
+Set `FORGEOS_DB_REQUIRED=true` in production to fail fast with a non-zero
+exit code if the database is unavailable at startup.
+
+### API Reference
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `Dependencies` | frozen dataclass | Immutable container holding pool + 3 repositories |
+| `Dependencies.create()` | async static method | Factory: initialises pool, builds repos, returns container |
+| `Dependencies.close()` | async method | Drains and closes the connection pool |
+| `AppContext` | dataclass | Lifespan context with config, dependencies, and health checker |
+| `AppContext.db_pool` | property | Backward-compatible pool accessor (prefer repository access) |
+| `AppContext.ticket_repo` | property | Shortcut to `dependencies.ticket_repo` |
+| `AppContext.claim_repo` | property | Shortcut to `dependencies.claim_repo` |
+| `AppContext.event_repo` | property | Shortcut to `dependencies.event_repo` |
+
+### Dependencies Attributes
+
+| Attribute | Type | Description |
+|---|---|---|
+| `pool` | `ConnectionPool` | The asyncpg pool wrapper (lifecycle + health) |
+| `ticket_repo` | `TicketRepository` | Data access for the `tickets` table |
+| `claim_repo` | `ClaimRepository` | Atomic claim/release operations |
+| `event_repo` | `EventRepository` | Append-only audit trail |
+
+
 ## File-Level Advisory Lock Mutex
 
 <!-- last_reviewed: 2026-03-10T20:30:00Z -->

@@ -10,6 +10,9 @@ Usage::
     deps = await Dependencies.create(dsn="postgresql://...")
     ticket = await deps.ticket_repo.get_by_id("FORGEOS-BE018")
     await deps.close()
+
+.. meta::
+   :last_reviewed: 2026-03-11T14:30:00Z
 """
 
 from __future__ import annotations
