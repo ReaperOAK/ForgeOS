@@ -1618,9 +1618,9 @@ See also: [FORGEOS-ARCH007 — Event Sourcing Architecture](../docs/architecture
 
 ## Tool Input Validation
 
-<--- last_reviewed: 2025-03-10T00:00:00Z -->
-<--- audience: developers -->
-<--- diataxis: reference -->
+<!-- last_reviewed: 2026-03-11T00:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
 
 The `mcp_server.tools.validation` module validates MCP tool input parameters
 against JSON Schema (Draft 2020-12) before handler invocation. Invalid inputs
