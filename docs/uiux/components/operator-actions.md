@@ -1,3 +1,15 @@
+---
+title: Operator Actions — Component Specification
+ticket: FORGEOS-UID004
+type: component-spec
+author: UIDesigner
+date: 2026-03-10T00:00:00Z
+status: APPROVED
+last_reviewed: "2026-03-10T23:00:00Z"
+reviewed_by: Documentation
+diataxis: reference
+---
+
 # Operator Actions — Component Specification
 
 > **Ticket:** FORGEOS-UID004 | **Author:** UIDesigner | **Date:** 2026-03-10

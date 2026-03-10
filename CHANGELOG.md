@@ -8,6 +8,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Operator Workbench and Claims Monitor — UI Design Documentation**
+  (FORGEOS-UID004) — Complete mockup specification and component documentation
+  for the Operator Workbench dashboard. Includes 7 React components
+  (ClaimsMonitorTable, LeaseCountdownTimer, OperatorActionButton,
+  ConfirmationModal, MachineStatusCard, AuthUserBadge, OperatorActivityLog),
+  4 screens (Claims Monitor, Operator Actions, Machine Status, Activity Log),
+  WCAG 2.2 AA accessibility compliance, Mermaid interaction flow diagrams,
+  TypeScript interface definitions, responsive breakpoints (mobile/tablet/
+  desktop), ForgeOS design token integration, and Google Stitch AI-generated
+  screenshot references. Component specs with cross-linked navigation and
+  freshness frontmatter added.
+
 - **`tickets.update` MCP Tool — API Reference Update** (TASK-FOS-03-003) —
   Added `tickets.update` subsection to `forgeos-server/README.md` with input
   schema, error codes, handler workflow, response format, and MCP invocation
@@ -152,6 +164,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   server, PostgreSQL, Python MCP server, and real-time dashboard.
 
 ### Added
+
+- **Operator Workbench and Claims Monitor — UI Design Documentation**
+  (FORGEOS-UID004) — Complete mockup specification and component documentation
+  for the Operator Workbench dashboard. Includes 7 React components
+  (ClaimsMonitorTable, LeaseCountdownTimer, OperatorActionButton,
+  ConfirmationModal, MachineStatusCard, AuthUserBadge, OperatorActivityLog),
+  4 screens (Claims Monitor, Operator Actions, Machine Status, Activity Log),
+  WCAG 2.2 AA accessibility compliance, Mermaid interaction flow diagrams,
+  TypeScript interface definitions, responsive breakpoints (mobile/tablet/
+  desktop), ForgeOS design token integration, and Google Stitch AI-generated
+  screenshot references. Component specs with cross-linked navigation and
+  freshness frontmatter added.
 
 - **Agent Registration and Identity Management** — Admin API endpoints
   for agent lifecycle management (TASK-FOS-04-002). `POST /api/admin/agents`
