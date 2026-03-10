@@ -4,7 +4,7 @@
   "description": "Create the initial Alembic migration that implements the core tables from the database schema design (ARCH005). Tables include: tickets (with JSONB fields for dependencies, file_paths, acceptance_criteria), claims (linking tickets to agents with lease tracking), agents (agent identity registry), machines (machine identity registry), and operators (human operator registry). Include all primary keys, foreign keys, and NOT NULL constraints.",
   "type": "backend",
   "priority": "critical",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Migration downgrades cleanly, dropping all created tables"
   ],
   "rework_count": 0,
-  "claimed_by": "CIReviewer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T09:31:03.443924+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -106,6 +106,24 @@
       "from_stage": "CI",
       "to_stage": "CI",
       "details": "Claimed by reaperoak@pop-os via CIReviewer, lease until 2026-03-10T09:31:03.443924+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T09:19:43.276109+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "CI PASS - Score 90/100, 0 critical, 1 warning (OC-007), 5 suggestions. Pyright clean. 41/41 tests. Advanced CI to DOCS."
+    },
+    {
+      "timestamp": "2026-03-10T09:19:47.806677+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "CI PASS - Score 90/100, 0 critical, 1 warning (OC-007), 5 suggestions. Pyright clean. 41/41 tests. Advanced CI to DOCS."
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
@@ -118,7 +136,7 @@
     "phase2",
     "BLK-05-01"
   ],
-  "status": "SECURITY_COMPLETE",
+  "status": "CI_COMPLETE",
   "completed_at": "2026-03-09T21:02:13.244517+00:00",
   "artifacts": [
     "mcp-server/alembic/versions/20260310_000000_002_core_tables.py",
