@@ -354,3 +354,13 @@ Known sources list disclosed in `UnknownSourceError` details. Risk accepted — 
 
 - **Agent:** Security Engineer
 - **Timestamp:** 2026-03-11T14:30:00Z
+
+### [FORGEOS-BE056] — Machine Binding Residual Risks (2026-03-11T22:30:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-BE056-001 | Low | `bind_operator_to_machine()`/`unbind_operator_from_machine()` do not enforce admin role internally — rely on callers (CWE-862). | Risk Accepted | Service-layer functions not yet wired to API endpoints. When routes are added, admin role check must be enforced at the endpoint layer. |
+| SEC-BE056-002 | Low | `get_operator_bindings()` accepts any `operator_id` without identity verification — potential IDOR at API layer (CWE-639). | Risk Accepted | No external API caller exists yet. Future endpoint must validate authenticated user matches queried operator_id or is admin. |
+
+- **Agent:** Security Engineer
+- **Timestamp:** 2026-03-11T22:30:00Z
