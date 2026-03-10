@@ -2830,3 +2830,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/auth/machine_auth.py
 - **Decisions:** Removed unused timezone import (F401), moved datetime to TYPE_CHECKING block (TC003) since from __future__ import annotations makes all annotations strings at runtime
 - **Timestamp:** 2026-03-10T17:45:00Z
+
+### FORGEOS-BE010 — Configure Transaction Isolation per Operation
+- **Artifacts:** mcp-server/src/mcp_server/locking/transaction_config.py, mcp-server/tests/test_transaction_config.py, mcp-server/src/mcp_server/locking/__init__.py
+- **Decisions:** Used enum-based isolation levels with frozen dataclass mapping. Chose PoolLike protocol for dependency injection (matches existing ConnectionLike pattern). Exponential back-off for serialization retries. Claims use READ COMMITTED with SKIP LOCKED; state transitions use SERIALIZABLE.
+- **Timestamp:** 2026-03-10T00:45:00+00:00
