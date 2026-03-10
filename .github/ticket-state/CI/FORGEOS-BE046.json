@@ -36,10 +36,10 @@
     "Configuration validates required fields and provides clear error messages for missing values"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "CI Reviewer",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T22:23:49.611069+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -116,6 +116,15 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-10T21:53:49.611083+00:00",
+      "event": "CLAIMED",
+      "agent": "CI Reviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "CI",
+      "details": "Claimed by ReaperOAK@pop-os via CI Reviewer, lease until 2026-03-10T22:23:49.611069+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-agent-sdk.md",

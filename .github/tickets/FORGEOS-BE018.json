@@ -4,7 +4,7 @@
   "description": "Wire the MCP server to the PostgreSQL database layer via the repository data access layer from BE013. Implement server startup hooks that initialize the connection pool and repository instances, and shutdown hooks that drain connections. Provide a dependency injection mechanism (or module-level factory) so that tool handlers can access repositories without direct pool management.",
   "type": "backend",
   "priority": "critical",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "No direct pool access in tool handlers; all database access is through repositories"
   ],
   "rework_count": 1,
-  "claimed_by": "CI Reviewer",
+  "claimed_by": "Documentation Specialist",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T22:11:34.943749+00:00",
+  "lease_expiry": "2026-03-10T22:23:50.114829+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -217,6 +217,31 @@
       "from_stage": "CI",
       "to_stage": "CI",
       "details": "Claimed by ReaperOAK@pop-os via CI Reviewer, lease until 2026-03-10T22:11:34.943749+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T23:55:00.000000+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "CI PASS \u2014 Score 95/100, 0 critical, 1 warning (OC-007 advisory), 81% coverage"
+    },
+    {
+      "timestamp": "2026-03-10T21:53:50.075533+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from CI Reviewer: manual release"
+    },
+    {
+      "timestamp": "2026-03-10T21:53:50.114846+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-10T22:23:50.114829+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
