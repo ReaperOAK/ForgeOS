@@ -2825,3 +2825,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/middleware/auth_middleware.py, mcp-server/README.md, CHANGELOG.md
 - **Decisions:** Added new README section after "Authentication — Agent API Keys" for logical grouping; existing docstrings were already thorough so no inline changes needed beyond freshness date
 - **Timestamp:** 2026-03-10T00:00:00Z
+
+### [FORGEOS-BE052] — BACKEND Rework #1 Complete
+- **Artifacts:** mcp-server/src/mcp_server/auth/machine_auth.py
+- **Decisions:** Removed unused timezone import (F401), moved datetime to TYPE_CHECKING block (TC003) since from __future__ import annotations makes all annotations strings at runtime
+- **Timestamp:** 2026-03-10T17:45:00Z
