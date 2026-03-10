@@ -4,7 +4,7 @@
   "description": "Implement structured exception hierarchy and centralized configuration for the agent SDK. Define exception classes: `ForgeOSError` (base), `ClaimConflictError`, `LeaseExpiredError`, `InvalidTransitionError`, `NetworkError`, `AuthenticationError`. Implement configuration class loading from environment variables with validation and sensible defaults.",
   "type": "backend",
   "priority": "high",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -36,10 +36,10 @@
     "Configuration validates required fields and provides clear error messages for missing values"
   ],
   "rework_count": 0,
-  "claimed_by": "CI Reviewer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T22:23:49.611069+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
