@@ -2311,3 +2311,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/db/pool.py, mcp-server/src/mcp_server/db/__init__.py, mcp-server/tests/test_pool.py
 - **Decisions:** Thin wrapper over asyncpg.create_pool with PoolConfig (pydantic-settings), PoolStats (frozen dataclass), async context manager for acquire, ping health check, graceful close. Constructor accepts optional overrides (dsn, min_size, max_size) for DI/testing.
 - **Timestamp:** 2026-03-10T12:25:00+00:00
+
+### [FORGEOS-BE024] — Security Review: Structured JSON Logging
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE024.md
+- **Decisions:** SECURITY PASS — STRIDE threat model on 4 components (all Low), OWASP 10/10 checked, zero critical/high/medium findings. Two informational items: (1) Bearer token regex gap in message filter (no current exposure), (2) handler accumulation on repeated configure_logging (no security impact). Zero external deps, json.dumps prevents log injection.
+- **Timestamp:** 2026-03-10T15:30:00+00:00
+
+### [FORGEOS-BE020] — Implement Dynamic Tool Registration System
+- **Artifacts:** mcp-server/src/mcp_server/tools/registry.py, mcp-server/src/mcp_server/tools/__init__.py, mcp-server/tests/test_tool_registry.py
+- **Decisions:** QA PASS — 37/37 tests pass, 97% line coverage (3 lines uncovered: non-string $schema branch, get_or_raise success path, FastMCP wrapper body). All 6 acceptance criteria verified. No defects found.
+- **Timestamp:** 2026-03-10T22:15:00+00:00
