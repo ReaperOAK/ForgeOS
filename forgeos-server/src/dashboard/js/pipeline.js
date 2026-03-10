@@ -62,6 +62,9 @@
      INITIALIZATION
      ═══════════════════════════════════════════════════════════ */
 
+  /**
+   * Initialize the pipeline module: fetch tickets, start timers, set up delegation.
+   */
   function initPipeline() {
     FOS = window.ForgeOS;
     STAGES_MAIN = FOS.STAGES_MAIN;
@@ -93,6 +96,9 @@
      INITIAL DATA FETCH
      ═══════════════════════════════════════════════════════════ */
 
+  /**
+   * Fetch all tickets from the REST API and populate the local map.
+   */
   function fetchInitialTickets() {
     FOS.fetchJSON('/api/tickets?limit=500')
       .then(function (result) {
@@ -117,6 +123,11 @@
      SSE EVENT HANDLER
      ═══════════════════════════════════════════════════════════ */
 
+  /**
+   * Handle incoming SSE events and update the pipeline board accordingly.
+   * @param {string} eventType - The SSE event type.
+   * @param {Object} data - Parsed event data payload.
+   */
   function handleSSEEvent(eventType, data) {
     switch (eventType) {
       /* Legacy compat: full snapshot replaces all */
@@ -232,6 +243,9 @@
      RENDERING — FULL BOARD (initial + snapshot)
      ═══════════════════════════════════════════════════════════ */
 
+  /**
+   * Render the full Kanban pipeline board from current ticket data.
+   */
   function renderFullBoard() {
     ALL_STAGES.forEach(function (stage) {
       var col = document.getElementById('col-' + stage);
@@ -264,6 +278,11 @@
      RENDERING — INDIVIDUAL CARD CREATE / UPDATE
      ═══════════════════════════════════════════════════════════ */
 
+  /**
+   * Create a new card DOM element for a ticket.
+   * @param {Object} ticket - Ticket data object.
+   * @returns {HTMLElement} The card element ready for insertion.
+   */
   function createCard(ticket) {
     var card = document.createElement('article');
     card.className = 'ticket-card';
@@ -280,6 +299,11 @@
     return card;
   }
 
+  /**
+   * Populate a card element with ticket data (title, badges, lease info).
+   * @param {HTMLElement} card - The card DOM element.
+   * @param {Object} ticket - Ticket data object.
+   */
   function populateCardContent(card, ticket) {
     var claimStatus = FOS.getClaimStatus(ticket);
     card.dataset.claimStatus = claimStatus;
@@ -498,10 +522,19 @@
     });
   }
 
+  /**
+   * Start a lease countdown timer for a claimed ticket.
+   * @param {string} ticketId - The ticket identifier.
+   * @param {string} expiryISO - ISO 8601 lease expiry timestamp.
+   */
   function startLeaseTimer(ticketId, expiryISO) {
     leaseTimers.set(ticketId, new Date(expiryISO).getTime());
   }
 
+  /**
+   * Stop and remove the lease countdown timer for a ticket.
+   * @param {string} ticketId - The ticket identifier.
+   */
   function stopLeaseTimer(ticketId) {
     leaseTimers.delete(ticketId);
   }
@@ -641,7 +674,7 @@
 
   function updateFilterBadge() {
     var active = [filters.stage, filters.type, filters.priority,
-      filters.machine, filters.agent, filters.search].filter(Boolean).length;
+    filters.machine, filters.agent, filters.search].filter(Boolean).length;
 
     if (!filterCountBadge) {
       filterCountBadge = document.getElementById('filterCountBadge');
@@ -669,6 +702,11 @@
     }
   }
 
+  /**
+   * Handle a filter change event from the filter bar controls.
+   * @param {string} name - Filter field name (e.g. "stage", "type").
+   * @param {string} value - Selected filter value.
+   */
   function onFilterChange(name, value) {
     filters[name] = value || '';
     syncFiltersToURL();
