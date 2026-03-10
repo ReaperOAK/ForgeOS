@@ -2668,3 +2668,9 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/sessions/__init__.py, mcp-server/src/mcp_server/sessions/manager.py, mcp-server/tests/test_session_manager.py
 - **Decisions:** In-memory session manager with thread-safe locking (threading.Lock). AsyncIO cleanup loop for timeout expiration. Identity validation on resume (agent_name, role, machine_id must match). SessionConfig frozen dataclass for immutable configuration. Structured logging via mcp_server.observability, metrics via session_opened/session_closed gauges. 58 tests, 97% coverage. All 6 ACs met.
 - **Timestamp:** 2026-03-10T15:05:47Z
+
+
+### [FORGEOS-BE054] — BACKEND Complete
+- **Artifacts:** auth_middleware.py, test_auth_middleware.py, middleware/__init__.py
+- **Decisions:** Used Starlette BaseHTTPMiddleware with contextvars for async-safe auth context. Dual response format (JSON-RPC for MCP, plain JSON for REST). X-API-Key takes precedence over Bearer token.
+- **Timestamp:** 2025-07-22T00:00:00Z
