@@ -34,10 +34,10 @@
     "Operator credentials stored as bcrypt hashes in the operators table"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "QA",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T17:13:23.041568+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -74,6 +74,13 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Released claim from Backend: Lease expired at 2026-03-10T15:19:14+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T16:43:23.041568+00:00",
+      "event": "CLAIMED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "Claimed by QA agent for QA stage"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
