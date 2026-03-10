@@ -4,7 +4,7 @@
   "description": "Wire the MCP server to the PostgreSQL database layer via the repository data access layer from BE013. Implement server startup hooks that initialize the connection pool and repository instances, and shutdown hooks that drain connections. Provide a dependency injection mechanism (or module-level factory) so that tool handlers can access repositories without direct pool management.",
   "type": "backend",
   "priority": "critical",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
