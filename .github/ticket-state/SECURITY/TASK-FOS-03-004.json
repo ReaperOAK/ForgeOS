@@ -1,0 +1,86 @@
+{
+  "ticket_id": "TASK-FOS-03-004",
+  "title": "tickets.complete \u2014 Complete Stage and Advance",
+  "description": "Implement the tickets.complete MCP tool that marks the current stage as complete and advances the ticket to the next stage in its SDLC flow. Uses the advance_ticket SQL function. Requires completion evidence (artifacts, test_results, confidence). Also implement the SDLC flow engine: flows.ts defines SDLC_FLOWS mapping each of 10 ticket types to their ordered stage array, transitions.ts provides getNextStage(), getImplementationStage(), and isValidTransition() helper functions. On ticket reaching DONE, calls resolve_dependencies to unblock dependent tickets.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "QA",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:05:37.898839+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-FOS-03-002"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/tools/tickets-complete.ts",
+    "forgeos-server/src/sdlc/flows.ts",
+    "forgeos-server/src/sdlc/transitions.ts"
+  ],
+  "acceptance_criteria": [
+    "Tool registered as 'tickets.complete' with Zod schema: ticket_id (string), evidence object (artifacts: string[], test_results: string, confidence: HIGH|MEDIUM|LOW, notes: optional string)",
+    "Returns MISSING_EVIDENCE error if evidence object is missing required fields",
+    "Calls advance_ticket SQL function which validates claim ownership and SDLC flow ordering",
+    "Returns INVALID_TRANSITION error if trying to advance beyond the final stage",
+    "On success, returns {ticket, previous_stage, new_stage, dependencies_unblocked}",
+    "SDLC_FLOWS object defines correct stage arrays for all 10 ticket types matching Architecture \u00a76.4",
+    "getNextStage(type, currentStage) returns the correct next stage or null if at end",
+    "When ticket reaches DONE, resolve_dependencies function unblocks dependent tickets by setting them to READY",
+    "File locks released on stage advancement via advance_ticket SQL function",
+    "STAGE_ADVANCED event recorded with evidence payload"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:05:37.898841+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/03-ticket-tools.md"
+    },
+    {
+      "timestamp": "2026-03-09T20:23:57.998117+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-09T20:42:44.049665+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "CLAIM by Backend on pop-os (ReaperOAK)"
+    },
+    {
+      "timestamp": "2026-03-09T21:13:14.080577+00:00",
+      "event": "BACKEND_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "tickets.complete tool, SDLC flows, transitions -- 62 tests passing"
+    },
+    {
+      "timestamp": "2026-03-10T08:25:18.456601+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: Lease expired at 2026-03-09T21:12:44.049597+00:00"
+    }
+  ],
+  "source_task_file": "TODO/tickets/03-ticket-tools.md",
+  "tags": []
+}
