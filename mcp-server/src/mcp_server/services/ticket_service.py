@@ -387,6 +387,9 @@ class TicketService:
             )
             raise ValueError(f"Unknown agent role: {agent_role}")
 
+        # Role-stage authorization check (FORGEOS-BE055 rework).
+        check_role_stage_authorization(agent_role, stage)
+
         agent_id = str(uuid.uuid4())
 
         logger.info(
