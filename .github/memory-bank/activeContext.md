@@ -3180,3 +3180,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/QA/FORGEOS-BE018.md
 - **Decisions:** PASS — 59/60 tests pass (1 pre-existing argparse issue), 93% coverage (100% dependencies.py, 92% server.py), ruff clean. All 6 ACs verified. Rework lint fixes (F401, I001) confirmed resolved.
 - **Timestamp:** 2026-03-11T16:00:00Z
+
+### [FORGEOS-BE046] — BACKEND complete
+- **Artifacts:** agent-sdk/src/forgeos_sdk/exceptions.py, agent-sdk/src/forgeos_sdk/config.py, agent-sdk/tests/test_exceptions.py, agent-sdk/tests/test_config.py
+- **Decisions:** Enhanced ForgeOSError with error_code/details. Added ClaimConflictError, LeaseExpiredError, InvalidTransitionError, NetworkError. Added api_key to SDKConfig with pydantic validators for blank rejection. Maintained backward compat with existing exception signatures.
+- **Timestamp:** 2026-03-11T22:30:00Z

@@ -10,15 +10,23 @@ Public API
 .. autoclass:: ConfigurationError
 .. autoclass:: AuthenticationError
 .. autoclass:: ToolCallError
+.. autoclass:: ClaimConflictError
+.. autoclass:: LeaseExpiredError
+.. autoclass:: InvalidTransitionError
+.. autoclass:: NetworkError
 """
 
 from forgeos_sdk.client import ConnectionState, ForgeOSClient
 from forgeos_sdk.config import SDKConfig, TransportType
 from forgeos_sdk.exceptions import (
     AuthenticationError,
+    ClaimConflictError,
     ConfigurationError,
     ConnectionError,
     ForgeOSError,
+    InvalidTransitionError,
+    LeaseExpiredError,
+    NetworkError,
     ToolCallError,
 )
 
@@ -35,4 +43,8 @@ __all__ = [
     "ConfigurationError",
     "AuthenticationError",
     "ToolCallError",
+    "ClaimConflictError",
+    "LeaseExpiredError",
+    "InvalidTransitionError",
+    "NetworkError",
 ]
