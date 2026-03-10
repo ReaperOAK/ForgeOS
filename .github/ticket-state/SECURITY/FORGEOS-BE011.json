@@ -35,10 +35,10 @@
     "Pool exposes a close() method for clean shutdown"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Security",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T13:27:28.109068+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -93,6 +93,13 @@
       "from_stage": "QA",
       "to_stage": "SECURITY",
       "details": "QA PASS - 25/25 tests, 99% branch coverage, 6/6 AC met"
+    },
+    {
+      "timestamp": "2026-03-10T12:57:28.109146+00:00",
+      "event": "CLAIMED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "details": "Claimed by Security on pop-os (reaperoak)"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
