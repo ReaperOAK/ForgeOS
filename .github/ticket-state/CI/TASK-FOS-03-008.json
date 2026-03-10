@@ -4,7 +4,7 @@
   "description": "Implement the tickets.release MCP tool that releases a claim on a ticket, returning it to READY status. Uses the release_ticket SQL function. Normal release requires the caller to be the claim owner; forced release (admin only) can release any claim. Clears claimed_by, machine_id, operator, and lease_expiry. Releases all file locks associated with the ticket. Records a RELEASED or FORCE_RELEASED event.",
   "type": "backend",
   "priority": "high",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -36,10 +36,10 @@
     "Returns {ticket, released_file_locks: string[]} on success"
   ],
   "rework_count": 0,
-  "claimed_by": "Security",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T08:55:50.823778+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -94,6 +94,15 @@
       "from_stage": "SECURITY",
       "to_stage": "SECURITY",
       "details": "Claimed by reaperoak@pop-os via Security, lease until 2026-03-10T08:55:50.823778+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T08:29:34.319611+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
