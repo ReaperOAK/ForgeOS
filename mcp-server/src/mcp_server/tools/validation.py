@@ -24,8 +24,7 @@ import logging
 from dataclasses import dataclass, field
 from typing import Any
 
-import jsonschema
-from jsonschema import Draft202012Validator
+from jsonschema import Draft202012Validator, ValidationError
 
 logger = logging.getLogger("forgeos.tools.validation")
 
@@ -109,8 +108,12 @@ def validate_tool_input(
     """
     validator = compile_validator(tool_name, schema)
 
+    raw_errors: list[ValidationError] = sorted(
+        validator.iter_errors(params),  # type: ignore[reportUnknownMemberType]
+        key=lambda e: list(e.absolute_path),
+    )
     errors: list[FieldError] = []
-    for error in sorted(validator.iter_errors(params), key=lambda e: list(e.absolute_path)):
+    for error in raw_errors:
         path = _format_path(error.absolute_path)
         errors.append(FieldError(path=path, message=error.message))
 
@@ -128,7 +131,7 @@ class McpValidationErrorData:
     """Structured data payload for MCP INVALID_PARAMS error responses."""
 
     tool_name: str
-    errors: list[dict[str, str]] = field(default_factory=list)
+    errors: list[dict[str, str]] = field(default_factory=list)  # type: ignore[reportUnknownVariableType]
 
     def to_dict(self) -> dict[str, Any]:
         """Serialise to a plain dict suitable for MCP ErrorData.data."""

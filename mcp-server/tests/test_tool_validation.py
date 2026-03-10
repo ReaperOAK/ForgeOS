@@ -11,6 +11,7 @@ Coverage map (FORGEOS-BE021 acceptance criteria):
 
 from __future__ import annotations
 
+import contextlib
 import time
 from collections import deque
 from typing import Any
@@ -184,7 +185,11 @@ class TestMissingRequiredFields:
     def test_multiple_missing_required_fields(self) -> None:
         schema: dict[str, Any] = {
             "type": "object",
-            "properties": {"a": {"type": "string"}, "b": {"type": "string"}, "c": {"type": "string"}},
+            "properties": {
+                "a": {"type": "string"},
+                "b": {"type": "string"},
+                "c": {"type": "string"},
+            },
             "required": ["a", "b", "c"],
         }
         with pytest.raises(ToolInputValidationError) as exc_info:
@@ -223,10 +228,8 @@ class TestPerformance:
         compile_validator("err", SIMPLE_SCHEMA)
         start = time.perf_counter_ns()
         for _ in range(100):
-            try:
+            with contextlib.suppress(ToolInputValidationError):
                 validate_tool_input("err", SIMPLE_SCHEMA, {"ticket_id": 123})
-            except ToolInputValidationError:
-                pass
         avg_ms = ((time.perf_counter_ns() - start) / 100) / 1_000_000
         assert avg_ms < 1.0, f"Average {avg_ms:.3f} ms"
 
