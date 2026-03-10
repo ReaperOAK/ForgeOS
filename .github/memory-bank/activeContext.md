@@ -2533,3 +2533,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE026.md
 - **Decisions:** APPROVED — All 10 DoD items pass. 42/42 tests, 97% coverage, lint clean, all upstream verdicts (QA/Security/CI/Docs) independently verified PASS.
 - **Timestamp:** 2026-03-10T13:48:00Z
+
+### [FORGEOS-BE012] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE012.md
+- **Decisions:** Added Event Sourcing section to README (event types table, quick start, event fields, API reference, backend architecture, design constraints, cross-ref to ARCH007). Added events/ module to Architecture listing. CHANGELOG entry added. Inline docstrings already comprehensive — no additions needed.
+- **Timestamp:** 2026-03-11T00:45:00Z
+
+### [FORGEOS-BE004] — Documentation Summary
+- **Artifacts:** docs/architecture/database-indexes.md, docs/database/schema-reference.md, CHANGELOG.md
+- **Decisions:** Updated architecture doc section headers from Proposed to Added in Migration 003; added new Migration 003 indexes section to schema reference; added implementation status section to architecture doc
+- **Timestamp:** 2026-03-10T13:57:55Z
