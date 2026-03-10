@@ -41,10 +41,10 @@
     "Respects prefers-reduced-motion: disables force simulation animation if set"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T10:36:00.539840+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -126,6 +126,13 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "CI PASS \u2014 Score 82/100. 0 critical, 3 warnings, 3 suggestions. Lint clean, CC max 9/10, WCAG 2.2 AA compliant."
+    },
+    {
+      "timestamp": "2026-03-10T10:06:00.539856+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "details": "CLAIM by Documentation on pop-os (ReaperOAK)"
     }
   ],
   "source_task_file": "TODO/tickets/05-dashboard.md",
