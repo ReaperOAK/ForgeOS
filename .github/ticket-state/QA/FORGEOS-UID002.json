@@ -4,7 +4,7 @@
   "description": "Design the stage pipeline view (Kanban board) and ticket detail view. The pipeline view shows columns for each SDLC stage (READY through DONE) with ticket cards showing ID, title, type badge, priority indicator, and claim status. The ticket detail view shows full metadata, acceptance criteria checklist, file paths, dependency tree, history timeline, and agent activity log. Define component specifications for TicketCard, StageColumn, MetadataPanel, HistoryTimeline, and DependencyTree.",
   "type": "frontend",
   "priority": "high",
-  "stage": "FRONTEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -40,7 +40,7 @@
   "claimed_by": "QA",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T08:29:39.656337+00:00",
+  "lease_expiry": "2026-03-10T08:29:39.656018+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -72,6 +72,22 @@
       "from_stage": "FRONTEND",
       "to_stage": "FRONTEND",
       "details": "Advanced from FRONTEND to FRONTEND"
+    },
+    {
+      "timestamp": "2026-03-09T21:19:33.419679+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Frontend",
+      "machine_id": "pop-os",
+      "from_stage": "FRONTEND",
+      "to_stage": "QA",
+      "details": "FRONTEND complete. Created app.js (1591 lines), updated index.html (tabbed slide-over), updated style.css (~300 new lines). All 7 AC met."
+    },
+    {
+      "timestamp": "2026-03-10T07:51:30.966958+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Frontend: Lease expired at 2026-03-09T21:12:42.871089+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
@@ -83,5 +99,12 @@
     "ticketDetail",
     "phase4",
     "BLK-10-01"
+  ],
+  "status": "in_progress",
+  "completed_at": "2026-03-09T21:19:33.419679+00:00",
+  "artifacts": [
+    "forgeos-server/src/dashboard/js/app.js",
+    "forgeos-server/src/dashboard/index.html",
+    "forgeos-server/src/dashboard/css/style.css"
   ]
 }
