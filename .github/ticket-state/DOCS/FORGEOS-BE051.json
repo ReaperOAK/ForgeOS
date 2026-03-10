@@ -36,10 +36,10 @@
     "Invalid or expired API keys produce clear error messages in MCP error format"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T14:06:34.627675+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -111,6 +111,13 @@
       "agent": "CIReviewer",
       "machine_id": "pop-os",
       "details": "CI PASS (score 82/100), advancing to DOCS"
+    },
+    {
+      "timestamp": "2026-03-10T13:36:34.627675+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "details": "Claimed by Documentation agent for DOCS stage"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
