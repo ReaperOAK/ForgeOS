@@ -4,7 +4,7 @@
   "description": "Implement graceful shutdown for the MCP server. On receiving SIGTERM or SIGINT, the server stops accepting new connections, waits for in-flight requests to complete (up to a configurable timeout), closes all agent sessions cleanly, flushes pending events to the database, and then exits. If in-flight requests exceed the timeout, they are cancelled with appropriate error responses.",
   "type": "backend",
   "priority": "high",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Database connection pool is closed after all pending operations complete"
   ],
   "rework_count": 0,
-  "claimed_by": "CIReviewer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T13:27:36.215248+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -81,6 +81,13 @@
       "agent": "Security",
       "machine_id": "pop-os",
       "details": "Security PASS \u2014 advanced to CI stage"
+    },
+    {
+      "timestamp": "2026-03-10T13:02:55.689142+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "details": "CI PASS (score 85/100) \u2014 advanced to DOCS stage"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
