@@ -4,7 +4,7 @@
   "description": "Implement operator permission scoping: operators can only perform operations on machines they are registered to. Create the operator-machine binding table and enforce that claim, advance, and rework operations via the REST API are constrained to the operator's registered machines. Admin operators bypass machine restrictions.",
   "type": "backend",
   "priority": "high",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Binding management endpoints (add/remove machine binding) for admin use"
   ],
   "rework_count": 1,
-  "claimed_by": "CI Reviewer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T22:57:50.087221+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -167,6 +167,15 @@
       "from_stage": "CI",
       "to_stage": "CI",
       "details": "Claimed by ReaperOAK@pop-os via CI Reviewer, lease until 2026-03-10T22:57:50.087221+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T22:35:03.903630+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "system",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "Advanced from CI to DOCS"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
