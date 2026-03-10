@@ -4,7 +4,7 @@
   "description": "Create the Python package structure for `forgeos-agent-sdk`, the client library that agents use to interact with the MCP server. Set up pyproject.toml with metadata, dependencies (mcp client SDK, pydantic), and entry points. Create the base client class stub with connection configuration. The package depends on the MCP server (FORGEOS-BE015) and SSE/HTTP transport (FORGEOS-BE017) being available.",
   "type": "backend",
   "priority": "critical",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -37,10 +37,10 @@
     "README documents installation, basic usage, and configuration"
   ],
   "rework_count": 0,
-  "claimed_by": "Security",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T17:33:22.390218+00:00",
+  "claimed_by": "",
+  "machine_id": "",
+  "operator": "",
+  "lease_expiry": "",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -70,6 +70,13 @@
       "agent": "QA",
       "machine_id": "pop-os",
       "details": "QA PASS: 44 tests, 100% coverage, all 6 ACs met"
+    },
+    {
+      "timestamp": "2026-03-10T17:07:33.926714+00:00",
+      "event": "STAGE_COMPLETE",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "details": "SECURITY PASS: Zero critical/high/medium findings. Stub SDK with minimal attack surface."
     }
   ],
   "source_task_file": "TODO/tasks/phase3-agent-sdk.md",
