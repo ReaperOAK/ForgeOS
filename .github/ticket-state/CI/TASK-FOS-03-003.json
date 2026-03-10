@@ -4,7 +4,7 @@
   "description": "Implement the tickets.update MCP tool that updates metadata on a claimed ticket. Only the current claim owner can update a ticket. Merges the provided metadata object into the ticket's existing metadata JSONB field using PostgreSQL's || operator. Records an UPDATED event in the events table. Updates the ticket's updated_at timestamp automatically via the trigger.",
   "type": "backend",
   "priority": "high",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "updated_at field refreshes automatically via trg_tickets_updated_at trigger"
   ],
   "rework_count": 1,
-  "claimed_by": "Security",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T09:59:21.748642+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "completed_at": "2026-03-10T08:38:41.957128Z",
   "history": [
@@ -61,6 +61,13 @@
       "agent": "QA",
       "machine_id": "pop-os",
       "details": "PASS: 32/32 tests, coverage 100%/91.66%/100%/100%, rework fix verified, all 7 AC pass"
+    },
+    {
+      "timestamp": "2026-03-10T09:34:53.021147+00:00",
+      "event": "SECURITY_COMPLETE",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "details": "PASS (HIGH confidence). STRIDE max score 9 (LOW). OWASP 10/10 clear. 4 medium/low findings documented. 0 CVEs. 0 secrets."
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
