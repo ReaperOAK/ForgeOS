@@ -161,6 +161,7 @@ class HTTPTransport:
 
         # Build composite app with health route + MCP transport + admin API
         from mcp_server.api import create_audit_endpoint
+        from mcp_server.api.routes import create_tickets_endpoint
 
         # Audit repo getter — deferred to account for late binding
         _audit_repo_ref: list[Any] = [None]
@@ -170,9 +171,18 @@ class HTTPTransport:
 
         audit_handler = create_audit_endpoint(_get_audit_repo)
 
+        # Ticket repo getter — deferred to account for late binding
+        _ticket_repo_ref: list[Any] = [None]
+
+        def _get_ticket_repo() -> Any:
+            return _ticket_repo_ref[0]
+
+        tickets_handler = create_tickets_endpoint(_get_ticket_repo)
+
         routes: list[Route | Mount] = [
             Route("/health", health_endpoint, methods=["GET"]),
             Route("/api/admin/audit", audit_handler, methods=["GET"]),
+            Route("/api/tickets", tickets_handler, methods=["GET"]),
             Mount(config.mount_path, app=http_starlette_app),
         ]
 
@@ -180,6 +190,7 @@ class HTTPTransport:
 
         # Store the audit repo ref on the app for late binding by lifespan
         app.state.audit_repo_ref = _audit_repo_ref  # type: ignore[attr-defined]
+        app.state.ticket_repo_ref = _ticket_repo_ref  # type: ignore[attr-defined]
         logger.info(
             "HTTP transport app created: mount_path=%s stateless=%s",
             config.mount_path,
