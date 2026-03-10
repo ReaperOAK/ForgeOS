@@ -4,7 +4,7 @@
   "description": "Implement the repository pattern data access layer that all higher-level services consume. Create repository classes for tickets (CRUD, filtering, stage queries), claims (create, release, find active), and events (append, query by ticket). Repositories accept a database connection/pool and encapsulate all SQL queries. Both sync and async interfaces must be supported.",
   "type": "backend",
   "priority": "critical",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -36,10 +36,10 @@
     "All repository methods have type hints and docstrings"
   ],
   "rework_count": 0,
-  "claimed_by": "QA",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T16:28:52.777819+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -78,11 +78,18 @@
       "details": "Released claim from Backend: Lease expired at 2026-03-10T15:26:51.967765+00:00"
     },
     {
-      "timestamp": "2026-03-10T15:58:52.777825+00:00",
+      "timestamp": "2026-03-10T15:58:52.777588+00:00",
       "event": "CLAIMED",
       "agent": "QA",
       "machine_id": "pop-os",
       "details": "Claimed for QA stage review"
+    },
+    {
+      "timestamp": "2026-03-10T16:05:27.587490+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "QA PASS \u2014 82 tests, 100% coverage, 100% mutation score. Advanced to SECURITY."
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
