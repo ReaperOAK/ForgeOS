@@ -2,14 +2,16 @@
 title: ForgeOS Database Schema Reference
 type: Reference
 audience: Backend Engineers, DevOps Engineers, Architects
-last_reviewed: 2026-03-07  # Updated by Documentation Specialist 2026-03-07
+last_reviewed: 2026-03-10  # Updated by Documentation Specialist 2026-03-10
 migration_file: forgeos-server/src/db/migrations/001_initial.sql
+migration_002: mcp-server/alembic/versions/20260310_000000_002_event_tables.py
+migration_003: mcp-server/alembic/versions/20260310_000000_002_core_tables.py
 ---
 
 # ForgeOS Database Schema Reference
 
 
-This document describes the PostgreSQL schema for the ForgeOS distributed orchestration engine. It covers all tables, enums, indexes, stored functions, triggers, Row-Level Security policies, and seed data defined in the initial migration ([001_initial.sql](../../forgeos-server/src/db/migrations/001_initial.sql)).
+This document describes the PostgreSQL schema for the ForgeOS distributed orchestration engine. It covers all tables, enums, indexes, stored functions, triggers, Row-Level Security policies, and seed data defined in the initial migration ([001_initial.sql](../../forgeos-server/src/db/migrations/001_initial.sql)), the event sourcing migration ([002_event_tables.py](../../mcp-server/alembic/versions/20260310_000000_002_event_tables.py)), and the core tables migration ([002_core_tables.py](../../mcp-server/alembic/versions/20260310_000000_002_core_tables.py)).
 
 **See also:**
 - [Core Database Schema Architecture](../architecture/database-schema.md)
@@ -35,7 +37,12 @@ This document describes the PostgreSQL schema for the ForgeOS distributed orches
   - [tickets](#tickets)
   - [file_locks](#file_locks)
   - [events](#events)
+  - [event_history](#event_history)
+  - [stage_transitions](#stage_transitions)
   - [system_config](#system_config)
+  - [machines](#machines)
+  - [operators](#operators)
+  - [claims](#claims)
 - [Indexes](#indexes)
 - [Stored Functions](#stored-functions)
   - [claim_ticket](#claim_ticket)
@@ -239,6 +246,7 @@ Central entity of the ForgeOS state machine. Each row is one unit of work.
 | `created_at` | TIMESTAMPTZ | NOT NULL, DEFAULT `NOW()` | Creation timestamp |
 | `updated_at` | TIMESTAMPTZ | NOT NULL, DEFAULT `NOW()` | Last modification (auto-updated) |
 | `completed_at` | TIMESTAMPTZ | | Completion timestamp |
+| `created_by` | TEXT | | Agent or system that created the ticket (added in Core Tables Migration) |
 
 **Check constraints:**
 
@@ -293,6 +301,62 @@ reconstruction.
 > for full payload schemas, sequence numbering strategy, state reconstruction
 > patterns, LISTEN/NOTIFY integration, and archival strategy.
 
+### event_history
+
+*(Added in Migration 002)*
+
+Immutable append-only audit log of all ticket state changes. Each row captures
+the full JSONB before-and-after state snapshot. Two database triggers prevent
+any UPDATE or DELETE, enforcing the append-only invariant at the PostgreSQL
+level.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `id` | UUID | PK, DEFAULT `uuid_generate_v4()` | Internal identifier |
+| `ticket_id` | TEXT | NOT NULL, FK → tickets(ticket_id) ON DELETE CASCADE | Associated ticket |
+| `event_type` | event_type | NOT NULL | Event classification |
+| `previous_state` | JSONB | | Full ticket state before the change |
+| `new_state` | JSONB | | Full ticket state after the change |
+| `agent_id` | UUID | FK → agents(id) ON DELETE SET NULL | Acting agent |
+| `machine_id` | TEXT | | Machine hostname |
+| `created_at` | TIMESTAMPTZ | NOT NULL, DEFAULT `NOW()` | Event timestamp |
+| `metadata` | JSONB | NOT NULL, DEFAULT `'{}'` | Additional event-specific data |
+
+**Immutability triggers:**
+
+| Trigger | Event | Function | Behavior |
+|---------|-------|----------|----------|
+| `trg_event_history_no_update` | BEFORE UPDATE | `prevent_event_history_update()` | Raises exception — UPDATE prohibited |
+| `trg_event_history_no_delete` | BEFORE DELETE | `prevent_event_history_delete()` | Raises exception — DELETE prohibited |
+
+**Design rationale:** The `event_history` table uses full JSONB state snapshots
+rather than deltas to simplify querying and reduce reconstruction cost. Any
+historical ticket state can be read directly from `new_state` without replaying
+a chain of events. ARCH007 §4 establishes this design.
+
+### stage_transitions
+
+*(Added in Migration 002)*
+
+Records each SDLC stage transition with the triggering agent and reason.
+Provides a lightweight, queryable timeline of ticket movement through the
+pipeline without the overhead of full state snapshots.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `id` | UUID | PK, DEFAULT `uuid_generate_v4()` | Internal identifier |
+| `ticket_id` | TEXT | NOT NULL, FK → tickets(ticket_id) ON DELETE CASCADE | Associated ticket |
+| `from_stage` | ticket_stage | | Stage before transition (NULL for initial placement) |
+| `to_stage` | ticket_stage | NOT NULL | Stage after transition |
+| `triggered_by` | TEXT | NOT NULL | Agent or system that triggered the transition |
+| `reason` | TEXT | | Transition reason (e.g., rejection rationale) |
+| `created_at` | TIMESTAMPTZ | NOT NULL, DEFAULT `NOW()` | Transition timestamp |
+
+**Use cases:**
+- Stage duration analytics (time between consecutive transitions per ticket).
+- Bottleneck identification (which stages have the longest dwell times).
+- Rework pattern detection (transitions back to implementation stages).
+
 ### system_config
 
 Key-value store for runtime configuration parameters.
@@ -303,6 +367,83 @@ Key-value store for runtime configuration parameters.
 | `value` | JSONB | NOT NULL | Configuration value |
 | `description` | TEXT | | Human-readable description |
 | `updated_at` | TIMESTAMPTZ | NOT NULL, DEFAULT `NOW()` | Last modification |
+
+### machines
+
+*(Added in Core Tables Migration — FORGEOS-BE002)*
+
+<!-- last_reviewed: 2026-03-10T12:00:00Z -->
+
+Machine identity registry. Each row represents a unique host that has
+participated in the distributed orchestration system.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `machine_id` | UUID | PK, DEFAULT `uuid_generate_v4()` | Internal identifier |
+| `hostname` | TEXT | NOT NULL, UNIQUE | Machine hostname |
+| `registered_at` | TIMESTAMPTZ | NOT NULL, DEFAULT `NOW()` | First registration time |
+| `last_seen` | TIMESTAMPTZ | NOT NULL, DEFAULT `NOW()` | Last activity timestamp |
+
+**Trigger:** `trg_machines_last_seen` (BEFORE UPDATE) calls
+`update_updated_at()`. Note: the trigger sets the `updated_at` column, but the
+machines table uses `last_seen` — the trigger is a no-op on this table.
+Tracked as SEC-INFO-001 for future cleanup.
+
+**Design rationale:** Machines are promoted to first-class entities so that
+claims track the physical host via a UUID FK instead of a plain TEXT field.
+The UNIQUE constraint on `hostname` prevents duplicate registrations.
+
+### operators
+
+*(Added in Core Tables Migration — FORGEOS-BE002)*
+
+<!-- last_reviewed: 2026-03-10T12:00:00Z -->
+
+Human operator registry. Each row identifies a person who initiates agent runs.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `operator_id` | UUID | PK, DEFAULT `uuid_generate_v4()` | Internal identifier |
+| `name` | TEXT | NOT NULL, UNIQUE | Operator display name |
+| `created_at` | TIMESTAMPTZ | NOT NULL, DEFAULT `NOW()` | Registration timestamp |
+
+**Design rationale:** Operators as first-class entities enable proper FK
+relationships and queryable audit trails. The UNIQUE constraint on `name`
+prevents duplicate registrations.
+
+### claims
+
+*(Added in Core Tables Migration — FORGEOS-BE002)*
+
+<!-- last_reviewed: 2026-03-10T12:00:00Z -->
+
+Lease-based distributed locking. Each row represents one claim lifecycle —
+from acquisition to release or expiry. Links a ticket to the agent, machine,
+and operator responsible for the work.
+
+| Column | Type | Constraints | Description |
+|--------|------|-------------|-------------|
+| `claim_id` | UUID | PK, DEFAULT `uuid_generate_v4()` | Internal identifier |
+| `ticket_id` | UUID | NOT NULL, FK → tickets(id) ON DELETE CASCADE | Claimed ticket |
+| `agent_id` | UUID | FK → agents(id) ON DELETE SET NULL | Claiming agent |
+| `machine_id` | UUID | FK → machines(machine_id) ON DELETE SET NULL | Host machine |
+| `operator` | TEXT | | Human operator name |
+| `lease_expiry` | TIMESTAMPTZ | NOT NULL | Claim expiration time |
+| `claimed_at` | TIMESTAMPTZ | NOT NULL, DEFAULT `NOW()` | Claim acquisition time |
+| `released_at` | TIMESTAMPTZ | | Release time (NULL while active) |
+
+**ON DELETE behaviors:**
+
+| FK Column | Target | ON DELETE | Rationale |
+|-----------|--------|-----------|-----------|
+| `ticket_id` | tickets(id) | CASCADE | Deleting a ticket removes its claims |
+| `agent_id` | agents(id) | SET NULL | Agent removal preserves claim history |
+| `machine_id` | machines(machine_id) | SET NULL | Machine removal preserves claim history |
+
+**Design rationale:** The claims table provides a full audit trail of claim
+lifecycle, separate from the inline claim fields on the tickets table. Active
+claims have `released_at IS NULL`. Expired claims can be identified by
+`released_at IS NULL AND lease_expiry < NOW()`.
 
 ---
 
@@ -341,6 +482,27 @@ GIN (Generalized Inverted Index) supports efficient containment operators
 | `idx_tickets_expired_leases` | tickets | (lease_expiry) | `claimed_by IS NOT NULL AND lease_expiry IS NOT NULL` | `release_expired_claims()` |
 | `idx_file_locks_active` | file_locks | (file_path) UNIQUE | `released_at IS NULL` | File mutex enforcement |
 
+### Core Tables Indexes
+
+*(Added in Core Tables Migration — FORGEOS-BE002)*
+
+| Index | Table | Columns | Type | Purpose |
+|-------|-------|---------|------|---------|
+| `idx_machines_hostname` | machines | (hostname) | B-tree | Hostname lookups (supplements UNIQUE constraint) |
+| `idx_operators_name` | operators | (name) | B-tree | Operator name lookups (supplements UNIQUE constraint) |
+| `idx_claims_ticket_id` | claims | (ticket_id) | B-tree | Find all claims for a ticket |
+| `idx_claims_agent_id` | claims | (agent_id) | B-tree | Agent workload and claim history |
+| `idx_claims_machine_id` | claims | (machine_id) | B-tree | Machine claim distribution |
+
+### Core Tables Partial Indexes
+
+*(Added in Core Tables Migration — FORGEOS-BE002)*
+
+| Index | Table | Columns | Condition | Purpose |
+|-------|-------|---------|-----------|---------|
+| `idx_claims_active` | claims | (ticket_id) | `released_at IS NULL` | Fast lookup of currently held claims |
+| `idx_claims_expired_leases` | claims | (lease_expiry) | `released_at IS NULL AND lease_expiry < NOW()` | Expired lease cleanup |
+
 ### Event Indexes
 
 | Index | Table | Columns | Purpose |
@@ -354,6 +516,31 @@ GIN (Generalized Inverted Index) supports efficient containment operators
 | `idx_events_correlation` | events | (correlation_id) WHERE NOT NULL | Event chain tracing (added in Migration 002) |
 | `idx_events_ticket_time` | events | (ticket_id, created_at) | Time-travel per ticket (added in Migration 002) |
 | `idx_file_locks_ticket_id` | file_locks | (ticket_id) | Ticket → lock join |
+
+### Event History Indexes
+
+*(Added in Migration 002)*
+
+| Index | Table | Columns | Type | Purpose |
+|-------|-------|---------|------|---------|
+| `idx_event_history_ticket_id` | event_history | (ticket_id) | B-tree | Per-ticket history lookup |
+| `idx_event_history_event_type` | event_history | (event_type) | B-tree | Event type filtering |
+| `idx_event_history_agent_id` | event_history | (agent_id) | B-tree | Agent activity queries |
+| `idx_event_history_created_at` | event_history | (created_at) | B-tree | Chronological queries |
+| `idx_event_history_ticket_timeline` | event_history | (ticket_id, created_at) | B-tree | Ticket timeline display |
+| `idx_event_history_metadata` | event_history | (metadata) | GIN | JSONB metadata queries |
+
+### Stage Transition Indexes
+
+*(Added in Migration 002)*
+
+| Index | Table | Columns | Type | Purpose |
+|-------|-------|---------|------|---------|
+| `idx_stage_transitions_ticket_id` | stage_transitions | (ticket_id) | B-tree | Per-ticket transitions |
+| `idx_stage_transitions_from_stage` | stage_transitions | (from_stage) | B-tree | Source stage filtering |
+| `idx_stage_transitions_to_stage` | stage_transitions | (to_stage) | B-tree | Destination stage filtering |
+| `idx_stage_transitions_created_at` | stage_transitions | (created_at) | B-tree | Chronological queries |
+| `idx_stage_transitions_ticket_timeline` | stage_transitions | (ticket_id, created_at) | B-tree | Ticket transition timeline |
 
 ---
 
@@ -521,6 +708,26 @@ create a RECONCILED event instead.
 **Applied to:** events table (via `trg_events_immutable_update` and
 `trg_events_immutable_delete`).
 
+### prevent_event_history_update
+
+*(Added in Migration 002)*
+
+Trigger function that raises an exception on any UPDATE against the
+`event_history` table. The error message states that the table is append-only
+and UPDATE operations are prohibited.
+
+**Applied to:** event_history table (via `trg_event_history_no_update`).
+
+### prevent_event_history_delete
+
+*(Added in Migration 002)*
+
+Trigger function that raises an exception on any DELETE against the
+`event_history` table. The error message states that the table is append-only
+and DELETE operations are prohibited.
+
+**Applied to:** event_history table (via `trg_event_history_no_delete`).
+
 ### notify_event_created
 
 *(Added in Migration 002)*
@@ -579,10 +786,13 @@ discrepancies, current state, replayed state, and event count.
 | `trg_tickets_updated_at` | tickets | BEFORE UPDATE | `update_updated_at()` |
 | `trg_agents_updated_at` | agents | BEFORE UPDATE | `update_updated_at()` |
 | `trg_projects_updated_at` | projects | BEFORE UPDATE | `update_updated_at()` |
+| `trg_machines_last_seen` | machines | BEFORE UPDATE | `update_updated_at()` — intended to refresh `last_seen`, but trigger sets `updated_at` (column absent on machines); effectively a no-op. Tracked as SEC-INFO-001. (added in Core Tables Migration) |
 | `trg_ticket_notify` | tickets | AFTER INSERT OR UPDATE | `notify_ticket_change()` |
 | `trg_events_immutable_update` | events | BEFORE UPDATE | `prevent_event_mutation()` — raises exception to enforce append-only immutability (added in Migration 002) |
 | `trg_events_immutable_delete` | events | BEFORE DELETE | `prevent_event_mutation()` — raises exception to enforce append-only immutability (added in Migration 002) |
 | `trg_event_notify` | events | AFTER INSERT | `notify_event_created()` — sends NOTIFY on `ticket_events` channel for real-time streaming (added in Migration 002) |
+| `trg_event_history_no_update` | event_history | BEFORE UPDATE | `prevent_event_history_update()` — raises exception to enforce append-only immutability (added in Migration 002) |
+| `trg_event_history_no_delete` | event_history | BEFORE DELETE | `prevent_event_history_delete()` — raises exception to enforce append-only immutability (added in Migration 002) |
 
 ---
 
@@ -633,9 +843,29 @@ The `system_config` table is seeded with default operational parameters:
                    │(ticket_id│         │ (agent_id) │
                    │ audit)   │         └────────────┘
                    └──────────┘
+                   ┌──────────────────┐
+                   │  event_history   │──M:1── tickets (ticket_id)
+                   │ (state snapshots)│──M:1── agents  (agent_id)
+                   └──────────────────┘
+                   ┌──────────────────┐
+                   │stage_transitions │──M:1── tickets (ticket_id)
+                   │ (SDLC movement)  │
+                   └──────────────────┘
                    ┌──────────┐
                    │file_locks│──M:1── agents (locked_by)
                    │(mutex)   │
+                   └──────────┘
+                   ┌──────────┐       ┌──────────────┐
+                   │  claims  │──M:1──│   tickets    │
+                   │(lease    │       └──────────────┘
+                   │ locking) │──M:1── agents  (agent_id)
+                   │          │──M:1── machines (machine_id)
+                   └──────────┘
+                   ┌──────────┐
+                   │ machines │  (standalone, referenced by claims)
+                   └──────────┘
+                   ┌──────────┐
+                   │operators │  (standalone registry)
                    └──────────┘
 ```
 
@@ -645,13 +875,22 @@ The `system_config` table is seeded with default operational parameters:
 - **agents → events:** One agent generates many events (`agent_id` FK).
 - **agents → file_locks:** One agent holds many file locks (`locked_by` FK).
 - **tickets → events:** Each ticket has an append-only event history.
+- **tickets → event_history:** Each ticket has immutable state-change snapshots (append-only, CASCADE delete).
+- **agents → event_history:** Each agent generates event history entries (`agent_id` FK, SET NULL on delete).
+- **tickets → stage_transitions:** Each ticket has a timeline of SDLC stage movements (CASCADE delete).
 - **tickets → file_locks:** Each ticket can hold multiple file locks.
+- **tickets → claims:** Each ticket can have many claims over time (`ticket_id` FK, CASCADE). Only one active at a time (`released_at IS NULL`).
+- **agents → claims:** One agent holds many claims over time (`agent_id` FK, SET NULL).
+- **machines → claims:** One machine appears in many claims (`machine_id` FK, SET NULL).
+- **operators:** Referenced by `claims.operator` as TEXT; no FK constraint.
 
 ---
 
 ## Running Migrations
 
-<!-- last_reviewed: 2026-03-06T18:00:00Z -->
+<!-- last_reviewed: 2026-03-10T11:00:00Z -->
+
+### TypeScript Migrations (Migration 001)
 
 The migration runner (`forgeos-server/src/db/migrate.ts`) handles schema setup.
 
@@ -683,3 +922,34 @@ Migrations are idempotent: the schema uses `CREATE IF NOT EXISTS`,
 | `name` | TEXT | Migration filename (unique) |
 | `checksum` | TEXT | SHA-256 hex digest of file contents at apply time |
 | `applied_at` | TIMESTAMPTZ | Timestamp when the migration was executed |
+
+### Alembic Migrations (Migration 002+)
+
+Event sourcing and audit trail tables are managed by Alembic (Python) in the
+`mcp-server/` directory. Alembic tracks applied migrations in its own
+`alembic_version` table.
+
+```bash
+# From mcp-server/ directory:
+cd mcp-server
+
+# Run all pending migrations
+alembic upgrade head
+
+# Downgrade one revision
+alembic downgrade -1
+
+# Show current revision
+alembic current
+
+# Show migration history
+alembic history
+```
+
+**Migration files:**
+
+| Revision | File | Description |
+|----------|------|-------------|
+| 001 | `001_initial_schema.py` | Core tables (projects, agents, sessions, tickets, file_locks, events, system_config) |
+| 002 | `20260310_000000_002_event_tables.py` | Event history, stage transitions, event sourcing enhancements (FORGEOS-BE003) |
+| 002 | `20260310_000000_002_core_tables.py` | Machines, operators, claims tables; tickets.created_by column (FORGEOS-BE002) |

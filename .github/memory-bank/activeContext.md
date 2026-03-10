@@ -2146,3 +2146,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/uiux/mockups/FORGEOS-UID005.md, docs/uiux/components/health-panel.md, CHANGELOG.md
 - **Decisions:** Added freshness-tracking frontmatter (last_reviewed, reviewed_by, diataxis: reference) to both design specification files. CHANGELOG entry added. Both docs classified as Diataxis "Reference" quadrant. No implementation code changes needed — doc comments only.
 - **Timestamp:** 2026-03-10T15:45:00Z
+
+### [FORGEOS-BE002] — Documentation Summary
+- **Artifacts:** docs/database/schema-reference.md, CHANGELOG.md, mcp-server/alembic/versions/20260310_000000_002_core_tables.py, .github/agent-output/Documentation/FORGEOS-BE002.md
+- **Decisions:** Documented 3 new tables (machines, operators, claims) and tickets.created_by in schema-reference.md with full column refs, indexes, ON DELETE matrix, triggers, entity relationships. Enhanced migration docstrings. CHANGELOG entry added. SEC-INFO-001 (trg_machines_last_seen no-op) documented inline.
+- **Timestamp:** 2026-03-10T17:00:00Z

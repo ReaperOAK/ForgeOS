@@ -8,6 +8,15 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Core Tables Migration Documentation** (FORGEOS-BE002) — Documented
+  `machines`, `operators`, and `claims` tables in
+  `docs/database/schema-reference.md` with full column references, ON DELETE
+  behaviors, design rationale, 7 new indexes (including 2 partial indexes for
+  active claims and expired leases), trigger documentation for
+  `trg_machines_last_seen`, `tickets.created_by` column, and updated entity
+  relationship diagram. Enhanced `upgrade()` and `downgrade()` docstrings in
+  the Alembic migration file. Added migration to Running Migrations table.
+
 - **Event History & Audit Tables Documentation** (FORGEOS-BE003) — Documented
   `event_history` and `stage_transitions` tables in `docs/database/schema-reference.md`
   with full column references, immutability triggers, design rationale, 11 new
