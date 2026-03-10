@@ -1,3 +1,13 @@
+### [FORGEOS-BE033] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE033.md
+- **Decisions:** PASS — Zero critical/high findings. Three note-level findings (no per-tool auth, no SELECT FOR UPDATE on dep resolution, unbounded validate query) risk-accepted. All SQL parameterized. Lease manipulation impossible (server-side timestamp). Dependency graph poisoning impossible (read-only). Sync privilege escalation impossible (claiming still requires role-stage auth).
+- **Timestamp:** 2026-03-11T00:00:00Z
+
+### [FORGEOS-BE055] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE055.md
+- **Decisions:** FAIL — SEC-001 HIGH: `claim_by_id()` missing `check_role_stage_authorization()` call (CWE-862, OWASP A01). Bypasses role-stage enforcement via `tickets.claim` MCP tool. Rework #1 to BACKEND. Risk entry added to riskRegister.md.
+- **Timestamp:** 2026-03-11T00:00:00Z
+
 ### [FORGEOS-BE030] — Security Review
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE030.md
 - **Decisions:** PASS — Zero critical/high findings. All STRIDE scores ≤ 6 (LOW). OWASP Top 10 clear. SERIALIZABLE isolation with FOR UPDATE locking. Stage engine prevents stage skipping (pure domain, no I/O). Claim ownership validated before advance. Parameterized SQL throughout. Event audit trail on every transition.
@@ -3545,3 +3555,25 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Verdict:** PASS — advanced QA → SECURITY. 25/25 tests pass. All 6 ACs verified.
 - **Coverage:** signature.py 100%, github_handler.py 100%, webhooks/__init__.py 100%, transport/webhooks.py 78% (pre-existing misses)
 - **Timestamp:** 2026-03-11T14:30:00Z
+
+### [FORGEOS-BE029] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE029.md
+- **Decisions:** PASS — Zero critical/high findings. 1 MEDIUM (SEC-BE029-001: `claim_by_id` skips `check_role_stage_authorization` unlike `claim_next`; risk accepted — dispatcher protocol + advance-stage guard mitigate). 2 LOW (self-asserted identity, no rate limit). OWASP A01-A10 checked. STRIDE on 4 trust boundaries. No injection, no secrets, no CVEs.
+- **Timestamp:** 2026-03-11T23:45:00Z
+
+### [FORGEOS-BE042] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE042.md
+- **Decisions:** PASS — Zero critical/high findings. 1 MEDIUM (SEC-RATE-001: machine_id header spoofing bypass, CWE-290; accepted — requires valid API key, trusted-agent system). 1 LOW (SEC-RATE-002: unbounded bucket memory, CWE-401; accepted — bounded agent population). OWASP A01-A10 checked. STRIDE on 3 trust boundaries. Clean secret scan.
+- **Timestamp:** 2026-03-11T23:50:00Z
+
+### [FORGEOS-BE067] — QA Complete
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE067.md
+- **Decisions:** PASS — All 6 ACs verified. 150 tests pass, 95% coverage, zero ruff errors. Backoff schedule [60,300,900,3600]s correct. Dead-letter replay properly guards DEAD_LETTER status.
+- **Verdict:** PASS — advanced QA → SECURITY
+- **Coverage:** processor.py 97%, queue.py 96%, overall 95%
+- **Timestamp:** 2026-03-11T16:00:00Z
+
+### [FORGEOS-BE056] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE056.md
+- **Decisions:** APPROVED — All 10 DoD items pass. 41/41 tests, 100% BE056-specific coverage (authorization.py), ruff clean, mypy clean, all 6 ACs verified. QA ✓ Security ✓ CI ✓ Docs ✓. Rework #1 lint fixes (TC003, I001, F401) confirmed resolved.
+- **Timestamp:** 2026-03-12T03:00:00Z
