@@ -2011,3 +2011,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/tools/index.ts, forgeos-server/src/tools/tickets-update.ts, forgeos-server/src/__tests__/tools/tickets-update.test.ts
 - **Decisions:** Recreated tickets-update.ts from memory (file was never committed, lost during stash operations). Used inferred type from pool.connect() instead of Awaited<ReturnType<...>> due to pg overload resolution issue. Followed existing transaction pattern (BEGIN/SELECT FOR UPDATE/UPDATE/INSERT event/COMMIT).
 - **Timestamp:** 2026-03-10T08:38:41Z
+
+### [FORGEOS-BE015] --- Documentation Summary
+- **Artifacts:** mcp-server/src/mcp_server/server.py, __init__.py, __main__.py, mcp-server/README.md
+- **Decisions:** Enhanced module-level docstrings with Public API inventory, Error Hierarchy catalog, Sphinx cross-references, and last_reviewed metadata.
+- **Timestamp:** 2026-03-10T08:59:10Z
