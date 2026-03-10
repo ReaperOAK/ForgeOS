@@ -36,7 +36,11 @@ from mcp_server.tools.registry import (
 )
 from mcp_server.tools.ticket_tools import (
     TICKETS_NEXT_SCHEMA,
+    TICKETS_RELEASE_SCHEMA,
+    TICKETS_STATUS_SCHEMA,
     handle_tickets_next,
+    handle_tickets_release,
+    handle_tickets_status,
     register_ticket_tools,
 )
 from mcp_server.tools.validation import (
@@ -53,6 +57,8 @@ from mcp_server.tools.validation import (
 __all__ = [
     "INVALID_PARAMS",
     "TICKETS_NEXT_SCHEMA",
+    "TICKETS_RELEASE_SCHEMA",
+    "TICKETS_STATUS_SCHEMA",
     "DuplicateToolError",
     "FieldError",
     "McpValidationErrorData",
@@ -65,6 +71,8 @@ __all__ = [
     "clear_validator_cache",
     "compile_validator",
     "handle_tickets_next",
+    "handle_tickets_release",
+    "handle_tickets_status",
     "register_ticket_tools",
     "validate_tool_input",
 ]
