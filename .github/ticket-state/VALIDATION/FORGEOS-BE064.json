@@ -115,20 +115,29 @@
       "details": "Security review PASS. 0 critical/high findings. 2 low/informational documented."
     },
     {
-      "timestamp": "2026-03-10T17:08:05.148447+00:00",
+      "timestamp": "2026-03-10T23:35:00+00:00",
+      "event": "DOCS_COMPLETE",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "details": "Documentation complete. README updated, CHANGELOG entry added. HIGH confidence."
+    },
+    {
+      "timestamp": "2026-03-10T17:46:14.418295+00:00",
       "event": "STAGE_COMPLETED",
-      "agent": "Security",
+      "agent": "Documentation",
       "machine_id": "system",
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "Advanced from CI to DOCS"
     },
     {
-      "timestamp": "2026-03-10T23:35:00+00:00",
-      "event": "DOCS_COMPLETE",
+      "timestamp": "2026-03-10T17:46:30.600478+00:00",
+      "event": "STAGE_COMPLETED",
       "agent": "Documentation",
-      "machine_id": "pop-os",
-      "details": "Documentation complete. README updated, CHANGELOG entry added. HIGH confidence."
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-webhooks.md",
