@@ -4,7 +4,7 @@
   "description": "Implement operator permission scoping: operators can only perform operations on machines they are registered to. Create the operator-machine binding table and enforce that claim, advance, and rework operations via the REST API are constrained to the operator's registered machines. Admin operators bypass machine restrictions.",
   "type": "backend",
   "priority": "high",
-  "stage": "BACKEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -106,6 +106,15 @@
       "from_stage": "BACKEND",
       "to_stage": "BACKEND",
       "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-10T22:11:34.674093+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T15:00:00+00:00",
+      "event": "STAGE_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "BACKEND",
+      "to_stage": "QA",
+      "details": "BACKEND rework #1 complete - fixed 3 lint errors: TC003 (datetime to TYPE_CHECKING), I001 (import sort), F401 (unused MachineScopeError)"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",

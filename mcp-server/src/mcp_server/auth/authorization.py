@@ -24,9 +24,11 @@ Security
 
 from __future__ import annotations
 
-import datetime
 from dataclasses import dataclass
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    import datetime
 
 from mcp_server.observability import get_logger
 from mcp_server.server import INVALID_PARAMS, ForgeOSError

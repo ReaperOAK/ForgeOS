@@ -3250,3 +3250,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/QA/FORGEOS-BE058.md, mcp-server/tests/test_audit_logging.py
 - **Decisions:** PASS — 49/49 tests pass, 92% coverage (all modules >89%), lint clean, all 6 acceptance criteria verified. Comprehensive audit logging with append-only enforcement, parameterized SQL, middleware auto-logging, admin endpoint with filters.
 - **Timestamp:** 2026-03-11T14:00:00Z
+
+### [FORGEOS-BE056] — BACKEND rework #1 complete
+- **Artifacts:** mcp-server/src/mcp_server/auth/authorization.py, mcp-server/src/mcp_server/services/operator_service.py
+- **Decisions:** Fixed TC003 (datetime→TYPE_CHECKING), I001 (import sort order), F401 (unused MachineScopeError). Ruff verified clean.
+- **Timestamp:** 2026-03-11T15:00:00Z
