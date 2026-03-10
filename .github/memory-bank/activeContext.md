@@ -1866,3 +1866,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/tools/tickets-reject.ts, forgeos-server/src/__tests__/tools/tickets-reject.test.ts, .github/agent-output/QA/TASK-FOS-03-005.md
 - **Decisions:** QA PASS (HIGH confidence). 25/25 tests pass, 100% stmt / 90.9% branch / 100% func / 100% line coverage. All 8 ACs verified. Mutation testing N/A (I/O-bound handler with mocked DB, no pure business logic). Advanced QA→SECURITY.
 - **Timestamp:** 2026-03-10T07:58:00Z
+
+### [TASK-FOS-03-003] — QA REJECT (Rework #1)
+- **Artifacts:** .github/agent-output/QA/TASK-FOS-03-003.md, forgeos-server/src/tools/tickets-update.ts, forgeos-server/src/__tests__/tools/tickets-update.test.ts
+- **Decisions:** QA REJECT (HIGH confidence). 32/32 tests pass, 100% stmt / 93.3% branch / 100% func / 100% line coverage. AC1 FAIL: tickets.update is NOT registered in forgeos-server/src/tools/index.ts — import and server.tool() call are missing. Handler and schema are correct but unreachable via MCP. Sent back to BACKEND for rework.
+- **Timestamp:** 2026-03-10T08:00:15Z
+
+### [FORGEOS-BE002] — QA PASS (Core Tables Migration)
+- **Artifacts:** mcp-server/alembic/versions/20260310_000000_002_core_tables.py, mcp-server/tests/test_core_tables_migration.py, .github/agent-output/QA/FORGEOS-BE002.md
+- **Decisions:** QA PASS (HIGH confidence). 41/41 tests pass, 242/247 full suite pass (5 pre-existing async failures unrelated). All 7 ACs verified: machines, operators, claims tables created; created_by column added to tickets; FK with ON DELETE CASCADE/SET NULL; clean downgrade. Mutation testing N/A. No TODO, no print(), ruff clean.
+- **Timestamp:** 2026-03-10T12:00:00Z

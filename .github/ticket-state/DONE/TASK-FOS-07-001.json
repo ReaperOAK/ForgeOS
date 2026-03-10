@@ -1,0 +1,82 @@
+{
+  "ticket_id": "TASK-FOS-07-001",
+  "title": "Update Agent Files with MCP Tool References",
+  "description": "Update all 14 .github/agents/*.agent.md files to reference the new MCP-based ticket operations. Each agent file should document: (1) which MCP tools the agent is authorized to use (based on the RBAC matrix from Architecture \u00a77.2), (2) the MCP server URL configuration (FORGEOS_MCP_URL env var), (3) updated workflow steps using tickets.claim/tickets.complete instead of tickets.py CLI, (4) the filesystem fallback mechanism when MCP is unavailable. Agent files should retain their existing structure (role, stage, scope, forbidden actions) while adding MCP integration sections.",
+  "type": "docs",
+  "priority": "medium",
+  "stage": "DONE",
+  "sdlc_flow": [
+    "READY",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:05:37.905283+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-FOS-02-001",
+    "TASK-FOS-03-002"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    ".github/agents/Backend.agent.md",
+    ".github/agents/Frontend.agent.md",
+    ".github/agents/QA.agent.md",
+    ".github/agents/Security.agent.md",
+    ".github/agents/Architect.agent.md",
+    ".github/agents/Research.agent.md",
+    ".github/agents/Documentation.agent.md",
+    ".github/agents/CIReviewer.agent.md",
+    ".github/agents/Validator.agent.md",
+    ".github/agents/DevOps.agent.md",
+    ".github/agents/UIDesigner.agent.md",
+    ".github/agents/ProductManager.agent.md",
+    ".github/agents/ReaperOAK.agent.md",
+    ".github/agents/TODO.agent.md"
+  ],
+  "acceptance_criteria": [
+    "All 14 agent files updated with MCP tool authorization section listing permitted tools per RBAC matrix",
+    "Backend agent: authorized for tickets.next(BACKEND), tickets.claim(BACKEND), tickets.complete, tickets.spawn, tickets.release(own), tickets.extend(own)",
+    "QA agent: authorized for tickets.next(QA), tickets.claim(QA), tickets.complete, tickets.reject, tickets.release(own), tickets.extend(own)",
+    "ReaperOAK agent: authorized for tickets.next(all stages), tickets.stats, tickets.graph (no claim/complete)",
+    "Each agent file documents FORGEOS_MCP_URL and FORGEOS_API_KEY environment variables",
+    "Workflow steps updated: replace \"python3 tickets.py --claim\" with \"tickets.claim MCP tool call\"",
+    "Fallback mechanism documented: if MCP unreachable, use tickets.py CLI directly",
+    "Existing agent file structure (role, stage, scope, forbidden actions, references) preserved"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:05:37.905286+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/07-system-update.md"
+    },
+    {
+      "timestamp": "2026-03-09T21:13:33.951773+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation Specialist",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
+    },
+    {
+      "timestamp": "2026-03-10T07:59:48.354613+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
+    }
+  ],
+  "source_task_file": "TODO/tickets/07-system-update.md",
+  "tags": []
+}

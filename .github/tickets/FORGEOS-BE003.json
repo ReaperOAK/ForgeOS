@@ -34,10 +34,10 @@
     "Migration downgrades cleanly, dropping all event/audit tables"
   ],
   "rework_count": 0,
-  "claimed_by": "Backend",
+  "claimed_by": "QA",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-09T21:15:06.727337+00:00",
+  "lease_expiry": "2026-03-10T08:31:29.616819+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
