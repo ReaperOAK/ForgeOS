@@ -3055,3 +3055,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/README.md, mcp-server/src/mcp_server/locking/__init__.py, mcp-server/src/mcp_server/locking/transaction_config.py, .github/agent-output/Documentation/FORGEOS-BE010.md
 - **Decisions:** Implementation docstrings already comprehensive. Updated __init__.py module docstring with transaction_config public API. Added ~100-line README reference section covering isolation strategy, usage, retry behavior, API reference, and error handling. Diátaxis: Reference.
 - **Timestamp:** 2026-03-11T19:00:00Z
+
+### [FORGEOS-BE014] — Documentation Review
+- **Artifacts:** mcp-server/README.md, mcp-server/src/mcp_server/db/__init__.py, CHANGELOG.md
+- **Decisions:** Removed duplicate README section and duplicate CHANGELOG entry. Updated __init__.py docstring to include PoolHealthMonitor and HealthReport. Source file docstrings already comprehensive — no changes needed.
+- **Timestamp:** 2026-03-11T19:00:00Z
