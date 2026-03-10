@@ -2366,3 +2366,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/sdk/agent-runner.ts, forgeos-server/src/sdk/config.ts, forgeos-server/src/sdk/agent-runner.test.ts, forgeos-server/src/sdk/config.test.ts
 - **Decisions:** QA PASS — 32/32 tests pass, SDK folder 81.39% line coverage (config.ts 100%, agent-runner.ts 79.48%). All 7 acceptance criteria met. Git safety guards (forbidden git-add patterns, scope validation) thoroughly tested. Two-commit protocol enforced via API design. No defects found.
 - **Timestamp:** 2026-03-10T18:10:00Z
+
+### [FORGEOS-BE017] — QA PASS: SSE/HTTP Transport for Remote Agents
+- **Artifacts:** mcp-server/src/mcp_server/transport/sse.py, mcp-server/src/mcp_server/transport/http.py, mcp-server/tests/test_transport_sse.py, mcp-server/tests/test_transport_http.py
+- **Decisions:** QA PASS — 58/58 tests pass (5 new idle-timeout-sweep tests added by QA), sse.py 86% coverage, http.py 82% coverage. All 6 acceptance criteria verified. ConnectionTracker lifecycle, idle sweep, health endpoints all tested. No CORS needed (agent transport, not browser). No defects found.
+- **Timestamp:** 2026-03-10T18:30:00Z
