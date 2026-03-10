@@ -13,6 +13,11 @@
 - **Decisions:** Implemented tickets.release MCP tool using release_ticket SQL function. Added agent_name parameter for caller identity (required by SQL function and NOT_CLAIM_OWNER error semantics). Admin gate checks for '*' or 'admin_all' permissions. Auto-registers unknown agents with non-admin permissions. 17 unit tests cover all AC.
 - **Timestamp:** 2026-03-09T20:56:00.396799+00:00
 
+### [FORGEOS-DO006] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-DO006.md
+- **Decisions:** PASS (HIGH confidence). STRIDE threat model: all scores ≤4 (Low). OWASP 10/10 reviewed. 0 critical/high findings. 1 medium (SEC-001: action tag pinning vs SHA, risk accepted — first-party GitHub actions). 1 low (SEC-002: schema info in CI logs, by design). Permissions minimal (`contents: read`). No secrets, no injection vectors, no untrusted input interpolation.
+- **Timestamp:** 2026-03-10T12:00:00Z
+
 ### [FORGEOS-DO006] — QA Review
 - **Artifacts:** .github/agent-output/QA/FORGEOS-DO006.md
 - **Decisions:** PASS (HIGH confidence). All 6 AC verified. Workflow YAML valid. Schema validation cross-referenced against initial migration: 7 tables, 5 enums, 20 indexes, 3 triggers, 1 function confirmed. PostgreSQL 17-alpine matches production. No defects found. Structural review only (CI workflow artifact). Ticket advanced to SECURITY.
