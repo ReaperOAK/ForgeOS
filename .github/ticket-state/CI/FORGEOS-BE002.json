@@ -4,7 +4,7 @@
   "description": "Create the initial Alembic migration that implements the core tables from the database schema design (ARCH005). Tables include: tickets (with JSONB fields for dependencies, file_paths, acceptance_criteria), claims (linking tickets to agents with lease tracking), agents (agent identity registry), machines (machine identity registry), and operators (human operator registry). Include all primary keys, foreign keys, and NOT NULL constraints.",
   "type": "backend",
   "priority": "critical",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -88,6 +88,15 @@
       "from_stage": "QA",
       "to_stage": "SECURITY",
       "details": "Advanced from QA to SECURITY"
+    },
+    {
+      "timestamp": "2026-03-10T08:32:00.000000+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "SECURITY PASS — STRIDE threat model clean (all ≤6 Low), OWASP 10/10 compliant, 3 informational notes, 0 critical/high/medium findings. Advanced to CI."
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
@@ -100,7 +109,7 @@
     "phase2",
     "BLK-05-01"
   ],
-  "status": "BACKEND_COMPLETE",
+  "status": "SECURITY_COMPLETE",
   "completed_at": "2026-03-09T21:02:13.244517+00:00",
   "artifacts": [
     "mcp-server/alembic/versions/20260310_000000_002_core_tables.py",
