@@ -36,10 +36,10 @@
     "updated_at field refreshes automatically via trg_tickets_updated_at trigger"
   ],
   "rework_count": 1,
-  "claimed_by": "Backend",
+  "claimed_by": "QA",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T08:52:18.584406+00:00",
+  "lease_expiry": "2026-03-10T09:58:00.000000+00:00",
   "lease_duration_minutes": 30,
   "completed_at": "2026-03-10T08:38:41.957128Z",
   "history": [
