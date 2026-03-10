@@ -23,8 +23,7 @@
     "FORGEOS-UID004"
   ],
   "blocked_by": [
-    "FORGEOS-FE006",
-    "FORGEOS-UID004"
+    "FORGEOS-FE006"
   ],
   "file_paths": [
     "dashboard/src/app/machines/page.tsx",

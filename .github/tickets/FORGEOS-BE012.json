@@ -109,7 +109,7 @@
       "event": "STAGE_ADVANCED",
       "agent": "Documentation",
       "machine_id": "pop-os",
-      "details": "DOCS complete — Event Sourcing API docs, CHANGELOG, README section. Advancing to VALIDATION."
+      "details": "DOCS complete \u2014 Event Sourcing API docs, CHANGELOG, README section. Advancing to VALIDATION."
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",

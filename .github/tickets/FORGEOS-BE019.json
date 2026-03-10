@@ -102,7 +102,7 @@
       "machine_id": "pop-os",
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
-      "details": "DOCS PASS — README Correlation IDs section expanded, CHANGELOG entry added, freshness updated on all files"
+      "details": "DOCS PASS \u2014 README Correlation IDs section expanded, CHANGELOG entry added, freshness updated on all files"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
