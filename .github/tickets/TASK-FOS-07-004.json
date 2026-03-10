@@ -4,7 +4,7 @@
   "description": "Update the existing tickets.py to support dual-mode operation as a backward compatibility bridge. Add a FORGEOS_MODE environment variable with three values: \"filesystem\" (current behavior, default), \"dual\" (writes to both filesystem and PostgreSQL via MCP), and \"mcp\" (PostgreSQL-only via MCP). In dual mode, every claim/advance/release operation first executes against the filesystem (existing code) and then mirrors the operation to the MCP server via HTTP API calls. In mcp mode, all operations go through MCP and filesystem operations are skipped. Include a shadow mode that compares filesystem and MCP results and logs divergences without failing.",
   "type": "backend",
   "priority": "medium",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -37,10 +37,10 @@
     "If MCP server is unreachable in dual mode, operation continues with filesystem-only and logs WARNING"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T14:49:27.771298+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -136,6 +136,15 @@
       "agent": "Validator",
       "machine_id": "pop-os",
       "details": "CLAIM by Validator on pop-os (reaperoak)"
+    },
+    {
+      "timestamp": "2026-03-10T14:21:05.789203+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "VALIDATION APPROVED \u2014 10/10 DoD, 9/9 AC. Moved to DONE."
     }
   ],
   "source_task_file": "TODO/tickets/07-system-update.md",
