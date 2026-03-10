@@ -1,0 +1,109 @@
+{
+  "ticket_id": "FORGEOS-BE005",
+  "title": "Create Database Seed Script for JSON Import",
+  "description": "Create a database seeding script that imports existing ticket JSON files from .github/tickets/ into the PostgreSQL database. The script should read all ticket JSON files, validate them against the ticket schema, transform them into database records, and insert them with proper conflict handling (skip existing). Include sample test data for development environments.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "CI",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:59:13.990027+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE002"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "database/seed.py",
+    "database/seed_data/sample_tickets.json"
+  ],
+  "acceptance_criteria": [
+    "Seed script reads all .github/tickets/*.json files and inserts into the tickets table",
+    "Script validates each ticket against ticket-schema.json before insertion",
+    "Duplicate ticket_ids are skipped with a warning (not an error)",
+    "Script reports count of imported, skipped, and failed tickets",
+    "Sample test data file provides at least 5 representative tickets for development",
+    "Script can be run via `make seed` or `python database/seed.py`"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:59:13.990033+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase2-database.md"
+    },
+    {
+      "timestamp": "2026-03-10T10:27:38.762947+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-10T12:09:38.546947+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Claimed by Backend agent for BACKEND stage"
+    },
+    {
+      "timestamp": "2026-03-10T12:15:45.642124+00:00",
+      "event": "STAGE_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "BACKEND stage complete. 46 tests pass."
+    },
+    {
+      "timestamp": "2026-03-10T12:36:29.460929+00:00",
+      "event": "CLAIMED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "Claimed by QA agent for QA stage"
+    },
+    {
+      "timestamp": "2026-03-10T12:41:58.616710+00:00",
+      "event": "STAGE_COMPLETE",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "QA PASS. 68/68 tests pass, 95% coverage. Advanced to SECURITY."
+    },
+    {
+      "timestamp": "2026-03-10T12:57:16.575880+00:00",
+      "event": "CLAIMED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "details": "Claimed by Security agent for SECURITY stage"
+    },
+    {
+      "timestamp": "2026-03-10T13:00:26.248700+00:00",
+      "event": "STAGE_COMPLETE",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "details": "SECURITY PASS. Zero critical/high findings. Advanced to CI."
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase2-database.md",
+  "tags": [
+    "backend",
+    "database",
+    "seed",
+    "import",
+    "phase2",
+    "BLK-05-01"
+  ]
+}
