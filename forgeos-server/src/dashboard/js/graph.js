@@ -28,44 +28,44 @@ const ForgeGraph = (function () {
 
   /* ── Status Color Tokens (AC-2) ──────────────────────────── */
   const STATUS_COLORS = {
-    DONE:      '#22C55E',
-    READY:     '#3B82F6',
-    BLOCKED:   '#EF4444',
-    CLAIMED:   '#EAB308',
+    DONE: '#22C55E',
+    READY: '#3B82F6',
+    BLOCKED: '#EF4444',
+    CLAIMED: '#EAB308',
     ESCALATED: '#A855F7'
   };
 
   /* ── Priority → Radius Tokens (AC-3) ────────────────────── */
   const PRIORITY_RADIUS = {
     critical: 24,
-    high:     18,
-    medium:   14,
-    low:      10
+    high: 18,
+    medium: 14,
+    low: 10
   };
 
   const PRIORITY_RADIUS_MOBILE = {
     critical: 20,
-    high:     15,
-    medium:   12,
-    low:      8
+    high: 15,
+    medium: 12,
+    low: 8
   };
 
   /* ── Edge Tokens ─────────────────────────────────────────── */
   const EDGE_DEFAULTS = {
-    resolvedColor:   'var(--graph-edge-resolved)',
+    resolvedColor: 'var(--graph-edge-resolved)',
     unresolvedColor: 'var(--graph-edge-unresolved)',
-    criticalColor:   'var(--graph-edge-critical)',
-    defaultStroke:   1.5,
-    criticalStroke:  3,
-    arrowSize:       8
+    criticalColor: 'var(--graph-edge-critical)',
+    defaultStroke: 1.5,
+    criticalStroke: 3,
+    arrowSize: 8
   };
 
   /* ── Force Simulation Tokens ──────────────────────────────── */
   const FORCE_CONFIG = {
-    linkDistance:   100,
+    linkDistance: 100,
     chargeStrength: -300,
-    zoomMin:       0.25,
-    zoomMax:       4.0
+    zoomMin: 0.25,
+    zoomMax: 4.0
   };
 
   /* ── Module State ────────────────────────────────────────── */
@@ -89,6 +89,11 @@ const ForgeGraph = (function () {
      INITIALIZATION
      ═══════════════════════════════════════════════════════════ */
 
+  /**
+   * Initialize the dependency graph module.
+   * Sets up the SVG canvas, toolbar, search input, and motion preferences.
+   * Safe to call multiple times — subsequent calls are no-ops.
+   */
   function init() {
     if (isInitialized) return;
 
@@ -116,6 +121,10 @@ const ForgeGraph = (function () {
      SVG SETUP
      ═══════════════════════════════════════════════════════════ */
 
+  /**
+   * Create the SVG element inside the graph container with zoom behavior
+   * and a ResizeObserver for responsive sizing.
+   */
   function setupSVG() {
     const container = document.getElementById('graphContainer');
     if (!container) return;
@@ -149,6 +158,7 @@ const ForgeGraph = (function () {
     resizeSVG();
   }
 
+  /** Resize the SVG element to match its container's current dimensions. */
   function resizeSVG() {
     const container = document.getElementById('graphContainer');
     if (!container || !svg) return;
@@ -160,6 +170,12 @@ const ForgeGraph = (function () {
      DATA LOADING
      ═══════════════════════════════════════════════════════════ */
 
+  /**
+   * Fetch ticket data from the REST API and render the dependency graph.
+   * Shows loading/error/empty states as appropriate. Connects SSE for
+   * real-time updates after successful render.
+   * @returns {Promise<void>}
+   */
   async function loadGraph() {
     const loadingEl = document.getElementById('graphLoading');
     const errorEl = document.getElementById('graphError');
@@ -198,6 +214,11 @@ const ForgeGraph = (function () {
     }
   }
 
+  /**
+   * Transform raw ticket array into a graph data structure with nodes,
+   * directed edges (dependency -> dependent), and a lookup map.
+   * @param {Array<Object>} tickets - Ticket objects from the REST API.
+   */
   function buildGraphData(tickets) {
     var nodeMap = {};
     var nodes = [];
@@ -269,6 +290,11 @@ const ForgeGraph = (function () {
      CRITICAL PATH (AC-5)
      ═══════════════════════════════════════════════════════════ */
 
+  /**
+   * Compute the critical path through the DAG using longest-path analysis.
+   * Populates criticalPathSet (node IDs) and criticalEdgeSet
+   * (edge keys) used for visual emphasis during rendering (AC-5).
+   */
   function computeCriticalPath() {
     criticalPathSet.clear();
     criticalEdgeSet.clear();
@@ -349,6 +375,7 @@ const ForgeGraph = (function () {
      RENDERING
      ═══════════════════════════════════════════════════════════ */
 
+  /** Clear and re-render all edges, nodes, and the force simulation. */
   function renderGraph() {
     if (!gEdges || !gNodes) return;
 
@@ -361,6 +388,7 @@ const ForgeGraph = (function () {
   }
 
   /* ── Edges (AC-4, AC-5) ──────────────────────────────────── */
+  /** Render directed edges with arrowhead markers and critical-path styling. */
   function renderEdges() {
     var edgeSelection = gEdges.selectAll('.graph-edge')
       .data(graphData.links, function (d) { return d.edgeKey; });
@@ -400,6 +428,11 @@ const ForgeGraph = (function () {
   }
 
   /* ── Nodes (AC-2, AC-3) ─────────────────────────────────── */
+  /**
+   * Render ticket nodes as circles with status-based coloring (AC-2)
+   * and priority-based sizing (AC-3). Attaches drag, click, hover,
+   * and keyboard event handlers.
+   */
   function renderNodes() {
     var radiusMap = isMobile ? PRIORITY_RADIUS_MOBILE : PRIORITY_RADIUS;
 
@@ -498,6 +531,11 @@ const ForgeGraph = (function () {
      FORCE SIMULATION (AC-1)
      ═══════════════════════════════════════════════════════════ */
 
+  /**
+   * Create and start the D3 force simulation (AC-1). Configures link,
+   * charge, center, and collision forces. When prefers-reduced-motion
+   * is active, runs to completion instantly without animation (AC-10).
+   */
   function startSimulation() {
     if (simulation) simulation.stop();
 
@@ -539,6 +577,7 @@ const ForgeGraph = (function () {
     }
   }
 
+  /** Update edge and node positions on each simulation tick. */
   function ticked() {
     gEdges.selectAll('.graph-edge')
       .attr('x1', function (d) { return d.source.x; })
@@ -596,6 +635,11 @@ const ForgeGraph = (function () {
      NODE INTERACTION (AC-6)
      ═══════════════════════════════════════════════════════════ */
 
+  /**
+   * Handle click on a graph node. Toggles selection, applies visual
+   * filters to dim non-adjacent nodes, and opens popover (AC-6).
+   * @param {Object} d - D3 datum for the clicked node.
+   */
   function handleNodeClick(d) {
     if (selectedNodeId === d.id) {
       deselectNode();
@@ -621,6 +665,11 @@ const ForgeGraph = (function () {
   /* ── Tooltip (hover, 200ms delay) ────────────────────────── */
   var tooltipTimeout = null;
 
+  /**
+   * Show a tooltip near the cursor after a 200ms hover delay.
+   * @param {Object} d - D3 datum for the hovered node.
+   * @param {MouseEvent} event - The mouse event for positioning.
+   */
   function showTooltip(d, event) {
     clearTimeout(tooltipTimeout);
     tooltipTimeout = setTimeout(function () {
@@ -848,6 +897,10 @@ const ForgeGraph = (function () {
     }
   }
 
+  /**
+   * Pan and zoom the view to center on a specific node.
+   * @param {Object} node - D3 datum with x/y coordinates.
+   */
   function centerOnNode(node) {
     if (!svg || !zoomBehavior) return;
     var w = parseInt(svg.attr('width'), 10) || 800;
@@ -872,6 +925,10 @@ const ForgeGraph = (function () {
 
   var searchDebounceTimer = null;
 
+  /**
+   * Bind debounced search input to filter and highlight graph nodes (AC-8).
+   * Matching nodes are highlighted; the best match is centered on screen.
+   */
   function bindSearch() {
     /* Graph toolbar has a search via the graph search input,
        but we also support the global search. Look for a graph-specific
@@ -1017,6 +1074,10 @@ const ForgeGraph = (function () {
     svg.call(zoomBehavior.transform, t);
   }
 
+  /**
+   * Zoom and pan the SVG so all nodes fit within the viewport with padding.
+   * Respects prefers-reduced-motion for the transition.
+   */
   function fitToView() {
     if (!svg || !zoomBehavior || !graphData.nodes.length) return;
 
@@ -1045,6 +1106,7 @@ const ForgeGraph = (function () {
     }
   }
 
+  /** Reset selection, search query, dismiss overlays, and fit-to-view. */
   function resetGraph() {
     selectedNodeId = null;
     searchQuery = '';
@@ -1159,6 +1221,10 @@ const ForgeGraph = (function () {
      SSE REAL-TIME UPDATES (AC-9)
      ═══════════════════════════════════════════════════════════ */
 
+  /**
+   * Connect to the SSE endpoint for real-time ticket update events (AC-9).
+   * Automatically reconnects on connection loss with a 3-second delay.
+   */
   function connectGraphSSE() {
     /* Reuse the main app's SSE connection by intercepting ticket-update events.
        We hook into the existing EventSource rather than creating a new one. */
@@ -1189,6 +1255,12 @@ const ForgeGraph = (function () {
     }
   }
 
+  /**
+   * Handle an incoming SSE ticket-update event. Updates the affected
+   * node, recomputes the critical path, shows a pulse animation and
+   * a toast notification.
+   * @param {Object} data - Parsed event payload with ticket_id and new data.
+   */
   function handleGraphTicketUpdate(data) {
     var ticket = data.ticket || data;
     var ticketId = ticket.ticket_id || ticket.id;
@@ -1247,10 +1319,10 @@ const ForgeGraph = (function () {
       if (sourceId === ticketId) {
         if (d.isResolved) {
           line.classed('graph-edge--resolved', true)
-              .classed('graph-edge--unresolved', false)
-              .attr('stroke', EDGE_DEFAULTS.resolvedColor)
-              .attr('stroke-dasharray', null)
-              .attr('marker-end', 'url(#arrowResolved)');
+            .classed('graph-edge--unresolved', false)
+            .attr('stroke', EDGE_DEFAULTS.resolvedColor)
+            .attr('stroke-dasharray', null)
+            .attr('marker-end', 'url(#arrowResolved)');
         }
       }
     });
@@ -1377,6 +1449,10 @@ const ForgeGraph = (function () {
      LEGEND
      ═══════════════════════════════════════════════════════════ */
 
+  /**
+   * Create and inject the graph legend element showing status colors,
+   * edge types, and priority-based node sizes.
+   */
   function createLegend() {
     var container = document.getElementById('graphContainer');
     if (!container || container.querySelector('.graph-legend')) return;
@@ -1419,9 +1495,9 @@ const ForgeGraph = (function () {
     html += '<br><strong style="font-size:var(--text-sm,13px)">Size = Priority</strong><br>';
     var sizes = [
       { label: 'Critical', r: 8 },
-      { label: 'High',     r: 6 },
-      { label: 'Medium',   r: 4 },
-      { label: 'Low',      r: 3 }
+      { label: 'High', r: 6 },
+      { label: 'Medium', r: 4 },
+      { label: 'Low', r: 3 }
     ];
     sizes.forEach(function (s) {
       html += '<span style="display:inline-block;width:' + (s.r * 2) + 'px;height:' + (s.r * 2) + 'px;' +
@@ -1472,6 +1548,12 @@ const ForgeGraph = (function () {
      GRAPH UPDATE (Full Reload)
      ═══════════════════════════════════════════════════════════ */
 
+  /**
+   * Update a single node's visual state without full re-render.
+   * Used by SSE handler for real-time ticket status changes.
+   * @param {string} ticketId - The ticket ID to update.
+   * @param {Object} newData - Partial node data (status, title, priority).
+   */
   function updateNode(ticketId, newData) {
     var node = graphData.nodeMap ? graphData.nodeMap[ticketId] : null;
     if (!node) return;
@@ -1497,6 +1579,11 @@ const ForgeGraph = (function () {
      UTILITIES
      ═══════════════════════════════════════════════════════════ */
 
+  /**
+   * Escape a string for safe HTML insertion.
+   * @param {string} str - Raw string to escape.
+   * @returns {string} HTML-safe string.
+   */
   function escapeHtml(str) {
     var div = document.createElement('div');
     div.appendChild(document.createTextNode(str));
