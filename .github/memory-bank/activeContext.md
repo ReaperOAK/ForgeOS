@@ -8,6 +8,11 @@
 - **Decisions:** asyncio.Lock over threading.Lock for event-loop-safe concurrency; composition over inheritance (reuses AgentSession/SessionState, separate class); MaxSessionsExceededError with retry_after_seconds for programmatic retry handling; default 50 max sessions
 - **Timestamp:** 2026-03-11T00:00:00Z
 
+### [FORGEOS-BE023] — QA PASS
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE023.md
+- **Decisions:** PASS — 22/22 tests pass, 88% coverage (above 80% threshold), zero lint errors. All 6 acceptance criteria verified. Minor cosmetic finding: misleading comment in test_timeout_cleanup_only_removes_expired (non-blocking).
+- **Timestamp:** 2026-03-11T04:30:00Z
+
 ### [FORGEOS-BE010] — QA PASS
 - **Artifacts:** .github/agent-output/QA/FORGEOS-BE010.md
 - **Decisions:** PASS — 49/49 tests pass, 100% coverage (66 stmts), mypy clean. All 6 ticket JSON ACs verified. Lint: 2 source issues (UP035 AsyncIterator import, F401 unused TYPE_CHECKING), 15 test style issues (F841 unused conn vars, I001 unsorted imports). Non-blocking for QA — CI Reviewer scope.
@@ -2944,4 +2949,9 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 ### [FORGEOS-BE052] — Security Review
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE052.md
 - **Decisions:** PASS — Zero critical/high findings. All SQL parameterized, STRICT mode provides 403 deny-by-default, inactive machines always rejected, frozen dataclass prevents mutation, structured logging with no PII. Two informational notes: UPSERT reactivates soft-deleted machines (by design), schema mismatch with migration 002 (needs follow-up migration).
+- **Timestamp:** 2026-03-11T12:30:00Z
+
+### [FORGEOS-BE014] — QA Complete
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE014.md, mcp-server/tests/test_health.py (lint fixes)
+- **Decisions:** PASS — 56/56 tests, 99% coverage, all 6 ACs met, 5 test lint issues fixed by QA
 - **Timestamp:** 2026-03-11T12:30:00Z
