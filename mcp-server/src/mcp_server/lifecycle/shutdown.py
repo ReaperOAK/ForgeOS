@@ -1,11 +1,21 @@
 """Graceful shutdown with request draining for the ForgeOS MCP Server.
 
 Provides :class:`GracefulShutdownManager` which:
+
 - Registers SIGTERM / SIGINT handlers on the running event loop.
 - Tracks in-flight requests with a thread-safe counter.
 - Drains pending requests before closing database connections.
 - Executes registered cleanup callbacks in LIFO order.
 - Times out if draining exceeds the configured threshold.
+
+Configuration
+-------------
+Shutdown behaviour is controlled via :class:`ShutdownConfig`:
+
+``shutdown_timeout_seconds`` (default 30.0)
+    Maximum seconds to wait for in-flight requests to complete.
+``drain_poll_interval_seconds`` (default 0.5)
+    Sleep interval between drain-loop polls.
 
 Usage::
 
@@ -23,6 +33,18 @@ Usage::
     # Or, as a context manager:
     with manager.request_scope():
         ...
+
+    # Register additional cleanup (runs in LIFO order):
+    manager.add_cleanup_callback("flush_events", flush_pending_events)
+
+Shutdown Lifecycle
+------------------
+1. Signal received (SIGTERM or SIGINT).
+2. State transitions to ``DRAINING`` — new requests are rejected.
+3. Drain loop waits for in-flight requests (up to timeout).
+4. Registered cleanup callbacks execute in LIFO order.
+5. Database connection pool is closed.
+6. State transitions to ``SHUTDOWN`` — ``shutdown_complete`` event is set.
 """
 
 from __future__ import annotations
@@ -50,11 +72,19 @@ logger = logging.getLogger(__name__)
 
 
 class ShutdownState(enum.Enum):
-    """Lifecycle state of the server."""
+    """Lifecycle state of the server.
+
+    Transitions: ``RUNNING`` → ``DRAINING`` → ``SHUTDOWN`` (one-way).
+    """
 
     RUNNING = "running"
+    """Server is accepting requests normally."""
+
     DRAINING = "draining"
+    """Server is rejecting new requests and waiting for in-flight ones."""
+
     SHUTDOWN = "shutdown"
+    """Server has completed shutdown; all resources are released."""
 
 
 class ShutdownError(Exception):
@@ -189,9 +219,17 @@ class GracefulShutdownManager:
     # -- cleanup callbacks --------------------------------------------------
 
     def add_cleanup_callback(self, name: str, callback: object) -> None:
-        """Register an async callable to run during shutdown cleanup.
+        """Register a callable to run during shutdown cleanup.
 
         Callbacks execute in **LIFO** order (last registered runs first).
+        Both sync and async callables are supported.
+
+        Parameters
+        ----------
+        name:
+            Human-readable label for logging.
+        callback:
+            A sync or async callable with no arguments.
         """
         self._cleanup_callbacks.append((name, callback))
 
@@ -274,7 +312,14 @@ class GracefulShutdownManager:
     # -- introspection ------------------------------------------------------
 
     def status(self) -> dict[str, object]:
-        """Return a snapshot of the manager's current status."""
+        """Return a snapshot of the manager's current status.
+
+        Returns
+        -------
+        dict
+            Keys: ``state``, ``in_flight_requests``,
+            ``shutdown_timeout_seconds``, ``shutdown_complete``.
+        """
         with self._lock:
             return {
                 "state": self._state.value,

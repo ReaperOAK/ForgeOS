@@ -8,6 +8,29 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Structured JSON Logging** (FORGEOS-BE024) — Production-grade structured
+  logging module for the Python MCP server (`mcp_server/observability/`). All
+  log output is machine-parseable JSON with consistent fields: `timestamp`,
+  `level`, `message`, `logger`, and `correlation_id`. Features include
+  `StructuredJsonFormatter` (single-line JSON output), `SensitiveDataFilter`
+  (redacts passwords, tokens, API keys, DSN credentials from log records),
+  `contextvars`-based correlation ID propagation for async request tracing,
+  configurable log levels via `FORGEOS_LOG_LEVEL` environment variable, and
+  zero external dependencies (stdlib `logging` only). 96% test coverage with
+  35 tests. Added Observability section to `mcp-server/README.md` covering
+  log schema, configuration, correlation IDs, redaction, and public API.
+
+- **Graceful Shutdown with Request Draining** (FORGEOS-BE026) — Added
+  `GracefulShutdownManager` in `mcp-server/src/mcp_server/lifecycle/shutdown.py`
+  providing signal-driven (SIGTERM/SIGINT) graceful shutdown for the MCP server.
+  Features: thread-safe in-flight request tracking, configurable drain timeout
+  (default 30 s), LIFO cleanup callback registry, database pool closure, and a
+  `request_scope()` context manager for middleware integration. Includes
+  `ShutdownConfig` (validated dataclass), `ShutdownState` enum
+  (RUNNING → DRAINING → SHUTDOWN), and `ShutdownError` for rejected requests.
+  Added `Graceful Shutdown` section to `mcp-server/README.md` documenting
+  configuration, environment variables, lifecycle, and API reference.
+
 - **Operator Workbench and Claims Monitor — UI Design Documentation**
   (FORGEOS-UID004) — Complete mockup specification and component documentation
   for the Operator Workbench dashboard. Includes 7 React components
