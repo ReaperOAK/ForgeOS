@@ -37,7 +37,7 @@
   "claimed_by": "Backend",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T10:37:08.889818+00:00",
+  "lease_expiry": "2026-03-10T12:39:15+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -60,6 +60,20 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "Claimed by Backend on pop-os (reaperoak)"
+    },
+    {
+      "timestamp": "2026-03-10T12:04:37.696680+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: Lease expired at 2026-03-10T10:37:08.889818+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T12:09:15+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Re-claimed by Backend on pop-os (reaperoak) — re-dispatch"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
