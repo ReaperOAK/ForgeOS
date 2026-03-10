@@ -2730,3 +2730,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** agent-sdk/pyproject.toml, agent-sdk/src/forgeos_sdk/__init__.py, client.py, config.py, exceptions.py, agent-sdk/tests/test_client.py, test_config.py, test_exceptions.py
 - **Decisions:** QA PASS — 44/44 tests pass, 100% coverage (64 stmts, 0 missed). All 6 ACs verified. No defects found. 1 cosmetic ruff warning (UP045 Optional→union). Structured logging only, no TODO/FIXME. Clean exception hierarchy. Ticket advanced to SECURITY.
 - **Timestamp:** 2026-03-10T22:00:00Z
+
+### [FORGEOS-BE053] — QA PASS
+- **Artifacts:** mcp-server/src/mcp_server/auth/operator_auth.py, mcp-server/src/mcp_server/services/operator_service.py, mcp-server/tests/test_operator_auth.py
+- **Decisions:** JWT/HS256 with bcrypt password hashing; 62/62 tests pass; 97% coverage (98% operator_auth, 97% operator_service); all 6 ACs verified; no defects found
+- **Timestamp:** 2026-03-10T16:46:00+00:00
