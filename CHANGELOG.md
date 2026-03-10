@@ -6,6 +6,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Added
+
+- **Database Migration CI Pipeline Documentation** — Enhanced inline YAML
+  comments in `.github/workflows/database-ci.yml` explaining trigger path
+  filters, concurrency control, minimal permissions, ephemeral service
+  container credentials, `PIPESTATUS` error handling, schema validation
+  inventory (7 tables, 5 enums, 20 indexes, 3 triggers, 1 function), and
+  output variable usage. Created `docs/operations/database-migration-ci.md`
+  as a Diataxis Reference document covering pipeline steps, troubleshooting,
+  and a how-to guide for adding new migrations (FORGEOS-DO006).
+
 ### Changed
 
 - **Root Documentation Updates** — Updated README.md, agents.md, and
