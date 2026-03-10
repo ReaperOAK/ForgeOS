@@ -4,7 +4,7 @@
   "description": "Implement the tickets.spawn MCP tool that creates a child ticket linked to the current ticket, enabling self-expanding workflows. The child ticket gets a generated ticket_id, inherits the parent's project context, and has parent_id set to the parent ticket_id. The child starts in BLOCKED status if it has dependencies, or READY if not. Records a SPAWNED event on the parent ticket.",
   "type": "backend",
   "priority": "high",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Returns {ticket: childTicket, parent_ticket_id} on success"
   ],
   "rework_count": 0,
-  "claimed_by": "Security",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T15:20:00+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -84,6 +84,15 @@
       "agent": "Security",
       "machine_id": "pop-os",
       "details": "Claimed by Security on pop-os (reaperoak)"
+    },
+    {
+      "timestamp": "2026-03-10T14:30:00+00:00",
+      "event": "SECURITY_COMPLETE",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "SECURITY PASS. STRIDE max score 9 (LOW). OWASP 10/10 reviewed. 0 critical/high. 6 advisory findings. Advanced to CI."
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
