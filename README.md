@@ -9,6 +9,18 @@ simulates a professional engineering organization — not a code generator.
 
 Version 9.1.0 | Built on GitHub Copilot Agent Infrastructure
 
+## Quick Start
+
+```bash
+git clone https://github.com/ReaperOAK/ForgeOS.git
+cd ForgeOS
+make setup   # checks prerequisites, installs deps, creates .env
+make up      # starts PostgreSQL, MCP Server, and pgAdmin
+make migrate && make seed  # apply schema and load sample data
+```
+
+Open the live Kanban dashboard at **http://localhost:3000/dashboard**.
+
 ---
 
 ## Vision
@@ -38,6 +50,20 @@ engineering output with full audit trails.
 
 Vibecoding operates a **two-layer concurrent model** with no global phase
 barriers. Strategic discovery and execution run simultaneously.
+
+The runtime infrastructure consists of:
+
+- **ForgeOS MCP Server** (`forgeos-server/`) — TypeScript/Express service
+  exposing 11 ticket-lifecycle tools over the Model Context Protocol (MCP)
+  via Streamable HTTP transport.
+- **PostgreSQL 17** — Primary data store with Row-Level Security, stored
+  functions for atomic ticket operations, event-sourcing audit trail, and
+  `LISTEN/NOTIFY` for real-time Server-Sent Events.
+- **Python MCP Server** (`mcp-server/`) — Alternative MCP server built on
+  the official Python SDK with FastMCP, asyncpg, and Pydantic.
+- **Real-Time Dashboard** — Live Kanban board at
+  **http://localhost:3000/dashboard** with SSE-driven updates, stage
+  filtering, and ticket detail views.
 
 ```
 ReaperOAK (CTO / Elastic Multi-Worker Parallel Orchestrator)
@@ -447,6 +473,31 @@ autonomous delivery.
 agents.md                  Boot protocol loaded on every agent interaction
                            Safety checks, context loading, chunk routing
 
+forgeos-server/            TypeScript MCP Server (Express + PostgreSQL 17)
+  src/
+    server.ts              Express app with MCP Streamable HTTP transport
+    config.ts              Zod-validated environment configuration
+    db/                    Connection pool, migrations, seed, file-mutex
+    tools/                 MCP tool handlers (claim, advance, reject, etc.)
+    api/                   REST + SSE routes (tickets, stages, events, admin)
+    auth/                  Agent registration, API key management
+    dashboard/             Static Kanban dashboard (HTML/CSS/JS)
+    middleware/            Logging, error handling, validation
+    webhooks/              GitHub push reconciliation
+  docker-compose.yml       PostgreSQL + PgBouncer + MCP Server
+  Dockerfile               Multi-stage Docker build
+
+mcp-server/                Python MCP Server (FastMCP + asyncpg + Pydantic)
+  src/mcp_server/          Server, tools, config, error hierarchy
+  alembic/                 PostgreSQL schema migrations
+  tests/                   Pytest test suite
+
+infra/                     Infrastructure and DevOps
+  docker-compose.yml       Production Docker stack
+  scripts/                 setup.sh, seed.sh, backup.sh, restore.sh
+  config/                  Environment profiles (settings.py)
+  monitoring/              Prometheus + Grafana stack
+
 TODO/                      Task decomposition artifacts
   vision.md                L0 vision + L1 capabilities
   capabilities.md          L1 capability details with status
@@ -613,26 +664,29 @@ It is a programmable engineering organization.
 
 ### Prerequisites
 
+- Docker and Docker Compose (v2+)
 - VS Code with GitHub Copilot (Agent Mode)
 - Git configured with commit permissions
-- Node.js / Python runtime (for project-specific builds)
+- Node.js 22+ / Python 3.12+ (for local development without Docker)
 
 ### Setup
 
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd vibecoding
+git clone https://github.com/ReaperOAK/ForgeOS.git
+cd ForgeOS
 
-# Verify agent definitions
-ls .github/agents/
+# One-command setup — checks prerequisites, installs deps, creates .env
+make setup
 
-# Verify chunk system
-ls .github/vibecoding/chunks/
+# Start all services (PostgreSQL 17, MCP Server, pgAdmin)
+make up
 
-# Check guardian status
-cat .github/guardian/STOP_ALL
+# Apply database migrations and load sample data
+make migrate && make seed
 ```
+
+The live Kanban dashboard is available at **http://localhost:3000/dashboard**.
 
 ### Configuration
 
