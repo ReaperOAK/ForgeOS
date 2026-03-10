@@ -193,6 +193,14 @@ _None_
 | SEC-COMPOSE-007 | Low | Missing container hardening: no security_opt no-new-privileges, no read_only FS (CWE-250) | Risk Accepted | Dev environment; add hardening options for production |
 | SEC-COMPOSE-008 | Low | pgbouncer lacks healthcheck; mcp-server depends via service_started only (CWE-693) | Risk Accepted | pgbouncer starts quickly; add healthcheck for production reliability |
 
+### [FORGEOS-BE060] — Webhook Signature Verification Security Risks (2026-03-11T15:45:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-REPLAY-001 | Medium | No webhook replay protection — `X-GitHub-Delivery` header not tracked for deduplication (CWE-294) | Risk Accepted | Requires network interception to exploit; HMAC is strong; recommend future enhancement to track delivery IDs in TTL cache |
+| SEC-CONFIG-001 | Medium | Silent skip of signature verification when `GITHUB_WEBHOOK_SECRET` is unset (CWE-1188) | Risk Accepted | Documented dev behavior; production deployments should enforce secret via deployment checks; recommend startup warning log |
+| SEC-DOS-001 | Low | No explicit body size limit on webhook endpoint (CWE-770) | Risk Accepted | Starlette/uvicorn configurable limits apply; GitHub payloads are typically <256KB |
+
 ### [TASK-FOS-03-001] — tickets.next MCP Tool Security Risks (2026-03-07T08:15:00Z)
 
 | ID | Severity | Description | Status | Mitigation |

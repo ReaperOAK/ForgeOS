@@ -1,3 +1,8 @@
+### [FORGEOS-BE034] — QA PASS (Rework #1 Re-review)
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE034.md
+- **Decisions:** PASS — Both rework defects verified fixed: (1) list_tickets() method exists with correct 7-param signature, parameterized dynamic WHERE, COUNT(*) OVER(); (2) /api/tickets route mounted in create_app() with late-binding ticket_repo_ref. 29/29 tests pass. Ruff clean. All 6 ACs satisfied. Coverage ≥90% for new code. Mutation score: N/A (unit tests with mocked repo — real SQL tested via guard tests).
+- **Timestamp:** 2026-03-11T00:30:00Z
+
 ### [FORGEOS-BE033] — Security Review
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE033.md
 - **Decisions:** PASS — Zero critical/high findings. Three note-level findings (no per-tool auth, no SELECT FOR UPDATE on dep resolution, unbounded validate query) risk-accepted. All SQL parameterized. Lease manipulation impossible (server-side timestamp). Dependency graph poisoning impossible (read-only). Sync privilege escalation impossible (claiming still requires role-stage auth).
@@ -7,6 +12,11 @@
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE055.md
 - **Decisions:** FAIL — SEC-001 HIGH: `claim_by_id()` missing `check_role_stage_authorization()` call (CWE-862, OWASP A01). Bypasses role-stage enforcement via `tickets.claim` MCP tool. Rework #1 to BACKEND. Risk entry added to riskRegister.md.
 - **Timestamp:** 2026-03-11T00:00:00Z
+
+### [FORGEOS-BE060] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE060.md
+- **Decisions:** PASS — Zero critical/high findings. Two MEDIUM findings risk-accepted: (1) SEC-REPLAY-001 no X-GitHub-Delivery replay protection (CWE-294), (2) SEC-CONFIG-001 silent skip of verification when secret unset (CWE-1188). One LOW: no body size limit (CWE-770). HMAC-SHA256 with constant-time comparison confirmed. Secret from env var, never hardcoded.
+- **Timestamp:** 2026-03-11T15:45:00Z
 
 ### [FORGEOS-BE030] — Security Review
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE030.md
