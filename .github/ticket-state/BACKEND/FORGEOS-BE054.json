@@ -4,7 +4,7 @@
   "description": "Create unified authentication middleware that intercepts both MCP tool calls and REST API requests. For MCP, extract the API key from the request metadata and validate agent identity. For REST, extract the bearer token from the Authorization header and validate operator identity. The middleware populates a request context with the authenticated identity for downstream use by authorization and audit layers.",
   "type": "backend",
   "priority": "critical",
-  "stage": "READY",
+  "stage": "BACKEND",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Request context includes identity_type (agent/operator/admin), identity_id, role, and machine_id"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Backend",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T15:16:05.268046+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -54,6 +54,13 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-10T14:46:05.268046+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Claimed for BACKEND stage implementation"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
