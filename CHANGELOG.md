@@ -121,6 +121,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   Reports total, active, idle, and waiting connection counts, pool saturation
   percentage, and average wait time. 56 tests with 96% coverage.
 
+- **Per-Operation Transaction Isolation** (FORGEOS-BE010) — Maps ForgeOS
+  operations to PostgreSQL transaction isolation levels at
+  `mcp_server/locking/transaction_config.py`. Claim and read operations use
+  `READ COMMITTED` (with `SKIP LOCKED` for non-blocking semantics); state
+  transitions (advance, rework) use `SERIALIZABLE` to prevent concurrent
+  state corruption. `transactional()` async context manager sets the isolation
+  level per transaction, with automatic retry on serialization failure
+  (SQLSTATE `40001`) using exponential back-off (default 3 retries, 50 ms
+  base delay). Enum-based `IsolationLevel` and `OperationType`, frozen
+  `OperationIsolation` dataclass with justification strings, `PoolLike`
+  Protocol for dependency injection. 49 tests with 100% coverage.
+
 - **File-Level Advisory Lock Mutex** (FORGEOS-BE007) — PostgreSQL advisory lock
   mutex for file-level concurrency control (`mcp_server/locking/file_mutex.py`).
   Provides `FileMutex` with blocking (`acquire`) and non-blocking (`try_acquire`)

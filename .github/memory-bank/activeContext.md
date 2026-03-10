@@ -1,3 +1,8 @@
+### [FORGEOS-BE010] — Documentation Complete
+- **Artifacts:** CHANGELOG.md, mcp-server/README.md, mcp-server/src/mcp_server/locking/transaction_config.py, .github/agent-output/Documentation/FORGEOS-BE010.md
+- **Decisions:** Docstrings already comprehensive — no code changes needed. Added CHANGELOG entry for per-operation transaction isolation. Updated last_reviewed freshness dates in README section and module docstring.
+- **Timestamp:** 2026-03-11T12:00:00Z
+
 ### [FORGEOS-BE009] — BACKEND complete
 - **Artifacts:** mcp-server/src/mcp_server/locking/lease_cleanup.py, mcp-server/tests/test_lease_cleanup.py, mcp-server/src/mcp_server/locking/__init__.py
 - **Decisions:** Followed LeaseHeartbeat pattern for async background task. Used RELEASED event_type for event_history records. Atomic per-lease release transactions for consistency.
