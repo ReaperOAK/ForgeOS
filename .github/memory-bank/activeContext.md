@@ -2711,6 +2711,11 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** PASS verdict — 82 tests (40 existing + 42 QA), 100% line+branch coverage (164 stmts, 8 branches), 100% mutation score (7/7 killed). Tested converter edge cases, frozen dataclass immutability, pagination parameter forwarding, SQL WHERE clause verification, metadata/payload passthrough. All 6 acceptance criteria verified. No defects found.
 - **Timestamp:** 2026-03-10T22:00:00Z
 
+### [FORGEOS-BE022] — QA PASS
+- **Artifacts:** mcp-server/src/mcp_server/sessions/manager.py, mcp-server/src/mcp_server/sessions/__init__.py, mcp-server/tests/test_session_manager.py (58 tests), .github/agent-output/QA/FORGEOS-BE022.md
+- **Decisions:** PASS verdict — 58 tests passing, 96% branch coverage (204 stmts, 52 branches). All 6 acceptance criteria verified: session creation with identity metadata, timestamp storage (connected_at, last_heartbeat), heartbeat extends timeout (proven by keep-alive test), async cleanup loop with callbacks (error-resilient), identity-validated resumption with resumption window, session listing/monitoring with state filter. Thread-safe via threading.Lock, async cleanup via asyncio.Task, callbacks outside lock. No TODO, no print(), structured logging only.
+- **Timestamp:** 2026-03-10T17:30:00Z
+
 ### [FORGEOS-BE014] — QA PASS
 - **Artifacts:** mcp-server/tests/test_health.py (expanded 30→56 tests), .github/agent-output/QA/FORGEOS-BE014.md
 - **Decisions:** Added 26 mutation-killing tests covering arithmetic, boundary, state transition, and exception handler mutations. Manual mutation analysis (22/22 killed) due to mutmut v3 infra incompatibility. Coverage improved 96%→99%.
