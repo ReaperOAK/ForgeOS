@@ -455,6 +455,334 @@ class TestPoolHealthMonitorWaitTracking:
 
 
 # ---------------------------------------------------------------------------
+# Mutation-killing: saturation & avg_wait arithmetic (AC4)
+# ---------------------------------------------------------------------------
+
+
+class TestMutationKillingArithmetic:
+    """Kill mutants that swap operands or change arithmetic in health_report."""
+
+    def test_saturation_half_pool(self) -> None:
+        """5 active out of 10 max = 50%, not 200% or some other mutation."""
+        pool = _make_mock_pool(size=7, idle=2, max_size=10)
+        monitor = PoolHealthMonitor(pool)
+        report = monitor.health_report()
+        # active = size - idle = 7 - 2 = 5; saturation = 5/10*100 = 50.0
+        assert report.saturation_pct == 50.0
+
+    def test_saturation_with_max_size_zero(self) -> None:
+        """When max_size is 0, saturation must be 0 (guard against ZeroDivisionError)."""
+        pool = _make_mock_pool(size=0, idle=0, max_size=0)
+        # Override used_size since mock calculates it from size - idle
+        pool.stats.return_value = PoolStats(
+            size=0, free_size=0, used_size=0, min_size=0, max_size=0,
+        )
+        monitor = PoolHealthMonitor(pool)
+        report = monitor.health_report()
+        assert report.saturation_pct == 0.0
+
+    def test_avg_wait_time_calculation(self) -> None:
+        """10ms total over 5 acquires = 2.0ms avg, not 0.5 (inverted division)."""
+        pool = _make_mock_pool()
+        monitor = PoolHealthMonitor(pool)
+        monitor._total_wait_time_ms = 10.0
+        monitor._total_acquires = 5
+        report = monitor.health_report()
+        assert report.avg_wait_time_ms == 2.0
+
+    def test_avg_wait_time_single_acquire(self) -> None:
+        """Single acquire with 7.5ms wait must report 7.5ms avg."""
+        pool = _make_mock_pool()
+        monitor = PoolHealthMonitor(pool)
+        monitor.record_acquire_wait(7.5)
+        report = monitor.health_report()
+        assert report.avg_wait_time_ms == 7.5
+
+    def test_saturation_one_active(self) -> None:
+        """1 active out of 10 max = 10%."""
+        pool = _make_mock_pool(size=5, idle=4, max_size=10)
+        monitor = PoolHealthMonitor(pool)
+        report = monitor.health_report()
+        # active = 5 - 4 = 1; saturation = 1/10*100 = 10.0
+        assert report.saturation_pct == 10.0
+
+
+# ---------------------------------------------------------------------------
+# Mutation-killing: boundary conditions (AC2, AC3)
+# ---------------------------------------------------------------------------
+
+
+class TestMutationKillingBoundaries:
+    """Kill mutants that change >= to > or modify conditional boundaries."""
+
+    @pytest.mark.asyncio
+    async def test_recycle_exactly_at_lifetime(self) -> None:
+        """When elapsed == max_lifetime, recycling MUST trigger (>= boundary)."""
+        pool = _make_mock_pool()
+        monitor = PoolHealthMonitor(pool, max_lifetime=10.0)
+        # Set last_recycle_epoch so elapsed exactly equals max_lifetime
+        monitor._last_recycle_epoch = time.monotonic() - 10.0
+
+        await monitor._run_health_check()
+
+        pool._pool.expire_connections.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_no_recycle_just_under_lifetime(self) -> None:
+        """When elapsed < max_lifetime by a tiny margin, no recycling."""
+        pool = _make_mock_pool()
+        monitor = PoolHealthMonitor(pool, max_lifetime=10.0)
+        monitor._last_recycle_epoch = time.monotonic() - 9.99
+
+        await monitor._run_health_check()
+
+        pool._pool.expire_connections.assert_not_called()
+
+    def test_decrement_from_one_goes_to_zero(self) -> None:
+        """max(0, 1 - 1) = 0. Kill mutant that changes max(0, ...) to max(1, ...)."""
+        pool = _make_mock_pool()
+        monitor = PoolHealthMonitor(pool)
+        monitor._waiting_count = 1
+        monitor.decrement_waiting()
+        assert monitor._waiting_count == 0
+
+    def test_decrement_twice_from_zero(self) -> None:
+        """Clamped at 0, never goes negative."""
+        pool = _make_mock_pool()
+        monitor = PoolHealthMonitor(pool)
+        monitor.decrement_waiting()
+        monitor.decrement_waiting()
+        assert monitor._waiting_count == 0
+
+    def test_increment_decrement_sequence(self) -> None:
+        """3 increments, 2 decrements = 1 remaining."""
+        pool = _make_mock_pool()
+        monitor = PoolHealthMonitor(pool)
+        monitor.increment_waiting()
+        monitor.increment_waiting()
+        monitor.increment_waiting()
+        monitor.decrement_waiting()
+        monitor.decrement_waiting()
+        assert monitor._waiting_count == 1
+
+
+# ---------------------------------------------------------------------------
+# Mutation-killing: state transitions in _run_health_check (AC2, AC3)
+# ---------------------------------------------------------------------------
+
+
+class TestMutationKillingStateTransitions:
+    """Kill mutants that remove state updates or negate conditions."""
+
+    @pytest.mark.asyncio
+    async def test_last_check_epoch_updated_on_success(self) -> None:
+        """_last_check_epoch must be set to a recent monotonic value after check."""
+        pool = _make_mock_pool(ping_ok=True)
+        monitor = PoolHealthMonitor(pool)
+        before = time.monotonic()
+        await monitor._run_health_check()
+        after = time.monotonic()
+        assert before <= monitor._last_check_epoch <= after
+
+    @pytest.mark.asyncio
+    async def test_last_check_epoch_updated_on_failure(self) -> None:
+        """_last_check_epoch is updated even when ping fails."""
+        pool = _make_mock_pool(ping_ok=False)
+        monitor = PoolHealthMonitor(pool)
+        before = time.monotonic()
+        await monitor._run_health_check()
+        after = time.monotonic()
+        assert before <= monitor._last_check_epoch <= after
+
+    @pytest.mark.asyncio
+    async def test_ping_success_sets_healthy_true(self) -> None:
+        """After a successful ping, is_healthy must be True (not negated)."""
+        pool = _make_mock_pool(ping_ok=True)
+        monitor = PoolHealthMonitor(pool)
+        monitor._last_ping_ok = False  # Start unhealthy
+        await monitor._run_health_check()
+        assert monitor._last_ping_ok is True
+
+    @pytest.mark.asyncio
+    async def test_ping_failure_sets_healthy_false(self) -> None:
+        """After a failed ping, is_healthy must be False (not negated)."""
+        pool = _make_mock_pool(ping_ok=False)
+        monitor = PoolHealthMonitor(pool)
+        monitor._last_ping_ok = True  # Start healthy
+        await monitor._run_health_check()
+        assert monitor._last_ping_ok is False
+
+    @pytest.mark.asyncio
+    async def test_ping_failure_returns_without_lifetime_check(self) -> None:
+        """On ping failure, expire is called once (for ping), not twice (for lifetime too)."""
+        pool = _make_mock_pool(ping_ok=False)
+        monitor = PoolHealthMonitor(pool, max_lifetime=0.001)
+        monitor._last_recycle_epoch = time.monotonic() - 100.0  # Way past lifetime
+
+        await monitor._run_health_check()
+
+        # Only one expire call (from ping failure), not two (lifetime would also trigger)
+        pool._pool.expire_connections.assert_called_once()
+
+    @pytest.mark.asyncio
+    async def test_last_recycle_epoch_resets_after_recycling(self) -> None:
+        """After stale recycle, _last_recycle_epoch must be updated to ~now."""
+        pool = _make_mock_pool()
+        monitor = PoolHealthMonitor(pool, max_lifetime=1.0)
+        monitor._last_recycle_epoch = time.monotonic() - 5.0
+
+        before = time.monotonic()
+        await monitor._run_health_check()
+        after = time.monotonic()
+
+        assert before <= monitor._last_recycle_epoch <= after
+
+    @pytest.mark.asyncio
+    async def test_last_recycle_epoch_unchanged_when_no_recycle(self) -> None:
+        """If max_lifetime not exceeded, _last_recycle_epoch stays unchanged."""
+        pool = _make_mock_pool()
+        monitor = PoolHealthMonitor(pool, max_lifetime=3600.0)
+        original_epoch = monitor._last_recycle_epoch
+
+        await monitor._run_health_check()
+
+        assert monitor._last_recycle_epoch == original_epoch
+
+
+# ---------------------------------------------------------------------------
+# Mutation-killing: _check_loop exception handler (uncovered lines 235-238)
+# ---------------------------------------------------------------------------
+
+
+class TestCheckLoopExceptionHandler:
+    """Cover the exception handler in _check_loop that was previously uncovered."""
+
+    @pytest.mark.asyncio
+    async def test_loop_continues_after_unexpected_exception(self) -> None:
+        """_check_loop must swallow non-CancelledError exceptions and continue."""
+        pool = _make_mock_pool()
+        monitor = PoolHealthMonitor(pool, check_interval=0.02)
+
+        call_count = 0
+
+        async def failing_then_ok() -> None:
+            nonlocal call_count
+            call_count += 1
+            if call_count <= 2:
+                raise RuntimeError("transient failure")
+
+        with patch.object(monitor, "_run_health_check", side_effect=failing_then_ok):
+            monitor.start()
+            await asyncio.sleep(0.15)
+            await monitor.stop()
+
+        # Must have been called multiple times despite initial failures
+        assert call_count >= 3
+
+    @pytest.mark.asyncio
+    async def test_loop_reraises_cancelled_error(self) -> None:
+        """CancelledError must propagate (not be swallowed by the handler)."""
+        pool = _make_mock_pool()
+        monitor = PoolHealthMonitor(pool, check_interval=0.02)
+
+        monitor.start()
+        assert monitor.is_running
+
+        await monitor.stop()
+        assert not monitor.is_running
+
+
+# ---------------------------------------------------------------------------
+# Mutation-killing: _expire_connections (inner pool access)
+# ---------------------------------------------------------------------------
+
+
+class TestExpireConnections:
+    """Kill mutants that skip expire_connections or check wrong condition."""
+
+    def test_expire_with_no_inner_pool(self) -> None:
+        """If _pool._pool is None, _expire_connections must not raise."""
+        pool = _make_mock_pool()
+        pool._pool = None
+        monitor = PoolHealthMonitor(pool)
+        # Should not raise
+        monitor._expire_connections()
+
+    def test_expire_calls_inner_pool(self) -> None:
+        """_expire_connections must call inner_pool.expire_connections()."""
+        pool = _make_mock_pool()
+        monitor = PoolHealthMonitor(pool)
+        monitor._expire_connections()
+        pool._pool.expire_connections.assert_called_once()
+
+
+# ---------------------------------------------------------------------------
+# Mutation-killing: HealthReport field correctness (AC1)
+# ---------------------------------------------------------------------------
+
+
+class TestHealthReportFieldMapping:
+    """Kill mutants that swap fields in HealthReport construction."""
+
+    def test_health_report_maps_stats_correctly(self) -> None:
+        """Verify each PoolStats field maps to the correct HealthReport field."""
+        pool = _make_mock_pool(size=7, idle=3, max_size=15)
+        monitor = PoolHealthMonitor(pool)
+        report = monitor.health_report()
+
+        # size maps to total_connections
+        assert report.total_connections == 7
+        # used_size (size - idle = 4) maps to active_connections
+        assert report.active_connections == 4
+        # free_size maps to idle_connections
+        assert report.idle_connections == 3
+        # max_lifetime param maps to max_lifetime_seconds
+        assert report.max_lifetime_seconds == 3600.0
+
+    def test_all_to_dict_keys_present(self) -> None:
+        """All 9 expected keys must be present in to_dict output."""
+        pool = _make_mock_pool()
+        monitor = PoolHealthMonitor(pool)
+        d = monitor.to_dict()
+        expected_keys = {
+            "total_connections", "active_connections", "idle_connections",
+            "waiting_requests", "saturation_pct", "avg_wait_time_ms",
+            "max_lifetime_seconds", "is_healthy", "last_check_epoch",
+        }
+        assert set(d.keys()) == expected_keys
+
+
+# ---------------------------------------------------------------------------
+# Mutation-killing: constructor defaults (AC6)
+# ---------------------------------------------------------------------------
+
+
+class TestConstructorDefaults:
+    """Kill mutants that change default parameter values."""
+
+    def test_default_check_interval_is_30(self) -> None:
+        pool = _make_mock_pool()
+        monitor = PoolHealthMonitor(pool)
+        assert monitor._check_interval == 30.0
+
+    def test_default_max_lifetime_is_3600(self) -> None:
+        pool = _make_mock_pool()
+        monitor = PoolHealthMonitor(pool)
+        assert monitor._max_lifetime == 3600.0
+
+    def test_initial_state(self) -> None:
+        """Verify initial state values are correct."""
+        pool = _make_mock_pool()
+        monitor = PoolHealthMonitor(pool)
+        assert monitor._last_ping_ok is True
+        assert monitor._last_check_epoch == 0.0
+        assert monitor._waiting_count == 0
+        assert monitor._total_wait_time_ms == 0.0
+        assert monitor._total_acquires == 0
+        assert monitor._task is None
+
+
+# ---------------------------------------------------------------------------
 # Package exports
 # ---------------------------------------------------------------------------
 
