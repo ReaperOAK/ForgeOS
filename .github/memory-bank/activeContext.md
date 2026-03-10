@@ -3,6 +3,11 @@
 - **Decisions:** PASS — Both rework defects verified fixed: (1) list_tickets() method exists with correct 7-param signature, parameterized dynamic WHERE, COUNT(*) OVER(); (2) /api/tickets route mounted in create_app() with late-binding ticket_repo_ref. 29/29 tests pass. Ruff clean. All 6 ACs satisfied. Coverage ≥90% for new code. Mutation score: N/A (unit tests with mocked repo — real SQL tested via guard tests).
 - **Timestamp:** 2026-03-11T00:30:00Z
 
+### [FORGEOS-BE033] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE033.md
+- **Decisions:** PASS — Score 96/100, 0 critical, 0 warnings, 2 suggestions. Ruff clean. Mypy strict clean. Cyclomatic max 7 (B grade, under threshold). Coverage: sync_engine.py 100%, ticket_tools.py BE033-specific code 100%. 37 sync/validate tests green. OC checks pass (1 cosmetic else, 1 file length note).
+- **Timestamp:** 2026-03-11T00:45:00Z
+
 ### [FORGEOS-BE033] — Security Review
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE033.md
 - **Decisions:** PASS — Zero critical/high findings. Three note-level findings (no per-tool auth, no SELECT FOR UPDATE on dep resolution, unbounded validate query) risk-accepted. All SQL parameterized. Lease manipulation impossible (server-side timestamp). Dependency graph poisoning impossible (read-only). Sync privilege escalation impossible (claiming still requires role-stage auth).
@@ -3596,4 +3601,14 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 ### [FORGEOS-BE032] — CI Review
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE032.md
 - **Decisions:** PASS — Score 85/100, 0 critical, 3 warnings (pre-existing TC003 in ticket_repo.py). 80 tests pass. All BE032 functions CC ≤ 9. Upstream QA+Security PASS confirmed.
+- **Timestamp:** 2026-03-11T00:45:00Z
+
+### [FORGEOS-BE042] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE042.md
+- **Decisions:** PASS — Score 93/100, 0 critical, 1 warning (pyright partial type), 2 suggestions (OC-002 else)
+- **Timestamp:** 2026-03-11T00:15:00Z
+
+### [FORGEOS-BE029] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE029.md
+- **Decisions:** PASS — Score 82/100, 0 critical, 3 warnings (OC-007 entity size). SEC-BE029-001 remediated.
 - **Timestamp:** 2026-03-11T00:45:00Z
