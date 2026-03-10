@@ -4,7 +4,7 @@
   "description": "Implement agent identity verification using pre-shared API keys. Each registered agent receives a unique API key that is sent with MCP requests. Create the API key storage table (hashed, never stored in plaintext), key validation logic, and agent identity lookup. API keys are managed via environment variables or database records. The core tables migration (FORGEOS-BE002) provides the agents table for identity storage.",
   "type": "backend",
   "priority": "critical",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -36,10 +36,10 @@
     "Invalid or expired API keys produce clear error messages in MCP error format"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T14:06:34.628065+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -118,6 +118,13 @@
       "agent": "Documentation",
       "machine_id": "pop-os",
       "details": "Claimed by Documentation agent for DOCS stage"
+    },
+    {
+      "timestamp": "2026-03-10T13:54:56.591345+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "details": "DOCS complete, advancing to VALIDATION"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
