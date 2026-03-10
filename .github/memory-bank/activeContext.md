@@ -1,3 +1,8 @@
+### [FORGEOS-BE012] — Event Sourcing Subsystem
+- **Artifacts:** mcp-server/src/mcp_server/events/event_store.py, mcp-server/src/mcp_server/events/__init__.py, mcp-server/tests/test_event_store.py
+- **Decisions:** Chose frozen dataclass for immutable Event objects; InMemoryEventBackend as default (pluggable via Protocol); alias enum values (ADVANCED/SYNCED/LEASE_EXPIRED) to map ticket AC naming to ARCH007 schema naming; two-level ordering (sequence_number global + aggregate_version per-ticket)
+- **Timestamp:** 2026-03-10T12:15:00+00:00
+
 ### [TASK-FOS-05-003] — Validation APPROVED
 - **Artifacts:** .github/agent-output/Validator/TASK-FOS-05-003.md
 - **Decisions:** APPROVED (HIGH confidence) — 10/10 DoD items pass (2 justified N/A: vanilla browser JS has no unit tests or TypeScript), 10/10 ACs verified. Upstream QA/Security/CI all PASS. DOCS stage had process gap (lease expired, no completion) but documentation content independently verified as adequate. Ticket moved to DONE.
@@ -2271,3 +2276,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/auth/agent_auth.py, mcp-server/src/mcp_server/auth/__init__.py, mcp-server/alembic/versions/20260310_000000_003_api_keys.py, mcp-server/tests/test_agent_auth.py
 - **Decisions:** Used SHA-256 over bcrypt for key hashing (faster lookup, keys are high-entropy random). Prefix-based DB lookup with constant-time hash comparison. In-memory token bucket rate limiter. Created separate api_keys table (not inline on agents) for multi-key support and rotation.
 - **Timestamp:** 2026-03-10T12:14:21.475451+00:00
+
+### [FORGEOS-BE004] — Create Database Indexes and Constraints
+- **Artifacts:** mcp-server/alembic/versions/20260310_000000_003_indexes_constraints.py
+- **Decisions:** Added composite indexes (stage+type+priority, status+stage, stage+claimed_by), upgraded idx_tickets_claimable with stage as leading column per ARCH006, upgraded idx_claims_active to UNIQUE partial for database-enforced one-active-claim-per-ticket mutex, added FK coverage indexes on file_locks, added CHECK constraints for lease_duration_minutes and max_reworks business rules. GIN indexes on depends_on/file_paths already existed in migration 001.
+- **Timestamp:** 2026-03-10T12:20:00Z
