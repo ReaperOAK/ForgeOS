@@ -67,7 +67,7 @@
       "event": "STAGE_ADVANCED",
       "agent": "Backend",
       "machine_id": "pop-os",
-      "details": "BACKEND complete \u2014 advancing to QA. 53 tests pass, 97% coverage."
+      "details": "BACKEND complete — advancing to QA. 53 tests pass, 97% coverage."
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
