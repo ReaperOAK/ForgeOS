@@ -4,7 +4,7 @@
   "description": "Implement file-level mutual exclusion using PostgreSQL advisory locks (pg_advisory_xact_lock) keyed on file path hashes. This prevents two agents from modifying the same file concurrently. The advisory lock is transaction-scoped, automatically releasing when the transaction commits or rolls back.",
   "type": "backend",
   "priority": "high",
-  "stage": "BACKEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -53,6 +53,13 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "Claimed by Backend for BACKEND stage"
+    },
+    {
+      "timestamp": "2026-03-10T16:00:00Z",
+      "event": "STAGE_COMPLETED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "BACKEND complete — 36 tests, 100% coverage, 0 lint errors"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",

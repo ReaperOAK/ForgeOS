@@ -2679,3 +2679,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** notifications/__init__.py, notifications/queue.py, 20260310_000000_004_notification_queue.py, test_notification_queue.py
 - **Decisions:** Used Protocol-based pool injection for testability. Frozen dataclass for immutable Notification value objects. Explicit state machine with _VALID_TRANSITIONS dict. Exponential backoff (base=10s * 2^retry, cap=3600s). Dead-letter when retry_count >= max_retries.
 - **Timestamp:** 2026-03-10T21:00:00Z
+
+### [FORGEOS-BE053] — BACKEND Complete
+- **Artifacts:** mcp-server/src/mcp_server/auth/operator_auth.py, mcp-server/src/mcp_server/services/operator_service.py, mcp-server/tests/test_operator_auth.py, mcp-server/alembic/versions/20260310_000000_005_operator_auth_columns.py
+- **Decisions:** JWT HS256 with configurable expiry (default 8h). bcrypt rounds=12 default. Frozen dataclasses for OperatorIdentity/TokenPayload. Domain error hierarchy extending ForgeOSError. Used "operator_name" instead of "name" in structured logging extras (Python LogRecord reserves "name").
+- **Timestamp:** 2026-03-10T15:33:08+00:00
