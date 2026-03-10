@@ -35,10 +35,10 @@
     "Lease expiry set according to configurable lease_duration_minutes"
   ],
   "rework_count": 1,
-  "claimed_by": "QA Engineer",
+  "claimed_by": "Security Engineer",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T23:36:12.117099+00:00",
+  "lease_expiry": "2026-03-10T23:56:33.876484+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -165,6 +165,22 @@
       "from_stage": "QA",
       "to_stage": "SECURITY",
       "details": "QA PASS \u2014 104 tests pass, 100% BE029 coverage, ruff clean, all 7 ACs verified"
+    },
+    {
+      "timestamp": "2026-03-10T23:26:33.842903+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from QA Engineer: manual release"
+    },
+    {
+      "timestamp": "2026-03-10T23:26:33.876500+00:00",
+      "event": "CLAIMED",
+      "agent": "Security Engineer",
+      "machine_id": "pop-os",
+      "from_stage": "SECURITY",
+      "to_stage": "SECURITY",
+      "details": "Claimed by ReaperOAK@pop-os via Security Engineer, lease until 2026-03-10T23:56:33.876484+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
