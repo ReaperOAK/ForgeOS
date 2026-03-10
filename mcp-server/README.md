@@ -204,6 +204,77 @@ The server uses **Streamable HTTP** transport in stateless mode (`stateless_http
 - Supports horizontal scaling behind a load balancer
 
 
+## Observability — Structured JSON Logging
+
+The `mcp_server.observability` package provides structured JSON logging with
+correlation-ID propagation and automatic PII/secret redaction.
+
+### Quick Start
+
+```python
+from mcp_server.observability import configure_logging, get_logger
+
+configure_logging("INFO")          # Call once at startup
+logger = get_logger("my_module")   # Per-module named logger
+logger.info("Server ready", extra={"port": 8000})
+```
+
+**Log output** (single-line JSON, formatted here for clarity):
+
+```json
+{
+  "timestamp": "2026-03-10T12:34:56.789012+00:00",
+  "level": "INFO",
+  "message": "Server ready",
+  "logger": "my_module",
+  "correlation_id": "req-abc123"
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `timestamp` | string | ISO 8601 with timezone |
+| `level` | string | DEBUG, INFO, WARNING, ERROR, CRITICAL |
+| `message` | string | Human-readable log message |
+| `logger` | string | Logger name (module path) |
+| `correlation_id` | string | Request-scoped trace identifier |
+
+### Configuration
+
+| Variable | Default | Description |
+|---|---|---|
+| `FORGEOS_LOG_LEVEL` | `INFO` | Root log level (`DEBUG` \| `INFO` \| `WARNING` \| `ERROR` \| `CRITICAL`) |
+
+### Correlation IDs
+
+Use `set_correlation_id` / `get_correlation_id` to propagate a trace identifier
+across async boundaries via `contextvars`:
+
+```python
+from mcp_server.observability import set_correlation_id, get_correlation_id
+
+set_correlation_id("req-abc123")   # Set in middleware
+cid = get_correlation_id()         # Read anywhere in the same async context
+```
+
+### Sensitive Data Redaction
+
+`SensitiveDataFilter` automatically masks values that match common secret
+patterns (API keys, tokens, passwords, SSNs, emails). The filter is installed
+by `configure_logging()` — no extra setup needed.
+
+### Public API
+
+| Symbol | Kind | Purpose |
+|---|---|---|
+| `configure_logging(level)` | function | One-shot root logger setup |
+| `get_logger(name)` | function | Named logger factory |
+| `set_correlation_id(id)` | function | Store correlation ID in context |
+| `get_correlation_id()` | function | Retrieve current correlation ID |
+| `StructuredJsonFormatter` | class | JSON formatter for log records |
+| `SensitiveDataFilter` | class | PII / secret redaction filter |
+
+
 ## Database Migrations
 
 ForgeOS uses [Alembic](https://alembic.sqlalchemy.org/) for PostgreSQL schema
