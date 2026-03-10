@@ -33,10 +33,10 @@
     "Health monitoring runs as a lightweight background task without impacting pool performance"
   ],
   "rework_count": 1,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Security Engineer",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T19:53:32.011666+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
