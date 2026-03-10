@@ -34,10 +34,10 @@
     "Database connection pool is closed after all pending operations complete"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Security",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T13:06:21.793721+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -67,6 +67,13 @@
       "agent": "QA",
       "machine_id": "pop-os",
       "details": "QA PASS \u2014 advanced to SECURITY stage"
+    },
+    {
+      "timestamp": "2026-03-10T12:36:21.793739+00:00",
+      "event": "CLAIMED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "details": "Claimed for SECURITY stage"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
