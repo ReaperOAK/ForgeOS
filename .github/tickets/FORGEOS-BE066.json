@@ -4,7 +4,7 @@
   "description": "Implement configurable notification channels that determine where notifications are delivered. Support outbound webhook URLs (POST JSON to configured endpoints) and Slack incoming webhooks. Create a notification_channels table to store channel configurations. Each channel can filter by event types (e.g., only stage_changed events sent to Slack).",
   "type": "backend",
   "priority": "medium",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
