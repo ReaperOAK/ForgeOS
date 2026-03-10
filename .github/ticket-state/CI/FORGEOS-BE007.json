@@ -34,10 +34,10 @@
     "Concurrent lock attempts on the same file path correctly serialize or fail-fast"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "CIReviewer",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T17:31:48.024450+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -90,6 +90,13 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-10T17:01:48.024467+00:00",
+      "event": "CLAIMED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "details": "Claimed by CIReviewer for CI stage"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
