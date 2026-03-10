@@ -6,6 +6,10 @@ author: UIDesigner
 date: 2026-03-10T02:00:00Z
 status: APPROVED
 parent_mockup: docs/uiux/mockups/FORGEOS-UID005.md
+confidence: HIGH
+last_reviewed: 2026-03-10T15:45:00Z
+reviewed_by: Documentation
+diataxis: reference
 ---
 
 # Health Panel — Component Specification
