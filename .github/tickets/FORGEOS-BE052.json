@@ -4,7 +4,7 @@
   "description": "Implement machine registration and identity verification. Each machine running agents registers with a unique machine_id (hostname or UUID). Machine registration records the hostname, first-seen timestamp, and last-seen timestamp. On each request, the machine_id is verified against the registry. Unknown machines can be auto-registered or rejected based on configuration.",
   "type": "backend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
