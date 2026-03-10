@@ -4,7 +4,7 @@
   "description": "Define the foundational design system for the ForgeOS dashboard. Establish design tokens for colors (dark and light theme), typography scale, spacing system (4px grid), border radius, shadow levels, and z-index layering. Specify responsive layout breakpoints (desktop-first: 1440px, 1024px, 768px). Define the overall dashboard shell layout: sidebar navigation, top bar, main content area, and notification panel. Produce the design token JSON file and layout specification document.",
   "type": "frontend",
   "priority": "high",
-  "stage": "DONE",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -114,13 +114,11 @@
       "details": "Advanced from DOCS to VALIDATION"
     },
     {
-      "timestamp": "2026-03-09T19:37:25.331711+00:00",
-      "event": "STAGE_COMPLETED",
-      "agent": "Validator",
+      "timestamp": "2026-03-10T10:27:38.739891+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
       "machine_id": "system",
-      "from_stage": "VALIDATION",
-      "to_stage": "DONE",
-      "details": "Advanced from VALIDATION to DONE"
+      "details": "Released claim from Validator: Lease expired at 2026-03-09T20:05:10+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",

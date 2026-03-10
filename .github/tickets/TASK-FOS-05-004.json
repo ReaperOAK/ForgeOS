@@ -134,7 +134,7 @@
       "machine_id": "pop-os",
       "from_stage": "CI",
       "to_stage": "DOCS",
-      "details": "CI PASS — Score 81/100, 0 critical, 3 warnings, 4 suggestions. Advanced CI → DOCS."
+      "details": "CI PASS \u2014 Score 81/100, 0 critical, 3 warnings, 4 suggestions. Advanced CI \u2192 DOCS."
     }
   ],
   "source_task_file": "TODO/tickets/05-dashboard.md",

@@ -16,9 +16,7 @@
   "dependencies": [
     "TASK-FOS-07-001"
   ],
-  "blocked_by": [
-    "TASK-FOS-07-001"
-  ],
+  "blocked_by": [],
   "file_paths": [
     "agents.md",
     ".github/copilot-instructions.md",

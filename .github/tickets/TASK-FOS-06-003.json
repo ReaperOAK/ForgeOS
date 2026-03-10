@@ -4,7 +4,7 @@
   "description": "Build an updated agent-runner module that uses MCP for claim/advance operations while retaining Git for code commits. Replaces tickets.py --claim with tickets.claim MCP tool call and tickets.py --advance with tickets.complete MCP tool call. Retains the two-commit protocol for code changes (Git remains the code store). Includes filesystem fallback: if FORGEOS_MCP_URL is not set or the MCP server is unreachable, falls back to direct tickets.py CLI calls. Configuration via environment variables: FORGEOS_MCP_URL, FORGEOS_API_KEY, FORGEOS_FALLBACK_ENABLED.",
   "type": "backend",
   "priority": "medium",
-  "stage": "BLOCKED",
+  "stage": "READY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -21,10 +21,7 @@
     "TASK-FOS-03-002",
     "TASK-FOS-03-004"
   ],
-  "blocked_by": [
-    "TASK-FOS-03-002",
-    "TASK-FOS-03-004"
-  ],
+  "blocked_by": [],
   "file_paths": [
     "forgeos-server/src/sdk/agent-runner.ts",
     "forgeos-server/src/sdk/config.ts"
@@ -51,6 +48,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tickets/06-git-integration.md"
+    },
+    {
+      "timestamp": "2026-03-10T10:27:38.760412+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
     }
   ],
   "source_task_file": "TODO/tickets/06-git-integration.md",

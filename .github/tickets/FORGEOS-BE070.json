@@ -22,8 +22,7 @@
     "FORGEOS-BE002"
   ],
   "blocked_by": [
-    "FORGEOS-BE068",
-    "FORGEOS-BE002"
+    "FORGEOS-BE068"
   ],
   "file_paths": [
     "mcp-server/src/migration/importer.py",

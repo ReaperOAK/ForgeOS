@@ -4,7 +4,7 @@
   "description": "Update the existing tickets.py to support dual-mode operation as a backward compatibility bridge. Add a FORGEOS_MODE environment variable with three values: \"filesystem\" (current behavior, default), \"dual\" (writes to both filesystem and PostgreSQL via MCP), and \"mcp\" (PostgreSQL-only via MCP). In dual mode, every claim/advance/release operation first executes against the filesystem (existing code) and then mirrors the operation to the MCP server via HTTP API calls. In mcp mode, all operations go through MCP and filesystem operations are skipped. Include a shadow mode that compares filesystem and MCP results and logs divergences without failing.",
   "type": "backend",
   "priority": "medium",
-  "stage": "BLOCKED",
+  "stage": "READY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -21,10 +21,7 @@
     "TASK-FOS-03-002",
     "TASK-FOS-03-004"
   ],
-  "blocked_by": [
-    "TASK-FOS-03-002",
-    "TASK-FOS-03-004"
-  ],
+  "blocked_by": [],
   "file_paths": [
     ".github/tickets.py"
   ],
@@ -52,6 +49,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tickets/07-system-update.md"
+    },
+    {
+      "timestamp": "2026-03-10T10:27:38.749462+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
     }
   ],
   "source_task_file": "TODO/tickets/07-system-update.md",
