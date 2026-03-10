@@ -35,10 +35,10 @@
     "Channel delivery failure does not block the notification queue processing"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation Specialist",
+  "claimed_by": "Validator",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T22:44:17.314457+00:00",
+  "lease_expiry": "2026-03-10T22:58:33.523523+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -149,6 +149,38 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "DOCS complete \u2014 CHANGELOG, README Notification Channels section, architecture list updated"
+    },
+    {
+      "timestamp": "2026-03-10T22:28:23.667584+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Documentation Specialist: manual release"
+    },
+    {
+      "timestamp": "2026-03-10T22:28:23.701007+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-10T22:58:23.700990+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T22:28:33.488120+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Validator: manual release"
+    },
+    {
+      "timestamp": "2026-03-10T22:28:33.523540+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-10T22:58:33.523523+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-webhooks.md",
