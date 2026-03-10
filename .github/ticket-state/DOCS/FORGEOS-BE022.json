@@ -35,10 +35,10 @@
     "Session manager tracks all active sessions and provides listing for admin/monitoring"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T18:26:35.207838+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -130,6 +130,13 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "Advanced from DOCS to VALIDATION"
+    },
+    {
+      "timestamp": "2026-03-10T17:56:35.207838+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "details": "Claimed for DOCS stage"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
