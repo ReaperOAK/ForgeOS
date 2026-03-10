@@ -1,0 +1,139 @@
+{
+  "ticket_id": "FORGEOS-BE051",
+  "title": "Implement Agent API Key Authentication",
+  "description": "Implement agent identity verification using pre-shared API keys. Each registered agent receives a unique API key that is sent with MCP requests. Create the API key storage table (hashed, never stored in plaintext), key validation logic, and agent identity lookup. API keys are managed via environment variables or database records. The core tables migration (FORGEOS-BE002) provides the agents table for identity storage.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "DONE",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:06:45.281558+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE015",
+    "FORGEOS-BE002"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "mcp-server/src/auth/agent_auth.py",
+    "mcp-server/src/auth/__init__.py",
+    "database/alembic/versions/010_api_keys.py"
+  ],
+  "acceptance_criteria": [
+    "API key table created via Alembic migration storing hashed keys with agent_id reference",
+    "API key validation function accepts a key and returns the agent identity or raises AuthenticationError",
+    "Keys are stored as bcrypt or SHA-256 hashes, never in plaintext",
+    "Key generation utility creates new API keys for registered agents",
+    "Agent identity includes agent_id, agent_name, and role for downstream authorization",
+    "Invalid or expired API keys produce clear error messages in MCP error format"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:06:45.281566+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase3-auth.md"
+    },
+    {
+      "timestamp": "2026-03-10T10:27:38.752494+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-10T12:10:21.567267+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Claimed by Backend agent for BACKEND stage"
+    },
+    {
+      "timestamp": "2026-03-10T12:14:21.475451+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "BACKEND stage complete, advancing to QA"
+    },
+    {
+      "timestamp": "2026-03-10T12:41:16.346404+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "QA PASS, advancing to SECURITY"
+    },
+    {
+      "timestamp": "2026-03-10T12:57:17.910251+00:00",
+      "event": "CLAIMED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "details": "Claimed by Security agent for SECURITY stage"
+    },
+    {
+      "timestamp": "2026-03-10T13:00:22.852734+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "details": "SECURITY PASS, advancing to CI"
+    },
+    {
+      "timestamp": "2026-03-10T13:11:33.538049+00:00",
+      "event": "CLAIMED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "details": "Claimed by CIReviewer agent for CI stage"
+    },
+    {
+      "timestamp": "2026-03-10T13:12:21.962163+00:00",
+      "event": "CLAIMED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "details": "Claimed by CIReviewer agent for CI stage"
+    },
+    {
+      "timestamp": "2026-03-10T13:17:35.774856+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "details": "CI PASS (score 82/100), advancing to DOCS"
+    },
+    {
+      "timestamp": "2026-03-10T13:36:34.628065+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "details": "Claimed by Documentation agent for DOCS stage"
+    },
+    {
+      "timestamp": "2026-03-10T13:54:56.591345+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "details": "DOCS complete, advancing to VALIDATION"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase3-auth.md",
+  "tags": [
+    "backend",
+    "auth",
+    "apikey",
+    "agent",
+    "phase3",
+    "BLK-08-01"
+  ]
+}
