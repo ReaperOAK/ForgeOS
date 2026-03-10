@@ -1,3 +1,8 @@
+### [FORGEOS-BE009] — Documentation Complete
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE009.md
+- **Decisions:** Docstrings already comprehensive — no code changes needed. Added Expired Lease Cleanup reference section to README with quick start, API tables, error handling, and design constraints. CHANGELOG entry with full feature summary.
+- **Timestamp:** 2026-03-11T12:45:00Z
+
 ### [FORGEOS-BE010] — Documentation Complete
 - **Artifacts:** CHANGELOG.md, mcp-server/README.md, mcp-server/src/mcp_server/locking/transaction_config.py, .github/agent-output/Documentation/FORGEOS-BE010.md
 - **Decisions:** Docstrings already comprehensive — no code changes needed. Added CHANGELOG entry for per-operation transaction isolation. Updated last_reviewed freshness dates in README section and module docstring.
@@ -3295,3 +3300,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE009.md
 - **Decisions:** PASS — Score 98/100, 0 critical, 0 warnings, 99% coverage on changed files
 - **Timestamp:** 2026-03-11T12:30:00Z
+
+### [FORGEOS-BE028] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md
+- **Decisions:** Added dedicated reference section for tickets.next MCP tool in README after Tool Input Validation. Updated Architecture section to mention TicketService and ticket tools. Inline docstrings were already comprehensive — no changes needed.
+- **Timestamp:** 2026-03-11T13:00:00Z
+
+### [FORGEOS-BE018] — Documentation
+- **Artifacts:** CHANGELOG.md, mcp-server/README.md, mcp-server/src/mcp_server/server.py, mcp-server/src/mcp_server/dependencies.py
+- **Decisions:** Added audit_repo to Dependencies docs (was missing from README tables). CHANGELOG entry added. Docstring freshness updated.
+- **Timestamp:** 2026-03-11T23:59:00Z
