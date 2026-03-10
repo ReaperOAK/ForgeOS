@@ -182,6 +182,7 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/__init__.py`** — Package metadata (version, app name)
 - **`mcp_server/__main__.py`** — `python -m mcp_server` entry point
 - **`mcp_server/observability/`** — Structured JSON logging, correlation IDs, and PII redaction
+- **`mcp_server/auth/`** — Agent API key authentication, rate limiting, and identity resolution
 
 ### Error Handling
 
@@ -192,6 +193,7 @@ Domain errors extend `ForgeOSError` and map to standard JSON-RPC error codes:
 | `TicketNotFoundError` | `-32602` | 404 |
 | `TicketAlreadyClaimedError` | `-32602` | 409 |
 | `ValidationError` | `-32602` | 400 |
+| `AuthenticationError` | `-32602` | 401 |
 | `DatabaseError` | `-32603` | 503 |
 
 Tool-level expected failures use `isError=True` in the MCP `CallToolResult`.
@@ -273,6 +275,147 @@ by `configure_logging()` — no extra setup needed.
 | `get_correlation_id()` | function | Retrieve current correlation ID |
 | `StructuredJsonFormatter` | class | JSON formatter for log records |
 | `SensitiveDataFilter` | class | PII / secret redaction filter |
+
+
+## Authentication — Agent API Keys
+
+<!-- last_reviewed: 2026-03-10T14:00:00Z -->
+
+The `mcp_server.auth` package provides API key authentication for MCP agents.
+Each agent is issued a unique key that is validated on every request.
+
+### Key Format
+
+API keys follow the pattern `fgos_<64 hex characters>` (69 characters total).
+The `fgos_` prefix identifies ForgeOS keys. Keys are generated from 32 bytes
+of `os.urandom`, so each key has 256 bits of entropy.
+
+### Authentication Flow
+
+```
+Client sends raw key
+       │
+       ▼
+┌─ Format check ──▸ reject if missing "fgos_" prefix
+│
+├─ Rate-limit check ──▸ reject if bucket exhausted (60 req/min per prefix)
+│
+├─ Hash key (SHA-256)
+│
+├─ Prefix lookup ──▸ SELECT from api_keys WHERE key_prefix = first 8 hex chars
+│
+├─ Constant-time comparison (hmac.compare_digest) ──▸ reject on mismatch
+│
+├─ Revocation check ──▸ reject if is_active=FALSE or revoked_at IS NOT NULL
+│
+├─ Expiry check ──▸ reject if expires_at < NOW()
+│
+├─ Agent status check ──▸ reject if agent is_active=FALSE
+│
+└─ Return AgentIdentity(agent_id, agent_name, role, permissions)
+```
+
+### Key Storage
+
+Keys are never stored in plaintext. The `api_keys` table stores:
+
+| Column | Description |
+|---|---|
+| `key_hash` | SHA-256 hex digest of the full key |
+| `key_prefix` | First 8 hex characters (indexed for fast lookup) |
+| `agent_id` | Foreign key to `agents` table |
+| `label` | Human-readable label (e.g. `"production"`) |
+| `is_active` | Revocation flag |
+| `revoked_at` | Timestamp of revocation (if any) |
+| `expires_at` | Optional expiration timestamp |
+| `last_used_at` | Updated on each successful authentication |
+
+### Rate Limiting
+
+An in-memory token-bucket rate limiter prevents brute-force attacks:
+
+| Parameter | Default | Description |
+|---|---|---|
+| `max_requests` | `60` | Maximum requests per window |
+| `window_seconds` | `60.0` | Sliding window duration |
+
+Each key prefix gets an independent bucket. When tokens are exhausted, the
+request is rejected with `"Rate limit exceeded"` before any database query.
+
+### Key Management
+
+**Generate a key** (admin utility):
+
+```python
+from mcp_server.auth import generate_api_key
+
+raw_key, key_hash, key_prefix = generate_api_key()
+# Show raw_key to the operator exactly once; persist key_hash and key_prefix.
+```
+
+**Provision a key for an agent** (writes to database):
+
+```python
+from mcp_server.auth.agent_auth import create_api_key_for_agent
+
+raw_key = await create_api_key_for_agent(
+    db_pool,
+    agent_id="<uuid>",
+    label="production",
+    expires_at=None,  # or a datetime for time-limited keys
+)
+```
+
+**Revoke a key:**
+
+```python
+from mcp_server.auth.agent_auth import revoke_api_key
+
+revoked = await revoke_api_key(db_pool, key_prefix="abcd1234")
+```
+
+**Validate a key** (used by middleware):
+
+```python
+from mcp_server.auth import validate_api_key
+
+identity = await validate_api_key(db_pool, raw_key)
+# identity.agent_id, identity.agent_name, identity.role, identity.permissions
+```
+
+### Audit Logging
+
+Every authentication attempt is logged via the structured logger:
+
+| Event | Level | Extra Fields |
+|---|---|---|
+| `auth_success` | INFO | `agent_id`, `agent_name`, `key_prefix` |
+| `auth_failure` | WARNING | `reason`, `key_prefix` |
+| `auth_rate_limited` | WARNING | `key_prefix` |
+| `auth_db_error` | ERROR | `key_prefix`, `error` |
+| `api_key_created` | INFO | `agent_id`, `key_prefix`, `label` |
+| `api_key_revoked` | INFO | `key_prefix` |
+
+Failed attempts log the key prefix only — never the full key.
+
+### Public API
+
+| Symbol | Kind | Purpose |
+|---|---|---|
+| `AgentIdentity` | dataclass | Authenticated agent descriptor (`agent_id`, `agent_name`, `role`, `permissions`) |
+| `AuthenticationError` | exception | Raised on invalid, expired, revoked, or rate-limited keys |
+| `validate_api_key(pool, key)` | async function | Validate key and return `AgentIdentity` |
+| `generate_api_key()` | function | Generate `(raw_key, key_hash, key_prefix)` tuple |
+| `hash_api_key(key)` | function | Compute SHA-256 hex digest of a raw key |
+| `create_api_key_for_agent(pool, agent_id)` | async function | Provision and store a new key |
+| `revoke_api_key(pool, prefix)` | async function | Revoke a key by prefix |
+| `RateLimiter` | class | Per-prefix token-bucket rate limiter |
+
+### Environment Variables
+
+| Variable | Default | Description |
+|---|---|---|
+| `FORGEOS_API_KEY` | _(required)_ | API key for agent authentication against the MCP server |
 
 
 ## Database Migrations
