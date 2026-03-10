@@ -4,7 +4,7 @@
   "description": "Implement the tickets.update MCP tool that updates metadata on a claimed ticket. Only the current claim owner can update a ticket. Merges the provided metadata object into the ticket's existing metadata JSONB field using PostgreSQL's || operator. Records an UPDATED event in the events table. Updates the ticket's updated_at timestamp automatically via the trigger.",
   "type": "backend",
   "priority": "high",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,12 +34,12 @@
     "updated_at field refreshes automatically via trg_tickets_updated_at trigger"
   ],
   "rework_count": 1,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T13:40:00+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
-  "completed_at": "2026-03-10T08:38:41.957128Z",
+  "completed_at": "2026-03-10T12:44:48.085714+00:00",
   "history": [
     {
       "timestamp": "2026-03-05T18:05:37.898567+00:00",
@@ -85,7 +85,16 @@
       "machine_id": "pop-os",
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
-      "details": "DOCS PASS (HIGH confidence). Added tickets.update subsection to README. Fixed 3 inaccuracies in mcp-tool-definitions.md §4.6. CHANGELOG entry added. JSDoc verified accurate."
+      "details": "DOCS PASS (HIGH confidence). Added tickets.update subsection to README. Fixed 3 inaccuracies in mcp-tool-definitions.md \u00a74.6. CHANGELOG entry added. JSDoc verified accurate."
+    },
+    {
+      "timestamp": "2026-03-10T12:44:48.085714+00:00",
+      "event": "VALIDATION_APPROVED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "APPROVED (HIGH confidence). DoD 10/10. All 7 AC pass. All 5 upstream stages PASS."
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
