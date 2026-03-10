@@ -543,3 +543,126 @@ class TestImports:
         assert LockAcquireResult is not None
         assert FileLockRecord is not None
         assert FileConflictError is not None
+
+
+# ===========================================================================
+# QA-added: Additional mutation-killing & edge-case tests
+# ===========================================================================
+
+
+class TestFilePathToLockKeyQA:
+    """QA-added: strengthen mutation resistance for hash function."""
+
+    def test_known_hash_hardcoded_literal(self) -> None:
+        """Regression test with a hardcoded expected value (kills mask mutations)."""
+        # Pre-computed: file_path_to_lock_key("test.py")
+        # CRC32("test.py") = 0xb368c3ff, namespace = 0x464F5247
+        # combined unsigned = 0x464F5247b368c3ff
+        # signed int64 = 5071476839756268543
+        expected = struct.unpack(
+            ">q", struct.pack(">Q", 0x464F5247B368C3FF)
+        )[0]
+        assert file_path_to_lock_key("test.py") == expected
+
+    def test_hash_odd_crc_bit0_preserved(self) -> None:
+        """CRC32 with LSB=1 must preserve that bit (kills 0xFFFFFFFE mask mutation)."""
+        # "test.py" has CRC32 = 0xb368c3ff (LSB=1)
+        key = file_path_to_lock_key("test.py")
+        unsigned = struct.unpack(">Q", struct.pack(">q", key))[0]
+        lower32 = unsigned & 0xFFFFFFFF
+        assert lower32 & 1 == 1, "LSB must be preserved from CRC32"
+
+    def test_unicode_path(self) -> None:
+        """Unicode file paths produce valid int64 keys."""
+        key = file_path_to_lock_key("src/데이터/файл.py")
+        assert -(2**63) <= key < 2**63
+
+    def test_very_long_path(self) -> None:
+        """Very long file paths produce valid int64 keys."""
+        long_path = "a/" * 500 + "file.py"
+        key = file_path_to_lock_key(long_path)
+        assert -(2**63) <= key < 2**63
+
+    def test_slash_only_raises(self) -> None:
+        """A path of only slashes raises ValueError after normalization."""
+        with pytest.raises(ValueError, match="must not be empty"):
+            file_path_to_lock_key("///")
+
+    def test_dot_paths_distinct(self) -> None:
+        """Relative path components produce distinct keys."""
+        k1 = file_path_to_lock_key("a/b/c.py")
+        k2 = file_path_to_lock_key("a/b/../b/c.py")
+        # These are different strings, so different keys (no path resolution)
+        assert k1 != k2
+
+
+class TestFileMutexAcquireQA:
+    """QA-added: edge cases for acquire() and try_acquire()."""
+
+    @pytest.mark.asyncio
+    async def test_acquire_propagates_db_error(self) -> None:
+        """Database errors during advisory lock propagate as exceptions."""
+        conn = _make_mock_conn()
+        conn.execute = AsyncMock(side_effect=RuntimeError("connection lost"))
+        mutex = FileMutex(conn)
+
+        with pytest.raises(RuntimeError, match="connection lost"):
+            await mutex.acquire("src/test.py", "TICKET-ERR")
+
+    @pytest.mark.asyncio
+    async def test_try_acquire_propagates_db_error(self) -> None:
+        """Database errors during try_acquire propagate as exceptions."""
+        conn = _make_mock_conn(fetchval_side_effect=RuntimeError("timeout"))
+        mutex = FileMutex(conn)
+
+        with pytest.raises(RuntimeError, match="timeout"):
+            await mutex.try_acquire("src/test.py", "TICKET-ERR")
+
+    @pytest.mark.asyncio
+    async def test_acquire_sql_insert_uses_on_conflict(self) -> None:
+        """The INSERT into file_locks uses ON CONFLICT DO NOTHING."""
+        conn = _make_mock_conn()
+        mutex = FileMutex(conn)
+
+        await mutex.acquire("src/test.py", "TICKET-001")
+
+        insert_call = conn.execute.call_args_list[1]
+        assert "ON CONFLICT" in insert_call.args[0]
+        assert "DO NOTHING" in insert_call.args[0]
+
+    @pytest.mark.asyncio
+    async def test_release_ticket_locks_sql_filters_released(self) -> None:
+        """release_ticket_locks only targets rows where released_at IS NULL."""
+        conn = _make_mock_conn(fetch_return=[])
+        mutex = FileMutex(conn)
+
+        await mutex.release_ticket_locks("TICKET-001")
+
+        query = conn.fetch.call_args.args[0]
+        assert "released_at IS NULL" in query
+
+    @pytest.mark.asyncio
+    async def test_get_active_locks_empty(self) -> None:
+        """get_active_locks returns empty list when no locks exist."""
+        conn = _make_mock_conn(fetch_return=[])
+        mutex = FileMutex(conn)
+
+        locks = await mutex.get_active_locks("TICKET-999")
+
+        assert locks == []
+
+    @pytest.mark.asyncio
+    async def test_get_active_locks_multiple(self) -> None:
+        """get_active_locks returns multiple records correctly."""
+        now = datetime.now(timezone.utc)
+        conn = _make_mock_conn(fetch_return=[
+            {"file_path": "a.py", "ticket_id": "T1", "locked_by": None, "machine_id": None, "locked_at": now},
+            {"file_path": "b.py", "ticket_id": "T1", "locked_by": "ag", "machine_id": "h1", "locked_at": now},
+        ])
+        mutex = FileMutex(conn)
+
+        locks = await mutex.get_active_locks("T1")
+
+        assert len(locks) == 2
+        assert locks[0].file_path == "a.py"
+        assert locks[1].locked_by == "ag"

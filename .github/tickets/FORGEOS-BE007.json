@@ -4,7 +4,7 @@
   "description": "Implement file-level mutual exclusion using PostgreSQL advisory locks (pg_advisory_xact_lock) keyed on file path hashes. This prevents two agents from modifying the same file concurrently. The advisory lock is transaction-scoped, automatically releasing when the transaction commits or rolls back.",
   "type": "backend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Concurrent lock attempts on the same file path correctly serialize or fail-fast"
   ],
   "rework_count": 0,
-  "claimed_by": "QA",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T16:21:42.249223+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -69,11 +69,18 @@
       "details": "Released claim from Backend: Lease expired at 2026-03-10T15:22:09Z"
     },
     {
-      "timestamp": "2026-03-10T15:51:42.249223+00:00",
+      "timestamp": "2026-03-10T15:51:42.248962+00:00",
       "event": "CLAIMED",
       "agent": "QA",
       "machine_id": "pop-os",
       "details": "Claimed by QA for QA stage"
+    },
+    {
+      "timestamp": "2026-03-10T15:57:03.351246+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "QA PASS \u2014 48 tests, 100% coverage, mutation score >=90%"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",

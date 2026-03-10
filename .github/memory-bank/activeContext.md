@@ -2689,3 +2689,9 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** `.github/agent-output/QA/FORGEOS-BE006.md`
 - **Decisions:** PASS verdict — 40/40 tests pass, 100% line+branch coverage, 100% mutation kill rate (12/12 real mutations), all 6 acceptance criteria verified. Clean architecture with Protocol-based DI, frozen dataclasses, structured error hierarchy. No defects found.
 - **Timestamp:** 2026-03-10T21:15:00Z
+
+### FORGEOS-BE007 — QA PASS: File-Level Advisory Lock Mutex
+- **Artifacts:** mcp-server/tests/test_file_mutex.py (12 QA tests added), .github/agent-output/QA/FORGEOS-BE007.md
+- **Decisions:** Added hardcoded regression test to kill mask mutations; added edge cases for unicode, long paths, DB error propagation, ON CONFLICT verification
+- **Verdict:** PASS — 48 tests, 100% line+branch coverage, mutation score ≥90%, 0 defects, 0 lint errors
+- **Timestamp:** 2026-03-10T17:30:00Z
