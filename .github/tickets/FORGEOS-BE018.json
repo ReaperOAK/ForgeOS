@@ -35,10 +35,10 @@
     "No direct pool access in tool handlers; all database access is through repositories"
   ],
   "rework_count": 1,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Backend",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T21:28:17.170155+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -147,6 +147,15 @@
       "from_stage": "VALIDATION",
       "to_stage": "BACKEND",
       "details": "Rework #1: DoD #3 FAIL: 2 lint errors \u2014 F401 unused import (dependencies.py:21) and I001 unsorted imports (server.py:41). Fix with: ruff check --fix src/mcp_server/server.py src/mcp_server/dependencies.py"
+    },
+    {
+      "timestamp": "2026-03-10T20:58:17.170172+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "BACKEND",
+      "to_stage": "BACKEND",
+      "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-10T21:28:17.170155+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
