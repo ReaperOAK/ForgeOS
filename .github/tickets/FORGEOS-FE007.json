@@ -23,8 +23,7 @@
     "FORGEOS-UID003"
   ],
   "blocked_by": [
-    "FORGEOS-FE002",
-    "FORGEOS-UID003"
+    "FORGEOS-FE002"
   ],
   "file_paths": [
     "dashboard/src/components/search/SearchBar.tsx",

@@ -4,7 +4,7 @@
   "description": "Implement the ticket claim queue using PostgreSQL SELECT FOR UPDATE SKIP LOCKED for fair, non-blocking claim semantics. This replaces the git-push-based distributed lock. The claim queue allows agents to atomically claim the next available ticket matching their role criteria, without blocking other agents from claiming different tickets concurrently.",
   "type": "backend",
   "priority": "critical",
-  "stage": "BLOCKED",
+  "stage": "READY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -47,6 +47,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase2-database.md"
+    },
+    {
+      "timestamp": "2026-03-10T14:19:52.569734+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",

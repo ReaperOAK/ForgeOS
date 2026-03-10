@@ -4,7 +4,7 @@
   "description": "Build the in-database notification event queue for reliable delivery. Create a notification_queue table via Alembic migration with columns for event_type, payload, status (pending, processing, delivered, failed, dead_letter), retry_count, next_retry_at, and created_at. Implement enqueue and dequeue operations with proper locking to prevent duplicate processing.",
   "type": "backend",
   "priority": "high",
-  "stage": "BLOCKED",
+  "stage": "READY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -48,6 +48,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase3-webhooks.md"
+    },
+    {
+      "timestamp": "2026-03-10T14:19:08.639533+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-webhooks.md",

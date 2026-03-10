@@ -22,8 +22,7 @@
     "FORGEOS-BE012"
   ],
   "blocked_by": [
-    "FORGEOS-BE034",
-    "FORGEOS-BE012"
+    "FORGEOS-BE034"
   ],
   "file_paths": [
     "mcp-server/src/api/routes/websocket.py",
