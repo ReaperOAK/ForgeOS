@@ -3256,7 +3256,27 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** PASS — 49/49 tests pass, 92% coverage (all modules >89%), lint clean, all 6 acceptance criteria verified. Comprehensive audit logging with append-only enforcement, parameterized SQL, middleware auto-logging, admin endpoint with filters.
 - **Timestamp:** 2026-03-11T14:00:00Z
 
+### [FORGEOS-BE059] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE059.md
+- **Decisions:** PASS — Zero critical/high findings. 1 medium (SEC-059-001: unbounded request body size, CWE-400), 2 low (SEC-059-002: no async task concurrency limit CWE-770, SEC-059-003: known_sources info disclosure CWE-200). All risks accepted — body size limit handled at infrastructure layer, task exhaustion requires authenticated sustained traffic, source names publicly discoverable. STRIDE on 1 trust boundary chain (max score 12), OWASP 10/10 checked. No new dependencies, no secrets, no CVEs.
+- **Timestamp:** 2026-03-11T16:00:00Z
+
+### [FORGEOS-BE066] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE066.md
+- **Decisions:** PASS — Zero critical/high findings. 1 medium (SEC-BE066-001: SSRF via unvalidated webhook URLs, CWE-918), 2 low (cleartext webhook secrets CWE-312, no HTTPS enforcement CWE-319). All risk-accepted — admin-only URL config, internal deployment, stdlib urllib blocks file:// scheme. STRIDE on 4 trust boundaries (max score 6). OWASP 10/10 checked. Zero new dependencies.
+- **Timestamp:** 2026-03-11T14:30:00Z
+
 ### [FORGEOS-BE056] — BACKEND rework #1 complete
 - **Artifacts:** mcp-server/src/mcp_server/auth/authorization.py, mcp-server/src/mcp_server/services/operator_service.py
 - **Decisions:** Fixed TC003 (datetime→TYPE_CHECKING), I001 (import sort order), F401 (unused MachineScopeError). Ruff verified clean.
 - **Timestamp:** 2026-03-11T15:00:00Z
+
+### [FORGEOS-BE018] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE018.md
+- **Decisions:** PASS — Score 95/100, 0 critical, 1 warning (OC-007 module length advisory), 81% coverage
+- **Timestamp:** 2026-03-11T23:55:00Z
+
+### [FORGEOS-BE046] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE046.md
+- **Decisions:** PASS — Zero critical/high findings. 1 medium (SEC-BE046-001: api_key as plaintext str exposes value in repr/model_dump, CWE-532). Risk accepted — v0.1.0 alpha, optional field, requires explicit logging by caller. SecretStr migration recommended for future hardening. STRIDE on 2 trust boundaries (max score 9), OWASP 10/10 checked. Dependencies current, no CVEs.
+- **Timestamp:** 2026-03-11T15:30:00Z
