@@ -1936,3 +1936,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/dashboard/js/app.js, forgeos-server/src/dashboard/js/pipeline.js, forgeos-server/src/dashboard/js/admin.js
 - **Decisions:** IIFE pattern (not ES modules) to match existing codebase convention. window.ForgeOS global exposes shared API for module communication. SSE exponential backoff: 1s→2s→4s→8s→16s→30s cap. Handler registration pattern decouples SSE dispatch from view modules. Individual card DOM updates (no full re-render). Single global setInterval for all lease countdowns. Admin panel built via buildDOM() replacing HTML placeholder — no HTML modification required. Vanilla JS only, no external dependencies.
 - **Timestamp:** 2026-03-10T14:30:00+05:30
+
+### [FORGEOS-BE003] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE003.md
+- **Decisions:** PASS — Zero critical/high findings. 3 LOW + 1 INFO findings with risk acceptance. STRIDE max 9 (LOW). OWASP 10/10 checked, 0 failures. Static DDL — zero injection. Append-only triggers on event_history.
+- **Timestamp:** 2026-03-10T23:15:00Z
+
+### [FORGEOS-UID005] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-UID005.md
+- **Decisions:** PASS — Zero critical/high findings. STRIDE analysis on 3 trust boundaries (Browser↔API, Browser↔SSE, Browser↔CDN). Max score 9 (Low). OWASP 10/10 checked. All dynamic content rendered via textContent (no XSS). Dashboard behind authMiddleware. 4 low/advisory findings are pre-existing (no CSP, no SRI on d3.js CDN, SSE optionally auth'd, window API exposure). No new dependencies introduced.
+- **Timestamp:** 2026-03-10T10:45:00+00:00
