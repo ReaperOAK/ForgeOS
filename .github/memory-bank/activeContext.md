@@ -3195,3 +3195,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/auth/authorization.py, mcp-server/src/mcp_server/services/operator_service.py, mcp-server/alembic/versions/20260311_000000_006_operator_machine_bindings.py, mcp-server/tests/test_authorization.py
 - **Decisions:** Separate authorization.py from operator_auth.py for concerns separation. TEXT for machine_id (consistent with machine_auth.py). UPSERT for idempotent binding creation. Admin bypass via simple role check.
 - **Timestamp:** 2026-03-11T12:00:00Z
+
+### [FORGEOS-BE059] — BACKEND complete
+- **Artifacts:** mcp-server/src/mcp_server/services/webhook_service.py, mcp-server/src/mcp_server/transport/webhooks.py, mcp-server/src/mcp_server/services/__init__.py, mcp-server/tests/test_webhook_service.py, mcp-server/tests/test_webhook_endpoint.py
+- **Decisions:** Used Starlette routes (not FastAPI) to match existing transport layer pattern. Handler registry pattern for extensibility. Asyncio task for 202-before-processing pattern. Placed route in transport/ package alongside http.py since project has no api/routes/ directory.
+- **Timestamp:** 2026-03-11T23:00:00Z
