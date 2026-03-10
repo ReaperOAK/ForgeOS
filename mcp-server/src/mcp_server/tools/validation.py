@@ -56,10 +56,19 @@ class ToolInputValidationError(Exception):
 
 
 def _format_path(path_deque: Any) -> str:
-    """Convert a jsonschema error's absolute_path deque to a dotted path.
+    """Convert a jsonschema error's ``absolute_path`` deque to a dotted string.
 
-    Examples: deque([]) -> "$", deque(["ticket_id"]) -> "$.ticket_id",
-    deque(["nested", 0, "name"]) -> "$.nested[0].name"
+    The *path_deque* parameter is typed as :data:`~typing.Any` because
+    ``jsonschema.ValidationError.absolute_path`` is a :class:`~collections.deque`
+    whose elements are untyped in the library's own type stubs.
+
+    Examples:
+        >>> _format_path(deque([]))
+        '$'
+        >>> _format_path(deque(['ticket_id']))
+        '$.ticket_id'
+        >>> _format_path(deque(['nested', 0, 'name']))
+        '$.nested[0].name'
     """
     parts: list[str] = ["$"]
     for segment in path_deque:
@@ -77,7 +86,19 @@ def compile_validator(
     tool_name: str,
     schema: dict[str, Any],
 ) -> Draft202012Validator:
-    """Compile and cache a JSON Schema validator for a tool."""
+    """Compile and cache a JSON Schema validator for a tool.
+
+    Args:
+        tool_name: Unique tool identifier used as the cache key.
+        schema: JSON Schema (Draft 2020-12) to compile.
+
+    Returns:
+        A compiled :class:`Draft202012Validator` instance (cached on
+        subsequent calls with the same *tool_name*).
+
+    Raises:
+        jsonschema.SchemaError: If *schema* is not a valid JSON Schema.
+    """
     if tool_name in _validator_cache:
         return _validator_cache[tool_name]
 
@@ -144,7 +165,20 @@ class McpValidationErrorData:
 def build_validation_error_data(
     exc: ToolInputValidationError,
 ) -> dict[str, Any]:
-    """Convert a ToolInputValidationError into structured MCP error data."""
+    """Convert a :exc:`ToolInputValidationError` into structured MCP error data.
+
+    Returns a dict suitable for the ``data`` field of a JSON-RPC error
+    response with code :data:`INVALID_PARAMS` (``-32602``).
+
+    The returned dict has the shape::
+
+        {
+            "tool_name": "tickets.claim",
+            "errors": [
+                {"path": "$.ticket_id", "message": "..."},
+            ]
+        }
+    """
     return McpValidationErrorData(
         tool_name=exc.tool_name,
         errors=[{"path": e.path, "message": e.message} for e in exc.field_errors],
