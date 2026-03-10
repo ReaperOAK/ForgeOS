@@ -4,7 +4,7 @@
   "description": "Implement the `tickets.next` MCP tool that allows agents to claim the next available ticket matching their role. This tool uses the SKIP LOCKED claim queue from FORGEOS-BE006 to atomically select and lock an eligible ticket. The tool registers via the dynamic tool registration system (FORGEOS-BE020) with JSON Schema validation (FORGEOS-BE021). Create the shared ticket service layer that both MCP tools and REST endpoints will consume.",
   "type": "backend",
   "priority": "critical",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -128,6 +128,15 @@
       "from_stage": "CI",
       "to_stage": "CI",
       "details": "Claimed by ReaperOAK@pop-os via CI Reviewer, lease until 2026-03-10T22:11:35.021651+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T21:46:09.822949+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "CI PASS \u2014 Score 96/100, 0 critical, 0 warnings, 100% coverage"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
