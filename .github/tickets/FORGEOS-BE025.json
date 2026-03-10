@@ -34,10 +34,10 @@
     "Both endpoints respond within 500ms even under load"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Validator",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T18:31:44.199302+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -104,6 +104,13 @@
       "from_stage": "VALIDATION",
       "to_stage": "DONE",
       "details": "Advanced from VALIDATION to DONE"
+    },
+    {
+      "timestamp": "2026-03-10T18:01:44.199302+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "details": "CLAIM by Validator on pop-os (ReaperOAK)"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
