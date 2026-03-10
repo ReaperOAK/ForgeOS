@@ -36,6 +36,12 @@
       <button class="tab-nav__tab" role="tab" aria-selected="false" aria-controls="panel-graph" id="tab-graph" data-view="graph" tabindex="-1">
         Graph
       </button>
+      <button class="tab-nav__tab" role="tab" aria-selected="false" aria-controls="panel-claims" id="tab-claims" data-view="claims" tabindex="-1">
+        Claims
+      </button>
+      <button class="tab-nav__tab" role="tab" aria-selected="false" aria-controls="panel-workbench" id="tab-workbench" data-view="workbench" tabindex="-1">
+        Workbench
+      </button>
       <button class="tab-nav__tab" role="tab" aria-selected="false" aria-controls="panel-machines" id="tab-machines" data-view="machines" tabindex="-1">
         Machines
       </button>
@@ -45,6 +51,12 @@
     </nav>
 
     <div class="top-bar__right">
+      <div class="auth-user-badge" id="authUserBadge" role="status" aria-label="Authentication status">
+        <span class="auth-user-badge__icon" aria-hidden="true">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+        </span>
+        <span class="auth-user-badge__label">Not authenticated</span>
+      </div>
       <button class="top-bar__search-btn" id="searchTrigger" aria-label="Search tickets (Ctrl+K)" title="Search (Ctrl+K)">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
       </button>
@@ -448,11 +460,165 @@
       </section>
     </div>
 
-    <!-- Machines View (placeholder) -->
+    <!-- ═══ Claims Monitor View (FORGEOS-UID004) ═══ -->
+    <div id="panel-claims" class="view-panel" role="tabpanel" aria-labelledby="tab-claims" hidden>
+      <section class="claims-section" aria-label="Active claims monitor">
+        <div class="claims-section__header">
+          <h2 class="section-heading">Active Claims</h2>
+          <button class="btn btn--danger btn--sm" id="releaseAllExpiredBtn" disabled aria-label="Release all expired claims">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+            Release All Expired
+          </button>
+        </div>
+
+        <!-- Desktop: Table View -->
+        <div class="claims-table-wrap">
+          <table class="claims-table" id="claimsTable" aria-label="Active claims" role="table">
+            <thead>
+              <tr>
+                <th class="claims-table__th claims-table__th--sortable" data-sort="ticket" aria-sort="none" scope="col">
+                  <button class="claims-table__sort-btn" aria-label="Sort by ticket ID">Ticket <span class="claims-table__sort-icon" aria-hidden="true"></span></button>
+                </th>
+                <th class="claims-table__th claims-table__th--sortable" data-sort="agent" aria-sort="none" scope="col">
+                  <button class="claims-table__sort-btn" aria-label="Sort by agent">Agent <span class="claims-table__sort-icon" aria-hidden="true"></span></button>
+                </th>
+                <th class="claims-table__th claims-table__th--sortable" data-sort="machine" aria-sort="none" scope="col">
+                  <button class="claims-table__sort-btn" aria-label="Sort by machine">Machine <span class="claims-table__sort-icon" aria-hidden="true"></span></button>
+                </th>
+                <th class="claims-table__th claims-table__th--sortable" data-sort="operator" aria-sort="none" scope="col">
+                  <button class="claims-table__sort-btn" aria-label="Sort by operator">Operator <span class="claims-table__sort-icon" aria-hidden="true"></span></button>
+                </th>
+                <th class="claims-table__th claims-table__th--sortable" data-sort="leaseRemaining" aria-sort="ascending" scope="col">
+                  <button class="claims-table__sort-btn" aria-label="Sort by lease remaining">Lease <span class="claims-table__sort-icon" aria-hidden="true">&#9650;</span></button>
+                </th>
+                <th class="claims-table__th" scope="col">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="claimsTableBody" aria-live="polite">
+              <!-- Rows populated by JS via template -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Mobile: Card View -->
+        <div class="claims-cards" id="claimsCards" aria-label="Active claims cards" role="list">
+          <!-- Cards populated by JS via template -->
+        </div>
+
+        <!-- Empty State -->
+        <div class="claims-empty" id="claimsEmpty" role="status" hidden>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M8 12h8"/></svg>
+          <p>No active claims</p>
+        </div>
+
+        <!-- Pagination -->
+        <nav class="claims-pagination" id="claimsPagination" aria-label="Claims pagination" hidden>
+          <span class="claims-pagination__info" id="claimsPaginationInfo" aria-live="polite">Showing 1–20 of 0 claims</span>
+          <div class="claims-pagination__controls">
+            <button class="claims-pagination__btn" id="claimsPrevBtn" disabled aria-label="Previous page">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="15 18 9 12 15 6"/></svg>
+              Prev
+            </button>
+            <span class="claims-pagination__page" aria-current="page">Page <span id="claimsPageNum">1</span></span>
+            <button class="claims-pagination__btn" id="claimsNextBtn" disabled aria-label="Next page">
+              Next
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9 6 15 12 9 18"/></svg>
+            </button>
+          </div>
+        </nav>
+      </section>
+    </div>
+
+    <!-- ═══ Operator Workbench View (FORGEOS-UID004) ═══ -->
+    <div id="panel-workbench" class="view-panel" role="tabpanel" aria-labelledby="tab-workbench" hidden>
+      <div class="workbench-layout">
+        <!-- Ticket Selector -->
+        <section class="workbench-selector" aria-label="Ticket selector">
+          <h2 class="section-heading">Operator Workbench</h2>
+          <div class="workbench-selector__search-wrap" role="combobox" aria-expanded="false" aria-owns="workbenchDropdown" aria-haspopup="listbox">
+            <label for="workbenchTicketSearch" class="sr-only">Search tickets by ID</label>
+            <svg class="workbench-selector__search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+            <input type="search" class="workbench-selector__input" id="workbenchTicketSearch" placeholder="Search ticket by ID…" autocomplete="off" aria-label="Search tickets by ID" aria-autocomplete="list" aria-controls="workbenchDropdown" />
+            <div class="workbench-selector__dropdown" id="workbenchDropdown" role="listbox" aria-label="Matching tickets" hidden>
+              <!-- Options populated by JS -->
+            </div>
+          </div>
+        </section>
+
+        <!-- Selected Ticket Card -->
+        <section class="workbench-selection" id="workbenchSelection" aria-label="Selected ticket details" hidden>
+          <div class="workbench-selection__card">
+            <div class="workbench-selection__header">
+              <span class="workbench-selection__ticket-id" id="wbTicketId">—</span>
+              <span class="workbench-selection__stage badge" id="wbStage">—</span>
+            </div>
+            <h3 class="workbench-selection__title" id="wbTitle">—</h3>
+            <dl class="workbench-selection__meta">
+              <div class="workbench-selection__meta-item">
+                <dt>Claimed By</dt>
+                <dd id="wbClaimedBy">—</dd>
+              </div>
+              <div class="workbench-selection__meta-item">
+                <dt>Machine</dt>
+                <dd id="wbMachine">—</dd>
+              </div>
+              <div class="workbench-selection__meta-item">
+                <dt>Lease</dt>
+                <dd id="wbLease">—</dd>
+              </div>
+            </dl>
+          </div>
+        </section>
+
+        <!-- Action Buttons (2x2 grid) -->
+        <section class="workbench-actions" aria-label="Operator actions">
+          <h3 class="workbench-actions__heading sr-only">Actions</h3>
+          <div class="workbench-actions__grid">
+            <button class="operator-action operator-action--claim" id="actionClaim" disabled aria-label="Claim this ticket">
+              <svg class="operator-action__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+              <span class="operator-action__label">Claim</span>
+              <span class="operator-action__desc">Acquire lock on ticket</span>
+            </button>
+            <button class="operator-action operator-action--release" id="actionRelease" disabled aria-label="Release your claim on this ticket">
+              <svg class="operator-action__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 5-5 5 5 0 0 1 5 5v4"/><line x1="8" y1="16" x2="16" y2="16"/></svg>
+              <span class="operator-action__label">Release</span>
+              <span class="operator-action__desc">Release your claim</span>
+            </button>
+            <button class="operator-action operator-action--advance" id="actionAdvance" disabled aria-label="Advance ticket to next stage">
+              <svg class="operator-action__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polyline points="9 18 15 12 9 6"/></svg>
+              <span class="operator-action__label">Advance</span>
+              <span class="operator-action__desc">Move to next stage</span>
+            </button>
+            <button class="operator-action operator-action--force-release" id="actionForceRelease" disabled aria-label="Force release another operator's claim">
+              <svg class="operator-action__icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
+              <span class="operator-action__label">Force Release</span>
+              <span class="operator-action__desc">Override another claim</span>
+            </button>
+          </div>
+        </section>
+
+        <!-- Activity Log -->
+        <section class="workbench-activity" aria-label="Operator activity log">
+          <h3 class="workbench-activity__heading">Activity Log</h3>
+          <div class="activity-log" id="activityLog" role="log" aria-live="polite" aria-label="Recent operator actions">
+            <p class="activity-log__empty" id="activityEmpty">No actions recorded yet</p>
+            <!-- Entries populated by JS via template -->
+          </div>
+        </section>
+      </div>
+    </div>
+
+    <!-- ═══ Machines View (FORGEOS-UID004) ═══ -->
     <div id="panel-machines" class="view-panel" role="tabpanel" aria-labelledby="tab-machines" hidden>
-      <section class="placeholder-section">
-        <h2 class="section-heading">Machines</h2>
-        <p class="placeholder-section__text">Machine monitoring view — coming soon.</p>
+      <section class="machines-section" aria-label="Connected machines">
+        <h2 class="section-heading">Connected Machines</h2>
+        <div class="machines-grid" id="machinesGrid" role="list" aria-label="Machine status cards">
+          <!-- Cards populated by JS via template -->
+        </div>
+        <div class="machines-empty" id="machinesEmpty" role="status" hidden>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" aria-hidden="true"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          <p>No machines connected</p>
+        </div>
       </section>
     </div>
 
@@ -739,6 +905,8 @@
       <h3 class="mobile-sidebar__section-title">Views</h3>
       <button class="mobile-sidebar__item mobile-sidebar__item--active" data-view="pipeline">Pipeline</button>
       <button class="mobile-sidebar__item" data-view="graph">Graph</button>
+      <button class="mobile-sidebar__item" data-view="claims">Claims</button>
+      <button class="mobile-sidebar__item" data-view="workbench">Workbench</button>
       <button class="mobile-sidebar__item" data-view="machines">Machines</button>
       <button class="mobile-sidebar__item" data-view="agents">Agents</button>
       <button class="mobile-sidebar__item" data-view="admin">Admin</button>
