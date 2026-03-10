@@ -37,6 +37,23 @@ RULE: Push success = lock acquired.
 RULE: Push failure = another machine claimed first => ABORT. Try another ticket.
 PROHIBITED: Any code changes during claim commit.
 
+### MCP-Assisted Claim (Primary Mode)
+
+RULE: When the MCP server is available, agents claim tickets via MCP tool call.
+RULE: The MCP `tickets.claim` tool acquires a PostgreSQL-backed distributed lock.
+RULE: After MCP claim succeeds, the agent still executes the Git claim commit
+to synchronize filesystem state with MCP state.
+
+```
+1. tickets.claim({ticket_id, agent_name, machine_id})  → MCP lock acquired
+2. Update local ticket JSON with claim metadata
+3. git add + git commit + git push (CLAIM commit)       → filesystem synchronized
+```
+
+RULE: MCP claim is the authoritative lock. Git commit is the filesystem sync.
+RULE: If MCP claim fails (already claimed), agent aborts without Git commit.
+RULE: If Git push fails after MCP claim, agent releases MCP claim via `tickets.release`.
+
 ## 3. Commit 2 — WORK
 
 REQUIRED: Execute agent work for the assigned stage.
@@ -51,6 +68,22 @@ git add <each-modified-file-explicitly>
 git commit -m "[<ticket-id>] <STAGE> complete by <agent> on <machine>"
 git push
 ```
+
+### MCP-Assisted Completion (Primary Mode)
+
+RULE: After the Git work commit is pushed, agents call `tickets.complete` to
+advance the ticket in the MCP server's PostgreSQL state.
+RULE: The MCP `tickets.complete` tool requires evidence (artifact paths, test results).
+RULE: If `tickets.complete` fails, the Git commit is already pushed — agent retries
+the MCP call or escalates.
+
+```
+1. Execute work (code changes, tests, docs)
+2. git add + git commit + git push (WORK commit)         → code delivered
+3. tickets.complete({ticket_id, evidence: {...}})         → MCP state advanced
+```
+
+RULE: Git push is the code delivery mechanism. MCP complete is the state transition.
 
 ## 4. Scoped Git Rules (Hard)
 
