@@ -4,7 +4,7 @@
   "description": "Design the system health dashboard view. Show database connection pool status (active, idle, max), MCP server status (uptime, connected agents, request rate), webhook delivery health (success rate, pending queue, failed deliveries), and system alerts. Design status indicator components (green/yellow/red) and metric cards with sparkline mini-charts for trending data. Define the notification/alert tray design for system-wide warnings.",
   "type": "frontend",
   "priority": "low",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -36,10 +36,10 @@
     "Mockup approval status set to APPROVED in mockup document header"
   ],
   "rework_count": 0,
-  "claimed_by": "CIReviewer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T09:21:37.603653+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -114,6 +114,15 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-10T08:59:49.297800+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "CI PASS -- Quality score 100/100, 0 critical, 0 warnings. Advanced CI -> DOCS."
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
