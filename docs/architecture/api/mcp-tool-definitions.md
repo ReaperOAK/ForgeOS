@@ -1076,20 +1076,72 @@ export const ticketsUpdateSchema = z.object({
     "ticket": {
       "$ref": "#/$defs/Ticket",
       "description": "The ticket with updated metadata"
+    },
+    "message": {
+      "type": "string",
+      "description": "Status message — 'OK' on success"
     }
   },
-  "required": ["ticket"]
+  "required": ["ticket", "message"]
 }
 ```
+
+**Handler Workflow:**
+
+1. Acquires row-level lock via `SELECT * FROM tickets WHERE ticket_id = $1 FOR UPDATE`.
+2. Returns `TICKET_NOT_FOUND` if no row matches.
+3. Returns `NOT_CLAIM_OWNER` if `claimed_by` or `claimed_by_name` is null.
+4. Merges metadata: `UPDATE tickets SET metadata = metadata || $1::jsonb`.
+5. Inserts an `UPDATED` event with the metadata payload.
+6. Commits and returns the updated ticket with `message: "OK"`.
 
 **Error Codes:**
 
 | Error Code | Condition |
 |------------|-----------|
 | `TICKET_NOT_FOUND` | No ticket with given ID |
-| `NOT_CLAIM_OWNER` | Caller does not own the claim |
-| `LEASE_EXPIRED` | Agent's lease has expired |
-| `INTERNAL_ERROR` | Database error |
+| `NOT_CLAIM_OWNER` | Ticket has no active claim (`claimed_by` is null) |
+| `INTERNAL_ERROR` | Database or runtime error |
+
+**Error Response Schema:**
+```json
+{
+  "type": "object",
+  "properties": {
+    "error": { "type": "string", "description": "Machine-readable error code" },
+    "message": { "type": "string", "description": "Human-readable description" },
+    "ticket_id": { "type": "string", "description": "Targeted ticket ID" },
+    "timestamp": { "type": "string", "format": "date-time" }
+  },
+  "required": ["error", "message", "ticket_id", "timestamp"]
+}
+```
+
+**Request Example:**
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "tickets.update",
+    "arguments": {
+      "ticket_id": "TASK-FOS-03-003",
+      "metadata": { "review_notes": "Approved", "priority_override": "critical" }
+    }
+  }
+}
+```
+
+**Success Response Example:**
+```json
+{
+  "content": [{
+    "type": "text",
+    "text": "{\"ticket\":{\"ticket_id\":\"TASK-FOS-03-003\",\"metadata\":{\"review_notes\":\"Approved\"},...},\"message\":\"OK\"}"
+  }]
+}
+```
+
+**Implementation:** [`forgeos-server/src/tools/tickets-update.ts`](../../../forgeos-server/src/tools/tickets-update.ts)
 
 **Annotations:**
 ```json
@@ -1379,13 +1431,20 @@ export const ticketsGraphSchema = z.object({
 
 ### 4.9 tickets.extend
 
-**Purpose:** Extend the lease on a claimed ticket to prevent expiry during long-running work.
+<!-- last_reviewed: 2026-03-10T12:09:22Z -->
+
+**Purpose:** Extend the lease on a claimed ticket to prevent expiry during
+long-running operations. The handler resolves `agent_name` to a UUID,
+calls the `extend_lease` SQL stored function, and returns the updated
+ticket with the new lease expiry.
+
+**Implementation:** [`forgeos-server/src/tools/tickets-extend.ts`](../../../forgeos-server/src/tools/tickets-extend.ts)
 
 **MCP Registration:**
 ```typescript
 server.tool(
   'tickets.extend',
-  'Extend the lease on a claimed ticket to prevent expiry. Agent must own the active claim. Duration is capped by the project maximum.',
+  'Extend the lease on a claimed ticket to prevent expiry during long operations',
   ticketsExtendSchema.shape,
   async (params) => ticketsExtendHandler(params),
 );
@@ -1398,16 +1457,21 @@ server.tool(
   "properties": {
     "ticket_id": {
       "type": "string",
-      "description": "Human-readable ticket ID whose lease to extend"
+      "description": "Ticket ID whose lease to extend"
+    },
+    "agent_name": {
+      "type": "string",
+      "description": "Agent name that holds the claim"
     },
     "duration_minutes": {
       "type": "integer",
-      "minimum": 1,
-      "maximum": 480,
-      "description": "Additional minutes to add to the current lease (defaults to project setting)"
+      "minimum": 5,
+      "maximum": 120,
+      "default": 30,
+      "description": "Lease extension duration in minutes (5–120, default 30)"
     }
   },
-  "required": ["ticket_id"],
+  "required": ["ticket_id", "agent_name"],
   "additionalProperties": false
 }
 ```
@@ -1415,9 +1479,10 @@ server.tool(
 **Zod Schema (TypeScript):**
 ```typescript
 export const ticketsExtendSchema = z.object({
-  ticket_id: z.string().min(1).describe('Ticket ID whose lease to extend'),
-  duration_minutes: z.number().int().min(1).max(480).optional()
-    .describe('Additional minutes to add to current lease'),
+  ticket_id: z.string().describe('Ticket ID whose lease to extend'),
+  agent_name: z.string().describe('Agent name that holds the claim'),
+  duration_minutes: z.number().int().min(5).max(120).default(30)
+    .describe('Lease extension duration in minutes (5–120, default 30)'),
 });
 ```
 
@@ -1440,17 +1505,62 @@ export const ticketsExtendSchema = z.object({
 }
 ```
 
-**Stored Function:** `extend_lease(p_ticket_id, p_duration_minutes)`
+**Stored Function:** `extend_lease(p_ticket_id, p_agent_id, p_agent_name, p_duration_minutes)`
+
+The function uses `SELECT FOR UPDATE` to verify claim ownership,
+checks the requested duration against `max_lease_minutes` from
+`system_config`, and updates `lease_expiry` to `NOW() + duration_minutes`.
+Records a `LEASE_EXTENDED` event with `new_expiry` and
+`extension_minutes` in the payload.
+
+**Handler Workflow:**
+
+1. Look up `agent_name` in the `agents` table to resolve the UUID.
+2. If agent not found, return `NOT_CLAIM_OWNER` (cannot verify ownership).
+3. Call `extend_lease($1, $2, $3, $4)` with ticket ID, agent UUID,
+   agent name, and duration minutes.
+4. If no rows returned, return `NOT_CLAIM_OWNER`.
+5. On success, return `{ ticket, new_lease_expiry }` from the updated row.
+6. Catch SQL exceptions: map `NOT_CLAIM_OWNER` and `LEASE_TOO_LONG`
+   error strings to structured error responses.
 
 **Error Codes:**
 
 | Error Code | Condition |
 |------------|-----------|
-| `TICKET_NOT_FOUND` | No ticket with given ID |
-| `NOT_CLAIM_OWNER` | Caller does not own the claim |
-| `LEASE_EXPIRED` | Lease already expired (cannot extend an expired lease) |
-| `LEASE_TOO_LONG` | Extension would exceed project `max_lease_minutes` |
-| `INTERNAL_ERROR` | Database error |
+| `NOT_CLAIM_OWNER` | Agent does not hold the claim on the ticket, or agent not registered |
+| `LEASE_TOO_LONG` | `duration_minutes` exceeds `max_lease_minutes` from `system_config` |
+| `INTERNAL_ERROR` | Unexpected database or runtime error |
+
+**Request/Response Examples:**
+
+*Success:*
+```jsonc
+// Request
+{ "method": "tools/call",
+  "params": { "name": "tickets.extend",
+    "arguments": { "ticket_id": "TASK-001", "agent_name": "Backend",
+      "duration_minutes": 45 } } }
+// Response content[0].text
+{ "ticket": { "ticket_id": "TASK-001", "lease_expiry": "2026-03-10T13:00:00Z", "..." : "..." },
+  "new_lease_expiry": "2026-03-10T13:00:00Z" }
+```
+
+*Error — not claim owner:*
+```json
+{ "error": "NOT_CLAIM_OWNER",
+  "message": "Cannot extend lease: you do not hold the claim on ticket TASK-001",
+  "ticket_id": "TASK-001",
+  "timestamp": "2026-03-10T12:00:00.000Z" }
+```
+
+*Error — duration too long:*
+```json
+{ "error": "LEASE_TOO_LONG",
+  "message": "Requested duration exceeds max_lease_minutes",
+  "ticket_id": "TASK-001",
+  "timestamp": "2026-03-10T12:00:00.000Z" }
+```
 
 **Annotations:**
 ```json

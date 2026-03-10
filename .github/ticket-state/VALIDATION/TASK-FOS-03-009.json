@@ -149,7 +149,7 @@
       "machine_id": "pop-os",
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
-      "details": "DOCS PASS \u2014 Fixed 6 inaccuracies in mcp-tool-definitions.md \u00a74.9, added tickets.extend README section, CHANGELOG entry. Advanced DOCS -> VALIDATION."
+      "details": "DOCS PASS — Fixed 6 inaccuracies in mcp-tool-definitions.md §4.9, added tickets.extend README section, CHANGELOG entry. Advanced DOCS -> VALIDATION."
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",

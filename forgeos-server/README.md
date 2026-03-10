@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-10T16:30:00Z -->
+<!-- last_reviewed: 2026-03-10T18:10:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -672,6 +672,94 @@ for sub-50 ms response times.
 | `src/tools/tickets-next.ts` | Zod schema, handler, types |
 | `src/tools/index.ts` | Tool registration on McpServer |
 
+### tickets.update — Update Ticket Metadata
+
+Updates arbitrary metadata on a claimed ticket. Merges the provided
+key-value pairs into the ticket's existing `metadata` JSONB column
+using PostgreSQL's `||` operator (shallow merge). Only callable when
+the ticket has an active claim. Records an `UPDATED` event in the
+`events` table with the metadata payload.
+
+#### Input Schema
+
+| Parameter  | Type   | Required | Description                                       |
+|------------|--------|----------|---------------------------------------------------|
+| `ticket_id`| string | Yes      | Human-readable ticket identifier (min 1 character)|
+| `metadata` | object | Yes      | Key-value pairs to shallow-merge into ticket metadata |
+
+Both fields are validated via Zod at invocation time. Invalid values
+return a schema validation error before the handler executes.
+
+#### Handler Workflow
+
+The handler runs in a single database transaction:
+
+1. Locks the ticket row with `SELECT ... FOR UPDATE`.
+2. Returns `TICKET_NOT_FOUND` if the ticket does not exist.
+3. Returns `NOT_CLAIM_OWNER` if the ticket has no active claim
+   (`claimed_by` is null).
+4. Merges metadata via `UPDATE tickets SET metadata = metadata || $1::jsonb`.
+5. Inserts an `UPDATED` event into the `events` table.
+6. Commits and returns the updated ticket.
+
+The `updated_at` column refreshes automatically via the
+`trg_tickets_updated_at` database trigger.
+
+#### Response Format
+
+**Success:**
+
+```json
+{
+  "ticket": { "ticket_id": "TASK-FOS-03-003", "metadata": { "key": "value" }, ... },
+  "message": "OK"
+}
+```
+
+#### Error Codes
+
+| Error Code         | Condition                         | Description                       |
+|--------------------|-----------------------------------|-----------------------------------|
+| `TICKET_NOT_FOUND` | No ticket with given ID           | Ticket does not exist             |
+| `NOT_CLAIM_OWNER`  | Ticket has no active claim        | No agent currently holds the claim|
+| `INTERNAL_ERROR`   | Database or runtime failure       | Unexpected error during update    |
+
+**Error response shape:**
+
+```json
+{
+  "error": "TICKET_NOT_FOUND",
+  "message": "Ticket TASK-XXX does not exist",
+  "ticket_id": "TASK-XXX",
+  "timestamp": "2026-03-10T10:00:00.000Z"
+}
+```
+
+#### MCP Invocation Example
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "tickets.update",
+    "arguments": {
+      "ticket_id": "TASK-FOS-03-003",
+      "metadata": {
+        "review_notes": "Approved by security team",
+        "priority_override": "critical"
+      }
+    }
+  }
+}
+```
+
+#### Implementation Files
+
+| File | Purpose |
+|------|---------|
+| `src/tools/tickets-update.ts` | Zod schema, handler, types |
+| `src/tools/index.ts` | Tool registration on McpServer |
+
 ### tickets.complete — Complete Stage and Advance
 
 Marks the current SDLC stage as complete and advances the ticket to the
@@ -1033,6 +1121,102 @@ Both functions are pure (no I/O) and exported for direct unit testing.
 |------|---------|
 | `src/tools/tickets-graph.ts` | Zod schema, graph algorithms, handler |
 | `src/tools/index.ts` | Tool registration on McpServer |
+
+### tickets.extend — Extend Lease Duration
+
+Extends the lease on a claimed ticket to prevent expiry during long-running
+operations. The handler resolves the agent name to a UUID, calls the
+`extend_lease` PostgreSQL stored function, and returns the updated ticket
+with the new lease expiry timestamp.
+
+#### Input Schema
+
+| Parameter | Type | Required | Default | Description |
+|-----------|------|----------|---------|-------------|
+| `ticket_id` | `string` | Yes | — | Ticket ID whose lease to extend |
+| `agent_name` | `string` | Yes | — | Agent name that holds the claim |
+| `duration_minutes` | `integer` | No | `30` | Extension duration in minutes (5–120) |
+
+All values are validated via Zod at invocation time. `duration_minutes`
+is clamped to 5–120 and defaults to 30 when omitted.
+
+#### Handler Behavior
+
+1. Looks up `agent_name` in the `agents` table to resolve the UUID.
+2. If the agent is not found, returns `NOT_CLAIM_OWNER`.
+3. Calls the `extend_lease(p_ticket_id, p_agent_id, p_agent_name,
+   p_duration_minutes)` stored function. The function uses
+   `SELECT FOR UPDATE` to verify claim ownership and checks the
+   requested duration against `max_lease_minutes` from `system_config`.
+4. On success, updates `lease_expiry` to `NOW() + duration_minutes` and
+   records a `LEASE_EXTENDED` event with `new_expiry` and
+   `extension_minutes` in the payload.
+5. Returns the updated ticket and new lease expiry.
+
+#### Response Format
+
+**Success:**
+
+```json
+{
+  "ticket": { "ticket_id": "TASK-001", "lease_expiry": "2026-03-10T13:00:00Z", "..." : "..." },
+  "new_lease_expiry": "2026-03-10T13:00:00Z"
+}
+```
+
+**Error — not claim owner:**
+
+```json
+{
+  "error": "NOT_CLAIM_OWNER",
+  "message": "Cannot extend lease: you do not hold the claim on ticket TASK-001",
+  "ticket_id": "TASK-001",
+  "timestamp": "2026-03-10T12:00:00.000Z"
+}
+```
+
+**Error — duration exceeds maximum:**
+
+```json
+{
+  "error": "LEASE_TOO_LONG",
+  "message": "Requested duration exceeds max_lease_minutes",
+  "ticket_id": "TASK-001",
+  "timestamp": "2026-03-10T12:00:00.000Z"
+}
+```
+
+#### Error Codes
+
+| Error Code | Condition |
+|------------|-----------|
+| `NOT_CLAIM_OWNER` | Agent does not hold the claim, or agent not registered |
+| `LEASE_TOO_LONG` | `duration_minutes` exceeds `max_lease_minutes` system config |
+| `INTERNAL_ERROR` | Unexpected database or runtime error |
+
+#### MCP Invocation Example
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "tickets.extend",
+    "arguments": {
+      "ticket_id": "TASK-FOS-03-009",
+      "agent_name": "Backend",
+      "duration_minutes": 45
+    }
+  }
+}
+```
+
+#### Implementation Files
+
+| File | Purpose |
+|------|---------|
+| `src/tools/tickets-extend.ts` | Zod schema, handler, types |
+| `src/tools/index.ts` | Tool registration on McpServer |
+
 ## Git Hooks
 
 The repository uses [Husky](https://typicode.github.io/husky/) to enforce
