@@ -38,7 +38,48 @@ depends_on: str | Sequence[str] | None = None
 
 
 def upgrade() -> None:
-    """Create event history and audit tables with event sourcing enhancements."""
+    """Create event history and audit tables with event sourcing enhancements.
+
+    Creates the following database objects:
+
+    Tables:
+        event_history: Immutable append-only audit log with full JSONB state
+            snapshots (previous_state, new_state). Foreign keys reference
+            tickets(ticket_id) and agents(id) from migration 001.
+        stage_transitions: SDLC stage transition log with from_stage, to_stage,
+            triggered_by, and reason columns.
+
+    Enum extensions:
+        event_type: Adds DONE and REWORKED values for lifecycle completion
+            and rework tracking.
+
+    Enhanced columns (events table):
+        sequence_number: Global monotonic ordering via events_sequence_number_seq.
+        aggregate_version: Per-ticket version for optimistic concurrency.
+        correlation_id: Links related events across tickets.
+        causation_id: References the event that caused this event.
+        schema_version: Payload schema version for event evolution.
+
+    Triggers:
+        trg_event_history_no_update: Prevents UPDATE on event_history.
+        trg_event_history_no_delete: Prevents DELETE on event_history.
+
+    Indexes:
+        6 on event_history (ticket_id, event_type, agent_id, created_at,
+            ticket+created_at composite, metadata GIN).
+        5 on stage_transitions (ticket_id, from_stage, to_stage, created_at,
+            ticket+created_at composite).
+        4 on events (sequence_number, aggregate_version UNIQUE, correlation_id,
+            causation_id).
+
+    Raises:
+        sqlalchemy.exc.OperationalError: If migration 001 has not been applied
+            (missing tickets/agents tables or event_type enum).
+
+    See Also:
+        FORGEOS-ARCH007 (Event Sourcing Audit Trail Schema) for design rationale.
+        docs/database/schema-reference.md for the full schema reference.
+    """
     # ------------------------------------------------------------------
     # Extend event_type enum with new lifecycle values (ARCH007 §5.1)
     # ------------------------------------------------------------------
@@ -213,7 +254,25 @@ def upgrade() -> None:
 
 
 def downgrade() -> None:
-    """Revert event history and audit tables and event sourcing enhancements."""
+    """Revert event history and audit tables and event sourcing enhancements.
+
+    Drops objects in reverse dependency order:
+
+    1. Enhanced events column indexes (causation, correlation, aggregate_version,
+       sequence_number).
+    2. stage_transitions indexes and table.
+    3. event_history triggers (no_delete, no_update), trigger functions
+       (prevent_event_history_delete, prevent_event_history_update),
+       indexes, and table.
+    4. Enhanced columns from events table (schema_version, causation_id,
+       correlation_id, aggregate_version, sequence_number).
+    5. events_sequence_number_seq sequence.
+
+    Note:
+        PostgreSQL does not support removing individual enum values. The DONE
+        and REWORKED values added to event_type persist until the enum type
+        is dropped entirely (in migration 001's downgrade).
+    """
     # ------------------------------------------------------------------
     # Drop indexes on enhanced events columns
     # ------------------------------------------------------------------
