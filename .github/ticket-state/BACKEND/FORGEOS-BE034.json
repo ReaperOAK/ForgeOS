@@ -4,7 +4,7 @@
   "description": "Implement the `GET /api/tickets` REST endpoint for listing tickets with filtering and pagination. The endpoint shares the ticket service layer created in FORGEOS-BE028. Supports filtering by stage, type, priority, claimed_by, and machine_id. Implement cursor-based or offset-based pagination. Create Pydantic response/request schemas. Mount the ASGI API routes on the HTTP transport from FORGEOS-BE017.",
   "type": "backend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "BACKEND",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -36,11 +36,11 @@
     "API routes mounted on the existing HTTP/SSE transport server",
     "Empty filter returns all tickets; invalid filter values return 400 Bad Request"
   ],
-  "rework_count": 0,
-  "claimed_by": "QA Engineer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T23:36:12.255654+00:00",
+  "rework_count": 1,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -122,6 +122,15 @@
       "from_stage": "QA",
       "to_stage": "QA",
       "details": "Claimed by ReaperOAK@pop-os via QA Engineer, lease until 2026-03-10T23:36:12.255654+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T23:11:09.843387+00:00",
+      "event": "REWORK",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "BACKEND",
+      "details": "Rework #1: Missing list_tickets() method in TicketRepository (runtime AttributeError); /api/tickets route not mounted in transport/http.py (404 at runtime). See .github/agent-output/QA/FORGEOS-BE034.md for fix guidance."
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
