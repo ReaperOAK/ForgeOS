@@ -31,7 +31,6 @@ from mcp_server.middleware.auth_middleware import AuthContext, IdentityType
 from mcp_server.repositories.audit_repo import AuditLogRow, AuditRepository
 from mcp_server.services.audit_service import AuditService
 
-
 # ---------------------------------------------------------------------------
 # Fixtures
 # ---------------------------------------------------------------------------
@@ -121,7 +120,7 @@ class TestAuditRepositoryAppend:
             result="success",
             source_machine="pop-os",
         )
-        pool, conn = _make_mock_pool(fetchrow_result=row_data)
+        pool, _conn = _make_mock_pool(fetchrow_result=row_data)
 
         repo = AuditRepository(pool)
         entry = await repo.append(
@@ -223,7 +222,7 @@ class TestAuditRepositoryQuery:
     async def test_query_no_filters(self) -> None:
         """Query with no filters returns all entries up to limit."""
         rows = [_make_audit_row(), _make_audit_row()]
-        pool, conn = _make_mock_pool(fetch_result=rows)
+        pool, _conn = _make_mock_pool(fetch_result=rows)
 
         repo = AuditRepository(pool)
         result = await repo.query()
@@ -335,7 +334,7 @@ class TestAuditRepositoryCount:
     @pytest.mark.asyncio()
     async def test_count_no_filters(self) -> None:
         """Count with no filters returns total count."""
-        pool, conn = _make_mock_pool(fetchval_result=42)
+        pool, _conn = _make_mock_pool(fetchval_result=42)
 
         repo = AuditRepository(pool)
         result = await repo.count()
@@ -1102,9 +1101,9 @@ class TestDependenciesWiring:
 
     def test_dependencies_has_audit_repo_field(self) -> None:
         """Dependencies dataclass includes audit_repo."""
-        from mcp_server.dependencies import Dependencies
-
         import dataclasses
+
+        from mcp_server.dependencies import Dependencies
 
         field_names = [f.name for f in dataclasses.fields(Dependencies)]
         assert "audit_repo" in field_names

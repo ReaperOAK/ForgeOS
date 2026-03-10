@@ -4,7 +4,7 @@
   "description": "Implement comprehensive audit logging for all authenticated operations. Every MCP tool call and REST API request logs: identity (agent/operator/admin), operation type, target resource, timestamp, result (success/failure), and source IP/machine. Create a dedicated audit_log table via migration. Audit records are append-only and cannot be modified or deleted.",
   "type": "backend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "GET /api/admin/audit endpoint allows admin to query audit logs with filters (identity, operation, time range)"
   ],
   "rework_count": 0,
-  "claimed_by": "QA Engineer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T21:58:36.153323+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -79,6 +79,15 @@
       "from_stage": "QA",
       "to_stage": "QA",
       "details": "Claimed by ReaperOAK@pop-os via QA Engineer, lease until 2026-03-10T21:58:36.153323+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T21:33:59.003704+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
