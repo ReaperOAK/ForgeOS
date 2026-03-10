@@ -276,3 +276,13 @@ _None_
 
 - **Agent:** Security Engineer
 - **Timestamp:** 2026-03-10T23:15:00Z
+
+### [TASK-FOS-03-008] — SEC-001: INTERNAL_ERROR leaks raw DB error messages
+- **Severity:** Medium
+- **CWE:** CWE-209
+- **Component:** forgeos-server/src/tools/tickets-release.ts (line 248)
+- **Description:** Catch-all INTERNAL_ERROR handler returns raw PostgreSQL error messages in MCP response. Could expose table/column/constraint names to MCP caller.
+- **Recommended Fix:** Return generic message for INTERNAL_ERROR; log detailed error server-side only (already done via logger.error).
+- **Status:** Documented risk acceptance — MCP transport is internal (agent-to-server, not user-facing). Known error types already mapped to safe codes.
+- **Agent:** Security Engineer
+- **Timestamp:** 2026-03-10T17:30:00Z
