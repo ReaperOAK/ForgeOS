@@ -4,7 +4,7 @@
   "description": "Implement file-level mutual exclusion using PostgreSQL advisory locks (pg_advisory_xact_lock) keyed on file path hashes. This prevents two agents from modifying the same file concurrently. The advisory lock is transaction-scoped, automatically releasing when the transaction commits or rolls back.",
   "type": "backend",
   "priority": "high",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Concurrent lock attempts on the same file path correctly serialize or fail-fast"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T18:27:01.122116+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -120,18 +120,25 @@
       "details": "DOCS complete \u2014 README updated, CHANGELOG entry added, all docstrings verified"
     },
     {
-      "timestamp": "2026-03-10T17:56:54.524944+00:00",
+      "timestamp": "2026-03-10T17:56:54.525252+00:00",
       "event": "CLAIMED",
       "agent": "Validator",
       "machine_id": "pop-os",
       "details": "Claimed by Validator for VALIDATION stage"
     },
     {
-      "timestamp": "2026-03-10T17:57:01.122133+00:00",
+      "timestamp": "2026-03-10T17:57:01.122403+00:00",
       "event": "CLAIMED",
       "agent": "Validator",
       "machine_id": "pop-os",
       "details": "Claimed by Validator for VALIDATION stage"
+    },
+    {
+      "timestamp": "2026-03-10T18:05:11.738754+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "details": "VALIDATION APPROVED \u2014 10/10 DoD items pass, HIGH confidence"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
