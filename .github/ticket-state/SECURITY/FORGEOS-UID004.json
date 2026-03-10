@@ -4,7 +4,7 @@
   "description": "Design the operator workbench and active claims monitor views. The claims monitor shows all active claims with agent identity, machine ID, operator name, ticket info, and a real-time lease countdown timer. The operator workbench provides authenticated action buttons for claim, release, and advance operations. Design confirmation modals for destructive actions (force-release, force-advance). Define the multi-machine status panel showing connected machines and running agents.",
   "type": "frontend",
   "priority": "medium",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -37,10 +37,10 @@
     "Mockup approval status set to APPROVED in mockup document header"
   ],
   "rework_count": 1,
-  "claimed_by": "QA",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T15:30:00+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -120,6 +120,15 @@
       "agent": "QA",
       "machine_id": "pop-os",
       "details": "Claimed by QA on pop-os (reaperoak) - rework #1 re-verification"
+    },
+    {
+      "timestamp": "2026-03-10T15:05:00+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "QA PASS \u2014 All 4 rework defects fixed. 7/7 acceptance criteria met. Advancing to SECURITY."
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
