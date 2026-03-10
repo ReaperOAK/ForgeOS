@@ -1,3 +1,8 @@
+### [FORGEOS-BE009] — BACKEND complete
+- **Artifacts:** mcp-server/src/mcp_server/locking/lease_cleanup.py, mcp-server/tests/test_lease_cleanup.py, mcp-server/src/mcp_server/locking/__init__.py
+- **Decisions:** Followed LeaseHeartbeat pattern for async background task. Used RELEASED event_type for event_history records. Atomic per-lease release transactions for consistency.
+- **Timestamp:** 2026-03-11T22:00:00Z
+
 ### [FORGEOS-BE023] — Validation: APPROVED
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE023.md
 - **Decisions:** APPROVED — 10/10 DoD items pass. 6/6 ACs independently verified. 22/22 tests pass, 88% coverage, ruff clean, mypy clean, no TODO/console. All upstream verdicts (QA, Security, CI, Docs) cross-verified as PASS.
