@@ -34,10 +34,10 @@
     "Correlation IDs propagate through database operations to event_history records"
   ],
   "rework_count": 0,
-  "claimed_by": "Backend",
+  "claimed_by": "QA",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T12:39:18+00:00",
+  "lease_expiry": "2026-03-10T13:09:44.069441+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -59,7 +59,14 @@
       "event": "STAGE_COMPLETE",
       "agent": "Backend",
       "machine_id": "pop-os",
-      "details": "BACKEND complete — correlation middleware implemented, 22 tests pass"
+      "details": "BACKEND complete \u2014 correlation middleware implemented, 22 tests pass"
+    },
+    {
+      "timestamp": "2026-03-10T12:39:44.069441+00:00",
+      "event": "CLAIMED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "Claimed by QA agent for QA stage"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
