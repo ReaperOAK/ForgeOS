@@ -110,6 +110,15 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "SECURITY PASS. 4 medium/low findings."
+    },
+    {
+      "timestamp": "2026-03-10T10:30:00Z",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "SECURITY PASS. 4 medium/low findings."
     }
   ],
   "source_task_file": "TODO/tickets/05-dashboard.md",
