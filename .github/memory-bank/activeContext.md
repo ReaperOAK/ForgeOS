@@ -1,3 +1,8 @@
+### [FORGEOS-BE018] — Validation: REJECTED (Rework #1)
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE018.md
+- **Decisions:** REJECTED — 9/10 DoD items pass. DoD #3 FAIL: 2 lint errors (F401 unused `Any` import in dependencies.py:21, I001 unsorted imports in server.py:41). All 6 ACs verified, all upstream verdicts confirmed PASS. 25 tests, 86% coverage, mypy clean. Sent back to BACKEND for auto-fixable lint cleanup.
+- **Timestamp:** 2026-03-11T15:00:00+05:30
+
 ### [FORGEOS-BE008] — Validation Summary
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE008.md
 - **Decisions:** APPROVED — 10/10 DoD items pass, 6/6 ACs verified, all upstream verdicts (QA/Security/CI/Docs) confirmed PASS. 38 tests, 99% coverage, mypy clean. 3 minor style suggestions (import ordering, contextlib.suppress) accepted per CI Reviewer.
