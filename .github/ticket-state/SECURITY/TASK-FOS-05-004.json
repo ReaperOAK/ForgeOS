@@ -4,7 +4,7 @@
   "description": "Implement the dashboard's JavaScript logic as vanilla JS (no framework). app.js initializes the SSE connection (EventSource), handles reconnection on disconnect, and dispatches events to view modules. pipeline.js renders and updates the Kanban pipeline board: fetches initial state from REST API, builds card DOM elements, updates cards on SSE events, manages lease countdown timers (updating every second), and implements filter logic. admin.js provides admin panel functionality: force-release button with confirmation dialog, machine status list with health indicators (active/stale/offline based on last_seen), and system health metrics display. All modules use event delegation for performance.",
   "type": "frontend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -85,6 +85,15 @@
       "from_stage": "FRONTEND",
       "to_stage": "QA",
       "details": "FRONTEND implementation complete. app.js refactored (SSE backoff, handler dispatch), pipeline.js created (Kanban), admin.js created (admin panel)."
+    },
+    {
+      "timestamp": "2026-03-10T08:25:00+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "QA PASS. All 10 acceptance criteria verified. No defects. Static analysis clean."
     }
   ],
   "source_task_file": "TODO/tickets/05-dashboard.md",
