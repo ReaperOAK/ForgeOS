@@ -4,7 +4,7 @@
   "description": "Build the inbound webhook HTTP endpoint (`POST /api/webhooks/:source`) that accepts JSON payloads from external systems. The endpoint authenticates webhook requests using the auth middleware (FORGEOS-BE054), validates the payload structure, and routes the event to the appropriate internal handler based on the source parameter and event type. The HTTP transport from FORGEOS-BE017 hosts the endpoint.",
   "type": "backend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
