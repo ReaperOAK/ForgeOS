@@ -137,6 +137,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   and `StreamableHttpTransport` implementations. `create_transport()` factory
   function. 76 tests with 92% coverage.
 
+- **SDK Error Handling and Configuration** (FORGEOS-BE046) — Extended the
+  agent SDK exception hierarchy with four ticket-domain exceptions:
+  `ClaimConflictError` (claim blocked by another agent),
+  `LeaseExpiredError` (expired claim lease with timestamp),
+  `InvalidTransitionError` (invalid SDLC stage transition with from/to
+  stages), and `NetworkError` (connection failure with optional
+  `retry_after` hint). Added optional `FORGEOS_API_KEY` environment
+  variable to `SDKConfig` with blank-value validation. 70 tests with
+  97% coverage on changed files.
+
 - **Agent SDK Configuration and Exceptions** (FORGEOS-BE043) — SDK project
   scaffolding with `SDKConfig` (pydantic-settings, `FORGEOS_` prefix),
   `TransportType` enum, and exception hierarchy (`ForgeOSError`,
