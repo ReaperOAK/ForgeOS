@@ -4,7 +4,7 @@
   "description": "Implement operator (human) authentication using token-based auth (JWT or simple bearer tokens). Operators authenticate via the REST API to perform dashboard actions. Implement token generation on login, token validation on each request, token expiry, and token refresh. Operator records are stored in the operators table from FORGEOS-BE002.",
   "type": "backend",
   "priority": "high",
-  "stage": "BLOCKED",
+  "stage": "BACKEND",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Operator credentials stored as bcrypt hashes in the operators table"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Backend",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T15:19:14+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -46,6 +46,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase3-auth.md"
+    },
+    {
+      "timestamp": "2026-03-10T14:49:14+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Claimed by Backend agent for BACKEND stage"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
