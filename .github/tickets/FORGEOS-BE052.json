@@ -4,7 +4,7 @@
   "description": "Implement machine registration and identity verification. Each machine running agents registers with a unique machine_id (hostname or UUID). Machine registration records the hostname, first-seen timestamp, and last-seen timestamp. On each request, the machine_id is verified against the registry. Unknown machines can be auto-registered or rejected based on configuration.",
   "type": "backend",
   "priority": "high",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Machine identity includes machine_id, hostname, and registration timestamp"
   ],
   "rework_count": 1,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T21:28:33.886385+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -149,6 +149,15 @@
       "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
       "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-10T21:28:33.886385+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T21:04:57.404124+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
