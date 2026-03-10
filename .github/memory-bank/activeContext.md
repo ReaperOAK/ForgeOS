@@ -2926,7 +2926,22 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** PASS — 44/44 tests pass, 96% coverage (111 stmts, 4 miss — defensive ValueError guards only), zero lint errors. All 6 ticket JSON ACs verified: Alembic migration with complete schema, enqueue with pending+JSONB, dequeue with FOR UPDATE SKIP LOCKED, status transition enforcement, exponential backoff retry + dead_letter, partial index on (status, next_retry_at). Rework #1 context: prior rejection was lint-only (4 ruff errors), now clean.
 - **Timestamp:** 2026-03-11T12:00:00Z
 
+### [FORGEOS-BE021] — QA PASS (Rework)
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE021.md
+- **Decisions:** PASS — 42/42 tests pass, 100% coverage (53 stmts, 0 miss), zero lint errors, zero pyright errors. All 6 ACs verified: JSON Schema validation via Draft202012Validator, field path + reason in errors, MCP INVALID_PARAMS -32602, no type coercion, missing required fields listed, sub-1ms performance. Rework #1 context: prior rejection was lint/type-only (3 ruff + 3 pyright errors), now clean.
+- **Timestamp:** 2026-03-11T12:30:00Z
+
 ### [FORGEOS-BE010] — Security Review
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE010.md
 - **Decisions:** PASS — Zero critical/high/medium findings. STRIDE on transactional() context manager: no injection (enum-derived isolation strings), no info disclosure to callers, bounded retries with exponential backoff. OWASP 10/10 clear. 2 informational items: mutable module-level dict (low, defense-in-depth suggestion), exception str() in internal logs (standard practice). No secrets, no PII, no new dependencies.
 - **Timestamp:** 2026-03-11T00:00:00Z
+
+### [FORGEOS-BE044] — QA Review
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE044.md
+- **Decisions:** PASS — 76/76 tests pass, 92% coverage (client.py 91%, transport.py 93%), zero lint errors. All 7 ACs verified: stdio/SSE/HTTP transports, env+constructor config, exponential backoff (1s/30s/10% jitter), session init via initialize(), session resumption via Mcp-Session-Id header, clean shutdown. No defects found.
+- **Timestamp:** 2026-03-11T13:00:00Z
+
+### [FORGEOS-BE052] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE052.md
+- **Decisions:** PASS — Zero critical/high findings. All SQL parameterized, STRICT mode provides 403 deny-by-default, inactive machines always rejected, frozen dataclass prevents mutation, structured logging with no PII. Two informational notes: UPSERT reactivates soft-deleted machines (by design), schema mismatch with migration 002 (needs follow-up migration).
+- **Timestamp:** 2026-03-11T12:30:00Z
