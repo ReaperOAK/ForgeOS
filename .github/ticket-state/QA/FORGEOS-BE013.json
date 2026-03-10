@@ -4,7 +4,7 @@
   "description": "Implement the repository pattern data access layer that all higher-level services consume. Create repository classes for tickets (CRUD, filtering, stage queries), claims (create, release, find active), and events (append, query by ticket). Repositories accept a database connection/pool and encapsulate all SQL queries. Both sync and async interfaces must be supported.",
   "type": "backend",
   "priority": "critical",
-  "stage": "BACKEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -62,6 +62,13 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "Claimed for BACKEND stage implementation"
+    },
+    {
+      "timestamp": "2026-03-10T15:30:00+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "BACKEND complete — 3 repositories (14 methods), 41 tests passing. Advanced to QA."
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
