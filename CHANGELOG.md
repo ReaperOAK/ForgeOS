@@ -8,6 +8,14 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **tickets.complete Tool Documentation** — Added complete reference
+  documentation for the `tickets.complete` MCP tool (TASK-FOS-03-004).
+  New `tickets.complete` section in `forgeos-server/README.md` with input/output
+  schemas, error codes, MCP invocation example, and implementation file map.
+  Fixed stored function signature in `docs/architecture/api/mcp-tool-definitions.md`
+  from 2-parameter to 4-parameter form matching actual implementation. Added
+  behavioral description of `advance_ticket()` internals.
+
 - **System Health Dashboard Design Specification** — Complete mockup and
   component specification for the System Health Dashboard view
   (FORGEOS-UID005). Mockup covers 4 health panels — Database (connection
@@ -22,6 +30,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   ratios), and health-specific design token extensions for gauges,
   sparklines, alerts, and donut charts. Stitch screenshot references
   included for desktop and mobile variants.
+
+- **`tickets.release` MCP Tool — API Reference Update** — Updated
+  `docs/architecture/api/mcp-tool-definitions.md` section 4.5 to match
+  the implementation in `forgeos-server/src/tools/tickets-release.ts`
+  (TASK-FOS-03-008). Added missing `agent_name` required parameter.
+  Corrected output schema from `released: boolean` to
+  `released_file_locks: string[]`. Updated stored function signature to
+  five parameters (`p_ticket_id`, `p_agent_id`, `p_agent_name`, `p_reason`,
+  `p_force`). Added handler workflow (5-step), three request/response
+  examples, and error response schema with timestamps.
 
 - **Database Migration CI Pipeline Documentation** — Enhanced inline YAML
   comments in `.github/workflows/database-ci.yml` explaining trigger path
