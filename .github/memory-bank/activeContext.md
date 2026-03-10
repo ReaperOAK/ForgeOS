@@ -1,3 +1,8 @@
+### [FORGEOS-BE023] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE023.md
+- **Decisions:** PASS — Zero critical/high findings. 1 medium (SEC-BE023-001: session ID collision when explicit ID provided, CWE-639), 2 low/info (mutable reference leakage CWE-374, no per-agent quota CWE-770). All risk-accepted — uuid4() default path safe, internal API with transport-layer auth. STRIDE on 4 trust boundaries, OWASP 10/10 checked.
+- **Timestamp:** 2026-03-11T05:00:00Z
+
 ### [FORGEOS-BE008] — Security Review
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE008.md
 - **Decisions:** PASS — Zero critical/high findings. 3 informational advisories (no rate limiting on internal func, no LIMIT clause, str(exc) in error msg) all risk-accepted. Parameterized SQL, SELECT FOR UPDATE, frozen dataclasses, structured logging confirmed.
@@ -2946,6 +2951,11 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** PASS — 76/76 tests pass, 92% coverage (client.py 91%, transport.py 93%), zero lint errors. All 7 ACs verified: stdio/SSE/HTTP transports, env+constructor config, exponential backoff (1s/30s/10% jitter), session init via initialize(), session resumption via Mcp-Session-Id header, clean shutdown. No defects found.
 - **Timestamp:** 2026-03-11T13:00:00Z
 
+### [FORGEOS-BE044] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE044.md
+- **Decisions:** PASS — Zero critical/high findings. STRIDE: 8 LOW threats, all mitigated by design. OWASP: 6 PASS, 4 N/A. Two informational SARIF notes (default HTTP for dev, non-crypto RNG for jitter). Strong security patterns: input validation, structured logging, async resource cleanup, exponential backoff.
+- **Timestamp:** 2026-03-11T14:00:00Z
+
 ### [FORGEOS-BE052] — Security Review
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE052.md
 - **Decisions:** PASS — Zero critical/high findings. All SQL parameterized, STRICT mode provides 403 deny-by-default, inactive machines always rejected, frozen dataclass prevents mutation, structured logging with no PII. Two informational notes: UPSERT reactivates soft-deleted machines (by design), schema mismatch with migration 002 (needs follow-up migration).
@@ -2956,7 +2966,27 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** PASS — 56/56 tests, 99% coverage, all 6 ACs met, 5 test lint issues fixed by QA
 - **Timestamp:** 2026-03-11T12:30:00Z
 
+### [FORGEOS-BE054] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE054.md
+- **Decisions:** PASS — Zero critical/high findings. 3 LOW/informational: unused IdentityType.OPERATOR enum, machine_id from user-controllable headers (audit only), no pre-auth rate limiting (rely on WAF). Constant-time hash comparison, frozen dataclasses, parameterized SQL, async-safe contextvars confirmed.
+- **Timestamp:** 2026-03-11T13:00:00Z
+
+### [FORGEOS-BE014] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE014.md
+- **Decisions:** PASS — Zero critical/high findings. 2 informational: health endpoint info exposure (CWE-200, recommend auth at API layer), no constructor param validation (defense-in-depth). Frozen dataclass, structured logging, no credential exposure, proper CancelledError handling, clamped counters confirmed.
+- **Timestamp:** 2026-03-11T14:00:00Z
+
 ### [FORGEOS-BE018] — Security Review
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE018.md
 - **Decisions:** PASS — Zero critical/high findings. All SQL parameterized (asyncpg $1-style), Dependencies frozen dataclass prevents mutation, structured logging with no PII. 4 LOW findings documented: exception messages may leak DSN (CWE-209), no SSL enforcement in default DSN (CWE-319), default dev credentials in source (CWE-798), no explicit pool.acquire timeout (CWE-400). All mitigated by env var override pattern and server-side-only logging.
 - **Timestamp:** 2026-03-11T13:00:00+05:30
+
+### [FORGEOS-BE021] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE021.md
+- **Decisions:** PASS — Zero critical/high findings. 3 LOW/informational findings: jsonschema undeclared direct dep (CWE-1104), unbounded validator cache (CWE-400), error value echo (CWE-209). All risk-accepted — module is pure validation library with immutable dataclasses, strict Draft202012Validator, structured logging, no network/FS/shell access.
+- **Timestamp:** 2026-03-11T14:15:00+00:00
+
+### [FORGEOS-BE025] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE025.md
+- **Decisions:** PASS — Zero critical/high findings. 3 LOW findings: version exposure (CWE-200), DB ping without rate limit (CWE-770), exception message leakage (CWE-209). All risk-accepted — health probes are internal infrastructure endpoints, pool acts as natural throttle, asyncpg errors don't contain credentials.
+- **Timestamp:** 2026-03-11T15:00:00+00:00
