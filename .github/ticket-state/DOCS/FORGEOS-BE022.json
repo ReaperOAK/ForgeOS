@@ -1,0 +1,144 @@
+{
+  "ticket_id": "FORGEOS-BE022",
+  "title": "Implement Agent Session Lifecycle Management",
+  "description": "Implement agent session management for the MCP server. Each connecting agent establishes a session that tracks its identity (agent name, role, machine_id), connection state, and associated claims. Sessions support heartbeat tracking (is the agent still connected?), timeout handling (auto-cleanup after disconnect), and resumption after transient disconnects.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "DOCS",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:59:14.008844+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE015",
+    "FORGEOS-BE011"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "mcp-server/src/sessions/manager.py",
+    "mcp-server/src/sessions/__init__.py"
+  ],
+  "acceptance_criteria": [
+    "Session is created on MCP initialize request with agent identity metadata",
+    "Session stores agent_name, role, machine_id, connected_at, and last_heartbeat timestamps",
+    "Session heartbeat updates last_heartbeat and extends session timeout",
+    "Timed-out sessions trigger cleanup: release associated claims, close connection",
+    "Session resumption allows reconnecting agents to reclaim their previous session by ID",
+    "Session manager tracks all active sessions and provides listing for admin/monitoring"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:59:14.008858+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase2-mcp-server.md"
+    },
+    {
+      "timestamp": "2026-03-10T14:19:52.542515+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-10T14:47:09Z",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Claimed for BACKEND stage"
+    },
+    {
+      "timestamp": "2026-03-10T15:05:47Z",
+      "event": "STAGE_COMPLETED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "BACKEND complete \u2014 58 tests, 97% coverage, all 6 ACs met"
+    },
+    {
+      "timestamp": "2026-03-10T15:40:57.640760+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: Lease expired at 2026-03-10T15:17:15Z"
+    },
+    {
+      "timestamp": "2026-03-10T16:43:30.489892+00:00",
+      "event": "CLAIMED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "Claimed for QA stage"
+    },
+    {
+      "timestamp": "2026-03-10T16:46:53.368188+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "QA PASS \u2014 58 tests, 96% coverage, all 6 ACs met"
+    },
+    {
+      "timestamp": "2026-03-10T16:55:02.075238+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-10T17:05:19.374783+00:00",
+      "event": "CLAIMED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "details": "Claimed for SECURITY stage"
+    },
+    {
+      "timestamp": "2026-03-10T17:07:21.065610+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-10T17:32:53.802937+00:00",
+      "event": "CLAIMED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "details": "Claimed for CI stage"
+    },
+    {
+      "timestamp": "2026-03-10T17:36:18.778164+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase2-mcp-server.md",
+  "tags": [
+    "backend",
+    "mcp",
+    "sessions",
+    "lifecycle",
+    "phase2",
+    "BLK-04-02"
+  ]
+}
