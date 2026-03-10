@@ -2905,3 +2905,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** agent-sdk/src/forgeos_sdk/transport.py, agent-sdk/src/forgeos_sdk/client.py, agent-sdk/tests/test_transport.py, agent-sdk/tests/test_client.py
 - **Decisions:** Wrapped official MCP SDK transports (stdio_client, sse_client, streamablehttp_client) via MCPTransport ABC; AsyncExitStack to manage context manager lifecycles; session resumption via Mcp-Session-Id header; exponential backoff 2^n with 10% jitter
 - **Timestamp:** 2026-03-11T00:00:00Z
+
+### [FORGEOS-BE054] — BACKEND Rework #1 Complete
+- **Artifacts:** mcp-server/src/mcp_server/middleware/auth_middleware.py
+- **Decisions:** Fixed 4 lint errors (F401, TC002x2, RUF100) — moved Request/ASGIApp to TYPE_CHECKING, removed unused RateLimiter import, replaced unused noqa directive
+- **Timestamp:** 2026-03-11T00:00:00Z
