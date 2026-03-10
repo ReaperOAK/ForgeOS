@@ -8,6 +8,29 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Notification Event Queue** (FORGEOS-BE064) — Async notification delivery
+  system at `mcp_server/notifications/queue.py` using PostgreSQL
+  `FOR UPDATE SKIP LOCKED` for atomic dequeue. Provides `NotificationQueue`
+  with `enqueue()`, `dequeue()`, `mark_delivered()`, `mark_failed()`,
+  `get_by_id()`, `get_dead_letters()`, and `count_by_status()`. Five-state
+  lifecycle: `pending → processing → delivered | failed → dead_letter`.
+  Exponential backoff retry (base 60 s, factor 2, cap 3600 s, max 5 attempts).
+  `Notification` frozen dataclass, `NotificationStatus` enum, and
+  `InvalidTransitionError` for illegal transitions. Alembic migration 004
+  (`20260310_000000_004_notification_queue.py`) creates `notification_status`
+  enum, `notification_queue` table with partial index on pending rows, and
+  auto-update trigger. 44 tests with 94% coverage.
+
+- **Connection Pool Health Monitoring** (FORGEOS-BE014) — Background health
+  monitor for the asyncpg connection pool (`mcp_server/db/health.py`). Provides
+  `PoolHealthMonitor` with configurable check interval and max connection
+  lifetime, periodic database ping to detect dead connections, automatic stale
+  connection recycling when `max_lifetime` is exceeded, and wait-time tracking
+  for connection acquisition. Exposes pool health as a frozen `HealthReport`
+  dataclass with `to_dict()` for JSON serialization in the `/health` endpoint.
+  Reports total, active, idle, and waiting connection counts, pool saturation
+  percentage, and average wait time. 56 tests with 96% coverage.
+
 - **File-Level Advisory Lock Mutex** (FORGEOS-BE007) — PostgreSQL advisory lock
   mutex for file-level concurrency control (`mcp_server/locking/file_mutex.py`).
   Provides `FileMutex` with blocking (`acquire`) and non-blocking (`try_acquire`)

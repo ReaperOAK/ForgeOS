@@ -1241,6 +1241,118 @@ future ticket to provide durable, multi-process event storage.
 See also: [FORGEOS-ARCH007 — Event Sourcing Architecture](../docs/architecture/event-sourcing-schema.md).
 
 
+## Notification Event Queue
+
+The `mcp_server.notifications` package provides a PostgreSQL-backed async
+notification delivery system with at-least-once semantics.
+
+### Status Lifecycle
+
+```
+pending ──► processing ──► delivered
+                │
+                ▼
+             failed ──► dead_letter  (after max retries)
+```
+
+### Quick Start
+
+```python
+from mcp_server.notifications import NotificationQueue, NotificationStatus
+
+async with pool.acquire() as conn:
+    queue = NotificationQueue(pool)
+
+    # Enqueue a notification
+    note_id = await queue.enqueue(
+        conn, channel="email", recipient="ops@example.com",
+        payload={"subject": "Alert", "body": "Disk full"},
+    )
+
+    # Dequeue next pending (atomic via FOR UPDATE SKIP LOCKED)
+    note = await queue.dequeue(conn, channel="email")
+
+    # Mark outcome
+    await queue.mark_delivered(conn, note.id)
+```
+
+### NotificationQueue Methods
+
+| Method | Description |
+|--------|-------------|
+| `enqueue(conn, channel, recipient, payload)` | Insert a new notification (status: `pending`) |
+| `dequeue(conn, channel)` | Atomically claim next pending notification |
+| `mark_delivered(conn, notification_id)` | Transition `processing → delivered` |
+| `mark_failed(conn, notification_id, error)` | Transition `processing → failed` or `→ dead_letter` |
+| `get_by_id(conn, notification_id)` | Retrieve a single notification by UUID |
+| `get_dead_letters(conn, channel, limit)` | List dead-lettered notifications |
+| `count_by_status(conn, channel)` | Aggregate counts grouped by status |
+
+### Data Classes
+
+| Class | Description |
+|-------|-------------|
+| `Notification` | Frozen dataclass with 10 fields (id, channel, recipient, payload, status, etc.) |
+| `NotificationStatus` | Enum: `pending`, `processing`, `delivered`, `failed`, `dead_letter` |
+| `InvalidTransitionError` | Raised on illegal status transitions |
+
+### Notification Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `id` | `UUID` | Primary key |
+| `channel` | `str` | Delivery channel (email, webhook, etc.) |
+| `recipient` | `str` | Target address |
+| `payload` | `dict` | Notification content |
+| `status` | `NotificationStatus` | Current lifecycle state |
+| `attempt` | `int` | Current retry attempt (0-based) |
+| `max_attempts` | `int` | Maximum retry attempts (default: 5) |
+| `error` | `str \| None` | Last error message |
+| `created_at` | `datetime` | Creation timestamp (UTC) |
+| `updated_at` | `datetime` | Last modification timestamp (UTC) |
+
+### Retry and Backoff
+
+| Attempt | Delay (seconds) |
+|---------|-----------------|
+| 1 | 60 |
+| 2 | 120 |
+| 3 | 240 |
+| 4 | 480 |
+| 5 | 960 |
+
+Backoff formula: `min(base × factor^attempt, cap)` where base = 60, factor = 2,
+cap = 3600.
+
+### Database Schema
+
+Alembic migration `004` (`20260310_000000_004_notification_queue.py`) creates:
+
+| Column | Type | Constraint |
+|--------|------|------------|
+| `id` | `UUID` | PK, default `gen_random_uuid()` |
+| `channel` | `VARCHAR(64)` | NOT NULL |
+| `recipient` | `VARCHAR(256)` | NOT NULL |
+| `payload` | `JSONB` | NOT NULL, default `'{}'` |
+| `status` | `notification_status` | NOT NULL, default `'pending'` |
+| `attempt` | `INTEGER` | NOT NULL, default `0` |
+| `max_attempts` | `INTEGER` | NOT NULL, default `5` |
+| `error` | `TEXT` | Nullable |
+| `created_at` | `TIMESTAMPTZ` | NOT NULL, default `now()` |
+| `updated_at` | `TIMESTAMPTZ` | NOT NULL, auto-updated via trigger |
+
+Includes a partial index on `(channel, created_at)` filtered to `status = 'pending'`
+for efficient dequeue queries.
+
+### Design Constraints
+
+- **Exactly-once dequeue** — `FOR UPDATE SKIP LOCKED` prevents double-processing.
+- **Frozen notifications** — `Notification` dataclass is frozen; mutation raises `FrozenInstanceError`.
+- **Strict transitions** — only transitions in `_VALID_TRANSITIONS` are allowed.
+- **Exponential backoff** — `compute_backoff_seconds()` is a pure function with capped output.
+- **Dead-letter safety** — notifications exceeding `max_attempts` move to `dead_letter`, never retried.
+
+
 ## Database Migrations
 
 ForgeOS uses [Alembic](https://alembic.sqlalchemy.org/) for PostgreSQL schema
