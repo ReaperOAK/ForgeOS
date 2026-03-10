@@ -35,10 +35,10 @@
     "No direct pool access in tool handlers; all database access is through repositories"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "QA Engineer",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T19:18:16.863614+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {

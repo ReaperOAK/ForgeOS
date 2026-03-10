@@ -33,10 +33,10 @@
     "Validation performance is acceptable (< 1ms for typical tool inputs)"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
+  "claimed_by": "Backend",
   "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T18:26:38.039408+00:00",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T19:18:16.863614+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
