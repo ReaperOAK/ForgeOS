@@ -4,7 +4,7 @@
   "description": "Implement a background task that periodically scans for expired leases and releases them, making the associated tickets available for reclaim. This replaces the `--release-expired` CLI command in tickets.py. The cleanup task runs on a configurable interval and logs all automatic releases for audit.",
   "type": "backend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -154,6 +154,15 @@
       "from_stage": "DOCS",
       "to_stage": "DOCS",
       "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-10T22:23:50.039277+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T12:45:00+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "DOCS complete — README section added, CHANGELOG entry, docstrings verified"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
