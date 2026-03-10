@@ -33,10 +33,10 @@
     "Validation performance is acceptable (< 1ms for typical tool inputs)"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "QA",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T16:45:30.566805+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -66,6 +66,13 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "Tool Input JSON Schema Validation implemented. 42 tests, 100% coverage."
+    },
+    {
+      "timestamp": "2026-03-10T16:15:30.566824+00:00",
+      "event": "CLAIMED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "Claimed for QA stage review"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
