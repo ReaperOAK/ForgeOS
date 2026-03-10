@@ -8,6 +8,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Machine Registration and Verification** (FORGEOS-BE052) — Machine identity
+  registration and verification at `mcp-server/src/mcp_server/auth/machine_auth.py`
+  with `MachineService` orchestration at
+  `mcp-server/src/mcp_server/services/machine_service.py`. Each machine running
+  agents registers with a unique `machine_id` (hostname or UUID). Two modes:
+  `AUTO` (unknown machines self-register) and `STRICT` (unknown machines
+  rejected with 403). UPSERT-based registration for concurrency safety,
+  fire-and-forget `last_seen_at` updates, frozen `MachineIdentity` dataclass
+  with `__slots__`, and input validation (255-char cap). `MachineService`
+  wraps low-level functions with a configured pool and default mode. 50 tests
+  with 100% coverage. Added Machine Registration section to
+  `mcp-server/README.md`.
+
 - **Auth Middleware for MCP and REST** (FORGEOS-BE054) — Unified Starlette
   middleware at `mcp_server/middleware/auth_middleware.py` that authenticates
   both MCP tool calls and REST API requests through a single credential
