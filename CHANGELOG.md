@@ -8,6 +8,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Tool Input JSON Schema Validation** (FORGEOS-BE021) — JSON Schema
+  validation for MCP tool input parameters at
+  `mcp-server/src/mcp_server/tools/validation.py`. Validates tool arguments
+  against the tool's registered JSON Schema (Draft 2020-12) before handler
+  invocation. Collects all validation errors in a single pass and reports
+  them with JSONPath-style field paths (`$.user.name`, `$.tags[0]`) and
+  descriptive messages. Error responses follow MCP protocol semantics with
+  `INVALID_PARAMS` code (`-32602`). No type coercion — inputs must match
+  schema types exactly. Compiled validators are cached per tool name for
+  sub-millisecond validation of typical inputs. Public API:
+  `validate_tool_input()`, `compile_validator()`,
+  `build_validation_error_data()`, `FieldError`, `ToolInputValidationError`,
+  `McpValidationErrorData`. 42 tests with 100% coverage.
+
 - **Notification Event Queue** (FORGEOS-BE064) — Async notification delivery
   system at `mcp_server/notifications/queue.py` using PostgreSQL
   `FOR UPDATE SKIP LOCKED` for atomic dequeue. Provides `NotificationQueue`
