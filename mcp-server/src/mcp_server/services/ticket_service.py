@@ -747,7 +747,7 @@ class TicketService:
         """
         if self._pool is None:
             raise RuntimeError("Pool not configured for sync operation")
-        from mcp_server.services.sync_engine import SyncEngine, SyncResult
+        from mcp_server.services.sync_engine import SyncEngine
 
         engine = SyncEngine(self._pool)
         result: SyncResult = await engine.sync()
@@ -773,7 +773,7 @@ class TicketService:
         """
         if self._pool is None:
             raise RuntimeError("Pool not configured for validate operation")
-        from mcp_server.services.sync_engine import SyncEngine, ValidateResult
+        from mcp_server.services.sync_engine import SyncEngine
 
         engine = SyncEngine(self._pool)
         result: ValidateResult = await engine.validate()
