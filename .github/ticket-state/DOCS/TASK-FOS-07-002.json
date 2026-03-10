@@ -38,7 +38,7 @@
   "claimed_by": "Documentation",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T08:53:37Z",
+  "lease_expiry": "2026-03-10T09:03:54.171082+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -47,20 +47,6 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tickets/07-system-update.md"
-    },
-    {
-      "timestamp": "2026-03-10T08:00:45.622385+00:00",
-      "event": "MOVED_TO_READY",
-      "agent": "tickets.py",
-      "machine_id": "system",
-      "details": "Dependencies resolved, moved to READY"
-    },
-    {
-      "timestamp": "2026-03-10T08:23:37Z",
-      "event": "CLAIMED",
-      "agent": "Documentation",
-      "machine_id": "pop-os",
-      "details": "Claimed by Documentation on pop-os (reaperoak)"
     }
   ],
   "source_task_file": "TODO/tickets/07-system-update.md",
