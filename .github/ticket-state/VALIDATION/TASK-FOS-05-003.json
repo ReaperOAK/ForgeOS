@@ -39,10 +39,10 @@
     "Respects prefers-reduced-motion: disables force simulation animation if set"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Validator",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T15:26:47.656009+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -146,7 +146,14 @@
       "machine_id": "pop-os",
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
-      "details": "DOCS complete — 21 JSDoc annotations added, CHANGELOG entry added. Re-documentation after state regression."
+      "details": "DOCS complete \u2014 21 JSDoc annotations added, CHANGELOG entry added. Re-documentation after state regression."
+    },
+    {
+      "timestamp": "2026-03-10T14:56:47.656026+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "details": "CLAIM by Validator on pop-os (ReaperOAK)"
     }
   ],
   "source_task_file": "TODO/tickets/05-dashboard.md",
