@@ -4,7 +4,7 @@
   "description": "Implement a dynamic lease heartbeat mechanism that replaces the fixed 30-minute lease timeout from the git-based system. Agents send periodic heartbeats to extend their lease while actively working on a ticket. Heartbeat intervals and maximum lease duration are configurable. The mechanism writes heartbeat timestamps to the lease_heartbeats table.",
   "type": "backend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -87,6 +87,15 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "Advanced from CI to DOCS"
+    },
+    {
+      "timestamp": "2026-03-10T20:16:57.668891+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",

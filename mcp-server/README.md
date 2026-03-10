@@ -596,6 +596,147 @@ Frozen dataclass returned on a successful claim:
 - **Structured logging** -- all operations include agent_id, machine_id, and ticket_id correlation context.
 
 
+## Lease Heartbeat
+
+<!-- last_reviewed: 2026-03-11T18:45:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.locking.lease_heartbeat` module provides a lease heartbeat
+mechanism that replaces the fixed 30-minute lease timeout from the git-based
+system. Agents send periodic heartbeats to extend their lease while actively
+working on a ticket. When heartbeats stop (crash, disconnect, or completion),
+the lease expires naturally and the ticket becomes reclaimable.
+
+### How It Works
+
+1. An agent claims a ticket and receives a `lease_expiry` timestamp.
+2. A background `LeaseHeartbeat` task periodically calls `extend_lease()`,
+   which issues a conditional `UPDATE` — extending `lease_expiry` only if
+   the ticket is still claimed by the same agent.
+3. Each successful heartbeat writes a record to the `lease_heartbeats` audit
+   table for observability.
+4. If the agent crashes or disconnects, heartbeats stop. The lease expires
+   and `find_stale_claims()` detects the abandoned claim.
+
+### Configuration
+
+`HeartbeatConfig` is a frozen dataclass controlling heartbeat behavior:
+
+| Parameter | Default | Description |
+|---|---|---|
+| `interval_seconds` | `60.0` | How often the heartbeat fires (seconds) |
+| `extension_seconds` | `120.0` | Seconds added to `lease_expiry` per heartbeat |
+| `max_lease_seconds` | `7200.0` | Maximum total lease duration from the original claim time (2 hours) |
+
+Validation rules:
+- All values must be positive.
+- `interval_seconds` must be less than `extension_seconds` to prevent lease gaps.
+
+### Usage
+
+Use `LeaseHeartbeat` as an async context manager for automatic lifecycle
+management:
+
+```python
+from mcp_server.locking.lease_heartbeat import LeaseHeartbeat, HeartbeatConfig
+
+config = HeartbeatConfig(interval_seconds=30, extension_seconds=90)
+
+async with LeaseHeartbeat(pool, ticket_id="FORGEOS-BE008", agent_id=agent_uuid, config=config):
+    # ... do work ... heartbeat runs in background
+    pass
+# heartbeat task is cancelled on exit
+```
+
+Or manage the lifecycle explicitly:
+
+```python
+hb = LeaseHeartbeat(pool, ticket_id="FORGEOS-BE008", agent_id=agent_uuid)
+await hb.start()
+
+# ... do work ...
+print(hb.heartbeat_count)   # number of successful heartbeats
+print(hb.is_running)        # True while the background task is active
+
+await hb.stop()
+```
+
+### Stale Claim Detection
+
+`find_stale_claims()` returns tickets whose lease has expired without a recent
+heartbeat — indicating the claiming agent has stopped working:
+
+```python
+from mcp_server.locking.lease_heartbeat import find_stale_claims
+
+stale = await find_stale_claims(pool, heartbeat_interval_seconds=60.0)
+for claim in stale:
+    print(f"{claim.ticket_id} claimed by {claim.agent_name} on {claim.machine_id}")
+```
+
+A claim is stale when:
+1. `lease_expiry` is in the past, AND
+2. No heartbeat was recorded within `2 × heartbeat_interval_seconds`.
+
+### API Reference
+
+| Symbol | Type | Description |
+|---|---|---|
+| `HeartbeatConfig` | frozen dataclass | Configuration for heartbeat interval, extension, and max duration |
+| `LeaseHeartbeat` | class | Async context manager that runs a background heartbeat task |
+| `HeartbeatRecord` | frozen dataclass | Immutable record of one successful heartbeat event |
+| `StaleClaim` | frozen dataclass | A claim that has not received a heartbeat within the expected window |
+| `extend_lease()` | async function | Conditionally extend `lease_expiry` for an active claim |
+| `find_stale_claims()` | async function | Detect claims with expired leases and no recent heartbeats |
+| `PoolLike` | Protocol | Minimal async pool interface (structural subtyping) |
+
+### LeaseHeartbeat Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `ticket_id` | `str` | The ticket being kept alive |
+| `agent_id` | `str` | The agent whose lease is extended |
+| `config` | `HeartbeatConfig` | Active heartbeat configuration |
+| `heartbeat_count` | `int` | Number of successful heartbeats sent |
+| `last_error` | `Exception \| None` | Last error encountered, or `None` |
+| `is_running` | `bool` | `True` while the background task is active |
+
+### Error Handling
+
+| Error | HTTP | When |
+|---|---|---|
+| `HeartbeatError` | 409 | Base error for heartbeat failures |
+| `LeaseNotActiveError` | 410 | Lease was released, reassigned, or expired before the heartbeat |
+| `MaxLeaseDurationExceededError` | 409 | Extending would exceed `max_lease_seconds` |
+| `DatabaseError` | 503 | Database communication error |
+
+### Heartbeat Loop Behavior
+
+| Event | Action |
+|---|---|
+| Heartbeat succeeds | Increments `heartbeat_count`; clears `last_error` |
+| `LeaseNotActiveError` | Loop stops gracefully (claim was released or reassigned) |
+| `MaxLeaseDurationExceededError` | Loop stops gracefully (max lease duration reached) |
+| Transient DB error | Logs the error, sets `last_error`, retries on next interval |
+| `asyncio.CancelledError` | Loop exits immediately (normal shutdown path) |
+| Context manager exit | Calls `stop()`, cancels the background task |
+
+### Design Constraints
+
+- **Conditional update** — the `UPDATE` only succeeds if `claimed_by` still
+  matches the heartbeat sender, preventing extensions on released or
+  reassigned tickets.
+- **Append-only audit** — every heartbeat writes to `lease_heartbeats`. Records
+  are never deleted during normal operation.
+- **No retry loops** — if the lease is no longer extendable, the heartbeat
+  stops. Callers handle reconnection.
+- **Transaction-scoped** — each heartbeat is a single transaction with
+  `FOR UPDATE` row locking.
+- **Structured logging** — all operations include `ticket_id` and `agent_id`
+  correlation context.
+
+
 ## Graceful Shutdown
 
 <!-- last_reviewed: 2026-03-11T00:30:00Z -->
