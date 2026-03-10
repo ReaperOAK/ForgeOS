@@ -8,6 +8,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Ticket Claim Queue with SKIP LOCKED** (FORGEOS-BE006) -- Distributed ticket
+  claim queue at `mcp-server/src/mcp_server/locking/claim_queue.py` using
+  PostgreSQL `SELECT FOR UPDATE SKIP LOCKED` for fair, non-blocking claim
+  semantics. Provides `ClaimQueue` with three async methods: `claim_next()`
+  (claim next eligible ticket by stage), `claim_by_id()` (claim a specific
+  ticket with file-conflict detection), and `claim_for_role()` (role-based
+  stage resolution via `AgentRoleMap`). Returns frozen `ClaimResult` dataclass
+  with full ticket metadata. Custom error hierarchy: `ClaimError` (409),
+  `NoEligibleTicketError` (404), `LeaseExpiredError` (410). Role-to-stage
+  mapping covers all 12 agent roles and 10 ticket types. Stored-function
+  delegation keeps all locking logic in PL/pgSQL. Added Ticket Claim Queue
+  section to `mcp-server/README.md` with quick-start, method reference,
+  data classes, error handling, and design constraints.
+
 - **Repository Pattern Data Access Layer** (FORGEOS-BE013) — Three repository
   classes in `mcp-server/src/mcp_server/repositories/` implementing the
   repository pattern for all database access. `TicketRepository` provides

@@ -243,6 +243,124 @@ event = await event_repo.append_event(
 - **Atomic claims** — `create_claim` uses `UPDATE ... WHERE claimed_by IS NULL` for mutual exclusion.
 
 
+
+## Ticket Claim Queue
+
+<!-- last_reviewed: 2026-03-10T17:30:00Z -->
+
+The `mcp_server.locking` package provides a distributed ticket claim queue
+using PostgreSQL `SELECT FOR UPDATE SKIP LOCKED`. Agents atomically claim the
+next eligible ticket without blocking each other -- if a ticket is already being
+claimed by another transaction, it is transparently skipped.
+
+### How it works
+
+1. Agent calls `claim_next()` or `claim_for_role()` with its stage and identity.
+2. The stored function `claim_ticket` runs `SELECT FOR UPDATE SKIP LOCKED`
+   inside a single transaction.
+3. Exactly one agent wins each ticket. Concurrent claimants skip to the next
+   eligible row -- no blocking, no deadlocks.
+4. The winner receives a `ClaimResult` with ticket data and a lease expiry.
+
+### Quick Start
+
+```python
+from mcp_server.locking import ClaimQueue, AgentRoleMap
+
+queue = ClaimQueue(pool)  # accepts any asyncpg-compatible pool
+
+# Claim the next ticket at the BACKEND stage
+result = await queue.claim_next(
+    stage="BACKEND",
+    agent_id="550e8400-e29b-41d4-a716-446655440000",
+    agent_name="Backend",
+    machine_id="pop-os",
+    lease_minutes=30,
+)
+
+if result:
+    print(f"Claimed {result.ticket_id}: {result.title}")
+    print(f"Lease expires: {result.lease_expiry}")
+
+# Claim by role (resolves role to stage automatically)
+result = await queue.claim_for_role(
+    role="backend",
+    agent_id="550e8400-e29b-41d4-a716-446655440000",
+    agent_name="Backend",
+    machine_id="pop-os",
+)
+
+# Claim a specific ticket by ID
+result = await queue.claim_by_id(
+    ticket_id="FORGEOS-BE006",
+    agent_id="550e8400-e29b-41d4-a716-446655440000",
+    agent_name="Backend",
+    machine_id="pop-os",
+)
+```
+
+### ClaimQueue Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `claim_next(stage, agent_id, ...)` | `ClaimResult \| None` | Claim the next available ticket for a stage |
+| `claim_by_id(ticket_id, agent_id, ...)` | `ClaimResult \| None` | Claim a specific ticket by human-readable ID |
+| `claim_for_role(role, agent_id, ...)` | `ClaimResult \| None` | Resolve role to stage, then claim next ticket |
+
+All methods accept optional `operator` (str) and `lease_minutes` (int, default 30).
+
+### AgentRoleMap
+
+Stateless utility mapping agent roles to SDLC stages and ticket types.
+
+| Method | Returns | Description |
+|---|---|---|
+| `stage_for_role(role)` | `str \| None` | SDLC stage for a role (e.g. `"backend"` to `"BACKEND"`) |
+| `ticket_types_for_role(role)` | `list[str]` | Ticket types the role can process |
+| `is_compatible(role, ticket_type)` | `bool` | Whether a role can handle a ticket type |
+
+Supported roles: `architect`, `research`, `product_manager`, `ui_designer`,
+`backend`, `devops`, `frontend`, `qa`, `security`, `ci`, `documentation`, `validator`.
+
+### ClaimResult
+
+Frozen dataclass returned on a successful claim:
+
+| Field | Type | Description |
+|---|---|---|
+| `id` | `str` | Internal UUID |
+| `ticket_id` | `str` | Human-readable ID (e.g. `"FORGEOS-BE006"`) |
+| `title` | `str` | Ticket title |
+| `ticket_type` | `str` | Type (e.g. `"backend"`) |
+| `priority` | `str` | Priority level |
+| `stage` | `str` | Current SDLC stage |
+| `status` | `str` | Status (will be `"CLAIMED"`) |
+| `agent_id` | `str` | UUID of the claiming agent |
+| `agent_name` | `str` | Agent display name |
+| `machine_id` | `str` | Hostname of the claiming machine |
+| `lease_expiry` | `datetime` | When the claim lease expires |
+| `file_paths` | `list[str]` | Files in the ticket scope |
+| `acceptance_criteria` | `list[str]` | Ticket acceptance criteria |
+| `depends_on` | `list[str]` | Dependency ticket IDs |
+| `metadata` | `dict[str, Any]` | Additional ticket metadata |
+
+### Error Handling
+
+| Error | HTTP | When |
+|---|---|---|
+| `ClaimError` | 409 | Base error for claim failures (file conflict, unknown role) |
+| `NoEligibleTicketError` | 404 | No ticket available for the given criteria |
+| `LeaseExpiredError` | 410 | Lease on a claimed ticket has expired |
+| `DatabaseError` | 503 | Database communication error |
+
+### Design Constraints
+
+- **Stored-function delegation** -- all locking SQL lives in PL/pgSQL stored functions.
+- **No retry loops** -- returns `None` immediately if no ticket is available.
+- **Agent-role filtering** -- `AgentRoleMap` translates role to stage before calling the stored function.
+- **Structured logging** -- all operations include agent_id, machine_id, and ticket_id correlation context.
+
+
 ## Graceful Shutdown
 
 <!-- last_reviewed: 2026-03-11T00:30:00Z -->
@@ -350,6 +468,7 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/auth/`** — Agent API key authentication, rate limiting, and identity resolution
 - **`mcp_server/tools/`** — Dynamic tool registration, schema validation, and FastMCP bridge
 - **`mcp_server/events/`** — Append-only event sourcing (EventStore, EventType, Event dataclass)
+- **`mcp_server/locking/`** — Distributed claim queue (SKIP LOCKED), file mutex (advisory locks)
 
 ### Error Handling
 
