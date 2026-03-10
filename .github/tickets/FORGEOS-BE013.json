@@ -4,7 +4,7 @@
   "description": "Implement the repository pattern data access layer that all higher-level services consume. Create repository classes for tickets (CRUD, filtering, stage queries), claims (create, release, find active), and events (append, query by ticket). Repositories accept a database connection/pool and encapsulate all SQL queries. Both sync and async interfaces must be supported.",
   "type": "backend",
   "priority": "critical",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -36,10 +36,10 @@
     "All repository methods have type hints and docstrings"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T18:07:15.986872+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
