@@ -34,10 +34,10 @@
     "Remote agent can connect, send initialize request, and receive server capabilities"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T14:06:24.712578+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -133,6 +133,13 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "Advanced from CI to DOCS"
+    },
+    {
+      "timestamp": "2026-03-10T13:36:24.712578+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "details": "Claimed by Documentation on pop-os (reaperoak)"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
