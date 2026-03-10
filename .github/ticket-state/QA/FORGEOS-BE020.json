@@ -35,10 +35,10 @@
     "Registry provides a lookup method to resolve tool name to handler and schema"
   ],
   "rework_count": 0,
-  "claimed_by": "Backend",
+  "claimed_by": "QA",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T12:39:19.547665+00:00",
+  "lease_expiry": "2026-03-10T13:07:37.056821+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -75,6 +75,13 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "BACKEND stage complete. Tool registry with versioning implemented. 37 tests pass, 97% coverage."
+    },
+    {
+      "timestamp": "2026-03-10T12:37:37.056821+00:00",
+      "event": "CLAIMED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "Claimed by QA agent for QA stage"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",

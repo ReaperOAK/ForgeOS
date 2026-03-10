@@ -3,6 +3,11 @@
 - **Decisions:** Added tri-modal FORGEOS_MODE (filesystem/dual/mcp). Used stdlib urllib for HTTP client (no external deps). Dispatch functions wrap existing filesystem functions. Dual mode runs filesystem-first then mirrors to MCP. Lazy MCP health check via _get_mcp_client().
 - **Timestamp:** 2026-03-10T18:00:00Z
 
+### [FORGEOS-BE012] — QA PASS: Event Sourcing Subsystem
+- **Artifacts:** mcp-server/src/mcp_server/events/event_store.py, mcp-server/src/mcp_server/events/__init__.py, mcp-server/tests/test_event_store.py
+- **Decisions:** QA PASS — 53/53 tests pass, 96% branch coverage, all 6 acceptance criteria verified, no defects found. Uncovered lines (REWORKED/ESCALATED branches) are LOW risk.
+- **Timestamp:** 2026-03-10T13:00:00Z
+
 ### [FORGEOS-BE016] — Implement stdio Transport for Local Agents
 - **Artifacts:** mcp-server/src/mcp_server/transport/stdio.py, mcp-server/tests/test_stdio_transport.py
 - **Decisions:** Fixed StdioMessageReader to store async iterator once in __init__ instead of re-creating via async-for on each _read_chunk call. Added _exhausted flag for clean EOF-to-StopAsyncIteration transition. Fixed FakeAsyncTextStream test helper to use proper async iterator protocol (__aiter__ returns self, __anext__ tracks index).
