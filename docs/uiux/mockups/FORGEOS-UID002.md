@@ -8,6 +8,8 @@ status: APPROVED
 stitch_project_id: projects/17753507249462882723
 confidence: HIGH
 depends_on: FORGEOS-UID001
+doc_type: reference
+last_reviewed: 2026-03-10T09:30:00Z
 ---
 
 # FORGEOS-UID002 — Pipeline and Ticket Detail Views

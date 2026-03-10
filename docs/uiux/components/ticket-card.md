@@ -9,6 +9,8 @@ components:
   - StatusDot (reused from UID001)
   - Badge (reused from UID001)
   - CountdownTimer (reused from UID001)
+doc_type: reference
+last_reviewed: 2026-03-10T09:30:00Z
 ---
 
 # TicketCard Component Specification
