@@ -46,7 +46,10 @@ from mcp_server.observability.metrics import (
 
 __all__ = [
     "DbQueryTimer",
+    "HealthChecker",
+    "HealthStatus",
     "MetricsRegistry",
+    "ReadinessState",
     "RequestTimer",
     "SensitiveDataFilter",
     "StructuredJsonFormatter",
@@ -66,3 +69,25 @@ __all__ = [
     "session_opened",
     "set_correlation_id",
 ]
+
+
+# Lazy imports for health module to avoid circular dependencies
+# (health.py imports from observability.logging, which is eagerly loaded above).
+_HEALTH_NAMES = {"HealthChecker", "HealthStatus", "ReadinessState"}
+
+
+def __getattr__(name: str) -> object:
+    if name in _HEALTH_NAMES:
+        from mcp_server.observability.health import (
+            HealthChecker,
+            HealthStatus,
+            ReadinessState,
+        )
+
+        _map = {
+            "HealthChecker": HealthChecker,
+            "HealthStatus": HealthStatus,
+            "ReadinessState": ReadinessState,
+        }
+        return _map[name]
+    raise AttributeError(f"module {__name__!r} has no attribute {name!r}")
