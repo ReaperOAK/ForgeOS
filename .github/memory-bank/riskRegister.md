@@ -264,3 +264,15 @@ _None_
 - **Status:** Documented risk acceptance — no .env files currently exist
 - **Agent:** Security Engineer
 - **Timestamp:** 2026-03-10T08:04:48.122281+00:00
+
+### [FORGEOS-BE003] — Event History Audit Table Risks
+
+| ID | Severity | Description | Status | Rationale |
+|-----|----------|-------------|--------|-----------|
+| SEC-BE003-001 | Low | event_history.machine_id and stage_transitions.triggered_by are TEXT without FK — spoofing risk at application layer (CWE-290) | Risk Accepted | Application-layer validation expected. TEXT fields appropriate for cross-system identifiers. |
+| SEC-BE003-002 | Low | event_history.agent_id uses ON DELETE SET NULL — audit attribution lost on agent deletion (CWE-778) | Risk Accepted | Agent deletion is rare admin action. machine_id provides secondary attribution. |
+| SEC-BE003-003 | Low | stage_transitions has no immutability triggers — records modifiable post-insertion (CWE-471) | Risk Accepted | AC4 only requires event_history immutability. Application policy enforces integrity. |
+| SEC-BE003-004 | Info | ON DELETE CASCADE on event_history.ticket_id blocked by BEFORE DELETE trigger — emergent defense-in-depth | Documented | Positive behavior. Recommend documenting in architecture docs. |
+
+- **Agent:** Security Engineer
+- **Timestamp:** 2026-03-10T23:15:00Z

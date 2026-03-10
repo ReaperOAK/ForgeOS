@@ -4,7 +4,7 @@
   "description": "Create the Alembic migration for event sourcing and audit trail tables from the event sourcing schema design (ARCH007). Tables include: event_history (immutable append-only log of all ticket state changes), stage_transitions (records each SDLC stage transition with metadata), and file_locks (tracks which files are locked by which ticket/agent). These tables replace the embedded history array in ticket JSON.",
   "type": "backend",
   "priority": "critical",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Migration downgrades cleanly, dropping all event/audit tables"
   ],
   "rework_count": 0,
-  "claimed_by": "Security",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T08:51:53.511005+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -69,6 +69,15 @@
       "from_stage": "SECURITY",
       "to_stage": "SECURITY",
       "details": "Claimed by reaperoak@pop-os via Security, lease until 2026-03-10T08:51:53.511005+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T08:26:59.238771+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
