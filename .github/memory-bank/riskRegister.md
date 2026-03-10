@@ -364,3 +364,23 @@ Known sources list disclosed in `UnknownSourceError` details. Risk accepted — 
 
 - **Agent:** Security Engineer
 - **Timestamp:** 2026-03-11T22:30:00Z
+
+### [FORGEOS-BE029] — tickets.claim Authorization Gap (2026-03-11T23:45:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-BE029-001 | Medium | `TicketService.claim_by_id()` does not call `check_role_stage_authorization()` — any agent with a valid role can claim any READY ticket by ID regardless of stage match (CWE-862). `claim_next()` enforces this check (BE055) but `claim_by_id()` does not. | Risk Accepted | Dispatcher protocol limits agent-ticket assignment. Advance-stage guard catches mismatches downstream. DB stored function restricts to READY status. Recommend defense-in-depth follow-up ticket to add auth check. |
+| SEC-BE029-002 | Low | Agent identity (`agent_id`, `machine_id`, `operator`) accepted as self-asserted strings without cryptographic binding (CWE-287). | Risk Accepted | MCP transport provides session isolation. Internal system — no public API exposure. |
+| SEC-BE029-003 | Low | No rate limiting on `tickets.claim` tool invocations (CWE-770). | Risk Accepted | `SELECT FOR UPDATE SKIP LOCKED` prevents DB-level exhaustion. MCP session management limits concurrent connections. |
+
+- **Agent:** Security Engineer
+- **Timestamp:** 2026-03-11T23:45:00Z
+
+### [FORGEOS-BE055] — Role-Stage Authorization Bypass via claim_by_id (2026-03-11T00:00:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-BE055-001 | HIGH | `TicketService.claim_by_id()` (ticket_service.py:340-435) does NOT call `check_role_stage_authorization()`. The `tickets.claim` MCP tool (ticket_tools.py:237) uses `claim_by_id`, allowing any agent to bypass SDLC stage restrictions by specifying a ticket_id directly. `claim_next()` correctly enforces the check at line 288 but `claim_by_id()` skips it. This violates AC#5 which requires auth check on both MCP and REST paths. CWE-862, OWASP A01. STRIDE: Elevation of Privilege (Impact=5 × Likelihood=4 = 20). | Open — REWORK | Add `check_role_stage_authorization(agent_role, stage)` in `claim_by_id()` after `AgentRoleMap.stage_for_role()` and before `ClaimQueue.claim_by_id()`, mirroring the `claim_next()` pattern. |
+
+- **Agent:** Security Engineer
+- **Timestamp:** 2026-03-11T00:00:00Z
