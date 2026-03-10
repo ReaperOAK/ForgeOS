@@ -4,7 +4,7 @@
   "description": "Implement the dynamic tool registration system that allows ticket operations to be registered as MCP tools. Each tool is registered with a name, description, and JSON Schema defining its input parameters. The registry exposes registered tools to MCP clients during capability negotiation. Tools are implemented as async handler functions that receive validated input and return structured results.",
   "type": "backend",
   "priority": "critical",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Registry provides a lookup method to resolve tool name to handler and schema"
   ],
   "rework_count": 0,
-  "claimed_by": "Security",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T13:27:43.314679+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -96,6 +96,13 @@
       "agent": "Security",
       "machine_id": "pop-os",
       "details": "Claimed by Security agent for SECURITY stage"
+    },
+    {
+      "timestamp": "2026-03-10T13:07:07.545631+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "details": "SECURITY stage PASS. 0 critical/high findings. STRIDE max 6 (Low). OWASP 10/10. 4 informational risk-accepted."
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
