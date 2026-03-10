@@ -145,6 +145,104 @@ await pool.close()  # drains and closes all connections
 | Query timeout | Raises `asyncpg.QueryCanceledError` after `POOL_COMMAND_TIMEOUT` seconds |
 
 
+## Repository Pattern — Data Access Layer
+
+<!-- last_reviewed: 2026-03-10T18:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.repositories` package implements the repository pattern for all
+database access. Three repository classes encapsulate SQL queries for tickets,
+claims, and events. Each accepts an asyncpg connection pool via constructor
+injection and uses parameterized queries exclusively.
+
+### Repositories
+
+| Class | Module | Purpose |
+|---|---|---|
+| `TicketRepository` | `repositories.ticket_repo` | CRUD, filtering, and stage queries for the `tickets` table |
+| `ClaimRepository` | `repositories.claim_repo` | Atomic claim/release operations for distributed ticket locking |
+| `EventRepository` | `repositories.event_repo` | Append-only event sourcing for the audit trail |
+
+### Quick Start
+
+```python
+from mcp_server.repositories import TicketRepository, ClaimRepository, EventRepository
+
+# All repositories accept an asyncpg pool
+ticket_repo = TicketRepository(pool)
+claim_repo = ClaimRepository(pool)
+event_repo = EventRepository(pool)
+
+# Fetch a ticket
+ticket = await ticket_repo.get_by_id("FORGEOS-BE013")
+
+# List tickets in a stage
+ready_tickets = await ticket_repo.list_by_stage("READY", limit=10)
+
+# Claim a ticket atomically
+claim = await claim_repo.create_claim(
+    ticket_id="FORGEOS-BE013",
+    agent_id=agent_uuid,
+    agent_name="Backend",
+    machine_id="pop-os",
+    operator="ReaperOAK",
+)
+
+# Append an audit event
+event = await event_repo.append_event(
+    ticket_id="FORGEOS-BE013",
+    event_type="CLAIMED",
+    agent_name="Backend",
+)
+```
+
+### TicketRepository Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `get_by_id(ticket_id)` | `TicketRow \| None` | Fetch one ticket by human-readable ID |
+| `list_by_stage(stage, limit, offset)` | `list[TicketRow]` | List tickets in a stage, ordered by priority then creation date |
+| `list_by_type(ticket_type, limit, offset)` | `list[TicketRow]` | Filter tickets by type |
+| `create(ticket_id, title, ...)` | `TicketRow` | Insert a new ticket |
+| `update_stage(ticket_id, new_stage, new_status)` | `TicketRow \| None` | Update stage and status |
+| `count_by_stage()` | `dict[str, int]` | Aggregate ticket counts per stage |
+
+### ClaimRepository Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `create_claim(ticket_id, agent_id, agent_name, machine_id, operator, lease_duration_minutes)` | `ClaimInfo \| None` | Atomically claim an unclaimed READY ticket; returns `None` on conflict |
+| `release_claim(ticket_id)` | `bool` | Release a claim, setting ticket back to READY |
+| `get_active_claim(ticket_id)` | `ClaimInfo \| None` | Fetch non-expired claim for a ticket |
+| `list_expired_claims()` | `list[ClaimInfo]` | List all tickets with expired but unreleased claims |
+
+### EventRepository Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `append_event(ticket_id, event_type, ...)` | `EventRow` | Append a new event to the audit trail |
+| `get_events_by_ticket(ticket_id, limit, offset)` | `list[EventRow]` | Fetch events for a ticket, newest first |
+| `get_events_by_agent(agent_name, limit, offset)` | `list[EventRow]` | Fetch events by a specific agent |
+| `get_events_by_timerange(since, until, limit, offset)` | `list[EventRow]` | Fetch events within a time window |
+
+### Data Classes
+
+| Class | Module | Description |
+|---|---|---|
+| `TicketRow` | `ticket_repo` | Frozen dataclass with all ticket fields (29 attributes) |
+| `ClaimInfo` | `claim_repo` | Frozen dataclass with claim state (7 attributes) |
+| `EventRow` | `event_repo` | Frozen dataclass with event fields (13 attributes) |
+
+### Design Constraints
+
+- **Parameterized SQL** — all queries use `$1`, `$2`, etc. No string interpolation.
+- **Constructor injection** — repositories receive the pool; they never create connections.
+- **Async only** — all methods are `async` using asyncpg's native async interface.
+- **Immutable results** — all return types are frozen dataclasses.
+- **Atomic claims** — `create_claim` uses `UPDATE ... WHERE claimed_by IS NULL` for mutual exclusion.
+
+
 ## Graceful Shutdown
 
 <!-- last_reviewed: 2026-03-11T00:30:00Z -->
