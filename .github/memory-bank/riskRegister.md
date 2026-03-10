@@ -247,3 +247,10 @@ _None_
 | SEC-BE001-002 | Low | `migration_helpers.py` uses f-string SQL construction in `create_enum_type()`, `drop_enum_type()`, `create_updated_at_trigger()`, `drop_updated_at_trigger()` (CWE-89). Only called with hardcoded `ENUM_DEFINITIONS` values — no user input reaches these paths. | Risk Accepted | Internal DDL helpers only. Values come from hardcoded dictionary. No injection vector present. Recommend parameterized DDL if helpers become public API. |
 | SEC-BE001-003 | Low | No SSL enforcement in database connection config. `DatabaseConfig` in `connection.py` defaults `db_ssl_mode` to empty string. Production PostgreSQL connections should require `sslmode=require` or `verify-full` (CWE-319). | Risk Accepted | Local dev configuration. Recommend adding SSL enforcement guard for production environments. |
 | SEC-BE001-004 | Low | Project `.gitignore` does not exclude `.env` files. If `.env` files with real `DATABASE_URL` credentials are created, they could be committed to version control (CWE-200). | Risk Accepted | No `.env` files exist in repo currently. Recommend adding `.env` exclusion to `.gitignore`. |
+
+### [FORGEOS-DO006] — Database Migration CI Security Risks (2026-03-10T12:00:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-DO006-001 | Medium | `actions/checkout@v4` and `actions/setup-python@v5` pinned by major version tag, not commit SHA (CWE-829). Tag-based pinning allows potential supply chain attacks via tag mutation. | Risk Accepted | First-party GitHub-maintained actions with strong provenance and signed releases. SHA pinning recommended as defense-in-depth for future hardening. |
+| SEC-DO006-002 | Low | Schema object names (7 tables, 5 enums, 20 indexes, 3 triggers, 1 function) logged in `GITHUB_STEP_SUMMARY` (CWE-200). Reveals internal database design to repository readers. | Risk Accepted | Intentional CI transparency. Ephemeral test database only. No production data or credentials exposed. |
