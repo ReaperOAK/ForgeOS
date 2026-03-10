@@ -240,7 +240,23 @@ def transform_ticket(ticket: dict[str, Any]) -> dict[str, Any]:
 
 
 def load_tickets_from_directory(directory: str) -> list[dict[str, Any]]:
-    """Load all .json ticket files from a directory."""
+    """Load all .json ticket files from a directory.
+
+    Scans the given directory for ``*.json`` files, skips any file whose
+    name starts with ``ticket-schema``, and returns each parsed object in
+    a flat list.  Files that contain invalid JSON or a non-object root
+    element are logged as warnings and skipped.
+
+    Parameters
+    ----------
+    directory : str
+        Absolute or relative path to the directory to scan.
+
+    Returns
+    -------
+    list[dict[str, Any]]
+        Parsed ticket dicts, one per valid JSON file.
+    """
     pattern = os.path.join(directory, "*.json")
     files = sorted(glob.glob(pattern))
 
@@ -270,7 +286,28 @@ def load_tickets_from_directory(directory: str) -> list[dict[str, Any]]:
 
 
 def load_tickets_from_file(filepath: str) -> list[dict[str, Any]]:
-    """Load tickets from a single JSON file (array or object)."""
+    """Load tickets from a single JSON file.
+
+    Accepts a file containing either a JSON array of ticket objects or a
+    single ticket object.  Returns a list in both cases.
+
+    Parameters
+    ----------
+    filepath : str
+        Path to the JSON file.
+
+    Returns
+    -------
+    list[dict[str, Any]]
+        Parsed ticket dicts.
+
+    Raises
+    ------
+    FileNotFoundError
+        If *filepath* does not exist.
+    json.JSONDecodeError
+        If the file contains invalid JSON.
+    """
     with open(filepath, encoding="utf-8") as fh:
         data = json.load(fh)
 
@@ -399,6 +436,14 @@ def seed_tickets(
 
 
 def build_parser() -> argparse.ArgumentParser:
+    """Build the CLI argument parser for the seed script.
+
+    Returns
+    -------
+    argparse.ArgumentParser
+        Configured parser with ``--source``, ``--database-url``,
+        ``--dry-run``, and ``--verbose`` options.
+    """
     parser = argparse.ArgumentParser(
         description="Import ticket JSON files into the ForgeOS PostgreSQL database.",
         prog="seed",
@@ -435,7 +480,22 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def resolve_source(source: str | None) -> str:
-    """Resolve the ticket source path, defaulting to .github/tickets/."""
+    """Resolve the ticket source path.
+
+    When *source* is ``None``, walks upward from the script location and
+    the current working directory looking for ``.github/tickets/``.  Exits
+    with an error message if the directory cannot be found.
+
+    Parameters
+    ----------
+    source : str | None
+        Explicit path provided via ``--source``, or ``None`` to auto-detect.
+
+    Returns
+    -------
+    str
+        Resolved path to the ticket source (file or directory).
+    """
     if source:
         return source
 
@@ -456,6 +516,12 @@ def resolve_source(source: str | None) -> str:
 
 
 def main() -> int:
+    """Entry point for the seed CLI.
+
+    Parses arguments, loads tickets from the resolved source, and calls
+    :func:`seed_tickets` to validate, transform, and insert them.
+    Returns ``0`` on success and ``1`` if any ticket failed.
+    """
     parser = build_parser()
     args = parser.parse_args()
 

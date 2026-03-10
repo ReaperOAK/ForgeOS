@@ -473,6 +473,11 @@ autonomous delivery.
 agents.md                  Boot protocol loaded on every agent interaction
                            Safety checks, context loading, chunk routing
 
+database/                  Database seeding tools (Python, psycopg2)
+  seed.py                  CLI script — imports ticket JSON into PostgreSQL
+  seed_data/               Sample ticket JSON for development environments
+  tests/                   Pytest tests for the seed module (68 tests, 95% coverage)
+
 forgeos-server/            TypeScript MCP Server (Express + PostgreSQL 17)
   src/
     server.ts              Express app with MCP Streamable HTTP transport
@@ -752,6 +757,84 @@ make help
 
 See [`infra/README.md`](infra/README.md) for the full setup guide, including
 environment variables, secrets, debugging, and troubleshooting.
+
+### Database Seed Script
+
+The seed script at `database/seed.py` imports ticket JSON files into the
+PostgreSQL `tickets` table.  It validates each ticket against the schema,
+maps JSON stage values to database enums, and uses upsert semantics so
+duplicates are skipped rather than causing errors.
+
+```bash
+# Import all tickets from .github/tickets/ (default source)
+python database/seed.py
+
+# Import from sample data for development
+python database/seed.py --source database/seed_data/sample_tickets.json
+
+# Validate without writing to the database
+python database/seed.py --dry-run
+
+# Use a custom database URL
+DATABASE_URL=postgresql://user:pass@host:5432/db python database/seed.py
+
+# Enable debug logging
+python database/seed.py --verbose
+```
+
+| Option | Description |
+|--------|-------------|
+| `--source PATH` | JSON file (array) or directory of ticket JSONs. Defaults to `.github/tickets/`. |
+| `--database-url URL` | PostgreSQL connection string. Defaults to `DATABASE_URL` env var or `postgresql://forgeos:forgeos@localhost:5432/forgeos`. |
+| `--dry-run` | Validate and transform tickets without inserting. |
+| `--verbose`, `-v` | Enable debug-level logging. |
+
+The script reports a summary of imported, skipped, and failed tickets on
+completion.  Exit code is `0` when all tickets succeed and `1` when any
+ticket fails validation or insertion.
+
+Sample data at `database/seed_data/sample_tickets.json` provides 7
+representative tickets across 6 types (`architecture`, `backend`, `docs`,
+`frontend`, `fullstack`, `research`, `security`) for local development.
+
+### Database Seed Script
+
+The seed script at `database/seed.py` imports ticket JSON files into the
+PostgreSQL `tickets` table.  It validates each ticket against the schema,
+maps JSON stage values to database enums, and uses upsert semantics so
+duplicates are skipped rather than causing errors.
+
+```bash
+# Import all tickets from .github/tickets/ (default source)
+python database/seed.py
+
+# Import from sample data for development
+python database/seed.py --source database/seed_data/sample_tickets.json
+
+# Validate without writing to the database
+python database/seed.py --dry-run
+
+# Use a custom database URL
+DATABASE_URL=postgresql://user:pass@host:5432/db python database/seed.py
+
+# Enable debug logging
+python database/seed.py --verbose
+```
+
+| Option | Description |
+|--------|-------------|
+| `--source PATH` | JSON file (array) or directory of ticket JSONs. Defaults to `.github/tickets/`. |
+| `--database-url URL` | PostgreSQL connection string. Defaults to `DATABASE_URL` env var or `postgresql://forgeos:forgeos@localhost:5432/forgeos`. |
+| `--dry-run` | Validate and transform tickets without inserting. |
+| `--verbose`, `-v` | Enable debug-level logging. |
+
+The script reports a summary of imported, skipped, and failed tickets on
+completion.  Exit code is `0` when all tickets succeed and `1` when any
+ticket fails validation or insertion.
+
+Sample data at `database/seed_data/sample_tickets.json` provides 7
+representative tickets across 6 types (`architecture`, `backend`, `docs`,
+`frontend`, `fullstack`, `research`, `security`) for local development.
 
 ### Continuous Integration
 

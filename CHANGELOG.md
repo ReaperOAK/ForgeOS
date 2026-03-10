@@ -8,6 +8,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **SSE and Streamable HTTP Transport** (FORGEOS-BE017) — Dual transport layer
+  for remote agent communication (`mcp_server/transport/sse.py`,
+  `mcp_server/transport/http.py`). SSE transport provides server-to-client
+  streaming via Server-Sent Events with client-to-server HTTP POST, connection
+  tracking (per-session metadata, idle timeout sweep, max connection limiting),
+  and operational endpoints (`/health`, `/connections`). Streamable HTTP
+  transport provides the default stateless HTTP POST protocol with optional SSE
+  upgrade, configurable session mode (stateful or stateless for horizontal
+  scaling), and mount-path support. Both transports use Pydantic `BaseSettings`
+  for environment-based configuration (`FORGEOS_SSE_*` / `FORGEOS_HTTP_*`),
+  Starlette ASGI composition, and structured logging. Documented transport
+  selection, configuration variables, endpoints, connection lifecycle, and API
+  reference in `mcp-server/README.md`.
+
 - **Database Seed Script** (FORGEOS-BE005) — Standalone Python CLI at
   `database/seed.py` that imports ticket JSON files from `.github/tickets/`
   (or a custom source) into the PostgreSQL `tickets` table.  Features
@@ -46,6 +60,28 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   Authentication section to `mcp-server/README.md` with authentication flow
   diagram, key storage schema, rate limiting configuration, key management
   examples, audit log events, and public API reference.
+
+- **asyncpg Connection Pool** (FORGEOS-BE011) — Production-grade asyncpg
+  connection pool for the Python MCP server (`mcp_server/db/pool.py`). Provides
+  `ConnectionPool` with async lifecycle management (`initialize()` / `close()`),
+  async context manager for connection acquisition (`acquire()`), health-check
+  ping (`ping()`), and pool metrics exposure (`stats()` → `PoolStats`). Pool
+  configuration loaded from environment variables (`DATABASE_URL`, `POOL_MIN`,
+  `POOL_MAX`, `POOL_IDLE_TIMEOUT`, `POOL_COMMAND_TIMEOUT`) via
+  `PoolConfig(BaseSettings)`. Idle connections recycled after configurable
+  timeout (default 300 s). Fails fast on initialization if database is
+  unreachable. 100% test coverage (81 statements, 25 tests). Added Connection
+  Pool section to `mcp-server/README.md` with configuration, usage examples,
+  API reference, and error handling.
+
+- **Database Indexes and Constraints** (FORGEOS-BE004) — Alembic migration
+  003 implementing the index strategy from FORGEOS-ARCH006. Adds 6 new indexes
+  (composite B-tree on tickets stage/type/priority, status/stage, stage/claimed_by,
+  parent_id; partial B-tree for active claims; FK coverage for file_locks),
+  upgrades 2 existing indexes (idx_tickets_claimable with stage leading column,
+  idx_claims_active to UNIQUE partial), and adds 2 CHECK constraints
+  (lease_duration_minutes > 0, max_reworks >= 0). Full downgrade support
+  restores prior index definitions.
 
 - **Structured JSON Logging** (FORGEOS-BE024) — Production-grade structured
   logging module for the Python MCP server (`mcp_server/observability/`). All
