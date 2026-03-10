@@ -4,7 +4,7 @@
   "description": "Design the interactive dependency graph (DAG visualization) and global search interface. The dependency graph replaces `todo_visual.py --dot` output with an interactive, zoomable, pannable directed acyclic graph. Nodes represent tickets color-coded by stage, edges show dependency relationships. The search interface provides global search by ticket ID, title keyword, file path, agent, and stage with type-ahead suggestions and recent searches.",
   "type": "frontend",
   "priority": "medium",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -37,10 +37,10 @@
     "Mockup approval status set to APPROVED in mockup document header"
   ],
   "rework_count": 0,
-  "claimed_by": "CIReviewer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T22:30:00+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "completed_at": "2026-03-10T08:05:21Z",
   "history": [
@@ -86,6 +86,15 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Security review PASS. STRIDE 7 threats all Low. OWASP 10/10 clear. 0 critical/high. 2 informational."
+    },
+    {
+      "timestamp": "2026-03-10T22:05:00Z",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "CI review PASS. Score 89/100. 0 critical, 2 warnings (token inconsistency), 1 suggestion. 7/7 AC met. Advanced CI -> DOCS."
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",

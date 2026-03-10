@@ -7,7 +7,7 @@ date: 2026-03-07T08:34:00Z
 status: APPROVED
 audience: Backend Engineers, Agent Developers, Architect, QA
 purpose: Define MCP tool schemas (name, description, inputSchema, output format, error codes) for all ForgeOS ticket operations
-last_reviewed: 2026-03-07T15:00:00Z
+last_reviewed: 2026-03-10T16:00:00Z
 diataxis_quadrant: reference
 tags: [architecture, mcp, tools, api, phase1, schemas]
 ---
@@ -630,7 +630,15 @@ export const ticketsCompleteSchema = z.object({
 }
 ```
 
-**Stored Function:** `advance_ticket(p_ticket_id, p_evidence)`
+**Stored Function:** `advance_ticket(p_ticket_id, p_agent_id, p_agent_name, p_evidence)`
+
+The handler resolves `p_agent_id` (UUID) and `p_agent_name` (string) from
+the authenticated agent context before calling the stored function. Inside
+PostgreSQL, `advance_ticket()` validates claim ownership, computes the next
+SDLC stage from the ticket's `sdlc_flow` array, releases any held file
+locks, merges the evidence JSONB into the ticket record, emits a
+`STAGE_ADVANCED` audit event, and — when the new stage is `DONE` — calls
+`resolve_dependencies()` to unblock downstream tickets.
 
 **Error Codes:**
 
@@ -836,13 +844,18 @@ export const ticketsRejectSchema = z.object({
 
 ### 4.5 tickets.release
 
-**Purpose:** Release a claim on a ticket, freeing it for other agents. Supports force-release by admin agents for expired or stuck claims.
+**Purpose:** Release a claim on a ticket, freeing it for other agents. Supports
+normal release (by the claim owner) and force-release (by an admin agent) for
+expired or stuck claims. All file locks held by the ticket are released
+automatically.
 
 **MCP Registration:**
 ```typescript
 server.tool(
   'tickets.release',
-  'Release a claim on a ticket, freeing it for other agents. Supports force-release by admin for stuck claims. File locks are automatically released.',
+  'Release a claim on a ticket, freeing it for other agents. '
+  + 'Supports force-release by admin for stuck claims. '
+  + 'File locks are automatically released.',
   ticketsReleaseSchema.shape,
   async (params) => ticketsReleaseHandler(params),
 );
@@ -855,7 +868,13 @@ server.tool(
   "properties": {
     "ticket_id": {
       "type": "string",
+      "minLength": 1,
       "description": "Human-readable ticket ID to release"
+    },
+    "agent_name": {
+      "type": "string",
+      "minLength": 1,
+      "description": "Name of the agent requesting the release (used for ownership verification)"
     },
     "reason": {
       "type": "string",
@@ -867,7 +886,7 @@ server.tool(
       "description": "If true, release even if the caller is not the claim owner (admin only)"
     }
   },
-  "required": ["ticket_id"],
+  "required": ["ticket_id", "agent_name"],
   "additionalProperties": false
 }
 ```
@@ -876,6 +895,7 @@ server.tool(
 ```typescript
 export const ticketsReleaseSchema = z.object({
   ticket_id: z.string().min(1).describe('Human-readable ticket ID to release'),
+  agent_name: z.string().min(1).describe('Agent requesting the release'),
   reason: z.string().optional().describe('Reason for releasing the claim'),
   force: z.boolean().default(false).describe('Force-release (admin only)'),
 });
@@ -888,27 +908,106 @@ export const ticketsReleaseSchema = z.object({
   "properties": {
     "ticket": {
       "$ref": "#/$defs/Ticket",
-      "description": "The ticket with cleared claim fields"
+      "description": "The ticket after claim release (claimed_by, machine_id, operator, lease_expiry cleared)"
     },
-    "released": {
-      "type": "boolean",
-      "description": "True if the release was successful"
+    "released_file_locks": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "List of file paths whose locks were released"
     }
   },
-  "required": ["ticket", "released"]
+  "required": ["ticket", "released_file_locks"]
 }
 ```
 
-**Stored Function:** `release_ticket(p_ticket_id, p_force)`
+**Stored Function:**
+```sql
+release_ticket(
+  p_ticket_id  TEXT,
+  p_agent_id   UUID,
+  p_agent_name TEXT,
+  p_reason     TEXT DEFAULT NULL,
+  p_force      BOOLEAN DEFAULT FALSE
+) RETURNS JSONB
+```
+
+The function clears `claimed_by`, `machine_id`, `operator`, and `lease_expiry`.
+It sets `released_at = NOW()` on all file locks held by the ticket. A
+`RELEASED` or `FORCE_RELEASED` event is recorded in the ticket history with the
+reason in the event payload.
+
+**Handler Workflow:**
+
+1. **Resolve agent** — look up `agent_id` (UUID) from `agent_name` via the
+   `agents` table.
+2. **Admin gate** — if `force=true`, verify the resolved agent has the `admin`
+   role. Return `FORBIDDEN` if not.
+3. **Snapshot locks** — query `file_locks` for the ticket's active (unreleased)
+   locks before calling the SQL function.
+4. **Call stored function** — invoke `release_ticket(p_ticket_id, p_agent_id,
+   p_agent_name, p_reason, p_force)`. Returns the updated ticket row as JSONB.
+5. **Build response** — return `{ ticket, released_file_locks }` where
+   `released_file_locks` is the list of file paths from step 3.
 
 **Error Codes:**
 
 | Error Code | Condition | Description |
 |------------|-----------|-------------|
-| `TICKET_NOT_FOUND` | No ticket with given ID | Ticket does not exist |
-| `NOT_CLAIM_OWNER` | Caller ≠ owner and `force=false` | Only the claim owner or admin can release |
-| `FORBIDDEN` | `force=true` but caller lacks admin permission | Admin-only operation |
-| `INTERNAL_ERROR` | Database error | Unexpected failure |
+| `TICKET_NOT_FOUND` | No ticket with the given ID | Ticket does not exist in the database |
+| `NOT_CLAIM_OWNER` | Caller ≠ claim owner and `force=false` | Only the claim owner or an admin can release |
+| `FORBIDDEN` | `force=true` but caller lacks admin role | Force-release is an admin-only operation |
+| `INTERNAL_ERROR` | Unexpected database or handler error | Logged with timestamp and stack trace |
+
+**Error Response Schema:**
+```json
+{
+  "content": [
+    {
+      "type": "text",
+      "text": "JSON string with error_code, message, ticket_id, and timestamp"
+    }
+  ],
+  "isError": true
+}
+```
+
+**Examples:**
+
+*Normal release by the claim owner:*
+```json
+// Request
+{ "ticket_id": "TASK-001", "agent_name": "Backend", "reason": "Switching to higher priority" }
+
+// Response
+{
+  "content": [{ "type": "text", "text": "{\"ticket\":{...},\"released_file_locks\":[\"src/tools/tickets-claim.ts\"]}" }],
+  "isError": false
+}
+```
+
+*Force-release by an admin:*
+```json
+// Request
+{ "ticket_id": "TASK-002", "agent_name": "ReaperOAK", "force": true, "reason": "Lease expired, agent unresponsive" }
+
+// Response — same shape; released_file_locks may be empty if no locks were held
+{
+  "content": [{ "type": "text", "text": "{\"ticket\":{...},\"released_file_locks\":[]}" }],
+  "isError": false
+}
+```
+
+*Error — non-owner without force:*
+```json
+// Request
+{ "ticket_id": "TASK-003", "agent_name": "Frontend" }
+
+// Response
+{
+  "content": [{ "type": "text", "text": "{\"error_code\":\"NOT_CLAIM_OWNER\",\"message\":\"Only the claim owner or admin can release\",\"ticket_id\":\"TASK-003\",\"timestamp\":\"2026-03-10T12:00:00.000Z\"}" }],
+  "isError": true
+}
+```
 
 **Annotations:**
 ```json
@@ -1001,7 +1100,20 @@ export const ticketsUpdateSchema = z.object({
 
 ### 4.7 tickets.spawn
 
-**Purpose:** Create a child ticket under an existing parent. The child inherits project context and enters the SDLC flow for its own type.
+**Purpose:** Create a child ticket under an existing parent. The child inherits
+the parent's `project_id`, receives a generated `ticket_id` following the pattern
+`{parent_id}-SUB-{sequential_number}`, and enters the SDLC flow for its own
+ticket type. A `SPAWNED` event is recorded on the parent ticket.
+
+**Child ID Generation:** The handler queries for existing children of the parent
+and assigns an incremented suffix: `{parent_id}-SUB-1`, `{parent_id}-SUB-2`, etc.
+
+**Initial Status Logic:**
+
+| Condition | Initial Status |
+|-----------|---------------|
+| `depends_on` is non-empty | `BLOCKED` |
+| `depends_on` is empty or omitted | `READY` |
 
 **MCP Registration:**
 ```typescript
@@ -1020,13 +1132,14 @@ server.tool(
   "properties": {
     "parent_id": {
       "type": "string",
+      "minLength": 1,
       "description": "ticket_id of the parent ticket"
     },
     "title": {
       "type": "string",
-      "minLength": 5,
+      "minLength": 1,
       "maxLength": 200,
-      "description": "Title for the new child ticket"
+      "description": "Title for the child ticket (max 200 chars)"
     },
     "type": {
       "type": "string",
@@ -1039,18 +1152,19 @@ server.tool(
     "priority": {
       "type": "string",
       "enum": ["critical", "high", "medium", "low"],
-      "description": "Priority for the child (defaults to parent's priority)"
+      "default": "medium",
+      "description": "Priority for the child ticket (defaults to medium)"
     },
     "acceptance_criteria": {
       "type": "array",
-      "items": { "type": "string", "minLength": 5 },
+      "items": { "type": "string", "minLength": 1 },
       "minItems": 1,
-      "description": "Acceptance criteria the child must satisfy"
+      "description": "Acceptance criteria the child must satisfy (at least one required)"
     },
     "file_paths": {
       "type": "array",
       "items": { "type": "string" },
-      "description": "Workspace-relative file paths within the child's write scope"
+      "description": "Workspace-relative file paths within the child ticket write scope"
     },
     "description": {
       "type": "string",
@@ -1071,14 +1185,14 @@ server.tool(
 ```typescript
 export const ticketsSpawnSchema = z.object({
   parent_id: z.string().min(1).describe('ticket_id of the parent ticket'),
-  title: z.string().min(5).max(200).describe('Title for the new child ticket'),
-  type: z.enum(TICKET_TYPES).describe('Classification type for the child'),
-  priority: z.enum(TICKET_PRIORITIES).optional().describe("Priority (defaults to parent's)"),
-  acceptance_criteria: z.array(z.string().min(5)).min(1)
-    .describe('Acceptance criteria the child must satisfy'),
-  file_paths: z.array(z.string()).describe("File paths within the child's write scope"),
-  description: z.string().optional().describe('Detailed description'),
-  depends_on: z.array(z.string()).optional().describe('ticket_id values the child depends on'),
+  title: z.string().min(1).max(200).describe('Title for the child ticket (max 200 chars)'),
+  type: z.enum(TICKET_TYPES).describe('Classification type for the child ticket (determines SDLC flow)'),
+  priority: z.enum(TICKET_PRIORITIES).default('medium').describe('Priority for the child ticket (defaults to medium)'),
+  acceptance_criteria: z.array(z.string().min(1)).min(1)
+    .describe('Acceptance criteria the child ticket must satisfy (at least one required)'),
+  file_paths: z.array(z.string()).describe('Workspace-relative file paths within the child ticket write scope'),
+  description: z.string().optional().describe('Detailed description of the child ticket'),
+  depends_on: z.array(z.string()).optional().describe('Array of ticket_id values the child depends on'),
 });
 ```
 
@@ -1100,15 +1214,26 @@ export const ticketsSpawnSchema = z.object({
 }
 ```
 
+**Events Recorded:**
+
+| Event | Target | Payload |
+|-------|--------|---------|
+| `SPAWNED` | Parent ticket | `{ child_ticket_id }` |
+| `CREATED` | Child ticket | Initial ticket data |
+
 **Error Codes:**
 
 | Error Code | Condition |
 |------------|-----------|
-| `TICKET_NOT_FOUND` | Parent ticket does not exist |
-| `NOT_CLAIM_OWNER` | Caller does not own the parent claim |
-| `INVALID_SUBTASK` | Spawned child violates parent constraints (e.g., invalid file scope) |
-| `FILE_CONFLICT` | Child's file_paths conflict with existing locks |
-| `INTERNAL_ERROR` | Database error |
+| `INVALID_SUBTASK` | Title, type, or acceptance_criteria are missing or empty |
+| `TICKET_NOT_FOUND` | Parent ticket does not exist in the database |
+| `INTERNAL_ERROR` | Unexpected database or runtime error |
+
+> **Note:** The implementation does not enforce `NOT_CLAIM_OWNER` or
+> `FILE_CONFLICT` checks. Any caller may spawn a child on any parent
+> regardless of claim ownership or file-path overlap.
+
+**Implementation:** [`forgeos-server/src/tools/tickets-spawn.ts`](../../../forgeos-server/src/tools/tickets-spawn.ts)
 
 **Annotations:**
 ```json

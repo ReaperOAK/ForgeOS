@@ -1,3 +1,18 @@
+### [TASK-FOS-05-003] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/TASK-FOS-05-003.md
+- **Decisions:** PASS — Score 82/100, 0 critical, 3 warnings (OC-001 indentation, OC-002 else blocks, cognitive complexity showPopover ~18/15). Lint clean, CC max 9/10, WCAG 2.2 AA compliant. Advanced CI → DOCS.
+- **Timestamp:** 2026-03-10T16:00:00Z
+
+### [FORGEOS-UID003] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-UID003.md
+- **Decisions:** PASS — Score 89/100, 0 critical, 2 warnings (highlight token inconsistency between mockup and component specs), 1 suggestion (unify keyboard shortcut docs). 7/7 AC met. Advanced CI -> DOCS.
+- **Timestamp:** 2026-03-10T22:05:00Z
+
+### [TASK-FOS-03-004] — Documentation Summary
+- **Artifacts:** forgeos-server/README.md, docs/architecture/api/mcp-tool-definitions.md, CHANGELOG.md, .github/agent-output/Documentation/TASK-FOS-03-004.md
+- **Decisions:** Added tickets.complete section to README (input/output schemas, error codes, examples, implementation files). Fixed stored function signature in mcp-tool-definitions.md from 2 to 4 params. JSDoc already complete on all 3 implementation files — no code changes needed.
+- **Timestamp:** 2026-03-10T13:00:00Z
+
 ### [TASK-FOS-05-004] — CI Review
 - **Artifacts:** .github/agent-output/CIReviewer/TASK-FOS-05-004.md
 - **Decisions:** PASS — Score 81/100, 0 critical, 3 warnings (CI-001: app.js 2371 LOC, CI-004: createTicketCard CC=12, CI-007: hardcoded demo data), 4 suggestions. Coverage waived (vanilla browser JS). All 10 AC verified upstream. Advanced CI → DOCS.
@@ -7,6 +22,11 @@
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-UID003.md
 - **Decisions:** PASS — Score 89/100, 0 critical, 2 warnings (highlight token and search highlight color inconsistency between mockup and component specs), 1 suggestion (unify keyboard shortcut docs). 7/7 AC met. Advanced CI -> DOCS.
 - **Timestamp:** 2026-03-10T22:05:00Z
+
+### [TASK-FOS-03-005] — Documentation Summary
+- **Artifacts:** forgeos-server/src/tools/tickets-reject.ts, docs/architecture/api/mcp-tool-definitions.md, CHANGELOG.md
+- **Decisions:** Corrected stored-function signature from 3 to 5 params to match implementation. Reduced error codes from 5 aspirational to 2 actually emitted. Added handler workflow section for completeness. Active voice, tables-first layout.
+- **Timestamp:** 2026-03-10T16:20:00Z
 
 ### [FORGEOS-BE003] — Documentation Summary
 - **Artifacts:** docs/database/schema-reference.md, docs/architecture/event-sourcing-schema.md, mcp-server/alembic/versions/20260310_000000_002_event_tables.py, CHANGELOG.md
@@ -2116,3 +2136,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-DO006.md
 - **Decisions:** APPROVED (HIGH confidence, 95%). 10/10 DoD pass (3 justified N/A). 6/6 AC verified. All upstream PASS (QA, Security, CI, Docs). Ticket advanced to DONE.
 - **Timestamp:** 2026-03-10T09:35:00Z
+
+### [TASK-FOS-03-008] — Documentation Summary
+- **Artifacts:** docs/architecture/api/mcp-tool-definitions.md, CHANGELOG.md
+- **Decisions:** Updated section 4.5 to match implementation. Corrected 6 discrepancies (missing agent_name param, wrong output schema, wrong stored function signature, missing handler workflow, missing examples, missing error response schema). JSDoc verified complete — no source changes needed.
+- **Timestamp:** 2026-03-10T16:00:00Z
