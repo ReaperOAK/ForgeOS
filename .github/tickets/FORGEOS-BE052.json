@@ -4,7 +4,7 @@
   "description": "Implement machine registration and identity verification. Each machine running agents registers with a unique machine_id (hostname or UUID). Machine registration records the hostname, first-seen timestamp, and last-seen timestamp. On each request, the machine_id is verified against the registry. Unknown machines can be auto-registered or rejected based on configuration.",
   "type": "backend",
   "priority": "high",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -110,6 +110,13 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-11T14:00:00+00:00",
+      "event": "CI_COMPLETE",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "details": "CI PASS: Score 100/100, 0 critical, 0 warnings, 100% coverage, 50/50 tests"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
