@@ -40,7 +40,7 @@
   "claimed_by": "Frontend",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-09T21:15:54.249730+00:00",
+  "lease_expiry": "2026-03-10T14:15:00+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -72,6 +72,13 @@
       "agent": "Frontend",
       "machine_id": "pop-os",
       "details": "Claimed by Frontend on pop-os (reaperoak)"
+    },
+    {
+      "timestamp": "2026-03-10T13:45:00+00:00",
+      "event": "CLAIMED",
+      "agent": "Frontend",
+      "machine_id": "pop-os",
+      "details": "Claimed by Frontend on pop-os (reaperoak) — re-claim after lease expiry"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
