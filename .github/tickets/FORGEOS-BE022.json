@@ -35,10 +35,10 @@
     "Session manager tracks all active sessions and provides listing for admin/monitoring"
   ],
   "rework_count": 0,
-  "claimed_by": "Backend",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T15:17:15Z",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -67,7 +67,14 @@
       "event": "STAGE_COMPLETED",
       "agent": "Backend",
       "machine_id": "pop-os",
-      "details": "BACKEND complete — 58 tests, 97% coverage, all 6 ACs met"
+      "details": "BACKEND complete \u2014 58 tests, 97% coverage, all 6 ACs met"
+    },
+    {
+      "timestamp": "2026-03-10T15:40:57.640760+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: Lease expired at 2026-03-10T15:17:15Z"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",

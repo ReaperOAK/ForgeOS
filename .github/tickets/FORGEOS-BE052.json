@@ -4,7 +4,7 @@
   "description": "Implement machine registration and identity verification. Each machine running agents registers with a unique machine_id (hostname or UUID). Machine registration records the hostname, first-seen timestamp, and last-seen timestamp. On each request, the machine_id is verified against the registry. Unknown machines can be auto-registered or rejected based on configuration.",
   "type": "backend",
   "priority": "high",
-  "stage": "BLOCKED",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,9 +34,9 @@
     "Machine identity includes machine_id, hostname, and registration timestamp"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
+  "claimed_by": "Backend",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
   "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
@@ -46,6 +46,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase3-auth.md"
+    },
+    {
+      "timestamp": "2026-03-10T16:30:00.000000+00:00",
+      "event": "BACKEND_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Machine registration and verification implemented with 100% test coverage. Files: machine_auth.py, machine_service.py, services/__init__.py, test_machine_auth.py. 50 tests, 120 stmts, 0 missed."
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",

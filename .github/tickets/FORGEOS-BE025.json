@@ -34,10 +34,10 @@
     "Both endpoints respond within 500ms even under load"
   ],
   "rework_count": 0,
-  "claimed_by": "Backend",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T15:16:08.217740+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -66,7 +66,14 @@
       "event": "STAGE_COMPLETE",
       "agent": "Backend",
       "machine_id": "pop-os",
-      "details": "BACKEND complete — 25 tests pass, 91% coverage, all 6 AC met"
+      "details": "BACKEND complete \u2014 25 tests pass, 91% coverage, all 6 AC met"
+    },
+    {
+      "timestamp": "2026-03-10T15:40:57.641901+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: Lease expired at 2026-03-10T15:16:08.217740+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
