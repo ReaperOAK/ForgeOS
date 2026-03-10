@@ -17,6 +17,12 @@ Validation
 - :func:`build_validation_error_data` — convert validation errors to MCP format.
 - :class:`FieldError` — single field-level validation failure.
 - :exc:`ToolInputValidationError` — raised when tool input is invalid.
+
+Ticket Tools
+~~~~~~~~~~~~
+- :data:`TICKETS_NEXT_SCHEMA` — JSON Schema for tickets.next input.
+- :func:`handle_tickets_next` — handler for the tickets.next tool.
+- :func:`register_ticket_tools` — register ticket tools on a registry.
 """
 
 from __future__ import annotations
@@ -27,6 +33,11 @@ from mcp_server.tools.registry import (
     ToolHandler,
     ToolNotFoundError,
     ToolRegistry,
+)
+from mcp_server.tools.ticket_tools import (
+    TICKETS_NEXT_SCHEMA,
+    handle_tickets_next,
+    register_ticket_tools,
 )
 from mcp_server.tools.validation import (
     INVALID_PARAMS,
@@ -40,19 +51,20 @@ from mcp_server.tools.validation import (
 )
 
 __all__ = [
-    # Registry
+    "INVALID_PARAMS",
+    "TICKETS_NEXT_SCHEMA",
     "DuplicateToolError",
+    "FieldError",
+    "McpValidationErrorData",
     "ToolDefinition",
     "ToolHandler",
+    "ToolInputValidationError",
     "ToolNotFoundError",
     "ToolRegistry",
-    # Validation
-    "FieldError",
-    "INVALID_PARAMS",
-    "McpValidationErrorData",
-    "ToolInputValidationError",
     "build_validation_error_data",
     "clear_validator_cache",
     "compile_validator",
+    "handle_tickets_next",
+    "register_ticket_tools",
     "validate_tool_input",
 ]

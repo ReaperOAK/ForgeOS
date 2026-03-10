@@ -3150,3 +3150,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE052.md
 - **Decisions:** APPROVED — 10/10 DoD items pass. All 6 ACs verified. 50/50 tests, 100% coverage, ruff clean, mypy clean, no TODO/console. All upstream verdicts (QA, Security, CI, Docs) cross-verified as PASS.
 - **Timestamp:** 2026-03-11T22:00:00Z
+
+### [FORGEOS-BE028] — BACKEND Summary
+- **Artifacts:** mcp-server/src/mcp_server/services/ticket_service.py, mcp-server/src/mcp_server/tools/ticket_tools.py, mcp-server/tests/test_ticket_tools.py
+- **Decisions:** Created TicketService as shared module wrapping ClaimQueue for both MCP and REST consumption. Handler closure pattern to bind service into registry-compatible signature. Validation errors propagate as exceptions; business errors return structured dicts.
+- **Timestamp:** 2026-03-11T22:00:00Z
