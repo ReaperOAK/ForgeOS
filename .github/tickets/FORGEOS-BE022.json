@@ -38,7 +38,7 @@
   "claimed_by": "CIReviewer",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T24:30:00+00:00",
+  "lease_expiry": "2026-03-10T18:02:53.802937+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -114,6 +114,13 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-10T17:32:53.802937+00:00",
+      "event": "CLAIMED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "details": "Claimed for CI stage"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
