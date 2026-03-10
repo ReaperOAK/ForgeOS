@@ -34,10 +34,10 @@
     "Script can be run via `make seed` or `python database/seed.py`"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Security",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T13:27:16.575864+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -81,6 +81,13 @@
       "agent": "QA",
       "machine_id": "pop-os",
       "details": "QA PASS. 68/68 tests pass, 95% coverage. Advanced to SECURITY."
+    },
+    {
+      "timestamp": "2026-03-10T12:57:16.575880+00:00",
+      "event": "CLAIMED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "details": "Claimed by Security agent for SECURITY stage"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
