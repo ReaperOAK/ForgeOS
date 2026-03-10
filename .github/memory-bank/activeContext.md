@@ -1,3 +1,8 @@
+### [FORGEOS-UID003] — Frontend Implementation Review (Dependency Graph & Search)
+- **Artifacts:** docs/uiux/mockups/FORGEOS-UID003.md, docs/uiux/components/dependency-graph.md, docs/uiux/components/search-bar.md
+- **Decisions:** Enhanced UIDesigner specs with Frontend implementation mapping sections. Added CSS class ↔ component mapping tables, HTML element ID inventories, ARIA role verification, D3.js integration architecture notes, responsive breakpoint verification, and accessibility implementation checklist. All 7/7 acceptance criteria verified met. Graph-search.css (781 lines) fully implements all spec components. Zero hardcoded colors — 100% design-token-driven.
+- **Timestamp:** 2026-03-10T08:05:21Z
+
 ### [FORGEOS-UID005] — Frontend Implementation (System Health Dashboard)
 - **Artifacts:** forgeos-server/src/dashboard/index.html, forgeos-server/src/dashboard/css/health-dashboard.css, forgeos-server/src/dashboard/js/health-dashboard.js
 - **Decisions:** IIFE module pattern to match app.js convention. SVG gauge/donut/sparkline for a11y over canvas. SSE + 15s polling fallback for real-time updates. Demo data fallback for dev. Zero hardcoded colors — all design tokens. 5-state status indicators with text labels. Keyboard shortcuts 1-4/D/Esc.
@@ -1906,3 +1911,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/QA/FORGEOS-UID002.md, docs/uiux/mockups/FORGEOS-UID002.md, docs/uiux/components/pipeline-board.md, docs/uiux/components/ticket-card.md
 - **Decisions:** QA PASS (HIGH confidence). All 7 acceptance criteria verified MET. Design specs complete: pipeline wireframe (12 stage columns), TicketCard spec (type badges, claim indicator), StageColumn spec, tabbed detail view, HistoryTimeline, DependencyTree, mockup APPROVED. Advisory: implementation code missing HTML tab structure and ~300 CSS lines claimed by Frontend (out of design ticket scope).
 - **Timestamp:** 2026-03-10T08:05:00Z
+
+### [TASK-FOS-05-003] — Frontend Implementation (Dependency Graph D3.js Visualization)
+- **Artifacts:** forgeos-server/src/dashboard/js/graph.js, forgeos-server/src/dashboard/index.html
+- **Decisions:** IIFE module pattern (ForgeGraph) to match existing app.js convention. D3.js force-directed layout with link/charge/center/collision forces. Status color map from mockup §3.1. Priority radius map from mockup §3.2. Critical path via longest-path DAG algorithm. SSE integration via existing EventSource on state.eventSource. Canvas minimap for overview. Lazy-load graph on tab activation for performance. 44×44px minimum hit areas for WCAG 2.5.5. Pulse animation on SSE status change (respects reduced-motion). Toast notifications for real-time updates.
+- **Timestamp:** 2025-07-08T18:35:00Z

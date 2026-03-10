@@ -424,3 +424,80 @@ All tokens referenced in this spec are defined in [`docs/uiux/design-tokens.json
   }
 }
 ```
+
+---
+
+## 9. Frontend Implementation Mapping
+
+> **Added by:** Frontend Engineer | **Date:** 2026-03-10 | **Ticket:** FORGEOS-UID003
+
+### 9.1 Component ↔ CSS Class Mapping
+
+| Spec Component | CSS Classes | Source File | Lines |
+|---------------|-------------|-------------|-------|
+| **DependencyGraph** (container) | `.graph-section`, `.graph-container` | `graph-search.css` | 37–50 |
+| **DependencyGraphNode** | `.graph-node`, `.graph-node__rect`, `__priority-bar`, `__id`, `__title`, `__badge` | `graph-search.css` | 135–235 |
+| **DependencyEdge** | `.graph-edge`, `--resolved`, `--unresolved`, `--critical`, `--faded` | `graph-search.css` | 302–350 |
+| **GraphControlsToolbar** | `.graph-toolbar`, `__zoom`, `__btn`, `__slider`, `__select`, `__filter-group` | `graph-search.css` | 55–100 |
+| **MinimapNavigator** | `.graph-minimap`, `__toggle`, `__canvas`, `__viewport` | `graph-search.css` | 353–410 |
+| **NodeTooltip** | `.graph-node-tooltip`, `__id`, `__title`, `__stage` | `graph-search.css` | 412–470 |
+| **NodePopover** | `.graph-node-popover`, `__header`, `__close`, `__meta`, `__actions` | `graph-search.css` | 472–520 |
+| **Mobile Bottom Sheet** | `.graph-bottom-sheet`, `__handle`, `__content` | `graph-search.css` | 522–565 |
+| **Mobile FAB** | `.graph-fab` | `graph-search.css` | 567–600 |
+
+### 9.2 HTML Element IDs
+
+| Element ID | Purpose | ARIA Role |
+|-----------|---------|----------|
+| `#panel-graph` | Graph View tab panel | `tabpanel` |
+| `#graphContainer` | Main SVG wrapper | `img` with `aria-label` |
+| `#graphSvg` | D3 rendering target | — |
+| `#graphNodes` | Node group container | — |
+| `#graphEdges` | Edge group container | — |
+| `#graphArrowResolved` | SVG marker (resolved) | — |
+| `#graphArrowUnresolved` | SVG marker (unresolved) | — |
+| `#graphArrowCritical` | SVG marker (critical) | — |
+| `#graphMinimap` | Minimap canvas | `img` with `aria-label` |
+| `#graphTooltip` | Hover tooltip | `tooltip` |
+| `#graphPopover` | Click popover | `dialog` |
+
+### 9.3 Node State CSS Modifiers
+
+| State | CSS Class | Visual Effect |
+|-------|----------|---------------|
+| Default | `.graph-node` | Standard rendering |
+| Selected | `.graph-node--selected` | Glow via `box-shadow: 0 0 0 3px var(--graph-node-glow)` |
+| Faded | `.graph-node--faded` | `opacity: 0.3` |
+| Focused | `.graph-node:focus-visible` | `outline: 2px solid var(--color-focus)` |
+| CI variant | `.graph-node--ci` | `:before` indicator dot |
+| Stage color | `.graph-node__badge` | `background: var(--stage-{name})` |
+| Priority bar | `.graph-node__priority-bar` | Left border via `var(--priority-{level})` |
+
+### 9.4 D3.js Force Parameters (Verified)
+
+| Parameter | Spec Value | CSS Token | Status |
+|-----------|-----------|-----------|--------|
+| `linkDistance` | 100 | `--graph-force-link` | ✅ Matches |
+| `chargeStrength` | -300 | `--graph-force-charge` | ✅ Matches |
+| `collisionRadius` | 30 | `--graph-force-collide` | ✅ Matches |
+| `zoomMin` | 0.25 | `--graph-zoom-min` | ✅ Matches |
+| `zoomMax` | 4.0 | `--graph-zoom-max` | ✅ Matches |
+
+### 9.5 Responsive Behavior Verified
+
+| Breakpoint | Graph Behavior | CSS |
+|-----------|----------------|-----|
+| Desktop (≥1024px) | Full toolbar, 200×120px minimap, popover on click | Default styles |
+| Tablet (768–1023px) | Toolbar wraps, filters full-width, 160×96px minimap | `@media (max-width: 1023px)` |
+| Mobile (<768px) | Minimap hidden, FAB shown, bottom sheet, nodes 120×60px | `@media (max-width: 767px)` |
+
+### 9.6 Accessibility Notes
+
+- Graph container: `role="img"` with descriptive `aria-label`.
+- Nodes: `tabindex="0"`, keyboard Enter/Space to select, Escape to deselect.
+- Tooltip: `role="tooltip"` with `aria-describedby` linkage.
+- Popover: `role="dialog"` with focus trap, Escape to close.
+- Zoom controls: `aria-label` on each button; slider has `aria-valuemin/max/now`.
+- Filter chips: `aria-expanded` + `aria-haspopup="listbox"`.
+- High contrast: `@media (prefers-contrast: more)` — thicker strokes.
+- Reduced motion: `@media (prefers-reduced-motion: reduce)` — all transitions disabled.

@@ -831,7 +831,108 @@
     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"/></svg>
   </button>
 
+  <!-- ═══ Confirmation Modal ═══ -->
+  <div class="confirm-scrim" id="confirmScrim" hidden aria-hidden="true"></div>
+  <dialog class="confirm-modal" id="confirmModal" aria-labelledby="confirmTitle" aria-describedby="confirmDesc" aria-modal="true">
+    <h2 class="confirm-modal__title" id="confirmTitle">Confirm Action</h2>
+    <p class="confirm-modal__desc" id="confirmDesc">Are you sure you want to proceed?</p>
+    <div class="confirm-modal__field">
+      <label for="confirmReason" class="confirm-modal__label">Reason <span class="confirm-modal__required">(min 10 characters)</span></label>
+      <textarea class="confirm-modal__textarea" id="confirmReason" rows="3" placeholder="Provide a reason for this action…" aria-describedby="confirmCharHint" required minlength="10"></textarea>
+      <span class="confirm-modal__char-count" id="confirmCharHint"><span id="confirmCharCount">0</span> characters</span>
+    </div>
+    <div class="confirm-modal__actions">
+      <button class="btn btn--ghost" id="confirmCancelBtn" type="button">Cancel</button>
+      <button class="btn btn--danger" id="confirmConfirmBtn" type="button" disabled>Confirm</button>
+    </div>
+  </dialog>
+
+  <!-- ═══ Claim Row Template (Desktop Table) ═══ -->
+  <template id="claim-row-template">
+    <tr class="claims-table__row">
+      <td class="claims-table__td claims-table__td--ticket"><a class="claims-table__link" href="#">—</a></td>
+      <td class="claims-table__td claims-table__td--agent">—</td>
+      <td class="claims-table__td claims-table__td--machine">—</td>
+      <td class="claims-table__td claims-table__td--operator">—</td>
+      <td class="claims-table__td claims-table__td--lease"><span class="countdown-timer" role="timer" aria-live="off">—</span></td>
+      <td class="claims-table__td claims-table__td--actions">
+        <button class="claims-release-btn btn btn--outline btn--xs" aria-label="Release claim" disabled>Release</button>
+      </td>
+    </tr>
+  </template>
+
+  <!-- ═══ Claim Card Template (Mobile) ═══ -->
+  <template id="claim-card-template">
+    <article class="claim-card" role="listitem">
+      <div class="claim-card__header">
+        <span class="claim-card__ticket">—</span>
+        <span class="countdown-timer" role="timer" aria-live="off">—</span>
+      </div>
+      <dl class="claim-card__meta">
+        <div class="claim-card__meta-row">
+          <dt>Agent</dt>
+          <dd class="claim-card__agent">—</dd>
+        </div>
+        <div class="claim-card__meta-row">
+          <dt>Machine</dt>
+          <dd class="claim-card__machine">—</dd>
+        </div>
+        <div class="claim-card__meta-row">
+          <dt>Operator</dt>
+          <dd class="claim-card__operator">—</dd>
+        </div>
+      </dl>
+      <button class="claims-release-btn btn btn--outline btn--xs" aria-label="Release claim" disabled>Release</button>
+    </article>
+  </template>
+
+  <!-- ═══ Machine Card Template ═══ -->
+  <template id="machine-card-template">
+    <article class="machine-card" role="listitem">
+      <div class="machine-card__header">
+        <span class="machine-card__status-dot status-dot" aria-label="unknown"></span>
+        <h3 class="machine-card__hostname">—</h3>
+      </div>
+      <div class="machine-card__section">
+        <h4 class="machine-card__section-title">Active Agents</h4>
+        <ul class="machine-card__agents-list" aria-label="Active agents">
+          <!-- Populated by JS -->
+        </ul>
+      </div>
+      <div class="machine-card__metrics">
+        <div class="machine-card__metric">
+          <span class="machine-card__metric-label">Claims</span>
+          <span class="machine-card__metric-value">0</span>
+          <div class="machine-card__meter" role="meter" aria-valuenow="0" aria-valuemin="0" aria-valuemax="10" aria-label="Claims capacity">
+            <div class="machine-card__meter-fill"></div>
+          </div>
+        </div>
+        <div class="machine-card__metric">
+          <span class="machine-card__metric-label">Throughput</span>
+          <span class="machine-card__metric-value">0/hr</span>
+          <div class="machine-card__meter" role="meter" aria-valuenow="0" aria-valuemin="0" aria-valuemax="20" aria-label="Processing throughput">
+            <div class="machine-card__meter-fill"></div>
+          </div>
+        </div>
+      </div>
+      <div class="machine-card__footer">
+        <span class="machine-card__heartbeat-label">Last heartbeat:</span>
+        <time class="machine-card__heartbeat-time" datetime="">—</time>
+      </div>
+    </article>
+  </template>
+
+  <!-- ═══ Activity Entry Template ═══ -->
+  <template id="activity-entry-template">
+    <div class="activity-entry" role="listitem">
+      <span class="activity-entry__icon" aria-hidden="true"></span>
+      <span class="activity-entry__action">—</span>
+      <time class="activity-entry__time" datetime="">—</time>
+    </div>
+  </template>
+
   <script src="js/app.js"></script>
   <script src="js/health-dashboard.js"></script>
+  <script src="js/graph.js"></script>
 </body>
 </html>
