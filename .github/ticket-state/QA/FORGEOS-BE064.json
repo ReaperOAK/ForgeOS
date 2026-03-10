@@ -36,10 +36,10 @@
     "Index on (status, next_retry_at) for efficient dequeue queries"
   ],
   "rework_count": 1,
-  "claimed_by": "Backend",
+  "claimed_by": "QA Engineer",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T19:18:16.863614+00:00",
+  "lease_expiry": "2026-03-10T19:38:31.182337+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
