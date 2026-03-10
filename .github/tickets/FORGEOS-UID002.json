@@ -4,7 +4,7 @@
   "description": "Design the stage pipeline view (Kanban board) and ticket detail view. The pipeline view shows columns for each SDLC stage (READY through DONE) with ticket cards showing ID, title, type badge, priority indicator, and claim status. The ticket detail view shows full metadata, acceptance criteria checklist, file paths, dependency tree, history timeline, and agent activity log. Define component specifications for TicketCard, StageColumn, MetadataPanel, HistoryTimeline, and DependencyTree.",
   "type": "frontend",
   "priority": "high",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -37,10 +37,10 @@
     "Mockup approval status set to APPROVED in mockup document header"
   ],
   "rework_count": 0,
-  "claimed_by": "Security",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T08:52:58.665180+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -97,6 +97,24 @@
       "from_stage": "QA",
       "to_stage": "SECURITY",
       "details": "QA PASS. All 7 AC met. Design specs complete. Code advisory: missing HTML tabs and CSS (out of scope)."
+    },
+    {
+      "timestamp": "2026-03-10T08:35:11.595414+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "FRONTEND",
+      "to_stage": "FRONTEND",
+      "details": "Advanced from FRONTEND to FRONTEND"
+    },
+    {
+      "timestamp": "2026-03-10T08:36:43.085630+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "SECURITY PASS. STRIDE max score 4 (LOW). OWASP 10/10. Zero critical/high findings. 4 advisory notes (CSP, CORS, CSRF, helmet)."
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
