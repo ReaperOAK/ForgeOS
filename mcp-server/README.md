@@ -1760,6 +1760,129 @@ initializes after middleware registration).
 | `auth_no_db_pool` | ERROR | *(none)* |
 
 
+## Machine Registration and Verification
+
+<!-- last_reviewed: 2026-03-11T00:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.auth.machine_auth` module provides machine identity
+registration and verification. Each machine running agents registers with a
+unique `machine_id` (hostname or UUID). On each request the `machine_id` is
+verified against the registry.
+
+### Registration Modes
+
+| Mode | Enum Value | Behavior |
+|------|------------|----------|
+| Auto | `MachineRegistrationMode.AUTO` | Unknown machines are automatically registered on first request |
+| Strict | `MachineRegistrationMode.STRICT` | Unknown machines are rejected with a 403 error |
+
+### Verification Flow
+
+```
+Client sends machine_id
+       │
+       ▼
+┌─ Validate machine_id ──▸ reject if empty or > 255 chars
+│
+├─ Look up in machines table
+│
+├─ Unknown + STRICT mode ──▸ reject with MachineAuthError (403)
+│
+├─ Unknown + AUTO mode ──▸ auto-register via UPSERT, return identity
+│
+├─ Known + inactive ──▸ reject with MachineAuthError (403)
+│
+├─ Known + active ──▸ update last_seen_at (fire-and-forget)
+│
+└─ Return MachineIdentity(machine_id, hostname, first_seen_at, last_seen_at, is_active)
+```
+
+### Quick Start (Low-Level API)
+
+```python
+from mcp_server.auth.machine_auth import (
+    MachineRegistrationMode,
+    register_machine,
+    verify_machine,
+    get_machine,
+    deactivate_machine,
+)
+
+# Register a machine (idempotent UPSERT)
+identity = await register_machine(db_pool, "worker-01", "worker-01.local")
+
+# Verify on each request (auto-registers if unknown in AUTO mode)
+identity = await verify_machine(
+    db_pool, "worker-01", mode=MachineRegistrationMode.AUTO
+)
+
+# Look up a machine
+machine = await get_machine(db_pool, "worker-01")
+
+# Deactivate a machine (soft delete)
+was_deactivated = await deactivate_machine(db_pool, "worker-01")
+```
+
+### Quick Start (Service Layer)
+
+```python
+from mcp_server.auth.machine_auth import MachineRegistrationMode
+from mcp_server.services.machine_service import MachineService
+
+svc = MachineService(db_pool, mode=MachineRegistrationMode.STRICT)
+
+identity = await svc.register("worker-01", hostname="worker-01.local")
+identity = await svc.verify("worker-01")
+machine  = await svc.lookup("worker-01")
+result   = await svc.deactivate("worker-01")
+```
+
+### Machine Record
+
+The `machines` table stores:
+
+| Column | Description |
+|---|---|
+| `machine_id` | Unique machine identifier (hostname or UUID) |
+| `hostname` | Human-readable hostname |
+| `first_seen_at` | Registration timestamp (UTC) |
+| `last_seen_at` | Last verification timestamp (UTC) |
+| `is_active` | Whether the machine is active |
+
+### Public API — `mcp_server.auth.machine_auth`
+
+| Symbol | Kind | Purpose |
+|---|---|---|
+| `MachineIdentity` | frozen dataclass | Immutable machine descriptor with `machine_id`, `hostname`, `first_seen_at`, `last_seen_at`, `is_active` |
+| `MachineRegistrationMode` | enum | `AUTO` or `STRICT` verification mode |
+| `MachineAuthError` | exception | Verification failure (JSON-RPC `-32602`, HTTP 403) |
+| `register_machine(pool, id, hostname)` | async function | Register or upsert a machine record |
+| `verify_machine(pool, id, mode, hostname)` | async function | Verify identity; auto-register or reject |
+| `get_machine(pool, id)` | async function | Look up a machine by ID |
+| `deactivate_machine(pool, id)` | async function | Soft-deactivate a machine |
+
+### Public API — `mcp_server.services.machine_service`
+
+| Symbol | Kind | Purpose |
+|---|---|---|
+| `MachineService` | class | High-level wrapper holding pool and default mode |
+| `MachineService.register(id, hostname)` | async method | Register or upsert |
+| `MachineService.verify(id, hostname)` | async method | Verify with configured mode |
+| `MachineService.lookup(id)` | async method | Look up by ID |
+| `MachineService.deactivate(id)` | async method | Soft-deactivate |
+| `MachineService.mode` | property | Current `MachineRegistrationMode` |
+
+### Design Constraints
+
+- **UPSERT semantics** — `register_machine` uses `INSERT ... ON CONFLICT DO UPDATE` so concurrent registrations are safe.
+- **Fire-and-forget last_seen** — `last_seen_at` updates do not block the verification response.
+- **Frozen dataclass** — `MachineIdentity` is immutable with `__slots__` for memory efficiency.
+- **Input validation** — `machine_id` is stripped, checked for emptiness, and capped at 255 characters.
+- **Parameterized SQL** — all queries use `$1`, `$2` placeholders; no string interpolation.
+
+
 ## Event Sourcing
 
 The `mcp_server/events/` package provides an append-only event store that

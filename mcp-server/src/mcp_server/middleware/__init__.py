@@ -4,8 +4,8 @@ Provides request lifecycle middleware including correlation ID tracking,
 logging integration, error enrichment, and database metadata propagation.
 
 .. meta::
-   :ticket: FORGEOS-BE019
-   :last_reviewed: 2026-03-10T23:00:00Z
+   :ticket: FORGEOS-BE019, FORGEOS-BE054
+   :last_reviewed: 2026-03-11T00:00:00Z
 """
 
 from mcp_server.middleware.auth_middleware import (

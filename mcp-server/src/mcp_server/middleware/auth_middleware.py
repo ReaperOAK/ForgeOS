@@ -6,7 +6,7 @@ Sets per-request AuthContext via contextvars for downstream handlers.
 
 .. meta::
    :ticket: FORGEOS-BE054
-   :last_reviewed: 2025-07-22T00:00:00Z
+   :last_reviewed: 2026-03-11T00:00:00Z
 """
 
 from __future__ import annotations
