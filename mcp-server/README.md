@@ -2135,6 +2135,136 @@ The `machines` table stores:
 - **Parameterized SQL** — all queries use `$1`, `$2` placeholders; no string interpolation.
 
 
+## Operator Machine-Scoped Permissions
+
+<!-- last_reviewed: 2026-03-11T12:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.auth.authorization` module enforces that operators can only
+perform REST operations on machines they are bound to. The
+`operator_machine_bindings` table stores many-to-many operator-machine
+associations. Admin operators bypass all binding checks.
+
+Higher-level functions in `mcp_server.services.operator_service` wrap the
+low-level authorization functions with structured logging.
+
+### How It Works
+
+1. An admin binds an operator to one or more machines via `add_binding()`.
+2. On each REST request, `require_operator_machine_access()` checks the
+   operator's role — admins pass through; non-admins must have a binding.
+3. Unbound operator-machine pairs are rejected with `MachineScopeError`
+   (HTTP 403 Forbidden).
+4. Operators can be bound to multiple machines. Bindings are idempotent
+   (`INSERT ... ON CONFLICT DO NOTHING`).
+
+### Quick Start
+
+```python
+from mcp_server.auth.authorization import (
+    add_binding,
+    remove_binding,
+    list_bindings,
+    require_operator_machine_access,
+)
+
+# Bind operator to a machine (idempotent)
+binding = await add_binding(pool, operator_id="uuid-...", machine_id="pop-os")
+
+# Enforce access — raises MachineScopeError if unbound
+await require_operator_machine_access(
+    pool, operator_id="uuid-...", machine_id="pop-os", role="operator"
+)
+
+# Admin bypass — no binding check
+await require_operator_machine_access(
+    pool, operator_id="uuid-...", machine_id="any-machine", role="admin"
+)
+
+# List all bindings for an operator
+bindings = await list_bindings(pool, operator_id="uuid-...")
+for b in bindings:
+    print(f"{b.machine_id} since {b.registered_at}")
+
+# Remove a binding
+removed = await remove_binding(pool, operator_id="uuid-...", machine_id="pop-os")
+```
+
+### Service Layer
+
+The `operator_service` module provides higher-level wrappers that return
+plain dicts suitable for API responses:
+
+```python
+from mcp_server.services.operator_service import (
+    bind_operator_to_machine,
+    unbind_operator_from_machine,
+    get_operator_bindings,
+    validate_operator_machine_access,
+)
+
+# Bind
+result = await bind_operator_to_machine(pool, "uuid-...", "pop-os")
+# {"operator_id": "...", "machine_id": "pop-os", "registered_at": "..."}
+
+# List
+bindings = await get_operator_bindings(pool, "uuid-...")
+# [{"machine_id": "pop-os", "registered_at": "..."}]
+
+# Unbind
+result = await unbind_operator_from_machine(pool, "uuid-...", "pop-os")
+# {"removed": true, "operator_id": "...", "machine_id": "pop-os"}
+
+# Enforce access (delegates to require_operator_machine_access)
+await validate_operator_machine_access(pool, "uuid-...", "pop-os", "operator")
+```
+
+### API Reference
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `OperatorMachineBinding` | frozen dataclass | Binding descriptor with `id`, `operator_id`, `machine_id`, `registered_at` |
+| `MachineScopeError` | exception | Raised when operator is not bound to the requested machine (403) |
+| `ADMIN_ROLE` | constant | Role string (`"admin"`) that bypasses binding checks |
+
+### Authorization Functions
+
+| Function | Returns | Description |
+|---|---|---|
+| `check_operator_machine_binding(pool, operator_id, machine_id)` | `bool` | Check whether a binding exists |
+| `require_operator_machine_access(pool, operator_id, machine_id, role)` | `None` | Enforce binding; raises `MachineScopeError` if unbound and not admin |
+| `add_binding(pool, operator_id, machine_id)` | `OperatorMachineBinding` | Create a binding (idempotent UPSERT) |
+| `remove_binding(pool, operator_id, machine_id)` | `bool` | Delete a binding; returns `True` if deleted |
+| `list_bindings(pool, operator_id)` | `list[OperatorMachineBinding]` | List all bindings for an operator, ordered by registration time |
+
+### Service Functions
+
+| Function | Returns | Description |
+|---|---|---|
+| `bind_operator_to_machine(pool, operator_id, machine_id)` | `dict` | Service-layer bind returning response dict |
+| `unbind_operator_from_machine(pool, operator_id, machine_id)` | `dict` | Service-layer unbind returning `{"removed": bool}` |
+| `get_operator_bindings(pool, operator_id)` | `list[dict]` | List bindings as response dicts |
+| `validate_operator_machine_access(pool, operator_id, machine_id, role)` | `None` | Enforce binding (delegates to `require_operator_machine_access`) |
+
+### Error Handling
+
+| Scenario | Behavior |
+|---|---|
+| Unbound operator on non-admin role | Raises `MachineScopeError` (403) |
+| Admin role | Bypasses all binding checks |
+| Empty `operator_id` or `machine_id` in `add_binding`/`remove_binding` | Raises `MachineScopeError` |
+| Database error during binding CRUD | Raises `MachineScopeError` with `database_error` reason |
+
+### Design Constraints
+
+- **Idempotent bindings** — `add_binding` uses `ON CONFLICT DO NOTHING`; adding an existing binding is a no-op.
+- **Parameterized SQL** — all queries use `$1`, `$2` placeholders; no string interpolation.
+- **Frozen dataclass** — `OperatorMachineBinding` is immutable with `__slots__`.
+- **Structured logging** — all authorization decisions log `operator_id` and `machine_id`.
+- **Admin bypass** — based on the `role` field in the `operators` table, not on a separate privilege table.
+
+
 ## Event Sourcing
 
 The `mcp_server/events/` package provides an append-only event store that
