@@ -8,6 +8,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Event Sourcing Subsystem** (FORGEOS-BE012) — Append-only event store at
+  `mcp-server/src/mcp_server/events/` implementing the FORGEOS-ARCH007
+  architecture specification. Provides `EventType` enum with 15 lifecycle
+  event types and 3 aliases, `Event` frozen dataclass with 14 fields
+  (immutable records with monotonic sequencing), pluggable `EventStoreBackend`
+  protocol with `InMemoryEventBackend` default, and `EventStore` with
+  `append_event`, `get_events_by_ticket/type/agent`, `replay_ticket_events`,
+  and `reconstruct_ticket_state`. 53 tests, 97% coverage. Added Event
+  Sourcing section to `mcp-server/README.md` documenting event types, fields,
+  API reference, backend architecture, and design constraints.
+
 - **Dynamic Tool Registration System** (FORGEOS-BE020) — Runtime MCP tool
   registry at `mcp-server/src/mcp_server/tools/registry.py`. `ToolRegistry`
   class provides `register()` (imperative), `tool()` (decorator),
