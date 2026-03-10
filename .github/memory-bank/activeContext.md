@@ -2740,3 +2740,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/auth/operator_auth.py, mcp-server/src/mcp_server/services/operator_service.py, mcp-server/tests/test_operator_auth.py
 - **Decisions:** JWT/HS256 with bcrypt password hashing; 62/62 tests pass; 97% coverage (98% operator_auth, 97% operator_service); all 6 ACs verified; no defects found
 - **Timestamp:** 2026-03-10T16:46:00+00:00
+
+### [FORGEOS-BE013] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE013.md
+- **Decisions:** Added Repository Pattern section to README between Connection Pool and Graceful Shutdown for dependency-order layout. Verified all inline docstrings already complete — no source code changes needed.
+- **Timestamp:** 2026-03-10T18:00:00Z

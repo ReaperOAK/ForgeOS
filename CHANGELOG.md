@@ -8,6 +8,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Repository Pattern Data Access Layer** (FORGEOS-BE013) — Three repository
+  classes in `mcp-server/src/mcp_server/repositories/` implementing the
+  repository pattern for all database access. `TicketRepository` provides
+  `get_by_id`, `list_by_stage`, `list_by_type`, `create`, `update_stage`, and
+  `count_by_stage`. `ClaimRepository` provides `create_claim` (atomic via
+  `UPDATE … WHERE claimed_by IS NULL`), `release_claim`, `get_active_claim`,
+  and `list_expired_claims`. `EventRepository` provides `append_event`,
+  `get_events_by_ticket`, `get_events_by_agent`, and
+  `get_events_by_timerange`. All repositories accept an asyncpg pool via
+  constructor injection, use parameterized SQL exclusively, and return frozen
+  dataclasses (`TicketRow`, `ClaimInfo`, `EventRow`). 14 public methods across
+  3 classes. 82 tests with 100% coverage and 100% mutation score. Added
+  Repository Pattern section to `mcp-server/README.md` with quick-start,
+  method reference tables, data classes, and design constraints.
+
 - **Dependency Graph D3.js Visualization** (TASK-FOS-05-003) — Interactive
   force-directed dependency graph at `forgeos-server/src/dashboard/js/graph.js`
   (1554 LOC). Renders ticket DAG with status-based node coloring
