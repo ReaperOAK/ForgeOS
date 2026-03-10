@@ -1,3 +1,13 @@
+### [FORGEOS-BE027] — QA: PASS
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE027.md, mcp-server/tests/test_metrics.py
+- **Decisions:** QA PASS (HIGH confidence) — 72/72 tests pass, 100% coverage, all 6 ACs verified, 0 defects, 0 TODO/FIXME. Thread safety, memory bounding, gauge floor tested. Zero external deps. Mutation testing N/A (no framework configured). Ticket advanced to SECURITY.
+- **Timestamp:** 2026-03-10T21:05:00Z
+
+### [FORGEOS-BE013] — BACKEND complete
+- **Artifacts:** mcp-server/src/mcp_server/repositories/__init__.py, ticket_repo.py, claim_repo.py, event_repo.py, tests/test_repositories.py
+- **Decisions:** Used frozen dataclasses for row types; claims stored on tickets table (not separate); parameterized SQL with enum casts; asyncpg.Pool constructor injection
+- **Timestamp:** 2026-03-10T15:30:00Z
+
 ### [FORGEOS-BE017] — Validation: APPROVED
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE017.md
 - **Decisions:** APPROVED (HIGH confidence) — 9/10 DoD items PASS (1 advisory: 3 ruff stylistic lint findings, pre-existing codebase pattern). 6/6 ACs verified. 58/58 tests pass. http.py 82% coverage, sse.py 76% coverage (gap in infrastructure integration methods). All upstream verdicts confirmed: QA PASS, Security PASS, CI PASS (95/100), Docs PASS. mypy clean. Ticket moved to DONE.
@@ -2618,3 +2628,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/observability/metrics.py, mcp-server/tests/test_metrics.py, mcp-server/src/mcp_server/observability/__init__.py
 - **Decisions:** Zero-dependency stdlib-only metrics (no Prometheus client). Thread-safe primitives with bounded histograms (10k samples). Singleton registry with module-level convenience functions and context managers.
 - **Timestamp:** 2026-03-10T22:00:00Z
+
+### [FORGEOS-BE006] — BACKEND complete
+- **Artifacts:** mcp-server/src/mcp_server/locking/__init__.py, mcp-server/src/mcp_server/locking/claim_queue.py, mcp-server/tests/test_claim_queue.py
+- **Decisions:** Thin wrapper over PostgreSQL stored functions (claim_ticket, claim_ticket_by_id). Protocol-based DI for pool injection. No retry loops — callers control backoff. Frozen dataclasses for immutable ClaimResult.
+- **Timestamp:** 2026-03-10T15:04:13+00:00
