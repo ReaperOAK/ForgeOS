@@ -145,6 +145,84 @@ await pool.close()  # drains and closes all connections
 | Query timeout | Raises `asyncpg.QueryCanceledError` after `POOL_COMMAND_TIMEOUT` seconds |
 
 
+### Health Monitoring
+
+<!-- last_reviewed: 2026-03-11T00:30:00Z -->
+
+The `mcp_server.db.health` module provides background health monitoring for the
+connection pool. It tracks pool statistics, detects dead connections via
+periodic ping, and recycles stale connections when they exceed a configurable
+maximum lifetime.
+
+#### Quick Start
+
+```python
+from mcp_server.db import ConnectionPool, PoolHealthMonitor
+
+pool = ConnectionPool(config)
+await pool.initialize()
+
+# Start background monitoring (30s interval, 1h max lifetime)
+monitor = PoolHealthMonitor(pool, check_interval=30.0, max_lifetime=3600.0)
+monitor.start()
+
+# Get health snapshot
+report = monitor.health_report()
+print(report.saturation_pct)  # e.g. 45.0
+
+# JSON-serializable dict for /health endpoint
+health_dict = monitor.to_dict()
+
+# Stop monitoring
+await monitor.stop()
+```
+
+#### PoolHealthMonitor Parameters
+
+| Parameter | Default | Description |
+|---|---|---|
+| `pool` | *(required)* | `ConnectionPool` instance to monitor |
+| `check_interval` | `30.0` | Seconds between health checks |
+| `max_lifetime` | `3600.0` | Maximum connection lifetime before recycling (seconds) |
+
+#### PoolHealthMonitor Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `start()` | `None` | Start background health check loop (idempotent) |
+| `stop()` | `None` | Cancel the background task and wait for cleanup |
+| `health_report()` | `HealthReport` | Build a frozen snapshot of current pool metrics |
+| `to_dict()` | `dict` | Return health report as a JSON-serializable dict |
+| `record_acquire_wait(wait_ms)` | `None` | Record connection acquire wait time |
+| `increment_waiting()` | `None` | Increment waiting request counter |
+| `decrement_waiting()` | `None` | Decrement waiting counter (clamped at 0) |
+| `is_running` | `bool` | Property — `True` if the background task is active |
+
+#### HealthReport Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `total_connections` | `int` | Total connections in the pool |
+| `active_connections` | `int` | Connections currently in use |
+| `idle_connections` | `int` | Connections available for use |
+| `waiting_requests` | `int` | Acquire requests waiting for a connection |
+| `saturation_pct` | `float` | Percentage of max capacity in active use |
+| `avg_wait_time_ms` | `float` | Average acquire wait time in milliseconds |
+| `max_lifetime_seconds` | `float` | Configured max connection lifetime |
+| `is_healthy` | `bool` | `True` if last ping succeeded |
+| `last_check_epoch` | `float` | Monotonic timestamp of last health check |
+
+#### Health Check Behavior
+
+| Event | Action |
+|---|---|
+| Ping succeeds | Marks pool healthy; checks if `max_lifetime` exceeded |
+| Ping fails | Marks pool unhealthy; expires all connections for recycling |
+| `max_lifetime` exceeded | Expires connections to force rotation |
+| Background task exception | Logs error, continues checking on next interval |
+
+
+
 ## Repository Pattern — Data Access Layer
 
 <!-- last_reviewed: 2026-03-10T18:00:00Z -->
@@ -464,6 +542,7 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/server.py`** — Server initialization, configuration, error handling, entry point
 - **`mcp_server/__init__.py`** — Package metadata (version, app name)
 - **`mcp_server/__main__.py`** — `python -m mcp_server` entry point
+- **`mcp_server/db/`** — asyncpg connection pool, health monitoring, and pool metrics
 - **`mcp_server/observability/`** — Structured JSON logging, correlation IDs, and PII redaction
 - **`mcp_server/auth/`** — Agent API key authentication, rate limiting, and identity resolution
 - **`mcp_server/tools/`** — Dynamic tool registration, schema validation, and FastMCP bridge

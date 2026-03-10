@@ -8,6 +8,16 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Connection Pool Health Monitoring** (FORGEOS-BE014) — Background health
+  monitor for the asyncpg connection pool (`mcp_server/db/health.py`). Provides
+  `PoolHealthMonitor` with configurable check interval and max connection
+  lifetime, periodic database ping to detect dead connections, automatic stale
+  connection recycling when `max_lifetime` is exceeded, and wait-time tracking
+  for connection acquisition. Exposes pool health as a frozen `HealthReport`
+  dataclass with `to_dict()` for JSON serialization in the `/health` endpoint.
+  Reports total, active, idle, and waiting connection counts, pool saturation
+  percentage, and average wait time. 56 tests with 96% coverage.
+
 - **Ticket Claim Queue with SKIP LOCKED** (FORGEOS-BE006) -- Distributed ticket
   claim queue at `mcp-server/src/mcp_server/locking/claim_queue.py` using
   PostgreSQL `SELECT FOR UPDATE SKIP LOCKED` for fair, non-blocking claim
