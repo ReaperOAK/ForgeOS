@@ -33,11 +33,11 @@
     "Returns the updated ticket object as JSON text content",
     "updated_at field refreshes automatically via trg_tickets_updated_at trigger"
   ],
-  "rework_count": 0,
+  "rework_count": 1,
   "claimed_by": "Backend",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-09T21:13:11.079336+00:00",
+  "lease_expiry": "2026-03-10T08:52:18.584609+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
