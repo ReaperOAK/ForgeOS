@@ -34,10 +34,10 @@
     "Machine identity includes machine_id, hostname, and registration timestamp"
   ],
   "rework_count": 1,
-  "claimed_by": "CI Reviewer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T19:53:32.011666+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -117,6 +117,13 @@
       "agent": "CIReviewer",
       "machine_id": "pop-os",
       "details": "CI PASS: Score 100/100, 0 critical, 0 warnings, 100% coverage, 50/50 tests"
+    },
+    {
+      "timestamp": "2026-03-10T20:06:12.068285+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from CI Reviewer: Lease expired at 2026-03-10T19:53:32.011666+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",

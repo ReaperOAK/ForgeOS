@@ -35,10 +35,10 @@
     "Transaction wrapper integrates with the asyncpg connection pool"
   ],
   "rework_count": 0,
-  "claimed_by": "CI Reviewer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T19:53:32.011666+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -104,6 +104,13 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "CI PASS - Score 82/100, 0 critical, 2 warnings, 100% coverage"
+    },
+    {
+      "timestamp": "2026-03-10T20:06:12.066539+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from CI Reviewer: Lease expired at 2026-03-10T19:53:32.011666+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
