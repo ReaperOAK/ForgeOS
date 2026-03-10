@@ -21,8 +21,10 @@ Public API
 
 from __future__ import annotations
 
+import json
 import uuid
 from dataclasses import dataclass, field
+from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 from mcp_server.auth.authorization import check_role_stage_authorization
@@ -32,8 +34,10 @@ from mcp_server.locking.claim_queue import (
     ClaimResult,
     NoEligibleTicketError,
 )
+from mcp_server.locking.transaction_config import OperationType, PoolLike, transactional
 from mcp_server.observability import get_logger
 from mcp_server.server import TicketNotFoundError
+from mcp_server.services.stage_engine import InvalidTransitionError, validate_advance
 
 if TYPE_CHECKING:
     from mcp_server.repositories.claim_repo import ClaimRepository
@@ -156,6 +160,41 @@ class NextTicketResult:
         }
 
 
+@dataclass(frozen=True, slots=True)
+class AdvanceTicketResult:
+    """Typed result returned by :meth:`TicketService.advance_ticket`."""
+
+    ticket_id: str
+    title: str
+    ticket_type: str
+    previous_stage: str
+    new_stage: str
+    status: str
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialise to a plain dict suitable for MCP tool output."""
+        return {
+            "ticket_id": self.ticket_id,
+            "title": self.title,
+            "type": self.ticket_type,
+            "previous_stage": self.previous_stage,
+            "new_stage": self.new_stage,
+            "status": self.status,
+        }
+
+
+class ClaimValidationError(Exception):
+    """Raised when the advancing agent does not hold the active claim."""
+
+    def __init__(self, ticket_id: str, agent_id: str, reason: str) -> None:
+        self.ticket_id = ticket_id
+        self.agent_id = agent_id
+        self.reason = reason
+        super().__init__(
+            f"Claim validation failed for '{ticket_id}' by '{agent_id}': {reason}"
+        )
+
+
 class TicketService:
     """High-level service wrapping ticket lifecycle operations.
 
@@ -173,11 +212,13 @@ class TicketService:
         self,
         claim_queue: ClaimQueue,
         *,
+        pool: PoolLike | None = None,
         claim_repo: ClaimRepository | None = None,
         ticket_repo: TicketRepository | None = None,
         event_repo: EventRepository | None = None,
     ) -> None:
         self._claim_queue = claim_queue
+        self._pool = pool
         self._claim_repo = claim_repo
         self._ticket_repo = ticket_repo
         self._event_repo = event_repo
@@ -547,3 +588,145 @@ class TicketService:
             page=page,
             page_size=page_size,
         )
+
+    # ------------------------------------------------------------------
+    # Advance operation (FORGEOS-BE030)
+    # ------------------------------------------------------------------
+
+    async def advance_ticket(
+        self,
+        *,
+        ticket_id: str,
+        agent_id: str,
+        evidence: dict[str, Any] | None = None,
+    ) -> AdvanceTicketResult:
+        """Advance a ticket to its next SDLC stage.
+
+        Uses SERIALIZABLE transaction isolation via :func:`transactional`
+        to ensure state transition integrity.  Validates that the calling
+        agent holds the active claim and that the transition is legal
+        per the ticket's SDLC flow.
+
+        Parameters
+        ----------
+        ticket_id : str
+            The ticket to advance.
+        agent_id : str
+            The agent requesting the advance (must hold the active claim).
+        evidence : dict[str, Any] | None
+            Optional completion evidence (artifacts, coverage, etc.).
+
+        Returns
+        -------
+        AdvanceTicketResult
+            Result with previous and new stage information.
+
+        Raises
+        ------
+        ValueError
+            If the pool is not configured on this service instance.
+        TicketNotFoundError
+            If the ticket does not exist.
+        ClaimValidationError
+            If the agent does not hold the active claim.
+        InvalidTransitionError
+            If the transition violates the SDLC flow order.
+        """
+        if self._pool is None:
+            raise ValueError("Pool not configured for advance operations")
+
+        async with transactional(self._pool, OperationType.ADVANCE) as conn:
+            row = await conn.fetchrow(
+                "SELECT * FROM tickets WHERE ticket_id = $1 FOR UPDATE",
+                ticket_id,
+            )
+            if row is None:
+                raise TicketNotFoundError(f"Ticket '{ticket_id}' not found")
+
+            current_stage: str = row["stage"]
+            sdlc_flow: list[str] = row["sdlc_flow"]
+            claimed_by_name: str | None = row["claimed_by_name"]
+
+            if claimed_by_name is None:
+                raise ClaimValidationError(
+                    ticket_id, agent_id, "Ticket is not currently claimed"
+                )
+            if claimed_by_name != agent_id:
+                raise ClaimValidationError(
+                    ticket_id,
+                    agent_id,
+                    f"Ticket is claimed by '{claimed_by_name}', not '{agent_id}'",
+                )
+
+            next_stage = validate_advance(ticket_id, sdlc_flow, current_stage)
+
+            new_status = "DONE" if next_stage == "DONE" else "READY"
+
+            await conn.execute(
+                """
+                UPDATE tickets
+                SET stage = $2::ticket_stage,
+                    status = $3::ticket_status,
+                    claimed_by = NULL,
+                    claimed_by_name = NULL,
+                    machine_id = NULL,
+                    operator = NULL,
+                    lease_expiry = NULL,
+                    lease_duration_minutes = NULL,
+                    updated_at = NOW(),
+                    completed_at = CASE WHEN $2 = 'DONE' THEN NOW() ELSE NULL END
+                WHERE ticket_id = $1
+                """,
+                ticket_id,
+                next_stage,
+                new_status,
+            )
+
+            payload: dict[str, Any] = {}
+            if evidence:
+                payload["evidence"] = evidence
+
+            await conn.execute(
+                """
+                INSERT INTO events (
+                    ticket_id, event_type,
+                    agent_name,
+                    previous_stage, new_stage,
+                    previous_status, new_status,
+                    payload
+                ) VALUES (
+                    $1, $2::event_type,
+                    $3,
+                    $4::ticket_stage, $5::ticket_stage,
+                    $6::ticket_status, $7::ticket_status,
+                    $8::jsonb
+                )
+                """,
+                ticket_id,
+                "STAGE_ADVANCED",
+                agent_id,
+                current_stage,
+                next_stage,
+                current_stage,
+                new_status,
+                json.dumps(payload),
+            )
+
+            logger.info(
+                "Ticket advanced",
+                extra={
+                    "ticket_id": ticket_id,
+                    "previous_stage": current_stage,
+                    "new_stage": next_stage,
+                    "agent_id": agent_id,
+                },
+            )
+
+            return AdvanceTicketResult(
+                ticket_id=ticket_id,
+                title=row["title"],
+                ticket_type=row["type"],
+                previous_stage=current_stage,
+                new_stage=next_stage,
+                status=new_status,
+            )

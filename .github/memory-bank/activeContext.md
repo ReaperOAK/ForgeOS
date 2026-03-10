@@ -1,3 +1,8 @@
+### [FORGEOS-BE029] — BACKEND Complete
+- **Artifacts:** mcp-server/src/mcp_server/tools/ticket_tools.py, mcp-server/src/mcp_server/services/ticket_service.py, mcp-server/tests/test_ticket_tools.py
+- **Decisions:** Reused existing ClaimQueue.claim_by_id() and NextTicketResult data shape; handler factory pattern consistent with tickets.next; role validation via AgentRoleMap before DB call
+- **Timestamp:** 2026-03-12T00:00:00Z
+
 ### [FORGEOS-BE042] — BACKEND Complete
 - **Artifacts:** mcp-server/src/mcp_server/middleware/rate_limiter.py, mcp-server/tests/test_rate_limiter.py
 - **Decisions:** In-memory sliding window over PostgreSQL for simplicity; two-tier limits (write=30/min, read=120/min); Starlette BaseHTTPMiddleware pattern consistent with existing middleware
