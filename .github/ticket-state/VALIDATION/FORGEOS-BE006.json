@@ -4,7 +4,7 @@
   "description": "Implement the ticket claim queue using PostgreSQL SELECT FOR UPDATE SKIP LOCKED for fair, non-blocking claim semantics. This replaces the git-push-based distributed lock. The claim queue allows agents to atomically claim the next available ticket matching their role criteria, without blocking other agents from claiming different tickets concurrently.",
   "type": "backend",
   "priority": "critical",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
