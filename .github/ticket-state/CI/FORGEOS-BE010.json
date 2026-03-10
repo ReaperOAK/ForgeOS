@@ -35,10 +35,10 @@
     "Transaction wrapper integrates with the asyncpg connection pool"
   ],
   "rework_count": 1,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "CI Reviewer",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T21:58:35.129324+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -181,6 +181,15 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-10T21:28:35.129341+00:00",
+      "event": "CLAIMED",
+      "agent": "CI Reviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "CI",
+      "details": "Claimed by ReaperOAK@pop-os via CI Reviewer, lease until 2026-03-10T21:58:35.129324+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
