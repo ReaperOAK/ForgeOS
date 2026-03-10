@@ -89,6 +89,15 @@
       "agent": "QA",
       "machine_id": "pop-os",
       "details": "QA PASS \u2014 58 tests, 96% coverage, all 6 ACs met"
+    },
+    {
+      "timestamp": "2026-03-10T16:55:02.075238+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
