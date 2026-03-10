@@ -35,10 +35,10 @@
     "Binding management endpoints (add/remove machine binding) for admin use"
   ],
   "rework_count": 1,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Backend",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T22:11:34.674093+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -97,6 +97,15 @@
       "from_stage": "QA",
       "to_stage": "BACKEND",
       "details": "Rework #1: 3 lint errors in BE056 code: TC003 in authorization.py (datetime not in TYPE_CHECKING), I001 in operator_service.py (unsorted imports), F401 in operator_service.py (unused MachineScopeError import). All 41 tests pass. Functionality correct. Fix lint and resubmit."
+    },
+    {
+      "timestamp": "2026-03-10T21:41:34.674109+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "BACKEND",
+      "to_stage": "BACKEND",
+      "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-10T22:11:34.674093+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
