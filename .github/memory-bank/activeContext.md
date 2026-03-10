@@ -1,3 +1,18 @@
+### [TASK-FOS-05-003] — Validation APPROVED
+- **Artifacts:** .github/agent-output/Validator/TASK-FOS-05-003.md
+- **Decisions:** APPROVED (HIGH confidence) — 10/10 DoD items pass (2 justified N/A: vanilla browser JS has no unit tests or TypeScript), 10/10 ACs verified. Upstream QA/Security/CI all PASS. DOCS stage had process gap (lease expired, no completion) but documentation content independently verified as adequate. Ticket moved to DONE.
+- **Timestamp:** 2026-03-10T23:30:00Z
+
+### [TASK-FOS-03-003] — Documentation Summary
+- **Artifacts:** CHANGELOG.md, forgeos-server/README.md, docs/architecture/api/mcp-tool-definitions.md
+- **Decisions:** Added tickets.update subsection in README following established tool doc pattern. Fixed 3 inaccuracies in mcp-tool-definitions.md §4.6: removed non-existent LEASE_EXPIRED error code, corrected NOT_CLAIM_OWNER condition, added missing message field to output schema. JSDoc in implementation file verified accurate — no changes needed.
+- **Timestamp:** 2026-03-10T18:10:00Z
+
+### [FORGEOS-BE020] — Dynamic Tool Registration System
+- **Artifacts:** mcp-server/src/mcp_server/tools/registry.py, mcp-server/src/mcp_server/tools/__init__.py, mcp-server/tests/test_tool_registry.py
+- **Decisions:** Added tool versioning support (default "1.0.0") to ToolDefinition and ToolRegistry. Chose frozen dataclass with slots for immutability + performance. Async-only handlers enforced at registration time. Exported ToolHandler protocol in __init__.py.
+- **Timestamp:** 2026-03-10T21:30:00Z
+
 ### [TASK-FOS-03-009] — Documentation Summary
 - **Artifacts:** docs/architecture/api/mcp-tool-definitions.md, forgeos-server/README.md, CHANGELOG.md
 - **Decisions:** Fixed 6 inaccuracies in mcp-tool-definitions.md §4.9 (missing agent_name param, wrong duration range 1–480→5–120, wrong stored function signature 2→4 params, removed non-existent TICKET_NOT_FOUND/LEASE_EXPIRED error codes). Added full tickets.extend section in README matching existing tool doc pattern.
@@ -2246,3 +2261,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/QA/FORGEOS-BE026.md, mcp-server/tests/test_graceful_shutdown.py
 - **Decisions:** QA PASS (HIGH confidence) — 42/42 tests pass, 97% coverage, all 6 acceptance criteria verified, no defects. Thread-safe request tracking, idempotent shutdown, LIFO cleanup callbacks, frozen config validation. No regressions (323/324 suite pass, 1 pre-existing). Lint clean. Advanced to SECURITY.
 - **Timestamp:** 2026-03-10T23:45:00Z
+
+### [FORGEOS-BE017] — BACKEND Complete
+- **Artifacts:** mcp-server/src/mcp_server/transport/sse.py, mcp-server/src/mcp_server/transport/http.py, mcp-server/tests/test_transport_sse.py, mcp-server/tests/test_transport_http.py
+- **Decisions:** SSE transport wraps FastMCP sse_app() with ConnectionTracker (max connections, idle timeout sweep). HTTP transport wraps FastMCP streamable_http_app() with stateless mode default for horizontal scaling. Both use pydantic-settings with FORGEOS_SSE_*/FORGEOS_HTTP_* env prefixes. 53 tests total (34 SSE + 19 HTTP).
+- **Timestamp:** 2026-03-10T12:15:00Z
