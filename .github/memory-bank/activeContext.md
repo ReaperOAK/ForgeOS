@@ -3045,3 +3045,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE054.md
 - **Decisions:** PASS — Score 90/100, 0 critical, 2 warnings (OC-007 entity size). All 52 tests pass, ruff clean, complexity within thresholds.
 - **Timestamp:** 2026-03-11T00:00:00Z
+
+### [FORGEOS-BE008] — Documentation Summary
+- **Artifacts:** mcp-server/README.md (added Lease Heartbeat reference section), .github/agent-output/Documentation/FORGEOS-BE008.md
+- **Decisions:** Implementation docstrings already high quality — no source changes needed. Added ~130-line README reference section with config, usage, API tables, error handling, and design constraints. Diátaxis: Reference.
+- **Timestamp:** 2026-03-11T18:50:00Z
