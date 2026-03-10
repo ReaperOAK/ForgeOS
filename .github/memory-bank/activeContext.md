@@ -2895,3 +2895,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/db/health.py, mcp-server/tests/test_health.py
 - **Decisions:** Removed unused Any import (F401), replaced try-except-pass with contextlib.suppress (SIM105), used public raw_pool API instead of private _pool._pool (reportPrivateUsage), made _expire_connections async to properly await asyncpg coroutine (reportUnusedCoroutine)
 - **Timestamp:** 2026-03-11T00:20:00+00:00
+
+### [FORGEOS-BE021] — BACKEND Rework #1 Complete
+- **Artifacts:** mcp-server/src/mcp_server/tools/validation.py, mcp-server/tests/test_tool_validation.py
+- **Decisions:** Removed unused `import jsonschema` (F401), imported ValidationError for explicit typing, added type: ignore for jsonschema's incomplete type stubs (iter_errors, default_factory=list), replaced try/except/pass with contextlib.suppress (SIM105), broke long line in test (E501)
+- **Timestamp:** 2026-03-11T12:00:00+00:00
