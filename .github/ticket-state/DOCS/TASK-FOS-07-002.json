@@ -4,7 +4,7 @@
   "description": "Update the 5 core instruction files to reflect the new PostgreSQL-backed architecture. Key changes: (1) ticket-system.instructions.md \u2014 add MCP-based ticket operations alongside filesystem operations, describe dual-mode operation, document tickets.py backward compatibility bridge; (2) sdlc.instructions.md \u2014 update SDLC flows to include PRODUCT_MANAGER and UI_DESIGN stages for the 10 ticket types; (3) git-protocol.instructions.md \u2014 document how the two-commit protocol interacts with MCP (claim via MCP, code via Git); (4) core.instructions.md \u2014 add MCP server as part of boot sequence verification; (5) agent-behavior.instructions.md \u2014 update context derivation to include MCP server.",
   "type": "docs",
   "priority": "medium",
-  "stage": "BLOCKED",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "DOCS",
@@ -35,10 +35,10 @@
     "All existing rules preserved; new content is additive (no removals that break backward compatibility)"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T08:53:37Z",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -47,6 +47,20 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tickets/07-system-update.md"
+    },
+    {
+      "timestamp": "2026-03-10T08:00:45.622385+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-10T08:23:37Z",
+      "event": "CLAIMED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "details": "Claimed by Documentation on pop-os (reaperoak)"
     }
   ],
   "source_task_file": "TODO/tickets/07-system-update.md",
