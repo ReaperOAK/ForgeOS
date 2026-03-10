@@ -1,3 +1,13 @@
+### [TASK-FOS-05-003] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/TASK-FOS-05-003.md
+- **Decisions:** PASS — Score 82/100, 0 critical, 3 warnings (var usage, else blocks, long functions), 3 suggestions. All consistent with dashboard ES5 IIFE pattern. WCAG 2.2 AA compliant. Max CC 9/10. Upstream QA PASS + Security PASS confirmed. Advanced CI → DOCS.
+- **Timestamp:** 2026-03-10T15:05:00Z
+
+### [TASK-FOS-03-005] — Documentation Summary
+- **Artifacts:** forgeos-server/src/tools/tickets-reject.ts, docs/architecture/api/mcp-tool-definitions.md, CHANGELOG.md, .github/agent-output/Documentation/TASK-FOS-03-005.md
+- **Decisions:** Corrected stored function signature in mcp-tool-definitions.md from 3 to 5 params to match implementation. Added handler workflow section. Reduced error codes from 5 to 2 to match actual behavior. Updated module-level JSDoc with SQL signature. Handler TSDoc expanded with agent resolution and SELECT FOR UPDATE notes.
+- **Timestamp:** 2026-03-10T16:05:00Z
+
 ### [TASK-FOS-03-003] — QA PASS (Rework #1 Re-verify)
 - **Artifacts:** .github/agent-output/QA/TASK-FOS-03-003.md
 - **Decisions:** PASS (HIGH confidence). Rework #1 re-verification. tickets.update tool registration in index.ts is FIXED. All 7 AC satisfied. 32/32 tests pass. Coverage: 100% stmts/funcs/lines, 91.66% branch. Advanced QA -> SECURITY.
@@ -2072,7 +2082,17 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** APPROVED (HIGH). All 8 AC met.
 - **Timestamp:** 2026-03-10T09:05:00Z
 
+### [TASK-FOS-03-006] — Documentation Summary
+- **Artifacts:** docs/architecture/api/mcp-tool-definitions.md, forgeos-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/TASK-FOS-03-006.md
+- **Decisions:** Corrected 6 inaccuracies in mcp-tool-definitions.md section 4.7 (minLength, priority default, error codes). Added tickets.spawn subsection to forgeos-server README. JSDoc already comprehensive — no changes needed.
+- **Timestamp:** 2026-03-10T16:00:00Z
+
 ### [TASK-FOS-03-006] - CI Review
 - **Artifacts:** .github/agent-output/CIReviewer/TASK-FOS-03-006.md
 - **Decisions:** PASS - Score 93/100, 0 critical, 1 warning, 2 suggestions
 - **Timestamp:** 2026-03-10T15:30:00+00:00
+
+### [FORGEOS-BE015] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE015.md
+- **Decisions:** APPROVED — 10/10 DoD items pass, all upstream verdicts verified (QA PASS, Security PASS, CI PASS 93/100, Docs PASS), SDLC flow correct after rework #2.
+- **Timestamp:** 2026-03-10T22:10:00+00:00
