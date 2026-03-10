@@ -2855,3 +2855,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** dependencies.py, server.py, db/pool.py, test_dependencies.py, test_db_wiring.py
 - **Decisions:** Created Dependencies frozen dataclass as DI container rather than module-level singletons; added raw_pool property to ConnectionPool to expose underlying asyncpg.Pool for repository injection; fixed HealthChecker type mismatch bug (raw pool → ConnectionPool wrapper)
 - **Timestamp:** 2026-03-10T18:16:00+05:30
+
+### FORGEOS-BE025 — Health Check Rework #1
+- **Artifacts:** tests/test_health_probes.py (lint fix only)
+- **Decisions:** Fixed 2 ruff lint errors (I001 unsorted imports, F401 unused Any import) that caused Validator rejection
+- **Timestamp:** 2026-03-11T12:00:00+05:30
