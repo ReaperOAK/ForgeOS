@@ -286,3 +286,23 @@ _None_
 - **Status:** Documented risk acceptance — MCP transport is internal (agent-to-server, not user-facing). Known error types already mapped to safe codes.
 - **Agent:** Security Engineer
 - **Timestamp:** 2026-03-10T17:30:00Z
+
+### [TASK-FOS-03-006] — SEC-AUTHZ-001: MCP Per-Tool Authorization Not Enforced
+- **Severity:** Low
+- **CWE:** CWE-862
+- **Component:** forgeos-server/src/server.ts, forgeos-server/src/middleware/auth.ts
+- **Description:** RBAC permission matrix in auth/roles.ts defines tickets.spawn permission for 6 roles but requirePermission middleware is not applied to /mcp Express route. Any authenticated agent can invoke any MCP tool regardless of role.
+- **Recommended Fix:** Add per-tool permission checks inside MCP tool handlers or wrap MCP transport with role-based filtering.
+- **Status:** Documented risk acceptance — agent registration is admin-controlled, only trusted agents receive tokens.
+- **Agent:** Security Engineer
+- **Timestamp:** 2026-03-10T14:30:00Z
+
+### [TASK-FOS-03-006] — SEC-DOS-001: No Spawn Depth or Count Limits
+- **Severity:** Medium (advisory)
+- **CWE:** CWE-770
+- **Component:** forgeos-server/src/tools/tickets-spawn.ts, DB schema
+- **Description:** No CHECK constraint or application-level limit on nesting depth or number of children per parent. Recursive spawning could create unbounded tree depth or fan-out, exhausting DB resources.
+- **Recommended Fix:** Add MAX_SPAWN_DEPTH (e.g., 5) and MAX_CHILDREN_PER_PARENT (e.g., 20) limits. Wire rate-limiting middleware.
+- **Status:** Documented risk acceptance — agents are trusted internal actors with admin-provisioned tokens.
+- **Agent:** Security Engineer
+- **Timestamp:** 2026-03-10T14:30:00Z
