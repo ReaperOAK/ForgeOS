@@ -2870,3 +2870,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/auth/machine_auth.py, mcp-server/src/mcp_server/services/machine_service.py, mcp-server/tests/test_machine_auth.py
 - **Decisions:** All 6 ACs verified, 50/50 tests pass, 100% coverage, ruff clean, no TODOs. Rework was lint-only (import fixes).
 - **Timestamp:** 2026-03-11T00:00:00Z
+
+### [FORGEOS-BE008] — QA PASS
+- **Artifacts:** mcp-server/tests/test_lease_heartbeat.py (lint fixes), .github/agent-output/QA/FORGEOS-BE008.md
+- **Decisions:** 38/38 tests pass, 99% coverage (2 defensive lines missed), all 6 ticket ACs verified. Fixed F401/F841 lint issues in tests. No TODOs, no defects. Jitter not implemented but not in ticket JSON ACs.
+- **Timestamp:** 2026-03-11T10:00:00Z
+
+### [FORGEOS-BE014] — BACKEND Rework #1 Complete
+- **Artifacts:** mcp-server/src/mcp_server/db/health.py, mcp-server/tests/test_health.py
+- **Decisions:** Removed unused Any import (F401), replaced try-except-pass with contextlib.suppress (SIM105), used public raw_pool API instead of private _pool._pool (reportPrivateUsage), made _expire_connections async to properly await asyncpg coroutine (reportUnusedCoroutine)
+- **Timestamp:** 2026-03-11T00:20:00+00:00

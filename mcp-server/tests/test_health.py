@@ -55,10 +55,10 @@ def _make_mock_pool(
     else:
         mock.ping = AsyncMock(side_effect=ConnectionError("ping failed"))
 
-    # Mock the internal pool for expire_connections
+    # Mock the raw_pool for expire_connections
     inner_pool = MagicMock()
-    inner_pool.expire_connections = MagicMock()
-    mock._pool = inner_pool
+    inner_pool.expire_connections = AsyncMock()
+    mock.raw_pool = inner_pool
 
     return mock
 
@@ -318,7 +318,7 @@ class TestPoolHealthMonitorPing:
 
         await monitor._run_health_check()
 
-        pool._pool.expire_connections.assert_called_once()
+        pool.raw_pool.expire_connections.assert_awaited_once()
 
 
 # ---------------------------------------------------------------------------
@@ -338,7 +338,7 @@ class TestPoolHealthMonitorStaleRecycling:
 
         await monitor._run_health_check()
 
-        pool._pool.expire_connections.assert_called_once()
+        pool.raw_pool.expire_connections.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def test_no_recycle_before_lifetime(self) -> None:
@@ -349,7 +349,7 @@ class TestPoolHealthMonitorStaleRecycling:
 
         await monitor._run_health_check()
 
-        pool._pool.expire_connections.assert_not_called()
+        pool.raw_pool.expire_connections.assert_not_awaited()
 
 
 # ---------------------------------------------------------------------------
@@ -525,7 +525,7 @@ class TestMutationKillingBoundaries:
 
         await monitor._run_health_check()
 
-        pool._pool.expire_connections.assert_called_once()
+        pool.raw_pool.expire_connections.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def test_no_recycle_just_under_lifetime(self) -> None:
@@ -536,7 +536,7 @@ class TestMutationKillingBoundaries:
 
         await monitor._run_health_check()
 
-        pool._pool.expire_connections.assert_not_called()
+        pool.raw_pool.expire_connections.assert_not_awaited()
 
     def test_decrement_from_one_goes_to_zero(self) -> None:
         """max(0, 1 - 1) = 0. Kill mutant that changes max(0, ...) to max(1, ...)."""
@@ -622,7 +622,7 @@ class TestMutationKillingStateTransitions:
         await monitor._run_health_check()
 
         # Only one expire call (from ping failure), not two (lifetime would also trigger)
-        pool._pool.expire_connections.assert_called_once()
+        pool.raw_pool.expire_connections.assert_awaited_once()
 
     @pytest.mark.asyncio
     async def test_last_recycle_epoch_resets_after_recycling(self) -> None:
@@ -700,20 +700,22 @@ class TestCheckLoopExceptionHandler:
 class TestExpireConnections:
     """Kill mutants that skip expire_connections or check wrong condition."""
 
-    def test_expire_with_no_inner_pool(self) -> None:
-        """If _pool._pool is None, _expire_connections must not raise."""
+    @pytest.mark.asyncio
+    async def test_expire_with_no_inner_pool(self) -> None:
+        """If pool is not initialized, _expire_connections must not raise."""
         pool = _make_mock_pool()
-        pool._pool = None
+        pool.is_initialized = False
         monitor = PoolHealthMonitor(pool)
         # Should not raise
-        monitor._expire_connections()
+        await monitor._expire_connections()
 
-    def test_expire_calls_inner_pool(self) -> None:
+    @pytest.mark.asyncio
+    async def test_expire_calls_inner_pool(self) -> None:
         """_expire_connections must call inner_pool.expire_connections()."""
         pool = _make_mock_pool()
         monitor = PoolHealthMonitor(pool)
-        monitor._expire_connections()
-        pool._pool.expire_connections.assert_called_once()
+        await monitor._expire_connections()
+        pool.raw_pool.expire_connections.assert_awaited_once()
 
 
 # ---------------------------------------------------------------------------

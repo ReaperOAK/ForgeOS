@@ -20,8 +20,6 @@ import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime, timedelta, timezone
 from typing import Any
-from unittest.mock import AsyncMock, MagicMock, patch
-
 import pytest
 
 from mcp_server.locking.lease_heartbeat import (
@@ -556,7 +554,6 @@ class TestLeaseHeartbeat:
     async def test_transient_db_error_continues(self) -> None:
         """Transient DB errors don't stop the heartbeat loop."""
         call_count = 0
-        original_fetchrow = None
 
         class FlakeyConnection(FakeConnection):
             async def fetchrow(self, query: str, *args: Any) -> Any:

@@ -28,9 +28,10 @@ Usage::
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import time
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING
 
 from mcp_server.observability import get_logger
 
@@ -158,10 +159,8 @@ class PoolHealthMonitor:
 
         logger.info("Stopping pool health monitor")
         self._task.cancel()
-        try:
+        with contextlib.suppress(asyncio.CancelledError):
             await self._task
-        except asyncio.CancelledError:
-            pass
         self._task = None
         logger.info("Pool health monitor stopped")
 
@@ -256,7 +255,7 @@ class PoolHealthMonitor:
         except (ConnectionError, Exception):
             self._last_ping_ok = False
             logger.warning("Health check ping failed — expiring connections")
-            self._expire_connections()
+            await self._expire_connections()
             return
 
         # Step 2: Check max_lifetime for stale connection recycling
@@ -267,11 +266,10 @@ class PoolHealthMonitor:
                 elapsed,
                 self._max_lifetime,
             )
-            self._expire_connections()
+            await self._expire_connections()
             self._last_recycle_epoch = time.monotonic()
 
-    def _expire_connections(self) -> None:
+    async def _expire_connections(self) -> None:
         """Expire all connections in the pool, forcing recreation on next acquire."""
-        inner_pool = self._pool._pool
-        if inner_pool is not None:
-            inner_pool.expire_connections()
+        if self._pool.is_initialized:
+            await self._pool.raw_pool.expire_connections()
