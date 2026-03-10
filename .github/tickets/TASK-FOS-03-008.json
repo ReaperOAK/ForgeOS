@@ -36,10 +36,10 @@
     "Returns {ticket, released_file_locks: string[]} on success"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Security",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T08:55:50.823778+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -84,7 +84,16 @@
       "event": "QA_COMPLETE",
       "agent": "QA",
       "machine_id": "pop-os",
-      "details": "QA PASS — 17/17 tests pass, 100% line coverage, 95.23% branch coverage. Finding: tickets.release not registered in shared index.ts (overwritten by concurrent ticket). Handler implementation is complete and correct."
+      "details": "QA PASS \u2014 17/17 tests pass, 100% line coverage, 95.23% branch coverage. Finding: tickets.release not registered in shared index.ts (overwritten by concurrent ticket). Handler implementation is complete and correct."
+    },
+    {
+      "timestamp": "2026-03-10T08:25:50.823794+00:00",
+      "event": "CLAIMED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "from_stage": "SECURITY",
+      "to_stage": "SECURITY",
+      "details": "Claimed by reaperoak@pop-os via Security, lease until 2026-03-10T08:55:50.823778+00:00"
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
