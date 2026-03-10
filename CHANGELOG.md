@@ -8,6 +8,35 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Ticket Tools — `tickets.next` MCP Tool** (FORGEOS-BE028) — MCP tool
+  handler at `mcp-server/src/mcp_server/tools/ticket_tools.py` that allows
+  agents to claim the next available ticket matching their role. Accepts
+  `agent_role`, `machine_id`, and `operator` as input parameters, validated
+  against JSON Schema. Delegates to the new shared `TicketService` at
+  `mcp-server/src/mcp_server/services/ticket_service.py`, which resolves
+  the agent role to an SDLC stage via `AgentRoleMap` and calls the SKIP
+  LOCKED `ClaimQueue` for atomic claiming. Returns claimed ticket data
+  (ticket_id, title, type, stage, file_paths, acceptance_criteria) on
+  success, or structured MCP error response when no eligible ticket exists.
+  `NextTicketResult` frozen dataclass wraps claim output.
+  `register_ticket_tools()` integrates with the dynamic `ToolRegistry`.
+  TYPE_CHECKING guard prevents runtime circular imports between tools and
+  services. 52 tests with 100% coverage.
+
+- **Expired Lease Detection and Release** (FORGEOS-BE009) — Background cleanup
+  task at `mcp-server/src/mcp_server/locking/lease_cleanup.py` that periodically
+  scans for expired ticket leases and releases them, making associated tickets
+  available for reclaim. `LeaseCleanupTask` runs a configurable scan interval
+  (default 30 s) with batch processing (default 100 leases). Each expired lease
+  is released atomically: claim fields cleared, status/stage reset to READY,
+  and an `event_history` record inserted for audit. Structured logging includes
+  `ticket_id`, `agent_id`, and time since last heartbeat. Domain types:
+  `LeaseCleanupConfig` (frozen dataclass), `ExpiredLease`, `LeaseRelease`,
+  `LeaseCleanupError`. Standalone functions `find_expired_leases`,
+  `release_expired_lease`, and `scan_and_release_expired` for single-cycle use.
+  Async context manager support. 38 tests with 99% coverage. Added Expired
+  Lease Cleanup section to `mcp-server/README.md`.
+
 - **Machine Registration and Verification** (FORGEOS-BE052) — Machine identity
   registration and verification at `mcp-server/src/mcp_server/auth/machine_auth.py`
   with `MachineService` orchestration at
@@ -20,6 +49,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   wraps low-level functions with a configured pool and default mode. 50 tests
   with 100% coverage. Added Machine Registration section to
   `mcp-server/README.md`.
+
+- **MCP Server Database Wiring** (FORGEOS-BE018) — Wired the MCP server
+  to the PostgreSQL database layer via `mcp_server.dependencies.Dependencies`,
+  a frozen dataclass container holding the connection pool and four repository
+  instances (`TicketRepository`, `ClaimRepository`, `EventRepository`,
+  `AuditRepository`). Server lifespan (`_app_lifespan`) creates the container
+  on startup and drains/closes it on shutdown. `AppContext` dataclass exposes
+  typed property accessors (`ticket_repo`, `claim_repo`, `event_repo`,
+  `db_pool`) for tool handlers — no direct pool access. Degraded mode: when
+  `FORGEOS_DB_REQUIRED` is false (default), the server starts without a
+  database and database-dependent tools return error responses. Health check
+  MCP tool verifies database connectivity through the pool. 25 tests with
+  81% coverage.
 
 - **Auth Middleware for MCP and REST** (FORGEOS-BE054) — Unified Starlette
   middleware at `mcp_server/middleware/auth_middleware.py` that authenticates

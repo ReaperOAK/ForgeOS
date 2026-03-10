@@ -225,7 +225,7 @@ await monitor.stop()
 
 ## Dependency Injection — Server-to-Database Wiring
 
-<!-- last_reviewed: 2026-03-11T14:30:00Z -->
+<!-- last_reviewed: 2026-03-11T23:59:00Z -->
 <!-- audience: developers -->
 <!-- diataxis: reference -->
 
@@ -240,7 +240,8 @@ the pool directly.
 1. On server startup, the `_app_lifespan` context manager creates a
    `Dependencies` instance via the async `Dependencies.create()` factory.
 2. The factory initialises the `ConnectionPool`, then builds
-   `TicketRepository`, `ClaimRepository`, and `EventRepository`.
+   `TicketRepository`, `ClaimRepository`, `EventRepository`, and
+   `AuditRepository`.
 3. The `Dependencies` instance is stored in an `AppContext` dataclass
    and yielded to all tool handlers via the FastMCP lifespan protocol.
 4. On shutdown, `Dependencies.close()` drains and closes the pool.
@@ -279,7 +280,7 @@ exit code if the database is unavailable at startup.
 
 | Symbol | Kind | Description |
 |---|---|---|
-| `Dependencies` | frozen dataclass | Immutable container holding pool + 3 repositories |
+| `Dependencies` | frozen dataclass | Immutable container holding pool + 4 repositories |
 | `Dependencies.create()` | async static method | Factory: initialises pool, builds repos, returns container |
 | `Dependencies.close()` | async method | Drains and closes the connection pool |
 | `AppContext` | dataclass | Lifespan context with config, dependencies, and health checker |
@@ -296,6 +297,7 @@ exit code if the database is unavailable at startup.
 | `ticket_repo` | `TicketRepository` | Data access for the `tickets` table |
 | `claim_repo` | `ClaimRepository` | Atomic claim/release operations |
 | `event_repo` | `EventRepository` | Append-only audit trail |
+| `audit_repo` | `AuditRepository` | Structured audit log (insert + query) |
 
 
 ## File-Level Advisory Lock Mutex
@@ -847,6 +849,115 @@ type and total attempt count.
   with `acquire()` and `release()` methods works without inheritance.
 
 
+## Expired Lease Cleanup
+
+<!-- last_reviewed: 2026-03-11T12:30:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.locking.lease_cleanup` module provides a background task that
+periodically scans for expired ticket leases and releases them, making the
+associated tickets available for reclaim. Each automatic release is recorded in
+the `event_history` table for audit.
+
+### How It Works
+
+1. The background task sleeps for a configurable interval (default 30 seconds).
+2. On each cycle, it queries the `tickets` table for rows where `claimed_by IS
+   NOT NULL` and `lease_expiry < NOW()`.
+3. Each expired lease is released atomically in its own transaction: claim
+   fields are cleared, status and stage are reset to READY, and an
+   `event_history` record is inserted.
+4. If another process already released the same lease, the release is skipped.
+
+### Quick Start
+
+```python
+from mcp_server.locking import LeaseCleanupTask, LeaseCleanupConfig
+
+config = LeaseCleanupConfig(scan_interval_seconds=30, batch_size=100)
+
+# Use as an async context manager
+async with LeaseCleanupTask(pool, config=config):
+    # cleanup runs in background
+    ...
+# task is cancelled on exit
+```
+
+Or use standalone functions for a single scan cycle:
+
+```python
+from mcp_server.locking import scan_and_release_expired
+
+releases = await scan_and_release_expired(pool, batch_size=100)
+for r in releases:
+    print(f"Released {r.ticket_id} (expired {r.time_since_expiry_seconds:.1f}s ago)")
+```
+
+### LeaseCleanupConfig
+
+| Parameter | Default | Description |
+|---|---|---|
+| `scan_interval_seconds` | `30.0` | Seconds between cleanup scans |
+| `batch_size` | `100` | Maximum expired leases to process per cycle |
+
+Both parameters must be positive; `ValueError` is raised otherwise.
+
+### LeaseCleanupTask
+
+Async background task with lifecycle management.
+
+| Method / Property | Returns | Description |
+|---|---|---|
+| `start()` | `None` | Start the background cleanup loop |
+| `stop()` | `None` | Cancel the background task gracefully |
+| `config` | `LeaseCleanupConfig` | The cleanup configuration |
+| `scan_count` | `int` | Number of scan cycles completed |
+| `total_released` | `int` | Total expired leases released |
+| `last_error` | `Exception \| None` | Last error from the cleanup loop |
+| `is_running` | `bool` | Whether the background task is active |
+| `__aenter__` / `__aexit__` | — | Async context manager (start on enter, stop on exit) |
+
+### Standalone Functions
+
+| Function | Returns | Description |
+|---|---|---|
+| `find_expired_leases(pool, batch_size)` | `list[ExpiredLease]` | Query for expired leases, oldest first |
+| `release_expired_lease(pool, expired)` | `LeaseRelease` | Release one expired lease atomically |
+| `scan_and_release_expired(pool, batch_size)` | `list[LeaseRelease]` | Find and release all expired leases in one cycle |
+
+### Data Classes
+
+| Class | Description |
+|---|---|
+| `ExpiredLease` | Detected expired lease with `ticket_id`, `agent_id`, `agent_name`, `machine_id`, `lease_expiry`, `last_heartbeat`, `previous_stage` |
+| `LeaseRelease` | Successful release record with `ticket_id`, `agent_id`, `agent_name`, `machine_id`, `released_at`, `time_since_expiry_seconds`, `time_since_last_heartbeat_seconds` |
+
+### Error Handling
+
+| Error | When |
+|---|---|
+| `LeaseCleanupError` | Lease was already released by another process |
+| `DatabaseError` | Database communication failure |
+
+The background loop catches both errors per-lease and continues processing
+remaining leases. Transient database errors are retried on the next scan cycle.
+
+### Design Constraints
+
+- **Atomic per-lease** — each release runs in its own transaction. One failure
+  does not block other releases.
+- **Optimistic concurrency** — the `UPDATE` checks `claimed_by` matches the
+  expected agent. If another process released the lease first, the update
+  affects zero rows and `LeaseCleanupError` is raised.
+- **Structured logging** — every release logs `ticket_id`, `agent_id`, and
+  `time_since_last_heartbeat_seconds` for operational observability.
+- **No retry loops** — if a lease release fails, it is retried on the next
+  scan cycle rather than immediately.
+- **Protocol-based pool** — `PoolLike` uses structural subtyping for
+  dependency injection.
+
+
 ## Graceful Shutdown
 
 <!-- last_reviewed: 2026-03-11T00:30:00Z -->
@@ -1189,9 +1300,9 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/db/`** — asyncpg connection pool, health monitoring, and pool metrics
 - **`mcp_server/observability/`** — Structured JSON logging, correlation IDs, PII redaction, and health/readiness probes
 - **`mcp_server/auth/`** — Agent API key authentication, machine registration and verification, rate limiting, and identity resolution
-- **`mcp_server/services/`** — Business logic orchestration (MachineService)
+- **`mcp_server/services/`** — Business logic orchestration (TicketService, MachineService)
 - **`mcp_server/middleware/`** — Unified auth middleware (MCP + REST), correlation ID tracking
-- **`mcp_server/tools/`** — Dynamic tool registration, schema validation, and FastMCP bridge
+- **`mcp_server/tools/`** — Dynamic tool registration, schema validation, ticket tools (`tickets.next`), and FastMCP bridge
 - **`mcp_server/events/`** — Append-only event sourcing (EventStore, EventType, Event dataclass)
 - **`mcp_server/locking/`** — Distributed claim queue (SKIP LOCKED), file mutex (advisory locks)
 - **`mcp_server/sessions/`** -- Agent session lifecycle management (heartbeat, timeout, resumption, concurrent access)
@@ -2099,6 +2210,131 @@ clear_validator_cache()  # remove all cached validators
 - **All errors collected** — `iter_errors()` gathers every failure before raising.
 - **Immutable data** — `FieldError` and `McpValidationErrorData` are frozen dataclasses with `__slots__`.
 - **Cache key** — tool name is the cache key; schema changes require `clear_validator_cache()`.
+
+
+## Ticket Tools — `tickets.next` MCP Tool
+
+<!-- last_reviewed: 2026-03-11T00:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.tools.ticket_tools` module registers the `tickets.next` MCP
+tool. Agents call this tool to claim the next available ticket matching their
+role. The tool validates input via JSON Schema, delegates to the
+`TicketService` for business logic, and returns claimed ticket data or a
+structured MCP error.
+
+### How It Works
+
+1. Agent sends a `tickets.next` tool call with `agent_role`, `machine_id`,
+   and `operator`.
+2. Input is validated against `TICKETS_NEXT_SCHEMA` (JSON Schema Draft 2020-12).
+3. `TicketService.claim_next()` resolves the role to an SDLC stage via
+   `AgentRoleMap`, then calls the `ClaimQueue` for atomic claiming with
+   `SELECT FOR UPDATE SKIP LOCKED`.
+4. On success, the tool returns the claimed ticket's ID, title, type, stage,
+   file paths, and acceptance criteria.
+5. On failure, the tool returns a structured MCP error (code `-32602`).
+
+### Quick Start
+
+```python
+from mcp_server.tools import register_ticket_tools
+from mcp_server.services import TicketService
+from mcp_server.locking import ClaimQueue
+
+queue = ClaimQueue(pool)
+service = TicketService(claim_queue=queue)
+
+# Register the tool on a ToolRegistry
+register_ticket_tools(registry, service)
+```
+
+Calling the tool via MCP:
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "tickets.next",
+    "arguments": {
+      "agent_role": "backend",
+      "machine_id": "pop-os",
+      "operator": "ReaperOAK"
+    }
+  }
+}
+```
+
+### Input Schema
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `agent_role` | `string` | Yes | Agent role (e.g. `"backend"`, `"qa"`, `"frontend"`) |
+| `machine_id` | `string` | Yes | Hostname of the machine running the agent |
+| `operator` | `string` | Yes | Human operator initiating the claim |
+
+All parameters require `minLength: 1`. No additional properties are accepted.
+
+### Success Response
+
+```json
+{
+  "ticket_id": "FORGEOS-BE006",
+  "title": "Implement Ticket Claim Queue",
+  "type": "backend",
+  "stage": "BACKEND",
+  "file_paths": ["mcp-server/src/mcp_server/locking/claim_queue.py"],
+  "acceptance_criteria": ["Claim queue uses SKIP LOCKED"]
+}
+```
+
+### Error Responses
+
+| Scenario | `isError` | `code` | `message` |
+|---|---|---|---|
+| No eligible ticket for role | `true` | `-32602` | `No eligible ticket for role '{role}'` |
+| Unknown agent role | `true` | `-32602` | `Unknown agent role: {role}` |
+| Invalid input (schema failure) | Raises `ToolInputValidationError` | `-32602` | Field-level error details |
+
+### Ticket Service
+
+The `mcp_server.services.ticket_service` module provides a shared orchestration
+layer consumed by both MCP tool handlers and REST endpoints.
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `TicketService` | class | Coordinates claim queue, role mapping, and ticket operations |
+| `NextTicketResult` | frozen dataclass | Typed result with ticket ID, title, type, stage, file paths, and acceptance criteria |
+
+#### TicketService Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `claim_next(agent_role, machine_id, operator, lease_minutes)` | `NextTicketResult` | Resolve role to stage, claim next ticket atomically |
+
+#### NextTicketResult Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `ticket_id` | `str` | Human-readable ticket ID |
+| `title` | `str` | Ticket title |
+| `ticket_type` | `str` | Ticket type (e.g. `"backend"`) |
+| `stage` | `str` | Current SDLC stage after claiming |
+| `file_paths` | `list[str]` | Files within the ticket scope |
+| `acceptance_criteria` | `list[str]` | Ticket acceptance criteria |
+
+### Design Constraints
+
+- **Service layer separation** — tool handler validates input and formats
+  output; `TicketService` owns all business logic.
+- **TYPE_CHECKING guard** — `ticket_tools.py` imports `TicketService` and
+  `ToolRegistry` under `TYPE_CHECKING` only, avoiding runtime circular imports.
+- **Closure binding** — `_make_handler()` creates a closure that binds the
+  `TicketService` instance, matching the `ToolRegistry` handler protocol.
+- **No retry loops** — returns an error immediately if no ticket is available.
+- **Structured logging** — all operations log `agent_role`, `machine_id`, and
+  `ticket_id` for correlation.
 
 
 ## Notification Event Queue
