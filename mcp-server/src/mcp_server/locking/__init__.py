@@ -21,8 +21,18 @@ Public API
 * :exc:`FileConflictError` — raised on file lock conflicts.
 * :func:`file_path_to_lock_key` — deterministic file-path to int64 hash.
 
+* :class:`HeartbeatConfig` — configurable heartbeat parameters.
+* :class:`LeaseHeartbeat` — async context manager for automatic heartbeats.
+* :class:`HeartbeatRecord` — record of a successful heartbeat.
+* :class:`StaleClaim` — a claim with no recent heartbeats.
+* :func:`extend_lease` — extend lease for a claimed ticket.
+* :func:`find_stale_claims` — detect stale claims.
+* :exc:`HeartbeatError` — base error for heartbeat failures.
+* :exc:`LeaseNotActiveError` — lease is no longer active.
+* :exc:`MaxLeaseDurationExceededError` — max duration exceeded.
+
 .. meta::
-   :ticket: FORGEOS-BE006, FORGEOS-BE007
+   :ticket: FORGEOS-BE006, FORGEOS-BE007, FORGEOS-BE008
 """
 
 from mcp_server.locking.claim_queue import (
@@ -49,6 +59,17 @@ from mcp_server.locking.transaction_config import (
     isolation_for,
     transactional,
 )
+from mcp_server.locking.lease_heartbeat import (
+    HeartbeatConfig,
+    HeartbeatError,
+    HeartbeatRecord,
+    LeaseHeartbeat,
+    LeaseNotActiveError,
+    MaxLeaseDurationExceededError,
+    StaleClaim,
+    extend_lease,
+    find_stale_claims,
+)
 
 __all__ = [
     "AgentRoleMap",
@@ -66,7 +87,16 @@ __all__ = [
     "OperationType",
     "SerializationError",
     "TransactionError",
+    "extend_lease",
     "file_path_to_lock_key",
+    "find_stale_claims",
+    "HeartbeatConfig",
+    "HeartbeatError",
+    "HeartbeatRecord",
     "isolation_for",
+    "LeaseHeartbeat",
+    "LeaseNotActiveError",
+    "MaxLeaseDurationExceededError",
+    "StaleClaim",
     "transactional",
 ]
