@@ -1,3 +1,28 @@
+### [FORGEOS-BE014] — BACKEND Complete
+- **Artifacts:** mcp-server/src/mcp_server/db/health.py, mcp-server/tests/test_health.py, mcp-server/src/mcp_server/db/__init__.py (modified)
+- **Decisions:** Frozen dataclass HealthReport for immutable snapshots; PoolHealthMonitor with asyncio background task; running totals for wait-time average (O(1) memory); asyncpg expire_connections() for non-disruptive recycling; monotonic clock for lifetime tracking.
+- **Timestamp:** 2025-07-27T12:00:00Z
+
+### [FORGEOS-BE007] — BACKEND Complete
+- **Artifacts:** mcp-server/src/mcp_server/locking/file_mutex.py, mcp-server/tests/test_file_mutex.py, mcp-server/src/mcp_server/locking/__init__.py (modified)
+- **Decisions:** Advisory locks over row locks for auto-release; CRC32 + FORG namespace (0x464F5247) for int64 key generation; dual modes (blocking acquire + non-blocking try_acquire); ConnectionLike Protocol for DI/testability; file_locks table INSERT ON CONFLICT DO NOTHING for idempotent observability records
+- **Timestamp:** 2026-03-10T16:00:00Z
+
+### [FORGEOS-BE052] — Machine Registration and Verification
+- **Artifacts:** mcp-server/src/mcp_server/auth/machine_auth.py, mcp-server/src/mcp_server/services/machine_service.py, mcp-server/src/mcp_server/services/__init__.py, mcp-server/tests/test_machine_auth.py, mcp-server/src/mcp_server/auth/__init__.py (modified)
+- **Decisions:** Frozen dataclass with slots for MachineIdentity; UPSERT pattern for registration; fire-and-forget last_seen update; MachineRegistrationMode enum (AUTO/STRICT); MachineAuthError extends ForgeOSError with status_code=403
+- **Timestamp:** 2026-03-10T15:14:02+00:00
+
+### [FORGEOS-BE025] — BACKEND complete
+- **Artifacts:** mcp-server/src/mcp_server/observability/health.py, mcp-server/tests/test_health_probes.py, mcp-server/src/mcp_server/server.py (modified), mcp-server/src/mcp_server/observability/__init__.py (modified)
+- **Decisions:** Separate server-level HealthChecker from pool-level PoolHealthMonitor (BE014); ReadinessState enum state machine (STARTING→READY→DRAINING); integrated into AppContext and lifespan; lazy __getattr__ exports to avoid circular imports
+- **Timestamp:** 2026-03-10T15:13:34+00:00
+
+### [FORGEOS-BE043] — BACKEND Complete
+- **Artifacts:** agent-sdk/pyproject.toml, agent-sdk/src/forgeos_sdk/__init__.py, client.py, config.py, exceptions.py, agent-sdk/tests/test_client.py, test_config.py, test_exceptions.py, agent-sdk/README.md
+- **Decisions:** Used hatchling build (consistent with mcp-server), pydantic-settings for env config with FORGEOS_ prefix, ConfigurationError for transport validation instead of ValueError, read-only properties for immutability
+- **Timestamp:** 2026-03-11T02:00:00Z
+
 ### [FORGEOS-BE027] — QA: PASS
 - **Artifacts:** .github/agent-output/QA/FORGEOS-BE027.md, mcp-server/tests/test_metrics.py
 - **Decisions:** QA PASS (HIGH confidence) — 72/72 tests pass, 100% coverage, all 6 ACs verified, 0 defects, 0 TODO/FIXME. Thread safety, memory bounding, gauge floor tested. Zero external deps. Mutation testing N/A (no framework configured). Ticket advanced to SECURITY.
@@ -2633,3 +2658,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/locking/__init__.py, mcp-server/src/mcp_server/locking/claim_queue.py, mcp-server/tests/test_claim_queue.py
 - **Decisions:** Thin wrapper over PostgreSQL stored functions (claim_ticket, claim_ticket_by_id). Protocol-based DI for pool injection. No retry loops — callers control backoff. Frozen dataclasses for immutable ClaimResult.
 - **Timestamp:** 2026-03-10T15:04:13+00:00
+
+### [FORGEOS-BE021] — BACKEND complete
+- **Artifacts:** mcp-server/src/mcp_server/tools/validation.py, mcp-server/tests/test_tool_validation.py, mcp-server/src/mcp_server/tools/__init__.py
+- **Decisions:** Used jsonschema.Draft202012Validator for full draft 2020-12 compliance. Cached compiled validators per tool name. Batch error collection (all errors, not just first). No type coercion — strict type matching. Structured field paths ($.field.nested[0] format).
+- **Timestamp:** 2026-03-10T20:45:00+00:00
+
+### [FORGEOS-BE022] — BACKEND Complete
+- **Artifacts:** mcp-server/src/mcp_server/sessions/__init__.py, mcp-server/src/mcp_server/sessions/manager.py, mcp-server/tests/test_session_manager.py
+- **Decisions:** In-memory session manager with thread-safe locking (threading.Lock). AsyncIO cleanup loop for timeout expiration. Identity validation on resume (agent_name, role, machine_id must match). SessionConfig frozen dataclass for immutable configuration. Structured logging via mcp_server.observability, metrics via session_opened/session_closed gauges. 58 tests, 97% coverage. All 6 ACs met.
+- **Timestamp:** 2026-03-10T15:05:47Z
