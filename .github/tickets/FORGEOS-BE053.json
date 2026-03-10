@@ -34,10 +34,10 @@
     "Operator credentials stored as bcrypt hashes in the operators table"
   ],
   "rework_count": 0,
-  "claimed_by": "Backend",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T15:19:14+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -66,7 +66,14 @@
       "event": "STAGE_COMPLETE",
       "agent": "Backend",
       "machine_id": "pop-os",
-      "details": "BACKEND complete — operator token auth implemented with JWT/bcrypt, 62 tests, 97% coverage"
+      "details": "BACKEND complete \u2014 operator token auth implemented with JWT/bcrypt, 62 tests, 97% coverage"
+    },
+    {
+      "timestamp": "2026-03-10T15:40:57.642124+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: Lease expired at 2026-03-10T15:19:14+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",

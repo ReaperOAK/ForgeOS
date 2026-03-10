@@ -35,10 +35,10 @@
     "Function returns the claimed ticket data or None if no eligible tickets exist"
   ],
   "rework_count": 0,
-  "claimed_by": "Backend",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T15:19:19.285018+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -61,6 +61,13 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "Claimed by Backend agent for BACKEND stage"
+    },
+    {
+      "timestamp": "2026-03-10T15:40:57.642378+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: Lease expired at 2026-03-10T15:19:19.285018+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
