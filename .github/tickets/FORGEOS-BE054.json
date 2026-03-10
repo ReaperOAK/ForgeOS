@@ -4,7 +4,7 @@
   "description": "Create unified authentication middleware that intercepts both MCP tool calls and REST API requests. For MCP, extract the API key from the request metadata and validate agent identity. For REST, extract the bearer token from the Authorization header and validate operator identity. The middleware populates a request context with the authenticated identity for downstream use by authorization and audit layers.",
   "type": "backend",
   "priority": "critical",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
