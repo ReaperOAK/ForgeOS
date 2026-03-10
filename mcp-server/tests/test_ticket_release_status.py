@@ -842,3 +842,134 @@ class TestTicketServiceStatus:
         service = TicketService(claim_queue=mock_claim_queue)
         with pytest.raises(RuntimeError, match="Repositories not configured"):
             await service.get_ticket_status(ticket_id="TEST")
+
+
+# ===========================================================================
+# QA gap tests — additional coverage for edge paths (FORGEOS-BE032 QA)
+# ===========================================================================
+
+
+class TestReleaseStatusGapCoverage:
+    """Gap tests added by QA to cover edge paths and strengthen coverage."""
+
+    async def test_status_with_priority_filter_only(
+        self,
+        mock_ticket_repo: AsyncMock,
+        ticket_service: TicketService,
+    ) -> None:
+        """Priority-only filter routes to list_filtered, not list_by_stage."""
+        result = await handle_tickets_status(
+            _status_params(priority="high"),
+            ticket_service=ticket_service,
+        )
+        mock_ticket_repo.list_filtered.assert_awaited_once()
+        assert "tickets" in result
+
+    async def test_status_with_priority_and_stage(
+        self,
+        mock_ticket_repo: AsyncMock,
+        ticket_service: TicketService,
+    ) -> None:
+        """Combined stage + priority routes to list_filtered."""
+        result = await handle_tickets_status(
+            _status_params(stage="QA", priority="critical"),
+            ticket_service=ticket_service,
+        )
+        mock_ticket_repo.list_filtered.assert_awaited_once()
+        assert "tickets" in result
+
+    async def test_release_default_reason_is_empty(
+        self, ticket_service: TicketService
+    ) -> None:
+        """Release without explicit reason yields empty-string reason."""
+        result = await handle_tickets_release(
+            _release_params(), ticket_service=ticket_service
+        )
+        assert result["reason"] == ""
+
+    async def test_release_handler_via_registry(
+        self,
+        registry: ToolRegistry,
+        ticket_service: TicketService,
+    ) -> None:
+        """Invoke the release tool through the registry closure."""
+        register_ticket_tools(registry, ticket_service)
+        defn = registry.get(RELEASE_TOOL_NAME)
+        assert defn is not None
+        result = await defn.handler(_release_params())
+        assert result["ticket_id"] == "FORGEOS-BE099"
+
+    async def test_status_handler_via_registry_list(
+        self,
+        registry: ToolRegistry,
+        ticket_service: TicketService,
+    ) -> None:
+        """Invoke the status tool through the registry closure — list mode."""
+        register_ticket_tools(registry, ticket_service)
+        defn = registry.get(STATUS_TOOL_NAME)
+        assert defn is not None
+        result = await defn.handler({})
+        assert "tickets" in result
+
+    async def test_status_handler_via_registry_detail(
+        self,
+        registry: ToolRegistry,
+        ticket_service: TicketService,
+    ) -> None:
+        """Invoke the status tool through the registry closure — detail mode."""
+        register_ticket_tools(registry, ticket_service)
+        defn = registry.get(STATUS_TOOL_NAME)
+        assert defn is not None
+        result = await defn.handler({"ticket_id": "FORGEOS-BE099"})
+        assert result["ticket_id"] == "FORGEOS-BE099"
+
+    async def test_release_result_to_dict_keys(
+        self, ticket_service: TicketService
+    ) -> None:
+        """Verify ReleaseResult.to_dict() contains all expected keys."""
+        result = await ticket_service.release_ticket(
+            ticket_id="FORGEOS-BE099",
+            agent_id="backend",
+            reason="cleanup",
+        )
+        d = result.to_dict()
+        assert set(d.keys()) == {"ticket_id", "previous_stage", "released_by", "reason"}
+
+    async def test_ticket_list_result_to_dict_keys(
+        self, ticket_service: TicketService
+    ) -> None:
+        """Verify TicketListResult.to_dict() contains all expected keys."""
+        result = await ticket_service.list_tickets()
+        d = result.to_dict()
+        assert set(d.keys()) == {"tickets", "total", "page", "page_size"}
+
+    async def test_ticket_detail_to_dict_keys(
+        self, ticket_service: TicketService
+    ) -> None:
+        """Verify TicketDetail.to_dict() contains all expected keys."""
+        result = await ticket_service.get_ticket_status(ticket_id="FORGEOS-BE099")
+        d = result.to_dict()
+        expected = {
+            "ticket_id", "title", "description", "type", "priority",
+            "stage", "status", "file_paths", "acceptance_criteria",
+            "depends_on", "current_claim", "history",
+        }
+        assert set(d.keys()) == expected
+
+    async def test_list_tickets_stage_only_delegates_correctly(
+        self,
+        mock_ticket_repo: AsyncMock,
+        ticket_service: TicketService,
+    ) -> None:
+        """Stage-only filter at service level calls list_by_stage."""
+        await ticket_service.list_tickets(stage="QA")
+        mock_ticket_repo.list_by_stage.assert_awaited_once()
+
+    async def test_list_tickets_type_only_delegates_correctly(
+        self,
+        mock_ticket_repo: AsyncMock,
+        ticket_service: TicketService,
+    ) -> None:
+        """Type-only filter at service level calls list_by_type."""
+        await ticket_service.list_tickets(ticket_type="backend")
+        mock_ticket_repo.list_by_type.assert_awaited_once()

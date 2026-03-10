@@ -4,7 +4,7 @@
   "description": "Implement role-based claim restrictions that enforce stage ownership. Agents can only claim tickets matching their role's SDLC stage: Backend agent can only claim tickets in BACKEND stage, QA agent in QA stage, etc. The authorization layer checks the agent's role against the ticket's current stage before allowing a claim. Map the 14 agent roles to their authorized stages.",
   "type": "backend",
   "priority": "critical",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Role mapping is configurable (not hardcoded) for future role additions"
   ],
   "rework_count": 0,
-  "claimed_by": "QA Engineer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T23:36:12.368146+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -111,6 +111,15 @@
       "from_stage": "QA",
       "to_stage": "QA",
       "details": "Claimed by ReaperOAK@pop-os via QA Engineer, lease until 2026-03-10T23:36:12.368146+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T23:13:27.969601+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",

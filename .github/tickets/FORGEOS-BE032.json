@@ -4,7 +4,7 @@
   "description": "Implement two MCP tools: `tickets.release` to voluntarily release a claim before completion, and `tickets.status` to query the current state of a ticket or all tickets. `tickets.release` moves the ticket back to READY and clears the claim. `tickets.status` supports querying by ticket_id for detail or by filters (stage, type, priority) for listing.",
   "type": "backend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Status with filters returns a paginated list of matching tickets"
   ],
   "rework_count": 0,
-  "claimed_by": "QA Engineer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T23:36:12.188816+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -122,6 +122,15 @@
       "from_stage": "QA",
       "to_stage": "QA",
       "details": "Claimed by ReaperOAK@pop-os via QA Engineer, lease until 2026-03-10T23:36:12.188816+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T23:15:48.337842+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
