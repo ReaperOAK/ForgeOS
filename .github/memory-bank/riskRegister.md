@@ -133,6 +133,19 @@ append_only: true
 - **Status:** Open
 - **Evidence:** TASK-FOS-08-003 Security Review — `.github/agent-output/Security/TASK-FOS-08-003.md`
 
+### RISK-007: Audit Log Append-Only Enforcement at Application Level Only
+
+- **Date Identified:** 2026-03-11
+- **Identified By:** Security
+- **Severity:** Medium
+- **Likelihood:** Low
+- **Category:** Security
+- **Description:** The `audit_log` table enforces append-only semantics only at the application layer (`AuditRepository` exposes no UPDATE/DELETE methods). No database-level controls (REVOKE UPDATE/DELETE, triggers, or RLS policies) prevent direct modification of audit records by a compromised DB credential or direct SQL access. CWE-284 (Improper Access Control).
+- **Impact:** If the application database credential is compromised, an attacker could modify or delete audit trail entries, undermining non-repudiation guarantees.
+- **Mitigation:** Current threat model accepts this risk: the application is the sole consumer of the DB credential, no admin write UI exposes audit_log, and the repository layer enforces immutability. Recommend future hardening ticket to add `REVOKE UPDATE, DELETE ON audit_log FROM app_role` and/or a trigger that rejects UPDATE/DELETE.
+- **Status:** Open
+- **Evidence:** FORGEOS-BE058 Security Review — `.github/agent-output/Security/FORGEOS-BE058.md` (SEC-002)
+
 ---
 
 ## Closed Risks
@@ -197,6 +210,12 @@ _None_
 | SEC-DO001-003 | Low | pgAdmin default credentials admin@forgeos.local / admin (CWE-1393) | Risk Accepted | Env var overrides available (PGADMIN_EMAIL, PGADMIN_PASSWORD); local dev only |
 | SEC-DO001-004 | Low | DATABASE_URL missing password parameter — relies on Docker internal trust auth (CWE-287) | Risk Accepted | Docker bridge network isolation; production must include password in connection string |
 | SEC-DO001-005 | Low | Hardcoded API key `forgeos_dev_key_12345678` in dev overlay (CWE-798) | Risk Accepted | Dev-only file; base config uses env var with fallback |
+
+### [FORGEOS-BE046] — SDK Config API Key Exposure Risk (2026-03-11T15:30:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-BE046-001 | Medium | `SDKConfig.api_key` uses `str | None` type; `repr()` and `model_dump()` expose plaintext value (CWE-532) | Risk Accepted | v0.1.0 alpha, field is optional (default None), exposure requires explicit logging/serialization by caller. Recommend migrating to `pydantic.SecretStr` in future hardening ticket. |
 
 ### [TASK-FOS-02-003] — Middleware Stack Security Risks (2026-03-07T09:16:00Z)
 
@@ -316,3 +335,22 @@ No CSP/X-Frame-Options. Risk accepted (internal).
 ### [TASK-FOS-05-004] -- SEC-004 CWE-829 MEDIUM index.html:13
 D3.js CDN without SRI. Risk accepted.
 - **Agent:** Security | **Timestamp:** 2026-03-10T10:30:00Z
+
+### [FORGEOS-BE059] — SEC-059-001 CWE-400 MEDIUM webhooks.py:102
+Unbounded request body size — `await request.body()` reads full payload with no limit. Risk accepted — mitigated at infrastructure layer (nginx/ASGI server). Future defense-in-depth ticket recommended.
+### [FORGEOS-BE059] — SEC-059-002 CWE-770 LOW webhook_service.py:325
+No async task concurrency limit on `asyncio.create_task()`. Risk accepted — requires authenticated sustained traffic.
+### [FORGEOS-BE059] — SEC-059-003 CWE-200 LOW webhook_service.py:271
+Known sources list disclosed in `UnknownSourceError` details. Risk accepted — sources discoverable via path enumeration.
+- **Agent:** Security | **Timestamp:** 2026-03-11T16:00:00Z
+
+### [FORGEOS-BE066] — Notification Channel Security Risks (2026-03-11T14:30:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-BE066-001 | Medium | `_http_post()` accepts arbitrary admin-configured URLs without scheme validation, host allowlisting, or private IP blocking. SSRF risk via internal network scanning (CWE-918). | Risk Accepted | Admin-only URL configuration (env vars or ChannelStore CRUD). No user-facing API. Internal deployment limits surface. urllib blocks file:// by default. Recommend adding URL validation helper in future hardening. |
+| SEC-BE066-002 | Low | Slack webhook URLs contain embedded auth tokens stored in cleartext in notification_channels.config JSONB column and FORGEOS_CHANNEL_* env vars (CWE-312). | Risk Accepted | Standard webhook URL pattern. DB access restricted. Recommend application-level encryption or secret manager reference in production. |
+| SEC-BE066-003 | Low | No HTTPS enforcement on webhook URLs. HTTP targets transmit notification payloads in cleartext (CWE-319). | Risk Accepted | Admin controls URL scheme. Internal network for dev. Recommend scheme check in production hardening. |
+
+- **Agent:** Security Engineer
+- **Timestamp:** 2026-03-11T14:30:00Z

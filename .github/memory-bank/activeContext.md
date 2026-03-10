@@ -3271,6 +3271,11 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** Fixed TC003 (datetime→TYPE_CHECKING), I001 (import sort order), F401 (unused MachineScopeError). Ruff verified clean.
 - **Timestamp:** 2026-03-11T15:00:00Z
 
+### [FORGEOS-BE058] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE058.md
+- **Decisions:** PASS — STRIDE threat model on 3 trust boundaries, OWASP Top 10 full checklist, 0 critical/0 high findings. 2 medium (app-level-only append-only enforcement) and 1 low (client-supplied source_machine header) accepted with rationale. Parameterized SQL, admin-only endpoint with deny-by-default, no PII in logs.
+- **Timestamp:** 2026-03-11T16:00:00Z
+
 ### [FORGEOS-BE018] — CI Review
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE018.md
 - **Decisions:** PASS — Score 95/100, 0 critical, 1 warning (OC-007 module length advisory), 81% coverage
@@ -3280,3 +3285,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE046.md
 - **Decisions:** PASS — Zero critical/high findings. 1 medium (SEC-BE046-001: api_key as plaintext str exposes value in repr/model_dump, CWE-532). Risk accepted — v0.1.0 alpha, optional field, requires explicit logging by caller. SecretStr migration recommended for future hardening. STRIDE on 2 trust boundaries (max score 9), OWASP 10/10 checked. Dependencies current, no CVEs.
 - **Timestamp:** 2026-03-11T15:30:00Z
+
+### [FORGEOS-BE028] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE028.md
+- **Decisions:** PASS — Score 96/100, 0 critical, 0 warnings, 100% coverage on changed files
+- **Timestamp:** 2026-03-11T12:00:00Z
+
+### [FORGEOS-BE009] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE009.md
+- **Decisions:** PASS — Score 98/100, 0 critical, 0 warnings, 99% coverage on changed files
+- **Timestamp:** 2026-03-11T12:30:00Z
