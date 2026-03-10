@@ -30,11 +30,15 @@ No other agent may execute this script.
 
 import argparse
 import json
+import logging
+import os
 import re
 import sys
 from datetime import datetime, timedelta, timezone
 from pathlib import Path
 from typing import Optional
+from urllib.error import HTTPError, URLError
+from urllib.request import Request, urlopen
 
 # ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -79,6 +83,19 @@ STAGE_TO_STATE_DIR = {
 }
 
 DEFAULT_LEASE_MINUTES = 30
+
+# ─── Mode Configuration ──────────────────────────────────────────────────────
+
+FORGEOS_MODE = os.environ.get("FORGEOS_MODE", "filesystem")
+FORGEOS_MCP_URL = os.environ.get("FORGEOS_MCP_URL", "http://localhost:3000/mcp")
+FORGEOS_API_KEY = os.environ.get("FORGEOS_API_KEY", "")
+
+_logger = logging.getLogger("tickets.py")
+if not _logger.handlers:
+    _handler = logging.StreamHandler(sys.stderr)
+    _handler.setFormatter(logging.Formatter("%(levelname)s: %(message)s"))
+    _logger.addHandler(_handler)
+    _logger.setLevel(logging.WARNING)
 
 # ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -863,6 +880,210 @@ def print_dot_graph() -> None:
     print("}")
 
 
+# ─── MCP Client ───────────────────────────────────────────────────────────────
+
+
+class MCPClient:
+    """HTTP client for ForgeOS MCP Server ticket operations."""
+
+    def __init__(self, url: str, api_key: str):
+        self.url = url.rstrip("/")
+        self.api_key = api_key
+
+    def _call_tool(self, tool_name: str, arguments: dict) -> tuple[bool, str]:
+        """Call an MCP tool via Streamable HTTP JSON-RPC."""
+        payload = json.dumps({
+            "jsonrpc": "2.0",
+            "method": "tools/call",
+            "params": {"name": tool_name, "arguments": arguments},
+            "id": 1,
+        }).encode("utf-8")
+
+        headers = {
+            "Content-Type": "application/json",
+            "Accept": "application/json",
+        }
+        if self.api_key:
+            headers["Authorization"] = f"Bearer {self.api_key}"
+
+        req = Request(self.url, data=payload, headers=headers, method="POST")
+        try:
+            with urlopen(req, timeout=30) as resp:
+                body = json.loads(resp.read().decode("utf-8"))
+                if "error" in body:
+                    err = body["error"]
+                    return False, f"MCP error: {err.get('message', str(err))}"
+                result = body.get("result", {})
+                content = result.get("content", [])
+                text = content[0].get("text", "") if content else str(result)
+                return True, text
+        except HTTPError as e:
+            return False, f"MCP HTTP {e.code}: {e.reason}"
+        except URLError as e:
+            return False, f"MCP unreachable: {e.reason}"
+        except Exception as e:
+            return False, f"MCP error: {e}"
+
+    def health_check(self) -> bool:
+        """Check if MCP server is reachable."""
+        try:
+            base = self.url.rsplit("/", 1)[0] if "/" in self.url else self.url
+            req = Request(base + "/health", method="GET")
+            with urlopen(req, timeout=5) as resp:
+                return resp.status == 200
+        except Exception:
+            return False
+
+    def claim(self, ticket_id: str, agent: str, machine_id: str,
+              operator: str) -> tuple[bool, str]:
+        return self._call_tool("tickets.claim", {
+            "ticket_id": ticket_id,
+            "agent_name": agent,
+            "machine_id": machine_id,
+            "operator": operator,
+        })
+
+    def complete(self, ticket_id: str, agent: str,
+                 evidence: dict | None = None) -> tuple[bool, str]:
+        args: dict = {"ticket_id": ticket_id, "agent_name": agent}
+        if evidence:
+            args["evidence"] = evidence
+        return self._call_tool("tickets.complete", args)
+
+    def release(self, ticket_id: str, reason: str = "") -> tuple[bool, str]:
+        return self._call_tool("tickets.release", {
+            "ticket_id": ticket_id,
+            "reason": reason,
+        })
+
+
+_mcp_client: MCPClient | None = None
+
+
+def _get_mcp_client() -> MCPClient | None:
+    """Get or create MCP client. Returns None if not configured or unreachable."""
+    global _mcp_client
+    if _mcp_client is not None:
+        return _mcp_client
+    if not FORGEOS_MCP_URL:
+        return None
+    client = MCPClient(FORGEOS_MCP_URL, FORGEOS_API_KEY)
+    if not client.health_check():
+        _logger.warning("MCP server unreachable at %s", FORGEOS_MCP_URL)
+        return None
+    _mcp_client = client
+    return _mcp_client
+
+
+# ─── Mode-Aware Dispatch ─────────────────────────────────────────────────────
+
+
+def dispatch_claim(
+    ticket_id: str, agent: str, machine_id: str, operator: str,
+    lease_minutes: int = DEFAULT_LEASE_MINUTES,
+) -> tuple[bool, str]:
+    """Claim a ticket respecting FORGEOS_MODE."""
+    if FORGEOS_MODE == "mcp":
+        client = _get_mcp_client()
+        if not client:
+            return False, "MCP mode enabled but MCP server is not reachable"
+        return client.claim(ticket_id, agent, machine_id, operator)
+
+    # filesystem or dual: always run filesystem first
+    fs_ok, fs_msg = claim_ticket(ticket_id, agent, machine_id, operator, lease_minutes)
+
+    if FORGEOS_MODE == "dual":
+        client = _get_mcp_client()
+        if client:
+            mcp_ok, mcp_msg = client.claim(ticket_id, agent, machine_id, operator)
+            if fs_ok != mcp_ok:
+                _logger.warning(
+                    "DIVERGENCE: filesystem=%s mcp=%s for ticket %s",
+                    "OK" if fs_ok else "FAIL",
+                    "OK" if mcp_ok else "FAIL",
+                    ticket_id,
+                )
+            if not mcp_ok:
+                _logger.warning("MCP claim failed for %s: %s", ticket_id, mcp_msg)
+        else:
+            _logger.warning(
+                "MCP server unreachable, continuing with filesystem-only for ticket %s",
+                ticket_id,
+            )
+
+    return fs_ok, fs_msg
+
+
+def dispatch_advance(
+    ticket_id: str, agent: str, machine_id: str = "system",
+) -> tuple[bool, str]:
+    """Advance a ticket respecting FORGEOS_MODE."""
+    if FORGEOS_MODE == "mcp":
+        client = _get_mcp_client()
+        if not client:
+            return False, "MCP mode enabled but MCP server is not reachable"
+        return client.complete(ticket_id, agent)
+
+    # filesystem or dual: always run filesystem first
+    fs_ok, fs_msg = advance_ticket(ticket_id, agent, machine_id)
+
+    if FORGEOS_MODE == "dual":
+        client = _get_mcp_client()
+        if client:
+            mcp_ok, mcp_msg = client.complete(ticket_id, agent)
+            if fs_ok != mcp_ok:
+                _logger.warning(
+                    "DIVERGENCE: filesystem=%s mcp=%s for ticket %s",
+                    "OK" if fs_ok else "FAIL",
+                    "OK" if mcp_ok else "FAIL",
+                    ticket_id,
+                )
+            if not mcp_ok:
+                _logger.warning("MCP advance failed for %s: %s", ticket_id, mcp_msg)
+        else:
+            _logger.warning(
+                "MCP server unreachable, continuing with filesystem-only for ticket %s",
+                ticket_id,
+            )
+
+    return fs_ok, fs_msg
+
+
+def dispatch_release(
+    ticket_id: str, reason: str = "manual release",
+) -> tuple[bool, str]:
+    """Release a claim respecting FORGEOS_MODE."""
+    if FORGEOS_MODE == "mcp":
+        client = _get_mcp_client()
+        if not client:
+            return False, "MCP mode enabled but MCP server is not reachable"
+        return client.release(ticket_id, reason)
+
+    # filesystem or dual: always run filesystem first
+    fs_ok, fs_msg = release_claim(ticket_id, reason)
+
+    if FORGEOS_MODE == "dual":
+        client = _get_mcp_client()
+        if client:
+            mcp_ok, mcp_msg = client.release(ticket_id, reason)
+            if fs_ok != mcp_ok:
+                _logger.warning(
+                    "DIVERGENCE: filesystem=%s mcp=%s for ticket %s",
+                    "OK" if fs_ok else "FAIL",
+                    "OK" if mcp_ok else "FAIL",
+                    ticket_id,
+                )
+            if not mcp_ok:
+                _logger.warning("MCP release failed for %s: %s", ticket_id, mcp_msg)
+        else:
+            _logger.warning(
+                "MCP server unreachable, continuing with filesystem-only for ticket %s",
+                ticket_id,
+            )
+
+    return fs_ok, fs_msg
+
+
 # ─── CLI ──────────────────────────────────────────────────────────────────────
 
 
@@ -901,6 +1122,12 @@ Examples:
     parser.add_argument("--json", action="store_true", help="Output in JSON format where applicable")
 
     args = parser.parse_args()
+
+    # Validate FORGEOS_MODE
+    if FORGEOS_MODE not in ("filesystem", "dual", "mcp"):
+        print(f"ERROR: Invalid FORGEOS_MODE='{FORGEOS_MODE}'. Must be 'filesystem', 'dual', or 'mcp'.",
+              file=sys.stderr)
+        sys.exit(1)
 
     if args.sync:
         print("Syncing tickets...")
@@ -948,18 +1175,18 @@ Examples:
 
     elif args.claim:
         ticket_id, agent, machine_id, operator = args.claim
-        ok, msg = claim_ticket(ticket_id, agent, machine_id, operator)
+        ok, msg = dispatch_claim(ticket_id, agent, machine_id, operator)
         print(f"{'OK' if ok else 'FAIL'}: {msg}")
         sys.exit(0 if ok else 1)
 
     elif args.release:
-        ok, msg = release_claim(args.release)
+        ok, msg = dispatch_release(args.release)
         print(f"{'OK' if ok else 'FAIL'}: {msg}")
         sys.exit(0 if ok else 1)
 
     elif args.advance:
         ticket_id, agent = args.advance
-        ok, msg = advance_ticket(ticket_id, agent)
+        ok, msg = dispatch_advance(ticket_id, agent)
         print(f"{'OK' if ok else 'FAIL'}: {msg}")
         sys.exit(0 if ok else 1)
 
