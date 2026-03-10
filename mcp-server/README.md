@@ -677,6 +677,128 @@ Key methods on `GracefulShutdownManager`:
 | `initiate_shutdown()` | Begin drain → cleanup → close sequence (idempotent) |
 | `status()` | Return dict snapshot of current state |
 
+
+## Agent Session Lifecycle Management
+
+<!-- last_reviewed: 2025-07-14T00:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.sessions` package manages per-agent session lifecycles. Each
+connecting agent establishes a session that tracks identity, connection state,
+and associated ticket claims. Sessions support heartbeat tracking, timeout
+cleanup, and resumption after transient disconnects.
+
+### Quick Start
+
+```python
+from mcp_server.sessions import SessionManager, SessionConfig, SessionState
+
+config = SessionConfig(session_timeout_seconds=300)
+mgr = SessionManager(config=config)
+
+# Create a session when an agent connects
+session = mgr.create_session("Backend", "backend", "pop-os")
+
+# Periodic heartbeat keeps the session alive
+mgr.heartbeat(session.session_id)
+
+# Disconnect on transport close
+mgr.disconnect_session(session.session_id)
+
+# Resume within the resumption window
+resumed = mgr.resume_session(session.session_id, "Backend", "backend", "pop-os")
+
+# List all active sessions
+active = mgr.list_sessions(state=SessionState.ACTIVE)
+```
+
+### Session Configuration
+
+| Parameter | Default | Description |
+|---|---|---|
+| `session_timeout_seconds` | `300.0` | Max idle time before a session expires |
+| `cleanup_interval_seconds` | `30.0` | Interval between background cleanup sweeps |
+| `resumption_window_seconds` | `120.0` | Max time a disconnected session stays resumable |
+
+### Session Lifecycle
+
+```
+ACTIVE  --disconnect-->  DISCONNECTED  --timeout-->  EXPIRED
+  |                          |
+  |                          +--resume-->  ACTIVE
+  +----------timeout------------------------------>  EXPIRED
+```
+
+1. **ACTIVE** -- Agent is connected and sending heartbeats.
+2. **DISCONNECTED** -- Transport closed, but session can be resumed within
+   `resumption_window_seconds`.
+3. **EXPIRED** -- Session timed out. Associated claims are released via
+   registered cleanup callbacks.
+
+### SessionManager Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `create_session(agent_name, role, machine_id, ...)` | `AgentSession` | Create a new session with identity metadata |
+| `heartbeat(session_id)` | `AgentSession` | Update last-heartbeat timestamp |
+| `disconnect_session(session_id)` | `AgentSession` | Mark session as disconnected |
+| `close_session(session_id)` | `AgentSession` | Close and remove a session (explicit cleanup) |
+| `resume_session(session_id, agent_name, role, machine_id)` | `AgentSession` | Resume a disconnected session with identity validation |
+| `get_session(session_id)` | `AgentSession` | Retrieve a session by ID |
+| `list_sessions(state=None)` | `list[AgentSession]` | List sessions, optionally filtered by state |
+| `add_claim(session_id, ticket_id)` | `None` | Associate a ticket claim with a session |
+| `remove_claim(session_id, ticket_id)` | `None` | Remove a ticket claim from a session |
+| `register_cleanup_callback(callback)` | `None` | Register an async callback for expired sessions |
+| `start_cleanup_loop()` | `None` | Start the background expiration task |
+| `stop_cleanup_loop()` | `None` | Stop the background expiration task |
+
+### AgentSession Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `session_id` | `str` | Unique session identifier (UUID4) |
+| `agent_name` | `str` | Name of the connected agent |
+| `role` | `str` | Agent role (e.g. `backend`, `qa`) |
+| `machine_id` | `str` | Hostname or machine identifier |
+| `state` | `SessionState` | Current lifecycle state |
+| `connected_at` | `datetime` | UTC timestamp of session creation |
+| `last_heartbeat` | `datetime` | UTC timestamp of last heartbeat |
+| `disconnected_at` | `datetime \| None` | UTC timestamp of disconnect |
+| `claimed_ticket_ids` | `list[str]` | Ticket IDs claimed through this session |
+| `metadata` | `dict[str, Any]` | Arbitrary key-value metadata |
+
+### Error Handling
+
+| Error | When |
+|---|---|
+| `SessionNotFoundError` | Session ID does not exist in the manager |
+| `SessionExpiredError` | Operating on an expired session or resumption window exceeded |
+| `SessionResumeError` | Identity validation fails during resumption (agent_name, role, or machine_id mismatch) |
+
+### Cleanup Callbacks
+
+Register async callbacks to run when sessions expire. Callbacks receive the
+expired `AgentSession` and can release ticket claims or close resources:
+
+```python
+async def release_claims(session: AgentSession) -> None:
+    for ticket_id in session.claimed_ticket_ids:
+        await claim_repo.release_claim(ticket_id)
+
+mgr.register_cleanup_callback(release_claims)
+await mgr.start_cleanup_loop()
+```
+
+### Design Constraints
+
+- **Thread-safe** -- all session state is guarded by `threading.Lock`.
+- **Async cleanup** -- background expiration runs via `asyncio.Task`.
+- **Identity validation** -- resumption requires matching agent_name, role, and machine_id.
+- **Zero external dependencies** -- uses only Python stdlib and internal observability.
+- **Callbacks outside lock** -- cleanup callbacks execute after releasing the lock to avoid deadlocks.
+
+
 ## Development
 
 ### Run tests
@@ -705,6 +827,7 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/tools/`** — Dynamic tool registration, schema validation, and FastMCP bridge
 - **`mcp_server/events/`** — Append-only event sourcing (EventStore, EventType, Event dataclass)
 - **`mcp_server/locking/`** — Distributed claim queue (SKIP LOCKED), file mutex (advisory locks)
+- **`mcp_server/sessions/`** -- Agent session lifecycle management (heartbeat, timeout, resumption)
 
 ### Error Handling
 
