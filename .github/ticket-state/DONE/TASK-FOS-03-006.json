@@ -4,7 +4,7 @@
   "description": "Implement the tickets.spawn MCP tool that creates a child ticket linked to the current ticket, enabling self-expanding workflows. The child ticket gets a generated ticket_id, inherits the parent's project context, and has parent_id set to the parent ticket_id. The child starts in BLOCKED status if it has dependencies, or READY if not. Records a SPAWNED event on the parent ticket.",
   "type": "backend",
   "priority": "high",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -118,6 +118,15 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "DOCS complete. Corrected 6 inaccuracies in mcp-tool-definitions.md. Added tickets.spawn README subsection. Updated CHANGELOG."
+    },
+    {
+      "timestamp": "2026-03-10T17:00:00+00:00",
+      "event": "VALIDATION_COMPLETE",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "APPROVED. DoD 10/10. AC 8/8. All upstream verdicts PASS."
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
