@@ -2850,3 +2850,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/locking/lease_heartbeat.py, mcp-server/tests/test_lease_heartbeat.py, mcp-server/src/mcp_server/locking/__init__.py
 - **Decisions:** Used _now parameter injection for testability over datetime mocking; PoolLike Protocol for DI consistency with claim_queue; frozen dataclasses with slots=True per codebase convention; error hierarchy under ForgeOSError
 - **Timestamp:** 2026-03-10T18:15:23.349244+00:00
+
+### FORGEOS-BE018 — Wire MCP Server to Database Layer
+- **Artifacts:** dependencies.py, server.py, db/pool.py, test_dependencies.py, test_db_wiring.py
+- **Decisions:** Created Dependencies frozen dataclass as DI container rather than module-level singletons; added raw_pool property to ConnectionPool to expose underlying asyncpg.Pool for repository injection; fixed HealthChecker type mismatch bug (raw pool → ConnectionPool wrapper)
+- **Timestamp:** 2026-03-10T18:16:00+05:30
