@@ -40,6 +40,15 @@ from mcp_server.locking.file_mutex import (
     LockAcquireResult,
     file_path_to_lock_key,
 )
+from mcp_server.locking.transaction_config import (
+    IsolationLevel,
+    OperationIsolation,
+    OperationType,
+    SerializationError,
+    TransactionError,
+    isolation_for,
+    transactional,
+)
 
 __all__ = [
     "AgentRoleMap",
@@ -49,8 +58,15 @@ __all__ = [
     "FileConflictError",
     "FileLockRecord",
     "FileMutex",
+    "IsolationLevel",
     "LeaseExpiredError",
     "LockAcquireResult",
     "NoEligibleTicketError",
+    "OperationIsolation",
+    "OperationType",
+    "SerializationError",
+    "TransactionError",
     "file_path_to_lock_key",
+    "isolation_for",
+    "transactional",
 ]
