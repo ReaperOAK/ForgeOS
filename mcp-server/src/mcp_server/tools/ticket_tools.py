@@ -544,6 +544,113 @@ def _make_validate_handler(
     return _handler
 
 
+# ---------------------------------------------------------------------------
+# tickets.advance — advance ticket to next SDLC stage (FORGEOS-BE030)
+# ---------------------------------------------------------------------------
+
+TICKETS_ADVANCE_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "ticket_id": {
+            "type": "string",
+            "description": "Human-readable ticket ID to advance (e.g. 'FORGEOS-BE006').",
+            "minLength": 1,
+        },
+        "agent_id": {
+            "type": "string",
+            "description": "Agent role name that holds the active claim.",
+            "minLength": 1,
+        },
+        "evidence": {
+            "type": "object",
+            "description": "Optional completion evidence (artifacts, coverage, etc.).",
+            "additionalProperties": True,
+        },
+    },
+    "required": ["ticket_id", "agent_id"],
+    "additionalProperties": False,
+}
+
+
+async def handle_tickets_advance(
+    params: dict[str, Any],
+    *,
+    ticket_service: TicketService,
+) -> dict[str, Any]:
+    """Handle ``tickets.advance`` tool invocation.
+
+    Validates input against :data:`TICKETS_ADVANCE_SCHEMA`, then delegates
+    to :meth:`TicketService.advance_ticket` for an atomic stage transition
+    with SERIALIZABLE isolation.
+
+    Parameters
+    ----------
+    params : dict[str, Any]
+        Raw input parameters from the MCP tool call.
+    ticket_service : TicketService
+        The shared ticket service instance.
+
+    Returns
+    -------
+    dict[str, Any]
+        Updated ticket data on success, or a structured error response.
+    """
+    validate_tool_input(ADVANCE_TOOL_NAME, TICKETS_ADVANCE_SCHEMA, params)
+
+    ticket_id: str = params["ticket_id"]
+    agent_id: str = params["agent_id"]
+    evidence: dict[str, Any] | None = params.get("evidence")
+
+    logger.info(
+        "tickets.advance invoked",
+        extra={"ticket_id": ticket_id, "agent_id": agent_id},
+    )
+
+    try:
+        result = await ticket_service.advance_ticket(
+            ticket_id=ticket_id,
+            agent_id=agent_id,
+            evidence=evidence,
+        )
+    except TicketNotFoundError:
+        return {
+            "isError": True,
+            "code": INVALID_PARAMS,
+            "message": f"Ticket '{ticket_id}' not found",
+        }
+    except ClaimValidationError as exc:
+        return {
+            "isError": True,
+            "code": INVALID_PARAMS,
+            "message": exc.reason,
+        }
+    except InvalidTransitionError as exc:
+        return {
+            "isError": True,
+            "code": INVALID_PARAMS,
+            "message": exc.reason,
+        }
+    except ValueError as exc:
+        return {
+            "isError": True,
+            "code": INVALID_PARAMS,
+            "message": str(exc),
+        }
+
+    return result.to_dict()
+
+
+def _make_advance_handler(
+    ticket_service: TicketService,
+) -> Any:
+    """Create a bound handler closure for the tickets.advance tool."""
+
+    async def _handler(params: dict[str, Any]) -> dict[str, Any]:
+        return await handle_tickets_advance(params, ticket_service=ticket_service)
+
+    return _handler
+
+
 def register_ticket_tools(
     registry: ToolRegistry,
     ticket_service: TicketService,
@@ -619,3 +726,14 @@ def register_ticket_tools(
         TOOL_NAME, CLAIM_TOOL_NAME, RELEASE_TOOL_NAME, STATUS_TOOL_NAME,
         SYNC_TOOL_NAME, VALIDATE_TOOL_NAME,
     )
+    registry.register(
+        name=ADVANCE_TOOL_NAME,
+        description=(
+            "Advance a ticket to its next SDLC stage. Validates the agent "
+            "holds the active claim and enforces the SDLC flow order. "
+            "Uses SERIALIZABLE transaction isolation for state integrity."
+        ),
+        input_schema=TICKETS_ADVANCE_SCHEMA,
+        handler=_make_advance_handler(ticket_service),
+    )
+    logger.info("Registered advance tool: %s", ADVANCE_TOOL_NAME)

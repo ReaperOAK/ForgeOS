@@ -310,3 +310,67 @@ class TicketRepository:
                 """
             )
             return {r["stage_name"]: r["cnt"] for r in rows}
+
+    async def list_filtered(
+        self,
+        *,
+        stage: str | None = None,
+        ticket_type: str | None = None,
+        priority: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> list[TicketRow]:
+        """List tickets with optional combined filters.
+
+        Builds a dynamic WHERE clause using parameterized queries.
+
+        Args:
+            stage: Optional SDLC stage filter.
+            ticket_type: Optional ticket type filter.
+            priority: Optional priority filter.
+            limit: Maximum rows to return.
+            offset: Rows to skip for pagination.
+
+        Returns:
+            A list of ``TicketRow`` objects.
+        """
+        conditions: list[str] = []
+        params: list[Any] = []
+        idx = 1
+
+        if stage is not None:
+            conditions.append(f"stage = ${idx}::ticket_stage")
+            params.append(stage)
+            idx += 1
+        if ticket_type is not None:
+            conditions.append(f"type = ${idx}::ticket_type")
+            params.append(ticket_type)
+            idx += 1
+        if priority is not None:
+            conditions.append(f"priority = ${idx}::ticket_priority")
+            params.append(priority)
+            idx += 1
+
+        where = ""
+        if conditions:
+            where = "WHERE " + " AND ".join(conditions)
+
+        query = f"""
+            SELECT *
+            FROM tickets
+            {where}
+            ORDER BY
+                CASE priority
+                    WHEN 'critical' THEN 0
+                    WHEN 'high'     THEN 1
+                    WHEN 'medium'   THEN 2
+                    WHEN 'low'      THEN 3
+                END,
+                created_at ASC
+            LIMIT ${idx} OFFSET ${idx + 1}
+        """
+        params.extend([limit, offset])
+
+        async with self._pool.acquire() as conn:
+            rows = await conn.fetch(query, *params)
+            return [_row_to_ticket(r) for r in rows]
