@@ -35,10 +35,10 @@
     "Function returns the claimed ticket data or None if no eligible tickets exist"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T17:57:27.060480+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
