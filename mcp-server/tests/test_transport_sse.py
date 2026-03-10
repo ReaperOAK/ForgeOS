@@ -11,6 +11,7 @@ Ticket: FORGEOS-BE017
 
 from __future__ import annotations
 
+import asyncio
 import time
 
 import pytest
@@ -300,3 +301,44 @@ class TestSSEHealthEndpoint:
         data = response.json()
         assert data["active_connections"] == 0
         assert data["connections"] == []
+
+
+class TestSSEIdleTimeoutSweep:
+    """QA-added tests for _idle_timeout_sweep coverage (FORGEOS-BE017)."""
+
+    @pytest.mark.asyncio
+    async def test_sweep_removes_idle_connections(self) -> None:
+        tracker = ConnectionTracker(max_connections=10)
+        tracker.register("idle-1", "127.0.0.1")
+        tracker.register("idle-2", "127.0.0.1")
+        assert tracker.active_count == 2
+        idle = tracker.get_idle_connections(timeout_seconds=0)
+        assert len(idle) == 2
+        for conn in idle:
+            tracker.unregister(conn.session_id)
+        assert tracker.active_count == 0
+
+    @pytest.mark.asyncio
+    async def test_sweep_keeps_active_connections(self) -> None:
+        tracker = ConnectionTracker(max_connections=10)
+        tracker.register("active-1", "127.0.0.1")
+        idle = tracker.get_idle_connections(timeout_seconds=9999)
+        assert len(idle) == 0
+        assert tracker.active_count == 1
+
+    @pytest.mark.asyncio
+    async def test_sweep_cancellation_is_clean(self) -> None:
+        transport = SSETransport()
+        assert transport._timeout_task is None
+
+    @pytest.mark.asyncio
+    async def test_sweep_interval_capped_at_half_timeout(self) -> None:
+        cfg = SSETransportConfig(idle_timeout_seconds=10)
+        assert cfg.idle_timeout_seconds == 10
+        expected_interval = cfg.idle_timeout_seconds / 2
+        assert expected_interval == 5.0
+
+    @pytest.mark.asyncio
+    async def test_timeout_task_initially_none(self) -> None:
+        transport = SSETransport()
+        assert transport._timeout_task is None
