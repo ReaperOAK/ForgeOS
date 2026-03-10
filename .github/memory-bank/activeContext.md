@@ -1,3 +1,8 @@
+### [FORGEOS-UID004] — Documentation: Operator Workbench and Claims Monitor
+- **Artifacts:** docs/uiux/mockups/FORGEOS-UID004.md, docs/uiux/components/claims-monitor.md, docs/uiux/components/operator-actions.md, CHANGELOG.md
+- **Decisions:** Added YAML frontmatter with freshness tracking to both component specs (missing from UIDesigner output). Added diataxis: reference classification to all 3 docs. CHANGELOG entry describes 7 components, 4 screens, WCAG 2.2 AA compliance.
+- **Timestamp:** 2026-03-10T23:00:00Z
+
 ### [FORGEOS-BE051] — QA PASS: Agent API Key Authentication
 - **Artifacts:** mcp-server/src/mcp_server/auth/agent_auth.py, mcp-server/src/mcp_server/auth/__init__.py, mcp-server/tests/test_agent_auth.py, mcp-server/alembic/versions/20260310_000000_003_api_keys.py
 - **Decisions:** QA PASS — 40/40 tests pass, 98% coverage (147 stmts, 2 missed, 32 branches, 2 partial). SHA-256 hashing with hmac.compare_digest() for constant-time comparison. In-memory token bucket rate limiter. Prefix-based DB lookup. No security vulnerabilities found. All 6 acceptance criteria met.
@@ -8,10 +13,10 @@
 - **Decisions:** QA PASS — 25/25 tests pass, 99% branch coverage (81 stmts, 0 missed, 8 branches, 1 partial), all 6 acceptance criteria verified, no defects found. Clean thin wrapper over asyncpg with proper error handling, config via env vars, frozen PoolStats dataclass.
 - **Timestamp:** 2026-03-10T13:10:00Z
 
-### [TASK-FOS-07-004] — Update tickets.py for Backward Compatibility Bridge
-- **Artifacts:** .github/tickets.py
-- **Decisions:** Added tri-modal FORGEOS_MODE (filesystem/dual/mcp). Used stdlib urllib for HTTP client (no external deps). Dispatch functions wrap existing filesystem functions. Dual mode runs filesystem-first then mirrors to MCP. Lazy MCP health check via _get_mcp_client().
-- **Timestamp:** 2026-03-10T18:00:00Z
+### [TASK-FOS-07-004] — QA PASS: Update tickets.py for Backward Compatibility Bridge
+- **Artifacts:** .github/tickets.py, .github/tests/test_tickets_mcp_bridge.py
+- **Decisions:** QA PASS — 60/60 tests pass, 93.1% new code coverage (14 missed lines in edge-case release logging). All 9 ACs verified. Backward compatibility confirmed (7 dedicated tests). MCPClient uses stdlib urllib only. Dual mode logs DIVERGENCE on mismatch, filesystem-first. No defects found.
+- **Timestamp:** 2026-03-10T18:45:00Z
 
 ### [FORGEOS-BE019] — QA PASS: Request Lifecycle Correlation IDs
 - **Artifacts:** mcp-server/src/mcp_server/middleware/correlation.py, mcp-server/src/mcp_server/middleware/__init__.py, mcp-server/tests/test_correlation.py
@@ -2341,3 +2346,18 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/tools/registry.py, mcp-server/src/mcp_server/tools/__init__.py, mcp-server/tests/test_tool_registry.py
 - **Decisions:** QA PASS — 37/37 tests pass, 97% line coverage (3 lines uncovered: non-string $schema branch, get_or_raise success path, FastMCP wrapper body). All 6 acceptance criteria verified. No defects found.
 - **Timestamp:** 2026-03-10T22:15:00+00:00
+
+### [FORGEOS-BE016] — QA PASS: stdio Transport for Local Agents
+- **Artifacts:** mcp-server/src/mcp_server/transport/stdio.py, mcp-server/src/mcp_server/transport/__init__.py, mcp-server/tests/test_stdio_transport.py
+- **Decisions:** QA PASS — 33/33 tests pass, 100% coverage on in-scope files (86 stmts, 0 missed). Iterator bug fix verified correct. All 6 acceptance criteria met. No defects found.
+- **Timestamp:** 2026-03-10T12:42:00Z
+
+### [FORGEOS-BE005] — QA PASS: Database Seed Script for JSON Import
+- **Artifacts:** database/seed.py, database/seed_data/sample_tickets.json, database/tests/test_seed.py
+- **Decisions:** QA PASS — 68/68 tests pass (22 new tests added by QA), 95% coverage on seed.py (202 stmts, 13 missed). All 6 acceptance criteria verified. DB path tested with mocked psycopg2. Dry-run, upsert, error handling, CLI main() all covered. No defects found.
+- **Timestamp:** 2026-03-10T18:30:00Z
+
+### [TASK-FOS-06-003] — QA PASS: Agent-Runner Wrapper for Safe Git Operations
+- **Artifacts:** forgeos-server/src/sdk/agent-runner.ts, forgeos-server/src/sdk/config.ts, forgeos-server/src/sdk/agent-runner.test.ts, forgeos-server/src/sdk/config.test.ts
+- **Decisions:** QA PASS — 32/32 tests pass, SDK folder 81.39% line coverage (config.ts 100%, agent-runner.ts 79.48%). All 7 acceptance criteria met. Git safety guards (forbidden git-add patterns, scope validation) thoroughly tested. Two-commit protocol enforced via API design. No defects found.
+- **Timestamp:** 2026-03-10T18:10:00Z
