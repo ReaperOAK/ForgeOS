@@ -306,3 +306,13 @@ _None_
 - **Status:** Documented risk acceptance — agents are trusted internal actors with admin-provisioned tokens.
 - **Agent:** Security Engineer
 - **Timestamp:** 2026-03-10T14:30:00Z
+
+### [TASK-FOS-05-004] -- SEC-001 CWE-79 MEDIUM app.js:1366
+Inline onclick; escapeHtml misses single quotes. Risk accepted.
+### [TASK-FOS-05-004] -- SEC-002 CWE-352 MEDIUM admin.js:211
+fetchJSON drops POST options. Advisory.
+### [TASK-FOS-05-004] -- SEC-003 CWE-1021 LOW server.ts:86
+No CSP/X-Frame-Options. Risk accepted (internal).
+### [TASK-FOS-05-004] -- SEC-004 CWE-829 MEDIUM index.html:13
+D3.js CDN without SRI. Risk accepted.
+- **Agent:** Security | **Timestamp:** 2026-03-10T10:30:00Z
