@@ -1,3 +1,8 @@
+### [TASK-FOS-07-003] — Documentation Summary
+- **Artifacts:** README.md, agents.md, .github/copilot-instructions.md, CHANGELOG.md
+- **Decisions:** Added Quick Start section to README.md for immediate onboarding. Documented MCP tool integration table in agents.md to make tool availability discoverable. Updated copilot-instructions.md to include all three server directories in repo structure for LLM context accuracy.
+- **Timestamp:** 2026-03-10T08:35:00Z
+
 ### [FORGEOS-BE002] — Security Review
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE002.md
 - **Decisions:** PASS (HIGH confidence). STRIDE threat model on 4 components (machines, operators, claims, tickets ALTER): all scores ≤6 (Low). OWASP 10/10 reviewed, 0 findings. All SQL is static DDL — zero injection risk. No privilege escalation vectors. No sensitive data exposure. FK constraints correct (CASCADE on claims→tickets, SET NULL on claims→agents/machines). 0 secrets found. 0 critical/high CVEs in dependencies. 3 informational notes: trigger column mismatch (functional bug, not security), non-FK operator field (by design), no temporal CHECK on claims (app-layer validation). Advanced to CI.
@@ -1971,3 +1976,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Security/TASK-FOS-03-004.md
 - **Decisions:** PASS (HIGH confidence) — STRIDE threat model on 4 trust boundaries, max score 10 (MEDIUM). OWASP Top 10: 10/10 categories checked, 0 findings. All SQL parameterized ($1-$4), zero injection risk. 6-layer auth (transport→identity→RBAC→handler→DB ownership→flow enforcement). SDLC flow manipulation impossible (DB array index + SELECT FOR UPDATE). 4 informational notes (rate limiting, helmet, .gitignore patterns, evidence namespacing). 7 deps, 0 known CVEs. Advanced to CI.
 - **Timestamp:** 2026-03-10T08:30:00Z
+
+### [TASK-FOS-03-008] — Security Review
+- **Artifacts:** .github/agent-output/Security/TASK-FOS-03-008.md
+- **Decisions:** PASS (HIGH confidence). STRIDE: 10 threats analyzed, 0 critical/high, 1 medium (CWE-209 error message leakage — risk accepted, MCP internal transport). OWASP 10/10 checked, all PASS/N/A. All SQL parameterized ($1-$5). Admin permission gate enforced for force-release. UUID-based ownership in SQL (SELECT FOR UPDATE). Zero secrets, zero dangerous APIs, zero CVEs. Advanced to CI.
+- **Timestamp:** 2026-03-10T17:30:00Z

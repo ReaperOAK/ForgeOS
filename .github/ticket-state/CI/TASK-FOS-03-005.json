@@ -4,7 +4,7 @@
   "description": "Implement the tickets.reject MCP tool that rejects a ticket during a review stage (QA, Security, CI, Validation), sending it back for rework. Uses the reject_ticket SQL function. Increments rework_count; if rework_count >= max_reworks (default 3), the ticket moves to ESCALATED status instead of rework. On rework, the ticket returns to its implementation stage (first non-READY stage in the SDLC flow) with status READY. File locks are released on rejection.",
   "type": "backend",
   "priority": "high",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -82,6 +82,13 @@
       "agent": "QA",
       "machine_id": "pop-os",
       "details": "QA PASS: 25/25 tests, 100% stmt / 90.9% branch / 100% func / 100% line coverage. All 8 ACs verified. Advancing to SECURITY."
+    },
+    {
+      "timestamp": "2026-03-10T08:26:00+00:00",
+      "event": "SECURITY_COMPLETE",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "details": "SECURITY PASS (HIGH confidence): STRIDE max score 6 (Low), OWASP 9/9 PASS. 0 critical/high findings. 1 medium (fail-secure hardcoded agent identity), 3 low notes. 0 CVEs. Advancing to CI."
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
