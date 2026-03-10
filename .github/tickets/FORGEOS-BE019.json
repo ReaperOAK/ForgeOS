@@ -4,7 +4,7 @@
   "description": "Implement request lifecycle tracking with correlation IDs for the MCP server. Each incoming request (MCP tool call or REST request) receives a unique correlation ID that is propagated through all downstream operations (database queries, event recording, logging). The correlation ID is included in responses, error messages, and log entries for end-to-end traceability.",
   "type": "backend",
   "priority": "high",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Correlation IDs propagate through database operations to event_history records"
   ],
   "rework_count": 0,
-  "claimed_by": "CIReviewer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T13:40:57.795394+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -85,6 +85,15 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "SECURITY PASS \u2014 STRIDE max 4 (LOW), OWASP 10/10, 0 SARIF findings, UUID4 CSPRNG-backed, no external input paths"
+    },
+    {
+      "timestamp": "2026-03-10T13:15:42.192597+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "CI PASS Score 99/100, 0 critical, 0 warnings, 1 suggestion UP035"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
