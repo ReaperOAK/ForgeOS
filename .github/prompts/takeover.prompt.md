@@ -145,7 +145,7 @@ Before feature work, execute in parallel:
 
 Each ticket must:
 - Follow full SDLC through file-based state machine (`.github/ticket-state/`)
-- Use two-commit protocol per stage: Commit 1 (CLAIM) + Commit 2 (WORK)
+- Use dispatcher-claim protocol per stage: ReaperOAK performs Commit 1 (CLAIM) before dispatch, subagent performs Commit 2 (WORK) only
 - Traverse per ticket type (e.g., backend): READY → BACKEND → QA → SECURITY → CI → DOCS → VALIDATION → DONE
 - Write agent summary to `.github/agent-output/{AgentName}/{ticket-id}.md`
 - Read upstream summary from previous stage agent before starting
@@ -163,7 +163,7 @@ python3 .github/tickets.py --sync
 python3 .github/tickets.py --status
 ```
 
-Parallel execution allowed — claim via push-based distributed lock (push failure = another operator claimed first).
+Parallel execution allowed — ReaperOAK claims via push-based distributed lock before dispatching (push failure = another operator claimed first).
 ReaperOAK dispatches one subagent per READY ticket. No grouping, no batching.
 For N READY tickets, N workers run in parallel (using N `runSubagent` calls). No grouping or batching logic. No dependency reasoning.
 
@@ -182,7 +182,7 @@ Only after:
 
 Then continue normal autonomous execution:
 - Ticket by ticket via `python3 .github/tickets.py --sync` + `--status --json`
-- Two-commit protocol enforced: CLAIM commit (ticket JSON only) + WORK commit (code + summary + advance)
+- Dispatcher-claim protocol enforced: ReaperOAK performs CLAIM commit (ticket JSON only) → subagent performs WORK commit (code + summary + advance)
 - Parallelized across operators/machines with push-based distributed locking
 - Full SDLC loop through stage directories
 - Agent summary handoff via `.github/agent-output/{AgentName}/{ticket-id}.md`

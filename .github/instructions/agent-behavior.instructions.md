@@ -28,12 +28,10 @@ RULE: Agents derive context ONLY from:
 3. Codebase files within ticket scope
 4. Instruction files (`.github/instructions/`)
 5. Agent chunk files (`.github/vibecoding/chunks/{Agent}.agent/`)
-6. MCP server state (when available) — ticket metadata, pipeline stats,
-   dependency graph via `tickets.next`, `tickets.stats`, `tickets.graph`
 
 PROHIBITED: Expecting context injection from ReaperOAK.
 PROHIBITED: Reading other agents' summaries outside the chain.
-RULE: Context is filesystem-derived or MCP-derived. No other sources.
+RULE: Context is filesystem-derived. Period.
 
 ## 3. ReaperOAK Dispatcher Contract
 
@@ -64,16 +62,16 @@ RULE: Git + tickets.py enforce safety. Not ReaperOAK.
 |-------|----------------|
 | Architect | ARCHITECT |
 | Research Analyst | RESEARCH |
-| Product Manager | PRODUCT_MANAGER |
-| UIDesigner | UI_DESIGN |
 | Backend | BACKEND |
 | Frontend Engineer | FRONTEND |
+| UIDesigner | FRONTEND (UI phase, before Frontend) |
 | QA Engineer | QA |
 | Security Engineer | SECURITY |
 | CI Reviewer | CI |
 | Documentation Specialist | DOCS |
 | Validator | VALIDATION |
 | TODO | Ticket creation only (not a stage) |
+| Product Manager | Requirements only (not a stage) |
 | DevOps Engineer | BACKEND (infra tickets) |
 
 ## 5. Scope Enforcement

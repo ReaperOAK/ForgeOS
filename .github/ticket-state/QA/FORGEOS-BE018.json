@@ -21,9 +21,7 @@
     "FORGEOS-BE015",
     "FORGEOS-BE013"
   ],
-  "blocked_by": [
-    "FORGEOS-BE013"
-  ],
+  "blocked_by": [],
   "file_paths": [
     "mcp-server/src/server.py",
     "mcp-server/src/dependencies.py"
@@ -37,10 +35,10 @@
     "No direct pool access in tool handlers; all database access is through repositories"
   ],
   "rework_count": 0,
-  "claimed_by": "Backend",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T18:27:11.290555+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -63,6 +61,13 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "BACKEND stage complete \u2014 dependencies.py created, server.py wired, pool.py raw_pool property added, 25 new tests passing, 81% coverage"
+    },
+    {
+      "timestamp": "2026-03-10T18:42:52.110977+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: Lease expired at 2026-03-10T18:27:11.290555+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",

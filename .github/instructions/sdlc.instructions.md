@@ -10,12 +10,12 @@ description: Stage-based lifecycle, per-type flows, post-execution chain, rework
 
 RULE: Ticket state is determined by directory location under `.github/ticket-state/`.
 RULE: There are 11 possible stages. Each ticket type traverses a defined subset.
-RULE: Two-commit protocol applies per stage: CLAIM commit then WORK commit.
+RULE: Dispatcher-claim protocol applies per stage: ReaperOAK performs CLAIM commit, then subagent performs WORK commit.
 
 ### Available Stages
 
 ```
-READY | ARCHITECT | RESEARCH | PRODUCT_MANAGER | UI_DESIGN | BACKEND | FRONTEND | QA | SECURITY | CI | DOCS | VALIDATION | DONE
+READY | ARCHITECT | RESEARCH | BACKEND | FRONTEND | QA | SECURITY | CI | DOCS | VALIDATION | DONE
 ```
 
 ### SDLC Flows by Ticket Type
@@ -30,8 +30,6 @@ READY | ARCHITECT | RESEARCH | PRODUCT_MANAGER | UI_DESIGN | BACKEND | FRONTEND 
 | docs | READY → DOCS → VALIDATION → DONE |
 | research | READY → RESEARCH → DOCS → VALIDATION → DONE |
 | architecture | READY → ARCHITECT → DOCS → VALIDATION → DONE |
-| product | READY → PRODUCT_MANAGER → DOCS → VALIDATION → DONE |
-| design | READY → UI_DESIGN → DOCS → VALIDATION → DONE |
 
 PROHIBITED: Skipping any stage in the ticket's defined flow.
 PROHIBITED: Reordering stages.
@@ -44,10 +42,8 @@ RULE: tickets.py enforces flow order per ticket type.
 | READY | Dependencies met, eligible for claim | System (tickets.py) |
 | ARCHITECT | Architecture design, ADRs, API contracts | Architect |
 | RESEARCH | Evidence-based research, PoC, analysis | Research Analyst |
-| PRODUCT_MANAGER | Product requirements, user stories, acceptance criteria | Product Manager |
-| UI_DESIGN | UI mockups, design tokens, component specs | UIDesigner |
 | BACKEND | Server-side implementation, APIs, business logic | Backend / DevOps |
-| FRONTEND | UI implementation, components, layouts | Frontend Engineer |
+| FRONTEND | UI implementation, components, layouts | UIDesigner (mockup), Frontend Engineer |
 | QA | Test coverage, functional verification, mutation testing | QA Engineer |
 | SECURITY | Vulnerability scan, STRIDE, OWASP review | Security Engineer |
 | CI | Lint, type checks, complexity analysis | CI Reviewer |
@@ -92,7 +88,7 @@ REQUIRED: Every ticket must satisfy ALL items. Validator verifies independently.
 
 ## 6. Stage Transition Guards
 
-RULE: Implementation stage varies by ticket type (ARCHITECT, RESEARCH, PRODUCT_MANAGER, UI_DESIGN, BACKEND, FRONTEND, or SECURITY).
+RULE: Implementation stage varies by ticket type (ARCHITECT, RESEARCH, BACKEND, FRONTEND, or SECURITY).
 RULE: Claim commit locks the ticket within its current stage directory.
 
 | From | To | Guard |

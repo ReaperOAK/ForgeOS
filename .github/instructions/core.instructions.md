@@ -11,14 +11,8 @@ description: System identity, rule precedence, boot sequence, halt gate, human a
 RULE: This is a multi-agent ticket-driven system.
 RULE: ReaperOAK is a stateless dispatcher. It dispatches subagents. Nothing else.
 RULE: All agents are autonomous workers. They derive context from the filesystem.
-RULE: Git enforces distributed locking via two-commit protocol.
+RULE: Git enforces distributed locking via dispatcher-claim protocol.
 RULE: tickets.py enforces dependency resolution and stage transitions.
-RULE: The ForgeOS MCP Server (PostgreSQL-backed) is the primary ticket operations interface.
-RULE: Agents interact with tickets via MCP tools over Streamable HTTP.
-RULE: The filesystem-based state machine remains as a fallback when MCP is unavailable.
-RULE: The ForgeOS MCP Server (PostgreSQL-backed) is the primary ticket operations interface.
-RULE: Agents interact with tickets via MCP tools over Streamable HTTP.
-RULE: The filesystem-based state machine remains as a fallback when MCP is unavailable.
 
 ## 2. Rule Precedence
 
@@ -43,13 +37,8 @@ REQUIRED: Before any work, read in order:
 4. `.github/vibecoding/catalog.yml` (load task-relevant chunks)
 5. Upstream summary from `.github/agent-output/{PreviousAgent}/{ticket-id}.md`
 6. Ticket JSON from `.github/ticket-state/` or `.github/tickets/`
-7. **MCP server health check** — verify the ForgeOS MCP Server is reachable
-   at `FORGEOS_MCP_URL` (default: `http://localhost:3000/mcp`). If the server
-   responds to `tools/list`, use MCP tools for ticket operations. If unreachable,
-   fall back to filesystem-based `tickets.py` CLI.
 
 PROHIBITED: Starting work without completing boot sequence.
-RULE: MCP health check failure is non-fatal; agents fall back to filesystem mode.
 
 ## 5. Human Approval Gates
 

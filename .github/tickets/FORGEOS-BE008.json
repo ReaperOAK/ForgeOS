@@ -20,9 +20,7 @@
   "dependencies": [
     "FORGEOS-BE006"
   ],
-  "blocked_by": [
-    "FORGEOS-BE006"
-  ],
+  "blocked_by": [],
   "file_paths": [
     "mcp-server/src/mcp_server/locking/lease_heartbeat.py",
     "mcp-server/tests/test_lease_heartbeat.py"

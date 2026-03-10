@@ -4,7 +4,7 @@
   "description": "Implement the tickets.reject MCP tool that rejects a ticket during a review stage (QA, Security, CI, Validation), sending it back for rework. Uses the reject_ticket SQL function. Increments rework_count; if rework_count >= max_reworks (default 3), the ticket moves to ESCALATED status instead of rework. On rework, the ticket returns to its implementation stage (first non-READY stage in the SDLC flow) with status READY. File locks are released on rejection.",
   "type": "backend",
   "priority": "high",
-  "stage": "DONE",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -105,21 +105,14 @@
       "details": "Claimed by Documentation for DOCS stage"
     },
     {
-      "timestamp": "2026-03-10T16:20:00+00:00",
-      "event": "DOCS_COMPLETE",
-      "agent": "Documentation",
-      "machine_id": "pop-os",
-      "details": "DOCS PASS: Updated TSDoc (SQL signature, SELECT FOR UPDATE), corrected mcp-tool-definitions.md (5\u21922 error codes, 3\u21925 stored function params), added CHANGELOG entry. Advancing to VALIDATION."
-    },
-    {
-      "timestamp": "2026-03-10T16:35:00+00:00",
-      "event": "VALIDATION_COMPLETE",
-      "agent": "Validator",
-      "machine_id": "pop-os",
-      "details": "APPROVED (HIGH confidence): 10/10 DoD, 8/8 ACs, all upstream PASS."
+      "timestamp": "2026-03-10T18:22:07.571090+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Documentation: Lease expired at 2026-03-10T16:30:00+00:00"
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
   "tags": [],
-  "completed_at": "2026-03-10T16:35:00+00:00"
+  "completed_at": "2026-03-09T20:56:54.714115+00:00"
 }
