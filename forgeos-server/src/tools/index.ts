@@ -15,6 +15,7 @@ import { ticketsRejectSchema, ticketsRejectHandler } from './tickets-reject.js';
 import { ticketsSpawnSchema, ticketsSpawnHandler } from './tickets-spawn.js';
 import { ticketsCompleteSchema, ticketsCompleteHandler } from './tickets-complete.js';
 import { ticketsExtendSchema, ticketsExtendHandler } from './tickets-extend.js';
+import { ticketsUpdateSchema, ticketsUpdateHandler } from './tickets-update.js';
 
 /**
  * Register all MCP tools on the server.
@@ -69,5 +70,13 @@ export function registerTools(server: McpServer): void {
     'Extend the lease on a claimed ticket to prevent expiry during long operations',
     ticketsExtendSchema.shape,
     async (params) => ticketsExtendHandler(params),
+  );
+
+  // ── tickets.update ───────────────────────────────────────────────────────
+  server.tool(
+    'tickets.update',
+    'Update metadata on a claimed ticket. Only the current claim owner can update. Merges metadata using jsonb || operator.',
+    ticketsUpdateSchema.shape,
+    async (params) => ticketsUpdateHandler(params),
   );
 }

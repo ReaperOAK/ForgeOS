@@ -4,7 +4,7 @@
   "description": "Implement the tickets.update MCP tool that updates metadata on a claimed ticket. Only the current claim owner can update a ticket. Merges the provided metadata object into the ticket's existing metadata JSONB field using PostgreSQL's || operator. Records an UPDATED event in the events table. Updates the ticket's updated_at timestamp automatically via the trigger.",
   "type": "backend",
   "priority": "high",
-  "stage": "BACKEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -41,6 +41,7 @@
   "operator": "reaperoak",
   "lease_expiry": "2026-03-10T08:52:18.584406+00:00",
   "lease_duration_minutes": 30,
+  "completed_at": "2026-03-10T08:38:41.957128Z",
   "history": [
     {
       "timestamp": "2026-03-05T18:05:37.898567+00:00",
@@ -48,6 +49,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tickets/03-ticket-tools.md"
+    },
+    {
+      "timestamp": "2026-03-10T08:38:41.957128Z",
+      "event": "BACKEND_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "REWORK #1: Fixed tool registration in index.ts, recreated handler, 32 tests pass, coverage 100%/91.66%/100%/100%"
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
