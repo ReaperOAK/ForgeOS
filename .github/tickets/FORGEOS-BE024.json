@@ -4,7 +4,7 @@
   "description": "Implement structured JSON logging for the MCP server. All log output must be machine-parseable JSON with consistent fields: timestamp, level, message, correlation_id, module, and optional context fields. Configure log levels per module. Ensure no PII (personally identifiable information) or secrets appear in any log output. Replace any print() statements with structured logger calls.",
   "type": "backend",
   "priority": "critical",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Structured logger is importable as a shared utility for all server modules"
   ],
   "rework_count": 0,
-  "claimed_by": "QA",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T12:39:56.969601+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -67,6 +67,13 @@
       "agent": "QA",
       "machine_id": "pop-os",
       "details": "Claimed by QA for QA stage"
+    },
+    {
+      "timestamp": "2026-03-10T12:10:56.501736+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "QA PASS \u2014 advanced to SECURITY"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
