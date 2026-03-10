@@ -8,6 +8,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Dynamic Tool Registration System** (FORGEOS-BE020) — Runtime MCP tool
+  registry at `mcp-server/src/mcp_server/tools/registry.py`. `ToolRegistry`
+  class provides `register()` (imperative), `tool()` (decorator),
+  `register_all_on()` (FastMCP bridge), plus `get()`, `list_tools()`,
+  `list_names()` for lookup. Input schemas validated against JSON Schema
+  draft 2020-12 (type: object, no $ref, required ⊆ properties).
+  `ToolDefinition` frozen dataclass, `ToolHandler` protocol,
+  `DuplicateToolError` / `ToolNotFoundError` exceptions. 37 tests at
+  96% coverage. Added Dynamic Tool Registration section to
+  `mcp-server/README.md` with quick-start, schema validation, lookup,
+  error handling, and public API reference.
+
 - **SSE and Streamable HTTP Transport** (FORGEOS-BE017) — Dual transport layer
   for remote agent communication (`mcp_server/transport/sse.py`,
   `mcp_server/transport/http.py`). SSE transport provides server-to-client
