@@ -1,10 +1,12 @@
-"""ForgeOS database package — connection management, pool, migration helpers.
+"""ForgeOS database package — connection management, pool, health monitoring, migration helpers.
 
 This package provides:
 - ``ConnectionPool`` — asyncpg connection pool with lifecycle management
 - ``PoolConfig`` — pydantic-settings model for pool configuration
 - ``PoolStats`` — dataclass for pool metrics
 - ``PoolNotInitializedError`` — raised when pool ops precede initialization
+- ``PoolHealthMonitor`` — background health monitor for the connection pool
+- ``HealthReport`` — frozen dataclass snapshot of pool health metrics
 - ``DatabaseConfig`` — pydantic-settings model for DB configuration
 - ``get_async_engine_url`` / ``get_sync_engine_url`` — URL conversion utilities
 - ``make_async_engine`` / ``make_sync_engine`` — SQLAlchemy engine factories

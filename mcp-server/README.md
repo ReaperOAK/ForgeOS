@@ -318,68 +318,7 @@ signed int64 advisory lock key:
   PostgreSQL subsystems.
 
 
-
-
-## Connection Pool Health Monitoring
-
-<--- last_reviewed: 2026-03-10T00:00:00Z -->
-
-The `mcp_server.db.health` module provides a background health monitor for the
-asyncpg connection pool. It tracks pool statistics, pings the database to detect
-dead connections, and recycles stale connections that exceed a configurable
-maximum lifetime. Health data is exposed as a frozen dataclass suitable for JSON
-serialization in the `/health` endpoint.
-
-### Quick Start
-
-```python
-from mcp_server.db.pool import ConnectionPool
-from mcp_server.db.health import PoolHealthMonitor
-
-pool = ConnectionPool()
-await pool.initialize()
-
-monitor = PoolHealthMonitor(pool, check_interval=30.0, max_lifetime=3600.0)
-monitor.start()
-
-report = monitor.health_report()
-print(report.saturation_pct, report.is_healthy)
-await monitor.stop()
-```
-
-### Configuration
-
-| Parameter | Default | Description |
-|---|---|---|
-| `check_interval` | `30.0` | Seconds between background health checks |
-| `max_lifetime` | `3600.0` | Maximum connection lifetime in seconds |
-
-### Health Report Fields
-
-| Field | Type | Description |
-|---|---|---|
-| `total_connections` | `int` | Total connections in the pool |
-| `active_connections` | `int` | Connections currently in use |
-| `idle_connections` | `int` | Connections available for use |
-| `waiting_requests` | `int` | Acquire requests waiting |
-| `saturation_pct` | `float` | Pool capacity percentage in active use |
-| `avg_wait_time_ms` | `float` | Average acquire wait time in ms |
-| `max_lifetime_seconds` | `float` | Configured max connection lifetime |
-| `is_healthy` | `bool` | True if last ping succeeded |
-| `last_check_epoch` | `float` | Monotonic timestamp of last check |
-
-### PoolHealthMonitor Methods
-
-| Method | Returns | Description |
-|---|---|---|
-| `start()` | `None` | Start the background health check loop |
-| `stop()` | `None` | Stop the background loop |
-| `health_report()` | `HealthReport` | Build a snapshot from current pool state |
-| `to_dict()` | `dict` | Return health report as JSON-serializable dict |
-| `record_acquire_wait(wait_ms)` | `None` | Record wait time for a connection acquire |
-| `increment_waiting()` | `None` | Increment waiting-request counter |
-| `decrement_waiting()` | `None` | Decrement waiting-request counter |
-| `is_running` | `bool` | Property: True if background task is active |\n\n\n## Repository Pattern — Data Access Layer
+## Repository Pattern — Data Access Layer
 
 <!-- last_reviewed: 2026-03-10T18:00:00Z -->
 <!-- audience: developers -->
