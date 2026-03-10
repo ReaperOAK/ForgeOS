@@ -1,3 +1,8 @@
+### [FORGEOS-BE051] — QA PASS: Agent API Key Authentication
+- **Artifacts:** mcp-server/src/mcp_server/auth/agent_auth.py, mcp-server/src/mcp_server/auth/__init__.py, mcp-server/tests/test_agent_auth.py, mcp-server/alembic/versions/20260310_000000_003_api_keys.py
+- **Decisions:** QA PASS — 40/40 tests pass, 98% coverage (147 stmts, 2 missed, 32 branches, 2 partial). SHA-256 hashing with hmac.compare_digest() for constant-time comparison. In-memory token bucket rate limiter. Prefix-based DB lookup. No security vulnerabilities found. All 6 acceptance criteria met.
+- **Timestamp:** 2026-03-10T18:30:00Z
+
 ### [FORGEOS-BE011] — QA PASS: asyncpg Connection Pool
 - **Artifacts:** mcp-server/src/mcp_server/db/pool.py, mcp-server/src/mcp_server/db/__init__.py, mcp-server/tests/test_pool.py
 - **Decisions:** QA PASS — 25/25 tests pass, 99% branch coverage (81 stmts, 0 missed, 8 branches, 1 partial), all 6 acceptance criteria verified, no defects found. Clean thin wrapper over asyncpg with proper error handling, config via env vars, frozen PoolStats dataclass.
@@ -7,6 +12,16 @@
 - **Artifacts:** .github/tickets.py
 - **Decisions:** Added tri-modal FORGEOS_MODE (filesystem/dual/mcp). Used stdlib urllib for HTTP client (no external deps). Dispatch functions wrap existing filesystem functions. Dual mode runs filesystem-first then mirrors to MCP. Lazy MCP health check via _get_mcp_client().
 - **Timestamp:** 2026-03-10T18:00:00Z
+
+### [FORGEOS-BE019] — QA PASS: Request Lifecycle Correlation IDs
+- **Artifacts:** mcp-server/src/mcp_server/middleware/correlation.py, mcp-server/src/mcp_server/middleware/__init__.py, mcp-server/tests/test_correlation.py
+- **Decisions:** QA PASS — 22/22 tests pass, 100% coverage (50 stmts, 0 miss, 2 branches, 0 partial). All 6 ACs independently verified. contextvars.ContextVar for async-safe isolation, observability bridge pattern, context manager with proper cleanup. No defects.
+- **Timestamp:** 2026-03-10T18:30:00Z
+
+### [FORGEOS-BE004] — QA PASS: Database Indexes and Constraints
+- **Artifacts:** mcp-server/alembic/versions/20260310_000000_003_indexes_constraints.py, mcp-server/tests/test_indexes_constraints_migration.py
+- **Decisions:** QA PASS — 28/28 tests pass. All 7 acceptance criteria verified. GIN indexes (AC1, AC2) confirmed in migration 001. Composite index (AC3), unique partial claim index (AC4), event history index (AC5) verified. CHECK constraints (AC6) use enum types + business-rule CHECKs. Downgrade (AC7) restores prior state correctly. Mutation testing N/A for DDL migration.
+- **Timestamp:** 2026-03-10T18:30:00Z
 
 ### [FORGEOS-BE012] — QA PASS: Event Sourcing Subsystem
 - **Artifacts:** mcp-server/src/mcp_server/events/event_store.py, mcp-server/src/mcp_server/events/__init__.py, mcp-server/tests/test_event_store.py
