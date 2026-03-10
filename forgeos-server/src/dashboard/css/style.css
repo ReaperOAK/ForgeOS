@@ -2047,36 +2047,36 @@ body {
 
 /* Action Variants */
 .operator-action--claim {
-  border-color: rgba(59, 130, 246, 0.3);
-}
-.operator-action--claim:hover:not(:disabled) {
-  background: rgba(59, 130, 246, 0.1);
-  border-color: var(--color-info, #3B82F6);
-}
-.operator-action--claim .operator-action__icon {
-  color: var(--color-info, #3B82F6);
-}
-
-.operator-action--release {
-  border-color: rgba(234, 179, 8, 0.3);
-}
-.operator-action--release:hover:not(:disabled) {
-  background: rgba(234, 179, 8, 0.1);
-  border-color: var(--color-warning, #EAB308);
-}
-.operator-action--release .operator-action__icon {
-  color: var(--color-warning, #EAB308);
-}
-
-.operator-action--advance {
   border-color: rgba(22, 163, 74, 0.3);
 }
-.operator-action--advance:hover:not(:disabled) {
+.operator-action--claim:hover:not(:disabled) {
   background: rgba(22, 163, 74, 0.1);
   border-color: var(--color-success, #16A34A);
 }
-.operator-action--advance .operator-action__icon {
+.operator-action--claim .operator-action__icon {
   color: var(--color-success, #16A34A);
+}
+
+.operator-action--release {
+  border-color: rgba(249, 115, 22, 0.3);
+}
+.operator-action--release:hover:not(:disabled) {
+  background: rgba(249, 115, 22, 0.1);
+  border-color: var(--priority-high, #F97316);
+}
+.operator-action--release .operator-action__icon {
+  color: var(--priority-high, #F97316);
+}
+
+.operator-action--advance {
+  border-color: rgba(59, 130, 246, 0.3);
+}
+.operator-action--advance:hover:not(:disabled) {
+  background: rgba(59, 130, 246, 0.1);
+  border-color: var(--color-info, #3B82F6);
+}
+.operator-action--advance .operator-action__icon {
+  color: var(--color-info, #3B82F6);
 }
 
 .operator-action--force-release {
