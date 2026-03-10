@@ -85,6 +85,21 @@ STAGE_TO_STATE_DIR = {
 DEFAULT_LEASE_MINUTES = 30
 
 # ─── Mode Configuration ──────────────────────────────────────────────────────
+#
+# FORGEOS_MODE controls tri-modal operation for gradual filesystem-to-MCP migration:
+#   "filesystem" (default) — All ticket operations use local JSON files only.
+#                            Original behavior; no network dependency.
+#   "dual"                — Filesystem-first with MCP shadow writes.
+#                            Divergences logged at WARNING level.
+#                            MCP failures are non-fatal (fallback to filesystem).
+#   "mcp"                 — MCP-only. Filesystem is not used.
+#                            Requires a reachable ForgeOS MCP Server.
+#
+# FORGEOS_MCP_URL  — Streamable HTTP endpoint of the ForgeOS MCP Server.
+# FORGEOS_API_KEY  — Bearer token for MCP server authentication.
+#
+# See also: dispatch_claim(), dispatch_advance(), dispatch_release().
+# ──────────────────────────────────────────────────────────────────────────────
 
 FORGEOS_MODE = os.environ.get("FORGEOS_MODE", "filesystem")
 FORGEOS_MCP_URL = os.environ.get("FORGEOS_MCP_URL", "http://localhost:3000/mcp")
@@ -884,14 +899,42 @@ def print_dot_graph() -> None:
 
 
 class MCPClient:
-    """HTTP client for ForgeOS MCP Server ticket operations."""
+    """HTTP client for ForgeOS MCP Server ticket operations.
+
+    Uses JSON-RPC 2.0 over Streamable HTTP to communicate with the
+    ForgeOS MCP Server for ticket lifecycle operations (claim, complete,
+    release).  Requires a running server at ``FORGEOS_MCP_URL``.
+
+    Args:
+        url:     Base URL of the MCP server (e.g. ``http://localhost:3000/mcp``).
+        api_key: Bearer token for authentication.  May be empty for
+                 unauthenticated local development.
+
+    Example::
+
+        client = MCPClient("http://localhost:3000/mcp", os.environ["FORGEOS_API_KEY"])
+        if client.health_check():
+            ok, msg = client.claim("TASK-001", "Backend", "pop-os", "oak")
+    """
 
     def __init__(self, url: str, api_key: str):
         self.url = url.rstrip("/")
         self.api_key = api_key
 
     def _call_tool(self, tool_name: str, arguments: dict) -> tuple[bool, str]:
-        """Call an MCP tool via Streamable HTTP JSON-RPC."""
+        """Call an MCP tool via Streamable HTTP JSON-RPC.
+
+        Sends a JSON-RPC 2.0 POST request to the MCP server endpoint
+        and parses the response content.
+
+        Args:
+            tool_name:  MCP tool identifier (e.g. ``tickets.claim``).
+            arguments:  Tool-specific keyword arguments.
+
+        Returns:
+            ``(True, text)`` on success where *text* is the first content
+            block, or ``(False, error_message)`` on failure.
+        """
         payload = json.dumps({
             "jsonrpc": "2.0",
             "method": "tools/call",
@@ -925,7 +968,12 @@ class MCPClient:
             return False, f"MCP error: {e}"
 
     def health_check(self) -> bool:
-        """Check if MCP server is reachable."""
+        """Check if MCP server is reachable.
+
+        Sends a GET request to the ``/health`` endpoint with a 5-second
+        timeout.  Returns ``True`` only if the server responds with
+        HTTP 200.
+        """
         try:
             base = self.url.rsplit("/", 1)[0] if "/" in self.url else self.url
             req = Request(base + "/health", method="GET")
@@ -961,7 +1009,13 @@ _mcp_client: MCPClient | None = None
 
 
 def _get_mcp_client() -> MCPClient | None:
-    """Get or create MCP client. Returns None if not configured or unreachable."""
+    """Get or create a singleton MCP client.
+
+    Returns ``None`` when ``FORGEOS_MCP_URL`` is empty or the server
+    fails a health check.  The client instance is cached in the module
+    global ``_mcp_client`` after the first successful health check so
+    subsequent calls avoid repeated network probes.
+    """
     global _mcp_client
     if _mcp_client is not None:
         return _mcp_client
@@ -982,7 +1036,15 @@ def dispatch_claim(
     ticket_id: str, agent: str, machine_id: str, operator: str,
     lease_minutes: int = DEFAULT_LEASE_MINUTES,
 ) -> tuple[bool, str]:
-    """Claim a ticket respecting FORGEOS_MODE."""
+    """Claim a ticket respecting ``FORGEOS_MODE``.
+
+    Behavior by mode:
+
+    * **filesystem** — delegates to ``claim_ticket()`` (local JSON).
+    * **dual** — runs ``claim_ticket()`` first, then mirrors the claim
+      to MCP.  Logs a WARNING on divergence; MCP failure is non-fatal.
+    * **mcp** — delegates to ``MCPClient.claim()`` only.
+    """
     if FORGEOS_MODE == "mcp":
         client = _get_mcp_client()
         if not client:
@@ -1017,7 +1079,15 @@ def dispatch_claim(
 def dispatch_advance(
     ticket_id: str, agent: str, machine_id: str = "system",
 ) -> tuple[bool, str]:
-    """Advance a ticket respecting FORGEOS_MODE."""
+    """Advance a ticket to the next SDLC stage respecting ``FORGEOS_MODE``.
+
+    Behavior by mode:
+
+    * **filesystem** — delegates to ``advance_ticket()`` (local JSON move).
+    * **dual** — runs ``advance_ticket()`` first, then mirrors to
+      ``MCPClient.complete()``.  Logs a WARNING on divergence.
+    * **mcp** — delegates to ``MCPClient.complete()`` only.
+    """
     if FORGEOS_MODE == "mcp":
         client = _get_mcp_client()
         if not client:
@@ -1052,7 +1122,15 @@ def dispatch_advance(
 def dispatch_release(
     ticket_id: str, reason: str = "manual release",
 ) -> tuple[bool, str]:
-    """Release a claim respecting FORGEOS_MODE."""
+    """Release a ticket claim respecting ``FORGEOS_MODE``.
+
+    Behavior by mode:
+
+    * **filesystem** — delegates to ``release_claim()`` (local JSON).
+    * **dual** — runs ``release_claim()`` first, then mirrors to
+      ``MCPClient.release()``.  Logs a WARNING on divergence.
+    * **mcp** — delegates to ``MCPClient.release()`` only.
+    """
     if FORGEOS_MODE == "mcp":
         client = _get_mcp_client()
         if not client:
