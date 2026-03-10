@@ -2296,3 +2296,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/alembic/versions/20260310_000000_003_indexes_constraints.py
 - **Decisions:** Added composite indexes (stage+type+priority, status+stage, stage+claimed_by), upgraded idx_tickets_claimable with stage as leading column per ARCH006, upgraded idx_claims_active to UNIQUE partial for database-enforced one-active-claim-per-ticket mutex, added FK coverage indexes on file_locks, added CHECK constraints for lease_duration_minutes and max_reworks business rules. GIN indexes on depends_on/file_paths already existed in migration 001.
 - **Timestamp:** 2026-03-10T12:20:00Z
+
+### [FORGEOS-BE011] — Implement asyncpg Connection Pool
+- **Artifacts:** mcp-server/src/mcp_server/db/pool.py, mcp-server/src/mcp_server/db/__init__.py, mcp-server/tests/test_pool.py
+- **Decisions:** Thin wrapper over asyncpg.create_pool with PoolConfig (pydantic-settings), PoolStats (frozen dataclass), async context manager for acquire, ping health check, graceful close. Constructor accepts optional overrides (dsn, min_size, max_size) for DI/testing.
+- **Timestamp:** 2026-03-10T12:25:00+00:00
