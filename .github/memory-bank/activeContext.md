@@ -1,3 +1,8 @@
+### [FORGEOS-BE042] — BACKEND Complete
+- **Artifacts:** mcp-server/src/mcp_server/middleware/rate_limiter.py, mcp-server/tests/test_rate_limiter.py
+- **Decisions:** In-memory sliding window over PostgreSQL for simplicity; two-tier limits (write=30/min, read=120/min); Starlette BaseHTTPMiddleware pattern consistent with existing middleware
+- **Timestamp:** 2026-03-11T00:00:00Z
+
 ### [FORGEOS-BE046] — Validation: APPROVED
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE046.md
 - **Decisions:** APPROVED with HIGH confidence. 10/10 DoD items pass. 8/8 ACs verified. 70 tests, 97% coverage. Upstream verdicts confirmed: QA ✅, Security ✅, CI ✅, Docs ✅. Ruff clean, mypy clean, no TODOs, no console output.
@@ -3395,3 +3400,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE056.md
 - **Decisions:** PASS — Score 84/100, 0 critical, 3 warnings (E501 in BE053 code). authorization.py 100% coverage, BE056 functions 100% coverage. CC max 7, MI grade A. Mypy clean, no circular imports, no dead code.
 - **Timestamp:** 2026-03-11T23:30:00Z
+
+### [FORGEOS-BE058] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE058.md
+- **Decisions:** APPROVED — All 10 DoD items pass. 49/49 tests, 92% coverage (audit_service 100%, audit_middleware 96%, audit_repo 89%), ruff clean, mypy clean, all 6 ACs verified. QA ✓ Security ✓ CI ✓ Docs ✓. Append-only audit logging with parameterized SQL, middleware auto-logging, admin endpoint with filters.
+- **Timestamp:** 2026-03-12T02:30:00Z
