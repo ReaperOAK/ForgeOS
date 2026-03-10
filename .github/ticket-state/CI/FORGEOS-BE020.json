@@ -1,0 +1,121 @@
+{
+  "ticket_id": "FORGEOS-BE020",
+  "title": "Implement Dynamic Tool Registration System",
+  "description": "Implement the dynamic tool registration system that allows ticket operations to be registered as MCP tools. Each tool is registered with a name, description, and JSON Schema defining its input parameters. The registry exposes registered tools to MCP clients during capability negotiation. Tools are implemented as async handler functions that receive validated input and return structured results.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "CI",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T17:59:14.006740+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE015",
+    "FORGEOS-ARCH009"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "mcp-server/src/mcp_server/tools/registry.py",
+    "mcp-server/src/mcp_server/tools/__init__.py"
+  ],
+  "acceptance_criteria": [
+    "ToolRegistry class allows registering tools with name, description, input schema, and handler",
+    "Registered tools are reported in the MCP server's tools/list response",
+    "Tool handlers are async functions accepting validated input parameters",
+    "Registry prevents duplicate tool name registration (raises error)",
+    "Tool input schemas follow JSON Schema draft 2020-12 format",
+    "Registry provides a lookup method to resolve tool name to handler and schema"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T17:59:14.006755+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase2-mcp-server.md"
+    },
+    {
+      "timestamp": "2026-03-10T10:03:55Z",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Claimed by Backend agent for BACKEND stage"
+    },
+    {
+      "timestamp": "2026-03-10T10:03:55Z",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Claimed by Backend agent for BACKEND stage"
+    },
+    {
+      "timestamp": "2026-03-10T12:09:19.547665+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Re-claimed by Backend agent for BACKEND stage (stalled re-dispatch)"
+    },
+    {
+      "timestamp": "2026-03-10T12:12:40.282359+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "BACKEND stage complete. Tool registry with versioning implemented. 37 tests pass, 97% coverage."
+    },
+    {
+      "timestamp": "2026-03-10T12:37:37.056821+00:00",
+      "event": "CLAIMED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "Claimed by QA agent for QA stage"
+    },
+    {
+      "timestamp": "2026-03-10T12:39:06.949929+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "QA PASS. 37/37 tests pass, 97pct coverage, all 6 ACs verified."
+    },
+    {
+      "timestamp": "2026-03-10T12:57:43.314382+00:00",
+      "event": "CLAIMED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "details": "Claimed by Security agent for SECURITY stage"
+    },
+    {
+      "timestamp": "2026-03-10T12:59:52.779245+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "details": "SECURITY stage PASS. 0 critical/high findings, 4 informational (risk-accepted). STRIDE model clean, OWASP 10/10 checked."
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase2-mcp-server.md",
+  "tags": [
+    "backend",
+    "mcp",
+    "tools",
+    "registry",
+    "phase2",
+    "BLK-04-02"
+  ],
+  "completed_stages": [
+    "BACKEND",
+    "QA"
+  ]
+}
