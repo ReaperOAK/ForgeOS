@@ -5,7 +5,7 @@ type: architecture
 author: Architect
 date: 2026-03-07T00:00:00Z
 status: REVIEWED
-last_reviewed: 2026-03-07T14:45:00Z
+last_reviewed: 2026-03-10T11:00:00Z
 audience: Backend Engineers, DevOps Engineers, QA Engineers, Architects
 purpose: Define the event sourcing audit trail schema for ForgeOS ticket state changes, including table design, event type catalog, payload schemas, sequence numbering, state reconstruction, LISTEN/NOTIFY integration, and archival strategy
 diataxis_quadrant: reference
@@ -1199,6 +1199,14 @@ Individual partitions remain small (<200 MB), enabling fast VACUUM, efficient in
 ## 13. Migration Path
 
 ### 13.1 Migration 002: Event Sourcing Enhancements
+
+> **Implementation status:** Migration 002 has been implemented as an Alembic
+> (Python) migration at `mcp-server/alembic/versions/20260310_000000_002_event_tables.py`
+> (ticket FORGEOS-BE003). The file name follows Alembic conventions rather than
+> the SQL naming pattern described below. All tables, indexes, triggers, and enum
+> extensions specified in this section are present in the implemented migration.
+> See [Schema Reference](../../docs/database/schema-reference.md) for the full
+> column-level documentation.
 
 All schema changes are delivered as a single migration file: `002_event_sourcing_enhancements.sql`
 
