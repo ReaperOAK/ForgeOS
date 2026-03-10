@@ -35,10 +35,10 @@
     "Bulk query support: list events by ticket, by agent, by time range"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "QA",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T13:05:36.936300+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -67,7 +67,14 @@
       "event": "STAGE_ADVANCED",
       "agent": "Backend",
       "machine_id": "pop-os",
-      "details": "BACKEND complete — advancing to QA. 53 tests pass, 97% coverage."
+      "details": "BACKEND complete \u2014 advancing to QA. 53 tests pass, 97% coverage."
+    },
+    {
+      "timestamp": "2026-03-10T12:35:36.936300+00:00",
+      "event": "CLAIMED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "Claimed by QA for QA stage"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
