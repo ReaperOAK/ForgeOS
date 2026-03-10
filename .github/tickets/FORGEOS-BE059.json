@@ -36,10 +36,10 @@
     "Webhook receipt acknowledged with 202 Accepted before processing (async handling)"
   ],
   "rework_count": 0,
-  "claimed_by": "CI Reviewer",
+  "claimed_by": "Documentation Specialist",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T22:23:49.750490+00:00",
+  "lease_expiry": "2026-03-10T22:44:17.240780+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -134,6 +134,22 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "CI PASS - Score 87/100, 0 critical, 2 warnings, 3 suggestions. 48 tests passing."
+    },
+    {
+      "timestamp": "2026-03-10T22:14:17.207218+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from CI Reviewer: manual release"
+    },
+    {
+      "timestamp": "2026-03-10T22:14:17.240795+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-10T22:44:17.240780+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-webhooks.md",

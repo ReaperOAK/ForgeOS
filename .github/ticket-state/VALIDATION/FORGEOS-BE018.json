@@ -35,10 +35,10 @@
     "No direct pool access in tool handlers; all database access is through repositories"
   ],
   "rework_count": 1,
-  "claimed_by": "Documentation Specialist",
+  "claimed_by": "Validator",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T22:23:50.114829+00:00",
+  "lease_expiry": "2026-03-10T22:44:17.749222+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -244,13 +244,20 @@
       "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-10T22:23:50.114829+00:00"
     },
     {
-      "timestamp": "2026-03-12T00:30:00.000000+00:00",
-      "event": "STAGE_COMPLETED",
-      "agent": "Documentation",
+      "timestamp": "2026-03-10T22:14:17.716275+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Documentation Specialist: manual release"
+    },
+    {
+      "timestamp": "2026-03-10T22:14:17.749238+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
       "machine_id": "pop-os",
-      "from_stage": "DOCS",
+      "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
-      "details": "DOCS complete"
+      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-10T22:44:17.749222+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
