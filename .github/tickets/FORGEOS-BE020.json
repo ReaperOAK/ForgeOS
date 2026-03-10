@@ -35,10 +35,10 @@
     "Registry provides a lookup method to resolve tool name to handler and schema"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Security",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T13:27:43.314679+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -89,6 +89,13 @@
       "agent": "QA",
       "machine_id": "pop-os",
       "details": "QA PASS. 37/37 tests pass, 97pct coverage, all 6 ACs verified."
+    },
+    {
+      "timestamp": "2026-03-10T12:57:43.314689+00:00",
+      "event": "CLAIMED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "details": "Claimed by Security agent for SECURITY stage"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
