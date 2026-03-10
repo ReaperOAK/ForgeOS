@@ -3410,3 +3410,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE059.md
 - **Decisions:** APPROVED — 10/10 DoD items pass, all 6 ACs met, all upstream verdicts (QA/Security/CI/Docs) verified PASS, 48 tests pass, 98% coverage
 - **Timestamp:** 2026-03-12T00:15:00Z
+
+### [FORGEOS-BE045] — BACKEND Complete
+- **Artifacts:** agent-sdk/src/forgeos_sdk/models.py, agent-sdk/src/forgeos_sdk/operations.py, agent-sdk/tests/test_models.py, agent-sdk/tests/test_operations.py
+- **Decisions:** Mapped MCP tool names to server conventions (tickets.complete, tickets.reject). Ticket model uses extra="allow" for unknown server fields. claim_next raises ToolCallError on null ticket (empty queue) instead of returning None.
+- **Timestamp:** 2026-03-10T22:38:21Z

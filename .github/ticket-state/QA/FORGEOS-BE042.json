@@ -4,7 +4,7 @@
   "description": "Implement per-agent and per-machine rate limiting for MCP tool calls and REST API endpoints. Use a sliding window algorithm backed by PostgreSQL or in-memory storage. Different rate limits apply based on operation type: claim operations are more restrictive than status queries. Rate limit headers are included in responses.",
   "type": "backend",
   "priority": "medium",
-  "stage": "READY",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -23,7 +23,7 @@
   ],
   "blocked_by": [],
   "file_paths": [
-    "mcp-server/src/middleware/rate_limiter.py"
+    "mcp-server/src/mcp_server/middleware/rate_limiter.py"
   ],
   "acceptance_criteria": [
     "Rate limiter tracks requests per agent identity and per machine",
@@ -39,6 +39,12 @@
   "operator": "ReaperOAK",
   "lease_expiry": "2026-03-10T22:57:49.883734+00:00",
   "lease_duration_minutes": 30,
+  "completed_at": "2026-03-11T00:00:00+00:00",
+  "artifacts": [
+    "mcp-server/src/mcp_server/middleware/rate_limiter.py",
+    "mcp-server/src/mcp_server/middleware/__init__.py",
+    "mcp-server/tests/test_rate_limiter.py"
+  ],
   "history": [
     {
       "timestamp": "2026-03-05T18:06:45.294223+00:00",
@@ -62,6 +68,15 @@
       "from_stage": "READY",
       "to_stage": "READY",
       "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-10T22:57:49.883734+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T00:00:00+00:00",
+      "event": "BACKEND_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "BACKEND",
+      "to_stage": "QA",
+      "details": "Per-agent rate limiting middleware implemented with sliding window algorithm, 34 tests, 96% coverage"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
