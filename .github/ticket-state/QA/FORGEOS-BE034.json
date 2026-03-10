@@ -4,7 +4,7 @@
   "description": "Implement the `GET /api/tickets` REST endpoint for listing tickets with filtering and pagination. The endpoint shares the ticket service layer created in FORGEOS-BE028. Supports filtering by stage, type, priority, claimed_by, and machine_id. Implement cursor-based or offset-based pagination. Create Pydantic response/request schemas. Mount the ASGI API routes on the HTTP transport from FORGEOS-BE017.",
   "type": "backend",
   "priority": "high",
-  "stage": "READY",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -65,6 +65,15 @@
       "from_stage": "READY",
       "to_stage": "READY",
       "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-10T22:57:49.850198+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T22:41:00.558137+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "READY",
+      "to_stage": "QA",
+      "details": "BACKEND stage complete. Implementation: GET /api/tickets REST endpoint with filtering and pagination."
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
@@ -77,5 +86,6 @@
     "filtering",
     "phase3",
     "BLK-06-02"
-  ]
+  ],
+  "status": "IN_PROGRESS"
 }
