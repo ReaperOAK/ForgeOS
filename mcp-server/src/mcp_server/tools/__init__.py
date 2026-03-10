@@ -39,10 +39,14 @@ from mcp_server.tools.ticket_tools import (
     TICKETS_NEXT_SCHEMA,
     TICKETS_RELEASE_SCHEMA,
     TICKETS_STATUS_SCHEMA,
+    TICKETS_SYNC_SCHEMA,
+    TICKETS_VALIDATE_SCHEMA,
     handle_tickets_advance,
     handle_tickets_next,
     handle_tickets_release,
     handle_tickets_status,
+    handle_tickets_sync,
+    handle_tickets_validate,
     register_ticket_tools,
 )
 from mcp_server.tools.validation import (
@@ -62,6 +66,8 @@ __all__ = [
     "TICKETS_NEXT_SCHEMA",
     "TICKETS_RELEASE_SCHEMA",
     "TICKETS_STATUS_SCHEMA",
+    "TICKETS_SYNC_SCHEMA",
+    "TICKETS_VALIDATE_SCHEMA",
     "DuplicateToolError",
     "FieldError",
     "McpValidationErrorData",
@@ -77,6 +83,8 @@ __all__ = [
     "handle_tickets_next",
     "handle_tickets_release",
     "handle_tickets_status",
+    "handle_tickets_sync",
+    "handle_tickets_validate",
     "register_ticket_tools",
     "validate_tool_input",
 ]

@@ -3435,3 +3435,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/tools/ticket_tools.py, mcp-server/src/mcp_server/services/ticket_service.py, mcp-server/src/mcp_server/repositories/ticket_repo.py, mcp-server/tests/test_ticket_release_status.py
 - **Decisions:** Reused ClaimRepository.release_claim() and get_active_claim() for ownership validation; added list_filtered() with dynamic parameterized WHERE clause; frozen dataclasses for all result types; factory closure pattern for handler binding consistent with existing tools
 - **Timestamp:** 2025-07-08T12:00:00Z
+
+### [FORGEOS-BE030] — Implement tickets.advance MCP Tool
+- **Artifacts:** stage_engine.py, ticket_service.py, ticket_tools.py, services/__init__.py, tools/__init__.py, test_stage_engine.py, test_advance_tool.py
+- **Decisions:** Used pure-domain stage_engine.py for SDLC flow validation; used transactional() context manager with raw SQL for SERIALIZABLE isolation instead of going through repositories; reused existing TicketNotFoundError from mcp_server.server; created ClaimValidationError as new domain exception
+- **Timestamp:** 2026-03-11T01:30:00Z
