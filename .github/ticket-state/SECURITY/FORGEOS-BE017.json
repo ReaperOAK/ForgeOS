@@ -4,7 +4,7 @@
   "description": "Implement the SSE (Server-Sent Events) and/or Streamable HTTP transport layer for remote agent communication. This enables agents running on different machines to connect to the MCP server over the network. Configure the HTTP server (using an ASGI framework like Starlette or FastAPI), implement the SSE endpoint for server-to-client streaming, and handle connection lifecycle (connect, reconnect, timeout).",
   "type": "backend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Remote agent can connect, send initialize request, and receive server capabilities"
   ],
   "rework_count": 0,
-  "claimed_by": "QA",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T13:06:07.191617+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -90,6 +90,15 @@
       "agent": "QA",
       "machine_id": "pop-os",
       "details": "Claimed by QA on pop-os (reaperoak)"
+    },
+    {
+      "timestamp": "2026-03-10T12:43:02.006057+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "QA PASS - 58 tests, 86% sse.py / 82% http.py coverage"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
