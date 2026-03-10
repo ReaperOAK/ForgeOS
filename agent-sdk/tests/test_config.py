@@ -5,6 +5,9 @@ from __future__ import annotations
 import os
 from unittest.mock import patch
 
+import pytest
+from pydantic import ValidationError
+
 from forgeos_sdk.config import SDKConfig, TransportType
 
 
@@ -48,6 +51,13 @@ class TestSDKConfigDefaults:
             )
         assert config.transport == TransportType.STREAMABLE_HTTP
 
+    def test_default_api_key_is_none(self) -> None:
+        with patch.dict(os.environ, {}, clear=True):
+            config = SDKConfig(
+                _env_file=None,  # type: ignore[call-arg]
+            )
+        assert config.api_key is None
+
 
 class TestSDKConfigFromEnv:
     """Verify SDKConfig reads from environment variables."""
@@ -84,11 +94,20 @@ class TestSDKConfigFromEnv:
             )
         assert config.transport == TransportType.STDIO
 
+    def test_api_key_from_env(self) -> None:
+        env = {"FORGEOS_API_KEY": "secret-key-123"}
+        with patch.dict(os.environ, env, clear=True):
+            config = SDKConfig(
+                _env_file=None,  # type: ignore[call-arg]
+            )
+        assert config.api_key == "secret-key-123"
+
     def test_all_env_vars_together(self) -> None:
         env = {
             "FORGEOS_SERVER_URL": "http://custom:3000/mcp",
             "FORGEOS_AGENT_ID": "QA",
             "FORGEOS_TRANSPORT": "streamable-http",
+            "FORGEOS_API_KEY": "my-api-key",
         }
         with patch.dict(os.environ, env, clear=True):
             config = SDKConfig(
@@ -97,6 +116,60 @@ class TestSDKConfigFromEnv:
         assert config.server_url == "http://custom:3000/mcp"
         assert config.agent_id == "QA"
         assert config.transport == TransportType.STREAMABLE_HTTP
+        assert config.api_key == "my-api-key"
+
+
+class TestSDKConfigValidation:
+    """Verify SDKConfig rejects invalid configurations."""
+
+    def test_empty_server_url_rejected(self) -> None:
+        with pytest.raises(ValidationError, match="server_url"):
+            SDKConfig(
+                server_url="",
+                _env_file=None,  # type: ignore[call-arg]
+            )
+
+    def test_whitespace_server_url_rejected(self) -> None:
+        with pytest.raises(ValidationError, match="server_url"):
+            SDKConfig(
+                server_url="   ",
+                _env_file=None,  # type: ignore[call-arg]
+            )
+
+    def test_empty_agent_id_rejected(self) -> None:
+        with pytest.raises(ValidationError, match="agent_id"):
+            SDKConfig(
+                agent_id="",
+                _env_file=None,  # type: ignore[call-arg]
+            )
+
+    def test_whitespace_agent_id_rejected(self) -> None:
+        with pytest.raises(ValidationError, match="agent_id"):
+            SDKConfig(
+                agent_id="   ",
+                _env_file=None,  # type: ignore[call-arg]
+            )
+
+    def test_invalid_transport_rejected(self) -> None:
+        with pytest.raises(ValidationError):
+            SDKConfig(
+                transport="grpc",  # type: ignore[arg-type]
+                _env_file=None,  # type: ignore[call-arg]
+            )
+
+    def test_empty_api_key_rejected(self) -> None:
+        with pytest.raises(ValidationError, match="api_key"):
+            SDKConfig(
+                api_key="",
+                _env_file=None,  # type: ignore[call-arg]
+            )
+
+    def test_whitespace_api_key_rejected(self) -> None:
+        with pytest.raises(ValidationError, match="api_key"):
+            SDKConfig(
+                api_key="   ",
+                _env_file=None,  # type: ignore[call-arg]
+            )
 
 
 class TestSDKConfigEnvPrefix:

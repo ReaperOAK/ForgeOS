@@ -4,8 +4,11 @@ Configuration is loaded from environment variables with the ``FORGEOS_`` prefix
 using pydantic-settings.
 """
 
+from __future__ import annotations
+
 from enum import Enum
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings
 
 
@@ -25,6 +28,7 @@ class SDKConfig(BaseSettings):
     - ``FORGEOS_SERVER_URL`` — MCP server URL (default: ``http://localhost:8080/mcp``)
     - ``FORGEOS_AGENT_ID`` — Agent identifier (default: ``unknown-agent``)
     - ``FORGEOS_TRANSPORT`` — Transport type (default: ``streamable-http``)
+    - ``FORGEOS_API_KEY`` — API key for authentication (optional)
     """
 
     model_config = {"env_prefix": "FORGEOS_"}
@@ -32,3 +36,18 @@ class SDKConfig(BaseSettings):
     server_url: str = "http://localhost:8080/mcp"
     agent_id: str = "unknown-agent"
     transport: TransportType = TransportType.STREAMABLE_HTTP
+    api_key: str | None = None
+
+    @field_validator("server_url", "agent_id")
+    @classmethod
+    def _must_not_be_blank(cls, v: str) -> str:
+        if not v or not v.strip():
+            raise ValueError("must not be empty or blank")
+        return v
+
+    @field_validator("api_key")
+    @classmethod
+    def _api_key_not_blank(cls, v: str | None) -> str | None:
+        if v is not None and not v.strip():
+            raise ValueError("api_key must not be empty or blank when provided")
+        return v
