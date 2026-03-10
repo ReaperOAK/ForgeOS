@@ -34,10 +34,10 @@
     "An agent can connect via stdio, send an initialize request, and receive a response"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T14:08:44.534281+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -106,6 +106,13 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "CI PASS \u2014 Score 93/100, 0 critical, 1 warning (E402 accepted pattern), 2 suggestions"
+    },
+    {
+      "timestamp": "2026-03-10T13:38:44.534281+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "details": "Claimed by Documentation on pop-os (ReaperOAK)"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
