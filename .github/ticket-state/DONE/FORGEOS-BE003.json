@@ -4,7 +4,7 @@
   "description": "Create the Alembic migration for event sourcing and audit trail tables from the event sourcing schema design (ARCH007). Tables include: event_history (immutable append-only log of all ticket state changes), stage_transitions (records each SDLC stage transition with metadata), and file_locks (tracks which files are locked by which ticket/agent). These tables replace the embedded history array in ticket JSON.",
   "type": "backend",
   "priority": "critical",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Migration downgrades cleanly, dropping all event/audit tables"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T10:38:20+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -59,7 +59,7 @@
       "event": "QA_PASS",
       "agent": "QA",
       "machine_id": "pop-os",
-      "details": "QA PASS — 70/70 tests, all 6 ACs verified. Advanced to SECURITY."
+      "details": "QA PASS \u2014 70/70 tests, all 6 ACs verified. Advanced to SECURITY."
     },
     {
       "timestamp": "2026-03-10T08:21:53.511032+00:00",
@@ -86,7 +86,7 @@
       "machine_id": "pop-os",
       "from_stage": "CI",
       "to_stage": "DOCS",
-      "details": "CI PASS — Score 100/100. 0 critical, 0 warnings. Advanced from CI to DOCS."
+      "details": "CI PASS \u2014 Score 100/100. 0 critical, 0 warnings. Advanced from CI to DOCS."
     },
     {
       "timestamp": "2026-03-10T10:10:00+00:00",
@@ -104,7 +104,16 @@
       "machine_id": "pop-os",
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
-      "details": "DOCS PASS — schema-reference.md updated with event_history and stage_transitions tables, migration docstrings enhanced, CHANGELOG entry added. Advanced from DOCS to VALIDATION."
+      "details": "DOCS PASS \u2014 schema-reference.md updated with event_history and stage_transitions tables, migration docstrings enhanced, CHANGELOG entry added. Advanced from DOCS to VALIDATION."
+    },
+    {
+      "timestamp": "2026-03-10T10:10:00+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "APPROVED \u2014 All 10 DoD items pass. 70/70 tests, lint clean, type-safe, fully documented. All upstream verdicts verified (QA, Security, CI, Docs). Confidence: HIGH."
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",

@@ -4,7 +4,7 @@
   "description": "Design the stage pipeline view (Kanban board) and ticket detail view. The pipeline view shows columns for each SDLC stage (READY through DONE) with ticket cards showing ID, title, type badge, priority indicator, and claim status. The ticket detail view shows full metadata, acceptance criteria checklist, file paths, dependency tree, history timeline, and agent activity log. Define component specifications for TicketCard, StageColumn, MetadataPanel, HistoryTimeline, and DependencyTree.",
   "type": "frontend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -37,10 +37,10 @@
     "Mockup approval status set to APPROVED in mockup document header"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T10:33:00+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -140,6 +140,22 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "DOCS PASS. Added freshness metadata (doc_type, last_reviewed) to 3 design spec files. Di\u00e1taxis Reference classification. CHANGELOG entry. Readability FK grade ~9. All links valid."
+    },
+    {
+      "timestamp": "2026-03-10T10:05:00+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "details": "CLAIM by Validator on pop-os (reaperoak)"
+    },
+    {
+      "timestamp": "2026-03-10T10:06:00+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "VALIDATION APPROVED. 7/7 AC met. 9/10 DoD pass + 1 N/A justified. All upstream verdicts confirmed."
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
@@ -152,7 +168,7 @@
     "phase4",
     "BLK-10-01"
   ],
-  "status": "in_progress",
+  "status": "done",
   "completed_at": "2026-03-09T21:19:33.419679+00:00",
   "artifacts": [
     "forgeos-server/src/dashboard/js/app.js",

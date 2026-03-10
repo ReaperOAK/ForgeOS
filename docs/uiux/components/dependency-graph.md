@@ -5,6 +5,9 @@ type: component-spec
 author: UIDesigner
 date: 2026-03-10T00:00:00Z
 status: APPROVED
+last_reviewed: 2026-03-10T22:30:00Z
+reviewed_by: Documentation
+diataxis: reference
 ---
 
 # Dependency Graph — Component Specification

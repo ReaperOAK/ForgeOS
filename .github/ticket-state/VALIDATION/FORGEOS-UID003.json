@@ -4,7 +4,7 @@
   "description": "Design the interactive dependency graph (DAG visualization) and global search interface. The dependency graph replaces `todo_visual.py --dot` output with an interactive, zoomable, pannable directed acyclic graph. Nodes represent tickets color-coded by stage, edges show dependency relationships. The search interface provides global search by ticket ID, title keyword, file path, agent, and stage with type-ahead suggestions and recent searches.",
   "type": "frontend",
   "priority": "medium",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -37,10 +37,10 @@
     "Mockup approval status set to APPROVED in mockup document header"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T10:34:24.621643+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "completed_at": "2026-03-10T08:05:21Z",
   "history": [
@@ -95,6 +95,15 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "CI review PASS. Score 89/100. 0 critical, 2 warnings (token inconsistency), 1 suggestion. 7/7 AC met. Advanced CI -> DOCS."
+    },
+    {
+      "timestamp": "2026-03-10T22:30:00Z",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Documentation complete. Freshness metadata added to 3 files, CI-W001/W002 resolved (rendering spec), CI-S001 addressed (canonical keyboard shortcuts), CHANGELOG updated."
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
