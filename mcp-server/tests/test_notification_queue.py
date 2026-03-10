@@ -12,21 +12,19 @@ Covers all 6 acceptance criteria:
 from __future__ import annotations
 
 import json
-import math
 import uuid
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 from typing import Any
 
 import pytest
 
 from mcp_server.notifications import Notification, NotificationQueue, NotificationStatus
 from mcp_server.notifications.queue import (
-    InvalidTransitionError,
     _VALID_TRANSITIONS,
+    InvalidTransitionError,
     _record_to_notification,
     compute_backoff_seconds,
 )
-
 
 # ---------------------------------------------------------------------------
 # Helpers / In-Memory Pool Mock
@@ -101,7 +99,7 @@ class InMemoryPool:
 
         if "for update skip locked" in q:
             # Dequeue: find first pending/failed row
-            for nid, row in list(self.rows.items()):
+            for _nid, row in list(self.rows.items()):
                 if row["status"] in ("pending", "failed"):
                     nra = row["next_retry_at"]
                     if nra is None or nra <= args[0]:
