@@ -1,3 +1,8 @@
+### [FORGEOS-UID003] — QA Review (Dependency Graph & Search Design)
+- **Artifacts:** .github/agent-output/QA/FORGEOS-UID003.md
+- **Decisions:** PASS (HIGH confidence). Design-documentation ticket — 3 spec files reviewed (mockup 646 lines, dependency-graph component 504 lines, search-bar component 477 lines). 7/7 acceptance criteria verified. Spec completeness: all 3 docs present with APPROVED status. Internal consistency: 7/7 cross-reference checks passed (design tokens, ARIA roles, TypeScript interfaces, responsive breakpoints, D3 integration, component hierarchy, keyboard nav). 0 defects found. CSS/HTML implementation cross-references verified via grep. No executable code in scope — mutation/coverage/E2E not applicable. Advanced QA → SECURITY.
+- **Timestamp:** 2026-03-10T08:40:00Z
+
 ### [TASK-FOS-03-006] — Security Review
 - **Artifacts:** .github/agent-output/Security/TASK-FOS-03-006.md
 - **Decisions:** PASS (HIGH confidence). STRIDE threat model on 3 boundaries (Client→Express, Express→Handler, Handler→PostgreSQL): max score 9 (LOW). OWASP 10/10 reviewed, 0 failures, 2 advisory notes (A01 per-tool authz not enforced, A04 no spawn limits). 6 findings total: S1 MCP per-tool authz (LOW/CWE-862), S2 TOCTOU child ID race (LOW/CWE-367), S3 no spawn depth/count limits (MEDIUM-advisory/CWE-770), S4 error message info leak (LOW/CWE-209), S5 rate limiting not wired (INFO/CWE-799), S6 file_paths not validated (INFO/CWE-22). All SQL parameterized, clean npm audit, no secrets. Advanced to CI.
@@ -1996,3 +2001,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/QA/TASK-FOS-05-004.md
 - **Decisions:** PASS (HIGH confidence) — All 10 acceptance criteria verified. Static analysis clean: no console.*, no TODO comments, no innerHTML XSS vectors (all use escapeHtml), no eval/Function. Code review of app.js (2371 lines: SSE with exponential backoff, handler registry, filters, kanban), pipeline.js (775 lines: IIFE Kanban module, card DOM updates, lease countdowns), admin.js (460 lines: IIFE admin module, force-release modal, machine polling, health gauge). Advanced to SECURITY.
 - **Timestamp:** 2026-03-10T08:25:00Z
+
+### [TASK-FOS-07-002] - Documentation Summary
+- **Artifacts:** .github/instructions/core.instructions.md, .github/instructions/sdlc.instructions.md, .github/instructions/ticket-system.instructions.md, .github/instructions/git-protocol.instructions.md, .github/instructions/agent-behavior.instructions.md
+- **Decisions:** Additive-only changes to preserve backward compatibility. MCP sections added as new subsections in ticket-system. PRODUCT_MANAGER and UI_DESIGN added as first-class stages. Dual-mode operation uses availability-based fallback. UIDesigner stage ownership changed from FRONTEND to UI_DESIGN.
+- **Timestamp:** 2025-01-27T12:00:00Z
