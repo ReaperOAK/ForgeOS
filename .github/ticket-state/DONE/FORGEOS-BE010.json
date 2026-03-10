@@ -4,7 +4,7 @@
   "description": "Configure appropriate PostgreSQL transaction isolation levels for different operation types. Claim operations use READ COMMITTED (with SKIP LOCKED for non-blocking semantics). State transitions (advance, rework) use SERIALIZABLE to prevent concurrent state corruption. Provide a transaction context manager that sets the isolation level per operation type.",
   "type": "backend",
   "priority": "high",
-  "stage": "DONE",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -242,13 +242,11 @@
       "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-10T22:23:50.660679+00:00"
     },
     {
-      "timestamp": "2026-03-10T21:58:07.793033+00:00",
-      "event": "STAGE_COMPLETED",
-      "agent": "Validator",
+      "timestamp": "2026-03-10T22:27:11.214275+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
       "machine_id": "system",
-      "from_stage": "VALIDATION",
-      "to_stage": "DONE",
-      "details": "Advanced from VALIDATION to DONE"
+      "details": "Released claim from Validator: Lease expired at 2026-03-10T22:23:50.660679+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",

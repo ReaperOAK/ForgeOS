@@ -36,10 +36,10 @@
     "Configuration validates required fields and provides clear error messages for missing values"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation Specialist",
+  "claimed_by": "Validator",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T22:44:17.105366+00:00",
+  "lease_expiry": "2026-03-10T22:58:27.820321+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -143,6 +143,38 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "DOCS complete. README updated with 4 new exceptions and API key config. CHANGELOG entry added. Docstrings already comprehensive."
+    },
+    {
+      "timestamp": "2026-03-10T22:28:23.457717+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Documentation Specialist: manual release"
+    },
+    {
+      "timestamp": "2026-03-10T22:28:23.493508+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-10T22:58:23.493493+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T22:28:27.786831+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Validator: manual release"
+    },
+    {
+      "timestamp": "2026-03-10T22:28:27.820337+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-10T22:58:27.820321+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-agent-sdk.md",

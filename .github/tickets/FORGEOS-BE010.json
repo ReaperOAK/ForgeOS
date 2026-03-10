@@ -35,10 +35,10 @@
     "Transaction wrapper integrates with the asyncpg connection pool"
   ],
   "rework_count": 1,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T22:23:50.660679+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -240,6 +240,13 @@
       "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
       "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-10T22:23:50.660679+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T22:27:11.214275+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Validator: Lease expired at 2026-03-10T22:23:50.660679+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
