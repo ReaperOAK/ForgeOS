@@ -55,11 +55,13 @@
       "details": "Dependencies resolved, moved to READY"
     },
     {
-      "timestamp": "2026-03-10T08:05:49.798584+00:00",
-      "event": "QA_PASS",
+      "timestamp": "2026-03-10T08:03:03.204542+00:00",
+      "event": "STAGE_COMPLETED",
       "agent": "QA",
-      "machine_id": "pop-os",
-      "details": "QA PASS \u2014 70/70 tests, all 6 ACs verified. Advanced to SECURITY."
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
