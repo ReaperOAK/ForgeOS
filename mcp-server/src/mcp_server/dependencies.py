@@ -12,7 +12,7 @@ Usage::
     await deps.close()
 
 .. meta::
-   :last_reviewed: 2026-03-11T14:30:00Z
+   :last_reviewed: 2026-03-12T00:30:00Z
 """
 
 from __future__ import annotations
