@@ -1241,6 +1241,116 @@ future ticket to provide durable, multi-process event storage.
 See also: [FORGEOS-ARCH007 — Event Sourcing Architecture](../docs/architecture/event-sourcing-schema.md).
 
 
+
+## Tool Input Validation
+
+<--- last_reviewed: 2025-03-10T00:00:00Z -->
+<--- audience: developers -->
+<--- diataxis: reference -->
+
+The `mcp_server.tools.validation` module validates MCP tool input parameters
+against JSON Schema (Draft 2020-12) before handler invocation. Invalid inputs
+produce structured error responses with the MCP `INVALID_PARAMS` code (`-32602`).
+
+### Quick Start
+
+```python
+from mcp_server.tools import validate_tool_input, ToolInputValidationError
+
+schema = {
+    "type": "object",
+    "properties": {
+        "ticket_id": {"type": "string"},
+        "priority": {"type": "integer", "minimum": 1, "maximum": 5},
+    },
+    "required": ["ticket_id"],
+    "additionalProperties": False,
+}
+
+# Valid input passes silently
+validate_tool_input("my_tool", schema, {"ticket_id": "BE021", "priority": 3})
+
+# Invalid input raises ToolInputValidationError
+try:
+    validate_tool_input("my_tool", schema, {"priority": "high"})
+except ToolInputValidationError as exc:
+    for err in exc.field_errors:
+        print(f"{err.path}: {err.message}")
+    # $.ticket_id: 'ticket_id' is a required property
+    # $.priority: 'high' is not of type 'integer'
+```
+
+### Features
+
+- **All-errors-at-once** — collects every validation failure in a single pass.
+- **JSONPath field paths** — errors reference `$.user.name`, `$.tags[0]`, etc.
+- **No type coercion** — inputs must match schema types exactly (string `"3"`
+  is not accepted for an integer field).
+- **Compiled validator caching** — validators are compiled once per tool name
+  and reused, keeping validation under 1 ms for typical inputs.
+- **MCP error semantics** — `build_validation_error_data()` produces a
+  structured payload ready for MCP `INVALID_PARAMS` error responses.
+
+### Building MCP Error Responses
+
+```python
+from mcp_server.tools import (
+    build_validation_error_data,
+    ToolInputValidationError,
+    INVALID_PARAMS,
+)
+
+try:
+    validate_tool_input("tickets.claim", schema, params)
+except ToolInputValidationError as exc:
+    error_data = build_validation_error_data(exc)
+    # {
+    #     "tool_name": "tickets.claim",
+    #     "errors": [
+    #         {"path": "$.ticket_id", "message": "'ticket_id' is a required property"},
+    #         {"path": "$.agent_name", "message": "'agent_name' is a required property"}
+    #     ]
+    # }
+    # Use INVALID_PARAMS (-32602) as the JSON-RPC error code
+```
+
+### Validator Cache
+
+Compiled `Draft202012Validator` instances are cached per tool name. Call
+`clear_validator_cache()` to reset the cache (primarily useful in tests).
+
+```python
+from mcp_server.tools import compile_validator, clear_validator_cache
+
+validator = compile_validator("my_tool", schema)  # compiled and cached
+validator2 = compile_validator("my_tool", schema)  # returns cached instance
+assert validator is validator2
+
+clear_validator_cache()  # remove all cached validators
+```
+
+### API Reference
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `validate_tool_input(tool_name, schema, params)` | function | Validate params against JSON Schema; raises `ToolInputValidationError` on failure |
+| `compile_validator(tool_name, schema)` | function | Compile and cache a `Draft202012Validator` for a tool |
+| `build_validation_error_data(exc)` | function | Convert a `ToolInputValidationError` into a structured MCP error payload |
+| `clear_validator_cache()` | function | Remove all cached validators |
+| `FieldError` | dataclass | Frozen dataclass with `path` (str) and `message` (str) |
+| `ToolInputValidationError` | exception | Carries `tool_name` (str) and `field_errors` (list of `FieldError`) |
+| `McpValidationErrorData` | dataclass | Frozen dataclass with `tool_name` and `errors` list; has `to_dict()` method |
+| `INVALID_PARAMS` | constant | MCP/JSON-RPC error code `-32602` |
+
+### Design Constraints
+
+- **Draft 2020-12** — validators use `jsonschema.Draft202012Validator`.
+- **No coercion** — type mismatches are always rejected (e.g. `1` is not `true`).
+- **All errors collected** — `iter_errors()` gathers every failure before raising.
+- **Immutable data** — `FieldError` and `McpValidationErrorData` are frozen dataclasses with `__slots__`.
+- **Cache key** — tool name is the cache key; schema changes require `clear_validator_cache()`.
+
+
 ## Notification Event Queue
 
 The `mcp_server.notifications` package provides a PostgreSQL-backed async
