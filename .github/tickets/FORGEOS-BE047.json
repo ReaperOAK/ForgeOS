@@ -22,8 +22,7 @@
     "FORGEOS-BE008"
   ],
   "blocked_by": [
-    "FORGEOS-BE045",
-    "FORGEOS-BE008"
+    "FORGEOS-BE045"
   ],
   "file_paths": [
     "agent-sdk/src/forgeos_sdk/heartbeat.py",
