@@ -33,10 +33,10 @@
     "Returns {ticket, new_lease_expiry: ISO8601 string} on success"
   ],
   "rework_count": 1,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "QA",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T15:00:00+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -100,6 +100,13 @@
       "from_stage": "BACKEND",
       "to_stage": "QA",
       "details": "Advanced from BACKEND to QA (REWORK #1 fix)"
+    },
+    {
+      "timestamp": "2026-03-10T14:30:00.000000+00:00",
+      "event": "CLAIMED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "Claimed by QA on pop-os (reaperoak) -- REWORK #1 re-verify"
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
