@@ -115,7 +115,7 @@
       "event": "DOCS_COMPLETE",
       "agent": "Documentation",
       "machine_id": "pop-os",
-      "details": "DOCS PASS — README tickets.complete section added, mcp-tool-definitions.md stored function signature fixed (2→4 params), CHANGELOG entry added. JSDoc already complete."
+      "details": "DOCS PASS \u2014 README tickets.complete section added, mcp-tool-definitions.md stored function signature fixed (2\u21924 params), CHANGELOG entry added. JSDoc already complete."
     },
     {
       "timestamp": "2026-03-10T15:40:00+00:00",
