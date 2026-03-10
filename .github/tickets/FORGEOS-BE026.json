@@ -34,10 +34,10 @@
     "Database connection pool is closed after all pending operations complete"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Validator",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T14:18:14+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -95,6 +95,13 @@
       "agent": "Documentation",
       "machine_id": "pop-os",
       "details": "DOCS complete \u2014 advanced to VALIDATION stage"
+    },
+    {
+      "timestamp": "2026-03-10T13:47:58+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "details": "Claimed for VALIDATION stage"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
