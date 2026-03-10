@@ -159,13 +159,27 @@ class HTTPTransport:
                 "idle_timeout_seconds": config.idle_timeout_seconds,
             })
 
-        # Build composite app with health route + MCP transport
+        # Build composite app with health route + MCP transport + admin API
+        from mcp_server.api import create_audit_endpoint
+
+        # Audit repo getter — deferred to account for late binding
+        _audit_repo_ref: list[Any] = [None]
+
+        def _get_audit_repo() -> Any:
+            return _audit_repo_ref[0]
+
+        audit_handler = create_audit_endpoint(_get_audit_repo)
+
         routes: list[Route | Mount] = [
             Route("/health", health_endpoint, methods=["GET"]),
+            Route("/api/admin/audit", audit_handler, methods=["GET"]),
             Mount(config.mount_path, app=http_starlette_app),
         ]
 
         app = Starlette(routes=routes)
+
+        # Store the audit repo ref on the app for late binding by lifespan
+        app.state.audit_repo_ref = _audit_repo_ref  # type: ignore[attr-defined]
         logger.info(
             "HTTP transport app created: mount_path=%s stateless=%s",
             config.mount_path,

@@ -21,7 +21,12 @@ from dataclasses import dataclass
 
 from mcp_server.db.pool import ConnectionPool, PoolConfig
 from mcp_server.observability import get_logger
-from mcp_server.repositories import ClaimRepository, EventRepository, TicketRepository
+from mcp_server.repositories import (
+    AuditRepository,
+    ClaimRepository,
+    EventRepository,
+    TicketRepository,
+)
 
 logger = get_logger("dependencies")
 
@@ -50,6 +55,7 @@ class Dependencies:
     ticket_repo: TicketRepository
     claim_repo: ClaimRepository
     event_repo: EventRepository
+    audit_repo: AuditRepository
 
     @staticmethod
     async def create(
@@ -99,6 +105,7 @@ class Dependencies:
             ticket_repo=TicketRepository(raw),
             claim_repo=ClaimRepository(raw),
             event_repo=EventRepository(raw),
+            audit_repo=AuditRepository(raw),
         )
 
     async def close(self) -> None:

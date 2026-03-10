@@ -3200,3 +3200,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/services/webhook_service.py, mcp-server/src/mcp_server/transport/webhooks.py, mcp-server/src/mcp_server/services/__init__.py, mcp-server/tests/test_webhook_service.py, mcp-server/tests/test_webhook_endpoint.py
 - **Decisions:** Used Starlette routes (not FastAPI) to match existing transport layer pattern. Handler registry pattern for extensibility. Asyncio task for 202-before-processing pattern. Placed route in transport/ package alongside http.py since project has no api/routes/ directory.
 - **Timestamp:** 2026-03-11T23:00:00Z
+
+### [FORGEOS-BE058] — BACKEND complete
+- **Artifacts:** mcp-server/alembic/versions/20260311_000000_006_audit_log.py, mcp-server/src/mcp_server/repositories/audit_repo.py, mcp-server/src/mcp_server/services/audit_service.py, mcp-server/src/mcp_server/middleware/audit_middleware.py, mcp-server/src/mcp_server/api/__init__.py, mcp-server/tests/test_audit_logging.py
+- **Decisions:** Append-only enforced at application layer (no UPDATE/DELETE methods). BaseHTTPMiddleware for auto-logging. Dynamic parameterized WHERE filters. Factory pattern for admin endpoint with late-bound repo getter.
+- **Timestamp:** 2026-03-11T23:30:00Z
