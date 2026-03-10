@@ -35,10 +35,10 @@
     "Escalated tickets have status ESCALATED and claimed_by set to NULL"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T16:30:00+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -103,6 +103,13 @@
       "agent": "Documentation",
       "machine_id": "pop-os",
       "details": "Claimed by Documentation for DOCS stage"
+    },
+    {
+      "timestamp": "2026-03-10T18:22:07.571090+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Documentation: Lease expired at 2026-03-10T16:30:00+00:00"
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",

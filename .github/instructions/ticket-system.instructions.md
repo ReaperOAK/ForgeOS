@@ -18,13 +18,11 @@ RULE: State directory is source of truth for current stage.
 
 ```
 .github/ticket-state/
-    READY/           — Unblocked, available for claim
-    ARCHITECT/       — Being processed by Architect
-    RESEARCH/        — Being processed by Research Analyst
-    PRODUCT_MANAGER/ — Being processed by Product Manager
-    UI_DESIGN/       — Being processed by UIDesigner
-    BACKEND/         — Being processed by Backend Engineer
-    FRONTEND/        — Being processed by Frontend Engineer
+    READY/       — Unblocked, available for claim
+    ARCHITECT/   — Being processed by Architect
+    RESEARCH/    — Being processed by Research Analyst
+    BACKEND/     — Being processed by Backend Engineer
+    FRONTEND/    — Being processed by Frontend or UIDesigner
     QA/          — Being processed by QA Engineer
     SECURITY/    — Being processed by Security Engineer
     CI/          — Being processed by CI Reviewer
@@ -87,8 +85,6 @@ PROHIBITED: Agents reasoning about dependencies. tickets.py handles this.
 | docs | READY -> DOCS -> VALIDATION -> DONE |
 | research | READY -> RESEARCH -> DOCS -> VALIDATION -> DONE |
 | architecture | READY -> ARCHITECT -> DOCS -> VALIDATION -> DONE |
-| product | READY -> PRODUCT_MANAGER -> DOCS -> VALIDATION -> DONE |
-| design | READY -> UI_DESIGN -> DOCS -> VALIDATION -> DONE |
 
 RULE: No stage may be skipped. Order is enforced by tickets.py.
 
@@ -102,81 +98,11 @@ RULE: Backend-only tickets skip this gate.
 ## 7. Parallelism
 
 RULE: ReaperOAK dispatches one subagent per READY ticket.
+RULE: ReaperOAK performs claim commit before dispatching each subagent.
 RULE: ReaperOAK does NOT compute safe parallel groups.
 RULE: ReaperOAK does NOT reason about file conflicts.
-RULE: ReaperOAK dispatches blindly.
-RULE: Subagents enforce isolation via claim commit.
-RULE: Git push conflicts are the safety mechanism.
+RULE: Subagents do NOT perform claim commits — they receive pre-claimed tickets.
+RULE: Git push conflicts on the claim commit are the safety mechanism.
 PROHIBITED: Grouping logic in the dispatcher.
 PROHIBITED: Dependency reasoning in the dispatcher.
 PROHIBITED: File conflict analysis in the dispatcher.
-
-## 8. MCP-Based Ticket Operations (Primary)
-
-RULE: The ForgeOS MCP Server is the primary interface for ticket lifecycle operations.
-RULE: Agents interact with tickets via MCP tool calls over Streamable HTTP.
-RULE: The MCP server is backed by PostgreSQL and provides ACID-guaranteed state management.
-
-### Environment Variables
-
-| Variable | Description | Default |
-|----------|-------------|---------|
-| `FORGEOS_MCP_URL` | MCP server endpoint | `http://localhost:3000/mcp` |
-| `FORGEOS_API_KEY` | Agent authentication key | (required) |
-
-### Available MCP Tools
-
-| Tool | Category | Description |
-|------|----------|-------------|
-| `tickets.next` | Discovery | Find next claimable ticket for a stage (read-only peek) |
-| `tickets.claim` | Lifecycle | Acquire distributed lock on a ticket |
-| `tickets.complete` | Lifecycle | Mark stage done, advance ticket to next stage |
-| `tickets.reject` | Lifecycle | Reject ticket, send to REWORK |
-| `tickets.release` | Lifecycle | Release a claim without completing |
-| `tickets.update` | Metadata | Update ticket metadata fields |
-| `tickets.spawn` | Creation | Create new tickets (TODO agent) |
-| `tickets.graph` | Visualization | Query dependency graph |
-| `tickets.extend` | Lease | Extend lease on a claimed ticket |
-| `tickets.stats` | Dashboard | Aggregate pipeline statistics |
-| `tickets.sync` | System | Resolve dependencies and release expired claims |
-
-### MCP Workflow
-
-```
-1. tickets.next({stage: "BACKEND"})  → discover available ticket
-2. tickets.claim({ticket_id, agent_name, machine_id}) → acquire lock
-3. Execute work (code changes via Git two-commit protocol)
-4. tickets.complete({ticket_id, evidence: {...}}) → advance to next stage
-```
-
-RULE: MCP claim replaces filesystem claim for ticket locking.
-RULE: Git two-commit protocol still applies for code delivery.
-RULE: Each MCP tool call maps to a single PostgreSQL stored function inside a transaction.
-
-## 9. Dual-Mode Operation
-
-RULE: The system operates in dual mode — MCP primary, filesystem fallback.
-RULE: On boot, agents verify MCP server reachability via `tools/list` request.
-RULE: If MCP server responds, agents use MCP tools for all ticket operations.
-RULE: If MCP server is unreachable, agents fall back to filesystem-based `tickets.py` CLI.
-
-### Feature Flags for Gradual Cutover
-
-RULE: Dual-mode operation supports gradual migration from filesystem to MCP.
-RULE: Agents check MCP availability at boot and cache the result for the session.
-RULE: No feature flag configuration file is required — availability-based fallback is automatic.
-
-### Fallback Behavior
-
-| Operation | MCP (Primary) | Filesystem (Fallback) |
-|-----------|--------------|----------------------|
-| Discover ticket | `tickets.next({stage})` | `ls .github/ticket-state/READY/` |
-| Claim ticket | `tickets.claim({...})` | `tickets.py --claim <id> <agent> <machine> <operator>` |
-| Complete stage | `tickets.complete({...})` | `tickets.py --advance <id> <agent>` |
-| Reject ticket | `tickets.reject({...})` | `tickets.py --rework <id> <agent> <reason>` |
-| Release claim | `tickets.release({...})` | `tickets.py --release <id>` |
-| Sync state | `tickets.sync({})` | `tickets.py --sync` |
-
-RULE: Filesystem state machine remains fully functional as fallback.
-RULE: tickets.py is the backward-compatibility bridge during migration.
-PROHIBITED: Removing filesystem support while MCP is not proven stable.

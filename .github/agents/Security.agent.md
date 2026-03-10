@@ -2,7 +2,7 @@
 name: 'Security Engineer'
 description: 'Proactive appsec engineer. Performs STRIDE threat modeling, OWASP Top 10 / LLM Top 10 coverage, SBOM generation, and SARIF-formatted findings.'
 user-invokable: false
-tools: [vscode/getProjectSetupInfo, vscode/installExtension, vscode/newWorkspace, vscode/openSimpleBrowser, vscode/runCommand, vscode/askQuestions, vscode/vscodeAPI, vscode/extensions, execute/runNotebookCell, execute/testFailure, execute/getTerminalOutput, execute/awaitTerminal, execute/killTerminal, execute/createAndRunTask, execute/runInTerminal, read/getNotebookSummary, read/problems, read/readFile, read/terminalSelection, read/terminalLastCommand, agent/runSubagent, edit/createDirectory, edit/createFile, edit/createJupyterNotebook, edit/editFiles, edit/editNotebook, search/changes, search/codebase, search/fileSearch, search/listDirectory, search/searchResults, search/textSearch, search/usages, search/searchSubagent, web/fetch, web/githubRepo, awesome-copilot/list_collections, awesome-copilot/load_collection, awesome-copilot/load_instruction, awesome-copilot/search_instructions, firecrawl/firecrawl_agent, firecrawl/firecrawl_agent_status, firecrawl/firecrawl_browser_create, firecrawl/firecrawl_browser_delete, firecrawl/firecrawl_browser_execute, firecrawl/firecrawl_browser_list, firecrawl/firecrawl_check_crawl_status, firecrawl/firecrawl_crawl, firecrawl/firecrawl_extract, firecrawl/firecrawl_map, firecrawl/firecrawl_scrape, firecrawl/firecrawl_search, github/add_comment_to_pending_review, github/add_issue_comment, github/add_reply_to_pull_request_comment, github/assign_copilot_to_issue, github/create_branch, github/create_or_update_file, github/create_pull_request, github/create_repository, github/delete_file, github/fork_repository, github/get_commit, github/get_file_contents, github/get_label, github/get_latest_release, github/get_me, github/get_release_by_tag, github/get_tag, github/get_team_members, github/get_teams, github/issue_read, github/issue_write, github/list_branches, github/list_commits, github/list_issue_types, github/list_issues, github/list_pull_requests, github/list_releases, github/list_tags, github/merge_pull_request, github/pull_request_read, github/pull_request_review_write, github/push_files, github/request_copilot_review, github/search_code, github/search_issues, github/search_pull_requests, github/search_repositories, github/search_users, github/sub_issue_write, github/update_pull_request, github/update_pull_request_branch, io.github.upstash/context7/get-library-docs, io.github.upstash/context7/resolve-library-id, markitdown/convert_to_markdown, memory/add_observations, memory/create_entities, memory/create_relations, memory/delete_entities, memory/delete_observations, memory/delete_relations, memory/open_nodes, memory/read_graph, memory/search_nodes, microsoft-docs/microsoft_code_sample_search, microsoft-docs/microsoft_docs_fetch, microsoft-docs/microsoft_docs_search, mongodb/aggregate, mongodb/atlas-local-connect-deployment, mongodb/atlas-local-create-deployment, mongodb/atlas-local-delete-deployment, mongodb/atlas-local-list-deployments, mongodb/collection-indexes, mongodb/collection-schema, mongodb/collection-storage-size, mongodb/connect, mongodb/count, mongodb/create-collection, mongodb/create-index, mongodb/db-stats, mongodb/delete-many, mongodb/drop-collection, mongodb/drop-database, mongodb/drop-index, mongodb/explain, mongodb/export, mongodb/find, mongodb/insert-many, mongodb/list-collections, mongodb/list-databases, mongodb/mongodb-logs, mongodb/rename-collection, mongodb/update-many, playwright/browser_click, playwright/browser_close, playwright/browser_console_messages, playwright/browser_drag, playwright/browser_evaluate, playwright/browser_file_upload, playwright/browser_fill_form, playwright/browser_handle_dialog, playwright/browser_hover, playwright/browser_install, playwright/browser_navigate, playwright/browser_navigate_back, playwright/browser_network_requests, playwright/browser_press_key, playwright/browser_resize, playwright/browser_run_code, playwright/browser_select_option, playwright/browser_snapshot, playwright/browser_tabs, playwright/browser_take_screenshot, playwright/browser_type, playwright/browser_wait_for, sentry/analyze_issue_with_seer, sentry/create_dsn, sentry/create_project, sentry/create_team, sentry/find_dsns, sentry/find_organizations, sentry/find_projects, sentry/find_releases, sentry/find_teams, sentry/get_doc, sentry/get_event_attachment, sentry/get_issue_details, sentry/get_issue_tag_values, sentry/get_trace_details, sentry/search_docs, sentry/search_events, sentry/search_issue_events, sentry/search_issues, sentry/update_issue, sentry/update_project, sentry/whoami, sequentialthinking/sequentialthinking, stitch/create_project, stitch/edit_screens, stitch/generate_screen_from_text, stitch/generate_variants, stitch/get_project, stitch/get_screen, stitch/list_projects, stitch/list_screens, terraform/get_latest_module_version, terraform/get_latest_provider_version, terraform/get_module_details, terraform/get_policy_details, terraform/get_provider_capabilities, terraform/get_provider_details, terraform/search_modules, terraform/search_policies, terraform/search_providers, vscode.mermaid-chat-features/renderMermaidDiagram,  ms-azuretools.vscode-containers/containerToolsConfig, todo]
+tools: [vscode, execute, read, agent, edit, search, web, browser, 'awesome-copilot/*', 'github/*', 'io.github.upstash/context7/*', 'markitdown/*', 'memory/*', 'microsoft-docs/*', 'mongodb/*', 'playwright/*', 'sentry/*', 'sequentialthinking/*', 'terraform/*', vscode.mermaid-chat-features/renderMermaidDiagram, ms-azuretools.vscode-containers/containerToolsConfig, todo]
 model: Claude Opus 4.6 (copilot)
 ---
 
@@ -31,17 +31,15 @@ Execute in order before any work. Abort if any step fails.
 5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks.
 6. Read ticket JSON from `.github/ticket-state/SECURITY/{ticket-id}.json`.
 
-## 4. Ticket Discovery & Claiming (Two-Commit Protocol)
+## 4. Pre-Claimed Ticket (Dispatcher-Claim Protocol)
 
-**Commit 1 — CLAIM (distributed lock):**
-1. `git pull --rebase`
-2. Locate ticket in `.github/ticket-state/SECURITY/` (dispatched by ReaperOAK from QA).
-3. Verify ticket is unclaimed or lease has expired.
-4. Update ticket JSON: `claimed_by: Security`, `machine_id: {hostname}`, `operator: {operator}`, `lease_expiry: now + 30min`.
-5. `git add .github/ticket-state/SECURITY/{ticket-id}.json .github/tickets/{ticket-id}.json`
-6. `git commit -m "[{ticket-id}] CLAIM by Security on {machine} ({operator})"`
-7. `git push` — success means lock acquired; failure means another agent claimed first → **ABORT**.
-8. **NO code changes in the claim commit.**
+RULE: The ticket is already claimed by ReaperOAK before this agent is launched.
+RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
+
+1. Read ticket JSON from `.github/ticket-state/SECURITY/{ticket-id}.json`.
+2. Verify claim metadata exists: `claimed_by`, `machine_id`, `operator`, `lease_expiry`.
+3. If claim metadata is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing claim`.
+4. Proceed directly to execution workflow — no `git pull --rebase` for claiming.
 
 ## 5. Execution Workflow
 
@@ -90,8 +88,7 @@ For every ticket, perform ALL of the following analyses on modified files:
 → Advance ticket to CI stage.
 
 **FAIL** — Any critical or high finding present.
-→ Reject ticket via MCP: `tickets.reject({ticket_id, reason: "<finding summary>", evidence: {sarif, threat_model}})`
-→ Fallback CLI: `python3 .github/tickets.py --rework {ticket-id} Security "{finding summary}"`
+→ Reject ticket. Execute: `python3 .github/tickets.py --rework {ticket-id} Security "{finding summary}"`
 → Append entry to `.github/memory-bank/riskRegister.md` with threat details, severity, and recommended fix.
 
 ## 7. Work Commit (Commit 2)
@@ -138,51 +135,7 @@ Every completion claim must include:
 - **Findings in SARIF format** with rule IDs, CWE references, severity, locations.
 - **Verdict:** PASS or FAIL with justification and confidence level (HIGH/MEDIUM/LOW).
 
-## 11. MCP Tool Integration
-
-### Environment Variables
-
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `FORGEOS_MCP_URL` | MCP server endpoint (e.g., `http://localhost:3000/mcp`) | Yes |
-| `FORGEOS_API_KEY` | Agent authentication key for MCP server | Yes |
-
-### Authorized MCP Tools
-
-| Tool | Purpose | Scope Constraint |
-|------|---------|------------------|
-| `tickets.next` | Find next claimable ticket | Stage: `SECURITY` only |
-| `tickets.claim` | Acquire distributed lock on a ticket | Stage: `SECURITY` only |
-| `tickets.complete` | Mark security PASS, advance to CI | Own claimed tickets |
-| `tickets.reject` | Mark security FAIL, send to rework | Own claimed tickets |
-| `tickets.release` | Release a claim without completing | Own claims only |
-| `tickets.extend` | Extend lease on claimed ticket | Own claims only |
-
-**Denied tools:** `tickets.spawn`, `tickets.graph`, `tickets.sync`, `tickets.stats`.
-
-### MCP Workflow (Primary)
-
-1. `tickets.next({stage: "SECURITY"})` — discover available tickets.
-2. `tickets.claim({ticket_id, agent: "Security", machine_id, operator})` — acquire distributed lock.
-3. Execute security analysis (git two-commit protocol still applies).
-4. On PASS: `tickets.complete({ticket_id, evidence: {verdict: "PASS", stride_model, owasp_checklist}})` — advance to CI.
-5. On FAIL: `tickets.reject({ticket_id, reason: "<finding summary>", evidence: {sarif, cwe_refs}})` — rework.
-
-### Fallback: CLI Mode
-
-If the MCP server is unreachable, fall back to direct CLI:
-
-```bash
-python3 .github/tickets.py --claim <id> Security $(hostname) <operator>
-# ... execute security review ...
-python3 .github/tickets.py --advance <id> Security    # on PASS
-python3 .github/tickets.py --rework <id> Security "reason" # on FAIL
-```
-
-See `docs/architecture/api/mcp-tool-definitions.md` for full tool schemas and error codes.
-
-## 12. References
+## 11. References
 
 - `.github/instructions/*.instructions.md` — canonical system rules.
 - `.github/vibecoding/chunks/Security.agent/` — detailed patterns, code examples, checklists.
-- `docs/architecture/api/mcp-tool-definitions.md`

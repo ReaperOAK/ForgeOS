@@ -146,7 +146,8 @@ python3 .github/tickets.py --status --json
 **3c.** Dispatch workers — one `runSubagent` per READY ticket:
 
 ReaperOAK does NOT compute file conflicts or safe parallel groups.
-Git push conflicts are the safety mechanism — agents enforce isolation via claim commit.
+ReaperOAK performs the CLAIM commit before dispatching each subagent. Subagents only produce WORK commits.
+Git push conflicts on the claim commit are the safety mechanism.
 
 ```
 # Example: Backend ticket
@@ -189,8 +190,8 @@ runSubagent("Frontend Engineer", prompt="
 | UI Design | `"UIDesigner"` |
 | Task Decomposition | `"TODO"` |
 
-Launch all READY tickets. One ticket → one worker → one lifecycle → two commits (CLAIM then WORK).
-For N READY tickets, N workers run in parallel (using N `runSubagent` calls). No grouping or batching logic. No dependency reasoning.
+Launch all READY tickets. One ticket → one dispatcher CLAIM → one worker → one WORK commit.
+For N READY tickets, ReaperOAK claims each sequentially, then dispatches N workers in parallel (using N `runSubagent` calls). No grouping or batching logic. No dependency reasoning.
 
 ---
 
@@ -284,5 +285,5 @@ This will produce `RESUME_POINT.md`, `SESSION_SUMMARY.md`, and
 - ReaperOAK does NOT implement code — only dispatches and advances
 - All agents read their own chunks from `.github/vibecoding/chunks/{Agent}.agent/`
 - All agents derive context from filesystem — ReaperOAK does NOT inject context
-- Two-commit protocol enforced: CLAIM commit (ticket JSON) + WORK commit (deliverables)
+- Dispatcher-claim protocol enforced: ReaperOAK performs CLAIM commit (ticket JSON) → subagent performs WORK commit (deliverables)
 - Scoped git only — no `git add .` / `git add -A` / `git add --all`

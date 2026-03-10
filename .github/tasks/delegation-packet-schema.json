@@ -248,7 +248,7 @@
       "minimum": 5,
       "maximum": 120,
       "default": 30,
-      "description": "Lease duration for the two-commit protocol claim."
+      "description": "Lease duration for the dispatcher-claim protocol."
     },
     "rework_budget": {
       "type": "integer",

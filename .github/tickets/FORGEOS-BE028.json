@@ -23,8 +23,7 @@
     "FORGEOS-BE006"
   ],
   "blocked_by": [
-    "FORGEOS-BE021",
-    "FORGEOS-BE006"
+    "FORGEOS-BE021"
   ],
   "file_paths": [
     "mcp-server/src/tools/ticket_tools.py",

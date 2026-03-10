@@ -4,7 +4,7 @@
   "description": "Implement agent session management for the MCP server. Each connecting agent establishes a session that tracks its identity (agent name, role, machine_id), connection state, and associated claims. Sessions support heartbeat tracking (is the agent still connected?), timeout handling (auto-cleanup after disconnect), and resumption after transient disconnects.",
   "type": "backend",
   "priority": "critical",
-  "stage": "DOCS",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -137,6 +137,15 @@
       "agent": "Documentation",
       "machine_id": "pop-os",
       "details": "Claimed for DOCS stage"
+    },
+    {
+      "timestamp": "2026-03-10T18:15:18.181245+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",

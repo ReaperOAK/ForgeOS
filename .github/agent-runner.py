@@ -2,22 +2,26 @@
 """
 agent-runner.py — Distributed Agent Execution Runner
 
-Runs on any machine by any operator. Implements the two-commit protocol
-for claiming and processing tickets through the Git-native SDLC pipeline.
+Runs on any machine by any operator. Implements the dispatcher-claim / worker-work
+protocol for claiming and processing tickets through the Git-native SDLC pipeline.
 
 Usage:
-  python agent-runner.py --agent Backend --operator Owais
-  python agent-runner.py --agent QA --operator Sujal --machine sujal-laptop
-  python agent-runner.py --agent Backend --operator Owais --ticket TASK-001-01-01
+  # Dispatcher (ReaperOAK) claims a ticket before launching a subagent:
+  python agent-runner.py --claim-only --agent Backend --operator Owais --ticket TASK-001-01-01
+
+  # Subagent completes work (Commit 2 only — claim was already done by dispatcher):
+  python agent-runner.py --complete TASK-001-01-01 --agent Backend --operator Owais
+
+  # List claimable tickets:
   python agent-runner.py --list-ready
   python agent-runner.py --list-claimable --agent Backend
 
 This script:
 1. Identifies claimable tickets for the given agent role
-2. Executes Commit 1 (CLAIM) with git push
-3. Reports what the agent should do (for prompt-governed execution)
-4. After agent work, executes Commit 2 (WORK) with git push
+2. Executes Commit 1 (CLAIM) via --claim-only (called by ReaperOAK/dispatcher)
+3. After agent work, executes Commit 2 (WORK) via --complete (called by subagent)
 
+Subagents NEVER perform claim commits — only ReaperOAK (dispatcher) does.
 The actual agent work is done by the human+AI pair via Copilot prompts.
 This script handles the git protocol bookkeeping.
 """
@@ -206,7 +210,10 @@ def find_claimable_tickets(agent: str) -> list[dict]:
 
 def execute_claim(ticket_id: str, agent: str, machine_id: str, operator: str) -> bool:
     """
-    Execute Commit 1 — CLAIM PHASE.
+    Execute Commit 1 — CLAIM PHASE (called by ReaperOAK/dispatcher only).
+
+    Subagents NEVER call this directly. ReaperOAK performs the claim
+    before dispatching the subagent via --claim-only.
 
     1. git pull --rebase
     2. Verify ticket in expected stage
@@ -518,7 +525,7 @@ def list_claimable(agent: str) -> None:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Distributed Agent Execution Runner — Two-Commit Protocol",
+        description="Distributed Agent Execution Runner — Dispatcher-Claim / Worker-Work Protocol",
         formatter_class=argparse.RawDescriptionHelpFormatter,
     )
 
@@ -528,8 +535,8 @@ def main():
     parser.add_argument("--ticket", help="Specific ticket ID to claim")
     parser.add_argument("--list-ready", action="store_true", help="List all READY tickets")
     parser.add_argument("--list-claimable", action="store_true", help="List tickets claimable by agent")
-    parser.add_argument("--claim-only", action="store_true", help="Only execute claim (Commit 1)")
-    parser.add_argument("--complete", metavar="TICKET_ID", help="Execute work commit (Commit 2) for a claimed ticket")
+    parser.add_argument("--claim-only", action="store_true", help="Execute claim only (Commit 1) — used by ReaperOAK/dispatcher")
+    parser.add_argument("--complete", metavar="TICKET_ID", help="Execute work commit (Commit 2) for a pre-claimed ticket — used by subagents")
     parser.add_argument("--modified-files", nargs="*", default=[], help="Files modified during work (for --complete)")
     parser.add_argument("--summary-file", help="Path to summary .md file (for --complete; auto-detected if omitted)")
 
@@ -629,7 +636,7 @@ def main():
         sys.exit(1)
 
     if args.claim_only:
-        print("\n--- Claim complete. Execute agent work, then run work commit separately. ---")
+        print("\n--- Claim complete. Dispatch subagent now (subagent will do work commit only). ---")
         sys.exit(0)
 
     # After claim, print instructions for agent work
