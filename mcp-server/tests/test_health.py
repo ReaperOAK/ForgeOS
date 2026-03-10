@@ -18,15 +18,12 @@ from __future__ import annotations
 
 import asyncio
 import time
-from contextlib import asynccontextmanager
-from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
 
 from mcp_server.db.health import HealthReport, PoolHealthMonitor
 from mcp_server.db.pool import ConnectionPool, PoolStats
-
 
 # ---------------------------------------------------------------------------
 # Helpers
@@ -791,8 +788,8 @@ class TestConstructorDefaults:
 
 class TestHealthExports:
     def test_importable_from_db_package(self) -> None:
-        from mcp_server.db import HealthReport as HR
-        from mcp_server.db import PoolHealthMonitor as PHM
+        from mcp_server.db import HealthReport as HealthReportAlias
+        from mcp_server.db import PoolHealthMonitor as PoolHealthMonitorAlias
 
-        assert HR is HealthReport
-        assert PHM is PoolHealthMonitor
+        assert HealthReportAlias is HealthReport
+        assert PoolHealthMonitorAlias is PoolHealthMonitor

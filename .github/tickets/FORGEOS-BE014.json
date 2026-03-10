@@ -4,7 +4,7 @@
   "description": "Implement health monitoring for the asyncpg connection pool. Track pool statistics (active connections, idle connections, waiting requests), detect unhealthy connections via periodic ping, and trigger connection recycling when connections become stale. Expose pool health as a structured report for the health check endpoint.",
   "type": "backend",
   "priority": "medium",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -33,10 +33,10 @@
     "Health monitoring runs as a lightweight background task without impacting pool performance"
   ],
   "rework_count": 1,
-  "claimed_by": "QA Engineer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T19:38:31.182337+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -147,6 +147,15 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "BACKEND REWORK #1 complete \u2014 4 fixes (unused import, contextlib.suppress, public API for expire_connections, async await). 56/56 tests, 99% coverage, ruff 0 errors, pyright 0 errors."
+    },
+    {
+      "timestamp": "2026-03-10T19:14:13.686152+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
