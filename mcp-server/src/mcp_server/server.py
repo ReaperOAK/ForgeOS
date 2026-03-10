@@ -1,8 +1,27 @@
 """ForgeOS MCP Server — initialization, configuration, and bootstrap.
 
-This module creates the FastMCP server instance, registers its lifespan
-for database connectivity, defines MCP-compliant error handling, and
-exposes a ``main()`` entry point that starts the Streamable HTTP transport.
+This module creates the :class:`FastMCP` server instance, registers its
+lifespan for database connectivity, defines MCP-compliant error handling,
+and exposes a :func:`main` entry point that starts the Streamable HTTP
+transport.
+
+Public API
+----------
+* :class:`ServerConfig` — Pydantic-settings model for ``FORGEOS_*`` env vars.
+* :class:`AppContext` — typed dependency container injected into tool handlers.
+* :data:`mcp_server` — singleton :class:`FastMCP` instance.
+* :func:`main` — CLI entry point (``forgeos-mcp`` script).
+* :func:`health_check` — MCP tool returning component health status.
+
+Error Hierarchy
+~~~~~~~~~~~~~~~
+* :class:`ForgeOSError` — base class.
+* :class:`TicketNotFoundError` — ticket does not exist (``-32602``).
+* :class:`TicketAlreadyClaimedError` — concurrent claim conflict (``-32602``).
+* :class:`ValidationError` — bad input (``-32602``).
+* :class:`DatabaseError` — DB failure (``-32603``).
+* :func:`raise_mcp_error` — converts domain errors to :class:`McpError`.
+* :func:`tool_error_response` — builds ``isError=True`` content list.
 
 Design decisions
 ----------------
@@ -14,6 +33,9 @@ Design decisions
   and closed on shutdown via ``@asynccontextmanager``.
 * **Structured errors** — domain errors map to ``McpError`` with standard
   JSON-RPC error codes; tool-level failures use ``isError=True`` responses.
+
+.. meta::
+   :last_reviewed: 2026-03-10T21:00:00Z
 """
 
 from __future__ import annotations
