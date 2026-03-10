@@ -8,6 +8,38 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **`tickets.update` MCP Tool — API Reference Update** (TASK-FOS-03-003) —
+  Added `tickets.update` subsection to `forgeos-server/README.md` with input
+  schema, error codes, handler workflow, response format, and MCP invocation
+  example. Fixed `docs/architecture/api/mcp-tool-definitions.md` section 4.6:
+  removed undocumented `LEASE_EXPIRED` error code (not present in
+  implementation), added missing `message` field to output schema, added
+  handler workflow steps, request/response examples, and error response
+  schema with timestamps. Implementation file JSDoc verified accurate.
+
+- **tickets.extend Tool Documentation** (TASK-FOS-03-009) — Corrected and
+  expanded reference documentation for the `tickets.extend` MCP tool. Fixed
+  6 inaccuracies in `docs/architecture/api/mcp-tool-definitions.md` section 4.9:
+  added missing `agent_name` required parameter, corrected `duration_minutes`
+  range from 1–480 to 5–120 with `.default(30)`, corrected stored function
+  signature from 2-parameter to 4-parameter form (`p_ticket_id`, `p_agent_id`,
+  `p_agent_name`, `p_duration_minutes`), removed non-existent `TICKET_NOT_FOUND`
+  and `LEASE_EXPIRED` error codes, corrected MCP registration description
+  string. Added handler workflow (6-step), request/response examples
+  (success + two error cases), and implementation file link. New
+  `tickets.extend` subsection in `forgeos-server/README.md` with input
+  parameters, handler behavior, error codes, response format, and MCP
+  invocation example.
+
+- **Dashboard JavaScript Architecture Documentation** (TASK-FOS-05-004) —
+  Created `docs/architecture/dashboard-javascript.md` covering the two-module
+  architecture (`app.js` + `pipeline.js`), shared `window.ForgeOS` API surface,
+  SSE event dispatch with handler registry, Kanban rendering with granular
+  DOM updates, lease countdown timers, filter system with URL sync, keyboard
+  navigation (WCAG 2.2 AA), operator workbench, claims monitor, and
+  multi-machine status. Added comprehensive JSDoc comments to all public
+  functions in both `app.js` (2370 lines) and `pipeline.js` (774 lines).
+
 - **Dependency Graph & Search Interface Design Docs** (FORGEOS-UID003) — Added
   freshness-tracking frontmatter (`last_reviewed`, `reviewed_by`, `diataxis:
   reference`) to the mockup specification and both component specs

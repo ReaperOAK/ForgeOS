@@ -2266,3 +2266,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/transport/sse.py, mcp-server/src/mcp_server/transport/http.py, mcp-server/tests/test_transport_sse.py, mcp-server/tests/test_transport_http.py
 - **Decisions:** SSE transport wraps FastMCP sse_app() with ConnectionTracker (max connections, idle timeout sweep). HTTP transport wraps FastMCP streamable_http_app() with stateless mode default for horizontal scaling. Both use pydantic-settings with FORGEOS_SSE_*/FORGEOS_HTTP_* env prefixes. 53 tests total (34 SSE + 19 HTTP).
 - **Timestamp:** 2026-03-10T12:15:00Z
+
+### FORGEOS-BE051 — Implement Agent API Key Authentication
+- **Artifacts:** mcp-server/src/mcp_server/auth/agent_auth.py, mcp-server/src/mcp_server/auth/__init__.py, mcp-server/alembic/versions/20260310_000000_003_api_keys.py, mcp-server/tests/test_agent_auth.py
+- **Decisions:** Used SHA-256 over bcrypt for key hashing (faster lookup, keys are high-entropy random). Prefix-based DB lookup with constant-time hash comparison. In-memory token bucket rate limiter. Created separate api_keys table (not inline on agents) for multi-key support and rotation.
+- **Timestamp:** 2026-03-10T12:14:21.475451+00:00
