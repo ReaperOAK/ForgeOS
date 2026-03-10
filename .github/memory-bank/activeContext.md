@@ -2141,3 +2141,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/architecture/api/mcp-tool-definitions.md, CHANGELOG.md
 - **Decisions:** Updated section 4.5 to match implementation. Corrected 6 discrepancies (missing agent_name param, wrong output schema, wrong stored function signature, missing handler workflow, missing examples, missing error response schema). JSDoc verified complete — no source changes needed.
 - **Timestamp:** 2026-03-10T16:00:00Z
+
+### [FORGEOS-UID005] — Documentation Summary
+- **Artifacts:** docs/uiux/mockups/FORGEOS-UID005.md, docs/uiux/components/health-panel.md, CHANGELOG.md
+- **Decisions:** Added freshness-tracking frontmatter (last_reviewed, reviewed_by, diataxis: reference) to both design specification files. CHANGELOG entry added. Both docs classified as Diataxis "Reference" quadrant. No implementation code changes needed — doc comments only.
+- **Timestamp:** 2026-03-10T15:45:00Z

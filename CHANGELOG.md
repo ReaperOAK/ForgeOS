@@ -8,6 +8,24 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Event History & Audit Tables Documentation** (FORGEOS-BE003) — Documented
+  `event_history` and `stage_transitions` tables in `docs/database/schema-reference.md`
+  with full column references, immutability triggers, design rationale, 11 new
+  indexes, 2 stored trigger functions, updated entity relationship diagram, and
+  Alembic migration instructions. Enhanced `upgrade()` and `downgrade()` docstrings
+  in the migration file. Updated `docs/architecture/event-sourcing-schema.md` §13
+  with implementation status note linking to the actual Alembic migration.
+
+- **System Health Dashboard Design Specs** (FORGEOS-UID005) — Documentation review
+  of the System Health Dashboard mockup and component specification. Added
+  freshness-tracking frontmatter (`last_reviewed`, `reviewed_by`, `diataxis`)
+  to `docs/uiux/mockups/FORGEOS-UID005.md` and
+  `docs/uiux/components/health-panel.md`. Specification covers four health panels
+  (Database, MCP Server, Webhooks, Alerts), ten TypeScript component interfaces,
+  responsive breakpoints (desktop ≥1024 px, tablet 768–1023 px, mobile <768 px),
+  WCAG 2.1 AA accessibility checklist, health-specific design-token extensions,
+  and Stitch screenshots for all panels.
+
 - **tickets.spawn Tool Documentation** — Corrected and expanded reference
   documentation for the `tickets.spawn` MCP tool (TASK-FOS-03-006). Fixed
   6 inaccuracies in `docs/architecture/api/mcp-tool-definitions.md` section 4.7:
