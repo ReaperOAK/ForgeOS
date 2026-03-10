@@ -8,6 +8,14 @@ logging integration, error enrichment, and database metadata propagation.
    :last_reviewed: 2026-03-10T23:00:00Z
 """
 
+from mcp_server.middleware.auth_middleware import (
+    AuthContext,
+    AuthMiddleware,
+    IdentityType,
+    clear_auth_context,
+    get_auth_context,
+    set_auth_context,
+)
 from mcp_server.middleware.correlation import (
     CorrelationIdFilter,
     build_correlated_tool_error,
@@ -21,13 +29,19 @@ from mcp_server.middleware.correlation import (
 )
 
 __all__ = [
+    "AuthContext",
+    "AuthMiddleware",
     "CorrelationIdFilter",
+    "IdentityType",
     "build_correlated_tool_error",
+    "clear_auth_context",
     "configure_correlation_logging",
     "correlation_context",
     "enrich_error_details",
     "generate_correlation_id",
+    "get_auth_context",
     "get_correlation_id",
     "get_db_correlation_metadata",
+    "set_auth_context",
     "set_correlation_id",
 ]
