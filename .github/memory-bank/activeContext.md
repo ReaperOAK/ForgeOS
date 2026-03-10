@@ -2865,3 +2865,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/tests/test_notification_queue.py (lint fix only)
 - **Decisions:** Fixed 4 ruff lint errors (F401 unused math/timedelta imports, I001 unsorted imports, B007 unused loop var nid→_nid) that caused Validator rejection
 - **Timestamp:** 2026-03-11T00:15:00+00:00
+
+### [FORGEOS-BE052] — QA PASS (Rework #1)
+- **Artifacts:** mcp-server/src/mcp_server/auth/machine_auth.py, mcp-server/src/mcp_server/services/machine_service.py, mcp-server/tests/test_machine_auth.py
+- **Decisions:** All 6 ACs verified, 50/50 tests pass, 100% coverage, ruff clean, no TODOs. Rework was lint-only (import fixes).
+- **Timestamp:** 2026-03-11T00:00:00Z
