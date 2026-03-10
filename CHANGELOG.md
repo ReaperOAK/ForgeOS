@@ -8,6 +8,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Agent Session Lifecycle Management** (FORGEOS-BE022) — Per-agent session
+  tracking for the MCP server at `mcp-server/src/mcp_server/sessions/manager.py`.
+  Each connecting agent establishes a session with identity metadata
+  (agent_name, role, machine_id), heartbeat tracking, and timeout handling.
+  `SessionManager` provides `create_session()`, `heartbeat()`,
+  `disconnect_session()`, `resume_session()`, `close_session()`,
+  `list_sessions()`, `add_claim()`, `remove_claim()`, and configurable
+  cleanup callbacks for expired sessions. Three lifecycle states (ACTIVE,
+  DISCONNECTED, EXPIRED) with async background cleanup loop. Thread-safe
+  via `threading.Lock`. `SessionConfig` controls timeout (default 300s),
+  cleanup interval (30s), and resumption window (120s). Custom exceptions:
+  `SessionNotFoundError`, `SessionExpiredError`, `SessionResumeError`.
+  58 tests with 98% coverage.
+
 - **Tool Input JSON Schema Validation** (FORGEOS-BE021) — JSON Schema
   validation for MCP tool input parameters at
   `mcp-server/src/mcp_server/tools/validation.py`. Validates tool arguments
