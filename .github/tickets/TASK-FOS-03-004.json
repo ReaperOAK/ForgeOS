@@ -4,7 +4,7 @@
   "description": "Implement the tickets.complete MCP tool that marks the current stage as complete and advances the ticket to the next stage in its SDLC flow. Uses the advance_ticket SQL function. Requires completion evidence (artifacts, test_results, confidence). Also implement the SDLC flow engine: flows.ts defines SDLC_FLOWS mapping each of 10 ticket types to their ordered stage array, transitions.ts provides getNextStage(), getImplementationStage(), and isValidTransition() helper functions. On ticket reaching DONE, calls resolve_dependencies to unblock dependent tickets.",
   "type": "backend",
   "priority": "critical",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -39,10 +39,10 @@
     "STAGE_ADVANCED event recorded with evidence payload"
   ],
   "rework_count": 0,
-  "claimed_by": "CIReviewer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T09:30:13.635303+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -95,6 +95,13 @@
       "agent": "Security",
       "machine_id": "pop-os",
       "details": "SECURITY PASS - 0 critical/high, 4 INFO findings. STRIDE max 10/MEDIUM. OWASP 10/10 pass."
+    },
+    {
+      "timestamp": "2026-03-10T09:12:04.249905+00:00",
+      "event": "CI_COMPLETE",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "details": "CI PASS - Score 83/100, 0 critical, 3 warnings, 62/62 tests"
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
