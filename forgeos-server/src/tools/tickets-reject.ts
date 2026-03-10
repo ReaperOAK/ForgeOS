@@ -1,11 +1,14 @@
 /**
  * tickets.reject — Reject a ticket and trigger rework or escalation.
  *
- * Calls the `reject_ticket` PostgreSQL function which:
+ * Calls the `reject_ticket` PostgreSQL stored function which:
  * - If rework_count < max_reworks: resets ticket to its first implementation
  *   stage with status READY, increments rework_count.
  * - If rework_count >= max_reworks: sets status to ESCALATED, clears claim.
  * - In both cases: releases file locks, records STAGE_REJECTED or ESCALATED event.
+ *
+ * SQL signature: `reject_ticket(p_ticket_id TEXT, p_agent_id UUID,
+ * p_agent_name TEXT, p_reason TEXT, p_evidence JSONB)`
  *
  * Error codes returned on failure:
  * - `NOT_CLAIM_OWNER` — caller does not hold the claim on the ticket.
@@ -50,10 +53,15 @@ export const ticketsRejectSchema = z.object({
  * (rework_count >= max_reworks), the ticket status becomes `ESCALATED`
  * and all claim fields are cleared.
  *
- * The SQL function handles:
- * - Claim ownership validation (raises NOT_CLAIM_OWNER)
+ * Internally the handler resolves the agent name to a UUID via the
+ * `agents` table (auto-registering if absent) before calling the SQL
+ * function.
+ *
+ * The SQL function `reject_ticket(p_ticket_id, p_agent_id,
+ * p_agent_name, p_reason, p_evidence)` handles:
+ * - Claim ownership validation (`SELECT FOR UPDATE`, raises NOT_CLAIM_OWNER)
  * - Rework count increment
- * - File lock release
+ * - File lock release (`released_at = NOW()`)
  * - Event recording (STAGE_REJECTED or ESCALATED)
  *
  * If the agent name does not exist in the `agents` table it is
