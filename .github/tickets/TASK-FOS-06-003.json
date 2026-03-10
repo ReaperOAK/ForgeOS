@@ -36,10 +36,10 @@
     "Logs all operations (claim, complete, release, fallback) with structured JSON logging"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "CIReviewer",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T13:43:45.849790+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -104,6 +104,13 @@
       "agent": "Security",
       "machine_id": "pop-os",
       "details": "SECURITY PASS, advancing to CI"
+    },
+    {
+      "timestamp": "2026-03-10T13:13:45.849790+00:00",
+      "event": "CLAIMED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "details": "CI review claim"
     }
   ],
   "source_task_file": "TODO/tickets/06-git-integration.md",
