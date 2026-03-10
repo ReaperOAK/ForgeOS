@@ -7,8 +7,11 @@ transition enforcement, and exponential-backoff retries.
 Also provides configurable notification channels (webhook, Slack) that
 route notifications to external endpoints with event-type filtering.
 
+Background processor handles dequeue, dispatch, retry, and dead-letter
+lifecycle as an asyncio task.
+
 .. meta::
-   :ticket: FORGEOS-BE064, FORGEOS-BE066
+   :ticket: FORGEOS-BE064, FORGEOS-BE066, FORGEOS-BE067
 """
 
 from mcp_server.notifications.channels import (
@@ -24,6 +27,10 @@ from mcp_server.notifications.config import (
     ChannelEnvConfig,
     build_channel_config,
     load_channels_from_env,
+)
+from mcp_server.notifications.processor import (
+    NotificationProcessor,
+    ProcessorConfig,
 )
 from mcp_server.notifications.queue import (
     InvalidTransitionError,
@@ -41,8 +48,10 @@ __all__ = [
     "InvalidTransitionError",
     "Notification",
     "NotificationChannel",
+    "NotificationProcessor",
     "NotificationQueue",
     "NotificationStatus",
+    "ProcessorConfig",
     "SlackDelivery",
     "WebhookDelivery",
     "build_channel_config",

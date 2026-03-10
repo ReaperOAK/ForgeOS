@@ -2,11 +2,11 @@
 
 Implements a PostgreSQL-backed notification queue for the ForgeOS MCP server.
 Uses ``FOR UPDATE SKIP LOCKED`` for safe concurrent dequeue operations and
-exponential backoff for failed notification retries.
+configurable exponential backoff for failed notification retries.
 
 .. meta::
-   :ticket: FORGEOS-BE064
-   :last_reviewed: 2026-03-10
+   :ticket: FORGEOS-BE064, FORGEOS-BE067
+   :last_reviewed: 2026-03-11
 """
 
 from __future__ import annotations
@@ -28,6 +28,7 @@ logger = get_logger("notifications.queue")
 _DEFAULT_MAX_RETRIES = 5
 _BASE_BACKOFF_SECONDS = 10
 _MAX_BACKOFF_SECONDS = 3600
+_DEFAULT_BACKOFF_SCHEDULE: list[float] = [60.0, 300.0, 900.0, 3600.0]
 
 
 class NotificationStatus(str, Enum):
@@ -89,8 +90,20 @@ class AsyncPGPool(Protocol):
     ) -> str: ...
 
 
-def compute_backoff_seconds(retry_count: int) -> float:
-    """Compute exponential backoff delay in seconds."""
+def compute_backoff_seconds(
+    retry_count: int,
+    schedule: list[float] | None = None,
+) -> float:
+    """Compute backoff delay in seconds.
+
+    When *schedule* is provided, uses it as a lookup table indexed by
+    ``retry_count - 1`` (clamped to the last entry for counts beyond
+    the schedule length).  Otherwise falls back to the legacy
+    exponential formula ``base * 2^retry_count`` capped at 3600 s.
+    """
+    if schedule is not None:
+        idx = min(max(0, retry_count - 1), len(schedule) - 1)
+        return schedule[idx]
     delay = _BASE_BACKOFF_SECONDS * math.pow(2, retry_count)
     return min(delay, _MAX_BACKOFF_SECONDS)
 
@@ -120,8 +133,14 @@ def _record_to_notification(record: asyncpg.Record) -> Notification:
 class NotificationQueue:
     """PostgreSQL-backed notification event queue."""
 
-    def __init__(self, pool: AsyncPGPool) -> None:
+    def __init__(
+        self,
+        pool: AsyncPGPool,
+        *,
+        backoff_schedule: list[float] | None = None,
+    ) -> None:
         self._pool = pool
+        self.backoff_schedule = backoff_schedule
 
     async def enqueue(
         self,
@@ -239,7 +258,7 @@ class NotificationQueue:
                 },
             )
         else:
-            backoff = compute_backoff_seconds(new_retry_count)
+            backoff = compute_backoff_seconds(new_retry_count, self.backoff_schedule)
             next_retry = datetime.now(timezone.utc) + timedelta(seconds=backoff)
 
             record = await self._pool.fetchrow(
@@ -290,6 +309,45 @@ class NotificationQueue:
             limit,
         )
         return [_record_to_notification(r) for r in records]
+
+    async def replay_dead_letter(self, notification_id: str) -> Notification:
+        """Reset a dead-lettered notification to pending for reprocessing.
+
+        This is an admin-level operation that bypasses the normal state
+        machine, resetting retry_count and clearing error state so the
+        notification can be delivered again.
+        """
+        current = await self._get_by_id(notification_id)
+        if current is None:
+            raise ValueError(f"Notification {notification_id} not found")
+        if current.status != NotificationStatus.DEAD_LETTER:
+            raise ValueError(
+                f"Only dead_letter notifications can be replayed, "
+                f"got {current.status.value}"
+            )
+
+        record = await self._pool.fetchrow(
+            "UPDATE notification_queue"
+            " SET status = 'pending',"
+            "     retry_count = 0,"
+            "     next_retry_at = NULL,"
+            "     error_message = NULL,"
+            "     updated_at = NOW()"
+            " WHERE id = $1"
+            " RETURNING id, event_type, payload, status, retry_count,"
+            "           max_retries, next_retry_at, error_message,"
+            "           created_at, updated_at",
+            uuid.UUID(notification_id),
+        )
+
+        if record is None:
+            raise ValueError(f"Notification {notification_id} not found")
+
+        logger.info(
+            "Dead-letter notification replayed",
+            extra={"notification_id": notification_id},
+        )
+        return _record_to_notification(record)
 
     async def count_by_status(self) -> dict[str, int]:
         """Return counts of notifications grouped by status."""

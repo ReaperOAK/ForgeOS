@@ -3490,3 +3490,24 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Coverage:** 96% (109 stmts, 4 misses — edge-case fallbacks)
 - **Confidence:** HIGH
 - **Timestamp:** 2026-03-11T15:00:00Z
+
+### FORGEOS-BE032 — QA Complete: tickets.release and tickets.status Tools
+- **Artifacts:** mcp-server/tests/test_ticket_release_status.py (11 gap tests added), .github/agent-output/QA/FORGEOS-BE032.md
+- **Decisions:** PASS verdict — all 7 ACs verified; 80 tests pass (69 original + 11 QA gap); coverage 73% overall, 100% for BE032-specific code; ruff clean; no regressions
+- **Coverage:** ticket_tools.py 78%, ticket_service.py 79%, ticket_repo.py 51% (gaps from other tickets' code)
+- **Confidence:** HIGH
+- **Timestamp:** 2026-03-11T16:00:00Z
+
+### [FORGEOS-BE067] — BACKEND Complete
+- **Artifacts:** mcp-server/src/mcp_server/notifications/processor.py, mcp-server/src/mcp_server/notifications/queue.py, mcp-server/tests/test_notification_processor.py, mcp-server/src/mcp_server/notifications/__init__.py
+- **Decisions:** Configurable backoff schedule [60,300,900,3600]s via ProcessorConfig; backward-compatible compute_backoff_seconds with optional schedule param; replay_dead_letter as explicit admin operation bypassing state machine; no-matching-channels = delivered
+- **Coverage:** 95% notifications module (processor 97%, queue 96%); 150 tests pass
+- **Confidence:** HIGH
+- **Timestamp:** 2026-03-11T18:00:00Z
+
+### FORGEOS-BE045 — QA Complete
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE045.md
+- **Decisions:** All 8 ACs verified against implementation. 53 tests pass, 100% coverage on models.py and operations.py. Ruff clean. No defects found.
+- **Verdict:** PASS — advanced QA → SECURITY
+- **Coverage:** models.py 100%, operations.py 100%
+- **Timestamp:** 2026-03-11T10:15:00Z
