@@ -25,6 +25,7 @@ from mcp_server.db.migration_helpers import (
     drop_updated_at_trigger,
     enum_values_from_type,
 )
+from mcp_server.db.health import HealthReport, PoolHealthMonitor
 from mcp_server.db.pool import (
     ConnectionPool,
     PoolConfig,
@@ -35,7 +36,9 @@ from mcp_server.db.pool import (
 __all__ = [
     "ConnectionPool",
     "DatabaseConfig",
+    "HealthReport",
     "PoolConfig",
+    "PoolHealthMonitor",
     "PoolNotInitializedError",
     "PoolStats",
     "create_enum_type",

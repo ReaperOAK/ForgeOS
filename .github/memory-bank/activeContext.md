@@ -2674,3 +2674,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** auth_middleware.py, test_auth_middleware.py, middleware/__init__.py
 - **Decisions:** Used Starlette BaseHTTPMiddleware with contextvars for async-safe auth context. Dual response format (JSON-RPC for MCP, plain JSON for REST). X-API-Key takes precedence over Bearer token.
 - **Timestamp:** 2025-07-22T00:00:00Z
+
+### [FORGEOS-BE064] — BACKEND Complete
+- **Artifacts:** notifications/__init__.py, notifications/queue.py, 20260310_000000_004_notification_queue.py, test_notification_queue.py
+- **Decisions:** Used Protocol-based pool injection for testability. Frozen dataclass for immutable Notification value objects. Explicit state machine with _VALID_TRANSITIONS dict. Exponential backoff (base=10s * 2^retry, cap=3600s). Dead-letter when retry_count >= max_retries.
+- **Timestamp:** 2026-03-10T21:00:00Z
