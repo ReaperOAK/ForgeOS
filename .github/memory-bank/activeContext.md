@@ -2498,3 +2498,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE016.md
 - **Decisions:** PASS — Score 93/100, 0 critical, 1 warning (E402 accepted __init__.py pattern), 2 suggestions (I001 import sorting, unused type-ignore)
 - **Timestamp:** 2026-03-10T23:45:00Z
+
+### [FORGEOS-BE011] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE011.md
+- **Decisions:** PASS — Score 93/100, 0 critical, 1 warning (pyright: 10 errors from untyped asyncpg stubs), 2 suggestions (OC-007 class size, ternary else). 100% coverage, 25 tests pass.
+- **Timestamp:** 2026-03-10T23:55:00Z
+
+### [FORGEOS-BE005] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE005.md
+- **Decisions:** PASS — Score 77/100, 0 critical, 4 warnings (F401 unused import, F841 unused var in tests, 2x CC>10 in validation/batch functions). 95% coverage, 68 tests. Production code clean.
+- **Timestamp:** 2026-03-10T13:20:00Z
