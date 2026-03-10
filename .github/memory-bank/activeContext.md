@@ -1,3 +1,8 @@
+### [FORGEOS-BE003] — Documentation Summary
+- **Artifacts:** docs/database/schema-reference.md, docs/architecture/event-sourcing-schema.md, mcp-server/alembic/versions/20260310_000000_002_event_tables.py, CHANGELOG.md
+- **Decisions:** Added event_history and stage_transitions table documentation to schema-reference.md (11 new indexes, 2 trigger functions, updated entity diagram). Enhanced migration docstrings with full parameter docs. Updated event-sourcing-schema.md §13 with implementation status note. Active voice, tables-first layout for readability.
+- **Timestamp:** 2026-03-10T10:15:00Z
+
 ### [TASK-FOS-05-003] — CI Review
 - **Artifacts:** .github/agent-output/CIReviewer/TASK-FOS-05-003.md
 - **Decisions:** PASS — Score 82/100, 0 critical, 3 warnings (var usage, else blocks, long functions), 3 suggestions. All consistent with dashboard ES5 IIFE pattern. WCAG 2.2 AA compliant. Max CC 9/10. Upstream QA PASS + Security PASS confirmed. Advanced CI → DOCS.
