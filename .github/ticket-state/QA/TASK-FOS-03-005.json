@@ -35,10 +35,10 @@
     "Escalated tickets have status ESCALATED and claimed_by set to NULL"
   ],
   "rework_count": 0,
-  "claimed_by": "Backend",
+  "claimed_by": "QA",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-09T21:13:32.025278+00:00",
+  "lease_expiry": "2026-03-10T08:26:30+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -61,6 +61,20 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "Implementation complete: tickets.reject MCP tool with 25 tests (100% stmt, 90.9% branch coverage)"
+    },
+    {
+      "timestamp": "2026-03-10T07:51:30.967690+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: Lease expired"
+    },
+    {
+      "timestamp": "2026-03-10T07:56:30+00:00",
+      "event": "CLAIMED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "Claimed by QA for QA stage review"
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
