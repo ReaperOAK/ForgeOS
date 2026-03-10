@@ -1,0 +1,226 @@
+[
+  {
+    "ticket_id": "SAMPLE-001",
+    "title": "Implement User Authentication API",
+    "description": "Create the REST API endpoints for user login, logout, and token refresh with JWT-based authentication.",
+    "type": "backend",
+    "priority": "high",
+    "stage": "READY",
+    "sdlc_flow": ["READY", "BACKEND", "QA", "SECURITY", "CI", "DOCS", "VALIDATION", "DONE"],
+    "created_at": "2026-03-01T10:00:00+00:00",
+    "created_by": "seed-data",
+    "dependencies": [],
+    "blocked_by": [],
+    "file_paths": ["src/auth/login.ts", "src/auth/token.ts"],
+    "acceptance_criteria": [
+      "POST /auth/login accepts email and password",
+      "Returns JWT access token on success",
+      "POST /auth/refresh renews expired tokens",
+      "POST /auth/logout invalidates the session"
+    ],
+    "rework_count": 0,
+    "tags": ["auth", "api", "backend"],
+    "history": [
+      {
+        "timestamp": "2026-03-01T10:00:00+00:00",
+        "event": "CREATED",
+        "agent": "seed-data",
+        "machine_id": "dev",
+        "details": "Sample ticket for development"
+      }
+    ]
+  },
+  {
+    "ticket_id": "SAMPLE-002",
+    "title": "Create Dashboard Layout Component",
+    "description": "Build the main dashboard layout with sidebar navigation and content area using the design tokens from the UI design system.",
+    "type": "frontend",
+    "priority": "medium",
+    "stage": "READY",
+    "sdlc_flow": ["READY", "FRONTEND", "QA", "SECURITY", "CI", "DOCS", "VALIDATION", "DONE"],
+    "created_at": "2026-03-01T11:00:00+00:00",
+    "created_by": "seed-data",
+    "dependencies": [],
+    "blocked_by": [],
+    "file_paths": ["src/components/Dashboard.tsx", "src/components/Sidebar.tsx"],
+    "acceptance_criteria": [
+      "Dashboard renders with a collapsible sidebar",
+      "Sidebar shows navigation links for all sections",
+      "Content area fills remaining viewport width",
+      "Responsive layout adapts to mobile screens"
+    ],
+    "rework_count": 0,
+    "tags": ["frontend", "dashboard", "ui"],
+    "history": [
+      {
+        "timestamp": "2026-03-01T11:00:00+00:00",
+        "event": "CREATED",
+        "agent": "seed-data",
+        "machine_id": "dev",
+        "details": "Sample ticket for development"
+      }
+    ]
+  },
+  {
+    "ticket_id": "SAMPLE-003",
+    "title": "Define API Contract for Ticket Operations",
+    "description": "Write the OpenAPI 3.1 specification for the ticket CRUD endpoints, including request/response schemas and error codes.",
+    "type": "architecture",
+    "priority": "high",
+    "stage": "READY",
+    "sdlc_flow": ["READY", "ARCHITECT", "DOCS", "VALIDATION", "DONE"],
+    "created_at": "2026-03-01T12:00:00+00:00",
+    "created_by": "seed-data",
+    "dependencies": [],
+    "blocked_by": [],
+    "file_paths": ["docs/api/openapi.yaml"],
+    "acceptance_criteria": [
+      "OpenAPI spec covers GET, POST, PATCH, DELETE for /tickets",
+      "Request schemas include validation constraints",
+      "Error responses follow RFC 7807 Problem Details",
+      "Spec passes OpenAPI linter with zero errors"
+    ],
+    "rework_count": 0,
+    "tags": ["architecture", "api", "openapi"],
+    "history": [
+      {
+        "timestamp": "2026-03-01T12:00:00+00:00",
+        "event": "CREATED",
+        "agent": "seed-data",
+        "machine_id": "dev",
+        "details": "Sample ticket for development"
+      }
+    ]
+  },
+  {
+    "ticket_id": "SAMPLE-004",
+    "title": "Add Security Headers Middleware",
+    "description": "Implement Express middleware that sets standard security headers: Content-Security-Policy, X-Frame-Options, Strict-Transport-Security, and X-Content-Type-Options.",
+    "type": "security",
+    "priority": "critical",
+    "stage": "READY",
+    "sdlc_flow": ["READY", "SECURITY", "QA", "CI", "DOCS", "VALIDATION", "DONE"],
+    "created_at": "2026-03-02T09:00:00+00:00",
+    "created_by": "seed-data",
+    "dependencies": [],
+    "blocked_by": [],
+    "file_paths": ["src/middleware/security-headers.ts"],
+    "acceptance_criteria": [
+      "CSP header blocks inline scripts by default",
+      "HSTS max-age is at least 1 year",
+      "X-Frame-Options set to DENY",
+      "X-Content-Type-Options set to nosniff"
+    ],
+    "rework_count": 0,
+    "tags": ["security", "middleware", "headers"],
+    "history": [
+      {
+        "timestamp": "2026-03-02T09:00:00+00:00",
+        "event": "CREATED",
+        "agent": "seed-data",
+        "machine_id": "dev",
+        "details": "Sample ticket for development"
+      }
+    ]
+  },
+  {
+    "ticket_id": "SAMPLE-005",
+    "title": "Write Database Migration Guide",
+    "description": "Document the database migration workflow including how to create, test, and apply migrations in development and production environments.",
+    "type": "docs",
+    "priority": "low",
+    "stage": "DONE",
+    "sdlc_flow": ["READY", "DOCS", "VALIDATION", "DONE"],
+    "created_at": "2026-03-02T14:00:00+00:00",
+    "created_by": "seed-data",
+    "dependencies": [],
+    "blocked_by": [],
+    "file_paths": ["docs/operations/migration-guide.md"],
+    "acceptance_criteria": [
+      "Guide covers creating a new migration",
+      "Includes rollback procedures",
+      "Documents CI integration for migration testing",
+      "Has examples for common schema changes"
+    ],
+    "rework_count": 0,
+    "tags": ["docs", "database", "migration"],
+    "history": [
+      {
+        "timestamp": "2026-03-02T14:00:00+00:00",
+        "event": "CREATED",
+        "agent": "seed-data",
+        "machine_id": "dev",
+        "details": "Sample ticket for development"
+      },
+      {
+        "timestamp": "2026-03-03T10:00:00+00:00",
+        "event": "COMPLETED",
+        "agent": "Documentation",
+        "machine_id": "dev",
+        "details": "Completed by Documentation agent"
+      }
+    ]
+  },
+  {
+    "ticket_id": "SAMPLE-006",
+    "title": "Research MCP Transport Options",
+    "description": "Evaluate SSE vs WebSocket vs Streamable HTTP for the MCP server transport layer. Compare latency, complexity, and browser support.",
+    "type": "research",
+    "priority": "medium",
+    "stage": "READY",
+    "sdlc_flow": ["READY", "RESEARCH", "DOCS", "VALIDATION", "DONE"],
+    "created_at": "2026-03-03T08:00:00+00:00",
+    "created_by": "seed-data",
+    "dependencies": ["SAMPLE-003"],
+    "blocked_by": [],
+    "file_paths": ["docs/research/transport-comparison.md"],
+    "acceptance_criteria": [
+      "Comparison table with at least 3 transport options",
+      "Latency benchmarks for each option",
+      "Recommendation with justification",
+      "Risk assessment for the chosen approach"
+    ],
+    "rework_count": 0,
+    "tags": ["research", "mcp", "transport"],
+    "history": [
+      {
+        "timestamp": "2026-03-03T08:00:00+00:00",
+        "event": "CREATED",
+        "agent": "seed-data",
+        "machine_id": "dev",
+        "details": "Sample ticket for development"
+      }
+    ]
+  },
+  {
+    "ticket_id": "SAMPLE-007",
+    "title": "Implement Ticket Status Endpoint",
+    "description": "Create a full-stack ticket status page with backend API and frontend component showing ticket pipeline status.",
+    "type": "fullstack",
+    "priority": "high",
+    "stage": "READY",
+    "sdlc_flow": ["READY", "BACKEND", "FRONTEND", "QA", "SECURITY", "CI", "DOCS", "VALIDATION", "DONE"],
+    "created_at": "2026-03-04T10:00:00+00:00",
+    "created_by": "seed-data",
+    "dependencies": ["SAMPLE-001"],
+    "blocked_by": [],
+    "file_paths": ["src/api/status.ts", "src/components/StatusPage.tsx"],
+    "acceptance_criteria": [
+      "GET /api/tickets/status returns aggregated counts per stage",
+      "Frontend renders a kanban-style board",
+      "Real-time updates via SSE when ticket state changes",
+      "Supports filtering by ticket type and priority"
+    ],
+    "rework_count": 0,
+    "tags": ["fullstack", "api", "dashboard"],
+    "history": [
+      {
+        "timestamp": "2026-03-04T10:00:00+00:00",
+        "event": "CREATED",
+        "agent": "seed-data",
+        "machine_id": "dev",
+        "details": "Sample ticket for development"
+      }
+    ]
+  }
+]
