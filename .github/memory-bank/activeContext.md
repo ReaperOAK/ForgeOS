@@ -3181,7 +3181,17 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** PASS — 59/60 tests pass (1 pre-existing argparse issue), 93% coverage (100% dependencies.py, 92% server.py), ruff clean. All 6 ACs verified. Rework lint fixes (F401, I001) confirmed resolved.
 - **Timestamp:** 2026-03-11T16:00:00Z
 
+### [FORGEOS-BE066] — BACKEND complete
+- **Artifacts:** mcp-server/alembic/versions/20260311_000000_006_notification_channels.py, mcp-server/src/mcp_server/notifications/channels.py, mcp-server/src/mcp_server/notifications/config.py, mcp-server/tests/test_notification_channels.py, mcp-server/src/mcp_server/notifications/__init__.py
+- **Decisions:** Used stdlib urllib.request + asyncio.to_thread() for HTTP delivery to avoid adding external dependency. ChannelDispatcher isolates per-channel failures. Block Kit formatting for Slack. Env-based config via FORGEOS_CHANNEL_* variables.
+- **Timestamp:** 2026-03-11T23:30:00Z
+
 ### [FORGEOS-BE046] — BACKEND complete
 - **Artifacts:** agent-sdk/src/forgeos_sdk/exceptions.py, agent-sdk/src/forgeos_sdk/config.py, agent-sdk/tests/test_exceptions.py, agent-sdk/tests/test_config.py
 - **Decisions:** Enhanced ForgeOSError with error_code/details. Added ClaimConflictError, LeaseExpiredError, InvalidTransitionError, NetworkError. Added api_key to SDKConfig with pydantic validators for blank rejection. Maintained backward compat with existing exception signatures.
 - **Timestamp:** 2026-03-11T22:30:00Z
+
+### [FORGEOS-BE056] — BACKEND complete
+- **Artifacts:** mcp-server/src/mcp_server/auth/authorization.py, mcp-server/src/mcp_server/services/operator_service.py, mcp-server/alembic/versions/20260311_000000_006_operator_machine_bindings.py, mcp-server/tests/test_authorization.py
+- **Decisions:** Separate authorization.py from operator_auth.py for concerns separation. TEXT for machine_id (consistent with machine_auth.py). UPSERT for idempotent binding creation. Admin bypass via simple role check.
+- **Timestamp:** 2026-03-11T12:00:00Z
