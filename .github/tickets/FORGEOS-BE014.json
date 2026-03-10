@@ -4,7 +4,7 @@
   "description": "Implement health monitoring for the asyncpg connection pool. Track pool statistics (active connections, idle connections, waiting requests), detect unhealthy connections via periodic ping, and trigger connection recycling when connections become stale. Expose pool health as a structured report for the health check endpoint.",
   "type": "backend",
   "priority": "medium",
-  "stage": "VALIDATION",
+  "stage": "BACKEND",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -32,11 +32,11 @@
     "Health data is exposed as a dict suitable for JSON serialization in the /health endpoint",
     "Health monitoring runs as a lightweight background task without impacting pool performance"
   ],
-  "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T18:29:26.538847+00:00",
+  "rework_count": 1,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -131,6 +131,15 @@
       "agent": "Validator",
       "machine_id": "pop-os",
       "details": "Claimed for VALIDATION stage"
+    },
+    {
+      "timestamp": "2026-03-10T18:07:03.104338+00:00",
+      "event": "REWORK",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "BACKEND",
+      "details": "Rework #1: REJECTED: Lint fails (F401 unused import Any, SIM105 try-except-pass); Type checks fail (3 pyright errors: unused import, reportPrivateUsage on _pool._pool, reportUnusedCoroutine). See .github/agent-output/Validator/FORGEOS-BE014.md for remediation."
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
