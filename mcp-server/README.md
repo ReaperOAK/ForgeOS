@@ -78,6 +78,87 @@ async def check():
 asyncio.run(check())
 ```
 
+## Graceful Shutdown
+
+<!-- last_reviewed: 2026-03-10T22:00:00Z -->
+
+The server supports graceful shutdown with request draining. On SIGTERM or
+SIGINT, the server stops accepting new requests, waits for in-flight work to
+finish, runs cleanup callbacks, closes the database pool, and exits.
+
+### Shutdown Configuration
+
+| Parameter | Default | Description |
+|---|---|---|
+| `shutdown_timeout_seconds` | `30.0` | Max seconds to wait for in-flight requests before forced shutdown |
+| `drain_poll_interval_seconds` | `0.5` | Interval between drain-loop polls |
+
+Pass a `ShutdownConfig` to override defaults:
+
+```python
+from mcp_server.lifecycle import GracefulShutdownManager, ShutdownConfig
+
+config = ShutdownConfig(shutdown_timeout_seconds=60.0)
+manager = GracefulShutdownManager(config=config)
+```
+
+### Shutdown Lifecycle
+
+```
+RUNNING  ──signal──▸  DRAINING  ──drained──▸  SHUTDOWN
+```
+
+1. **Signal received** — SIGTERM or SIGINT triggers `initiate_shutdown()`.
+2. **DRAINING** — New requests raise `ShutdownError`. The drain loop polls
+   until all in-flight requests complete or the timeout expires.
+3. **Cleanup** — Registered callbacks execute in LIFO order (last added first).
+4. **Pool close** — The database connection pool is closed.
+5. **SHUTDOWN** — The `shutdown_complete` event is set.
+
+### Integration Example
+
+```python
+import asyncio
+from mcp_server.lifecycle import GracefulShutdownManager
+
+manager = GracefulShutdownManager()
+manager.register_signals(asyncio.get_running_loop())
+manager.set_db_pool(pool)
+
+# Register cleanup (LIFO order):
+manager.add_cleanup_callback("flush_events", flush_pending_events)
+
+# In request middleware:
+with manager.request_scope():
+    await handle_request(request)
+
+# Check status:
+print(manager.status())
+# {'state': 'running', 'in_flight_requests': 0, ...}
+```
+
+### API Reference
+
+| Symbol | Type | Description |
+|---|---|---|
+| `GracefulShutdownManager` | class | Main coordinator for shutdown lifecycle |
+| `ShutdownConfig` | dataclass | Validated shutdown configuration (timeout, poll interval) |
+| `ShutdownState` | enum | `RUNNING`, `DRAINING`, `SHUTDOWN` |
+| `ShutdownError` | exception | Raised when a request is rejected during shutdown |
+
+Key methods on `GracefulShutdownManager`:
+
+| Method | Description |
+|---|---|
+| `register_signals(loop)` | Attach SIGTERM/SIGINT handlers to the event loop |
+| `set_db_pool(pool)` | Assign the `asyncpg` pool for cleanup |
+| `track_request()` | Increment in-flight counter (raises `ShutdownError` if draining) |
+| `complete_request()` | Decrement in-flight counter |
+| `request_scope()` | Context manager combining `track_request` / `complete_request` |
+| `add_cleanup_callback(name, cb)` | Register a sync or async cleanup callable |
+| `initiate_shutdown()` | Begin drain → cleanup → close sequence (idempotent) |
+| `status()` | Return dict snapshot of current state |
+
 ## Development
 
 ### Run tests
@@ -100,6 +181,7 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/server.py`** — Server initialization, configuration, error handling, entry point
 - **`mcp_server/__init__.py`** — Package metadata (version, app name)
 - **`mcp_server/__main__.py`** — `python -m mcp_server` entry point
+- **`mcp_server/observability/`** — Structured JSON logging, correlation IDs, and PII redaction
 
 ### Error Handling
 
