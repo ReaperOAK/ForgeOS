@@ -39,8 +39,8 @@ Design decisions
 """
 
 from __future__ import annotations
-import sys
 
+import sys
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any

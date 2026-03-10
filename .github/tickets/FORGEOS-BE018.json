@@ -4,7 +4,7 @@
   "description": "Wire the MCP server to the PostgreSQL database layer via the repository data access layer from BE013. Implement server startup hooks that initialize the connection pool and repository instances, and shutdown hooks that drain connections. Provide a dependency injection mechanism (or module-level factory) so that tool handlers can access repositories without direct pool management.",
   "type": "backend",
   "priority": "critical",
-  "stage": "BACKEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -156,6 +156,15 @@
       "from_stage": "BACKEND",
       "to_stage": "BACKEND",
       "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-10T21:28:17.170155+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T15:30:00.000000+00:00",
+      "event": "STAGE_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "BACKEND",
+      "to_stage": "QA",
+      "details": "BACKEND rework #1 complete — fixed 2 lint errors: removed unused Any import (F401) in dependencies.py, sorted imports (I001) in server.py. ruff check passes clean."
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
