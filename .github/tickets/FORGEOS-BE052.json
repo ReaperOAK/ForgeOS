@@ -4,7 +4,7 @@
   "description": "Implement machine registration and identity verification. Each machine running agents registers with a unique machine_id (hostname or UUID). Machine registration records the hostname, first-seen timestamp, and last-seen timestamp. On each request, the machine_id is verified against the registry. Unknown machines can be auto-registered or rejected based on configuration.",
   "type": "backend",
   "priority": "high",
-  "stage": "BACKEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -85,6 +85,13 @@
       "from_stage": "VALIDATION",
       "to_stage": "BACKEND",
       "details": "Rework #1: DoD #3 FAIL: 2 ruff lint errors in machine_auth.py:36 - F401 unused import timezone, TC003 datetime should be in TYPE_CHECKING block"
+    },
+    {
+      "timestamp": "2026-03-10T17:45:00.000000+00:00",
+      "event": "BACKEND_REWORK_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Fixed 2 ruff lint errors: removed unused timezone import (F401), moved datetime to TYPE_CHECKING block (TC003). 50/50 tests pass."
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",

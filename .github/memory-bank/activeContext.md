@@ -2840,3 +2840,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE007.md
 - **Decisions:** APPROVED — 10/10 DoD items pass. All 6 ACs met, 48 tests (100% coverage), mypy clean, ruff clean on impl, all upstream verdicts PASS (QA, Security, CI, Docs). 2 E501 in QA test code noted as cosmetic.
 - **Timestamp:** 2026-03-10T19:00:00Z
+
+### [FORGEOS-BE014] — Validation REJECTED (Rework #1)
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE014.md
+- **Decisions:** REJECTED — Lint fails (F401 unused import Any, SIM105 try-except-pass); Type checks fail (3 pyright errors in strict mode: unused import, reportPrivateUsage on _pool._pool, reportUnusedCoroutine). Sent back to BACKEND for remediation.
+- **Timestamp:** 2026-03-10T18:05:00+00:00

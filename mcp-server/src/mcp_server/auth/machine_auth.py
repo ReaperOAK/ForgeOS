@@ -33,8 +33,10 @@ from __future__ import annotations
 
 import enum
 from dataclasses import dataclass
-from datetime import datetime, timezone
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from datetime import datetime
 
 from mcp_server.observability import get_logger
 from mcp_server.server import INVALID_PARAMS, ForgeOSError
