@@ -1,6 +1,6 @@
 {
   "ticket_id": "TASK-FOS-03-009",
-  "title": "tickets.extend — Extend Lease Duration",
+  "title": "tickets.extend \u2014 Extend Lease Duration",
   "description": "Implement the tickets.extend MCP tool that extends the lease on a claimed ticket to prevent expiry during long operations. Uses the extend_lease SQL function. Validates that the caller is the claim owner, that the requested duration doesn't exceed the system's max_lease_minutes config (default 120), and updates lease_expiry to NOW() + duration. Records a LEASE_EXTENDED event.",
   "type": "backend",
   "priority": "high",
@@ -33,11 +33,11 @@
     "Returns {ticket, new_lease_expiry: ISO8601 string} on success"
   ],
   "rework_count": 1,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
-  "lease_duration_minutes": null,
+  "claimed_by": "Security",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T09:58:58.187220+00:00",
+  "lease_duration_minutes": 30,
   "history": [
     {
       "timestamp": "2026-03-05T18:05:37.900949+00:00",
@@ -115,7 +115,7 @@
       "machine_id": "pop-os",
       "from_stage": "QA",
       "to_stage": "SECURITY",
-      "details": "QA PASS — Rework #1 re-verify. DEF-001 fixed. 24/24 tests, 100% coverage. Advanced to SECURITY."
+      "details": "QA PASS \u2014 Rework #1 re-verify. DEF-001 fixed. 24/24 tests, 100% coverage. Advanced to SECURITY."
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
