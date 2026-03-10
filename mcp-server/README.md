@@ -1,6 +1,6 @@
 # ForgeOS MCP Server
 
-<!-- last_reviewed: 2026-03-11T00:00:00Z -->
+<!-- last_reviewed: 2026-03-11T23:59:00Z -->
 <!-- audience: developers -->
 <!-- diataxis: reference -->
 
@@ -1300,12 +1300,14 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/db/`** — asyncpg connection pool, health monitoring, and pool metrics
 - **`mcp_server/observability/`** — Structured JSON logging, correlation IDs, PII redaction, and health/readiness probes
 - **`mcp_server/auth/`** — Agent API key authentication, machine registration and verification, rate limiting, and identity resolution
-- **`mcp_server/services/`** — Business logic orchestration (TicketService, MachineService)
+- **`mcp_server/services/`** — Business logic orchestration (TicketService, MachineService, WebhookService)
 - **`mcp_server/middleware/`** — Unified auth middleware (MCP + REST), correlation ID tracking
 - **`mcp_server/tools/`** — Dynamic tool registration, schema validation, ticket tools (`tickets.next`), and FastMCP bridge
 - **`mcp_server/events/`** — Append-only event sourcing (EventStore, EventType, Event dataclass)
 - **`mcp_server/locking/`** — Distributed claim queue (SKIP LOCKED), file mutex (advisory locks)
+- **`mcp_server/notifications/`** — Notification queue (at-least-once delivery) and configurable channels (webhook, Slack) with event-type filtering
 - **`mcp_server/sessions/`** -- Agent session lifecycle management (heartbeat, timeout, resumption, concurrent access)
+- **`mcp_server/transport/webhooks.py`** — Inbound webhook HTTP receiver (`POST /api/webhooks/{source}`)
 
 ### Error Handling
 
@@ -1416,6 +1418,145 @@ python -m mcp_server
 | `HTTPTransportConfig` | `transport.http` | Pydantic config for HTTP transport |
 | `SSETransport` | `transport.sse` | SSE transport class |
 | `SSETransportConfig` | `transport.sse` | Pydantic config for SSE transport |
+
+
+## Webhook Receiver
+
+<!-- last_reviewed: 2026-03-11T23:59:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.transport.webhooks` module exposes a `POST /api/webhooks/{source}`
+endpoint that accepts inbound webhook payloads from external systems. The endpoint
+validates the payload, acknowledges receipt with 202 Accepted, and dispatches
+processing asynchronously via `WebhookService`.
+
+### How It Works
+
+1. External system sends `POST /api/webhooks/{source}` with a JSON body.
+2. The route handler validates `Content-Type`, parses the JSON, and identifies
+   the source.
+3. `WebhookService.validate_payload()` runs source-specific validation
+   (GitHub requires `action`; custom requires `event_type`).
+4. The endpoint returns 202 Accepted immediately.
+5. `WebhookService.process_async()` schedules an `asyncio.Task` that routes
+   the event to the matching handler.
+
+### Supported Sources
+
+| Source | Validation | Event Type Resolution |
+|--------|------------|----------------------|
+| `github` | Payload must contain `action` (non-empty string) | `X-GitHub-Event` header if present, otherwise `action` field |
+| `custom` | Payload must contain `event_type` (non-empty string) | `event_type` field |
+
+Unknown sources return 400 Bad Request with the list of known sources.
+
+### Quick Start
+
+Mount the webhook routes into a Starlette application:
+
+```python
+from starlette.applications import Starlette
+from mcp_server.transport.webhooks import webhook_routes
+
+app = Starlette(routes=webhook_routes)
+```
+
+Send a webhook:
+
+```bash
+# GitHub-style webhook
+curl -X POST http://localhost:8080/api/webhooks/github \
+  -H "Content-Type: application/json" \
+  -H "X-GitHub-Event: push" \
+  -d '{"action": "completed", "ref": "refs/heads/main"}'
+
+# Custom webhook
+curl -X POST http://localhost:8080/api/webhooks/custom \
+  -H "Content-Type: application/json" \
+  -d '{"event_type": "deploy", "environment": "staging"}'
+```
+
+### Registering Custom Handlers
+
+Use the `handler_registry` to route specific (source, event_type) pairs to
+async handler functions:
+
+```python
+from mcp_server.services.webhook_service import (
+    handler_registry,
+    WebhookEvent,
+)
+
+async def on_github_push(event: WebhookEvent) -> None:
+    print(f"Push to {event.payload.get('ref')}")
+
+# Exact match: source="github", event_type="push"
+handler_registry.register("github", "push", on_github_push)
+
+# Fallback for all unmatched event types from a source
+handler_registry.register_default("custom", my_custom_fallback)
+```
+
+If no handler matches, the event is logged and dropped.
+
+### API Reference
+
+| Symbol | Module | Description |
+|--------|--------|-------------|
+| `webhook_routes` | `transport.webhooks` | List of Starlette `Route` objects to mount |
+| `receive_webhook()` | `transport.webhooks` | Route handler for `POST /api/webhooks/{source}` |
+| `get_webhook_service()` | `transport.webhooks` | Return the module-level `WebhookService` instance |
+| `set_webhook_service()` | `transport.webhooks` | Replace the service instance (testing) |
+| `WebhookService` | `services.webhook_service` | Validates payloads, routes events, dispatches async |
+| `WebhookEvent` | `services.webhook_service` | Frozen dataclass for a validated inbound event |
+| `WebhookSource` | `services.webhook_service` | Enum of known sources (`GITHUB`, `CUSTOM`) |
+| `handler_registry` | `services.webhook_service` | Module-level handler registry singleton |
+| `WebhookHandler` | `services.webhook_service` | Type alias: `Callable[[WebhookEvent], Coroutine]` |
+| `WebhookValidationError` | `services.webhook_service` | Payload failed schema validation |
+| `UnknownSourceError` | `services.webhook_service` | Source not in `WebhookSource` enum |
+
+### WebhookService Methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `validate_payload(source, payload, event_type_header)` | `WebhookEvent` | Validate and construct an event; raises on failure |
+| `dispatch(event)` | `None` | Route event to handler and execute |
+| `process_async(event)` | `None` | Schedule dispatch as a background `asyncio.Task` |
+
+### WebhookEvent Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `event_id` | `str` | UUID4 hex assigned on receipt |
+| `source` | `str` | Origin identifier (lowercased) |
+| `event_type` | `str` | Event classification |
+| `payload` | `dict[str, Any]` | Validated JSON body |
+| `received_at` | `datetime` | UTC timestamp of receipt |
+
+### Error Responses
+
+| Condition | Status | Response Body |
+|-----------|--------|---------------|
+| Missing `source` path parameter | 400 | `{"error": "Missing source parameter"}` |
+| `Content-Type` is not `application/json` | 400 | `{"error": "Content-Type must be application/json"}` |
+| Malformed JSON | 400 | `{"error": "Invalid JSON payload"}` |
+| Body is not a JSON object | 400 | `{"error": "Payload must be a JSON object"}` |
+| Unknown source | 400 | `{"error": "Unknown webhook source: ...", "details": {...}}` |
+| Missing required fields | 400 | `{"error": "... missing required fields: ...", "details": {...}}` |
+
+### Design Constraints
+
+- **Async dispatch** — the HTTP response returns before the handler executes,
+  following the 202 Accepted pattern for webhook receivers.
+- **Source-specific validation** — each source has its own validator function.
+  Adding a new source requires a validator entry in `_SOURCE_VALIDATORS`.
+- **Handler registry** — routes events by (source, event_type) with optional
+  per-source default fallback.
+- **Structured logging** — all operations log `event_id`, `source`, and
+  `event_type` for correlation.
+- **No external dependencies** — uses Starlette (already a dependency) and
+  stdlib only.
 
 
 ## Observability — Structured JSON Logging
@@ -2447,6 +2588,325 @@ for efficient dequeue queries.
 - **Strict transitions** — only transitions in `_VALID_TRANSITIONS` are allowed.
 - **Exponential backoff** — `compute_backoff_seconds()` is a pure function with capped output.
 - **Dead-letter safety** — notifications exceeding `max_attempts` move to `dead_letter`, never retried.
+
+
+## Audit Logging
+
+<!-- last_reviewed: 2026-03-11T00:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server/services/audit_service.py`, `mcp_server/repositories/audit_repo.py`,
+and `mcp_server/middleware/audit_middleware.py` modules provide comprehensive
+audit logging for all authenticated operations. Every MCP tool call and REST API
+request is recorded with identity, operation, target, result, and source machine.
+
+### How It Works
+
+1. `AuditMiddleware` (Starlette middleware) intercepts every HTTP request after
+   authentication. Health/readiness endpoints are skipped.
+2. The middleware extracts the `AuthContext` from `contextvars`, records the
+   HTTP method, path, status code, and duration, then delegates to
+   `AuditRepository.append()`.
+3. `AuditService` provides a higher-level API for tool handlers that need to
+   log operations explicitly (e.g. MCP tool calls).
+4. `AuditRepository` is append-only — no UPDATE or DELETE methods exist.
+
+### Quick Start
+
+```python
+from mcp_server.services.audit_service import AuditService
+from mcp_server.repositories.audit_repo import AuditRepository
+
+# Create service with a connection pool
+repo = AuditRepository(pool)
+service = AuditService(audit_repo=repo)
+
+# Log an operation
+entry = await service.log_operation(
+    auth_ctx=auth_ctx,
+    operation="mcp.claim_next",
+    target="FORGEOS-BE058",
+    result="success",
+    source_machine="pop-os",
+)
+
+# Query audit logs with filters
+logs = await service.query_logs(
+    identity_id="backend-agent",
+    operation="mcp.claim_next",
+    since=datetime(2026, 3, 1),
+    limit=50,
+)
+
+# Count matching entries
+total = await service.count_logs(identity_type="agent")
+```
+
+### Audit Log Schema
+
+The `audit_log` table is created by Alembic migration 006:
+
+| Column | Type | Description |
+|---|---|---|
+| `audit_id` | `UUID` | Primary key (auto-generated) |
+| `identity_type` | `TEXT` | `agent`, `operator`, or `admin` |
+| `identity_id` | `TEXT` | Identifier of the authenticated entity |
+| `operation` | `TEXT` | Action performed (e.g. `GET /api/tickets`) |
+| `target` | `TEXT` | Target resource (e.g. ticket ID, endpoint path) |
+| `result` | `TEXT` | Outcome: `success`, `failure`, or `error` |
+| `timestamp` | `TIMESTAMPTZ` | When the operation occurred (default `NOW()`) |
+| `metadata` | `JSONB` | Additional context (HTTP status, duration, etc.) |
+| `source_machine` | `TEXT` | Machine/IP originating the request |
+
+Indexes: `identity_id`, `identity_type`, `operation`, `timestamp`.
+
+### Public API — `mcp_server.services.audit_service`
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `AuditService` | class | High-level orchestration for audit logging |
+
+#### AuditService Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `log_operation(auth_ctx, operation, target, result, metadata, source_machine)` | `AuditLogRow` | Record an authenticated operation |
+| `query_logs(identity_id, identity_type, operation, since, until, limit, offset)` | `list[AuditLogRow]` | Query with optional filters, ordered by timestamp DESC |
+| `count_logs(identity_id, identity_type, operation, since, until)` | `int` | Count matching entries |
+
+### Public API — `mcp_server.repositories.audit_repo`
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `AuditRepository` | class | Append-only data access for audit records |
+| `AuditLogRow` | dataclass | Frozen, slotted representation of an audit entry |
+
+#### AuditRepository Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `append(identity_type, identity_id, operation, target, result, metadata, source_machine)` | `AuditLogRow` | Insert a new audit log entry |
+| `query(identity_id, identity_type, operation, since, until, limit, offset)` | `list[AuditLogRow]` | Query with filters; limit capped at 1000 |
+| `count(identity_id, identity_type, operation, since, until)` | `int` | Count matching entries |
+
+### Middleware — `mcp_server.middleware.audit_middleware`
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `AuditMiddleware` | class | Starlette middleware that logs all authenticated requests |
+
+`AuditMiddleware` skips health/readiness endpoints (`/health`, `/healthz`,
+`/ready`, `/readiness`, `/livez`, `/readyz`). Source machine is resolved from
+`X-Machine-Id` header, then `X-Forwarded-For`, then `request.client.host`.
+
+### Design Constraints
+
+- **Append-only** — `AuditRepository` exposes no UPDATE or DELETE methods. Records are immutable once written.
+- **Parameterized SQL** — all queries use `$1`, `$2` placeholders; no string interpolation.
+- **Non-blocking middleware** — audit write failures are caught and logged; they never block the response.
+- **Frozen dataclass** — `AuditLogRow` is frozen with `__slots__` for immutability and memory efficiency.
+- **Limit cap** — `query()` caps the `limit` parameter at 1000 to prevent runaway result sets.
+
+
+## Notification Channels
+
+<!-- last_reviewed: 2026-03-11T15:30:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.notifications.channels` module provides configurable delivery
+channels for the notification system. Channels determine where notifications
+are sent (webhook endpoints, Slack) and can filter by event type.
+
+### Channel Types
+
+| Type | Description |
+|------|-------------|
+| `webhook` | Generic HTTP POST with JSON payload to a configured URL |
+| `slack` | Slack incoming webhook with Block Kit formatted messages |
+
+### Quick Start
+
+```python
+from mcp_server.notifications import ChannelStore, ChannelDispatcher, ChannelType
+
+store = ChannelStore(pool)
+
+# Create a webhook channel
+channel = await store.create_channel(
+    name="ops-alerts",
+    channel_type=ChannelType.WEBHOOK,
+    config={"url": "https://hooks.example.com/forgeos"},
+    event_filter=["stage_changed", "ticket_reworked"],
+)
+
+# Create a Slack channel (all events)
+slack = await store.create_channel(
+    name="dev-slack",
+    channel_type=ChannelType.SLACK,
+    config={"url": "https://hooks.slack.com/services/T.../B.../xxx"},
+)
+
+# Dispatch a notification to all matching channels
+dispatcher = ChannelDispatcher(store)
+results = await dispatcher.dispatch(
+    event_type="stage_changed",
+    payload={"ticket_id": "FORGEOS-BE066", "details": "BACKEND → QA"},
+)
+
+for r in results:
+    print(f"{r.channel_id}: {'OK' if r.success else r.error_message}")
+```
+
+### Environment-Based Channel Configuration
+
+Channels can be bootstrapped from environment variables without database
+access. Set `FORGEOS_CHANNEL_*` variables with JSON values:
+
+```bash
+export FORGEOS_CHANNEL_OPS_WEBHOOK='{
+  "type": "webhook",
+  "url": "https://hooks.example.com/forgeos",
+  "event_filter": ["stage_changed", "ticket_reworked"],
+  "enabled": true,
+  "headers": {"X-Source": "forgeos"}
+}'
+
+export FORGEOS_CHANNEL_DEV_SLACK='{
+  "type": "slack",
+  "url": "https://hooks.slack.com/services/T.../B.../xxx"
+}'
+```
+
+Load at startup:
+
+```python
+from mcp_server.notifications import load_channels_from_env, build_channel_config
+
+env_channels = load_channels_from_env()
+for env_cfg in env_channels:
+    config = build_channel_config(env_cfg)
+    await store.create_channel(
+        name=env_cfg.name,
+        channel_type=env_cfg.channel_type,
+        config=config,
+        event_filter=env_cfg.event_filter,
+        enabled=env_cfg.enabled,
+    )
+```
+
+### ChannelStore Methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `create_channel(name, channel_type, config, ...)` | `NotificationChannel` | Insert a new channel |
+| `get_channel(channel_id)` | `NotificationChannel \| None` | Retrieve a channel by UUID |
+| `list_channels(enabled_only=False)` | `list[NotificationChannel]` | List all channels |
+| `update_channel(channel_id, ...)` | `NotificationChannel \| None` | Update channel fields |
+| `delete_channel(channel_id)` | `bool` | Delete a channel by UUID |
+
+### ChannelDispatcher
+
+Sends notifications to all enabled channels whose event filter matches.
+Delivery failures are isolated per-channel and never block queue processing.
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `dispatch(event_type, payload)` | `list[DeliveryResult]` | Send to all matching channels |
+
+### Data Classes
+
+| Class | Description |
+|-------|-------------|
+| `NotificationChannel` | Frozen dataclass: `channel_id`, `name`, `type`, `config`, `event_filter`, `enabled`, `created_at`, `updated_at` |
+| `DeliveryResult` | Result of a delivery attempt: `success`, `channel_id`, `error_message` |
+| `ChannelType` | Enum: `webhook`, `slack` |
+| `ChannelEnvConfig` | Parsed env var config: `name`, `channel_type`, `url`, `event_filter`, `enabled`, `extra` |
+
+### Event Filtering
+
+Channels can filter which event types they receive. An empty `event_filter`
+matches all events. Otherwise, only events whose `event_type` is in the
+filter list are delivered.
+
+```python
+# Only receives stage_changed and ticket_reworked
+channel = await store.create_channel(
+    name="filtered",
+    channel_type=ChannelType.WEBHOOK,
+    config={"url": "https://example.com/hook"},
+    event_filter=["stage_changed", "ticket_reworked"],
+)
+
+# Receives all event types
+channel = await store.create_channel(
+    name="all-events",
+    channel_type=ChannelType.WEBHOOK,
+    config={"url": "https://example.com/all"},
+    event_filter=[],
+)
+```
+
+### Webhook Delivery
+
+Sends a JSON POST request to the configured URL:
+
+```json
+{
+  "event_type": "stage_changed",
+  "payload": {"ticket_id": "FORGEOS-BE066", "details": "..."},
+  "channel_id": "550e8400-...",
+  "timestamp": "2026-03-11T15:00:00Z"
+}
+```
+
+Config keys: `url` (required), `timeout` (optional, default 10s),
+`headers` (optional, extra headers merged into the request).
+
+### Slack Delivery
+
+Formats the notification as a Slack Block Kit message with header, detail
+section, and context footer. Sends to the configured Slack incoming webhook URL.
+
+Config keys: `url` (required), `timeout` (optional, default 10s).
+
+### Database Schema
+
+Alembic migration 006 (`20260311_000000_006_notification_channels.py`) creates:
+
+| Column | Type | Constraint |
+|--------|------|------------|
+| `channel_id` | `UUID` | PK, default `gen_random_uuid()` |
+| `name` | `VARCHAR(128)` | NOT NULL |
+| `type` | `channel_type` | NOT NULL (enum: `webhook`, `slack`) |
+| `config` | `JSONB` | NOT NULL, default `'{}'` |
+| `event_filter` | `TEXT[]` | Nullable |
+| `enabled` | `BOOLEAN` | NOT NULL, default `TRUE` |
+| `created_at` | `TIMESTAMPTZ` | NOT NULL, default `now()` |
+| `updated_at` | `TIMESTAMPTZ` | NOT NULL, auto-updated via trigger |
+
+### Error Handling
+
+| Scenario | Behavior |
+|----------|----------|
+| Missing URL in channel config | Returns `DeliveryResult(success=False)` with error message |
+| HTTP non-2xx response | Returns failure result; logged as warning |
+| Network/timeout error | Returns failure result; logged with exception details |
+| Unsupported channel type | Raises `ValueError` |
+| Empty channel name | Raises `ValueError` |
+| Dispatch failure on one channel | Other channels still receive the notification |
+
+### Design Constraints
+
+- **Isolated delivery** — each channel delivers independently. One failure
+  never blocks other channels or the notification queue.
+- **Protocol-based delivery** — `ChannelDelivery` protocol allows adding new
+  channel types without modifying existing code.
+- **Thread-safe HTTP** — outbound HTTP uses `asyncio.to_thread()` with
+  `urllib.request` to avoid blocking the event loop.
+- **Immutable channels** — `NotificationChannel` is a frozen dataclass.
+- **Structured logging** — all operations include `channel_id` and `event_type`.
 
 
 ## Database Migrations
