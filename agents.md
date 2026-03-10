@@ -22,9 +22,10 @@ If unresolved conflict remains: STOP and emit NEEDS_INPUT_FROM: ReaperOAK.
 5. Read .github/instructions/git-protocol.instructions.md
 6. Read .github/instructions/agent-behavior.instructions.md
 7. Read .github/instructions/terminal-management.instructions.md
-8. Read upstream summary from .github/agent-output/{PreviousAgent}/{ticket-id}.md (if exists)
-9. Read .github/vibecoding/chunks/{YourAgent}.agent/ (all files)
-10. Read .github/vibecoding/catalog.yml; load task-relevant chunks
+8. Verify MCP server connectivity (`GET http://localhost:3000/health`). If unreachable, fall back to filesystem-based `tickets.py` CLI.
+9. Read upstream summary from .github/agent-output/{PreviousAgent}/{ticket-id}.md (if exists)
+10. Read .github/vibecoding/chunks/{YourAgent}.agent/ (all files)
+11. Read .github/vibecoding/catalog.yml; load task-relevant chunks
 
 ## 2) Identity Invariants
 
@@ -43,6 +44,24 @@ READY | ARCHITECT | RESEARCH | BACKEND | FRONTEND | QA | SECURITY | CI | DOCS | 
 Post-implementation chain (strict order): QA → Security → CI → Docs → Validator.
 
 No skip, no merge, no reorder. Failure at any stage -> REWORK (max 3, then ESCALATED).
+
+### MCP Tool Integration
+
+Agents interact with tickets via the ForgeOS MCP Server. When the server is
+reachable, use MCP tools. When unavailable, fall back to `tickets.py` CLI.
+
+| Tool | Purpose |
+|------|---------|
+| `tickets.next` | Discover next claimable ticket for a stage |
+| `tickets.claim` | Acquire distributed lock on a ticket |
+| `tickets.complete` | Mark stage done, advance to next stage |
+| `tickets.release` | Release a claim without completing |
+| `tickets.extend` | Extend lease on a claimed ticket |
+| `tickets.reject` | Reject ticket, send to REWORK |
+| `tickets.graph` | Query the dependency graph |
+| `tickets.stats` | Aggregate pipeline statistics |
+
+CLI fallback: `python3 .github/tickets.py --claim <id> <agent> <machine> <operator>`
 
 ## 4) Scoped Git (non-negotiable)
 

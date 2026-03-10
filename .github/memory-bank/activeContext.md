@@ -2006,3 +2006,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/instructions/core.instructions.md, .github/instructions/sdlc.instructions.md, .github/instructions/ticket-system.instructions.md, .github/instructions/git-protocol.instructions.md, .github/instructions/agent-behavior.instructions.md
 - **Decisions:** Additive-only changes to preserve backward compatibility. MCP sections added as new subsections in ticket-system. PRODUCT_MANAGER and UI_DESIGN added as first-class stages. Dual-mode operation uses availability-based fallback. UIDesigner stage ownership changed from FRONTEND to UI_DESIGN.
 - **Timestamp:** 2025-01-27T12:00:00Z
+
+### [TASK-FOS-03-003] — BACKEND REWORK #1 Complete
+- **Artifacts:** forgeos-server/src/tools/index.ts, forgeos-server/src/tools/tickets-update.ts, forgeos-server/src/__tests__/tools/tickets-update.test.ts
+- **Decisions:** Recreated tickets-update.ts from memory (file was never committed, lost during stash operations). Used inferred type from pool.connect() instead of Awaited<ReturnType<...>> due to pg overload resolution issue. Followed existing transaction pattern (BEGIN/SELECT FOR UPDATE/UPDATE/INSERT event/COMMIT).
+- **Timestamp:** 2026-03-10T08:38:41Z

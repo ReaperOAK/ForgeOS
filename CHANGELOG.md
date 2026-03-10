@@ -6,6 +6,23 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Root Documentation Updates** — Updated README.md, agents.md, and
+  copilot-instructions.md to reflect the MCP-based architecture and
+  PostgreSQL backend (TASK-FOS-07-003). README.md now includes a Quick Start
+  section (`git clone`, `make setup`, `make up`, dashboard link), describes
+  the distributed MCP server + PostgreSQL 17 architecture, lists
+  `forgeos-server/`, `mcp-server/`, and `infra/` in the repository structure,
+  and links to the live Kanban dashboard at http://localhost:3000/dashboard.
+  agents.md Required Boot Sequence includes MCP server connectivity check
+  (step 8). agents.md Required Lifecycle section documents 8 MCP tools
+  (`tickets.next`, `tickets.claim`, `tickets.advance`, `tickets.release`,
+  `tickets.extend`, `tickets.reject`, `tickets.graph`, `tickets.stats`)
+  with CLI fallback. copilot-instructions.md Repository Structure includes
+  `forgeos-server/` directory tree and Architecture section describes MCP
+  server, PostgreSQL, Python MCP server, and real-time dashboard.
+
 ### Added
 
 - **Agent Registration and Identity Management** — Admin API endpoints
