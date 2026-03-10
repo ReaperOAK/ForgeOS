@@ -4,7 +4,7 @@
   "description": "Implement the tickets.reject MCP tool that rejects a ticket during a review stage (QA, Security, CI, Validation), sending it back for rework. Uses the reject_ticket SQL function. Increments rework_count; if rework_count >= max_reworks (default 3), the ticket moves to ESCALATED status instead of rework. On rework, the ticket returns to its implementation stage (first non-READY stage in the SDLC flow) with status READY. File locks are released on rejection.",
   "type": "backend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Escalated tickets have status ESCALATED and claimed_by set to NULL"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T16:30:00+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -103,9 +103,23 @@
       "agent": "Documentation",
       "machine_id": "pop-os",
       "details": "Claimed by Documentation for DOCS stage"
+    },
+    {
+      "timestamp": "2026-03-10T16:20:00+00:00",
+      "event": "DOCS_COMPLETE",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "details": "DOCS PASS"
+    },
+    {
+      "timestamp": "2026-03-10T16:35:00+00:00",
+      "event": "VALIDATION_COMPLETE",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "details": "APPROVED (HIGH confidence): 10/10 DoD, 8/8 ACs."
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
   "tags": [],
-  "completed_at": "2026-03-09T20:56:54.714115+00:00"
+  "completed_at": "2026-03-10T16:35:00+00:00"
 }
