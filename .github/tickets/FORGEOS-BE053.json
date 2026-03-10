@@ -34,10 +34,10 @@
     "Operator credentials stored as bcrypt hashes in the operators table"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Security",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T17:32:31.619109+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
