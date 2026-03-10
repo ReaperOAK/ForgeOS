@@ -4,7 +4,7 @@
   "description": "Implement the MCP client connection management within the agent SDK. Support connecting to the MCP server via stdio (local) and SSE/HTTP (remote) transports. Implement automatic reconnection with exponential backoff on connection loss. Handle MCP session initialization (initialize handshake), session resumption after disconnect, and clean shutdown.",
   "type": "backend",
   "priority": "critical",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
