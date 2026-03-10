@@ -1,3 +1,8 @@
+### [FORGEOS-BE024] — Structured JSON Logging
+- **Artifacts:** mcp-server/src/mcp_server/observability/__init__.py, mcp-server/src/mcp_server/observability/logging.py, mcp-server/tests/test_structured_logging.py, mcp-server/src/mcp_server/server.py
+- **Decisions:** Built on stdlib logging (no external deps); used contextvars for async-safe correlation IDs; filter-based PII redaction; separate observability package for future extensibility; aliased configure_logging as _configure_logging in server.py for backward compat.
+- **Timestamp:** 2026-03-10T23:00:00Z
+
 ### [FORGEOS-UID003] — Documentation Summary
 - **Artifacts:** docs/uiux/mockups/FORGEOS-UID003.md, docs/uiux/components/dependency-graph.md, docs/uiux/components/search-bar.md, CHANGELOG.md
 - **Decisions:** Added freshness metadata (last_reviewed, reviewed_by, diataxis: reference) to all 3 specs. Resolved CI-W001/W002 with rendering specification subsection (mark.search-highlight element, token-to-CSS mapping, disambiguation from graph highlight tokens). Addressed CI-S001 by designating search-bar.md keyboard navigation as canonical source.
@@ -2206,3 +2211,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE003.md
 - **Decisions:** APPROVED — All 10 DoD items pass. 70/70 tests, lint clean (ruff 0), type-safe (pyright 0), fully documented. All upstream verdicts verified (QA PASS, Security PASS, CI PASS 100/100, Docs PASS). Confidence: HIGH.
 - **Timestamp:** 2026-03-10T10:10:00Z
+
+### [TASK-FOS-03-006] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/TASK-FOS-03-006.md
+- **Decisions:** APPROVED — DoD 10/10, AC 8/8. All upstream verdicts verified (QA PASS, Security PASS, CI PASS, Docs PASS).
+- **Timestamp:** 2026-03-10T17:00:00Z

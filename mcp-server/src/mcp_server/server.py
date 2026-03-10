@@ -40,8 +40,6 @@ Design decisions
 
 from __future__ import annotations
 
-import logging
-import sys
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Any
@@ -53,6 +51,8 @@ from pydantic import Field
 from pydantic_settings import BaseSettings
 
 from mcp_server import __app_name__, __version__
+from mcp_server.observability import configure_logging as _configure_logging
+from mcp_server.observability import get_logger
 
 if TYPE_CHECKING:
     from collections.abc import AsyncIterator
@@ -61,32 +61,7 @@ if TYPE_CHECKING:
 # Structured logger — JSON output, no PII, no console.log
 # ---------------------------------------------------------------------------
 
-logger = logging.getLogger("forgeos.mcp")
-
-
-def _configure_logging(level: str = "INFO") -> None:
-    """Configure structured JSON logging for the server.
-
-    Sets up a stderr handler with JSON-formatted output on the ``forgeos``
-    logger hierarchy.  Called once during server startup.
-
-    Parameters
-    ----------
-    level : str
-        Python logging level name (e.g. ``"INFO"``, ``"DEBUG"``).  Defaults
-        to ``"INFO"`` if the provided string does not map to a valid level.
-    """
-    handler = logging.StreamHandler(sys.stderr)
-    handler.setFormatter(
-        logging.Formatter(
-            '{"timestamp":"%(asctime)s","level":"%(levelname)s",'
-            '"logger":"%(name)s","message":"%(message)s"}',
-            datefmt="%Y-%m-%dT%H:%M:%S%z",
-        )
-    )
-    root = logging.getLogger("forgeos")
-    root.setLevel(getattr(logging, level.upper(), logging.INFO))
-    root.addHandler(handler)
+logger = get_logger("mcp")
 
 
 # ---------------------------------------------------------------------------
@@ -106,6 +81,10 @@ class ServerConfig(BaseSettings):
     host: str = Field(default="0.0.0.0", description="Bind address")
     port: int = Field(default=8080, description="Bind port")
     log_level: str = Field(default="INFO", description="Logging level")
+    transport: str = Field(
+        default="streamable-http",
+        description="MCP transport type: stdio, streamable-http, or sse",
+    )
 
     # Database settings — used by the lifespan to create the asyncpg pool.
     database_url: str = Field(
@@ -354,24 +333,53 @@ async def health_check() -> dict[str, str]:
 
 
 def main() -> None:
-    """Start the ForgeOS MCP server with Streamable HTTP transport.
+    """Start the ForgeOS MCP server with the configured transport.
 
-    Reads configuration from environment variables (``FORGEOS_*`` prefix).
-    Defaults to ``0.0.0.0:8080`` for local development.
+    Reads configuration from environment variables (``FORGEOS_*`` prefix)
+    and CLI arguments.  The ``--transport`` flag overrides the env var.
+
+    Supported transports:
+
+    * ``streamable-http`` (default) — HTTP-based remote transport.
+    * ``stdio`` — stdin/stdout pipes for local agent processes.
+    * ``sse`` — legacy Server-Sent Events transport.
     """
+    import argparse
+
+    from mcp_server.transport import parse_transport
+    from mcp_server.transport.stdio import run_stdio
+
+    parser = argparse.ArgumentParser(description="ForgeOS MCP Server")
+    parser.add_argument(
+        "--transport",
+        choices=["stdio", "streamable-http", "sse"],
+        default=None,
+        help="MCP transport type (overrides FORGEOS_TRANSPORT env var)",
+    )
+    args = parser.parse_args()
+
     config = ServerConfig()
     _configure_logging(config.log_level)
+
+    # CLI arg takes precedence over env var
+    transport = parse_transport(args.transport or config.transport)
 
     # Override FastMCP settings from validated config / env vars
     mcp_server.settings.host = config.host
     mcp_server.settings.port = config.port
 
     logger.info(
-        "Launching %s MCP server v%s — transport=streamable-http, host=%s, port=%d",
+        "Launching %s MCP server v%s — transport=%s, host=%s, port=%d",
         __app_name__,
         __version__,
+        transport,
         config.host,
         config.port,
     )
 
-    mcp_server.run(transport="streamable-http")
+    if transport == "stdio":
+        import asyncio
+
+        asyncio.run(run_stdio(mcp_server))
+    else:
+        mcp_server.run(transport=transport)
