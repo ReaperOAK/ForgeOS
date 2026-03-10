@@ -378,3 +378,91 @@ design tokens at [`docs/uiux/design-tokens.json`](../../uiux/design-tokens.json)
   }
 }
 ```
+
+---
+
+## 6. Frontend Implementation Mapping
+
+> **Added by:** Frontend Engineer | **Date:** 2026-03-10 | **Ticket:** FORGEOS-UID003
+
+### 6.1 Component ↔ CSS Class Mapping
+
+| Spec Component | CSS Classes | Source File | Lines |
+|---------------|-------------|-------------|-------|
+| **SearchTrigger** | `.search-trigger`, `__icon`, `__text`, `__kbd` | `graph-search.css` | 607–640 |
+| **SearchOverlay** | `.search-overlay`, `__backdrop`, `__panel` | `graph-search.css` | 642–700 |
+| **SearchInput** | `.search-overlay__input-row`, `__icon`, `__input`, `__kbd` | `graph-search.css` | 700–725 |
+| **FilterButtons** | `.search-overlay__filters`, `__filter-btn` | `graph-search.css` | 726–740 |
+| **SearchResults** | `.search-overlay__results`, `.search-results-loading`, `-empty`, `-footer` | `graph-search.css` | 742–760 |
+| **SearchResultCard** | `.search-result-card`, `__stage-dot`, `__id`, `__title`, `__mark`, `__path`, `__meta` | `graph-search.css` | 762–810 |
+| **RecentSearches** | `.search-recent`, `__header`, `__clear`, `__list`, `__item`, `__remove` | `graph-search.css` | 812–850 |
+| **FilterChip** (graph) | `.filter-chip`, `__btn`, `__dropdown`, `__option` | `graph-search.css` | 100–135 |
+
+### 6.2 HTML Element IDs + ARIA Roles
+
+| Element ID | Purpose | ARIA Pattern |
+|-----------|---------|-------------|
+| `#searchOverlay` | Overlay container | — |
+| `#searchBackdrop` | Click-away backdrop | — |
+| `#searchPanel` | Dialog panel | `role="combobox"`, `aria-expanded`, `aria-owns`, `aria-haspopup="listbox"` |
+| `#searchInput` | Text input | `role="searchbox"`, `aria-autocomplete="list"`, `aria-controls` |
+| `#searchResults` | Results container | `role="listbox"`, `aria-label="Search results"` |
+| Each result | Result card | `role="option"`, `aria-selected` |
+
+### 6.3 Overlay States
+
+| State | CSS | Behavior |
+|-------|-----|----------|
+| Closed | `.search-overlay` | `display: none` |
+| Open | `.search-overlay.active` | `display: flex`, backdrop, focus trapped |
+| Loading | `.search-results-loading.active` | Spinner in results area |
+| Empty | `.search-results-empty.active` | "No results" message |
+| Has results | `.search-result-card` children | Listbox populated, arrow key nav |
+
+### 6.4 Filter Button States
+
+| Filter | `data-filter` | Behavior |
+|--------|--------------|----------|
+| All | `"all"` | Default active, all results |
+| By ID | `"id"` | Match ticket ID |
+| By Title | `"title"` | Match title text |
+| By Stage | `"stage"` | Match stage name |
+| By Type | `"type"` | Match ticket type |
+
+Active filter: `aria-pressed="true"` with visual accent.
+
+### 6.5 Keyboard Navigation
+
+| Key | Context | Action |
+|-----|---------|--------|
+| `Ctrl+K` / `Cmd+K` | Global | Open overlay |
+| `Escape` | Open | Close, return focus to trigger |
+| `↓` / `↑` | Input focused | Navigate results |
+| `Enter` | Result highlighted | Select result |
+| `Tab` | In overlay | Cycle: input → filters → results → recent |
+
+### 6.6 Match Highlighting
+
+Matches highlighted via `<mark>` inside `.search-result-card__mark`:
+- Dark: `background: var(--search-highlight-bg)` (`rgba(6,182,212,0.15)`).
+- Light: `var(--search-highlight-bg)` overridden under `[data-theme="light"]` (`rgba(37,99,235,0.1)`).
+
+### 6.7 Responsive Behavior
+
+| Breakpoint | Search Behavior |
+|-----------|----------------|
+| Desktop (≥1024px) | 600px max-width, 12px radius, 70vh max-height |
+| Tablet (768–1023px) | Panel adapts width, padding reduced |
+| Mobile (<768px) | Full-screen (no radius, 100vw/100vh), 44px input height |
+
+### 6.8 Accessibility Notes
+
+- Overlay: `role="dialog"` + `aria-modal="true"` — background inert.
+- Input: `role="searchbox"`, `aria-autocomplete="list"`.
+- Combobox: `aria-expanded` tracks results visibility, `aria-activedescendant` tracks highlight.
+- Results: `role="option"` inside `role="listbox"`.
+- Filters: `aria-pressed` toggle pattern.
+- Escape closes overlay AND restores focus to opener.
+- Recent remove buttons: `aria-label="Remove '${query}' from recent searches"`.
+- Loading: `role="status"` + `aria-live="polite"`.
+- Empty state: `aria-live="assertive"`.
