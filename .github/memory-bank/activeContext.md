@@ -3587,3 +3587,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE056.md
 - **Decisions:** APPROVED — All 10 DoD items pass. 41/41 tests, 100% BE056-specific coverage (authorization.py), ruff clean, mypy clean, all 6 ACs verified. QA ✓ Security ✓ CI ✓ Docs ✓. Rework #1 lint fixes (TC003, I001, F401) confirmed resolved.
 - **Timestamp:** 2026-03-12T03:00:00Z
+
+### [FORGEOS-BE055] — Backend Rework #1: CWE-862 Authorization Fix
+- **Artifacts:** mcp-server/src/mcp_server/services/ticket_service.py, mcp-server/tests/test_ticket_tools.py
+- **Decisions:** Added check_role_stage_authorization() call in claim_by_id() to fix authorization bypass (CWE-862, OWASP A01). Mirrors pattern in claim_next().
+- **Timestamp:** 2026-03-11T00:15:00Z

@@ -18,7 +18,7 @@ from __future__ import annotations
 import uuid
 from datetime import datetime, timezone
 from typing import Any
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, patch
 
 import pytest
 
@@ -1257,6 +1257,33 @@ class TestTicketServiceClaimById:
                 machine_id="host",
                 operator="op",
             )
+
+    @pytest.mark.asyncio()
+    async def test_claim_by_id_calls_role_stage_authorization(
+        self,
+        mock_claim_queue: AsyncMock,
+        ticket_service: TicketService,
+    ) -> None:
+        """claim_by_id must call check_role_stage_authorization (CWE-862 fix)."""
+        from mcp_server.auth.authorization import RoleStageMismatchError
+
+        with (
+            patch(
+                "mcp_server.services.ticket_service.check_role_stage_authorization",
+                side_effect=RoleStageMismatchError(
+                    "Role 'backend' not authorized for stage 'QA'",
+                    details={"agent_role": "backend", "ticket_stage": "QA"},
+                ),
+            ),
+            pytest.raises(RoleStageMismatchError),
+        ):
+            await ticket_service.claim_by_id(
+                    ticket_id="FORGEOS-BE099",
+                    agent_role="backend",
+                    machine_id="host",
+                    operator="op",
+                )
+        mock_claim_queue.claim_by_id.assert_not_awaited()
 
     @pytest.mark.asyncio()
     async def test_claim_by_id_propagates_claim_error(
