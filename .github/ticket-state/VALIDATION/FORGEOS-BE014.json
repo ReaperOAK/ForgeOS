@@ -33,10 +33,10 @@
     "Health monitoring runs as a lightweight background task without impacting pool performance"
   ],
   "rework_count": 1,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Validator",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T21:11:43.447108+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -172,6 +172,15 @@
       "agent": "Documentation",
       "machine_id": "pop-os",
       "details": "DOCS stage completed \u2014 removed duplicate README section, updated __init__.py docstring, removed duplicate CHANGELOG entry"
+    },
+    {
+      "timestamp": "2026-03-10T20:41:43.447124+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-10T21:11:43.447108+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
