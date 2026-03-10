@@ -8,6 +8,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Dependency Graph D3.js Visualization** (TASK-FOS-05-003) — Interactive
+  force-directed dependency graph at `forgeos-server/src/dashboard/js/graph.js`
+  (1554 LOC). Renders ticket DAG with status-based node coloring
+  (DONE/READY/BLOCKED/CLAIMED/ESCALATED), priority-based node sizing
+  (critical=24px to low=10px radius), directed edges with arrowhead markers,
+  and critical-path highlighting via longest-path analysis. Interactive
+  features: click-to-open ticket detail panel, zoom/pan via scroll wheel and
+  drag, debounced search-by-ID with node centering, hover tooltips, and canvas
+  minimap. Real-time updates via SSE with pulse animations and toast
+  notifications. Respects `prefers-reduced-motion` by running simulation to
+  completion without animation. WCAG 2.2 AA compliant with ARIA labels, focus
+  management, and keyboard navigation. Responsive layout with mobile-optimized
+  radii and bottom-sheet detail view.
+
 - **Agent-Runner SDK** (TASK-FOS-06-003) — TypeScript wrapper for the
   two-commit Git protocol at `forgeos-server/src/sdk/agent-runner.ts`.
   `AgentRunner` class provides `claimTicket()`, `completeStage()`,
