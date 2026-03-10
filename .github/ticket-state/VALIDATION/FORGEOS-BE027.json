@@ -33,10 +33,10 @@
     "Metrics are exposed via a /metrics endpoint or structured JSON log line on configurable interval"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Validator",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T17:35:07.734462+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -114,6 +114,13 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "Advanced from DOCS to VALIDATION"
+    },
+    {
+      "timestamp": "2026-03-10T17:05:07.734462+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "details": "Claimed for VALIDATION stage review"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
