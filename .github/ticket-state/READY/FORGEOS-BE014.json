@@ -4,7 +4,7 @@
   "description": "Implement health monitoring for the asyncpg connection pool. Track pool statistics (active connections, idle connections, waiting requests), detect unhealthy connections via periodic ping, and trigger connection recycling when connections become stale. Expose pool health as a structured report for the health check endpoint.",
   "type": "backend",
   "priority": "medium",
-  "stage": "BLOCKED",
+  "stage": "READY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -45,6 +45,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase2-database.md"
+    },
+    {
+      "timestamp": "2026-03-10T14:19:52.542888+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",

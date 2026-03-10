@@ -22,8 +22,7 @@
     "FORGEOS-BE012"
   ],
   "blocked_by": [
-    "FORGEOS-BE054",
-    "FORGEOS-BE012"
+    "FORGEOS-BE054"
   ],
   "file_paths": [
     "mcp-server/src/services/audit_service.py",

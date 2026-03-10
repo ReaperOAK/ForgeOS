@@ -4,7 +4,7 @@
   "description": "Implement operator (human) authentication using token-based auth (JWT or simple bearer tokens). Operators authenticate via the REST API to perform dashboard actions. Implement token generation on login, token validation on each request, token expiry, and token refresh. Operator records are stored in the operators table from FORGEOS-BE002.",
   "type": "backend",
   "priority": "high",
-  "stage": "BLOCKED",
+  "stage": "READY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -46,6 +46,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase3-auth.md"
+    },
+    {
+      "timestamp": "2026-03-10T14:21:11.541086+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",

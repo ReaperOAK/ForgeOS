@@ -4,7 +4,7 @@
   "description": "Implement agent session management for the MCP server. Each connecting agent establishes a session that tracks its identity (agent name, role, machine_id), connection state, and associated claims. Sessions support heartbeat tracking (is the agent still connected?), timeout handling (auto-cleanup after disconnect), and resumption after transient disconnects.",
   "type": "backend",
   "priority": "critical",
-  "stage": "BLOCKED",
+  "stage": "READY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -47,6 +47,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase2-mcp-server.md"
+    },
+    {
+      "timestamp": "2026-03-10T14:19:52.542515+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",

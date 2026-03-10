@@ -4,7 +4,7 @@
   "description": "Implement the repository pattern data access layer that all higher-level services consume. Create repository classes for tickets (CRUD, filtering, stage queries), claims (create, release, find active), and events (append, query by ticket). Repositories accept a database connection/pool and encapsulate all SQL queries. Both sync and async interfaces must be supported.",
   "type": "backend",
   "priority": "critical",
-  "stage": "BLOCKED",
+  "stage": "READY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -48,6 +48,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase2-database.md"
+    },
+    {
+      "timestamp": "2026-03-10T14:19:52.545371+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
