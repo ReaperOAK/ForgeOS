@@ -108,7 +108,7 @@
       "machine_id": "pop-os",
       "from_stage": "CI",
       "to_stage": "DOCS",
-      "details": "CI PASS \u2014 Quality Score 93/100, 0 critical, 1 warning, 100% coverage"
+      "details": "CI PASS — Quality Score 93/100, 0 critical, 1 warning, 100% coverage"
     },
     {
       "timestamp": "2026-03-11T00:30:00+00:00",
@@ -124,7 +124,7 @@
       "machine_id": "pop-os",
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
-      "details": "DOCS complete \u2014 README Connection Pool section, CHANGELOG entry, docstrings verified"
+      "details": "DOCS complete — README Connection Pool section, CHANGELOG entry, docstrings verified"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
