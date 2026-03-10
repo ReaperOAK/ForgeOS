@@ -4,7 +4,7 @@
   "description": "Wire the MCP server to the PostgreSQL database layer via the repository data access layer from BE013. Implement server startup hooks that initialize the connection pool and repository instances, and shutdown hooks that drain connections. Provide a dependency injection mechanism (or module-level factory) so that tool handlers can access repositories without direct pool management.",
   "type": "backend",
   "priority": "critical",
-  "stage": "BLOCKED",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -37,10 +37,10 @@
     "No direct pool access in tool handlers; all database access is through repositories"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Backend",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T18:27:11.290555+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -49,6 +49,20 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase2-mcp-server.md"
+    },
+    {
+      "timestamp": "2026-03-10T17:57:11.290555+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "Claimed for BACKEND stage"
+    },
+    {
+      "timestamp": "2026-03-10T18:16:16.189937+00:00",
+      "event": "STAGE_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "BACKEND stage complete \u2014 dependencies.py created, server.py wired, pool.py raw_pool property added, 25 new tests passing, 81% coverage"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
@@ -59,5 +73,13 @@
     "wiring",
     "phase2",
     "BLK-04-01"
+  ],
+  "completed_at": "2026-03-10T18:16:16.189937+00:00",
+  "artifacts": [
+    "mcp-server/src/mcp_server/dependencies.py",
+    "mcp-server/src/mcp_server/db/pool.py",
+    "mcp-server/src/mcp_server/server.py",
+    "mcp-server/tests/test_dependencies.py",
+    "mcp-server/tests/test_db_wiring.py"
   ]
 }

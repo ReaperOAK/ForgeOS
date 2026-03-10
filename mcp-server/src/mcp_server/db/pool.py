@@ -149,6 +149,17 @@ class ConnectionPool:
         """Return ``True`` if the pool has been initialized and not closed."""
         return self._pool is not None
 
+    @property
+    def raw_pool(self) -> asyncpg.Pool[Any]:
+        """Return the underlying asyncpg pool for repository injection.
+
+        Raises
+        ------
+        PoolNotInitializedError
+            If the pool has not been initialized.
+        """
+        return self._ensure_pool()
+
     async def initialize(self) -> None:
         """Create the asyncpg pool and verify database connectivity.
 

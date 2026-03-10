@@ -39,6 +39,7 @@ Design decisions
 """
 
 from __future__ import annotations
+import sys
 
 from contextlib import asynccontextmanager
 from dataclasses import dataclass, field
@@ -93,6 +94,10 @@ class ServerConfig(BaseSettings):
     )
     db_min_pool_size: int = Field(default=2, description="Minimum pool connections")
     db_max_pool_size: int = Field(default=10, description="Maximum pool connections")
+    db_required: bool = Field(
+        default=False,
+        description="If true, server exits with code 1 when DB is unreachable",
+    )
 
 
 # ---------------------------------------------------------------------------
@@ -106,17 +111,40 @@ class AppContext:
 
     Attributes
     ----------
-    db_pool : object | None
-        The ``asyncpg.Pool`` instance (or ``None`` when DB is unavailable).
     config : ServerConfig
         Validated server configuration.
-    health_checker : object | None
+    dependencies : Dependencies | None
+        The dependency container (pool + repositories).  ``None`` when the
+        database is unavailable (degraded mode).
+    health_checker : HealthChecker | None
         The :class:`HealthChecker` instance for health/readiness probes.
     """
 
-    db_pool: Any = field(default=None)
     config: ServerConfig = field(default_factory=ServerConfig)
+    dependencies: Any = field(default=None)
     health_checker: Any = field(default=None)
+
+    @property
+    def db_pool(self) -> Any:
+        """Backward-compatible accessor for the connection pool wrapper."""
+        if self.dependencies is not None:
+            return self.dependencies.pool
+        return None
+
+    @property
+    def ticket_repo(self) -> Any:
+        """Shortcut to the ticket repository."""
+        return self.dependencies.ticket_repo if self.dependencies else None
+
+    @property
+    def claim_repo(self) -> Any:
+        """Shortcut to the claim repository."""
+        return self.dependencies.claim_repo if self.dependencies else None
+
+    @property
+    def event_repo(self) -> Any:
+        """Shortcut to the event repository."""
+        return self.dependencies.event_repo if self.dependencies else None
 
 
 # ---------------------------------------------------------------------------
@@ -148,43 +176,49 @@ async def _app_lifespan(server: FastMCP) -> AsyncIterator[AppContext]:
         config.port,
     )
 
+    from mcp_server.dependencies import Dependencies
     from mcp_server.observability.health import HealthChecker
 
-    db_pool: Any = None
+    deps: Dependencies | None = None
     health_checker: HealthChecker | None = None
     try:
-        # Attempt to connect asyncpg pool — gracefully degrade if DB is
-        # unavailable (e.g. during CI or initial bootstrap).
         try:
-            import asyncpg  # type: ignore[import-untyped]
-
-            db_pool = await asyncpg.create_pool(  # type: ignore[reportUnknownMemberType]
+            deps = await Dependencies.create(
                 dsn=config.database_url,
                 min_size=config.db_min_pool_size,
                 max_size=config.db_max_pool_size,
             )
-            logger.info("Database pool created (min=%d, max=%d)",
-                        config.db_min_pool_size, config.db_max_pool_size)
-        except Exception:
+            logger.info(
+                "Database wired (min=%d, max=%d, repos=3)",
+                config.db_min_pool_size,
+                config.db_max_pool_size,
+            )
+        except (ConnectionError, Exception) as exc:
+            if config.db_required:
+                logger.error(
+                    "Database connection required but failed: %s", exc
+                )
+                sys.exit(1)
             logger.warning(
-                "Database connection unavailable — server will start without DB"
+                "Database connection unavailable \u2014 running in degraded mode: %s",
+                exc,
             )
 
-        # Initialize the health checker with pool reference (if available).
-        health_checker = HealthChecker(pool=db_pool)
+        pool_wrapper = deps.pool if deps is not None else None
+        health_checker = HealthChecker(pool=pool_wrapper)
         health_checker.mark_ready()
 
         yield AppContext(
-            db_pool=db_pool,
             config=config,
+            dependencies=deps,
             health_checker=health_checker,
         )
     finally:
         if health_checker is not None:
             health_checker.mark_draining()
-        if db_pool is not None:
-            await db_pool.close()
-            logger.info("Database pool closed")
+        if deps is not None:
+            await deps.close()
+            logger.info("Dependencies closed")
         logger.info("Server shutdown complete")
 
 
