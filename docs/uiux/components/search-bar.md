@@ -5,6 +5,9 @@ type: component-spec
 author: UIDesigner
 date: 2026-03-10T00:00:00Z
 status: APPROVED
+last_reviewed: 2026-03-10T22:30:00Z
+reviewed_by: Documentation
+diataxis: reference
 ---
 
 # Search Bar & Search Results — Component Specification
@@ -141,7 +144,11 @@ interface SearchFilters {
 | Error | Red border, error text below | "Search failed. Try again." |
 | Disabled | 50% opacity, no interaction | Used during offline mode |
 
-### Keyboard Navigation
+### Keyboard Navigation (Canonical Source)
+
+> **Note (CI-S001):** This table is the single source of truth for search keyboard
+> shortcuts. The mockup accessibility checklist
+> (`docs/uiux/mockups/FORGEOS-UID003.md` §7) cross-references this section.
 
 | Key | Action |
 |-----|--------|
@@ -188,12 +195,33 @@ interface SearchFilters {
 └──────────────────────────────────────────────────┘
 ```
 
-### Text Highlighting
+### Rendering Specification
 
-Matching substring ranges are highlighted using the `matchRanges` array:
-- **Dark theme:** Primary text color (`#06B6D4`) + subtle background (`rgba(6, 182, 212, 0.15)`)
-- **Light theme:** Primary text color (`#2563EB`) + subtle background (`rgba(37, 99, 235, 0.1)`)
-- Uses `<mark>` element for semantic correctness with custom styling
+Matching substring ranges are highlighted using the `matchRanges` array.
+Highlights use the `<mark class="search-highlight">` HTML element for semantic
+correctness and screen-reader compatibility.
+
+#### Token-to-CSS Mapping
+
+| Design Token | CSS Custom Property | Value | Purpose |
+|---|---|---|---|
+| `--search-highlight-bg` | `--search-highlight-bg` | `rgba(6, 182, 212, 0.15)` (dark) / `rgba(37, 99, 235, 0.1)` (light) | Highlight background |
+| `--search-highlight-text` | `--search-highlight-text` | `#06B6D4` (dark) / `#2563EB` (light) | Highlighted text color |
+
+> **Disambiguation (CI-W001):** The token `--color-highlight` (`#F59E0B`, amber-500)
+> applies to *graph node* selection highlights. Search result text highlights use
+> the separate `--search-highlight-bg` / `--search-highlight-text` tokens above.
+
+#### CSS Rule
+
+```css
+mark.search-highlight {
+  background: var(--search-highlight-bg);
+  color: var(--search-highlight-text);
+  border-radius: 2px;
+  padding: 0 2px;
+}
+```
 
 ### Dimensions
 

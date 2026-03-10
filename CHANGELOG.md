@@ -8,6 +8,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Dependency Graph & Search Interface Design Docs** (FORGEOS-UID003) — Added
+  freshness-tracking frontmatter (`last_reviewed`, `reviewed_by`, `diataxis:
+  reference`) to the mockup specification and both component specs
+  (dependency-graph, search-bar). Resolved CI-W001/W002 by adding a Rendering
+  Specification subsection with `<mark class="search-highlight">` element,
+  token-to-CSS mapping table (`--search-highlight-bg`, `--search-highlight-text`),
+  CSS rule example, and disambiguation note separating graph highlight tokens
+  from search highlight tokens. Addressed CI-S001 by designating search-bar.md
+  §1 Keyboard Navigation as the canonical source with cross-reference note.
+  Specification covers interactive DAG visualization (D3.js force-directed
+  layout), global search with type-ahead, filter chips, result highlighting,
+  responsive breakpoints, and WCAG 2.1 AA accessibility.
+
 - **Core Tables Migration Documentation** (FORGEOS-BE002) — Documented
   `machines`, `operators`, and `claims` tables in
   `docs/database/schema-reference.md` with full column references, ON DELETE
