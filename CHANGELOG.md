@@ -8,6 +8,55 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Auth Middleware for MCP and REST** (FORGEOS-BE054) — Unified Starlette
+  middleware at `mcp_server/middleware/auth_middleware.py` that authenticates
+  both MCP tool calls and REST API requests through a single credential
+  pipeline. Extracts API keys from `X-API-Key` or `Authorization: Bearer`
+  headers, validates via `mcp_server.auth.agent_auth`, and populates a
+  per-request `AuthContext` (frozen dataclass with `identity_type`,
+  `identity_id`, `role`, `machine_id`, `agent_name`, `permissions`) via
+  `contextvars` for async-safe downstream access. Health and readiness
+  endpoints (`/health`, `/healthz`, `/ready`, `/readiness`, `/livez`,
+  `/readyz`) are excluded from authentication. Returns MCP-style JSON-RPC
+  error for `/mcp` paths and standard HTTP 401 for REST paths. 52 tests
+  with ~95% coverage.
+
+- **MCP Client Connection Manager** (FORGEOS-BE044) — Connection lifecycle
+  management for the ForgeOS Agent SDK at
+  `agent-sdk/src/forgeos_sdk/client.py` and `transport.py`. `ForgeOSClient`
+  connects to MCP servers via stdio (local), SSE, or Streamable HTTP
+  (remote) transports. Automatic reconnection with exponential backoff
+  (initial 1 s, max 30 s, jitter). Session initialization performs the MCP
+  `initialize` handshake and captures server capabilities. Session
+  resumption sends the previous session ID on reconnect (HTTP transports).
+  Clean shutdown cancels pending reconnections and closes transport.
+  `ForgeOSClient.from_env()` factory reads `FORGEOS_` environment variables.
+  Async context manager support. `ConnectionState` enum tracks lifecycle
+  (`DISCONNECTED`, `CONNECTING`, `CONNECTED`, `RECONNECTING`). Transport
+  abstraction via `MCPTransport` ABC with `StdioTransport`, `SSETransport`,
+  and `StreamableHttpTransport` implementations. `create_transport()` factory
+  function. 76 tests with 92% coverage.
+
+- **Agent SDK Configuration and Exceptions** (FORGEOS-BE043) — SDK project
+  scaffolding with `SDKConfig` (pydantic-settings, `FORGEOS_` prefix),
+  `TransportType` enum, and exception hierarchy (`ForgeOSError`,
+  `ConnectionError`, `ConfigurationError`, `AuthenticationError`,
+  `ToolCallError`). 44 tests with 100% coverage.
+
+- **Concurrent Session Handling** (FORGEOS-BE023) — Async-safe concurrent
+  session manager at `mcp-server/src/mcp_server/sessions/concurrent.py`.
+  Allows multiple agents to maintain simultaneous active sessions without
+  interference. Uses `asyncio.Lock` for all mutable state access and a
+  `dict` for O(1) session lookup. Enforces a configurable maximum session
+  limit (default 50) with `MaxSessionsExceededError` providing current/max
+  counts and retry guidance. Session termination only affects the terminated
+  session's resources. Background cleanup loop expires idle and disconnected
+  sessions. `ConcurrentSessionConfig` frozen dataclass controls
+  `max_concurrent_sessions`, `session_timeout_seconds`,
+  `cleanup_interval_seconds`, and `resumption_window_seconds`. Public API:
+  `ConcurrentSessionManager`, `ConcurrentSessionConfig`,
+  `MaxSessionsExceededError`. 22 tests with 88% coverage.
+
 - **Agent Session Lifecycle Management** (FORGEOS-BE022) — Per-agent session
   tracking for the MCP server at `mcp-server/src/mcp_server/sessions/manager.py`.
   Each connecting agent establishes a session with identity metadata

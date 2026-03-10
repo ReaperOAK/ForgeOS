@@ -1,6 +1,6 @@
 # ForgeOS MCP Server
 
-<!-- last_reviewed: 2026-03-11T00:30:00Z -->
+<!-- last_reviewed: 2026-03-11T00:00:00Z -->
 <!-- audience: developers -->
 <!-- diataxis: reference -->
 
@@ -931,7 +931,7 @@ Key methods on `GracefulShutdownManager`:
 
 ## Agent Session Lifecycle Management
 
-<!-- last_reviewed: 2025-07-14T00:00:00Z -->
+<!-- last_reviewed: 2026-03-11T20:30:00Z -->
 <!-- audience: developers -->
 <!-- diataxis: reference -->
 
@@ -1050,6 +1050,120 @@ await mgr.start_cleanup_loop()
 - **Callbacks outside lock** -- cleanup callbacks execute after releasing the lock to avoid deadlocks.
 
 
+## Concurrent Session Management
+
+<!-- last_reviewed: 2026-03-11T20:30:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.sessions.concurrent` module extends session management with
+async-safe concurrent access. `ConcurrentSessionManager` allows multiple agents
+to hold simultaneous sessions without interference, enforces a configurable
+maximum session limit (default 50), and provides O(1) session lookup.
+
+### Quick Start
+
+```python
+from mcp_server.sessions import (
+    ConcurrentSessionConfig,
+    ConcurrentSessionManager,
+    SessionState,
+)
+
+config = ConcurrentSessionConfig(max_concurrent_sessions=50)
+mgr = ConcurrentSessionManager(config=config)
+
+# Create a session when an agent connects
+session = await mgr.create_session("Backend", "backend", "pop-os")
+
+# Periodic heartbeat keeps the session alive
+await mgr.heartbeat(session.session_id)
+
+# Disconnect on transport close (session stays tracked for resumption)
+await mgr.disconnect_session(session.session_id)
+
+# Close and free the session slot
+await mgr.close_session(session.session_id)
+
+# List active sessions
+active = await mgr.list_sessions(state=SessionState.ACTIVE)
+```
+
+### ConcurrentSessionConfig
+
+Frozen dataclass controlling concurrent session behavior:
+
+| Parameter | Default | Description |
+|---|---|---|
+| `max_concurrent_sessions` | `50` | Upper bound on simultaneous active sessions |
+| `session_timeout_seconds` | `300.0` | Idle time before a session expires |
+| `cleanup_interval_seconds` | `30.0` | Interval between background cleanup sweeps |
+| `resumption_window_seconds` | `120.0` | Window for resuming disconnected sessions |
+
+### ConcurrentSessionManager Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `create_session(agent_name, role, machine_id, ...)` | `AgentSession` | Create a new session; raises `MaxSessionsExceededError` if limit reached |
+| `get_session(session_id)` | `AgentSession` | O(1) lookup by session ID |
+| `heartbeat(session_id)` | `AgentSession` | Update last-heartbeat timestamp |
+| `disconnect_session(session_id)` | `AgentSession` | Mark session as disconnected (does not count against limit) |
+| `close_session(session_id)` | `AgentSession` | Close and remove a session, freeing its slot |
+| `list_sessions(state=None)` | `list[AgentSession]` | List sessions, optionally filtered by state |
+| `add_claim(session_id, ticket_id)` | `None` | Associate a ticket claim with a session |
+| `remove_claim(session_id, ticket_id)` | `None` | Remove a ticket claim from a session |
+| `register_cleanup_callback(callback)` | `None` | Register an async callback for expired sessions |
+| `start_cleanup_loop()` | `None` | Start background expiration task |
+| `stop_cleanup_loop()` | `None` | Stop background expiration task |
+| `active_count()` | `int` | Number of currently active sessions |
+| `session_count()` | `int` | Total tracked sessions (all states) |
+| `expire_timed_out_sessions()` | `list[AgentSession]` | Manually trigger expiration sweep |
+
+### Session Limit Behavior
+
+When `create_session()` is called and the number of active sessions equals
+`max_concurrent_sessions`, it raises `MaxSessionsExceededError`:
+
+```python
+from mcp_server.sessions import MaxSessionsExceededError
+
+try:
+    session = await mgr.create_session("NewAgent", "backend", "pop-os")
+except MaxSessionsExceededError as exc:
+    print(f"Rejected: {exc}")
+    print(f"Current: {exc.current_sessions}/{exc.max_sessions}")
+    print(f"Retry after: {exc.retry_after_seconds}s")
+```
+
+The error message includes the current and maximum session counts and a
+suggested retry delay (equal to `cleanup_interval_seconds`).
+
+### Concurrency Model
+
+- All mutable state access is guarded by `asyncio.Lock`.
+- Session storage uses a `dict[str, AgentSession]` for O(1) lookup by ID.
+- Cleanup callbacks execute outside the lock to prevent deadlocks.
+- Disconnected sessions do not count against the active session limit.
+- Session termination (timeout, disconnect, or explicit close) only affects
+  the terminated session's resources — other sessions are unaffected.
+
+### Error Handling
+
+| Error | When |
+|---|---|
+| `MaxSessionsExceededError` | Active session count equals `max_concurrent_sessions` |
+| `SessionNotFoundError` | Session ID does not exist in the manager |
+
+### Design Constraints
+
+- **Async-safe** -- `asyncio.Lock` guards all session state mutations.
+- **O(1) lookup** -- dict-based storage; no linear scans for get/heartbeat/close.
+- **Isolated termination** -- closing one session never affects others.
+- **Configurable limit** -- `max_concurrent_sessions` defaults to 50, adjustable at init.
+- **Clear rejection** -- `MaxSessionsExceededError` includes counts and retry guidance.
+- **Callbacks outside lock** -- cleanup callbacks run after releasing the lock.
+
+
 ## Development
 
 ### Run tests
@@ -1074,11 +1188,13 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/__main__.py`** — `python -m mcp_server` entry point
 - **`mcp_server/db/`** — asyncpg connection pool, health monitoring, and pool metrics
 - **`mcp_server/observability/`** — Structured JSON logging, correlation IDs, PII redaction, and health/readiness probes
-- **`mcp_server/auth/`** — Agent API key authentication, rate limiting, and identity resolution
+- **`mcp_server/auth/`** — Agent API key authentication, machine registration and verification, rate limiting, and identity resolution
+- **`mcp_server/services/`** — Business logic orchestration (MachineService)
+- **`mcp_server/middleware/`** — Unified auth middleware (MCP + REST), correlation ID tracking
 - **`mcp_server/tools/`** — Dynamic tool registration, schema validation, and FastMCP bridge
 - **`mcp_server/events/`** — Append-only event sourcing (EventStore, EventType, Event dataclass)
 - **`mcp_server/locking/`** — Distributed claim queue (SKIP LOCKED), file mutex (advisory locks)
-- **`mcp_server/sessions/`** -- Agent session lifecycle management (heartbeat, timeout, resumption)
+- **`mcp_server/sessions/`** -- Agent session lifecycle management (heartbeat, timeout, resumption, concurrent access)
 
 ### Error Handling
 
@@ -1090,6 +1206,7 @@ Domain errors extend `ForgeOSError` and map to standard JSON-RPC error codes:
 | `TicketAlreadyClaimedError` | `-32602` | 409 |
 | `ValidationError` | `-32602` | 400 |
 | `AuthenticationError` | `-32602` | 401 |
+| `MachineAuthError` | `-32602` | 403 |
 | `DatabaseError` | `-32603` | 503 |
 
 Tool-level expected failures use `isError=True` in the MCP `CallToolResult`.
@@ -1505,6 +1622,142 @@ Failed attempts log the key prefix only — never the full key.
 | Variable | Default | Description |
 |---|---|---|
 | `FORGEOS_API_KEY` | _(required)_ | API key for agent authentication against the MCP server |
+
+
+## Auth Middleware — Unified MCP + REST Authentication
+
+<!-- last_reviewed: 2026-03-11T00:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.middleware` package provides a Starlette middleware that
+authenticates both MCP tool calls and REST API requests through a single
+credential pipeline. It delegates key validation to `mcp_server.auth` and
+populates a per-request `AuthContext` via `contextvars` for downstream use
+by authorization and audit layers.
+
+### Authentication Flow
+
+```
+Incoming request
+       │
+       ▼
+┌─ Path exclusion check ──▸ bypass if /health, /healthz, /ready, etc.
+│
+├─ Database pool check ──▸ 503 if pool unavailable
+│
+├─ Credential extraction
+│   ├─ X-API-Key header (preferred)
+│   └─ Authorization: Bearer <token> (fallback)
+│
+├─ Validate via validate_api_key() ──▸ 401 on failure
+│
+├─ Build AuthContext (identity_type, identity_id, role, machine_id, permissions)
+│
+├─ Set contextvars for downstream handlers
+│
+├─ Call next middleware / handler
+│
+└─ Clear AuthContext (finally block)
+```
+
+### Excluded Paths
+
+Health and readiness endpoints bypass authentication:
+
+| Path | Purpose |
+|---|---|
+| `/health` | Liveness probe |
+| `/healthz` | Kubernetes liveness |
+| `/ready` | Readiness probe |
+| `/readiness` | Readiness probe |
+| `/livez` | Kubernetes liveness |
+| `/readyz` | Kubernetes readiness |
+
+Custom exclusions can be passed via the `excluded_paths` constructor parameter.
+
+### Quick Start
+
+```python
+from mcp_server.middleware import AuthMiddleware, get_auth_context
+
+# Add to Starlette/FastAPI app
+app.add_middleware(AuthMiddleware, db_pool=pool)
+
+# In a downstream handler, read the authenticated identity
+async def my_handler(request):
+    ctx = get_auth_context()
+    if ctx:
+        print(ctx.identity_id, ctx.role, ctx.machine_id)
+```
+
+### AuthContext Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `identity_type` | `IdentityType` | `AGENT`, `OPERATOR`, or `ADMIN` |
+| `identity_id` | `str` | UUID of the authenticated agent |
+| `role` | `str` | Agent role string (e.g. `"backend"`, `"admin"`) |
+| `machine_id` | `str` | Machine ID from `X-Machine-Id`, `X-Forwarded-For`, or client IP |
+| `agent_name` | `str` | Human-readable agent name |
+| `permissions` | `list[str]` | Granted permissions list |
+
+`AuthContext` is a frozen dataclass with `slots=True` for memory efficiency.
+
+### IdentityType Enum
+
+| Value | Mapped From |
+|---|---|
+| `AGENT` | Any non-admin role |
+| `OPERATOR` | Reserved for future operator auth |
+| `ADMIN` | Role string `"admin"` |
+
+### Error Responses
+
+| Scenario | REST Response | MCP Response |
+|---|---|---|
+| Missing credentials | `401 {"error": "Authentication required"}` | `401 {"jsonrpc": "2.0", "error": {"code": -32602, "message": "Authentication required"}}` |
+| Invalid credentials | `401 {"error": "<reason>"}` | `401 {"jsonrpc": "2.0", "error": {"code": -32602, "message": "<reason>"}}` |
+| No database pool | `503 {"error": "Service unavailable"}` | `503 {"error": "Service unavailable"}` |
+
+### AuthMiddleware Constructor
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `app` | `ASGIApp` | *(required)* | The ASGI application to wrap |
+| `db_pool` | `asyncpg.Pool \| None` | `None` | Database pool for credential validation |
+| `excluded_paths` | `frozenset[str] \| None` | `None` | Additional paths to exclude from auth |
+
+The `db_pool` property supports get/set for late binding (e.g. when the pool
+initializes after middleware registration).
+
+### Context Management Functions
+
+| Function | Description |
+|---|---|
+| `set_auth_context(ctx)` | Set the `AuthContext` for the current async context |
+| `get_auth_context()` | Return the current `AuthContext` or `None` |
+| `clear_auth_context()` | Reset the context to `None` (called in `finally` block) |
+
+### Public API
+
+| Symbol | Kind | Purpose |
+|---|---|---|
+| `AuthMiddleware` | class | Starlette middleware for unified auth |
+| `AuthContext` | frozen dataclass | Per-request identity context |
+| `IdentityType` | enum | Identity classification (`AGENT`, `OPERATOR`, `ADMIN`) |
+| `set_auth_context` | function | Set context for current request |
+| `get_auth_context` | function | Read context in downstream handlers |
+| `clear_auth_context` | function | Clear context after request completes |
+
+### Audit Logging
+
+| Event | Level | Extra Fields |
+|---|---|---|
+| `auth_success` | INFO | `identity_type`, `agent_name`, `path` |
+| `auth_missing_credentials` | WARNING | `path` |
+| `auth_validation_failed` | WARNING | `path`, `reason` |
+| `auth_no_db_pool` | ERROR | *(none)* |
 
 
 ## Event Sourcing
