@@ -1,3 +1,8 @@
+### [FORGEOS-BE054] — Documentation Complete
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, mcp-server/src/mcp_server/middleware/auth_middleware.py, mcp-server/src/mcp_server/middleware/__init__.py, .github/agent-output/Documentation/FORGEOS-BE054.md
+- **Decisions:** Docstrings already comprehensive — no code changes needed. Added Auth Middleware README section (reference, Diátaxis). CHANGELOG entry with middleware scope, credential pipeline, and test count.
+- **Timestamp:** 2026-03-11T00:00:00Z
+
 ### [FORGEOS-BE008] — CI Review
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE008.md
 - **Decisions:** PASS — Score 93/100, 0 critical, 2 warnings (OC nesting + class size), 3 suggestions (import sorting, contextlib.suppress). 99% coverage, CC max 6. All upstream PASS.
@@ -152,6 +157,11 @@
 - **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE011.md
 - **Decisions:** Docstrings already complete (no additions needed). Added Connection Pool reference section to README. Classified as Reference (Diataxis).
 - **Timestamp:** 2026-03-11T00:35:00Z
+
+### [FORGEOS-BE044] — Documentation Summary
+- **Artifacts:** agent-sdk/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE044.md
+- **Decisions:** Docstrings already comprehensive — no code changes needed. Added Connection Lifecycle, Async Context Manager, and Transport Layer sections to agent-sdk README. Added CHANGELOG entries for BE044 and missing BE043.
+- **Timestamp:** 2026-03-11T03:00:00Z
 
 ### [FORGEOS-BE024] — Validation: APPROVED
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE024.md
@@ -3070,8 +3080,3 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/tools/validation.py, mcp-server/README.md, .github/agent-output/Documentation/FORGEOS-BE021.md
 - **Decisions:** Existing docs already comprehensive. Improved docstrings for _format_path (Any type rationale), compile_validator (Args/Returns/Raises), build_validation_error_data (return shape). Fixed broken HTML comment syntax in README. Updated last_reviewed date.
 - **Timestamp:** 2026-03-11T20:00:00Z
-
-### [FORGEOS-BE023] — Documentation Summary
-- **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE023.md
-- **Decisions:** Added standalone "Concurrent Session Management" reference section to README rather than merging into existing SessionManager section, since the two managers serve different purposes (sync vs async-safe concurrent). Existing source docstrings were comprehensive — no changes needed.
-- **Timestamp:** 2026-03-11T20:30:00Z
