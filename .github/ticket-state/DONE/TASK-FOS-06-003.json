@@ -36,10 +36,10 @@
     "Logs all operations (claim, complete, release, fallback) with structured JSON logging"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T14:44:00Z",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -125,6 +125,20 @@
       "agent": "Documentation",
       "machine_id": "pop-os",
       "details": "DOCS complete, advancing to VALIDATION"
+    },
+    {
+      "timestamp": "2026-03-10T14:14:00Z",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "details": "CLAIM by Validator on pop-os (reaperoak)"
+    },
+    {
+      "timestamp": "2026-03-10T14:14:30Z",
+      "event": "STAGE_ADVANCED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "details": "VALIDATION APPROVED, advancing to DONE"
     }
   ],
   "source_task_file": "TODO/tickets/06-git-integration.md",
