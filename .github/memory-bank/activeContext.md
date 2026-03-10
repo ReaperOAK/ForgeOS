@@ -1,3 +1,8 @@
+### [FORGEOS-BE008] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE008.md
+- **Decisions:** PASS — Zero critical/high findings. 3 informational advisories (no rate limiting on internal func, no LIMIT clause, str(exc) in error msg) all risk-accepted. Parameterized SQL, SELECT FOR UPDATE, frozen dataclasses, structured logging confirmed.
+- **Timestamp:** 2026-03-11T12:00:00Z
+
 ### [FORGEOS-BE023] — BACKEND Complete
 - **Artifacts:** mcp-server/src/mcp_server/sessions/concurrent.py, mcp-server/tests/test_concurrent_sessions.py, mcp-server/src/mcp_server/sessions/__init__.py (modified)
 - **Decisions:** asyncio.Lock over threading.Lock for event-loop-safe concurrency; composition over inheritance (reuses AgentSession/SessionState, separate class); MaxSessionsExceededError with retry_after_seconds for programmatic retry handling; default 50 max sessions
@@ -2909,4 +2914,19 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 ### [FORGEOS-BE054] — BACKEND Rework #1 Complete
 - **Artifacts:** mcp-server/src/mcp_server/middleware/auth_middleware.py
 - **Decisions:** Fixed 4 lint errors (F401, TC002x2, RUF100) — moved Request/ASGIApp to TYPE_CHECKING, removed unused RateLimiter import, replaced unused noqa directive
+- **Timestamp:** 2026-03-11T00:00:00Z
+
+### [FORGEOS-BE025] — QA PASS
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE025.md
+- **Decisions:** PASS — 25/25 tests pass, 91% coverage (66 stmts, 6 miss — defensive branches only), zero lint errors. All 6 ticket JSON ACs verified: health check JSON, readiness 200/503, DB ping via SELECT 1, pool saturation metrics, <500ms latency. Rework #1 context: prior rejection was lint-only, now clean.
+- **Timestamp:** 2026-03-11T00:00:00Z
+
+### [FORGEOS-BE064] — QA PASS
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE064.md
+- **Decisions:** PASS — 44/44 tests pass, 96% coverage (111 stmts, 4 miss — defensive ValueError guards only), zero lint errors. All 6 ticket JSON ACs verified: Alembic migration with complete schema, enqueue with pending+JSONB, dequeue with FOR UPDATE SKIP LOCKED, status transition enforcement, exponential backoff retry + dead_letter, partial index on (status, next_retry_at). Rework #1 context: prior rejection was lint-only (4 ruff errors), now clean.
+- **Timestamp:** 2026-03-11T12:00:00Z
+
+### [FORGEOS-BE010] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE010.md
+- **Decisions:** PASS — Zero critical/high/medium findings. STRIDE on transactional() context manager: no injection (enum-derived isolation strings), no info disclosure to callers, bounded retries with exponential backoff. OWASP 10/10 clear. 2 informational items: mutable module-level dict (low, defense-in-depth suggestion), exception str() in internal logs (standard practice). No secrets, no PII, no new dependencies.
 - **Timestamp:** 2026-03-11T00:00:00Z
