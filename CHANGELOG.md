@@ -8,6 +8,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **System Health Dashboard Design Specification** — Complete mockup and
+  component specification for the System Health Dashboard view
+  (FORGEOS-UID005). Mockup covers 4 health panels — Database (connection
+  pool gauge, P50/P99 latency, slow queries), MCP Server (uptime, connected
+  agents, requests/min sparkline), Webhooks (success rate donut, pending
+  queue, failed deliveries), and Alerts (severity-coded, dismissable).
+  Component spec defines 10 TypeScript interfaces (PanelHeader,
+  HealthPanelGrid, HealthStatusBanner, SlowQueriesTable, UptimeDisplay,
+  TrendIndicator, RetryButton, CountBadge, StatusIndicator, MetricCard)
+  with CSS grid layout, responsive breakpoints (mobile/tablet/desktop),
+  WCAG-compliant accessibility (ARIA roles, keyboard navigation, contrast
+  ratios), and health-specific design token extensions for gauges,
+  sparklines, alerts, and donut charts. Stitch screenshot references
+  included for desktop and mobile variants.
+
 - **Database Migration CI Pipeline Documentation** — Enhanced inline YAML
   comments in `.github/workflows/database-ci.yml` explaining trigger path
   filters, concurrency control, minimal permissions, ephemeral service
