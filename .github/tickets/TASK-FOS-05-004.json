@@ -41,10 +41,10 @@
     "No external JavaScript dependencies (except D3.js via CDN for graph view)"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Validator",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T13:31:38.998232+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -144,6 +144,13 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "DOCS complete. JSDoc added to app.js (22 functions) and pipeline.js (15 functions). Architecture doc created. CHANGELOG updated."
+    },
+    {
+      "timestamp": "2026-03-10T13:01:38.998605+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "details": "Claimed by Validator on pop-os (reaperoak)"
     }
   ],
   "source_task_file": "TODO/tickets/05-dashboard.md",
