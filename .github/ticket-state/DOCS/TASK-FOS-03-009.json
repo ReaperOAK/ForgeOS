@@ -4,7 +4,7 @@
   "description": "Implement the tickets.extend MCP tool that extends the lease on a claimed ticket to prevent expiry during long operations. Uses the extend_lease SQL function. Validates that the caller is the claim owner, that the requested duration doesn't exceed the system's max_lease_minutes config (default 120), and updates lease_expiry to NOW() + duration. Records a LEASE_EXTENDED event.",
   "type": "backend",
   "priority": "high",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -33,11 +33,11 @@
     "Returns {ticket, new_lease_expiry: ISO8601 string} on success"
   ],
   "rework_count": 1,
-  "claimed_by": "CIReviewer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T11:00:00.000000+00:00",
-  "lease_duration_minutes": 30,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": null,
   "history": [
     {
       "timestamp": "2026-03-05T18:05:37.900949+00:00",
@@ -125,6 +125,15 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "SECURITY PASS \u2014 STRIDE 6 threats all Low, OWASP 10/10 clear, 0 critical/high findings, 2 informational. Advanced SECURITY -> CI."
+    },
+    {
+      "timestamp": "2026-03-10T15:40:00.000000+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "CI PASS \u2014 Score 98/100, 0 critical, 0 warnings, 2 suggestions. 24/24 tests, 100% coverage. Advanced CI -> DOCS."
     }
   ],
   "source_task_file": "TODO/tickets/03-ticket-tools.md",
