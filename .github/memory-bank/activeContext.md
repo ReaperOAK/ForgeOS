@@ -1,3 +1,8 @@
+### [FORGEOS-BE052] — Validation: REJECTED (Rework #1)
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE052.md
+- **Decisions:** REJECTED — DoD #3 FAIL: 2 ruff lint errors (F401 unused import `timezone`, TC003 `datetime` should be in TYPE_CHECKING block) in machine_auth.py:36. 9/10 DoD items pass. 50/50 tests pass. All 6 ACs verified. QA PASS, Security PASS confirmed.
+- **Timestamp:** 2026-03-10T23:45:00Z
+
 ### [FORGEOS-BE007] — Documentation Summary
 - **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE007.md
 - **Decisions:** Added File-Level Advisory Lock Mutex reference section to README. Existing docstrings comprehensive — no changes needed. CHANGELOG entry added under [Unreleased].
