@@ -4,7 +4,7 @@
   "description": "Implement a dynamic lease heartbeat mechanism that replaces the fixed 30-minute lease timeout from the git-based system. Agents send periodic heartbeats to extend their lease while actively working on a ticket. Heartbeat intervals and maximum lease duration are configurable. The mechanism writes heartbeat timestamps to the lease_heartbeats table.",
   "type": "backend",
   "priority": "high",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Missing heartbeats beyond the configured interval mark the lease as stale"
   ],
   "rework_count": 0,
-  "claimed_by": "Security Engineer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T19:38:31.182337+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -69,6 +69,15 @@
       "from_stage": "QA",
       "to_stage": "SECURITY",
       "details": "Advanced from QA to SECURITY"
+    },
+    {
+      "timestamp": "2026-03-10T19:12:39.194199+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
