@@ -35,10 +35,13 @@ on:
 
 # Concurrency: one run per branch. Cancel in-progress runs on new pushes
 # to avoid wasting CI minutes during rapid iteration.
+# Concurrency: one run per branch. Cancel in-progress runs on new pushes
+# to avoid wasting CI minutes during rapid iteration.
 concurrency:
   group: db-migration-ci-${{ github.ref }}
   cancel-in-progress: true
 
+# Minimal permissions: read-only. The workflow validates, never mutates.
 # Minimal permissions: read-only. The workflow validates, never mutates.
 permissions:
   contents: read
@@ -52,6 +55,9 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
 
+    # Service container: ephemeral PostgreSQL 17-alpine for migration testing.
+    # Credentials are CI-only — never shared with production environments.
+    # Health check ensures the database accepts connections before steps run.
     # Service container: ephemeral PostgreSQL 17-alpine for migration testing.
     # Credentials are CI-only — never shared with production environments.
     # Health check ensures the database accepts connections before steps run.
@@ -72,6 +78,8 @@ jobs:
           --health-retries 5
           --health-start-period 15s
 
+    # DATABASE_URL connects to the ephemeral service container above.
+    # Same format used by Alembic env.py for connection configuration.
     # DATABASE_URL connects to the ephemeral service container above.
     # Same format used by Alembic env.py for connection configuration.
     env:
@@ -164,7 +172,7 @@ jobs:
           echo "head_revision=${HEAD_REV}" >> $GITHUB_OUTPUT
 
       # -----------------------------------------------------------------------
-      # Step 2: Validate schema — 7 tables, 5 enums, 20 indexes, 3 triggers — tables, indexes, enums, triggers
+      # Step 2: Validate schema — 7 tables, 5 enums, 20 indexes, 3 triggers — 7 tables, 5 enums, 20 indexes, 3 triggers — tables, indexes, enums, triggers
       # -----------------------------------------------------------------------
       # Queries pg_catalog and information_schema to verify all expected objects.
       # Fails with ::error:: annotation if any expected object is missing.
