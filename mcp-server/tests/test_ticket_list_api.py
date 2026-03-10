@@ -509,3 +509,68 @@ class TestTicketsEndpointResponseShape:
         assert "total" in body["pagination"]
         assert "limit" in body["pagination"]
         assert "offset" in body["pagination"]
+
+
+# ---------------------------------------------------------------------------
+# Repository method existence — guards against AsyncMock masking
+# ---------------------------------------------------------------------------
+
+
+class TestTicketRepositoryMethodExists:
+    """Verify TicketRepository has the list_tickets method (not auto-mocked)."""
+
+    def test_list_tickets_is_real_method(self) -> None:
+        from mcp_server.repositories.ticket_repo import TicketRepository
+
+        assert hasattr(TicketRepository, "list_tickets"), (
+            "TicketRepository must define list_tickets() — "
+            "AsyncMock auto-generates missing attributes and hides this bug"
+        )
+        import inspect
+
+        sig = inspect.signature(TicketRepository.list_tickets)
+        params = set(sig.parameters.keys())
+        expected = {"self", "stage", "ticket_type", "priority", "claimed_by", "machine_id", "limit", "offset"}
+        assert expected.issubset(params), (
+            f"list_tickets() signature missing params: {expected - params}"
+        )
+
+
+# ---------------------------------------------------------------------------
+# Transport mount — verify /api/tickets is registered in create_app
+# ---------------------------------------------------------------------------
+
+
+class TestTicketsRouteMounted:
+    """Verify /api/tickets is registered in HTTPTransport.create_app()."""
+
+    def test_route_is_mounted(self) -> None:
+        from unittest.mock import MagicMock
+
+        from mcp_server.transport.http import HTTPTransport
+
+        transport = HTTPTransport()
+        mock_server = MagicMock()
+        mock_server.settings = MagicMock()
+        mock_server.streamable_http_app.return_value = Starlette()
+
+        app = transport.create_app(mock_server)
+        paths = [r.path for r in app.routes if hasattr(r, "path")]
+        assert "/api/tickets" in paths, (
+            f"/api/tickets not found in mounted routes: {paths}"
+        )
+
+    def test_ticket_repo_ref_on_app_state(self) -> None:
+        from unittest.mock import MagicMock
+
+        from mcp_server.transport.http import HTTPTransport
+
+        transport = HTTPTransport()
+        mock_server = MagicMock()
+        mock_server.settings = MagicMock()
+        mock_server.streamable_http_app.return_value = Starlette()
+
+        app = transport.create_app(mock_server)
+        assert hasattr(app.state, "ticket_repo_ref"), (
+            "app.state must expose ticket_repo_ref for late binding"
+        )

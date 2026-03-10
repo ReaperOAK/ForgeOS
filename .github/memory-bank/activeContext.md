@@ -1,3 +1,23 @@
+### [FORGEOS-BE030] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE030.md
+- **Decisions:** PASS — Zero critical/high findings. All STRIDE scores ≤ 6 (LOW). OWASP Top 10 clear. SERIALIZABLE isolation with FOR UPDATE locking. Stage engine prevents stage skipping (pure domain, no I/O). Claim ownership validated before advance. Parameterized SQL throughout. Event audit trail on every transition.
+- **Timestamp:** 2026-03-11T23:30:00Z
+
+### [FORGEOS-BE034] — BACKEND Rework #1 Complete
+- **Artifacts:** mcp-server/src/mcp_server/repositories/ticket_repo.py, mcp-server/src/mcp_server/transport/http.py, mcp-server/tests/test_ticket_list_api.py
+- **Decisions:** Added list_tickets() with COUNT(*) OVER() window function for single-query pagination; mounted /api/tickets with late-binding _ticket_repo_ref pattern matching audit endpoint; added method-existence + route-mount guard tests to prevent AsyncMock masking
+- **Timestamp:** 2026-03-11T06:15:00Z
+
+### [FORGEOS-BE032] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE032.md
+- **Decisions:** PASS — Zero critical/high findings. All STRIDE scores LOW (max 3). OWASP Top 10 clear. Parameterized SQL throughout including dynamic list_filtered. Claim ownership enforced. JSON Schema input validation with additionalProperties:false. Event sourcing audit trail.
+- **Timestamp:** 2026-03-11T18:00:00Z
+
+### [FORGEOS-BE045] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE045.md
+- **Decisions:** PASS — Zero critical/high/medium findings. Three informational findings (unused logger, force-release flag, extra="allow") documented with risk acceptance. No credential exposure, safe JSON deserialization, Pydantic input validation, clean dependency chain.
+- **Timestamp:** 2026-03-11T14:30:00Z
+
 ### [FORGEOS-BE029] — BACKEND Complete
 - **Artifacts:** mcp-server/src/mcp_server/tools/ticket_tools.py, mcp-server/src/mcp_server/services/ticket_service.py, mcp-server/tests/test_ticket_tools.py
 - **Decisions:** Reused existing ClaimQueue.claim_by_id() and NextTicketResult data shape; handler factory pattern consistent with tickets.next; role validation via AgentRoleMap before DB call

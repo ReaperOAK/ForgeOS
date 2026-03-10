@@ -311,6 +311,85 @@ class TicketRepository:
             )
             return {r["stage_name"]: r["cnt"] for r in rows}
 
+    async def list_tickets(
+        self,
+        *,
+        stage: str | None = None,
+        ticket_type: str | None = None,
+        priority: str | None = None,
+        claimed_by: str | None = None,
+        machine_id: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> tuple[list[TicketRow], int]:
+        """List tickets with optional filters and return total count.
+
+        Builds a dynamic WHERE clause from the provided filters using
+        parameterized queries.  Uses ``COUNT(*) OVER()`` window function
+        to compute the total matching count without a second query.
+
+        Args:
+            stage: Optional SDLC stage filter.
+            ticket_type: Optional ticket type filter.
+            priority: Optional priority filter.
+            claimed_by: Optional filter on claimed_by_name column.
+            machine_id: Optional filter on machine_id column.
+            limit: Maximum rows to return.
+            offset: Rows to skip for pagination.
+
+        Returns:
+            A tuple of (list of ``TicketRow``, total matching count).
+        """
+        conditions: list[str] = []
+        params: list[Any] = []
+        idx = 1
+
+        if stage is not None:
+            conditions.append(f"stage = ${idx}::ticket_stage")
+            params.append(stage)
+            idx += 1
+        if ticket_type is not None:
+            conditions.append(f"type = ${idx}::ticket_type")
+            params.append(ticket_type)
+            idx += 1
+        if priority is not None:
+            conditions.append(f"priority = ${idx}::ticket_priority")
+            params.append(priority)
+            idx += 1
+        if claimed_by is not None:
+            conditions.append(f"claimed_by_name = ${idx}")
+            params.append(claimed_by)
+            idx += 1
+        if machine_id is not None:
+            conditions.append(f"machine_id = ${idx}")
+            params.append(machine_id)
+            idx += 1
+
+        where = ""
+        if conditions:
+            where = "WHERE " + " AND ".join(conditions)
+
+        query = f"""
+            SELECT *, COUNT(*) OVER() AS full_count
+            FROM tickets
+            {where}
+            ORDER BY
+                CASE priority
+                    WHEN 'critical' THEN 0
+                    WHEN 'high'     THEN 1
+                    WHEN 'medium'   THEN 2
+                    WHEN 'low'      THEN 3
+                END,
+                created_at ASC
+            LIMIT ${idx} OFFSET ${idx + 1}
+        """
+        params.extend([limit, offset])
+
+        async with self._pool.acquire() as conn:
+            rows = await conn.fetch(query, *params)
+            total = rows[0]["full_count"] if rows else 0
+            return [_row_to_ticket(r) for r in rows], total
+
     async def list_filtered(
         self,
         *,
