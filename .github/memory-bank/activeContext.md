@@ -3415,3 +3415,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** agent-sdk/src/forgeos_sdk/models.py, agent-sdk/src/forgeos_sdk/operations.py, agent-sdk/tests/test_models.py, agent-sdk/tests/test_operations.py
 - **Decisions:** Mapped MCP tool names to server conventions (tickets.complete, tickets.reject). Ticket model uses extra="allow" for unknown server fields. claim_next raises ToolCallError on null ticket (empty queue) instead of returning None.
 - **Timestamp:** 2026-03-10T22:38:21Z
+
+### [FORGEOS-BE034] — BACKEND Complete
+- **Artifacts:** mcp-server/src/mcp_server/api/schemas.py, mcp-server/src/mcp_server/api/routes/__init__.py, mcp-server/src/mcp_server/api/routes/tickets.py, mcp-server/tests/test_ticket_list_api.py
+- **Decisions:** Chose offset/limit pagination over cursor-based for simplicity. Validated filter enums against DB schema values client-side before query. Used same late-binding repo ref pattern as audit endpoint.
+- **Timestamp:** 2026-03-11T04:15:00Z
