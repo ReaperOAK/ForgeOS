@@ -24,7 +24,6 @@ from __future__ import annotations
 import json
 import uuid
 from dataclasses import dataclass, field
-from datetime import datetime, timezone
 from typing import TYPE_CHECKING, Any
 
 from mcp_server.auth.authorization import check_role_stage_authorization
@@ -37,12 +36,13 @@ from mcp_server.locking.claim_queue import (
 from mcp_server.locking.transaction_config import OperationType, PoolLike, transactional
 from mcp_server.observability import get_logger
 from mcp_server.server import TicketNotFoundError
-from mcp_server.services.stage_engine import InvalidTransitionError, validate_advance
+from mcp_server.services.stage_engine import validate_advance
 
 if TYPE_CHECKING:
     from mcp_server.repositories.claim_repo import ClaimRepository
     from mcp_server.repositories.event_repo import EventRepository
     from mcp_server.repositories.ticket_repo import TicketRepository
+    from mcp_server.services.sync_engine import SyncResult, ValidateResult
 
 logger = get_logger("services.ticket_service")
 
@@ -730,3 +730,58 @@ class TicketService:
                 new_stage=next_stage,
                 status=new_status,
             )
+
+    # ------------------------------------------------------------------
+    # Sync & validate operations (FORGEOS-BE033)
+    # ------------------------------------------------------------------
+
+    async def sync(self) -> SyncResult:
+        """Release expired leases, evaluate dependencies, move unblocked to READY.
+
+        Delegates to :class:`SyncEngine`. Requires ``pool`` to be configured.
+
+        Returns
+        -------
+        SyncResult
+            Summary of released leases and unblocked tickets.
+        """
+        if self._pool is None:
+            raise RuntimeError("Pool not configured for sync operation")
+        from mcp_server.services.sync_engine import SyncEngine, SyncResult
+
+        engine = SyncEngine(self._pool)
+        result: SyncResult = await engine.sync()
+        logger.info(
+            "Sync completed",
+            extra={
+                "released_count": result.released_count,
+                "unblocked_count": result.unblocked_count,
+                "error_count": len(result.errors),
+            },
+        )
+        return result
+
+    async def validate(self) -> ValidateResult:
+        """Check integrity of all tickets: stage, flow, consistency.
+
+        Delegates to :class:`SyncEngine`. Requires ``pool`` to be configured.
+
+        Returns
+        -------
+        ValidateResult
+            List of integrity errors (empty means clean).
+        """
+        if self._pool is None:
+            raise RuntimeError("Pool not configured for validate operation")
+        from mcp_server.services.sync_engine import SyncEngine, ValidateResult
+
+        engine = SyncEngine(self._pool)
+        result: ValidateResult = await engine.validate()
+        logger.info(
+            "Validate completed",
+            extra={
+                "error_count": len(result.errors),
+                "is_clean": result.is_clean,
+            },
+        )
+        return result
