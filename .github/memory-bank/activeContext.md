@@ -1,3 +1,13 @@
+### [FORGEOS-BE008] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE008.md
+- **Decisions:** APPROVED — 10/10 DoD items pass, 6/6 ACs verified, all upstream verdicts (QA/Security/CI/Docs) confirmed PASS. 38 tests, 99% coverage, mypy clean. 3 minor style suggestions (import ordering, contextlib.suppress) accepted per CI Reviewer.
+- **Timestamp:** 2026-03-11T19:30:00Z
+
+### [FORGEOS-BE025] — Validation APPROVED
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE025.md
+- **Decisions:** APPROVED — 10/10 DoD items pass. All 6 ACs verified. 25/25 tests, 91% coverage, ruff clean, mypy --strict clean, no TODO/console. All upstream verdicts (QA, Security, CI, Docs) cross-verified as PASS.
+- **Timestamp:** 2026-03-11T17:00:00Z
+
 ### [FORGEOS-BE054] — Documentation Complete
 - **Artifacts:** mcp-server/README.md, CHANGELOG.md, mcp-server/src/mcp_server/middleware/auth_middleware.py, mcp-server/src/mcp_server/middleware/__init__.py, .github/agent-output/Documentation/FORGEOS-BE054.md
 - **Decisions:** Docstrings already comprehensive — no code changes needed. Added Auth Middleware README section (reference, Diátaxis). CHANGELOG entry with middleware scope, credential pipeline, and test count.
@@ -3080,3 +3090,23 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/tools/validation.py, mcp-server/README.md, .github/agent-output/Documentation/FORGEOS-BE021.md
 - **Decisions:** Existing docs already comprehensive. Improved docstrings for _format_path (Any type rationale), compile_validator (Args/Returns/Raises), build_validation_error_data (return shape). Fixed broken HTML comment syntax in README. Updated last_reviewed date.
 - **Timestamp:** 2026-03-11T20:00:00Z
+
+### [FORGEOS-BE052] — Documentation: Machine Registration and Verification
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, mcp-server/src/mcp_server/auth/__init__.py, mcp-server/src/mcp_server/auth/machine_auth.py, mcp-server/src/mcp_server/services/machine_service.py, .github/agent-output/Documentation/FORGEOS-BE052.md
+- **Decisions:** Added Machine Registration section to README after Auth Middleware (grouping auth docs). Updated auth __init__.py docstring with machine auth public API listing. Source file docstrings already comprehensive — only updated last_reviewed dates.
+- **Timestamp:** 2026-03-11T21:00:00Z
+
+### [FORGEOS-BE010] — Validation: REJECTED
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE010.md
+- **Decisions:** REJECTED — All 6 acceptance criteria met, 49 tests pass with 100% coverage, type checks pass. However, DoD #3 fails: ruff check reports 20 lint errors (UP035/F401 in implementation, F841/I001/UP037/SIM117 in tests, E501/I001/RUF022 in __init__.py). Sent to REWORK #1.
+- **Timestamp:** 2026-03-11T21:30:00Z
+
+### [FORGEOS-BE014] — Validation: APPROVED
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE014.md
+- **Decisions:** APPROVED (HIGH confidence, 97%) — 10/10 DoD items pass, 6/6 ACs independently verified. 56/56 tests pass, 99% coverage. All upstream verdicts confirmed: QA PASS, Security PASS, CI PASS, Docs PASS. Ticket moved to DONE.
+- **Timestamp:** 2026-03-11T21:15:00Z
+
+### [FORGEOS-BE014] — Validation: APPROVED
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE014.md
+- **Decisions:** APPROVED (HIGH confidence, 97%) — 10/10 DoD items pass, 6/6 ACs independently verified. 56/56 tests pass, 99% coverage. All upstream verdicts confirmed: QA PASS, Security PASS, CI PASS, Docs PASS. Ticket moved to DONE.
+- **Timestamp:** 2026-03-11T21:15:00Z
