@@ -4,7 +4,7 @@
   "description": "Implement the ticket claim queue using PostgreSQL SELECT FOR UPDATE SKIP LOCKED for fair, non-blocking claim semantics. This replaces the git-push-based distributed lock. The claim queue allows agents to atomically claim the next available ticket matching their role criteria, without blocking other agents from claiming different tickets concurrently.",
   "type": "backend",
   "priority": "critical",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Function returns the claimed ticket data or None if no eligible tickets exist"
   ],
   "rework_count": 0,
-  "claimed_by": "QA",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T16:14:56.338522+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -63,18 +63,27 @@
       "details": "Claimed by Backend agent for BACKEND stage"
     },
     {
-      "timestamp": "2026-03-10T15:04:13+00:00",
-      "event": "STAGE_COMPLETE",
-      "agent": "Backend",
-      "machine_id": "pop-os",
-      "details": "BACKEND stage complete. Implemented claim queue module with 100% test coverage. Advancing to QA."
+      "timestamp": "2026-03-10T15:40:57.642378+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: Lease expired at 2026-03-10T15:19:19.285018+00:00"
     },
     {
-      "timestamp": "2026-03-10T15:44:56.338522+00:00",
+      "timestamp": "2026-03-10T15:44:56.338775+00:00",
       "event": "CLAIMED",
       "agent": "QA",
       "machine_id": "pop-os",
       "details": "Claimed by QA agent for QA stage"
+    },
+    {
+      "timestamp": "2026-03-10T15:49:42.140887+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
