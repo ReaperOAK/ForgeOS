@@ -223,6 +223,101 @@ await monitor.stop()
 
 
 
+## File-Level Advisory Lock Mutex
+
+<!-- last_reviewed: 2026-03-10T20:30:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server/locking/` package provides a file-level advisory lock mutex
+that prevents two agents from modifying the same workspace file concurrently.
+
+### How It Works
+
+1. A file path is hashed to a deterministic signed int64 using CRC32 with a
+   fixed `0x464F5247` ("FORG") namespace in the upper 32 bits.
+2. `pg_advisory_xact_lock(key)` acquires a transaction-scoped advisory lock
+   (blocking mode) or `pg_try_advisory_xact_lock(key)` attempts non-blocking
+   acquisition.
+3. After the advisory lock is held, a row is inserted into the `file_locks`
+   table for observability (the advisory lock is the authoritative mutex).
+4. The lock releases automatically when the transaction commits or rolls back.
+
+### Usage
+
+```python
+from mcp_server.locking import FileMutex, file_path_to_lock_key
+
+# Create a mutex instance
+mutex = FileMutex()
+
+# Blocking acquire — waits until the lock is available
+record = await mutex.acquire(conn, "src/db/pool.py", "FORGEOS-BE007")
+
+# Non-blocking acquire — returns immediately
+result = await mutex.try_acquire(conn, "src/db/pool.py", "FORGEOS-BE007")
+if result.acquired:
+    # lock held
+    ...
+
+# Check for conflicts before acquiring
+conflicts = await mutex.check_conflicts(conn, ["src/db/pool.py"])
+
+# Query active locks
+locks = await mutex.get_active_locks(conn, ticket_id="FORGEOS-BE007")
+```
+
+### Hash Function
+
+`file_path_to_lock_key(path)` converts a workspace-relative file path to a
+signed int64 advisory lock key:
+
+- Normalizes the path (strips whitespace and leading/trailing slashes).
+- Computes `CRC32(normalized.encode("utf-8"))` for the lower 32 bits.
+- Uses `0x464F5247` ("FORG") as the upper 32 bits (namespace).
+- Packs the combined 64-bit value as a signed integer (`struct.pack(">Q")` then
+  `struct.unpack(">q")`).
+
+### API Reference
+
+| Symbol | Type | Description |
+|--------|------|-------------|
+| `FileMutex` | class | Advisory lock manager with blocking and non-blocking modes |
+| `file_path_to_lock_key` | function | Deterministic file path to int64 hash |
+| `FileLockRecord` | frozen dataclass | Observability record for an active lock |
+| `LockAcquireResult` | frozen dataclass | Result of a non-blocking lock attempt |
+| `FileConflictError` | exception | Raised when a file is already locked |
+
+### FileMutex Methods
+
+| Method | Description |
+|--------|-------------|
+| `acquire(conn, file_path, ticket_id, ...)` | Blocking lock acquisition |
+| `try_acquire(conn, file_path, ticket_id, ...)` | Non-blocking lock attempt |
+| `release_ticket_locks(conn, ticket_id)` | Delete observability records for a ticket |
+| `get_active_locks(conn, ...)` | Query active lock records |
+| `check_conflicts(conn, file_paths)` | Check if any paths are already locked |
+
+### Error Handling
+
+| Scenario | Behavior |
+|----------|----------|
+| Empty file path | `ValueError` raised |
+| File already locked (blocking) | Waits until lock is released |
+| File already locked (non-blocking) | Returns `LockAcquireResult(acquired=False)` |
+| Connection lost | Advisory lock auto-released by PostgreSQL |
+| Transaction rollback | Advisory lock auto-released |
+
+### Design Constraints
+
+- Advisory locks are transaction-scoped. They release on commit or rollback.
+- The `file_locks` table is informational only. The advisory lock is authoritative.
+- CRC32 hashing means collisions are theoretically possible but unlikely for
+  typical workspace path lengths.
+- The "FORG" namespace avoids collisions with advisory locks used by other
+  PostgreSQL subsystems.
+
+
 ## Repository Pattern — Data Access Layer
 
 <!-- last_reviewed: 2026-03-10T18:00:00Z -->
@@ -543,7 +638,7 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/__init__.py`** — Package metadata (version, app name)
 - **`mcp_server/__main__.py`** — `python -m mcp_server` entry point
 - **`mcp_server/db/`** — asyncpg connection pool, health monitoring, and pool metrics
-- **`mcp_server/observability/`** — Structured JSON logging, correlation IDs, and PII redaction
+- **`mcp_server/observability/`** — Structured JSON logging, correlation IDs, PII redaction, and health/readiness probes
 - **`mcp_server/auth/`** — Agent API key authentication, rate limiting, and identity resolution
 - **`mcp_server/tools/`** — Dynamic tool registration, schema validation, and FastMCP bridge
 - **`mcp_server/events/`** — Append-only event sourcing (EventStore, EventType, Event dataclass)
