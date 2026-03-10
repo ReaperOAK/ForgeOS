@@ -23,8 +23,7 @@
     "FORGEOS-UID002"
   ],
   "blocked_by": [
-    "FORGEOS-FE002",
-    "FORGEOS-UID002"
+    "FORGEOS-FE002"
   ],
   "file_paths": [
     "dashboard/src/app/tickets/[id]/page.tsx",

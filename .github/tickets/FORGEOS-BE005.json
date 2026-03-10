@@ -4,7 +4,7 @@
   "description": "Create a database seeding script that imports existing ticket JSON files from .github/tickets/ into the PostgreSQL database. The script should read all ticket JSON files, validate them against the ticket schema, transform them into database records, and insert them with proper conflict handling (skip existing). Include sample test data for development environments.",
   "type": "backend",
   "priority": "high",
-  "stage": "BLOCKED",
+  "stage": "READY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -20,9 +20,7 @@
   "dependencies": [
     "FORGEOS-BE002"
   ],
-  "blocked_by": [
-    "FORGEOS-BE002"
-  ],
+  "blocked_by": [],
   "file_paths": [
     "database/seed.py",
     "database/seed_data/sample_tickets.json"
@@ -48,6 +46,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase2-database.md"
+    },
+    {
+      "timestamp": "2026-03-10T10:27:38.762947+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",

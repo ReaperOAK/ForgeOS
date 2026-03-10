@@ -4,7 +4,7 @@
   "description": "Create the Alembic migration implementing the index strategy from the database index design (ARCH006). Add GIN indexes on JSONB columns (dependencies, file_paths) for containment queries, composite indexes on (stage, claimed_by) for efficient claim lookups, unique constraints on active claims, and partial indexes for common query patterns (e.g., tickets in READY stage only). Include CHECK constraints for enum-like columns.",
   "type": "backend",
   "priority": "high",
-  "stage": "BLOCKED",
+  "stage": "READY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -22,10 +22,7 @@
     "FORGEOS-BE003",
     "FORGEOS-ARCH006"
   ],
-  "blocked_by": [
-    "FORGEOS-BE002",
-    "FORGEOS-BE003"
-  ],
+  "blocked_by": [],
   "file_paths": [
     "database/alembic/versions/003_indexes_constraints.py"
   ],
@@ -51,6 +48,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase2-database.md"
+    },
+    {
+      "timestamp": "2026-03-10T10:27:38.759335+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",

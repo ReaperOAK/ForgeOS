@@ -4,7 +4,7 @@
   "description": "Implement the event sourcing subsystem that records every ticket state change as an immutable event in the event_history table. Every claim, advance, rework, release, and sync operation produces an event with the ticket's previous and new state snapshots, the acting agent, and operation metadata. Provide event replay capability for audit and debugging.",
   "type": "backend",
   "priority": "high",
-  "stage": "BLOCKED",
+  "stage": "READY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -21,9 +21,7 @@
     "FORGEOS-BE003",
     "FORGEOS-ARCH007"
   ],
-  "blocked_by": [
-    "FORGEOS-BE003"
-  ],
+  "blocked_by": [],
   "file_paths": [
     "mcp-server/src/events/event_store.py",
     "mcp-server/src/events/__init__.py"
@@ -49,6 +47,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase2-database.md"
+    },
+    {
+      "timestamp": "2026-03-10T10:27:38.752119+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",

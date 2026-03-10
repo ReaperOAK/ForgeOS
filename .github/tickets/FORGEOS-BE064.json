@@ -22,8 +22,7 @@
     "FORGEOS-BE003"
   ],
   "blocked_by": [
-    "FORGEOS-BE012",
-    "FORGEOS-BE003"
+    "FORGEOS-BE012"
   ],
   "file_paths": [
     "mcp-server/src/notifications/queue.py",

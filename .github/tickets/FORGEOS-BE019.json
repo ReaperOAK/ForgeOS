@@ -4,7 +4,7 @@
   "description": "Implement request lifecycle tracking with correlation IDs for the MCP server. Each incoming request (MCP tool call or REST request) receives a unique correlation ID that is propagated through all downstream operations (database queries, event recording, logging). The correlation ID is included in responses, error messages, and log entries for end-to-end traceability.",
   "type": "backend",
   "priority": "high",
-  "stage": "BLOCKED",
+  "stage": "READY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -20,9 +20,7 @@
   "dependencies": [
     "FORGEOS-BE015"
   ],
-  "blocked_by": [
-    "FORGEOS-BE015"
-  ],
+  "blocked_by": [],
   "file_paths": [
     "mcp-server/src/middleware/correlation.py",
     "mcp-server/src/middleware/__init__.py"
@@ -48,6 +46,13 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase2-mcp-server.md"
+    },
+    {
+      "timestamp": "2026-03-10T10:27:38.773488+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
