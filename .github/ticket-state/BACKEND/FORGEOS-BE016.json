@@ -20,7 +20,9 @@
   "dependencies": [
     "FORGEOS-BE015"
   ],
-  "blocked_by": [],
+  "blocked_by": [
+    "FORGEOS-BE015"
+  ],
   "file_paths": [
     "mcp-server/src/mcp_server/transport/stdio.py",
     "mcp-server/src/mcp_server/transport/__init__.py"
