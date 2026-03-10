@@ -39,10 +39,10 @@
     "README documents how to install dependencies and start the server locally"
   ],
   "rework_count": 2,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T09:20:42.709043+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -185,6 +185,13 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "CI PASS \u2014 Score 93/100, 0 critical, 1 warning (unused type:ignore), 2 suggestions. Advancing to DOCS."
+    },
+    {
+      "timestamp": "2026-03-10T08:50:42.709043+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "details": "Claimed by Documentation on pop-os (ReaperOAK)"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
