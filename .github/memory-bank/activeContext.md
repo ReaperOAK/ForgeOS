@@ -1,3 +1,13 @@
+### [FORGEOS-BE023] — Validation: APPROVED
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE023.md
+- **Decisions:** APPROVED — 10/10 DoD items pass. 6/6 ACs independently verified. 22/22 tests pass, 88% coverage, ruff clean, mypy clean, no TODO/console. All upstream verdicts (QA, Security, CI, Docs) cross-verified as PASS.
+- **Timestamp:** 2026-03-11T00:00:00Z
+
+### [FORGEOS-BE044] — Validation: APPROVED
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE044.md
+- **Decisions:** APPROVED — 10/10 DoD items pass. 7/7 ACs independently verified. 76/76 tests pass, 92% coverage, ruff clean, mypy clean, no TODO/console. All upstream verdicts (QA, Security, CI, Docs) cross-verified as PASS.
+- **Timestamp:** 2026-03-11T00:00:00Z
+
 ### [FORGEOS-BE018] — Validation: REJECTED (Rework #1)
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE018.md
 - **Decisions:** REJECTED — 9/10 DoD items pass. DoD #3 FAIL: 2 lint errors (F401 unused `Any` import in dependencies.py:21, I001 unsorted imports in server.py:41). All 6 ACs verified, all upstream verdicts confirmed PASS. 25 tests, 86% coverage, mypy clean. Sent back to BACKEND for auto-fixable lint cleanup.
@@ -3130,3 +3140,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/dependencies.py, mcp-server/src/mcp_server/server.py
 - **Decisions:** Fixed 2 lint errors (F401 unused Any import, I001 unsorted imports). No functional changes. ruff check passes clean.
 - **Timestamp:** 2026-03-11T15:30:00Z
+
+### [FORGEOS-BE010] — BACKEND Rework #1 Complete
+- **Artifacts:** mcp-server/src/mcp_server/locking/transaction_config.py, mcp-server/tests/test_transaction_config.py, mcp-server/src/mcp_server/locking/__init__.py
+- **Decisions:** Fixed 20 ruff lint errors (F841, I001, E501, RUF022, UP035, F401, UP037, SIM117). No functional changes — all 49 tests pass.
+- **Timestamp:** 2026-03-11T16:00:00Z
+
+### [FORGEOS-BE052] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE052.md
+- **Decisions:** APPROVED — 10/10 DoD items pass. All 6 ACs verified. 50/50 tests, 100% coverage, ruff clean, mypy clean, no TODO/console. All upstream verdicts (QA, Security, CI, Docs) cross-verified as PASS.
+- **Timestamp:** 2026-03-11T22:00:00Z
