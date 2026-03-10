@@ -12,7 +12,7 @@ Public API
 .. autoclass:: ToolCallError
 """
 
-from forgeos_sdk.client import ForgeOSClient
+from forgeos_sdk.client import ConnectionState, ForgeOSClient
 from forgeos_sdk.config import SDKConfig, TransportType
 from forgeos_sdk.exceptions import (
     AuthenticationError,
@@ -26,6 +26,7 @@ __version__ = "0.1.0"
 __app_name__ = "forgeos-agent-sdk"
 
 __all__ = [
+    "ConnectionState",
     "ForgeOSClient",
     "SDKConfig",
     "TransportType",

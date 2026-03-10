@@ -2900,3 +2900,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/tools/validation.py, mcp-server/tests/test_tool_validation.py
 - **Decisions:** Removed unused `import jsonschema` (F401), imported ValidationError for explicit typing, added type: ignore for jsonschema's incomplete type stubs (iter_errors, default_factory=list), replaced try/except/pass with contextlib.suppress (SIM105), broke long line in test (E501)
 - **Timestamp:** 2026-03-11T12:00:00+00:00
+
+### [FORGEOS-BE044] — BACKEND Complete
+- **Artifacts:** agent-sdk/src/forgeos_sdk/transport.py, agent-sdk/src/forgeos_sdk/client.py, agent-sdk/tests/test_transport.py, agent-sdk/tests/test_client.py
+- **Decisions:** Wrapped official MCP SDK transports (stdio_client, sse_client, streamablehttp_client) via MCPTransport ABC; AsyncExitStack to manage context manager lifecycles; session resumption via Mcp-Session-Id header; exponential backoff 2^n with 10% jitter
+- **Timestamp:** 2026-03-11T00:00:00Z
