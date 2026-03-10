@@ -4,7 +4,7 @@
   "description": "Implement comprehensive audit logging for all authenticated operations. Every MCP tool call and REST API request logs: identity (agent/operator/admin), operation type, target resource, timestamp, result (success/failure), and source IP/machine. Create a dedicated audit_log table via migration. Audit records are append-only and cannot be modified or deleted.",
   "type": "backend",
   "priority": "high",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
