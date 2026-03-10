@@ -33,6 +33,12 @@ from mcp_server.services.webhook_service import (
     WebhookService,
     WebhookValidationError,
 )
+from mcp_server.webhooks.github_handler import (
+    GitHubSignatureError,
+    GitHubSignatureMissingError,
+    verify_github_request,
+)
+from mcp_server.webhooks.signature import get_webhook_secret
 
 logger = get_logger("transport.webhooks")
 
@@ -114,6 +120,23 @@ async def receive_webhook(request: Request) -> JSONResponse:
             status_code=400,
             content={"error": "Payload must be a JSON object"},
         )
+
+    # --- GitHub signature verification ------------------------------------
+    if source.lower() == "github":
+        webhook_secret = get_webhook_secret()
+        if webhook_secret is not None:
+            try:
+                verify_github_request(body, request.headers, webhook_secret)
+            except GitHubSignatureMissingError as exc:
+                return JSONResponse(
+                    status_code=401,
+                    content={"error": exc.message},
+                )
+            except GitHubSignatureError as exc:
+                return JSONResponse(
+                    status_code=403,
+                    content={"error": exc.message},
+                )
 
     # --- Validate ----------------------------------------------------------
     event_type_header = request.headers.get("x-github-event")
