@@ -3030,3 +3030,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE052.md
 - **Decisions:** PASS — Score 100/100, 0 critical, 0 warnings, 0 suggestions. 100% coverage (119 stmts, 0 missed), 50/50 tests pass. Previous rework lint issues (F401, TC003) verified fixed.
 - **Timestamp:** 2026-03-11T14:00:00Z
+
+### [FORGEOS-BE025] — CI Review (post-rework)
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE025.md
+- **Decisions:** PASS — Score 97/100, 0 critical, 0 warnings, 3 suggestions (OC-002 else keyword, OC-003 primitive state, uncovered error paths). 91% coverage (66 stmts, 6 miss), 25/25 tests pass. mypy unavailable (system issue), manual type audit clean.
+- **Timestamp:** 2026-03-11T16:30:00Z
+
+### [FORGEOS-BE018] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE018.md
+- **Decisions:** PASS — Score 91/100, 0 critical, 1 warning (unused import), 4 suggestions. 86% coverage, CC max 5.
+- **Timestamp:** 2026-03-11T14:30:00+05:30
