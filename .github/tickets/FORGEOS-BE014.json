@@ -146,7 +146,7 @@
       "event": "STAGE_COMPLETED",
       "agent": "Backend",
       "machine_id": "pop-os",
-      "details": "BACKEND REWORK #1 complete — 4 fixes (unused import, contextlib.suppress, public API for expire_connections, async await). 56/56 tests, 99% coverage, ruff 0 errors, pyright 0 errors."
+      "details": "BACKEND REWORK #1 complete \u2014 4 fixes (unused import, contextlib.suppress, public API for expire_connections, async await). 56/56 tests, 99% coverage, ruff 0 errors, pyright 0 errors."
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
