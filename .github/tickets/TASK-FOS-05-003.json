@@ -4,7 +4,7 @@
   "description": "Build the interactive dependency graph visualization using D3.js force-directed layout as specified in PRD FR-23. Fetches the dependency DAG from the tickets.graph API endpoint (or REST /api/tickets with depends_on data). Renders tickets as nodes with color-coding by status (DONE=green, READY=blue, BLOCKED=red, IN_PROGRESS/CLAIMED=yellow). Edges show dependency direction (arrow from dependency to dependent). Nodes sized by priority (critical=largest). Critical path visually highlighted (thicker edges, glowing nodes). Interactive features: click node to view ticket detail panel, zoom/pan with mouse wheel and drag, search by ticket ID to focus a node, tooltip on hover showing ticket summary. Respects prefers-reduced-motion for animations.",
   "type": "frontend",
   "priority": "medium",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -41,10 +41,10 @@
     "Respects prefers-reduced-motion: disables force simulation animation if set"
   ],
   "rework_count": 0,
-  "claimed_by": "CIReviewer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T15:30:00+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -110,6 +110,22 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "SECURITY PASS \u2014 Zero critical/high findings. 3 low/advisory documented."
+    },
+    {
+      "timestamp": "2026-03-10T15:00:00Z",
+      "event": "CLAIMED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "details": "CLAIM by CIReviewer on pop-os (ReaperOAK)"
+    },
+    {
+      "timestamp": "2026-03-10T16:00:00Z",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "CI PASS \u2014 Score 82/100. 0 critical, 3 warnings, 3 suggestions. Lint clean, CC max 9/10, WCAG 2.2 AA compliant."
     }
   ],
   "source_task_file": "TODO/tickets/05-dashboard.md",
