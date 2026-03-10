@@ -1,7 +1,17 @@
+### [TASK-FOS-03-009] — Documentation Summary
+- **Artifacts:** docs/architecture/api/mcp-tool-definitions.md, forgeos-server/README.md, CHANGELOG.md
+- **Decisions:** Fixed 6 inaccuracies in mcp-tool-definitions.md §4.9 (missing agent_name param, wrong duration range 1–480→5–120, wrong stored function signature 2→4 params, removed non-existent TICKET_NOT_FOUND/LEASE_EXPIRED error codes). Added full tickets.extend section in README matching existing tool doc pattern.
+- **Timestamp:** 2026-03-10T12:09:22Z
+
 ### [FORGEOS-UID004] — CI PASS
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-UID004.md
 - **Decisions:** PASS — Score 97/100, 0 critical, 0 warnings, 3 suggestions. 7/7 AC met. All 7 components fully specified with Props/States/A11y/Responsive. Upstream QA PASS and Security PASS verified. Zero TODO comments. Advanced to DOCS.
 - **Timestamp:** 2026-03-10T12:10:00Z
+
+### [FORGEOS-BE019] — BACKEND Complete
+- **Artifacts:** mcp-server/src/mcp_server/middleware/correlation.py, mcp-server/src/mcp_server/middleware/__init__.py, mcp-server/tests/test_correlation.py
+- **Decisions:** Used contextvars.ContextVar over threading.local() for async-safe per-request isolation; observability bridge pattern to sync with logging module
+- **Timestamp:** 2026-03-10T12:10:00+00:00
 
 ### [FORGEOS-BE024] — QA PASS
 - **Artifacts:** .github/agent-output/QA/FORGEOS-BE024.md
