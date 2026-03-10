@@ -34,10 +34,10 @@
     "Machine identity includes machine_id, hostname, and registration timestamp"
   ],
   "rework_count": 1,
-  "claimed_by": "Documentation Specialist",
+  "claimed_by": "Validator",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T21:11:43.134166+00:00",
+  "lease_expiry": "2026-03-10T21:28:33.886385+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -133,6 +133,22 @@
       "from_stage": "DOCS",
       "to_stage": "DOCS",
       "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-10T21:11:43.134166+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T20:58:33.850767+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Documentation Specialist: manual release"
+    },
+    {
+      "timestamp": "2026-03-10T20:58:33.886411+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-10T21:28:33.886385+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",

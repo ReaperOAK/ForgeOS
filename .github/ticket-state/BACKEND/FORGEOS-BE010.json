@@ -35,10 +35,10 @@
     "Transaction wrapper integrates with the asyncpg connection pool"
   ],
   "rework_count": 1,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Backend",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T21:28:17.132049+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -129,6 +129,15 @@
       "from_stage": "VALIDATION",
       "to_stage": "BACKEND",
       "details": "Rework #1: DoD #3 FAIL: 20 ruff lint errors in ticket files"
+    },
+    {
+      "timestamp": "2026-03-10T20:58:17.132064+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "BACKEND",
+      "to_stage": "BACKEND",
+      "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-10T21:28:17.132049+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
