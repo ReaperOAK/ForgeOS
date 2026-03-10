@@ -4,7 +4,7 @@
   "description": "Implement health monitoring for the asyncpg connection pool. Track pool statistics (active connections, idle connections, waiting requests), detect unhealthy connections via periodic ping, and trigger connection recycling when connections become stale. Expose pool health as a structured report for the health check endpoint.",
   "type": "backend",
   "priority": "medium",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -33,10 +33,10 @@
     "Health monitoring runs as a lightweight background task without impacting pool performance"
   ],
   "rework_count": 0,
-  "claimed_by": "CIReviewer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T17:32:17.852046+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -103,6 +103,13 @@
       "agent": "CIReviewer",
       "machine_id": "pop-os",
       "details": "Claimed for CI stage"
+    },
+    {
+      "timestamp": "2026-03-10T17:06:23.066714+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "details": "CI stage completed \u2014 PASS, score 84/100, 0 critical, 3 warnings"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
