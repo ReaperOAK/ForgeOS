@@ -2543,3 +2543,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/architecture/database-indexes.md, docs/database/schema-reference.md, CHANGELOG.md
 - **Decisions:** Updated architecture doc section headers from Proposed to Added in Migration 003; added new Migration 003 indexes section to schema reference; added implementation status section to architecture doc
 - **Timestamp:** 2026-03-10T13:57:55Z
+
+### [FORGEOS-BE017] — Documentation: SSE/HTTP Transport
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE017.md
+- **Decisions:** Expanded README Transport section from 4 lines to ~120 lines covering transport selection, Streamable HTTP config/endpoints/usage, SSE config/endpoints/connection lifecycle/usage, and API reference. Inline docstrings already comprehensive — no additions needed. CHANGELOG entry added.
+- **Timestamp:** 2026-03-11T00:30:00Z
