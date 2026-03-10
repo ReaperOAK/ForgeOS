@@ -18,7 +18,6 @@ Usage::
 from __future__ import annotations
 
 from dataclasses import dataclass
-from typing import Any
 
 from mcp_server.db.pool import ConnectionPool, PoolConfig
 from mcp_server.observability import get_logger
