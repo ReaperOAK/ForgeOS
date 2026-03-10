@@ -8,6 +8,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Operator Machine-Scoped Permissions** (FORGEOS-BE056) — Operator-machine
+  binding enforcement at `mcp-server/src/mcp_server/auth/authorization.py`
+  with service orchestration at
+  `mcp-server/src/mcp_server/services/operator_service.py`. Operators can only
+  perform REST operations on machines they are registered to via the
+  `operator_machine_bindings` table (many-to-many). Admin operators bypass all
+  binding checks. UPSERT-based `add_binding()` for idempotent registration,
+  `remove_binding()` for deletion, `list_bindings()` for enumeration.
+  `require_operator_machine_access()` enforces binding or raises
+  `MachineScopeError` (HTTP 403). `OperatorMachineBinding` frozen dataclass
+  with `__slots__`. Service-layer wrappers: `bind_operator_to_machine()`,
+  `unbind_operator_from_machine()`, `get_operator_bindings()`,
+  `validate_operator_machine_access()`. Structured logging for all
+  authorization decisions. 41 tests passing.
+
 - **Notification Channel Configuration** (FORGEOS-BE066) — Configurable
   notification channels at `mcp-server/src/mcp_server/notifications/channels.py`
   and `config.py`. Supports webhook (generic HTTP POST) and Slack (Block Kit

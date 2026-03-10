@@ -38,9 +38,25 @@ Operator auth (FORGEOS-BE053):
 - :func:`refresh_token` — refresh a valid JWT.
 - :func:`extract_bearer_token` — parse Authorization header.
 
+Operator-machine binding (FORGEOS-BE056) — via ``mcp_server.auth.authorization``:
+- :class:`~authorization.OperatorMachineBinding` — frozen binding descriptor.
+- :class:`~authorization.MachineScopeError` — 403 when operator unbound.
+- :data:`~authorization.ADMIN_ROLE` — role that bypasses binding checks.
+- :func:`~authorization.check_operator_machine_binding` — check binding exists.
+- :func:`~authorization.require_operator_machine_access` — enforce binding or raise.
+- :func:`~authorization.add_binding` — idempotent UPSERT binding.
+- :func:`~authorization.remove_binding` — delete a binding.
+- :func:`~authorization.list_bindings` — list bindings for an operator.
+
+Operator-machine binding service (FORGEOS-BE056) — via ``mcp_server.services.operator_service``:
+- :func:`~operator_service.bind_operator_to_machine` — service-layer bind.
+- :func:`~operator_service.unbind_operator_from_machine` — service-layer unbind.
+- :func:`~operator_service.get_operator_bindings` — list bindings (dict format).
+- :func:`~operator_service.validate_operator_machine_access` — enforce binding.
+
 .. meta::
-   :ticket: FORGEOS-BE051, FORGEOS-BE052, FORGEOS-BE053
-   :last_reviewed: 2026-03-11T00:00:00Z
+   :ticket: FORGEOS-BE051, FORGEOS-BE052, FORGEOS-BE053, FORGEOS-BE056
+   :last_reviewed: 2026-03-11T12:00:00Z
 """
 
 from mcp_server.auth.agent_auth import (

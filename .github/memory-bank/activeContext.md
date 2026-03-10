@@ -3445,3 +3445,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/services/sync_engine.py, mcp-server/src/mcp_server/tools/ticket_tools.py, mcp-server/src/mcp_server/services/ticket_service.py, mcp-server/src/mcp_server/services/__init__.py, mcp-server/src/mcp_server/tools/__init__.py, mcp-server/tests/test_sync_validate.py
 - **Decisions:** Used deferred imports to avoid circular deps. SyncEngine delegates to scan_and_release_expired for lease cleanup. Empty JSON Schema for both tools (no params needed).
 - **Timestamp:** 2026-03-10T22:57:58.897365+00:00
+
+### [FORGEOS-BE056] — Documentation Summary
+- **Artifacts:** mcp-server/src/mcp_server/auth/__init__.py, mcp-server/README.md, CHANGELOG.md
+- **Decisions:** Added operator-machine binding reference section to README after Machine Registration; updated auth __init__.py docstring with BE056 exports; active voice, Diátaxis Reference quadrant
+- **Timestamp:** 2026-03-11T12:00:00Z
