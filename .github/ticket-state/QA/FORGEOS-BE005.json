@@ -4,7 +4,7 @@
   "description": "Create a database seeding script that imports existing ticket JSON files from .github/tickets/ into the PostgreSQL database. The script should read all ticket JSON files, validate them against the ticket schema, transform them into database records, and insert them with proper conflict handling (skip existing). Include sample test data for development environments.",
   "type": "backend",
   "priority": "high",
-  "stage": "BACKEND",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Script can be run via `make seed` or `python database/seed.py`"
   ],
   "rework_count": 0,
-  "claimed_by": "Backend",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-10T12:39:38.546947+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -60,6 +60,13 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "Claimed by Backend agent for BACKEND stage"
+    },
+    {
+      "timestamp": "2026-03-10T12:15:45.642124+00:00",
+      "event": "STAGE_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "BACKEND stage complete. 46 tests pass."
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
