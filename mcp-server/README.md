@@ -1,6 +1,6 @@
 # ForgeOS MCP Server
 
-<!-- last_reviewed: 2026-03-10T21:00:00Z -->
+<!-- last_reviewed: 2026-03-11T00:30:00Z -->
 <!-- audience: developers -->
 <!-- diataxis: reference -->
 
@@ -78,9 +78,76 @@ async def check():
 asyncio.run(check())
 ```
 
+## Connection Pool
+
+<!-- last_reviewed: 2026-03-11T00:30:00Z -->
+
+The `mcp_server.db` package provides an asyncpg connection pool with lifecycle
+management, health checks, and pool metrics.
+
+### Pool Configuration
+
+| Variable | Default | Description |
+|---|---|---|
+| `DATABASE_URL` | `postgresql://forgeos:forgeos@localhost:5432/forgeos` | PostgreSQL connection string |
+| `POOL_MIN` | `2` | Minimum connections kept open |
+| `POOL_MAX` | `10` | Maximum connections allowed |
+| `POOL_IDLE_TIMEOUT` | `300` | Seconds before idle connections are recycled |
+| `POOL_COMMAND_TIMEOUT` | `30` | Per-query timeout in seconds |
+
+Configuration is loaded from environment variables via `PoolConfig(BaseSettings)`.
+
+### Usage
+
+```python
+from mcp_server.db import ConnectionPool, PoolConfig
+
+config = PoolConfig()  # reads from env
+pool = ConnectionPool(config)
+
+await pool.initialize()  # creates the asyncpg pool
+
+async with pool.acquire() as conn:
+    row = await conn.fetchrow("SELECT 1")
+
+await pool.ping()   # True if pool is healthy
+stats = pool.stats()  # PoolStats snapshot
+
+await pool.close()  # drains and closes all connections
+```
+
+### API Reference
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `ConnectionPool` | class | Async pool wrapper with lifecycle management |
+| `PoolConfig` | class | Pydantic settings for pool configuration |
+| `PoolStats` | dataclass | Frozen snapshot of pool metrics (`size`, `free`, `used`, `max`, `min`) |
+| `PoolNotInitializedError` | exception | Raised when accessing pool before `initialize()` |
+
+#### ConnectionPool Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `initialize()` | `None` | Creates the asyncpg pool; fails fast if DB is unreachable |
+| `close()` | `None` | Drains and closes all connections |
+| `ping()` | `bool` | Executes `SELECT 1` to verify connectivity |
+| `acquire()` | `AsyncContextManager[Connection]` | Yields one connection; auto-releases on exit |
+| `stats()` | `PoolStats` | Returns current pool metrics |
+| `is_initialized` | `bool` | Property — `True` after `initialize()`, `False` after `close()` |
+
+### Error Handling
+
+| Scenario | Behavior |
+|---|---|
+| DB unreachable on `initialize()` | Raises `ConnectionRefusedError` (fail fast) |
+| `acquire()` before `initialize()` | Raises `PoolNotInitializedError` |
+| Query timeout | Raises `asyncpg.QueryCanceledError` after `POOL_COMMAND_TIMEOUT` seconds |
+
+
 ## Graceful Shutdown
 
-<!-- last_reviewed: 2026-03-10T22:00:00Z -->
+<!-- last_reviewed: 2026-03-11T00:30:00Z -->
 
 The server supports graceful shutdown with request draining. On SIGTERM or
 SIGINT, the server stops accepting new requests, waits for in-flight work to
@@ -183,6 +250,8 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/__main__.py`** — `python -m mcp_server` entry point
 - **`mcp_server/observability/`** — Structured JSON logging, correlation IDs, and PII redaction
 - **`mcp_server/auth/`** — Agent API key authentication, rate limiting, and identity resolution
+- **`mcp_server/tools/`** — Dynamic tool registration, schema validation, and FastMCP bridge
+- **`mcp_server/events/`** — Append-only event sourcing (EventStore, EventType, Event dataclass)
 
 ### Error Handling
 
@@ -200,10 +269,98 @@ Tool-level expected failures use `isError=True` in the MCP `CallToolResult`.
 
 ### Transport
 
-The server uses **Streamable HTTP** transport in stateless mode (`stateless_http=True`), which:
-- Requires no server-side session state
-- Returns JSON responses (no SSE streaming)
-- Supports horizontal scaling behind a load balancer
+The server supports multiple transport protocols. Select one via the
+`FORGEOS_TRANSPORT` environment variable:
+
+| Value | Protocol | Default |
+|-------|----------|---------|
+| `streamable-http` | Streamable HTTP (stateless JSON) | **Yes** |
+| `sse` | Server-Sent Events (persistent connections) | No |
+| `stdio` | Standard I/O (local development) | No |
+
+#### Streamable HTTP
+
+Stateless request/response transport. Each MCP request is an independent HTTP
+POST that returns a JSON response — no server-side session state required.
+
+**Configuration** (environment variables):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FORGEOS_HTTP_HOST` | `0.0.0.0` | Bind address |
+| `FORGEOS_HTTP_PORT` | `3000` | Listen port |
+| `FORGEOS_HTTP_MOUNT_PATH` | `/mcp` | URL path prefix |
+| `FORGEOS_HTTP_STATELESS` | `true` | Disable session tracking |
+| `FORGEOS_HTTP_JSON_RESPONSE` | `true` | Return JSON instead of SSE streams |
+| `FORGEOS_HTTP_LOG_LEVEL` | `INFO` | Logging verbosity |
+| `FORGEOS_HTTP_SHUTDOWN_TIMEOUT` | `10` | Graceful shutdown seconds |
+
+**Endpoints:**
+
+| Path | Method | Description |
+|------|--------|-------------|
+| `/mcp` | POST | MCP JSON-RPC request endpoint |
+| `/mcp/health` | GET | Transport health check |
+
+**Usage:**
+
+```bash
+export FORGEOS_TRANSPORT=streamable-http
+python -m mcp_server
+```
+
+#### SSE Transport
+
+Persistent connection transport using Server-Sent Events. Clients open a
+long-lived SSE connection and receive real-time event streams. Includes
+built-in connection tracking, idle timeouts, and max-connection limits.
+
+**Configuration** (environment variables):
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `FORGEOS_SSE_HOST` | `0.0.0.0` | Bind address |
+| `FORGEOS_SSE_PORT` | `3000` | Listen port |
+| `FORGEOS_SSE_MAX_CONNECTIONS` | `100` | Maximum concurrent SSE clients |
+| `FORGEOS_SSE_IDLE_TIMEOUT` | `300` | Seconds before disconnecting idle clients |
+| `FORGEOS_SSE_SWEEP_INTERVAL` | `60` | Seconds between idle-connection sweeps |
+| `FORGEOS_SSE_LOG_LEVEL` | `INFO` | Logging verbosity |
+| `FORGEOS_SSE_SHUTDOWN_TIMEOUT` | `10` | Graceful shutdown seconds |
+
+**Endpoints:**
+
+| Path | Method | Description |
+|------|--------|-------------|
+| `/sse` | GET | Open SSE event stream |
+| `/messages/` | POST | Send MCP JSON-RPC message |
+| `/health` | GET | Transport health check |
+| `/connections` | GET | Active connection stats |
+
+**Connection lifecycle:**
+
+1. Client opens `GET /sse` — server assigns a session ID and begins streaming.
+2. Client sends MCP requests via `POST /messages/?session_id=<id>`.
+3. Server pushes responses and notifications through the SSE stream.
+4. Idle connections are reaped after `FORGEOS_SSE_IDLE_TIMEOUT` seconds.
+5. When `FORGEOS_SSE_MAX_CONNECTIONS` is reached, new connections receive 503.
+
+**Usage:**
+
+```bash
+export FORGEOS_TRANSPORT=sse
+python -m mcp_server
+```
+
+#### Transport API Reference
+
+| Symbol | Module | Description |
+|--------|--------|-------------|
+| `TransportType` | `transport` | Enum: `STREAMABLE_HTTP`, `SSE`, `STDIO` |
+| `parse_transport()` | `transport` | Parse string to `TransportType` |
+| `HTTPTransport` | `transport.http` | Streamable HTTP transport class |
+| `HTTPTransportConfig` | `transport.http` | Pydantic config for HTTP transport |
+| `SSETransport` | `transport.sse` | SSE transport class |
+| `SSETransportConfig` | `transport.sse` | Pydantic config for SSE transport |
 
 
 ## Observability — Structured JSON Logging
@@ -416,6 +573,114 @@ Failed attempts log the key prefix only — never the full key.
 | Variable | Default | Description |
 |---|---|---|
 | `FORGEOS_API_KEY` | _(required)_ | API key for agent authentication against the MCP server |
+
+
+## Event Sourcing
+
+The `mcp_server/events/` package provides an append-only event store that
+records every ticket lifecycle transition. All state changes flow through
+`EventStore.append_event()`, which assigns monotonically increasing sequence
+numbers and immutable timestamps before delegating to a pluggable backend.
+
+### Event Types
+
+| EventType | Description |
+|---|---|
+| `CREATED` | Ticket created |
+| `CLAIMED` | Agent acquired distributed lock |
+| `RELEASED` | Agent released claim voluntarily |
+| `FORCE_RELEASED` | System released expired lease |
+| `STAGE_ADVANCED` | Ticket moved to next SDLC stage |
+| `STAGE_REJECTED` | Stage reviewer rejected ticket |
+| `REWORKED` | Ticket returned for rework |
+| `ESCALATED` | Rework count exceeded threshold |
+| `DONE` | Ticket lifecycle complete |
+| `UPDATED` | Metadata fields modified |
+| `SPAWNED` | New ticket created (by TODO agent) |
+| `LEASE_EXTENDED` | Claim lease duration extended |
+| `RECONCILED` | Filesystem–MCP state reconciled |
+| `FILE_LOCKED` | File-level mutex acquired |
+| `FILE_UNLOCKED` | File-level mutex released |
+
+**Aliases:** `COMPLETE` → `DONE`, `REJECTED` → `STAGE_REJECTED`,
+`ADVANCED` → `STAGE_ADVANCED`.
+
+### Quick Start
+
+```python
+from mcp_server.events import EventStore, EventType, create_event_store
+
+store = create_event_store()
+
+store.append_event(
+    ticket_id="FORGEOS-BE012",
+    event_type=EventType.CLAIMED,
+    agent_name="Backend",
+    details={"machine_id": "pop-os"},
+)
+
+events = store.get_events_by_ticket("FORGEOS-BE012")
+state = store.reconstruct_ticket_state("FORGEOS-BE012")
+```
+
+### Event Fields
+
+Every `Event` is a frozen dataclass with these fields:
+
+| Field | Type | Description |
+|---|---|---|
+| `event_id` | `str` | UUID v4 identifier |
+| `ticket_id` | `str` | Associated ticket |
+| `event_type` | `EventType` | Lifecycle event category |
+| `agent_name` | `str \| None` | Agent that triggered the event |
+| `machine_id` | `str \| None` | Host machine identifier |
+| `operator` | `str \| None` | Human operator |
+| `timestamp` | `datetime` | When the event occurred (UTC) |
+| `sequence` | `int` | Monotonically increasing counter |
+| `from_stage` | `str \| None` | Previous SDLC stage |
+| `to_stage` | `str \| None` | Target SDLC stage |
+| `details` | `dict` | Arbitrary metadata |
+| `evidence` | `dict` | Completion evidence (artifacts, tests) |
+| `metadata` | `dict` | Additional structured data |
+| `version` | `int` | Schema version (default `1`) |
+
+### Public API
+
+Exported from `mcp_server.events`:
+
+| Symbol | Kind | Purpose |
+|---|---|---|
+| `Event` | frozen dataclass | Immutable event record |
+| `EventType` | enum | 15 event types + 3 aliases |
+| `EventStore` | class | Core event store with query + replay |
+| `create_event_store()` | factory function | Create configured EventStore instance |
+
+### EventStore Methods
+
+| Method | Description |
+|---|---|
+| `append_event(ticket_id, event_type, ...)` | Record a new event |
+| `get_events_by_ticket(ticket_id)` | All events for a ticket |
+| `get_events_by_type(event_type)` | All events of a given type |
+| `get_events_by_agent(agent_name)` | All events by an agent |
+| `replay_ticket_events(ticket_id)` | Ordered replay for auditing |
+| `reconstruct_ticket_state(ticket_id)` | Derive current state from events |
+
+### Backend Architecture
+
+`EventStore` delegates persistence to an `EventStoreBackend` protocol. The
+default `InMemoryEventBackend` stores events in memory (suitable for tests
+and single-process deployments). A PostgreSQL backend will be added in a
+future ticket to provide durable, multi-process event storage.
+
+### Design Constraints
+
+- **Append-only** — events are never modified or deleted.
+- **Monotonic sequencing** — `sequence` values are globally ordered.
+- **Frozen events** — `Event` dataclass is frozen; mutation raises `FrozenInstanceError`.
+- **Backend-agnostic** — swap storage by implementing `EventStoreBackend` protocol.
+
+See also: [FORGEOS-ARCH007 — Event Sourcing Architecture](../docs/architecture/event-sourcing-schema.md).
 
 
 ## Database Migrations
