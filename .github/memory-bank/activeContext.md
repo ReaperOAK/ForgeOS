@@ -1,3 +1,8 @@
+### [FORGEOS-BE008] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE008.md
+- **Decisions:** PASS — Score 93/100, 0 critical, 2 warnings (OC nesting + class size), 3 suggestions (import sorting, contextlib.suppress). 99% coverage, CC max 6. All upstream PASS.
+- **Timestamp:** 2026-03-11T18:30:00Z
+
 ### [FORGEOS-BE023] — Security Review
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE023.md
 - **Decisions:** PASS — Zero critical/high findings. 1 medium (SEC-BE023-001: session ID collision when explicit ID provided, CWE-639), 2 low/info (mutable reference leakage CWE-374, no per-agent quota CWE-770). All risk-accepted — uuid4() default path safe, internal API with transport-layer auth. STRIDE on 4 trust boundaries, OWASP 10/10 checked.
@@ -2995,3 +3000,28 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE044.md
 - **Decisions:** PASS — Score 97/100. 0 critical, 0 warnings, 3 suggestions. Lint clean (ruff 0 errors/warnings). Complexity clean (max cyclomatic 6). Coverage 92% (client 91%, transport 93%). No circular deps, no TODOs, no dead code. OC rules satisfied.
 - **Timestamp:** 2026-03-11T15:30:00+00:00
+
+### [FORGEOS-BE010] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE010.md
+- **Decisions:** PASS — Score 82/100, 0 critical, 2 warnings, 100% coverage
+- **Timestamp:** 2026-03-10T19:49:07Z
+
+### [FORGEOS-BE064] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE064.md
+- **Decisions:** PASS — Score 85/100, 0 critical, 3 warnings (OC-007 class size, OC-001 indentation, OC-002 else clause). Lint clean, mypy strict clean, CC avg 1.9 (all A), 96% coverage, no dead code, no TODOs.
+- **Timestamp:** 2026-03-11T16:00:00+00:00
+
+### [FORGEOS-BE021] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE021.md
+- **Decisions:** PASS — Score 98/100. 0 critical, 0 warnings, 2 suggestions. Lint clean (ruff 0 errors/warnings). Type check: 1 ANN401 note (justified). 42 tests pass. Coverage 100% on validation.py. Max cyclomatic complexity 3. No dead code, no TODOs.
+- **Timestamp:** 2026-03-11T16:00:00+00:00
+
+### [FORGEOS-BE014] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE014.md
+- **Decisions:** PASS — Score 96/100. 0 critical, 0 warnings. Lint clean (ruff), type check clean (mypy), cyclomatic complexity max 4 (all A-rank), 99% test coverage (56 tests). QA and Security upstream both PASS verified.
+- **Timestamp:** 2026-03-11T09:00:00Z
+
+### [FORGEOS-BE023] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE023.md
+- **Decisions:** PASS — Score 87/100, 0 critical, 2 warnings (CC=12 on expire_timed_out_sessions, entity size 54 lines), 3 suggestions. 88% coverage, 22/22 tests pass.
+- **Timestamp:** 2026-03-11T19:45:00Z
