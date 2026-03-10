@@ -3450,3 +3450,43 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/auth/__init__.py, mcp-server/README.md, CHANGELOG.md
 - **Decisions:** Added operator-machine binding reference section to README after Machine Registration; updated auth __init__.py docstring with BE056 exports; active voice, Diátaxis Reference quadrant
 - **Timestamp:** 2026-03-11T12:00:00Z
+
+### [FORGEOS-BE034] — QA REJECT (Rework #1)
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE034.md
+- **Decisions:** REJECTED — two blocker defects: (1) TicketRepository.list_tickets() method missing, route handler crashes with AttributeError; (2) /api/tickets route not mounted in transport/http.py, endpoint unreachable (404). Tests pass only because AsyncMock bypasses both gaps. Sent back to BACKEND for rework.
+- **Timestamp:** 2026-03-11T05:30:00Z
+
+### FORGEOS-BE033 — QA Complete
+- **Artifacts:** mcp-server/tests/test_sync_validate.py (9 gap tests added), .github/agent-output/QA/FORGEOS-BE033.md
+- **Decisions:** Added 9 gap tests covering sync_engine.py uncovered paths (lease release logging, dependency error handling, empty blocked tickets, unknown_ticket_type, flow_mismatch, lease release error, TicketService delegation guards). Achieved 100% coverage on sync_engine.py.
+- **Verdict:** PASS — all 8 ACs verified, 37/37 tests pass, ruff clean
+- **Timestamp:** 2026-03-11T12:00:00Z
+
+### [FORGEOS-BE029] — QA Complete
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE029.md
+- **Decisions:** All 7 ACs verified against implementation. 104/104 tests pass. BE029-specific code at 100% coverage. No gap tests needed — existing 53 claim tests are comprehensive.
+- **Verdict:** PASS — 104 tests pass, ruff clean, all 7 ACs satisfied
+- **Coverage:** ticket_tools.py 60%, ticket_service.py 55% (missing lines from other tickets' code; BE029 code = 100%)
+- **Mutation Score:** N/A (no business logic gaps identified warranting mutation testing)
+- **Confidence:** HIGH
+- **Timestamp:** 2026-03-11T14:00:00Z
+
+### [FORGEOS-BE060] — BACKEND Complete
+- **Artifacts:** mcp-server/src/mcp_server/webhooks/signature.py, mcp-server/src/mcp_server/webhooks/github_handler.py, mcp-server/src/mcp_server/webhooks/__init__.py, mcp-server/src/mcp_server/transport/webhooks.py (modified), mcp-server/tests/test_webhook_signature.py, mcp-server/tests/test_github_handler.py
+- **Decisions:** Created separate webhooks/ package for signature verification domain logic; graceful skip when GITHUB_WEBHOOK_SECRET not set; constant-time hmac.compare_digest for timing-attack prevention
+- **Timestamp:** 2026-03-11T12:00:00Z
+
+### [FORGEOS-BE055] — QA Complete
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE055.md
+- **Decisions:** PASS verdict — all 6 ACs verified; 95 tests pass (54 role-stage + 41 machine-scope); 99% coverage on authorization.py; zero ruff errors; no defects found
+- **Coverage:** 99% (authorization.py)
+- **Mutation Score:** N/A (deferred — branch coverage density mitigates risk)
+- **Confidence:** HIGH
+- **Timestamp:** 2026-03-11T14:43:00Z
+
+### [FORGEOS-BE042] — QA Complete
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE042.md
+- **Decisions:** PASS verdict — all 6 ACs verified; 34 tests pass, 96% coverage; zero ruff errors; mutmut blocked by pre-existing multiprocessing conflict, manual mutation analysis confirmed ~90% kill rate on business logic
+- **Coverage:** 96% (109 stmts, 4 misses — edge-case fallbacks)
+- **Confidence:** HIGH
+- **Timestamp:** 2026-03-11T15:00:00Z
