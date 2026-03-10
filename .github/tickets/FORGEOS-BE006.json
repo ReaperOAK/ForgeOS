@@ -35,10 +35,10 @@
     "Function returns the claimed ticket data or None if no eligible tickets exist"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "QA",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-10T16:14:56.338775+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -68,6 +68,13 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Released claim from Backend: Lease expired at 2026-03-10T15:19:19.285018+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T15:44:56.338775+00:00",
+      "event": "CLAIMED",
+      "agent": "QA",
+      "machine_id": "pop-os",
+      "details": "Claimed by QA agent for QA stage"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-database.md",
