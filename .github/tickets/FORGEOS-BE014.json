@@ -4,7 +4,7 @@
   "description": "Implement health monitoring for the asyncpg connection pool. Track pool statistics (active connections, idle connections, waiting requests), detect unhealthy connections via periodic ping, and trigger connection recycling when connections become stale. Expose pool health as a structured report for the health check endpoint.",
   "type": "backend",
   "priority": "medium",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
