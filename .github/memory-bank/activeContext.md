@@ -1916,3 +1916,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/dashboard/js/graph.js, forgeos-server/src/dashboard/index.html
 - **Decisions:** IIFE module pattern (ForgeGraph) to match existing app.js convention. D3.js force-directed layout with link/charge/center/collision forces. Status color map from mockup §3.1. Priority radius map from mockup §3.2. Critical path via longest-path DAG algorithm. SSE integration via existing EventSource on state.eventSource. Canvas minimap for overview. Lazy-load graph on tab activation for performance. 44×44px minimum hit areas for WCAG 2.5.5. Pulse animation on SSE status change (respects reduced-motion). Toast notifications for real-time updates.
 - **Timestamp:** 2025-07-08T18:35:00Z
+
+### [TASK-FOS-03-006] — QA PASS (tickets.spawn MCP tool)
+- **Artifacts:** forgeos-server/src/tools/tickets-spawn.ts, forgeos-server/src/tools/tickets-spawn.test.ts, .github/agent-output/QA/TASK-FOS-03-006.md
+- **Decisions:** QA PASS (HIGH confidence). 24/24 tests pass. Coverage: 97.09% statements, 80.95% branches, 100% functions, 97.09% lines. All 8 acceptance criteria verified. Fixed sdlc_flow test assertion for pg-driver custom enum array format (systemic LOW-severity observation). Added invalid-type bypass test to improve branch coverage from 76% to 81%. Documented race condition in generateChildTicketId (LOW severity, single-writer safe).
+- **Timestamp:** 2026-03-10T13:38:00Z
+
+### [FORGEOS-UID005] -- QA PASS (System Health Dashboard)
+- **Artifacts:** .github/agent-output/QA/FORGEOS-UID005.md
+- **Decisions:** QA PASS (HIGH confidence). All 7 acceptance criteria verified with line-number evidence. 4-panel health grid with SVG charts, design tokens, WCAG 2.2 AA accessibility, responsive breakpoints, SSE+polling+demo fallback. No blocking defects. Advanced QA->SECURITY.
+- **Timestamp:** 2026-03-10T08:11:50+00:00
