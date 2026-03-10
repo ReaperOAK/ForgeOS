@@ -14,6 +14,12 @@ Public API
 """
 
 from mcp_server.services.audit_service import AuditService
+from mcp_server.services.sync_engine import (
+    IntegrityError,
+    SyncEngine,
+    SyncResult,
+    ValidateResult,
+)
 from mcp_server.services.ticket_service import (
     AdvanceTicketResult,
     ClaimOwnershipError,
@@ -24,26 +30,20 @@ from mcp_server.services.ticket_service import (
     TicketListResult,
     TicketService,
 )
-from mcp_server.services.sync_engine import (
-    IntegrityError,
-    SyncEngine,
-    SyncResult,
-    ValidateResult,
-)
 from mcp_server.services.webhook_service import WebhookEvent, WebhookService
 
 __all__ = [
     "AdvanceTicketResult",
     "AuditService",
-    "IntegrityError",
     "ClaimOwnershipError",
     "ClaimValidationError",
+    "IntegrityError",
     "NextTicketResult",
     "ReleaseResult",
-    "TicketDetail",
-    "TicketListResult",
     "SyncEngine",
     "SyncResult",
+    "TicketDetail",
+    "TicketListResult",
     "TicketService",
     "ValidateResult",
     "WebhookEvent",

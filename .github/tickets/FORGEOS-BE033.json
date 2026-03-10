@@ -4,7 +4,7 @@
   "description": "Implement two MCP tools: `tickets.sync` for dependency resolution and `tickets.validate` for integrity checking. `tickets.sync` evaluates all ticket dependencies, releases expired leases (FORGEOS-BE009), and moves newly unblocked tickets to READY. `tickets.validate` performs a full integrity check: every ticket exists in exactly one stage directory equivalent, stage field matches, SDLC flows are valid, and no orphans exist.",
   "type": "backend",
   "priority": "high",
-  "stage": "READY",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -67,6 +67,15 @@
       "from_stage": "READY",
       "to_stage": "READY",
       "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-10T22:57:49.817004+00:00"
+    },
+    {
+      "timestamp": "2026-03-10T22:57:48.115376+00:00",
+      "event": "BACKEND_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "READY",
+      "to_stage": "QA",
+      "details": "BACKEND stage complete, moved to QA"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",

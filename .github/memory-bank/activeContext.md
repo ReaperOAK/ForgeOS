@@ -3440,3 +3440,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** stage_engine.py, ticket_service.py, ticket_tools.py, services/__init__.py, tools/__init__.py, test_stage_engine.py, test_advance_tool.py
 - **Decisions:** Used pure-domain stage_engine.py for SDLC flow validation; used transactional() context manager with raw SQL for SERIALIZABLE isolation instead of going through repositories; reused existing TicketNotFoundError from mcp_server.server; created ClaimValidationError as new domain exception
 - **Timestamp:** 2026-03-11T01:30:00Z
+
+### [FORGEOS-BE033] — Implement tickets.sync and tickets.validate Tools
+- **Artifacts:** mcp-server/src/mcp_server/services/sync_engine.py, mcp-server/src/mcp_server/tools/ticket_tools.py, mcp-server/src/mcp_server/services/ticket_service.py, mcp-server/src/mcp_server/services/__init__.py, mcp-server/src/mcp_server/tools/__init__.py, mcp-server/tests/test_sync_validate.py
+- **Decisions:** Used deferred imports to avoid circular deps. SyncEngine delegates to scan_and_release_expired for lease cleanup. Empty JSON Schema for both tools (no params needed).
+- **Timestamp:** 2026-03-10T22:57:58.897365+00:00
