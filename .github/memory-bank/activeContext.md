@@ -1931,3 +1931,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/dashboard/index.html, forgeos-server/src/dashboard/css/style.css
 - **Decisions:** HTML+CSS only — JS implementation was pre-existing in app.js. Added Claims Monitor (table+cards+pagination), Operator Workbench (search/selector, ticket card, 2×2 action grid, activity log), Machine Status panel (grid), Auth User Badge, Confirmation Modal with focus trap, 4 HTML templates, mobile sidebar entries. All design token consumption via var(--token). WCAG 2.2 AA: semantic HTML, ARIA roles/labels/live regions, keyboard accessible. Responsive at 320/768/1024/1440px.
 - **Timestamp:** 2026-03-10T14:30:00+00:00
+
+### [TASK-FOS-05-004] — Frontend Implementation (Dashboard JavaScript Logic)
+- **Artifacts:** forgeos-server/src/dashboard/js/app.js, forgeos-server/src/dashboard/js/pipeline.js, forgeos-server/src/dashboard/js/admin.js
+- **Decisions:** IIFE pattern (not ES modules) to match existing codebase convention. window.ForgeOS global exposes shared API for module communication. SSE exponential backoff: 1s→2s→4s→8s→16s→30s cap. Handler registration pattern decouples SSE dispatch from view modules. Individual card DOM updates (no full re-render). Single global setInterval for all lease countdowns. Admin panel built via buildDOM() replacing HTML placeholder — no HTML modification required. Vanilla JS only, no external dependencies.
+- **Timestamp:** 2026-03-10T14:30:00+05:30
