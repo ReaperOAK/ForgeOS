@@ -117,9 +117,12 @@ class TestAppContext:
         assert isinstance(ctx.config, ServerConfig)
 
     def test_custom_pool(self) -> None:
-        sentinel = object()
-        ctx = AppContext(db_pool=sentinel)
-        assert ctx.db_pool is sentinel
+        from unittest.mock import MagicMock
+
+        mock_deps = MagicMock()
+        mock_deps.pool = MagicMock()
+        ctx = AppContext(dependencies=mock_deps)
+        assert ctx.db_pool is mock_deps.pool
 
 
 # ---------------------------------------------------------------------------
