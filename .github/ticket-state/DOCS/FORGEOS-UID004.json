@@ -37,10 +37,10 @@
     "Mockup approval status set to APPROVED in mockup document header"
   ],
   "rework_count": 1,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-10T13:06:10.373514+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -145,6 +145,13 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "SECURITY PASS (HIGH confidence) \u2014 Zero critical/high findings. 7 advisory items documented. XSS mitigated, CSRF N/A, auth gates correct. Advancing to CI."
+    },
+    {
+      "timestamp": "2026-03-10T12:36:10.373514+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "details": "Claimed by Documentation on pop-os (reaperoak)"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
