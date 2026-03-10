@@ -26,7 +26,7 @@ Design decisions
 
 .. meta::
    :ticket: FORGEOS-BE010
-   :last_reviewed: 2026-03-11T00:00:00Z
+   :last_reviewed: 2026-03-11T12:00:00Z
 """
 
 from __future__ import annotations
@@ -35,9 +35,12 @@ import asyncio
 import enum
 from contextlib import asynccontextmanager
 from dataclasses import dataclass
-from typing import TYPE_CHECKING, Any, AsyncIterator, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from mcp_server.observability import get_logger
+
+if TYPE_CHECKING:
+    from collections.abc import AsyncIterator
 
 logger = get_logger("locking.transaction_config")
 

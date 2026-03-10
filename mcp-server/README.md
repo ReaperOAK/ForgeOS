@@ -753,7 +753,7 @@ A claim is stale when:
 
 ## Transaction Isolation
 
-<!-- last_reviewed: 2026-03-11T00:00:00Z -->
+<!-- last_reviewed: 2026-03-11T12:00:00Z -->
 <!-- audience: developers -->
 <!-- diataxis: reference -->
 
