@@ -4,7 +4,7 @@
   "description": "Wire the MCP server to the PostgreSQL database layer via the repository data access layer from BE013. Implement server startup hooks that initialize the connection pool and repository instances, and shutdown hooks that drain connections. Provide a dependency injection mechanism (or module-level factory) so that tool handlers can access repositories without direct pool management.",
   "type": "backend",
   "priority": "critical",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -113,6 +113,15 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "SECURITY PASS \u2014 zero critical/high findings, 4 LOW documented"
+    },
+    {
+      "timestamp": "2026-03-10T19:52:19.555676+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "CI PASS \u2014 Score 91/100, 0 critical, 1 warning, 86% coverage"
     }
   ],
   "source_task_file": "TODO/tasks/phase2-mcp-server.md",
