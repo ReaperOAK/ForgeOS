@@ -7,6 +7,9 @@ date: 2026-03-10T00:00:00Z
 status: APPROVED
 stitch_project_id: projects/17753507249462882723
 confidence: HIGH
+last_reviewed: "2026-03-10T23:00:00Z"
+reviewed_by: Documentation
+diataxis: reference
 ---
 
 # FORGEOS-UID004 — Operator Workbench and Claims Monitor
