@@ -1896,3 +1896,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE015.md
 - **Decisions:** PASS — Zero critical/high findings. STRIDE max score 9 (LOW). OWASP 10/10 clean. pip-audit 0 CVEs across 40 deps. 1 medium finding (SEC-001: .env not in .gitignore) documented as non-blocking risk acceptance.
 - **Timestamp:** 2026-03-10T08:04:48.122281+00:00
+
+### [FORGEOS-BE003] — QA PASS (Event History and Audit Tables Migration)
+- **Artifacts:** mcp-server/alembic/versions/20260310_000000_002_event_tables.py, mcp-server/tests/test_002_event_tables.py, .github/agent-output/QA/FORGEOS-BE003.md
+- **Decisions:** QA PASS (HIGH confidence). All 6 acceptance criteria verified. 70/70 structural tests pass (0.04s). Lint clean (ruff 0 errors, pyright 0 errors). No console errors, no TODO comments, no unhandled promises. event_history (AC1), stage_transitions (AC2) tables created with correct columns/types/FKs. file_locks (AC3) confirmed in migration 001. Append-only enforcement via triggers (AC4). All FKs reference core tables (AC5). Downgrade drops all created objects (AC6). Noted dual revision "002" multi-head (cross-ticket concern). Advanced QA→SECURITY.
+- **Timestamp:** 2026-03-10T22:30:00Z
+
+### [FORGEOS-UID002] — QA PASS
+- **Artifacts:** .github/agent-output/QA/FORGEOS-UID002.md, docs/uiux/mockups/FORGEOS-UID002.md, docs/uiux/components/pipeline-board.md, docs/uiux/components/ticket-card.md
+- **Decisions:** QA PASS (HIGH confidence). All 7 acceptance criteria verified MET. Design specs complete: pipeline wireframe (12 stage columns), TicketCard spec (type badges, claim indicator), StageColumn spec, tabbed detail view, HistoryTimeline, DependencyTree, mockup APPROVED. Advisory: implementation code missing HTML tab structure and ~300 CSS lines claimed by Frontend (out of design ticket scope).
+- **Timestamp:** 2026-03-10T08:05:00Z
