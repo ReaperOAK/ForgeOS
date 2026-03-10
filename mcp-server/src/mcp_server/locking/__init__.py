@@ -1,4 +1,4 @@
-"""ForgeOS locking subsystem — distributed claim queue, lease management, file mutex, transaction isolation.
+"""ForgeOS locking subsystem — distributed claims, leases, file mutex, transaction isolation.
 
 This package provides:
 
@@ -34,6 +34,15 @@ Public API
 * :exc:`LeaseNotActiveError` — lease is no longer active.
 * :exc:`MaxLeaseDurationExceededError` — max duration exceeded.
 
+* :class:`LeaseCleanupConfig` — configurable cleanup interval.
+* :class:`LeaseCleanupTask` — background task for expired lease detection.
+* :class:`ExpiredLease` — an expired lease detected during cleanup.
+* :class:`LeaseRelease` — record of a released expired lease.
+* :func:`find_expired_leases` — scan for expired leases.
+* :func:`release_expired_lease` — release a single expired lease.
+* :func:`scan_and_release_expired` — scan and release all expired leases.
+* :exc:`LeaseCleanupError` — base error for cleanup failures.
+
 * :class:`IsolationLevel` — PostgreSQL isolation levels (enum).
 * :class:`OperationType` — ForgeOS operation categories (enum).
 * :class:`OperationIsolation` — frozen dataclass mapping operation to isolation level.
@@ -43,7 +52,7 @@ Public API
 * :exc:`TransactionError` — non-retryable transaction error.
 
 .. meta::
-   :ticket: FORGEOS-BE006, FORGEOS-BE007, FORGEOS-BE008, FORGEOS-BE010
+   :ticket: FORGEOS-BE006, FORGEOS-BE007, FORGEOS-BE008, FORGEOS-BE009, FORGEOS-BE010
 """
 
 from mcp_server.locking.claim_queue import (
@@ -61,15 +70,6 @@ from mcp_server.locking.file_mutex import (
     LockAcquireResult,
     file_path_to_lock_key,
 )
-from mcp_server.locking.transaction_config import (
-    IsolationLevel,
-    OperationIsolation,
-    OperationType,
-    SerializationError,
-    TransactionError,
-    isolation_for,
-    transactional,
-)
 from mcp_server.locking.lease_heartbeat import (
     HeartbeatConfig,
     HeartbeatError,
@@ -81,33 +81,60 @@ from mcp_server.locking.lease_heartbeat import (
     extend_lease,
     find_stale_claims,
 )
+from mcp_server.locking.lease_cleanup import (
+    ExpiredLease,
+    LeaseCleanupConfig,
+    LeaseCleanupError,
+    LeaseCleanupTask,
+    LeaseRelease,
+    find_expired_leases,
+    release_expired_lease,
+    scan_and_release_expired,
+)
+from mcp_server.locking.transaction_config import (
+    IsolationLevel,
+    OperationIsolation,
+    OperationType,
+    SerializationError,
+    TransactionError,
+    isolation_for,
+    transactional,
+)
 
 __all__ = [
     "AgentRoleMap",
     "ClaimError",
     "ClaimQueue",
     "ClaimResult",
+    "ExpiredLease",
     "FileConflictError",
     "FileLockRecord",
     "FileMutex",
+    "HeartbeatConfig",
+    "HeartbeatError",
+    "HeartbeatRecord",
     "IsolationLevel",
+    "LeaseCleanupConfig",
+    "LeaseCleanupError",
+    "LeaseCleanupTask",
     "LeaseExpiredError",
+    "LeaseHeartbeat",
+    "LeaseNotActiveError",
+    "LeaseRelease",
     "LockAcquireResult",
+    "MaxLeaseDurationExceededError",
     "NoEligibleTicketError",
     "OperationIsolation",
     "OperationType",
     "SerializationError",
+    "StaleClaim",
     "TransactionError",
     "extend_lease",
     "file_path_to_lock_key",
+    "find_expired_leases",
     "find_stale_claims",
-    "HeartbeatConfig",
-    "HeartbeatError",
-    "HeartbeatRecord",
     "isolation_for",
-    "LeaseHeartbeat",
-    "LeaseNotActiveError",
-    "MaxLeaseDurationExceededError",
-    "StaleClaim",
+    "release_expired_lease",
+    "scan_and_release_expired",
     "transactional",
 ]
