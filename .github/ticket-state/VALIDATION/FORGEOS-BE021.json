@@ -4,7 +4,7 @@
   "description": "Implement JSON Schema validation for MCP tool input parameters. Before a tool handler is invoked, the input arguments are validated against the tool's registered JSON Schema. Validation errors produce clear, structured error responses following MCP error semantics, including the specific validation failure (missing field, wrong type, invalid value).",
   "type": "backend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -33,10 +33,10 @@
     "Validation performance is acceptable (< 1ms for typical tool inputs)"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-10T17:58:27.666136+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
