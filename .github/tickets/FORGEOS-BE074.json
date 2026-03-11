@@ -4,7 +4,7 @@
   "description": "Implement Migration Phase B: agents use the SDK (FORGEOS-BE050 integration hooks) for ticket operations, with automatic fallback to filesystem when the MCP server is unavailable. Feature flags transition per-operation from `filesystem` to `dual`. The CLAIM operation migrates first (via MCP), while WORK commits remain git-based. The SDK filesystem fallback (FORGEOS-BE049) activates transparently if the server is unreachable during an operation.",
   "type": "backend",
   "priority": "critical",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -36,10 +36,10 @@
     "Phase B entry and exit logged with timestamp and operation success ratios"
   ],
   "rework_count": 0,
-  "claimed_by": "CIReviewer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T17:40:46.207033+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -118,6 +118,15 @@
       "from_stage": "CI",
       "to_stage": "CI",
       "details": "Claimed by ReaperOAK@pop-os via CIReviewer, lease until 2026-03-11T17:40:46.207033+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T17:12:39.184464+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "system",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "Advanced from CI to DOCS"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",
