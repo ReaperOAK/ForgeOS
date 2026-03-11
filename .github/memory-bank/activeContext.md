@@ -1,3 +1,8 @@
+### [FORGEOS-BE049] — Documentation Complete
+- **Artifacts:** agent-sdk/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE049.md
+- **Decisions:** Docstrings already comprehensive — no code changes needed. Added Filesystem Fallback Mode section to agent-sdk/README.md (operation modes table, auto-mode behavior, direct fallback usage, fallback API table). Added FORGEOS_MODE to config table. CHANGELOG entry added.
+- **Timestamp:** 2026-03-11T02:30:00Z
+
 ### [FORGEOS-BE062] — Security Review
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE062.md
 - **Decisions:** PASS — zero critical/high findings. STRIDE max score 4 (Low). OWASP 10/10 categories pass. HMAC-SHA256 auth upstream, strict regex input validation, stage-check authorization, Protocol-based least privilege.
@@ -764,6 +769,11 @@
 - **Artifacts:** .github/agent-output/Security/TASK-FOS-03-002.md
 - **Decisions:** PASS — Zero critical/high findings. 1 medium (SEC-001: wildcard permissions on agent auto-registration, CWE-250), 2 low (SEC-002: RLS context not set, SEC-003: raw error messages), 1 info (SEC-004: no per-tool rate limiting). All mitigated by existing auth. Parameterized SQL, SKIP LOCKED concurrency, Zod validation confirmed.
 - **Timestamp:** 2026-03-10T00:15:00Z
+
+### [FORGEOS-BE061] — QA Review (Re-review #2)
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE061.md
+- **Decisions:** PASS — All 6 ACs met. Rework #2 fixed AC2 (ticket-branch file filtering), AC3 (path prefix filtering), AC6 (return sync summary). 46/46 tests pass, 94/94 regression suite green, 0 lint errors. BE061-specific coverage 100%.
+- **Timestamp:** 2026-03-11T05:30:00Z
 
 ### [TASK-FOS-0008] — Security Review
 - **Artifacts:** .github/agent-output/Security/FORGEOS-DO008.md
@@ -4025,3 +4035,28 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/README.md, CHANGELOG.md, mcp-server/src/mcp_server/services/ticket_service.py, mcp-server/src/mcp_server/tools/ticket_tools.py
 - **Decisions:** Added full tickets.rework reference section to README (schema, examples, error table, ReworkResult fields, design constraints). Added ReworkResult to ticket_service.py public API docstring. Existing inline docstrings were complete — no changes needed beyond meta tags.
 - **Timestamp:** 2026-03-11T03:00:00Z
+
+### [FORGEOS-BE047] — Documentation Summary
+- **Artifacts:** agent-sdk/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE047.md
+- **Decisions:** Added FORGEOS_HEARTBEAT_INTERVAL to config table, added Automatic Lease Heartbeat subsection under Ticket Operations, added standalone Lease Heartbeat section with async context manager and manual usage examples. Added CHANGELOG entry. Existing inline docstrings in heartbeat.py and operations.py were already complete.
+- **Timestamp:** 2026-03-11T03:00:00Z
+
+### [FORGEOS-BE039] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE039.md
+- **Decisions:** PASS — zero critical/high findings. Three medium/low findings documented with risk acceptance: SEC-BE039-001 (no WS auth, CWE-306, MEDIUM), SEC-BE039-002 (no connection limit, CWE-770, MEDIUM), SEC-BE039-003 (rate limiter bypass for WS, CWE-770, LOW). All risk-accepted for internal tool with non-PII data on private network.
+- **Timestamp:** 2026-03-11T23:55:00Z
+
+### [FORGEOS-BE062] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE062.md
+- **Decisions:** PASS — Score 92/100, 0 critical, 0 warnings, 2 suggestions (OC-002 else usage, OC-007 class size)
+- **Timestamp:** 2026-03-11T23:58:00Z
+
+### [FORGEOS-BE036] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE036.md
+- **Decisions:** PASS — Zero critical/high findings. Parameterized stored function prevents injection. Role-stage auth enforced in service layer. Atomic claiming via SELECT FOR UPDATE SKIP LOCKED. Two medium findings accepted (unbounded lease field, systemic middleware gap).
+- **Timestamp:** 2026-03-11T03:25:00Z
+
+### [FORGEOS-BE057] — QA PASS: Admin Force Operations
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE057.md, mcp-server/tests/test_admin_force_ops.py
+- **Decisions:** PASS — 41/41 tests pass. Route layer 100% coverage. All 6 ACs satisfied (force-release, force-advance, force-rework, admin auth, audit trail, reason field). No regressions. Stage engine 28/28 pass.
+- **Timestamp:** 2026-03-11T04:00:00Z
