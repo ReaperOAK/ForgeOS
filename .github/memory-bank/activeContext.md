@@ -3947,3 +3947,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/QA/FORGEOS-BE036.md
 - **Decisions:** PASS — 19/19 claim tests pass, coverage 96%, 7/7 ACs verified, no regressions
 - **Timestamp:** 2026-03-11T02:35:00+00:00
+
+### [FORGEOS-BE035] — QA Review
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE035.md, mcp-server/tests/test_ticket_detail_history_api.py
+- **Decisions:** PASS — 29/29 tests pass, 100% coverage on BE035 code, zero regressions, all 6 ACs met
+- **Timestamp:** 2026-03-11T02:30:00Z
+
+### [FORGEOS-BE048] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE048.md
+- **Decisions:** PASS — Score 100/100, 0 critical, 0 warnings. 100% coverage (58/58 stmts), 28/28 tests. Lint and mypy --strict clean.
+- **Timestamp:** 2026-03-11T03:30:00Z
