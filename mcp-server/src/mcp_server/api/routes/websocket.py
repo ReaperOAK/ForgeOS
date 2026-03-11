@@ -8,7 +8,7 @@ Query parameters:
 - ``stages``: Comma-separated list of SDLC stages to filter
 
 .. meta::
-   :ticket: FORGEOS-BE039
+   :ticket: FORGEOS-BE039, FORGEOS-BE040
 """
 
 from __future__ import annotations
@@ -19,7 +19,7 @@ from typing import TYPE_CHECKING, Any
 from starlette.websockets import WebSocket, WebSocketDisconnect
 
 from mcp_server.observability import get_logger
-from mcp_server.services.event_broadcaster import ClientFilter
+from mcp_server.services.event_broadcaster import ClientFilter, WebSocketLike
 
 if TYPE_CHECKING:
     from mcp_server.services.event_broadcaster import EventBroadcaster
@@ -38,9 +38,13 @@ def _parse_filters(ws: WebSocket) -> ClientFilter:
     """
     raw_ticket_ids = ws.query_params.get("ticket_ids")
     raw_stages = ws.query_params.get("stages")
+    raw_types = ws.query_params.get("types")
+    raw_agent_ids = ws.query_params.get("agent_ids")
 
     ticket_ids: frozenset[str] | None = None
     stages: frozenset[str] | None = None
+    types: frozenset[str] | None = None
+    agent_ids: frozenset[str] | None = None
 
     if raw_ticket_ids:
         ids = [tid.strip() for tid in raw_ticket_ids.split(",") if tid.strip()]
@@ -52,7 +56,19 @@ def _parse_filters(ws: WebSocket) -> ClientFilter:
         if stage_list:
             stages = frozenset(stage_list)
 
-    return ClientFilter(ticket_ids=ticket_ids, stages=stages)
+    if raw_types:
+        type_list = [t.strip() for t in raw_types.split(",") if t.strip()]
+        if type_list:
+            types = frozenset(type_list)
+
+    if raw_agent_ids:
+        agent_list = [a.strip() for a in raw_agent_ids.split(",") if a.strip()]
+        if agent_list:
+            agent_ids = frozenset(agent_list)
+
+    return ClientFilter(
+        ticket_ids=ticket_ids, stages=stages, types=types, agent_ids=agent_ids,
+    )
 
 
 def create_websocket_endpoint(broadcaster_getter: Any) -> Any:
@@ -95,7 +111,7 @@ def create_websocket_endpoint(broadcaster_getter: Any) -> Any:
                 try:
                     message = await websocket.receive_text()
                     # Handle client messages (e.g. filter updates)
-                    _handle_client_message(websocket, broadcaster, message)
+                    await _handle_client_message(websocket, broadcaster, message)
                 except WebSocketDisconnect:
                     break
         finally:
@@ -105,22 +121,41 @@ def create_websocket_endpoint(broadcaster_getter: Any) -> Any:
     return websocket_tickets
 
 
-def _handle_client_message(
-    ws: WebSocket,
+async def _handle_client_message(
+    ws: WebSocketLike,
     broadcaster: EventBroadcaster,
     raw_message: str,
 ) -> None:
-    """Process an inbound client message (currently a no-op).
+    """Process an inbound client message.
 
-    Future extension point for dynamic filter updates or pong responses.
+    Supported message types:
+    - ``subscribe``: Update client filter with provided criteria.
+    - ``unsubscribe``: Reset client filter to receive all events.
+    - ``pong``: Heartbeat response (no-op).
+
     Malformed messages are silently ignored to avoid crashing the
     connection loop.
     """
     try:
         data = json.loads(raw_message)
         msg_type = data.get("type", "")
-        if msg_type == "pong":
-            # Client responding to our ping — connection is alive
+        if msg_type == "subscribe":
+            filters = data.get("filters", {})
+            new_filter = _build_filter_from_message(filters)
+            await broadcaster.update_filter(ws, new_filter)
+            ack = json.dumps({"type": "subscribe_ack", "filters": _filter_to_dict(new_filter)})
+            try:
+                await ws.send_text(ack)
+            except Exception:
+                logger.warning("Failed to send subscribe ack")
+        elif msg_type == "unsubscribe":
+            await broadcaster.update_filter(ws, ClientFilter())
+            ack = json.dumps({"type": "unsubscribe_ack"})
+            try:
+                await ws.send_text(ack)
+            except Exception:
+                logger.warning("Failed to send unsubscribe ack")
+        elif msg_type == "pong":
             pass
         else:
             logger.debug(
@@ -129,3 +164,41 @@ def _handle_client_message(
             )
     except (json.JSONDecodeError, TypeError):
         logger.debug("Received non-JSON WebSocket message — ignoring")
+
+
+def _build_filter_from_message(filters: dict[str, Any]) -> ClientFilter:
+    """Build a ClientFilter from subscribe message filter criteria."""
+    ticket_ids: frozenset[str] | None = None
+    stages: frozenset[str] | None = None
+    types: frozenset[str] | None = None
+    agent_ids: frozenset[str] | None = None
+
+    raw_tids = filters.get("ticket_ids")
+    if isinstance(raw_tids, list) and raw_tids:
+        ticket_ids = frozenset(str(t) for t in raw_tids)
+
+    raw_stages = filters.get("stages")
+    if isinstance(raw_stages, list) and raw_stages:
+        stages = frozenset(str(s).upper() for s in raw_stages)
+
+    raw_types = filters.get("types")
+    if isinstance(raw_types, list) and raw_types:
+        types = frozenset(str(t) for t in raw_types)
+
+    raw_agents = filters.get("agent_ids")
+    if isinstance(raw_agents, list) and raw_agents:
+        agent_ids = frozenset(str(a) for a in raw_agents)
+
+    return ClientFilter(
+        ticket_ids=ticket_ids, stages=stages, types=types, agent_ids=agent_ids,
+    )
+
+
+def _filter_to_dict(filt: ClientFilter) -> dict[str, list[str] | None]:
+    """Serialize a ClientFilter to a JSON-friendly dict for ack messages."""
+    return {
+        "ticket_ids": sorted(filt.ticket_ids) if filt.ticket_ids else None,
+        "stages": sorted(filt.stages) if filt.stages else None,
+        "types": sorted(filt.types) if filt.types else None,
+        "agent_ids": sorted(filt.agent_ids) if filt.agent_ids else None,
+    }

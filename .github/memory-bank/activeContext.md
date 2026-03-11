@@ -4293,3 +4293,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/uiux/mockups/FORGEOS-FE001.md, .github/agent-output/UIDesigner/FORGEOS-FE001.md
 - **Decisions:** Used collapsible sidebar pattern (not top-tab) for better nav scalability. Theme toggle in sidebar footer. Health check as dedicated route. Reused all design tokens from FORGEOS-UID001. 5 screens generated via Stitch. 7 component specs with full state/a11y/responsive coverage.
 - **Timestamp:** 2026-03-11T04:05:00Z
+
+### [FORGEOS-BE040] — Filtered WebSocket Subscriptions
+- **Artifacts:** mcp-server/src/mcp_server/services/event_broadcaster.py, mcp-server/src/mcp_server/api/routes/websocket.py, mcp-server/tests/test_filtered_subscriptions.py, mcp-server/tests/test_websocket_streaming.py
+- **Decisions:** Extended ClientFilter with types/agent_ids rather than adding fields to TicketEvent; type/agent_id matching uses payload dict lookup for backward compatibility; backpressure uses deque(maxlen=N) for automatic oldest-drop semantics
+- **Timestamp:** 2026-03-11T04:22:00+00:00

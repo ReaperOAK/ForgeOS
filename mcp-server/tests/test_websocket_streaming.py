@@ -80,25 +80,29 @@ class TestParseFilters:
 
 
 class TestHandleClientMessage:
-    def test_pong_message_does_not_raise(self) -> None:
+    @pytest.mark.asyncio
+    async def test_pong_message_does_not_raise(self) -> None:
         ws = MagicMock()
         broadcaster = EventBroadcaster()
-        _handle_client_message(ws, broadcaster, '{"type": "pong"}')
+        await _handle_client_message(ws, broadcaster, '{"type": "pong"}')
 
-    def test_unknown_type_does_not_raise(self) -> None:
+    @pytest.mark.asyncio
+    async def test_unknown_type_does_not_raise(self) -> None:
         ws = MagicMock()
         broadcaster = EventBroadcaster()
-        _handle_client_message(ws, broadcaster, '{"type": "unknown"}')
+        await _handle_client_message(ws, broadcaster, '{"type": "unknown"}')
 
-    def test_invalid_json_does_not_raise(self) -> None:
+    @pytest.mark.asyncio
+    async def test_invalid_json_does_not_raise(self) -> None:
         ws = MagicMock()
         broadcaster = EventBroadcaster()
-        _handle_client_message(ws, broadcaster, "not json {{{")
+        await _handle_client_message(ws, broadcaster, "not json {{{")
 
-    def test_empty_message_does_not_raise(self) -> None:
+    @pytest.mark.asyncio
+    async def test_empty_message_does_not_raise(self) -> None:
         ws = MagicMock()
         broadcaster = EventBroadcaster()
-        _handle_client_message(ws, broadcaster, "")
+        await _handle_client_message(ws, broadcaster, "")
 
 
 # ---------------------------------------------------------------------------
