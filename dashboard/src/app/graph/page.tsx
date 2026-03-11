@@ -5,6 +5,13 @@ import { GitBranch, Loader2, AlertTriangle } from 'lucide-react';
 import { fetchTickets, type Ticket } from '@/lib/api';
 import { DependencyGraph } from '@/components/graph/DependencyGraph';
 
+/**
+ * Dependency graph page.
+ *
+ * Fetches every ticket via paginated API calls and renders the
+ * full-project DAG inside {@link DependencyGraph}. Displays loading
+ * and error states while data is in-flight.
+ */
 export default function GraphPage() {
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [loading, setLoading] = useState(true);

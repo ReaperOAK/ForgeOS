@@ -34,16 +34,34 @@ const MIN_SCALE = 0.2;
 const MAX_SCALE = 3;
 const ZOOM_STEP = 0.15;
 
+/** Props for {@link DependencyGraph}. */
 interface DependencyGraphProps {
+  /** Complete list of tickets to render as a directed acyclic graph. */
   tickets: Ticket[];
 }
 
-/** Truncate title to fit inside a node */
+/**
+ * Truncate a title to fit inside a graph node.
+ *
+ * @param text  - Full title text.
+ * @param maxLen - Maximum character length before truncation (default 18).
+ * @returns The original text or a truncated version ending with "…".
+ */
 function abbreviate(text: string, maxLen = 18): string {
   if (text.length <= maxLen) return text;
   return text.slice(0, maxLen - 1) + '…';
 }
 
+/**
+ * Interactive SVG dependency graph with zoom, pan, and touch support.
+ *
+ * Computes a Sugiyama-style layered layout via {@link computeLayout}, then
+ * renders nodes (coloured by SDLC stage) and curved Bézier edges.  Clicking
+ * a node navigates to the ticket detail page.  Supports mouse-wheel zoom,
+ * click-drag pan, and two-finger pinch-zoom on touch devices.
+ *
+ * @see GraphControls — floating toolbar for zoom in/out/fit-to-view.
+ */
 export function DependencyGraph({ tickets }: DependencyGraphProps) {
   const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
@@ -189,7 +207,13 @@ export function DependencyGraph({ tickets }: DependencyGraphProps) {
     [router],
   );
 
-  /** Compute SVG path for an edge with a smooth curve */
+  /**
+   * Compute a cubic-Bézier SVG path string for a dependency edge.
+   *
+   * @param fromNode - Source (upstream) graph node.
+   * @param toNode   - Target (downstream) graph node.
+   * @returns An SVG `d` attribute string for a `<path>` element.
+   */
   function edgePath(fromNode: GraphNode, toNode: GraphNode): string {
     const x1 = fromNode.x + fromNode.width;
     const y1 = fromNode.y + fromNode.height / 2;
