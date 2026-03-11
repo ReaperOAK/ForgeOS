@@ -37,10 +37,10 @@
     "Pydantic models define Ticket, Claim, OperationResult with proper field types"
   ],
   "rework_count": 0,
-  "claimed_by": "CI Reviewer",
+  "claimed_by": "Documentation Specialist",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T00:11:44.054075+00:00",
+  "lease_expiry": "2026-03-11T00:33:15.357325+00:00",
   "lease_duration_minutes": 30,
   "completed_at": "2026-03-10T22:38:21+00:00",
   "artifacts": [
@@ -174,7 +174,23 @@
       "machine_id": "pop-os",
       "from_stage": "CI",
       "to_stage": "DOCS",
-      "details": "CI PASS — Score 90/100, 0 critical, 2 warnings. 53 tests, 100% coverage."
+      "details": "CI PASS \u2014 Score 90/100, 0 critical, 2 warnings. 53 tests, 100% coverage."
+    },
+    {
+      "timestamp": "2026-03-11T00:03:06.034404+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from CI Reviewer: manual release"
+    },
+    {
+      "timestamp": "2026-03-11T00:03:15.357341+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-11T00:33:15.357325+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-agent-sdk.md",
