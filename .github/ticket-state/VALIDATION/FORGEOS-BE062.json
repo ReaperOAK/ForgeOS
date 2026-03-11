@@ -4,7 +4,7 @@
   "description": "Implement the handler for GitHub CI status events (check_run and status events). When CI checks pass for a ticket's branch, automatically advance the ticket past the CI stage. When CI checks fail, trigger a rework with the failure reason. Map GitHub check names/contexts to ticket IDs using branch naming conventions.",
   "type": "backend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
