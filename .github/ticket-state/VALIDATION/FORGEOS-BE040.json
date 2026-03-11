@@ -4,7 +4,7 @@
   "description": "Extend the WebSocket streaming from FORGEOS-BE039 to support client-side filter subscriptions. Clients can subscribe to filtered streams (by stage, type, agent, or ticket_id) to receive only relevant events. Implement subscription management: clients send subscribe/unsubscribe messages to control their filter set.",
   "type": "backend",
   "priority": "medium",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -119,6 +119,15 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Released claim from CI Reviewer: Lease expired at 2026-03-11T09:40:42.238341+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T15:00:00.000000+00:00",
+      "event": "DOCS_COMPLETE",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Documentation updated: README WebSocket section, docstrings, CHANGELOG. Advanced to VALIDATION."
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",

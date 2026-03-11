@@ -32,7 +32,9 @@ def _parse_filters(ws: WebSocket) -> ClientFilter:
 
     Supported parameters:
     - ``ticket_ids``: Comma-separated ticket IDs
-    - ``stages``: Comma-separated SDLC stage names
+    - ``stages``: Comma-separated SDLC stage names (uppercased automatically)
+    - ``types``: Comma-separated ticket types
+    - ``agent_ids``: Comma-separated agent identifiers
 
     Returns a :class:`ClientFilter` for use with the event broadcaster.
     """

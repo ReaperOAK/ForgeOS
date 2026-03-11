@@ -2168,7 +2168,7 @@ are loaded via `EventStore.replay_ticket_events()` and paginated in memory.
 
 ## WebSocket Ticket State Streaming
 
-<!-- last_reviewed: 2026-03-11T03:30:00Z -->
+<!-- last_reviewed: 2026-03-11T15:00:00Z -->
 <!-- audience: developers -->
 <!-- diataxis: reference -->
 
@@ -2177,24 +2177,108 @@ The `mcp_server.api.routes.websocket` module provides a WebSocket endpoint at
 real time. An `EventBroadcaster` service manages client connections, optional
 filtering, and heartbeat pings.
 
+Clients can filter events at connection time via query parameters, or
+dynamically at runtime by sending `subscribe` and `unsubscribe` JSON messages.
+Multiple filter dimensions are combined with **OR logic** — an event passes
+if it matches any one of the configured dimensions.
+
 ### How It Works
 
 1. A client opens a WebSocket connection to `/ws/tickets`.
-2. Optional query parameters narrow which events the client receives.
+2. Optional query parameters set the initial filter for the connection.
 3. The `EventBroadcaster` registers the client and applies its filter.
-4. When a ticket state change occurs, `EventBroadcaster.publish()` serializes
+4. The client may send `subscribe` or `unsubscribe` messages to update its
+   filter at any time without reconnecting.
+5. When a ticket state change occurs, `EventBroadcaster.publish()` serializes
    the event and delivers it to every matching client.
-5. A background ping loop detects stale connections and removes them.
-6. On disconnect, the client is automatically unregistered.
+6. A background ping loop detects stale connections and removes them.
+7. On disconnect, the client is automatically unregistered.
 
-### Query Parameters
+### Query Parameters (Initial Filter)
 
 | Parameter | Format | Description |
 |---|---|---|
 | `ticket_ids` | Comma-separated IDs | Only receive events for these tickets (e.g. `FORGEOS-BE039,FORGEOS-BE040`) |
 | `stages` | Comma-separated stages | Only receive events involving these SDLC stages (e.g. `BACKEND,QA`) |
+| `types` | Comma-separated types | Only receive events matching these ticket types |
+| `agent_ids` | Comma-separated agent IDs | Only receive events from these agents |
 
 When no parameters are provided, the client receives all events.
+
+### Client Messages (Dynamic Filter Updates)
+
+After connecting, clients can send JSON messages to update their filter:
+
+#### Subscribe
+
+```json
+{
+  "type": "subscribe",
+  "filters": {
+    "ticket_ids": ["FORGEOS-BE039", "FORGEOS-BE040"],
+    "stages": ["BACKEND", "QA"],
+    "types": ["backend"],
+    "agent_ids": ["Backend"]
+  }
+}
+```
+
+The server replaces the client's current filter with the provided criteria and
+responds with a `subscribe_ack`:
+
+```json
+{
+  "type": "subscribe_ack",
+  "filters": {
+    "ticket_ids": ["FORGEOS-BE039", "FORGEOS-BE040"],
+    "stages": ["BACKEND", "QA"],
+    "types": ["backend"],
+    "agent_ids": ["Backend"]
+  }
+}
+```
+
+All filter fields are optional. Omitted fields are treated as unfiltered for
+that dimension.
+
+#### Unsubscribe
+
+```json
+{ "type": "unsubscribe" }
+```
+
+Resets the filter to wildcard (receive all events). The server responds with:
+
+```json
+{ "type": "unsubscribe_ack" }
+```
+
+#### Pong
+
+```json
+{ "type": "pong" }
+```
+
+Heartbeat response — no-op, no server reply.
+
+### Filter Logic
+
+Multiple filter dimensions are combined with **OR logic**. An event passes if
+it matches **any** of the configured dimensions:
+
+- **ticket_ids** — event's `ticket_id` is in the set.
+- **stages** — event's `old_stage` or `new_stage` is in the set.
+- **types** — event's `payload.type` is in the set.
+- **agent_ids** — event's `payload.agent_id` is in the set.
+
+When no dimensions are set (all `None`), every event is delivered.
+
+### Backpressure Management
+
+Each client has a per-connection event buffer (default 256 entries). The buffer
+uses a fixed-size `deque` — when it reaches capacity, the oldest event is
+silently dropped. This prevents slow consumers from causing unbounded memory
+growth.
 
 ### Event Message Format
 
@@ -2227,11 +2311,17 @@ Each message is a JSON object:
 
 ```python
 import asyncio
+import json
 import websockets
 
 async def stream_tickets():
     uri = "ws://localhost:8080/ws/tickets?stages=BACKEND,QA"
     async with websockets.connect(uri) as ws:
+        # Dynamically update filter after connecting
+        await ws.send(json.dumps({
+            "type": "subscribe",
+            "filters": {"ticket_ids": ["FORGEOS-BE040"]}
+        }))
         async for message in ws:
             print(message)
 
@@ -2245,9 +2335,18 @@ asyncio.run(stream_tickets())
 | `create_websocket_endpoint` | function | Factory that returns a Starlette WebSocket handler |
 | `EventBroadcaster` | class | Manages client registry, filtering, and fan-out delivery |
 | `TicketEvent` | frozen dataclass | Immutable ticket state change event with JSON serialization |
-| `ClientFilter` | frozen dataclass | Per-client filter criteria (ticket IDs and/or stages) |
+| `ClientFilter` | frozen dataclass | Per-client filter criteria (ticket IDs, stages, types, agent IDs) |
 | `WebSocketLike` | protocol | Minimal interface for WebSocket-like objects (testing) |
-| `matches_filter` | function | Checks whether an event passes a client's filter |
+| `matches_filter` | function | Checks whether an event passes a client's filter (OR logic) |
+
+#### ClientFilter Attributes
+
+| Attribute | Type | Description |
+|---|---|---|
+| `ticket_ids` | `frozenset[str] \| None` | Filter by ticket IDs |
+| `stages` | `frozenset[str] \| None` | Filter by SDLC stages (matches old or new stage) |
+| `types` | `frozenset[str] \| None` | Filter by ticket types (from `payload.type`) |
+| `agent_ids` | `frozenset[str] \| None` | Filter by agent IDs (from `payload.agent_id`) |
 
 #### EventBroadcaster Methods
 
@@ -2256,18 +2355,33 @@ asyncio.run(stream_tickets())
 | `register(ws, filter)` | `None` | Add a WebSocket client to the broadcast list |
 | `unregister(ws)` | `None` | Remove a client (safe to call if not registered) |
 | `publish(event)` | `int` | Broadcast an event; returns number of clients delivered to |
+| `update_filter(ws, new_filter)` | `None` | Replace a registered client's filter at runtime |
+| `get_filter(ws)` | `ClientFilter \| None` | Return the current filter for a client, or `None` |
+| `get_buffer(ws)` | `deque[str] \| None` | Return the backpressure buffer for a client |
 | `start()` | `None` | Start the background heartbeat ping loop |
 | `stop()` | `None` | Stop the ping loop and clear all clients |
 | `client_count` | `int` | Property — number of connected clients |
+| `buffer_limit` | `int` | Property — per-client buffer size limit |
 
 #### EventBroadcaster Constructor
 
 | Parameter | Default | Description |
 |---|---|---|
 | `ping_interval` | `30.0` | Seconds between heartbeat pings |
+| `buffer_limit` | `256` | Maximum events buffered per client before oldest are dropped |
 
 ### Design Decisions
 
+- **OR-based filter logic** — Multiple filter dimensions combine with OR.
+  An event passes if it matches any dimension. This avoids overly restrictive
+  filtering when monitoring across concerns (e.g. a specific ticket OR a
+  specific stage).
+- **Dynamic subscriptions** — Clients update filters via `subscribe` /
+  `unsubscribe` messages without reconnecting, reducing connection churn
+  in dashboard UIs.
+- **Backpressure via bounded buffer** — Each client has a `deque(maxlen=256)`.
+  Slow consumers lose the oldest events rather than causing memory pressure
+  on the server.
 - **Filter-at-client** — Each client carries its own `ClientFilter`, so a
   single broadcaster serves all clients without per-topic fan-out queues.
 - **Heartbeat via ping bytes** — The broadcaster sends `b"ping"` frames on a

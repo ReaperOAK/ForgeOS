@@ -156,6 +156,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   filtering. 43 tests, 99% combined coverage, CI quality score 94/100. Added
   WebSocket Streaming section to `mcp-server/README.md`.
 
+- **Filtered WebSocket Subscriptions** (FORGEOS-BE040) — Dynamic
+  subscribe/unsubscribe filtering for the `/ws/tickets` WebSocket endpoint.
+  Clients send `subscribe` JSON messages to update their filter at runtime
+  without reconnecting. Four filter dimensions — `ticket_ids`, `stages`,
+  `types`, `agent_ids` — combine with OR logic (any match passes). `unsubscribe`
+  resets to wildcard. Server acknowledges with `subscribe_ack` /
+  `unsubscribe_ack` messages. Two new query parameters (`types`, `agent_ids`)
+  for initial connection-time filtering. Per-client backpressure buffer
+  (`deque(maxlen=256)`) drops oldest events for slow consumers.
+  `EventBroadcaster` gains `update_filter()`, `get_filter()`, `get_buffer()`,
+  and `buffer_limit` property. `ClientFilter` extended with `types` and
+  `agent_ids` dimensions. `matches_filter()` updated for 4-dimension OR logic.
+  80 tests, 98% combined coverage, CI quality score 78/100.
+
 - **PR Event Handler** (FORGEOS-BE063) — GitHub `pull_request` webhook handler
   at `mcp-server/src/mcp_server/services/pr_service.py` and
   `mcp-server/src/mcp_server/webhooks/github_handler.py`. Extracts ticket IDs

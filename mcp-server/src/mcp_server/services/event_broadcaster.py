@@ -36,9 +36,10 @@ class WebSocketLike(Protocol):
 class ClientFilter:
     """Optional filters for a connected WebSocket client.
 
-    When both fields are ``None`` (the default), the client receives
-    ALL ticket state change events.  When set, only events matching
-    at least one filter criterion are delivered.
+    When all fields are ``None`` (the default), the client receives
+    ALL ticket state change events.  When one or more dimensions are
+    set, only events matching at least one dimension are delivered
+    (OR logic across dimensions).
 
     Attributes
     ----------
@@ -46,6 +47,10 @@ class ClientFilter:
         If set, only events for these ticket IDs are delivered.
     stages : frozenset[str] | None
         If set, only events involving these stages (old or new) are delivered.
+    types : frozenset[str] | None
+        If set, only events whose ``payload.type`` matches are delivered.
+    agent_ids : frozenset[str] | None
+        If set, only events whose ``payload.agent_id`` matches are delivered.
     """
 
     ticket_ids: frozenset[str] | None = None
