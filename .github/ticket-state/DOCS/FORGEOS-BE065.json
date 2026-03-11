@@ -4,7 +4,7 @@
   "description": "Implement the notification emitter that creates queue entries when ticket state changes occur. Integrate with the ticket service layer: after advance, rework, claim, or release operations, enqueue a notification containing the ticket context, change details, and actor information. Support notification types: stage_changed, ticket_claimed, ticket_released, ticket_reworked, lease_expiring.",
   "type": "backend",
   "priority": "high",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -167,6 +167,15 @@
       "from_stage": "CI",
       "to_stage": "CI",
       "details": "Claimed by ReaperOAK@pop-os via CI Reviewer, lease until 2026-03-11T03:06:35.034272+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T03:00:22.695694+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "CI PASS - Score 100/100, 0 critical, 0 warnings"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-webhooks.md",
