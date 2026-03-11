@@ -34,10 +34,10 @@
     "Admin operations include a required reason field for audit trail"
   ],
   "rework_count": 0,
-  "claimed_by": "CI Reviewer",
+  "claimed_by": "Documentation Specialist",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T03:37:11.681331+00:00",
+  "lease_expiry": "2026-03-11T04:01:34.940136+00:00",
   "lease_duration_minutes": null,
   "history": [
     {
@@ -125,6 +125,22 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "CI PASS \u2014 Score 99/100, 0 critical, 0 warnings, 1 suggestion"
+    },
+    {
+      "timestamp": "2026-03-11T03:31:34.906859+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from CI Reviewer: manual release"
+    },
+    {
+      "timestamp": "2026-03-11T03:31:34.940151+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-11T04:01:34.940136+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
