@@ -1731,3 +1731,7 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 ### [FORGEOS-RES006] — Documentation Summary
 - **Artifacts:** docs/research/pg-connection-pooling.md (modified), .github/agent-output/Documentation/FORGEOS-RES006.md (created)
 - **Decisions:** Added document metadata table (Diátaxis: Reference, audience: backend/devops/architects, last_reviewed: 2026-03-06). Rewrote ~20 long sentences for Flesch-Kincaid grade ≤10. Added cross-reference link to FORGEOS-RES005 (pg-distributed-locking.md). Original 861-line report was comprehensive; cha
+### [FORGEOS-BE050] — Documentation Summary
+- **Artifacts:** agent-sdk/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE050.md
+- **Decisions:** Added Runner Hooks section to agent-sdk/README.md covering HookResult, HookConfig, pre_claim_check(), post_advance_or_rework() with code examples and env var table. CHANGELOG entry added. Inline docstrings already comprehensive — no additions needed.
+- **Timestamp:** 2026-03-11T09:50:00Z

@@ -8,6 +8,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **agent-runner.py Integration Hooks** (FORGEOS-BE050) — `RunnerHooks`
+  class at `agent-sdk/src/forgeos_sdk/runner_hooks.py` providing lifecycle
+  hooks for the two-commit protocol. `pre_claim_check()` validates ticket
+  claim status via MCP before the git CLAIM commit. `post_advance_or_rework()`
+  advances or reworks the ticket after the git WORK commit. `HookConfig`
+  dataclass with per-hook enable/disable via `FORGEOS_HOOK_*` environment
+  variables. `HookResult` dataclass for non-throwing error reporting. All
+  hooks are optional — `agent-runner.py` works without them in filesystem
+  mode. Exported from `forgeos_sdk.__init__` as `RunnerHooks`, `HookConfig`,
+  `HookResult`. 28 tests, 99% coverage, CI quality score 99/100.
+
 - **Ticket Advance and Rework REST Endpoints** (FORGEOS-BE037) —
   `POST /api/tickets/{id}/advance` and `POST /api/tickets/{id}/rework` REST
   endpoints at `mcp-server/src/mcp_server/api/routes/tickets.py` with Pydantic
