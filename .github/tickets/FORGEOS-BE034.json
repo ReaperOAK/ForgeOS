@@ -37,10 +37,10 @@
     "Empty filter returns all tickets; invalid filter values return 400 Bad Request"
   ],
   "rework_count": 1,
-  "claimed_by": "Documentation Specialist",
+  "claimed_by": "Validator",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T01:04:13.239224+00:00",
+  "lease_expiry": "2026-03-11T01:32:59.627128+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -221,6 +221,22 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "Advanced from DOCS to VALIDATION"
+    },
+    {
+      "timestamp": "2026-03-11T01:02:59.592013+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Documentation Specialist: manual release"
+    },
+    {
+      "timestamp": "2026-03-11T01:02:59.627147+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-11T01:32:59.627128+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
