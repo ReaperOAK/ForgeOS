@@ -2,59 +2,68 @@
 
 ## Implement Push Event Handler for Sync
 
-**Agent:** QA Engineer | **Machine:** pop-os | **Timestamp:** 2026-03-11T03:00:00Z
+**Agent:** QA Engineer | **Machine:** pop-os | **Timestamp:** 2026-03-11T05:30:00Z
+**Verdict:** PASS | **Confidence:** HIGH
+**Rework Re-review:** #2 — All 3 previously rejected ACs (AC2, AC3, AC6) now fixed.
 
-## Verdict: REJECT (Rework #1)
+## Acceptance Criteria Verification
 
-3 of 6 acceptance criteria are unmet. The implementation covers main-branch sync triggering well but is missing ticket-branch file filtering and sync summary return.
+| AC# | Criterion | Verdict | Evidence |
+|-----|-----------|---------|----------|
+| 1 | Push events to main branch trigger a full tickets.sync operation | PASS | `trigger_sync = push.is_main_branch or ...` in `_handle_push`; tests `test_main_branch_triggers_sync`, `test_master_branch_triggers_sync` |
+| 2 | Push events to ticket branches trigger sync if ticket-related files are modified | PASS | `_has_ticket_file_changes()` integrated into `trigger_sync` logic; tests `test_feature_branch_with_ticket_files_triggers_sync`, `test_feature_branch_ticket_state_files_triggers_sync` |
+| 3 | File path filtering checks for changes in .github/tickets/ or .github/ticket-state/ | PASS | `_TICKET_FILE_PREFIXES = (".github/tickets/", ".github/ticket-state/")` + `_has_ticket_file_changes()` helper; 9 tests in `TestHasTicketFileChanges` |
+| 4 | Sync results logged including tickets released, unblocked, and errors | PASS | `logger.info("push_sync_completed", extra={"sync_result": sync_result})` |
+| 5 | Non-ticket pushes are acknowledged but do not trigger sync | PASS | Tests `test_feature_branch_does_not_trigger_sync`, `test_feature_branch_without_ticket_files_returns_ack` verify `sync_triggered: False` |
+| 6 | Handler returns the sync summary as the webhook response payload | PASS | `_handle_push` returns `dict[str, Any] | None`; tests `test_main_branch_returns_sync_result`, `test_sync_failure_returns_error_response`, `test_feature_branch_without_ticket_files_returns_ack` |
 
-## Acceptance Criteria Review
+## Previously Rejected Items (Rework #1 and #2)
 
-| AC# | Criterion | Status | Evidence |
-|-----|-----------|--------|----------|
-| 1 | Push events to main branch trigger a full tickets.sync operation | PASS | `create_push_handler` calls `sync_fn()` when `push.is_main_branch is True`. Tested: `test_main_branch_triggers_sync`, `test_master_branch_triggers_sync` |
-| 2 | Push events to ticket branches trigger sync if ticket-related files are modified | FAIL | Handler skips ALL non-main branches (`push_non_main_acknowledged` log + return). No commit file inspection for ticket-related paths. Feature branches never trigger sync regardless of modified files. |
-| 3 | File path filtering checks for changes in .github/tickets/ or .github/ticket-state/ | FAIL | Zero file path filtering logic exists in `github_handler.py`. No inspection of `commits[].added/modified/removed` arrays. `grep` for `github/tickets`, `github/ticket-state`, `added`, `modified` in handler returns zero matches. |
-| 4 | Sync results logged including tickets released, unblocked, and errors | PASS | `push_sync_completed` log includes full `sync_result` dict with `correlation_id`. Content depends on sync engine return shape. |
-| 5 | Non-ticket pushes are acknowledged but do not trigger sync | PASS | `push_non_main_acknowledged` logged for non-main branches. No sync called. |
-| 6 | Handler returns the sync summary as the webhook response payload | FAIL | Handler signature is `async def _handle_push(event) -> None`. Returns `None`. Sync result is logged but not returned to caller. `WebhookHandler` type alias is `Callable[[WebhookEvent], Coroutine[Any, Any, None]]` — return type must be changed to support returning payload. |
-
-## Rework Guidance
-
-### AC2 — Ticket branch file filtering
-Add logic in `_handle_push` after `is_main_branch` check: iterate `push.commits`, inspect `added`, `modified`, `removed` arrays for paths starting with `.github/tickets/` or `.github/ticket-state/`. If any match, call `sync_fn()`. Consider adding a helper `_has_ticket_file_changes(commits: list[dict]) -> bool`.
-
-### AC3 — File path filtering
-Implement the path check described above. Use a constant like `_TICKET_PATHS = frozenset({".github/tickets/", ".github/ticket-state/"})` and check `any(f.startswith(prefix) for prefix in _TICKET_PATHS for f in commit.get("added", []) + commit.get("modified", []) + commit.get("removed", []))`.
-
-### AC6 — Return sync summary
-Change `_handle_push` return type from `None` to `dict[str, Any] | None`. Return `sync_result` from `sync_fn()`. Update `WebhookHandler` type alias or create a separate `PushHandler` type. Ensure `dispatch()` can propagate the return value if needed.
+| Defect | AC | Status |
+|--------|----|--------|
+| No ticket-branch file filtering | AC2 | FIXED — `_has_ticket_file_changes()` helper added |
+| No file path filtering for .github/tickets/ or .github/ticket-state/ | AC3 | FIXED — `_TICKET_FILE_PREFIXES` constant + helper function |
+| Handler returns None instead of sync summary | AC6 | FIXED — return type `dict[str, Any] | None`, returns structured response dicts |
 
 ## Test Results
 
-| Metric | Value |
-|--------|-------|
-| Push handler tests (test_push_event_handler.py) | 31/31 PASSED |
-| Webhook service tests (test_webhook_service.py) | 34/34 PASSED |
-| Webhook signature tests (test_webhook_signature.py) | 14/14 PASSED |
-| Total webhook regression | 79/79 PASSED |
-| Push-specific code coverage (lines 120-300 of github_handler.py) | 100% |
-| webhook_service.py coverage | 97% |
-| Ruff lint | 0 errors, 0 warnings |
+| Suite | Pass | Fail | Skip | Total |
+|-------|------|------|------|-------|
+| test_push_event_handler.py | 46 | 0 | 0 | 46 |
+| test_webhook_service.py + test_webhook_signature.py (regression) | 48 | 0 | 0 | 48 |
+| **Total** | **94** | **0** | **0** | **94** |
+
+## Coverage
+
+- File-wide `github_handler.py`: 51% (file contains code from BE060, BE061, BE062)
+- **BE061-specific code** (lines ~120-370): **100%** covered — all uncovered lines (42-53, 90-115, 396-684) belong to BE060/BE062
+- `webhook_service.py` changes (type alias, dispatch return type): covered by push handler registration tests
+
+## Lint
+
+- Ruff: 0 errors, 0 warnings on all 3 files (`github_handler.py`, `webhook_service.py`, `test_push_event_handler.py`)
+
+## Test Architecture
+
+- **TestParsePushEvent** (13 tests): Payload parsing — valid/invalid ref, commits, repository, sender
+- **TestValidateGitHubPushPayload** (6 tests): Service-layer push validation
+- **TestWebhookServicePushValidation** (3 tests): Integration with `WebhookService.validate_payload`
+- **TestCreatePushHandler** (13 tests): Handler factory — sync triggers, return values, error handling
+- **TestPushHandlerRegistration** (2 tests): Registry integration with service dispatch
+- **TestHasTicketFileChanges** (9 tests): File path filtering helper — empty, no-match, added/modified/removed, multi-commit, edge cases
+
+## TDD Verification
+
+- RED phase confirmed: `TestHasTicketFileChanges` (9 tests) and return-value tests written before implementation
+- GREEN phase confirmed: Helper and handler updated to pass all tests
+- REFACTOR phase: consolidated `trigger_sync` boolean, clean helper separation
 
 ## Defects Found
 
-| ID | Severity | File | Description |
-|----|----------|------|-------------|
-| D1 | HIGH | github_handler.py:268-270 | Non-main branches immediately return without inspecting commits for ticket-related file changes. AC2 requires conditional sync on ticket branches. |
-| D2 | HIGH | github_handler.py | No file path filtering logic exists anywhere. AC3 requires checking `.github/tickets/` and `.github/ticket-state/` paths in commit diffs. |
-| D3 | MEDIUM | github_handler.py:250 | Handler returns `None`. AC6 requires returning sync summary as response payload. |
+None.
 
-## Notes
+## Artifacts
 
-- The Backend agent's upstream summary listed rewritten ACs that differ from the ticket JSON. The actual ticket ACs include file path filtering (AC2, AC3) and return value (AC6) which were not implemented.
-- Existing code quality is good: factory pattern, frozen dataclass, proper validation, correlation ID logging, exception handling. Only the scope is incomplete.
-
-## Confidence
-
-**HIGH** — Evidence is concrete: `grep` confirms missing code paths, test suite confirms what IS tested, ACs are clearly specified in ticket JSON.
+- `mcp-server/src/mcp_server/webhooks/github_handler.py` (read-only review)
+- `mcp-server/src/mcp_server/services/webhook_service.py` (read-only review)
+- `mcp-server/tests/test_push_event_handler.py` (read-only review)
