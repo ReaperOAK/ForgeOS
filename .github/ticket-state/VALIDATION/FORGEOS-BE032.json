@@ -4,7 +4,7 @@
   "description": "Implement two MCP tools: `tickets.release` to voluntarily release a claim before completion, and `tickets.status` to query the current state of a ticket or all tickets. `tickets.release` moves the ticket back to READY and clears the claim. `tickets.status` supports querying by ticket_id for detail or by filters (stage, type, priority) for listing.",
   "type": "backend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -176,6 +176,15 @@
       "from_stage": "DOCS",
       "to_stage": "DOCS",
       "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-11T00:33:15.246407+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T00:08:57.082219+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
