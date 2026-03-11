@@ -3732,3 +3732,18 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE060.md
 - **Decisions:** APPROVED — All 10 DoD items passed; 100% test coverage; all 6 AC independently verified; all upstream verdicts confirmed PASS
 - **Timestamp:** 2026-03-11T18:00:00Z
+
+### [FORGEOS-BE055] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE055.md
+- **Decisions:** PASS — Score 92/100, 0 critical, 1 warning (CC=13 on check_role_stage_authorization, justified by auth contract). 95 tests passing, authorization.py 99% coverage. Ruff clean, mypy clean on BE055 code.
+- **Timestamp:** 2026-03-11T18:30:00Z
+
+### [FORGEOS-BE048] — Summary Handoff Helpers
+- **Artifacts:** agent-sdk/src/forgeos_sdk/summary.py, agent-sdk/tests/test_summary.py, agent-sdk/src/forgeos_sdk/__init__.py
+- **Decisions:** Standalone functions (not class-based) for read/write/delete summary I/O. STAGE_TO_AGENT mapping derives agent names from SDLC stages. Used pathlib for cross-platform path handling. Functions accept workspace_root as Path|str for flexibility.
+- **Timestamp:** 2026-03-11T19:00:00Z
+
+### [FORGEOS-BE041] — Idempotency Keys Middleware
+- **Artifacts:** mcp-server/src/mcp_server/middleware/idempotency.py, mcp-server/src/mcp_server/middleware/__init__.py, mcp-server/tests/test_idempotency.py
+- **Decisions:** Used Starlette BaseHTTPMiddleware following rate_limiter pattern. In-memory store with abstract IdempotencyStore base for pluggable backends. MissingKeyPolicy enum (WARN default, REJECT for strict). Monotonic time for TTL to avoid clock drift. In-progress marker for 409 conflict detection.
+- **Timestamp:** 2026-03-11T01:45:00Z
