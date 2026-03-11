@@ -335,6 +335,111 @@ deleted = delete_upstream_summary(ticket, "DOCS", flow, workspace_root=workspace
 
 All functions use UTF-8 encoding and handle missing files gracefully.
 
+## Runner Hooks (agent-runner.py Integration)
+
+`RunnerHooks` provides lifecycle hooks that `agent-runner.py` calls at
+specific points during the two-commit protocol. The SDK handles MCP ticket
+operations while `agent-runner.py` handles all git operations.
+
+### Hook Lifecycle
+
+```
+pre_claim_check  →  [agent work]  →  post_advance_or_rework
+```
+
+### Setup
+
+```python
+from forgeos_sdk import ForgeOSClient
+from forgeos_sdk.runner_hooks import RunnerHooks
+
+client = ForgeOSClient.from_env()
+await client.connect()
+hooks = RunnerHooks(client)
+```
+
+### Pre-Claim Check
+
+Validates that the ticket is claimed by the expected agent before the git
+CLAIM commit proceeds.
+
+```python
+result = await hooks.pre_claim_check("FORGEOS-BE050", agent_name="Backend")
+if not result.success:
+    print(f"Claim invalid: {result.error}")
+    return
+
+ticket = result.ticket  # Ticket data on success
+```
+
+### Post-Advance or Rework
+
+After the agent completes work, advances the ticket to the next SDLC stage
+or sends it back for rework.
+
+```python
+from forgeos_sdk import Evidence
+
+# Advance on success
+evidence = Evidence(
+    artifacts=["src/handler.py"],
+    test_results="42 tests passed",
+    confidence="HIGH",
+)
+result = await hooks.post_advance_or_rework(
+    "FORGEOS-BE050",
+    success=True,
+    evidence=evidence,
+)
+
+# Rework on failure
+result = await hooks.post_advance_or_rework(
+    "FORGEOS-BE050",
+    success=False,
+    rework_reason="Missing edge-case tests",
+)
+```
+
+### Hook Configuration
+
+Each hook can be enabled or disabled via environment variables. All hooks
+are enabled by default.
+
+| Variable | Hook | Default |
+|---|---|---|
+| `FORGEOS_HOOK_PRE_CLAIM` | `pre_claim_check` | `true` |
+| `FORGEOS_HOOK_POST_ADVANCE` | Advance in `post_advance_or_rework` | `true` |
+| `FORGEOS_HOOK_POST_REWORK` | Rework in `post_advance_or_rework` | `true` |
+
+```python
+from forgeos_sdk.runner_hooks import RunnerHooks, HookConfig
+
+# From environment variables (default)
+hooks = RunnerHooks(client)
+
+# Explicit configuration
+config = HookConfig(pre_claim_enabled=True, post_advance_enabled=False)
+hooks = RunnerHooks(client, config=config)
+```
+
+### HookResult
+
+All hook methods return a `HookResult` dataclass:
+
+| Field | Type | Description |
+|---|---|---|
+| `success` | `bool` | Whether the hook completed successfully |
+| `ticket` | `Ticket \| None` | Ticket data returned by the MCP operation |
+| `error` | `str \| None` | Error message when `success` is `False` |
+| `data` | `dict` | Additional metadata (e.g. `{"skipped": True}` when disabled) |
+
+### Error Handling
+
+Hooks never raise exceptions. All errors are caught, logged, and returned
+in `HookResult`. The runner continues operating even when a hook fails.
+When hooks are disabled, they return a successful `HookResult` with
+`data={"skipped": True}`.
+
 ## Transport Layer
 
 Three transport types are supported, selectable via the `transport_type`
