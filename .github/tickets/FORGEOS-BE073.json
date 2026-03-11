@@ -4,7 +4,7 @@
   "description": "Implement Migration Phase A: agents continue using the filesystem (via `tickets.py` and `agent-runner.py`) as-is, but the bidirectional sync engine (FORGEOS-BE071) runs in the background, mirroring all filesystem changes to the database. This phase requires zero changes to agent behavior. The filesystem fallback mode from the SDK (FORGEOS-BE049) is the default. Phase A is the read-only validation period where database contents are verified against filesystem truth.",
   "type": "backend",
   "priority": "critical",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -36,10 +36,10 @@
     "Phase A entry and exit logged with timestamp and validation results"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T16:34:27.828946+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -163,6 +163,15 @@
       "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
       "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-11T16:34:27.828946+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T16:07:33.481651+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",
