@@ -1370,6 +1370,9 @@ POST that returns a JSON response — no server-side session state required.
 | `/api/tickets/{id}/claim` | POST | Claim a ticket |
 | `/api/tickets/{id}/claim` | DELETE | Release a claim |
 | `/api/admin/audit` | GET | Audit log query endpoint |
+| `/api/admin/tickets/{id}/force-release` | POST | Force-release any claim (admin only) |
+| `/api/admin/tickets/{id}/force-advance` | POST | Force-advance to next stage (admin only) |
+| `/api/admin/tickets/{id}/force-rework` | POST | Force-rework to implementation stage (admin only) |
 
 **Usage:**
 
@@ -2316,6 +2319,125 @@ curl -X POST http://localhost:8080/api/webhooks/github \
   `event_type` for correlation.
 - **No external dependencies** — uses Starlette (already a dependency) and
   stdlib only.
+
+
+### Push Event Handler
+
+<!-- last_reviewed: 2026-03-11T23:59:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.webhooks.github_handler` module provides a push event handler
+that triggers `tickets.sync` when relevant pushes are detected. Push events
+to the main branch always trigger a full sync. Non-main-branch pushes trigger
+sync only when commit file lists include ticket-related paths
+(`.github/tickets/` or `.github/ticket-state/`). Non-ticket pushes are
+acknowledged but do not invoke the sync engine.
+
+#### How It Works
+
+1. GitHub sends a `push` event via the `POST /api/webhooks/github` endpoint.
+2. `parse_push_event()` validates the payload and extracts branch, ref,
+   commits, repository, and sender into a frozen `PushEventPayload` dataclass.
+3. If the push targets `main` or `master`, sync is triggered unconditionally.
+4. For other branches, `_has_ticket_file_changes()` inspects the `added`,
+   `modified`, and `removed` arrays of each commit for paths starting with
+   `.github/tickets/` or `.github/ticket-state/`.
+5. When sync is needed, the injected `SyncCallback` async function is invoked
+   and the sync result is returned in the response payload.
+6. If no sync engine is configured, the handler logs a warning and returns
+   `sync_triggered: false`.
+
+#### Sync Trigger Rules
+
+| Condition | Sync Triggered | Reason |
+|-----------|:--------------:|--------|
+| Push to `main` or `master` | Yes | `main_branch` |
+| Push to other branch with ticket file changes | Yes | `ticket_files_modified` |
+| Push to other branch without ticket file changes | No | — |
+| Sync engine not configured | No | `no_sync_engine` |
+
+#### Quick Start
+
+```python
+from mcp_server.webhooks.github_handler import create_push_handler
+from mcp_server.services.webhook_service import handler_registry
+
+# Define an async sync callback
+async def run_sync() -> dict:
+    # Invoke the sync engine (FORGEOS-BE033)
+    return {"released": 2, "unblocked": 3}
+
+# Create and register the push handler
+push_handler = create_push_handler(sync_fn=run_sync)
+handler_registry.register("github", "push", push_handler)
+```
+
+#### Response Payloads
+
+**Sync triggered:**
+```json
+{
+  "acknowledged": true,
+  "branch": "main",
+  "sync_triggered": true,
+  "sync_result": {"released": 2, "unblocked": 3}
+}
+```
+
+**Non-ticket push (no sync):**
+```json
+{
+  "acknowledged": true,
+  "branch": "feature/my-branch",
+  "sync_triggered": false
+}
+```
+
+**No sync engine configured:**
+```json
+{
+  "acknowledged": true,
+  "branch": "main",
+  "sync_triggered": false,
+  "reason": "no_sync_engine"
+}
+```
+
+#### API Reference
+
+| Symbol | Module | Description |
+|--------|--------|-------------|
+| `create_push_handler()` | `webhooks.github_handler` | Factory that returns an async push event handler with an injected sync callback |
+| `parse_push_event()` | `webhooks.github_handler` | Validate and parse a raw GitHub push payload into `PushEventPayload` |
+| `PushEventPayload` | `webhooks.github_handler` | Frozen dataclass with `ref`, `branch`, `commits`, `repository_name`, `sender`, `is_main_branch` |
+| `PushEventValidationError` | `webhooks.github_handler` | Raised when a push payload fails structural validation |
+| `SyncCallback` | `webhooks.github_handler` | Type alias for the async sync function signature |
+| `_has_ticket_file_changes()` | `webhooks.github_handler` | Returns `True` if any commit touches `.github/tickets/` or `.github/ticket-state/` |
+
+#### PushEventPayload Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `ref` | `str` | Full git ref (e.g. `refs/heads/main`) |
+| `branch` | `str` | Short branch name extracted from ref |
+| `commits` | `list[dict]` | Commit objects from the push |
+| `repository_name` | `str` | Short repository name |
+| `repository_full_name` | `str` | Full `owner/repo` name |
+| `sender` | `str` | Login of the user who pushed |
+| `is_main_branch` | `bool` | Whether the push targets `main` or `master` |
+
+#### Design Constraints
+
+- **Dependency injection** — the sync callback is injected via `create_push_handler()`,
+  keeping the handler decoupled from the sync engine.
+- **Frozenset constants** — `_MAIN_BRANCHES` and `_TICKET_FILE_PREFIXES` are
+  immutable for thread safety.
+- **Graceful degradation** — if the sync callback raises, the handler catches
+  the exception, logs it, and returns `error: "sync_failed"` instead of
+  propagating.
+- **Correlation tracking** — every log entry includes the `correlation_id`
+  (the webhook event ID) for traceability.
 
 
 ### CI Status Event Handler
@@ -3613,6 +3735,170 @@ This ensures role-stage enforcement applies to both the MCP tool path
   mismatch, unknown role) are logged with `agent_role` and `ticket_stage`.
 - **No database dependency** — role-stage authorization is a pure in-memory
   check. No database calls are needed.
+
+
+## Admin Force Operations
+
+<!-- last_reviewed: 2026-03-11T00:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.api.routes.admin` and `mcp_server.services.admin_service`
+modules provide admin-only elevated operations that bypass normal ownership
+and claim validation. All operations require admin authentication and create
+audit trail entries with `elevated_operation=true`.
+
+### Endpoints
+
+| Path | Method | Description |
+|------|--------|-------------|
+| `/api/admin/tickets/{id}/force-release` | POST | Release any claim regardless of owner |
+| `/api/admin/tickets/{id}/force-advance` | POST | Advance ticket to next SDLC stage bypassing claim checks |
+| `/api/admin/tickets/{id}/force-rework` | POST | Return ticket to implementation stage with escalation support |
+
+All endpoints require:
+- **Admin role** — `identity_type == ADMIN` in auth context (401 if unauthenticated, 403 if non-admin).
+- **Reason field** — JSON body with `{"reason": "..."}` (non-empty string, 400 if missing).
+
+### Request / Response
+
+**Request body** (all three endpoints):
+
+```json
+{"reason": "Unblocking pipeline — agent crashed mid-work"}
+```
+
+**Force-release response** (200):
+
+```json
+{
+  "ticket_id": "FORGEOS-BE018",
+  "previous_stage": "BACKEND",
+  "previous_claim": {
+    "claimed_by": "Backend",
+    "machine_id": "pop-os",
+    "operator": "ReaperOAK"
+  },
+  "released_by_admin": "admin-uuid",
+  "reason": "Unblocking pipeline — agent crashed mid-work"
+}
+```
+
+**Force-advance response** (200):
+
+```json
+{
+  "ticket_id": "FORGEOS-BE018",
+  "title": "Implement Connection Pool",
+  "type": "backend",
+  "previous_stage": "BACKEND",
+  "new_stage": "QA",
+  "advanced_by_admin": "admin-uuid",
+  "reason": "Manual advancement after external review"
+}
+```
+
+**Force-rework response** (200):
+
+```json
+{
+  "ticket_id": "FORGEOS-BE018",
+  "title": "Implement Connection Pool",
+  "type": "backend",
+  "previous_stage": "QA",
+  "new_stage": "BACKEND",
+  "rework_count": 2,
+  "escalated": false,
+  "reworked_by_admin": "admin-uuid",
+  "reason": "Critical bug found in manual review"
+}
+```
+
+### Error Responses
+
+| Status | Condition |
+|--------|-----------|
+| 400 | Invalid JSON body or missing/empty `reason` field |
+| 401 | No authentication context |
+| 403 | Caller is not an admin |
+| 404 | Ticket not found |
+| 409 | Invalid transition (force-advance on a ticket already at its final stage) |
+| 500 | Internal server error |
+| 503 | Service unavailable (admin service not initialized) |
+
+### AdminService
+
+`AdminService` orchestrates all force operations using SERIALIZABLE
+transactions to prevent concurrent state corruption.
+
+```python
+from mcp_server.services.admin_service import AdminService
+
+admin_svc = AdminService(pool=pool, emitter=emitter)
+
+# Force-release a stuck claim
+result = await admin_svc.force_release(
+    ticket_id="FORGEOS-BE018", admin_id="admin-uuid", reason="Agent crashed"
+)
+
+# Force-advance past a blocked stage
+result = await admin_svc.force_advance(
+    ticket_id="FORGEOS-BE018", admin_id="admin-uuid", reason="External review done"
+)
+
+# Force-rework with escalation check
+result = await admin_svc.force_rework(
+    ticket_id="FORGEOS-BE018", admin_id="admin-uuid", reason="Critical bug"
+)
+print(result.escalated)  # True if rework_count >= max_reworks
+```
+
+### API Reference
+
+| Symbol | Kind | Description |
+|--------|------|-------------|
+| `AdminService` | class | Service for admin force operations with SERIALIZABLE transactions |
+| `ForceReleaseResult` | frozen dataclass | Result of a force-release (previous claim info, admin, reason) |
+| `ForceAdvanceResult` | frozen dataclass | Result of a force-advance (previous/new stage, admin, reason) |
+| `ForceReworkResult` | frozen dataclass | Result of a force-rework (rework count, escalated flag, admin, reason) |
+| `_require_admin` | function | Auth guard returning error response for non-admin callers |
+| `_parse_reason` | function | Validates and extracts the `reason` field from request body |
+| `create_admin_force_release_endpoint` | factory | Creates the force-release route handler |
+| `create_admin_force_advance_endpoint` | factory | Creates the force-advance route handler |
+| `create_admin_force_rework_endpoint` | factory | Creates the force-rework route handler |
+
+### AdminService Methods
+
+| Method | Returns | Raises | Description |
+|--------|---------|--------|-------------|
+| `force_release(ticket_id, admin_id, reason)` | `ForceReleaseResult` | `TicketNotFoundError` | Clear all claim fields, record `FORCE_RELEASED` event |
+| `force_advance(ticket_id, admin_id, reason)` | `ForceAdvanceResult` | `TicketNotFoundError`, `InvalidTransitionError` | Move to next stage, clear claim, record `STAGE_ADVANCED` event |
+| `force_rework(ticket_id, admin_id, reason)` | `ForceReworkResult` | `TicketNotFoundError` | Return to implementation stage, increment rework count, escalate if limit reached |
+
+### Audit Trail
+
+Every force operation inserts an event into the `events` table with:
+
+| Field | Value |
+|-------|-------|
+| `event_type` | `FORCE_RELEASED`, `STAGE_ADVANCED`, or `STAGE_REJECTED` / `ESCALATED` |
+| `agent_name` | The admin's identity ID |
+| `payload.elevated_operation` | `true` |
+| `payload.admin_id` | Admin identity ID |
+| `payload.reason` | The provided reason string |
+
+### Design Constraints
+
+- **SERIALIZABLE isolation** — all operations use `transactional()` with
+  `FOR UPDATE` row locking to prevent concurrent state corruption.
+- **Factory pattern** — route handlers are created via factory functions that
+  accept a service getter, enabling late-binding for degraded-mode support.
+- **Early return** — auth and validation failures return immediately without
+  reaching the service layer.
+- **Typed results** — all operations return frozen dataclasses with
+  `to_dict()` for JSON serialization.
+- **Escalation on rework** — when `rework_count >= max_reworks`, the ticket
+  is set to `ESCALATED` status instead of being reworked.
 
 
 ## Event Sourcing
