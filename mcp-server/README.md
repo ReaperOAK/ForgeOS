@@ -1440,7 +1440,7 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/events/`** — Append-only event sourcing (EventStore, EventType, Event dataclass)
 - **`mcp_server/locking/`** — Distributed claim queue (SKIP LOCKED), file mutex (advisory locks)
 - **`mcp_server/notifications/`** — Notification queue (at-least-once delivery), configurable channels (webhook, Slack) with event-type filtering, background processor with exponential-backoff retries, and dead-letter handling
-- **`mcp_server/migration/`** — Dual-mode migration wrapper, YAML-based feature flag system for per-operation mode switching (filesystem / dual / database), bidirectional sync engine (FS ↔ DB), and database-wins conflict resolver
+- **`mcp_server/migration/`** — Dual-mode migration wrapper, YAML-based feature flag system for per-operation mode switching (filesystem / dual / database), bidirectional sync engine (FS ↔ DB), database-wins conflict resolver, and Phase A lifecycle manager (background sync with filesystem as source of truth)
 - **`mcp_server/sessions/`** -- Agent session lifecycle management (heartbeat, timeout, resumption, concurrent access)
 - **`mcp_server/transport/webhooks.py`** — Inbound webhook HTTP receiver (`POST /api/webhooks/{source}`)
 - **`mcp_server/webhooks/`** — GitHub webhook signature verification (HMAC-SHA256), push event handling, and CI status event handler (check_run/status → ticket advance or rework)
@@ -4694,6 +4694,161 @@ resolutions within a cycle, separate from structured logging.
   log at the start of each cycle, keeping the log relevant to the current run.
 - **Independent lifecycle** — the engine can start and stop without restarting
   the MCP server, supporting gradual rollout via feature flags.
+
+
+## Migration Phase A — Background Sync
+
+<!-- last_reviewed: 2026-03-11T23:59:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.migration.phases.phase_a` module implements the first phase
+of the filesystem-to-database migration. During Phase A the filesystem remains
+the sole source of truth, all feature flags are locked to `filesystem` mode,
+and agents require zero changes. The bidirectional sync engine runs in the
+background, mirroring every filesystem ticket change into PostgreSQL so that
+database contents can be validated against the canonical filesystem state.
+
+Phase A exits only when the database has matched the filesystem with **zero
+discrepancies for a configurable gate period** (default 24 hours).
+
+### Lifecycle
+
+```text
+INACTIVE  ──enter()──►  ACTIVE  ──exit()──►  INACTIVE
+                           │
+                    validate() / run_sync_cycle()
+```
+
+1. Call `enter()` — verifies all feature flags are `filesystem`, starts the
+   background `SyncEngine`, records entry timestamp.
+2. While active, call `run_sync_cycle()` to trigger manual sync iterations
+   or rely on the engine's timer-based loop.
+3. Call `validate()` at any time to compare filesystem and database state.
+   The report tracks how long zero-discrepancy has held.
+4. Call `exit()` — runs a final validation, stops the engine, records exit
+   timestamp, and returns the final `ValidationReport`.
+
+### Quick Start
+
+```python
+from pathlib import Path
+from mcp_server.migration.phases import PhaseA, PhaseAConfig
+
+config = PhaseAConfig(
+    tickets_dir=Path(".github/tickets"),
+    ticket_state_dir=Path(".github/ticket-state"),
+    flags_config_path=Path("config/migration-flags.yaml"),
+    sync_interval_seconds=60.0,
+    transition_gate_hours=24.0,
+)
+
+phase = PhaseA(config, db_reader, db_writer)
+
+# Enter Phase A — starts background sync
+await phase.enter()
+
+# Periodic validation
+report = await phase.validate()
+print(f"Discrepancies: {len(report.discrepancies)}")
+print(f"Can transition: {report.can_transition}")
+
+# When the gate is satisfied, exit
+if report.can_transition:
+    final_report = await phase.exit()
+```
+
+### PhaseAConfig
+
+Frozen dataclass controlling Phase A behaviour.
+
+| Parameter | Default | Description |
+|---|---|---|
+| `tickets_dir` | *(required)* | Path to `.github/tickets/` |
+| `ticket_state_dir` | *(required)* | Path to `.github/ticket-state/` |
+| `flags_config_path` | *(required)* | Path to `config/migration-flags.yaml` |
+| `sync_interval_seconds` | `60.0` | Delay between background sync cycles |
+| `transition_gate_hours` | `24.0` | Hours of zero discrepancies before transition |
+
+### PhaseA Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `enter()` | `None` | Verify flags, start sync engine, set status to ACTIVE |
+| `exit()` | `ValidationReport` | Validate, stop engine, set status to INACTIVE |
+| `run_sync_cycle()` | `SyncResult` | Trigger one manual sync cycle |
+| `validate()` | `ValidationReport` | Compare DB state against filesystem truth |
+| `status` | `PhaseAStatus` | Property — `INACTIVE`, `ACTIVE`, or `TRANSITIONING` |
+| `entered_at` | `str \| None` | Property — ISO-8601 entry timestamp |
+| `exited_at` | `str \| None` | Property — ISO-8601 exit timestamp |
+| `sync_results` | `list[SyncResult]` | Property — accumulated sync results |
+
+### PhaseAStatus
+
+| Value | Meaning |
+|---|---|
+| `INACTIVE` | Phase A is not running |
+| `ACTIVE` | Background sync is running; filesystem is source of truth |
+| `TRANSITIONING` | `exit()` is in progress (final validation) |
+
+### ValidationReport
+
+Returned by `validate()` and `exit()`.
+
+| Field | Type | Description |
+|---|---|---|
+| `discrepancies` | `list[Discrepancy]` | Mismatches found between FS and DB |
+| `fs_ticket_count` | `int` | Tickets found on the filesystem |
+| `db_ticket_count` | `int` | Tickets found in the database |
+| `validated_at` | `str` | ISO-8601 timestamp of this validation run |
+| `can_transition` | `bool` | `True` when zero-discrepancy gate is satisfied |
+| `zero_discrepancy_since` | `str \| None` | When zero-discrepancy window started |
+| `zero_discrepancy_hours` | `float` | Hours elapsed in the current zero window |
+
+### Discrepancy
+
+| Field | Type | Description |
+|---|---|---|
+| `ticket_id` | `str` | Ticket with mismatched state |
+| `field` | `str` | Divergent field (`"stage"`, `"claimed_by"`, `"existence"`, …) |
+| `fs_value` | `Any` | Value on the filesystem |
+| `db_value` | `Any` | Value in the database |
+
+### Validation Checks
+
+| Check | Discrepancy Reported |
+|---|---|
+| Ticket exists in FS but not DB | `field="existence"`, `db_value="missing"` |
+| Ticket exists in DB but not FS | `field="existence"`, `fs_value="missing"` |
+| Stage mismatch | `field="stage"` with both values |
+| Claim metadata mismatch (`claimed_by`, `machine_id`, `operator`) | `field=<name>` with both values |
+
+### Transition Gate
+
+Phase A can transition to Phase B only when `can_transition` is `True`.
+The gate requires **zero discrepancies** to hold continuously for
+`transition_gate_hours` (default 24). Any discrepancy resets the window.
+
+### Error Handling
+
+| Scenario | Behaviour |
+|---|---|
+| Flags not in `filesystem` mode | `ValueError` raised on `enter()` |
+| `enter()` called while active | `RuntimeError` raised |
+| `exit()` called while inactive | `RuntimeError` raised |
+| `run_sync_cycle()` before `enter()` | `RuntimeError` raised |
+| Unreadable ticket JSON file | Warning logged, file skipped |
+
+### Design Constraints
+
+- **Filesystem is source of truth** — the database is the read-only mirror
+  during Phase A. Agents interact only with `tickets.py`.
+- **Zero agent changes** — no SDK adoption, no new environment variables.
+  Phase A is invisible to agents.
+- **Idempotent validation** — `validate()` can be called any number of
+  times without side effects beyond updating the zero-discrepancy window.
+- **Safe indefinite operation** — Phase A can run continuously without
+  interfering with agent operations or the dispatcher-claim protocol.
 
 
 ## Database-to-Filesystem Export

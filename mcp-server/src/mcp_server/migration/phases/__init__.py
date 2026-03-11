@@ -11,6 +11,7 @@ Phase A — Background Sync:
 """
 
 from mcp_server.migration.phases.phase_a import (
+    Discrepancy,
     PhaseA,
     PhaseAConfig,
     PhaseAStatus,
@@ -18,6 +19,7 @@ from mcp_server.migration.phases.phase_a import (
 )
 
 __all__ = [
+    "Discrepancy",
     "PhaseA",
     "PhaseAConfig",
     "PhaseAStatus",
