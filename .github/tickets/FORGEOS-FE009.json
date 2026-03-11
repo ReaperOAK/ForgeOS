@@ -27,8 +27,7 @@
   "blocked_by": [
     "FORGEOS-FE008",
     "FORGEOS-BE036",
-    "FORGEOS-BE037",
-    "FORGEOS-BE055"
+    "FORGEOS-BE037"
   ],
   "file_paths": [
     "dashboard/src/components/operator/OperatorActions.tsx",
