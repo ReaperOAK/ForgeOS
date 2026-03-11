@@ -4,7 +4,7 @@
   "description": "Implement the notification emitter that creates queue entries when ticket state changes occur. Integrate with the ticket service layer: after advance, rework, claim, or release operations, enqueue a notification containing the ticket context, change details, and actor information. Support notification types: stage_changed, ticket_claimed, ticket_released, ticket_reworked, lease_expiring.",
   "type": "backend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Emitter is called from the ticket service layer (not duplicated across MCP/REST)"
   ],
   "rework_count": 2,
-  "claimed_by": "QA Engineer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T02:19:17.497015+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -131,6 +131,15 @@
       "from_stage": "QA",
       "to_stage": "QA",
       "details": "Claimed by ReaperOAK@pop-os via QA Engineer, lease until 2026-03-11T02:19:17.497015+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T01:59:09.569619+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-webhooks.md",
