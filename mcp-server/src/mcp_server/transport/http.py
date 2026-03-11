@@ -170,7 +170,6 @@ class HTTPTransport:
             create_tickets_endpoint,
         )
         from mcp_server.api.routes.websocket import create_websocket_endpoint
-        from mcp_server.services.event_broadcaster import EventBroadcaster
 
         # Audit repo getter — deferred to account for late binding
         _audit_repo_ref: list[Any] = [None]
@@ -217,9 +216,9 @@ class HTTPTransport:
         health_api_handler = create_health_endpoint(_get_health_checker)
 
         # WebSocket event broadcaster — deferred to account for late binding
-        _broadcaster_ref: list[EventBroadcaster | None] = [None]
+        _broadcaster_ref: list[Any] = [None]
 
-        def _get_broadcaster() -> EventBroadcaster | None:
+        def _get_broadcaster() -> Any:
             return _broadcaster_ref[0]
 
         ws_handler = create_websocket_endpoint(_get_broadcaster)

@@ -3897,3 +3897,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/api/schemas.py, mcp-server/src/mcp_server/api/routes/tickets.py, mcp-server/src/mcp_server/api/routes/__init__.py, mcp-server/src/mcp_server/transport/http.py, mcp-server/tests/test_ticket_claim_api.py
 - **Decisions:** Used factory pattern with ticket_service_getter + ticket_repo_getter for deferred binding. POST delegates to TicketService.claim_by_id (same logic as MCP tool). DELETE uses query params (agent_id, reason) for release. Error mapping: NoEligibleTicketError→409, TicketNotFoundError→404, ValueError→400.
 - **Timestamp:** 2026-03-11T02:45:00Z
+
+### [FORGEOS-BE039] — Implement WebSocket Ticket State Streaming
+- **Artifacts:** mcp-server/src/mcp_server/services/event_broadcaster.py, mcp-server/src/mcp_server/api/routes/websocket.py, mcp-server/tests/test_event_broadcaster.py, mcp-server/tests/test_websocket_streaming.py
+- **Decisions:** Used in-memory pub/sub EventBroadcaster with WebSocketLike protocol for testability. Deferred binding via app.state.broadcaster_ref. OR-semantics for filters (ticket_ids, stages). Background asyncio ping loop for heartbeat.
+- **Timestamp:** 2026-03-11T02:00:00Z
