@@ -4,7 +4,7 @@
   "description": "Implement integration hooks that connect the agent SDK to the existing `agent-runner.py` two-commit protocol. The SDK manages ticket state via MCP while `agent-runner.py` continues to handle git operations (git add, git commit, git push). Provide hook points: `pre_claim()`, `post_claim()`, `pre_commit()`, `post_commit()` that `agent-runner.py` can call at appropriate lifecycle stages.",
   "type": "backend",
   "priority": "medium",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Hook interface documented with usage examples for agent-runner.py integration"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-11T09:40:42.238341+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -140,6 +140,15 @@
       "agent": "Documentation Specialist",
       "machine_id": "pop-os",
       "details": "DOCS stage complete. README updated with Runner Hooks section, CHANGELOG entry added."
+    },
+    {
+      "timestamp": "2026-03-11T09:42:16.814505+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-agent-sdk.md",
