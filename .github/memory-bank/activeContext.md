@@ -1,3 +1,13 @@
+### [FORGEOS-BE067] — Validation: APPROVED
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE067.md
+- **Decisions:** APPROVED with HIGH confidence. 10/10 DoD items pass. 6/6 ACs verified. 88 tests pass, processor.py 97% + queue.py 96% coverage. Ruff clean, mypy clean, no TODOs, no console. Upstream: QA ✅, Security ✅, CI ✅ (97/100), Docs ✅.
+- **Timestamp:** 2026-03-11T01:30:00Z
+
+### [FORGEOS-BE032] — Validation: APPROVED
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE032.md
+- **Decisions:** APPROVED with HIGH confidence. 10/10 DoD items pass. 7/7 ACs independently verified. 80 tests pass. Ruff clean, mypy clean, no TODOs, no console output. Upstream verdicts confirmed: QA ✅, Security ✅, CI ✅, Docs ✅.
+- **Timestamp:** 2026-03-11T01:15:00Z
+
 ### [FORGEOS-BE055] — Security Review (Re-review)
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE055.md
 - **Decisions:** PASS — CWE-862 fix verified. Both `claim_next` and `claim_by_id` now call `check_role_stage_authorization()` before DB claim. STRIDE all LOW. OWASP 10/10 pass. Zero SARIF findings.
@@ -3697,3 +3707,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE045.md
 - **Decisions:** APPROVED — All 10 DoD items pass, all 8 AC verified, upstream verdicts confirmed
 - **Timestamp:** 2026-03-11T17:00:00Z
+
+### [FORGEOS-BE033] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE033.md
+- **Decisions:** APPROVED — all 10 DoD items pass, all 8 acceptance criteria verified, all upstream verdicts confirmed (QA PASS, Security PASS, CI PASS, Docs PASS)
+- **Timestamp:** 2026-03-11T06:00:00Z
