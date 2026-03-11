@@ -28,12 +28,24 @@ from mcp_server.migration.feature_flags import (
     FlagMode,
     OperationFlag,
 )
+from mcp_server.migration.conflict_resolver import (
+    ConflictRecord,
+    ConflictResolver,
+    ConflictType,
+)
 from mcp_server.migration.importer import (
     DatabaseWriter,
     ImportConfig,
     ImportResult,
     ImportStats,
     TicketImporter,
+)
+from mcp_server.migration.sync_engine import (
+    DatabaseReader,
+    SyncConfig,
+    SyncEngine,
+    SyncResult,
+    SyncStats,
 )
 from mcp_server.migration.transformers import (
     TicketTransformer,
@@ -44,6 +56,10 @@ from mcp_server.migration.transformers import (
 )
 
 __all__ = [
+    "ConflictRecord",
+    "ConflictResolver",
+    "ConflictType",
+    "DatabaseReader",
     "DatabaseWriter",
     "DualModeConfig",
     "DualModeWrapper",
@@ -58,6 +74,10 @@ __all__ = [
     "OperationFlag",
     "OperationMode",
     "OperationResult",
+    "SyncConfig",
+    "SyncEngine",
+    "SyncResult",
+    "SyncStats",
     "TicketImporter",
     "TicketOperations",
     "TicketTransformer",
