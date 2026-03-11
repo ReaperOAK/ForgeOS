@@ -8,6 +8,32 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Pipeline Overview and Health Endpoints** (FORGEOS-BE038) — Two REST
+  endpoints at `mcp-server/src/mcp_server/api/routes/pipeline.py` and
+  `mcp-server/src/mcp_server/api/routes/health.py`. `GET /api/pipeline`
+  returns per-stage ticket counts with optional `?group_by=type` breakdown.
+  `GET /api/health` returns server health status with component-level checks,
+  version, uptime, and response timing. Returns 200 when healthy, 503 when
+  degraded. Pydantic response models (`PipelineResponse`, `HealthResponse`,
+  `StageCount`, `StageTypeCount`, `ComponentHealth`) at
+  `mcp-server/src/mcp_server/api/schemas.py`. Factory pattern with late-binding
+  repo/checker getters for degraded-mode support.
+
+- **WebSocket Ticket State Streaming** (FORGEOS-BE039) — Real-time WebSocket
+  endpoint at `mcp-server/src/mcp_server/api/routes/websocket.py` exposing
+  `/ws/tickets` for streaming ticket state change events to dashboard clients.
+  `EventBroadcaster` service at
+  `mcp-server/src/mcp_server/services/event_broadcaster.py` manages client
+  connections and fan-out delivery with optional filtering by ticket IDs or
+  SDLC stages via query parameters. `TicketEvent` frozen dataclass with JSON
+  serialization. `ClientFilter` frozen dataclass for per-client event filtering.
+  Background heartbeat ping loop detects and removes stale connections.
+  `WebSocketLike` protocol enables test doubles without real WebSocket
+  connections. Clean disconnection handling via `register()`/`unregister()`
+  lifecycle. `matches_filter()` supports wildcard (no filters) and dimensional
+  filtering. 43 tests, 99% combined coverage, CI quality score 94/100. Added
+  WebSocket Streaming section to `mcp-server/README.md`.
+
 - **PR Event Handler** (FORGEOS-BE063) — GitHub `pull_request` webhook handler
   at `mcp-server/src/mcp_server/services/pr_service.py` and
   `mcp-server/src/mcp_server/webhooks/github_handler.py`. Extracts ticket IDs

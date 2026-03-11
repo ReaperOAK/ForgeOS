@@ -4,7 +4,7 @@
   "description": "Implement the WebSocket endpoint at `/ws/tickets` that streams real-time ticket state changes to connected dashboard clients. Create an event broadcaster service that subscribes to ticket state change events from the event sourcing subsystem (FORGEOS-BE012) and pushes them to all connected WebSocket clients. Handle connection lifecycle including authentication, keep-alive pings, and clean disconnection.",
   "type": "backend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -158,6 +158,15 @@
       "from_stage": "DOCS",
       "to_stage": "DOCS",
       "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-11T03:37:12.025899+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T03:14:11.683076+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "DOCS stage complete \u2014 README WebSocket section, CHANGELOG entry, docstrings verified"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",

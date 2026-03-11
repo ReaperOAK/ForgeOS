@@ -4132,3 +4132,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE065.md
 - **Decisions:** PASS — Score 100/100, 0 critical, 0 warnings. Ruff 0/0, mypy strict clean, CC max B(9), coverage 100% on emitter.py, 21 tests pass. No dead code, no circular imports.
 - **Timestamp:** 2026-03-11T03:20:00Z
+
+### [FORGEOS-BE039] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md
+- **Decisions:** Added WebSocket Streaming reference section to README (Diátaxis: Reference). Docstrings already comprehensive — no changes needed. CHANGELOG entry added under [Unreleased].
+- **Timestamp:** 2026-03-11T03:40:00Z
