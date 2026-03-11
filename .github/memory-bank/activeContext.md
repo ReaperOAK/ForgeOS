@@ -1,3 +1,8 @@
+### [FORGEOS-BE055] — Security Review (Re-review)
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE055.md
+- **Decisions:** PASS — CWE-862 fix verified. Both `claim_next` and `claim_by_id` now call `check_role_stage_authorization()` before DB claim. STRIDE all LOW. OWASP 10/10 pass. Zero SARIF findings.
+- **Timestamp:** 2026-03-11T01:05:00Z
+
 ### [FORGEOS-BE067] — Documentation Summary
 - **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE067.md
 - **Decisions:** Rewrote Notification Event Queue section to match current API (event_type-based, pool-injected queue). Added Background Notification Processor subsection. Corrected stale field names and backoff formula. Added CHANGELOG entry.
@@ -3662,3 +3667,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/README.md, CHANGELOG.md
 - **Decisions:** Added signature verification section under existing Webhook Receiver heading to maintain doc coherence; env var added to top-level config table for discoverability
 - **Timestamp:** 2026-03-11T17:00:00Z
+
+### [FORGEOS-BE029] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE029.md
+- **Decisions:** APPROVED — All 10 DoD items pass (105 tests, ruff clean, pyright clean on BE029 code). All 7 ACs verified independently. Upstream QA ✓ Security ✓ CI ✓ Docs ✓. Minor note: ticket_service.py meta tag missing BE029 reference (cosmetic only).
+- **Timestamp:** 2026-03-11T01:00:00Z
