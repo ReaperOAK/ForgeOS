@@ -3,14 +3,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { RefreshCw } from 'lucide-react';
 import { PipelineBoard } from '@/components/pipeline/PipelineBoard';
+import { ConnectionStatusIndicator } from '@/components/ConnectionStatusIndicator';
+import { useTicketStream } from '@/lib/hooks/useTicketStream';
 import { fetchTickets } from '@/lib/api';
 import type { Ticket } from '@/lib/api';
 
 /**
  * Pipeline page displaying all tickets in a horizontal Kanban board.
  *
- * Fetches all tickets on mount and provides a manual refresh button.
- * Renders the {@link PipelineBoard} component with loading and error states.
+ * Fetches all tickets on mount, subscribes to WebSocket events for
+ * real-time updates, and provides a manual refresh fallback button.
  *
  * @returns The pipeline Kanban view page
  */
@@ -19,6 +21,22 @@ export default function PipelinePage() {
     const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [isRefreshing, setIsRefreshing] = useState(false);
+
+    const handleTicketUpdate = useCallback((updated: Ticket) => {
+        setTickets((prev) => {
+            const idx = prev.findIndex((t) => t.ticket_id === updated.ticket_id);
+            if (idx >= 0) {
+                const next = [...prev];
+                next[idx] = updated;
+                return next;
+            }
+            return [...prev, updated];
+        });
+    }, []);
+
+    const { status: wsStatus } = useTicketStream({
+        onTicketUpdate: handleTicketUpdate,
+    });
 
     const loadTickets = useCallback(async (showSpinner = false) => {
         if (showSpinner) setIsRefreshing(true);
@@ -44,7 +62,10 @@ export default function PipelinePage() {
         <div>
             {/* Header */}
             <div className="flex items-center justify-between mb-6">
-                <h1 className="text-2xl font-bold">Pipeline</h1>
+                <div className="flex items-center gap-3">
+                    <h1 className="text-2xl font-bold">Pipeline</h1>
+                    <ConnectionStatusIndicator status={wsStatus} />
+                </div>
                 <button
                     onClick={() => loadTickets(true)}
                     disabled={isRefreshing}
