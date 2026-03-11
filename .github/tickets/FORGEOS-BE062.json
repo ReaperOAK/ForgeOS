@@ -4,7 +4,7 @@
   "description": "Implement the handler for GitHub CI status events (check_run and status events). When CI checks pass for a ticket's branch, automatically advance the ticket past the CI stage. When CI checks fail, trigger a rework with the failure reason. Map GitHub check names/contexts to ticket IDs using branch naming conventions.",
   "type": "backend",
   "priority": "high",
-  "stage": "READY",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -62,6 +62,15 @@
       "from_stage": "READY",
       "to_stage": "READY",
       "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-11T01:32:59.408283+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T01:45:00.000000+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "BACKEND",
+      "to_stage": "QA",
+      "details": "BACKEND complete — CI status handler implemented with 31 tests, 84% coverage"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-webhooks.md",
