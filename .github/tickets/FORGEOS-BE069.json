@@ -20,9 +20,7 @@
   "dependencies": [
     "FORGEOS-BE068"
   ],
-  "blocked_by": [
-    "FORGEOS-BE068"
-  ],
+  "blocked_by": [],
   "file_paths": [
     "mcp-server/src/migration/feature_flags.py",
     "mcp-server/src/migration/config.py",
@@ -38,10 +36,10 @@
     "Structured log entry emitted on every flag change with old and new values"
   ],
   "rework_count": 0,
-  "claimed_by": "Backend",
+  "claimed_by": "QA Engineer",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T03:37:11.540846+00:00",
+  "lease_expiry": "2026-03-11T04:01:34.798699+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -75,6 +73,22 @@
       "from_stage": "BACKEND",
       "to_stage": "QA",
       "details": "Feature flag system implemented with YAML config, 4-level scoped evaluation, env overrides, audit logging. 60 tests, 98% coverage."
+    },
+    {
+      "timestamp": "2026-03-11T03:31:34.765710+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: manual release"
+    },
+    {
+      "timestamp": "2026-03-11T03:31:34.798716+00:00",
+      "event": "CLAIMED",
+      "agent": "QA Engineer",
+      "machine_id": "pop-os",
+      "from_stage": "QA",
+      "to_stage": "QA",
+      "details": "Claimed by ReaperOAK@pop-os via QA Engineer, lease until 2026-03-11T04:01:34.798699+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",

@@ -35,10 +35,10 @@
     "Emitter is called from the ticket service layer (not duplicated across MCP/REST)"
   ],
   "rework_count": 2,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Validator",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-11T04:01:35.368571+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -201,6 +201,15 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "DOCS complete \u2014 README, CHANGELOG, docstring metadata updated"
+    },
+    {
+      "timestamp": "2026-03-11T03:31:35.368588+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-11T04:01:35.368571+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-webhooks.md",

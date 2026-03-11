@@ -39,7 +39,7 @@
   "claimed_by": "Validator",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T03:37:11.886137+00:00",
+  "lease_expiry": "2026-03-11T04:01:35.152794+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -150,6 +150,22 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "Documentation complete, advancing to VALIDATION"
+    },
+    {
+      "timestamp": "2026-03-11T03:31:35.119328+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Validator: manual release"
+    },
+    {
+      "timestamp": "2026-03-11T03:31:35.152811+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-11T04:01:35.152794+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
