@@ -392,3 +392,14 @@ Known sources list disclosed in `UnknownSourceError` details. Risk accepted — 
 
 - **Agent:** Security Engineer
 - **Timestamp:** 2026-03-11T00:00:00Z
+
+### [FORGEOS-BE039] — WebSocket DoS and Unauthenticated Access (2026-03-11T23:55:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-BE039-001 | MEDIUM | WebSocket endpoint `/ws/tickets` accepts connections without authentication. Any network-reachable client can subscribe to ticket state change events. CWE-306, OWASP A01/A07. STRIDE: Spoofing (Impact=3 × Likelihood=4 = 12). | Risk Accepted | Internal tool on private network. Data is non-PII operational metadata. Future: add `?token=` query param validated against agent auth. |
+| SEC-BE039-002 | MEDIUM | `EventBroadcaster` has no `max_clients` limit. Unlimited WebSocket connections can be registered, risking memory/fd exhaustion. CWE-770, OWASP A04. STRIDE: DoS (Impact=4 × Likelihood=3 = 12). | Risk Accepted | Ping loop (30s) removes stale connections. Future: add `max_clients` parameter similar to SSE transport `ConnectionTracker(max_connections=100)`. |
+| SEC-BE039-003 | LOW | Rate limiter middleware (`BaseHTTPMiddleware`) does not intercept WebSocket upgrade requests. WS connections bypass rate limiting. CWE-770. Framework limitation. | Risk Accepted | Not a code defect. Future: add ASGI-native WS rate limiting or connection-level throttling. |
+
+- **Agent:** Security Engineer
+- **Timestamp:** 2026-03-11T23:55:00Z
