@@ -48,7 +48,15 @@ logger = get_logger("migration.sync_engine")
 
 @dataclass(frozen=True)
 class SyncConfig:
-    """Settings for the bidirectional sync engine."""
+    """Settings for the bidirectional sync engine.
+
+    Attributes:
+        tickets_dir: Path to the ``.github/tickets/`` directory containing
+            master ticket JSON files.
+        ticket_state_dir: Path to the ``.github/ticket-state/`` directory
+            whose subdirectories represent SDLC stages.
+        interval_seconds: Delay between sync cycles in seconds (default 60).
+    """
 
     tickets_dir: Path
     ticket_state_dir: Path
@@ -83,7 +91,16 @@ class DatabaseReader(Protocol):
 
 @dataclass
 class SyncStats:
-    """Counters for a single sync cycle."""
+    """Counters for a single sync cycle.
+
+    Attributes:
+        fs_to_db_imported: Tickets newly imported from filesystem to database.
+        fs_to_db_updated: Tickets updated in the database from filesystem changes.
+        fs_to_db_errors: Errors encountered during FS-to-DB synchronisation.
+        db_to_fs_stage_moves: Ticket JSON files moved between stage directories.
+        db_to_fs_claim_updates: Ticket JSON files whose claim metadata was refreshed.
+        db_to_fs_errors: Errors encountered during DB-to-FS synchronisation.
+    """
 
     fs_to_db_imported: int = 0
     fs_to_db_updated: int = 0
@@ -95,7 +112,15 @@ class SyncStats:
 
 @dataclass(frozen=True)
 class SyncResult:
-    """Outcome of a single sync cycle."""
+    """Outcome of a single sync cycle.
+
+    Attributes:
+        stats: Aggregate counters for both sync directions.
+        conflicts: Audit records of every conflict resolved this cycle.
+        errors: Human-readable error messages collected during the cycle.
+        started_at: ISO-8601 timestamp when the cycle began.
+        finished_at: ISO-8601 timestamp when the cycle ended.
+    """
 
     stats: SyncStats
     conflicts: list[ConflictRecord]
@@ -174,7 +199,15 @@ class SyncEngine:
     # -- single cycle ------------------------------------------------------
 
     async def sync_once(self) -> SyncResult:
-        """Execute one full bidirectional sync cycle."""
+        """Execute one full bidirectional sync cycle.
+
+        Runs FS-to-DB import followed by DB-to-FS export, collecting
+        statistics, conflict records, and error messages.
+
+        Returns:
+            A :class:`SyncResult` with counters, conflict audit log,
+            and any error messages from the cycle.
+        """
         started = datetime.now(timezone.utc).isoformat()
         self._resolver.clear()
         stats = SyncStats()
@@ -323,7 +356,12 @@ class SyncEngine:
     # -- filesystem helpers ------------------------------------------------
 
     def _read_fs_tickets(self) -> dict[str, dict[str, Any]]:
-        """Read all ticket JSON files from the tickets directory."""
+        """Read all ticket JSON files from the tickets directory.
+
+        Returns:
+            Mapping of ``ticket_id`` to parsed JSON dict.  Malformed or
+            unreadable files are logged and skipped.
+        """
         tickets: dict[str, dict[str, Any]] = {}
         tickets_dir = self._config.tickets_dir
         if not tickets_dir.is_dir():
@@ -343,7 +381,12 @@ class SyncEngine:
         return tickets
 
     def _find_current_fs_stage(self, ticket_id: str) -> str | None:
-        """Find which ``ticket-state/`` subdirectory contains this ticket."""
+        """Find which ``ticket-state/`` subdirectory contains this ticket.
+
+        Returns:
+            The directory name (e.g. ``"BACKEND"``) or ``None`` if the
+            ticket is not present in any stage directory.
+        """
         state_dir = self._config.ticket_state_dir
         if not state_dir.is_dir():
             return None
@@ -390,7 +433,12 @@ class SyncEngine:
 
     @staticmethod
     def _extract_claim(data: dict[str, Any]) -> dict[str, Any]:
-        """Extract claim-related fields from a ticket dict."""
+        """Extract claim-related fields from a ticket dict.
+
+        Returns:
+            Dict with keys ``claimed_by``, ``machine_id``, ``operator``,
+            ``lease_expiry``, and ``lease_duration_minutes``.
+        """
         return {
             "claimed_by": data.get("claimed_by"),
             "machine_id": data.get("machine_id"),

@@ -1910,3 +1910,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-FE011.md
 - **Decisions:** PASS — Score 92/100, 0 critical, 1 warning (AF-005 coverage gap on health/ components, mitigated by QA PASS). Lint clean, type check clean, 131 tests passing. All complexity within thresholds.
 - **Timestamp:** 2026-03-11T14:45:00Z
+
+### [FORGEOS-BE071] — Documentation
+- **Artifacts:** mcp-server/src/mcp_server/migration/sync_engine.py, mcp-server/src/mcp_server/migration/conflict_resolver.py, mcp-server/README.md, .github/agent-output/Documentation/FORGEOS-BE071.md
+- **Decisions:** Added Attributes/Args/Returns docstring sections to all public dataclasses and methods. Added new Bidirectional Sync Engine section to README with API reference tables and usage examples.
+- **Timestamp:** 2026-03-11T14:30:00Z

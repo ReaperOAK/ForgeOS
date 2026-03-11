@@ -1279,6 +1279,135 @@ suggested retry delay (equal to `cleanup_interval_seconds`).
 - **Callbacks outside lock** -- cleanup callbacks run after releasing the lock.
 
 
+## Bidirectional Sync Engine
+
+<!-- last_reviewed: 2026-03-11T14:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.migration.sync_engine` module keeps the filesystem ticket
+state (`.github/tickets/` and `.github/ticket-state/`) synchronised with the
+PostgreSQL database during the dual-mode migration period.
+
+### How It Works
+
+Each sync cycle runs two phases:
+
+1. **FS → DB** — scans `.github/tickets/` for new or modified JSON files and
+   imports them into the database via `TicketImporter`.
+2. **DB → FS** — reads current ticket rows from the database and writes back
+   stage directory moves and claim/lease metadata updates to the filesystem.
+
+When both sides have diverged (e.g. a ticket's stage differs between JSON on
+disk and the row in PostgreSQL), the **database-wins** conflict resolution
+strategy applies. Every resolution is recorded in a structured audit log.
+
+### Quick Start
+
+```python
+from pathlib import Path
+from mcp_server.migration.sync_engine import SyncConfig, SyncEngine
+
+config = SyncConfig(
+    tickets_dir=Path(".github/tickets"),
+    ticket_state_dir=Path(".github/ticket-state"),
+    interval_seconds=60.0,  # default
+)
+
+engine = SyncEngine(
+    config=config,
+    db_reader=my_reader,   # implements DatabaseReader protocol
+    db_writer=my_writer,   # implements DatabaseWriter protocol
+)
+
+# Start periodic background sync
+await engine.start()
+
+# Run a single cycle manually
+result = await engine.sync_once()
+print(result.stats.fs_to_db_imported, result.stats.db_to_fs_stage_moves)
+
+# Stop the engine
+await engine.stop()
+```
+
+### Configuration
+
+| Parameter | Default | Description |
+|---|---|---|
+| `tickets_dir` | *(required)* | Path to `.github/tickets/` |
+| `ticket_state_dir` | *(required)* | Path to `.github/ticket-state/` |
+| `interval_seconds` | `60.0` | Delay between sync cycles (seconds) |
+
+### SyncEngine Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `start()` | `None` | Launch the periodic sync loop as a background task |
+| `stop()` | `None` | Signal the loop to stop and wait for clean shutdown |
+| `sync_once()` | `SyncResult` | Execute one full bidirectional sync cycle |
+| `is_running` | `bool` | Property — `True` while the background loop is active |
+
+### SyncResult
+
+Frozen dataclass returned by `sync_once()`:
+
+| Field | Type | Description |
+|---|---|---|
+| `stats` | `SyncStats` | Aggregate counters for both directions |
+| `conflicts` | `list[ConflictRecord]` | Audit records of every conflict resolved |
+| `errors` | `list[str]` | Human-readable error messages |
+| `started_at` | `str` | ISO-8601 cycle start timestamp |
+| `finished_at` | `str` | ISO-8601 cycle end timestamp |
+
+### SyncStats
+
+| Field | Type | Description |
+|---|---|---|
+| `fs_to_db_imported` | `int` | Tickets newly imported from filesystem |
+| `fs_to_db_updated` | `int` | Tickets updated in the database |
+| `fs_to_db_errors` | `int` | Errors during FS → DB sync |
+| `db_to_fs_stage_moves` | `int` | Stage directory moves performed |
+| `db_to_fs_claim_updates` | `int` | Claim metadata writes |
+| `db_to_fs_errors` | `int` | Errors during DB → FS sync |
+
+### Conflict Resolution
+
+The `ConflictResolver` in `mcp_server.migration.conflict_resolver` implements
+database-wins resolution with an immutable audit trail.
+
+| Method | Returns | Description |
+|---|---|---|
+| `resolve_stage(ticket_id, fs_stage, db_stage)` | `str` | Stage mismatch — returns DB stage |
+| `resolve_claim(ticket_id, fs_claim, db_claim)` | `dict` | Claim mismatch — returns DB claim |
+| `resolve_metadata(ticket_id, field, fs_val, db_val)` | `Any` | Generic field — returns DB value |
+| `record_new_in_fs(ticket_id)` | `None` | Log a ticket found only on filesystem |
+| `record_new_in_db(ticket_id)` | `None` | Log a ticket found only in database |
+| `conflicts` | `list[ConflictRecord]` | Property — copy of the audit log |
+| `clear()` | `None` | Reset the audit log between cycles |
+
+### ConflictRecord
+
+Immutable audit entry:
+
+| Field | Type | Description |
+|---|---|---|
+| `ticket_id` | `str` | Affected ticket |
+| `conflict_type` | `ConflictType` | `STAGE_MISMATCH`, `CLAIM_MISMATCH`, `METADATA_MISMATCH`, `NEW_IN_FS`, `NEW_IN_DB` |
+| `fs_value` | `Any` | Value found on filesystem |
+| `db_value` | `Any` | Value found in database |
+| `resolution` | `str` | Human-readable resolution description |
+| `resolved_at` | `str` | ISO-8601 timestamp |
+
+### Design Constraints
+
+- **Database-wins** — the database is always authoritative when both sides diverge.
+- **Audit-first** — every conflict produces an immutable `ConflictRecord` before state is changed.
+- **Independent lifecycle** — `start()` / `stop()` decouple the engine from the MCP server.
+- **Protocol-based DI** — `DatabaseReader` and `DatabaseWriter` are runtime-checkable `Protocol` classes.
+- **Structured logging** — all operations emit structured log entries via `mcp_server.observability`.
+
+
 ## Development
 
 ### Run tests
@@ -1311,7 +1440,7 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/events/`** — Append-only event sourcing (EventStore, EventType, Event dataclass)
 - **`mcp_server/locking/`** — Distributed claim queue (SKIP LOCKED), file mutex (advisory locks)
 - **`mcp_server/notifications/`** — Notification queue (at-least-once delivery), configurable channels (webhook, Slack) with event-type filtering, background processor with exponential-backoff retries, and dead-letter handling
-- **`mcp_server/migration/`** — Dual-mode migration wrapper and YAML-based feature flag system for per-operation mode switching (filesystem / dual / database)
+- **`mcp_server/migration/`** — Dual-mode migration wrapper, YAML-based feature flag system for per-operation mode switching (filesystem / dual / database), bidirectional sync engine (FS ↔ DB), and database-wins conflict resolver
 - **`mcp_server/sessions/`** -- Agent session lifecycle management (heartbeat, timeout, resumption, concurrent access)
 - **`mcp_server/transport/webhooks.py`** — Inbound webhook HTTP receiver (`POST /api/webhooks/{source}`)
 - **`mcp_server/webhooks/`** — GitHub webhook signature verification (HMAC-SHA256), push event handling, and CI status event handler (check_run/status → ticket advance or rework)
