@@ -8,6 +8,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Database-to-Filesystem Export** (FORGEOS-BE072) — `TicketExporter` at
+  `mcp-server/src/mcp_server/migration/exporter.py` reads all tickets from
+  PostgreSQL and generates `.github/tickets/*.json` master files plus
+  `.github/ticket-state/<STAGE>/*.json` state copies. Non-destructive: backs
+  up existing filesystem files before overwrite (auto-timestamped or
+  user-specified directory). Active claims (`claimed_by`, `machine_id`,
+  `operator`, `lease_expiry`) preserved in exported JSON. Dry-run mode for
+  preview without writes. `ExportConfig` frozen dataclass,
+  `ExportDatabaseReader` protocol, `ExportResult`/`ExportStats` reporting
+  with human-readable `summary()` output and stage distribution. Progress
+  callback support. 32 tests, 96% coverage, CI quality score 84/100.
+
 - **Dashboard Web Application Scaffold** (FORGEOS-FE001) — Next.js 14+
   dashboard at `dashboard/` using App Router, TypeScript strict mode, and
   Tailwind CSS. Dark/light theme system with CSS custom properties sourced
