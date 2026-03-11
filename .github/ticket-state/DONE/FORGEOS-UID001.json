@@ -4,7 +4,7 @@
   "description": "Define the foundational design system for the ForgeOS dashboard. Establish design tokens for colors (dark and light theme), typography scale, spacing system (4px grid), border radius, shadow levels, and z-index layering. Specify responsive layout breakpoints (desktop-first: 1440px, 1024px, 768px). Define the overall dashboard shell layout: sidebar navigation, top bar, main content area, and notification panel. Produce the design token JSON file and layout specification document.",
   "type": "frontend",
   "priority": "high",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",

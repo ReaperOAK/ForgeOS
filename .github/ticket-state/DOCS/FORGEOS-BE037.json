@@ -37,10 +37,10 @@
     "Both endpoints create event history records"
   ],
   "rework_count": 0,
-  "claimed_by": "CI Reviewer",
+  "claimed_by": "Documentation Specialist",
   "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T04:49:13.994957+00:00",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-11T08:56:07.423058+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -128,11 +128,18 @@
       "details": "Claimed by ReaperOAK@pop-os via CI Reviewer, lease until 2026-03-11T04:49:13.994957+00:00"
     },
     {
-      "timestamp": "2026-03-11T04:27:28.156642+00:00",
+      "timestamp": "2026-03-11T04:29:19.444192+00:00",
       "event": "STAGE_ADVANCED",
       "agent": "CIReviewer",
       "machine_id": "pop-os",
       "details": "CI PASS \u2014 Score 98/100, 0 critical, 0 warnings, 24/24 tests passed"
+    },
+    {
+      "timestamp": "2026-03-11T08:22:46.402411+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from CI Reviewer: Lease expired at 2026-03-11T04:49:13.994957+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
