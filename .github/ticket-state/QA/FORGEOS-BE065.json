@@ -4,7 +4,7 @@
   "description": "Implement the notification emitter that creates queue entries when ticket state changes occur. Integrate with the ticket service layer: after advance, rework, claim, or release operations, enqueue a notification containing the ticket context, change details, and actor information. Support notification types: stage_changed, ticket_claimed, ticket_released, ticket_reworked, lease_expiring.",
   "type": "backend",
   "priority": "high",
-  "stage": "READY",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Emitter is called from the ticket service layer (not duplicated across MCP/REST)"
   ],
   "rework_count": 0,
-  "claimed_by": "Backend",
+  "claimed_by": "QA Engineer",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T01:04:13.015661+00:00",
+  "lease_expiry": "2026-03-11T01:32:59.197710+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -63,6 +63,22 @@
       "from_stage": "READY",
       "to_stage": "READY",
       "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-11T01:04:13.015661+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T01:02:59.162644+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: manual release"
+    },
+    {
+      "timestamp": "2026-03-11T01:02:59.197725+00:00",
+      "event": "CLAIMED",
+      "agent": "QA Engineer",
+      "machine_id": "pop-os",
+      "from_stage": "QA",
+      "to_stage": "QA",
+      "details": "Claimed by ReaperOAK@pop-os via QA Engineer, lease until 2026-03-11T01:32:59.197710+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-webhooks.md",
