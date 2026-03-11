@@ -1,5 +1,6 @@
 import type { ApiClientConfig, ApiError } from './types';
 
+/** Default client configuration. Uses `NEXT_PUBLIC_API_URL` or localhost:3000. */
 const DEFAULT_CONFIG: ApiClientConfig = {
   baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
   timeout: 10_000,
@@ -8,6 +9,10 @@ const DEFAULT_CONFIG: ApiClientConfig = {
   },
 };
 
+/**
+ * Parse a non-OK fetch response into a typed {@link ApiError}.
+ * Falls back to status text when the body is not valid JSON.
+ */
 async function parseErrorResponse(response: Response): Promise<ApiError> {
   try {
     const body = await response.json();
@@ -25,6 +30,7 @@ async function parseErrorResponse(response: Response): Promise<ApiError> {
   }
 }
 
+/** Type guard that narrows an unknown value to {@link ApiError}. */
 export function isApiError(error: unknown): error is ApiError {
   return (
     typeof error === 'object' &&
@@ -36,6 +42,10 @@ export function isApiError(error: unknown): error is ApiError {
   );
 }
 
+/**
+ * Build a URL query string from a key-value map, omitting undefined values.
+ * @returns The query string prefixed with `?`, or an empty string if no params.
+ */
 export function buildQueryString(
   params: Record<string, string | number | undefined>,
 ): string {
@@ -49,6 +59,12 @@ export function buildQueryString(
   return qs ? `?${qs}` : '';
 }
 
+/**
+ * HTTP client for the ForgeOS REST API.
+ *
+ * Wraps `fetch` with timeout handling, JSON parsing, and typed error responses.
+ * Base URL is read from `NEXT_PUBLIC_API_URL` at construction time.
+ */
 class ForgeApiClient {
   private config: ApiClientConfig;
 
@@ -60,10 +76,15 @@ class ForgeApiClient {
     };
   }
 
+  /** Return the configured base URL. */
   getBaseUrl(): string {
     return this.config.baseUrl;
   }
 
+  /**
+   * Send a GET request and return the parsed JSON body.
+   * @throws {ApiError} On non-OK response or network failure.
+   */
   async get<T>(path: string): Promise<T> {
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), this.config.timeout);
@@ -104,4 +125,5 @@ class ForgeApiClient {
   }
 }
 
+/** Singleton API client instance used by all endpoint functions. */
 export const apiClient = new ForgeApiClient();

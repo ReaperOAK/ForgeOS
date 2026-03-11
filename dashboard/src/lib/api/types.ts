@@ -58,6 +58,7 @@ export type EventType =
   | 'HEARTBEAT'
   | 'COMPLETED';
 
+/** Core ticket entity returned by the list and detail endpoints. */
 export interface Ticket {
   id: string;
   ticket_id: string;
@@ -89,6 +90,7 @@ export interface Ticket {
   completed_at: string | null;
 }
 
+/** Active claim on a ticket by an agent. */
 export interface Claim {
   ticket_id: string;
   title: string;
@@ -101,6 +103,7 @@ export interface Claim {
   status: TicketStatus;
 }
 
+/** Records a single stage or status transition for a ticket. */
 export interface StageTransition {
   previous_stage: TicketStage | null;
   new_stage: TicketStage | null;
@@ -111,6 +114,7 @@ export interface StageTransition {
   machine_id: string | null;
 }
 
+/** Audit trail entry for a single ticket lifecycle event. */
 export interface EventHistory {
   id: string;
   ticket_id: string;
@@ -127,18 +131,21 @@ export interface EventHistory {
   created_at: string;
 }
 
+/** Aggregate counts for one pipeline stage. */
 export interface StageSummary {
   count: number;
   claimed: number;
   ready: number;
 }
 
+/** Full pipeline snapshot with per-stage summaries. */
 export interface PipelineOverview {
   stages: Record<string, StageSummary>;
   total_tickets: number;
   timestamp: string;
 }
 
+/** Pagination metadata returned alongside a list response. */
 export interface PaginationInfo {
   total: number;
   limit: number;
@@ -146,11 +153,13 @@ export interface PaginationInfo {
   has_more: boolean;
 }
 
+/** Generic wrapper for paginated list responses. */
 export interface PaginatedResponse<T> {
   data: T[];
   pagination: PaginationInfo;
 }
 
+/** Resolution status of a single ticket dependency. */
 export interface DependencyStatus {
   ticket_id: string;
   title: string | null;
@@ -158,10 +167,12 @@ export interface DependencyStatus {
   is_resolved: boolean;
 }
 
+/** Extended ticket with resolved dependency information. */
 export interface TicketDetail extends Ticket {
   dependency_status: DependencyStatus[];
 }
 
+/** Query parameters accepted by the ticket list endpoint. */
 export interface TicketFilters {
   stage?: TicketStage;
   type?: TicketType;
@@ -172,12 +183,14 @@ export interface TicketFilters {
   offset?: number;
 }
 
+/** Configuration options for {@link ForgeApiClient}. */
 export interface ApiClientConfig {
   baseUrl: string;
   timeout: number;
   headers: Record<string, string>;
 }
 
+/** Structured error thrown by the API client on non-OK responses. */
 export interface ApiError {
   message: string;
   status: number;
