@@ -4,7 +4,9 @@ import { useEffect, useState } from 'react';
 import type { EventHistory } from '@/lib/api';
 import { fetchTicketHistory, isApiError } from '@/lib/api';
 
+/** Props for the {@link HistoryTimeline} component. */
 interface HistoryTimelineProps {
+    /** Ticket ID used to fetch the event history from the API. */
     ticketId: string;
 }
 
@@ -56,6 +58,13 @@ function formatRelativeTime(iso: string): string {
     return `${diffDays}d ago`;
 }
 
+/**
+ * Vertical timeline showing chronological ticket events.
+ *
+ * Fetches history via {@link fetchTicketHistory} and renders each event
+ * as a card with agent name, machine, relative timestamp, optional
+ * stage transition indicator, and expandable JSON payload details.
+ */
 export function HistoryTimeline({ ticketId }: HistoryTimelineProps) {
     const [events, setEvents] = useState<EventHistory[]>([]);
     const [loading, setLoading] = useState(true);

@@ -4,7 +4,7 @@
   "description": "Implement the ticket detail page following the UIDesigner mockup (FORGEOS-UID002). Display full ticket metadata (ID, title, type, priority, stage, claimed_by, machine, operator, lease_expiry), acceptance criteria as a checklist, file paths list, and tabbed content for History (timeline of state transitions) and Dependencies (upstream depends_on and downstream dependents). Data from the ticket detail and history API endpoints.",
   "type": "frontend",
   "priority": "critical",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -149,6 +149,24 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "Advanced from CI to DOCS"
+    },
+    {
+      "timestamp": "2026-03-11T16:04:27.899462+00:00",
+      "event": "CLAIMED",
+      "agent": "DocumentationSpecialist",
+      "machine_id": "pop-os",
+      "from_stage": "READY",
+      "to_stage": "READY",
+      "details": "Claimed by ReaperOAK@pop-os via DocumentationSpecialist, lease until 2026-03-11T16:34:27.899444+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T16:12:52.924256+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "DocumentationSpecialist",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",

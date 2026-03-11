@@ -1,5 +1,12 @@
 import Link from 'next/link';
 
+/**
+ * Custom 404 page shown when a ticket ID does not exist.
+ *
+ * Provides a link back to the pipeline view.
+ *
+ * @returns The ticket-not-found error page
+ */
 export default function TicketNotFound() {
     return (
         <div className="max-w-md mx-auto text-center py-20">
