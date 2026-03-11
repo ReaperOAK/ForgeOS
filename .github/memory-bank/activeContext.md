@@ -3872,3 +3872,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/api/schemas.py, mcp-server/src/mcp_server/api/routes/tickets.py, mcp-server/src/mcp_server/api/routes/__init__.py, mcp-server/src/mcp_server/transport/http.py, mcp-server/tests/test_ticket_detail_history_api.py
 - **Decisions:** Used EventStore.replay_ticket_events() for history rather than direct DB query; paginate in-memory after replay for simplicity since event count per ticket is bounded; resolve dependency status eagerly via sequential get_by_id calls
 - **Timestamp:** 2026-03-11T02:10:00+00:00
+
+### [FORGEOS-BE055] — Validation APPROVED
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE055.md
+- **Decisions:** APPROVED — 10/10 DoD items pass, all 6 ACs verified, all upstream verdicts (QA/Security/CI/Docs) confirmed PASS. CWE-862 rework fix verified in claim_by_id. 4 pre-existing pyright errors in TicketDetail not from BE055.
+- **Timestamp:** 2026-03-11T02:45:00Z
