@@ -4,7 +4,7 @@
   "description": "Extend the WebSocket streaming from FORGEOS-BE039 to support client-side filter subscriptions. Clients can subscribe to filtered streams (by stage, type, agent, or ticket_id) to receive only relevant events. Implement subscription management: clients send subscribe/unsubscribe messages to control their filter set.",
   "type": "backend",
   "priority": "medium",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Backpressure management drops oldest events for slow consumers after buffer limit"
   ],
   "rework_count": 0,
-  "claimed_by": "Security Engineer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-11T08:56:07.423058+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -96,6 +96,15 @@
       "from_stage": "QA",
       "to_stage": "SECURITY",
       "details": "Advanced from QA to SECURITY"
+    },
+    {
+      "timestamp": "2026-03-11T08:46:42.541739+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
