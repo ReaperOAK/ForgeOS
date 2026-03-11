@@ -3803,6 +3803,11 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** QA PASS — 297/297 tests pass (43 new + 254 existing), fallback.py 96% coverage, config.py 100%, client.py 90%, overall SDK 95%. All 6 ACs verified. No shell injection (list-form subprocess), proper timeouts, clean exports. Zero lint errors. No regressions.
 - **Timestamp:** 2026-03-11T02:10:00Z
 
+### [FORGEOS-BE031] — Implement tickets.rework MCP Tool (QA PASS)
+- **Artifacts:** mcp-server/src/mcp_server/tools/ticket_tools.py, mcp-server/src/mcp_server/services/ticket_service.py, mcp-server/tests/test_rework_tool.py, .github/agent-output/QA/FORGEOS-BE031.md
+- **Decisions:** QA PASS — 34/34 rework tests pass, 139/139 combined (rework + ticket_tools) pass, 2278/2278 full suite pass (6 pre-existing failures unrelated). All 8 ACs verified. Rework-specific code ~95% covered. SERIALIZABLE isolation, sdlc_flow[1] for impl stage, STAGE_REJECTED/ESCALATED events, claim released on rework. Zero lint errors, no regressions.
+- **Timestamp:** 2026-03-11T02:30:00Z
+
 ### [FORGEOS-BE041] — Implement Idempotency Keys for Operations (QA PASS)
 - **Artifacts:** mcp-server/src/mcp_server/middleware/idempotency.py, mcp-server/tests/test_idempotency.py, mcp-server/src/mcp_server/middleware/__init__.py
 - **Decisions:** QA PASS — 38/38 tests pass, 94% branch coverage. All 6 ACs verified (AC4 PostgreSQL store deferred — in-memory with pluggable store abstraction, file_paths scope confirms this was intended). No regressions (1 pre-existing failure in test_correlation.py unrelated to BE041). Ruff lint clean.
