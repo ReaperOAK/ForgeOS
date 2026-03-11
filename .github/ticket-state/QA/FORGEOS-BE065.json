@@ -35,10 +35,10 @@
     "Emitter is called from the ticket service layer (not duplicated across MCP/REST)"
   ],
   "rework_count": 2,
-  "claimed_by": "Backend",
+  "claimed_by": "QA Engineer",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T01:58:27.416120+00:00",
+  "lease_expiry": "2026-03-11T02:19:17.497015+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -115,6 +115,22 @@
       "from_stage": "BACKEND",
       "to_stage": "QA",
       "details": "BACKEND rework #2 complete: added emit_reworked() call in rework_ticket() + integration test. 21/21 tests pass, 129 regression tests pass."
+    },
+    {
+      "timestamp": "2026-03-11T01:49:17.464343+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: manual release"
+    },
+    {
+      "timestamp": "2026-03-11T01:49:17.497031+00:00",
+      "event": "CLAIMED",
+      "agent": "QA Engineer",
+      "machine_id": "pop-os",
+      "from_stage": "QA",
+      "to_stage": "QA",
+      "details": "Claimed by ReaperOAK@pop-os via QA Engineer, lease until 2026-03-11T02:19:17.497015+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-webhooks.md",
