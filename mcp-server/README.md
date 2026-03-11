@@ -4055,6 +4055,223 @@ old value, and new value. This provides an audit trail for migration transitions
 - **No external state** — flags are derived purely from the YAML file and environment variables.
 
 
+## Filesystem-to-Database Data Import
+
+<!-- last_reviewed: 2026-03-11T09:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.migration.importer` and `mcp_server.migration.transformers`
+modules provide an idempotent import pipeline that reads ticket JSON files from
+the filesystem and writes them to PostgreSQL. This is the first step of the
+migration data flow from the file-based ticket system to the database-backed
+MCP server.
+
+### How It Works
+
+1. `TicketImporter` scans `.github/tickets/*.json` for raw ticket data.
+2. It scans `.github/ticket-state/` subdirectories to determine each ticket's
+   current stage (picks the most advanced directory when duplicates exist).
+3. `TicketTransformer` maps JSON fields to database schema columns, translates
+   stage names, infers status, and decomposes history arrays into event records.
+4. The importer calls `DatabaseWriter.upsert_ticket()` for each ticket and
+   `DatabaseWriter.insert_events()` for history entries.
+5. Re-running the import updates existing records without creating duplicates.
+
+### Quick Start
+
+```python
+from pathlib import Path
+from mcp_server.migration import TicketImporter, ImportConfig
+
+config = ImportConfig(
+    tickets_dir=Path(".github/tickets"),
+    ticket_state_dir=Path(".github/ticket-state"),
+    dry_run=True,  # preview without writing to the database
+)
+
+importer = TicketImporter(config)
+result = await importer.run()
+print(result.summary())
+```
+
+For actual database writes, provide a `DatabaseWriter` implementation:
+
+```python
+importer = TicketImporter(config, writer=my_db_writer)
+result = await importer.run()
+print(f"Imported: {result.stats.imported}, Updated: {result.stats.updated}")
+```
+
+### ImportConfig
+
+Frozen dataclass controlling import behavior:
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `tickets_dir` | `Path` | *(required)* | Directory containing `*.json` ticket files |
+| `ticket_state_dir` | `Path` | *(required)* | Directory with stage subdirectories (`READY/`, `BACKEND/`, etc.) |
+| `dry_run` | `bool` | `False` | When `True`, transforms tickets without writing to the database |
+
+### DatabaseWriter Protocol
+
+Runtime-checkable protocol that the importer calls for persistence:
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `upsert_ticket(ticket)` | `bool` | Insert or update a ticket. Returns `True` if newly inserted. |
+| `insert_events(events)` | `int` | Insert events, skipping duplicates. Returns count of inserted events. |
+
+### ImportResult and ImportStats
+
+`ImportResult` contains the outcome of a run:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `stats` | `ImportStats` | Counters for the run |
+| `dry_run` | `bool` | Whether this was a dry run |
+| `errors` | `list[str]` | Error messages for failed tickets |
+| `warnings` | `list[str]` | Warnings from transformation |
+| `summary()` | `str` | Human-readable summary string |
+
+`ImportStats` counters:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `total_found` | `int` | Number of ticket files discovered |
+| `imported` | `int` | New tickets inserted |
+| `updated` | `int` | Existing tickets updated |
+| `skipped` | `int` | Tickets skipped |
+| `errors` | `int` | Tickets that failed to import |
+| `events_imported` | `int` | Total event records inserted |
+
+### TicketTransformer
+
+Stateless transformer that converts raw ticket JSON to database-ready records.
+
+#### Methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `transform(raw, resolved_stage=None)` | `TransformResult` | Convert one ticket dict to DB format |
+| `resolve_stage(directory_names)` | `str` | Pick the most advanced stage from directory names |
+| `map_stage(fs_name)` | `str` | Map a filesystem stage name to DB enum |
+| `map_sdlc_flow(flow)` | `list[str]` | Map a list of stage names to DB enum values |
+
+#### Stage Mapping
+
+Filesystem directory names map to database enum values:
+
+| Directory | DB Enum |
+|-----------|---------|
+| `READY` | `READY` |
+| `ARCHITECT` | `ARCHITECT` |
+| `RESEARCH` | `RESEARCH` |
+| `BACKEND` | `BACKEND` |
+| `FRONTEND` | `FRONTEND` |
+| `QA` | `QA` |
+| `SECURITY` | `SECURITY` |
+| `CI` | `CI` |
+| `DOCS` | `DOCUMENTATION` |
+| `VALIDATION` | `VALIDATOR` |
+| `DONE` | `DONE` |
+
+When a ticket appears in multiple stage directories, `resolve_stage()` returns
+the most advanced stage based on a numeric ordering.
+
+#### Event-Type Mapping
+
+History entries map to database event types:
+
+| Filesystem Event | DB Event Type |
+|------------------|---------------|
+| `CREATED` | `CREATED` |
+| `CLAIMED` | `CLAIMED` |
+| `RELEASED` | `RELEASED` |
+| `STAGE_ADVANCED` | `STAGE_ADVANCED` |
+| `STAGE_REJECTED` | `STAGE_REJECTED` |
+| `MOVED_TO_READY` | `UPDATED` |
+| `ESCALATED` | `ESCALATED` |
+| `LEASE_EXTENDED` | `LEASE_EXTENDED` |
+| `FORCE_RELEASED` | `FORCE_RELEASED` |
+| `RECONCILED` | `RECONCILED` |
+
+### TransformedTicket
+
+Frozen dataclass with all database-ready ticket fields (22 attributes):
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `ticket_id` | `str` | Human-readable ticket ID |
+| `title` | `str` | Ticket title |
+| `description` | `str \| None` | Description text |
+| `ticket_type` | `str` | Type (`backend`, `frontend`, `fullstack`, etc.) |
+| `priority` | `str` | Priority (`critical`, `high`, `medium`, `low`) |
+| `status` | `str` | Inferred status (`READY`, `CLAIMED`, `DONE`) |
+| `stage` | `str` | DB enum stage name |
+| `sdlc_flow` | `list[str]` | Ordered stage list for this ticket type |
+| `depends_on` | `list[str]` | Dependency ticket IDs |
+| `file_paths` | `list[str]` | Files in scope |
+| `acceptance_criteria` | `list[str]` | Acceptance criteria list |
+| `rework_count` | `int` | Number of rework cycles |
+| `created_at` | `str` | Creation timestamp |
+
+### TransformedEvent
+
+Frozen dataclass for database-ready event records:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `ticket_id` | `str` | Associated ticket ID |
+| `event_type` | `str` | Mapped event type |
+| `agent_name` | `str \| None` | Agent that triggered the event |
+| `machine_id` | `str \| None` | Machine identifier |
+| `previous_stage` | `str \| None` | Stage before the event (mapped) |
+| `new_stage` | `str \| None` | Stage after the event (mapped) |
+| `payload` | `dict` | Additional event data |
+| `created_at` | `str` | Event timestamp |
+
+### Progress Callback
+
+Pass a callback to receive progress updates during import:
+
+```python
+def on_progress(current: int, total: int, ticket_id: str) -> None:
+    print(f"[{current}/{total}] Processing {ticket_id}")
+
+importer = TicketImporter(config, writer=writer, on_progress=on_progress)
+```
+
+### Error Handling
+
+| Scenario | Behavior |
+|----------|----------|
+| No `DatabaseWriter` with `dry_run=False` | Raises `ValueError` |
+| Missing required fields (`ticket_id`, `title`, `type`) | `TransformError` — ticket skipped, error recorded |
+| Invalid JSON file | Warning logged, file skipped |
+| Non-dict JSON file | Warning logged, file skipped |
+| Unknown ticket type | Warning emitted, defaults to `"backend"` |
+| Unknown priority | Warning emitted, defaults to `"medium"` |
+| Database write failure | Error recorded, import continues with remaining tickets |
+| Tickets directory missing | Returns empty result with zero counts |
+
+### Design Constraints
+
+- **Idempotent** — upsert semantics ensure re-running the import updates
+  existing records without creating duplicates.
+- **Stateless transformer** — `TicketTransformer` holds no state between calls.
+  Each `transform()` invocation is independent.
+- **Protocol-based persistence** — `DatabaseWriter` is a runtime-checkable
+  `Protocol`. Any class implementing `upsert_ticket()` and `insert_events()`
+  satisfies the interface without inheritance.
+- **Partial-success semantics** — individual ticket failures are recorded but
+  do not abort the import. The summary includes error counts and messages.
+- **Dry-run support** — set `dry_run=True` to preview the import without
+  touching the database.
+- **Structured logging** — all operations include `ticket_id` correlation
+  context via the `mcp_server.observability` logger.
+
+
 ## Admin Force Operations
 
 <!-- last_reviewed: 2026-03-11T00:00:00Z -->

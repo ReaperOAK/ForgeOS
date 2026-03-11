@@ -8,6 +8,23 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Filesystem-to-Database Data Import** (FORGEOS-BE070) — Async
+  `TicketImporter` at `mcp-server/src/mcp_server/migration/importer.py` that
+  reads all `.github/tickets/*.json` files and imports them into PostgreSQL
+  with upsert semantics. Stage determined from `.github/ticket-state/`
+  directory location using `TicketTransformer.resolve_stage()` (picks the most
+  advanced directory when a ticket appears in multiple). History arrays
+  decomposed into individual `event_history` records with event-type mapping
+  (`CREATED`, `CLAIMED`, `STAGE_ADVANCED`, etc.). Stateless
+  `TicketTransformer` at `transformers.py` handles field mapping, stage-name
+  translation (filesystem directory names to DB enum values), status
+  inference, and validation. Dry-run mode for preview without database writes.
+  `DatabaseWriter` protocol for pluggable persistence. `ImportConfig`,
+  `ImportStats`, `ImportResult` frozen/mutable dataclasses for configuration
+  and reporting. Progress callback support. Idempotent: re-running updates
+  existing records without creating duplicates. 70 tests, 99% coverage, CI
+  quality score 99/100.
+
 - **Feature Flag System for Migration** (FORGEOS-BE069) — YAML-based feature
   flag system at `mcp-server/src/mcp_server/migration/feature_flags.py` that
   controls per-operation routing between filesystem, dual, and database modes
