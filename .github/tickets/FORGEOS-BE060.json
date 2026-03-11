@@ -4,7 +4,7 @@
   "description": "Implement GitHub webhook signature verification using HMAC-SHA256. The webhook secret is stored as an environment variable (never hardcoded). Verify the `X-Hub-Signature-256` header against the computed HMAC of the request body. Reject requests with invalid or missing signatures. Parse GitHub event types from the `X-GitHub-Event` header.",
   "type": "backend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",

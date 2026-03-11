@@ -8,6 +8,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **GitHub Webhook Signature Verification** (FORGEOS-BE060) — HMAC-SHA256
+  signature verification for inbound GitHub webhooks at
+  `mcp-server/src/mcp_server/webhooks/signature.py` and
+  `mcp-server/src/mcp_server/webhooks/github_handler.py`. Verifies the
+  `X-Hub-Signature-256` header against the computed HMAC of the request body
+  using `hmac.compare_digest()` for constant-time comparison. Secret loaded
+  from `GITHUB_WEBHOOK_SECRET` environment variable (never hardcoded).
+  Rejects missing signatures with 401 and invalid signatures with 403.
+  Extracts GitHub event type from `X-GitHub-Event` header.
+  Domain errors: `GitHubSignatureError`, `GitHubSignatureMissingError`.
+  Integrated into the webhook receiver at `transport/webhooks.py`.
+  100% test coverage (46/46 statements), 40 tests passing.
+
 - **Sync and Validate MCP Tools** (FORGEOS-BE033) — Two MCP tools at
   `mcp-server/src/mcp_server/tools/ticket_tools.py` backed by the
   `SyncEngine` at `mcp-server/src/mcp_server/services/sync_engine.py`.
