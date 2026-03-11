@@ -424,3 +424,14 @@ Known sources list disclosed in `UnknownSourceError` details. Risk accepted — 
 
 - **Agent:** Security Engineer
 - **Timestamp:** 2026-03-11T10:10:00Z
+
+## FORGEOS-BE071 — Bidirectional Sync Engine
+**Date:** 2026-03-11T11:30:00Z
+**Agent:** Security Engineer
+
+| ID | Threat | CWE | Severity | Status | Mitigation |
+|----|--------|-----|----------|--------|------------|
+| SEC-001 | Path traversal via unvalidated ticket_id in filesystem path construction | CWE-22 | MEDIUM | Accepted | ticket_id from trusted DB; controlled format FORGEOS-XXNNN; recommend adding format validation |
+| SEC-002 | Stage name fallback passes raw DB value to mkdir/path construction | CWE-22 | MEDIUM | Accepted | DB uses enum constraint on stage column; recommend removing fallback |
+| SEC-003 | TOCTOU race in file exist check → move | CWE-367 | LOW | Accepted | Git-based claim protocol ensures single-writer per ticket |
+| SEC-004 | Unbounded JSON file read in _read_fs_tickets | CWE-400 | LOW | Accepted | Operator-managed directory; files typically <5KB |
