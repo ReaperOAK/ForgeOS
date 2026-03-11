@@ -4133,6 +4133,16 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** PASS — Score 100/100, 0 critical, 0 warnings. Ruff 0/0, mypy strict clean, CC max B(9), coverage 100% on emitter.py, 21 tests pass. No dead code, no circular imports.
 - **Timestamp:** 2026-03-11T03:20:00Z
 
+### [FORGEOS-BE035] — Documentation
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE035.md
+- **Decisions:** Added Ticket Detail and Ticket History REST Endpoint reference sections to mcp-server/README.md. Updated architecture description and endpoints table. Changelog entry added. Inline docstrings pre-existing and complete — no changes needed.
+- **Timestamp:** 2026-03-11T03:40:00Z
+
+### [FORGEOS-BE036] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, mcp-server/src/mcp_server/api/schemas.py, CHANGELOG.md
+- **Decisions:** Added full reference section for Ticket Claim REST Endpoint (POST/DELETE /api/tickets/{id}/claim) to README. Updated module docstring in schemas.py to reference BE036 claim/release schemas. Added CHANGELOG entry. Updated endpoints table and module listing.
+- **Timestamp:** 2026-03-11T04:00:00Z
+
 ### [FORGEOS-BE039] — Documentation Summary
 - **Artifacts:** mcp-server/README.md, CHANGELOG.md
 - **Decisions:** Added WebSocket Streaming reference section to README (Diátaxis: Reference). Docstrings already comprehensive — no changes needed. CHANGELOG entry added under [Unreleased].
@@ -4147,3 +4157,18 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/README.md, CHANGELOG.md, mcp-server/src/mcp_server/api/schemas.py, .github/agent-output/Documentation/FORGEOS-BE038.md
 - **Decisions:** Added two reference sections (Pipeline Overview, Health Check) to README following existing endpoint section pattern. Updated schemas module docstring. CHANGELOG entry added.
 - **Timestamp:** 2026-03-11T03:45:00Z
+
+### [FORGEOS-BE063] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE063.md
+- **Decisions:** APPROVED — 10/10 DoD items pass, all 6 ACs verified, upstream verdicts (QA/Security/CI/Docs) all PASS, 34/34 tests, 100% coverage, lint clean, type checks clean
+- **Timestamp:** 2026-03-11T04:00:00Z
+
+### [FORGEOS-BE062] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE062.md
+- **Decisions:** APPROVED (HIGH confidence) — 10/10 DoD items pass. 31 tests, 84% coverage. Lint clean. Type check clean. All upstream verdicts verified (QA PASS, Security PASS, CI PASS, Docs PASS).
+- **Timestamp:** 2026-03-11T04:30:00Z
+
+### [FORGEOS-BE061] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE061.md
+- **Decisions:** PASS — Score 99/100, 0 critical, 0 warnings, 1 suggestion (pre-existing mypy arg-type in webhook_service base class)
+- **Timestamp:** 2026-03-11T07:30:00Z
