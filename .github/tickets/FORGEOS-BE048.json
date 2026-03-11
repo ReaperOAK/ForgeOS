@@ -4,7 +4,7 @@
   "description": "Implement summary handoff helper methods in the agent SDK. Provide `read_upstream_summary(ticket_id)` to read the previous stage agent's summary from `.github/agent-output/{PreviousAgent}/{ticket-id}.md`, and `write_summary(ticket_id, content)` to write the current agent's summary. Helpers map agent roles to directory names and handle file I/O with proper encoding.",
   "type": "backend",
   "priority": "medium",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -33,10 +33,10 @@
     "Both methods use UTF-8 encoding and handle missing files gracefully"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T03:06:35.451982+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -172,6 +172,15 @@
       "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
       "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-11T03:06:35.451982+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T02:44:00.169098+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-agent-sdk.md",
