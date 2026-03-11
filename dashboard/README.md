@@ -290,6 +290,31 @@ Constants: `NODE_WIDTH = 180`, `NODE_HEIGHT = 56`, `HORIZONTAL_GAP = 80`,
 - **Click a node** — navigate to `/tickets/{id}`.
 - **Hover a node** — highlight connected edges.
 
+---
+
+## Global Search (`/search`)
+
+Full-text ticket search with typeahead, filters, and URL-persisted state.
+
+### Files
+
+| File | Purpose |
+|------|---------|
+| `src/app/search/page.tsx` | Search page with URL-param sync, filter toggles, and Suspense boundary |
+| `src/components/search/SearchBar.tsx` | Combobox-style typeahead (Cmd/Ctrl+K shortcut, debounced API, recent searches) |
+| `src/components/search/SearchResults.tsx` | Results list with highlighted matches, empty state, and skeleton loaders |
+
+### Features
+
+- **Keyboard shortcut** — `Cmd/Ctrl + K` focuses the search input from anywhere.
+- **Debounced typeahead** — 300 ms debounce; max 10 suggestions.
+- **Filter chips** — stage, priority, and type filters toggle on/off.
+- **Recent searches** — last 5 queries persisted in `localStorage`.
+- **URL sync** — query and active filters serialised to `?q=&stage=&priority=&type=`
+  so search state is shareable and bookmark-friendly.
+- **Match highlighting** — matching substrings highlighted in both the typeahead
+  dropdown and the full results page via `<mark>` elements.
+
 ### Error Handling
 
 All endpoint functions throw an `ApiError` on non-OK responses or network

@@ -7,10 +7,15 @@ import type { Ticket, TicketPriority } from '@/lib/api';
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
 
+/** Props for {@link SearchResults}. */
 export interface SearchResultsProps {
+    /** Tickets matching the current query and filters. */
     tickets: Ticket[];
+    /** Current search query string. */
     query: string;
+    /** Whether a search request is in-flight. */
     isLoading: boolean;
+    /** Total number of matching tickets (before pagination). */
     totalCount: number;
 }
 
@@ -164,6 +169,13 @@ function ResultSkeleton() {
 /*  SearchResults Component                                            */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Search results list with highlighted matches and empty/loading states.
+ *
+ * Renders a count header, skeleton loaders while loading, an empty-state
+ * illustration when no tickets match, and a list of {@link TicketResultCard}
+ * components with query-term highlighting.
+ */
 export function SearchResults({
     tickets,
     query,
