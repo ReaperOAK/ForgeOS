@@ -8,6 +8,11 @@ Phase A — Background Sync:
     in the background, mirroring every filesystem change to the
     database. The filesystem remains the source of truth. No agent
     behaviour changes are required.
+
+Phase B — SDK with Fallback:
+    Agents use the ForgeOS SDK for the CLAIM operation (MCP primary,
+    filesystem fallback).  WORK commits remain git-based.  The phase
+    exits when 95%+ operations succeed via MCP for 48+ hours.
 """
 
 from mcp_server.migration.phases.phase_a import (
@@ -17,11 +22,29 @@ from mcp_server.migration.phases.phase_a import (
     PhaseAStatus,
     ValidationReport,
 )
+from mcp_server.migration.phases.phase_b import (
+    FilesystemClaimAdapter,
+    OperationBackend,
+    OperationRecord,
+    PhaseB,
+    PhaseBConfig,
+    PhaseBStatus,
+    SDKClaimAdapter,
+    TransitionReport,
+)
 
 __all__ = [
     "Discrepancy",
+    "FilesystemClaimAdapter",
+    "OperationBackend",
+    "OperationRecord",
     "PhaseA",
     "PhaseAConfig",
     "PhaseAStatus",
+    "PhaseB",
+    "PhaseBConfig",
+    "PhaseBStatus",
+    "SDKClaimAdapter",
+    "TransitionReport",
     "ValidationReport",
 ]
