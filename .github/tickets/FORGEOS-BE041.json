@@ -4,7 +4,7 @@
   "description": "Implement idempotency keys for claim and advance operations to prevent duplicate processing from retries. Clients include an idempotency key header or parameter. The server stores the key and its result; replayed requests return the cached result without re-executing. Keys expire after a configurable TTL.",
   "type": "backend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",

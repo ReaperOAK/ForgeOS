@@ -1,0 +1,68 @@
+{
+  "ticket_id": "FORGEOS-BE039",
+  "title": "Implement WebSocket Ticket State Streaming",
+  "description": "Implement the WebSocket endpoint at `/ws/tickets` that streams real-time ticket state changes to connected dashboard clients. Create an event broadcaster service that subscribes to ticket state change events from the event sourcing subsystem (FORGEOS-BE012) and pushes them to all connected WebSocket clients. Handle connection lifecycle including authentication, keep-alive pings, and clean disconnection.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:06:45.292753+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE034",
+    "FORGEOS-BE012"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "mcp-server/src/api/routes/websocket.py",
+    "mcp-server/src/services/event_broadcaster.py"
+  ],
+  "acceptance_criteria": [
+    "WebSocket endpoint at /ws/tickets accepts client connections",
+    "Event broadcaster subscribes to ticket state change events from the event subsystem",
+    "State changes are broadcast to all connected WebSocket clients in real-time",
+    "WebSocket messages use a defined JSON format with event_type, ticket_id, and payload",
+    "Keep-alive ping/pong mechanism prevents idle disconnections",
+    "Clean disconnection handling removes client from broadcast list"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:06:45.292758+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase3-ticket-api.md"
+    },
+    {
+      "timestamp": "2026-03-11T01:13:29.675513+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase3-ticket-api.md",
+  "tags": [
+    "backend",
+    "websocket",
+    "streaming",
+    "realtime",
+    "phase3",
+    "BLK-06-03"
+  ]
+}
