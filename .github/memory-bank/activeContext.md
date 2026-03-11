@@ -3627,3 +3627,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE045.md
 - **Decisions:** PASS — Score 90/100, 0 critical, 2 warnings (TC-001 hasattr type narrowing, OC-007 class size). 53 tests, 100% coverage.
 - **Timestamp:** 2026-03-11T15:00:00Z
+
+### [FORGEOS-BE034] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE034.md
+- **Decisions:** PASS — Zero critical/high findings. One NOTE-level finding (SEC-NOTE-001: no per-endpoint auth on GET /api/tickets) risk-accepted as platform-level architectural decision consistent with all existing REST endpoints. All SQL fully parameterized via asyncpg $N positional params. Enum validation defense-in-depth. Limit capped at 200. TicketSummary Pydantic model filters response fields. No IDOR risk (list endpoint). No new dependencies.
+- **Timestamp:** 2026-03-11T23:55:00Z
+
+### [FORGEOS-BE042] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, mcp-server/src/mcp_server/middleware/__init__.py, .github/agent-output/Documentation/FORGEOS-BE042.md
+- **Decisions:** Added Per-Agent Rate Limiting reference section to README (~90 lines), CHANGELOG entry, updated Architecture description. Inline docstrings already comprehensive — no source changes needed.
+- **Timestamp:** 2026-03-11T16:00:00Z

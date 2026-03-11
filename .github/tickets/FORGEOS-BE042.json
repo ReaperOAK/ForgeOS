@@ -4,7 +4,7 @@
   "description": "Implement per-agent and per-machine rate limiting for MCP tool calls and REST API endpoints. Use a sliding window algorithm backed by PostgreSQL or in-memory storage. Different rate limits apply based on operation type: claim operations are more restrictive than status queries. Rate limit headers are included in responses.",
   "type": "backend",
   "priority": "medium",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",

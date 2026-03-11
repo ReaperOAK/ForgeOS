@@ -1301,11 +1301,11 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/observability/`** — Structured JSON logging, correlation IDs, PII redaction, and health/readiness probes
 - **`mcp_server/auth/`** — Agent API key authentication, machine registration and verification, rate limiting, and identity resolution
 - **`mcp_server/services/`** — Business logic orchestration (TicketService, MachineService, WebhookService)
-- **`mcp_server/middleware/`** — Unified auth middleware (MCP + REST), correlation ID tracking
-- **`mcp_server/tools/`** — Dynamic tool registration, schema validation, ticket tools (`tickets.next`), and FastMCP bridge
+- **`mcp_server/middleware/`** — Unified auth middleware (MCP + REST), per-agent rate limiting, correlation ID tracking
+- **`mcp_server/tools/`** — Dynamic tool registration, schema validation, ticket tools (`tickets.next`, `tickets.claim`, `tickets.release`, `tickets.status`, `tickets.advance`, `tickets.sync`, `tickets.validate`), and FastMCP bridge
 - **`mcp_server/events/`** — Append-only event sourcing (EventStore, EventType, Event dataclass)
 - **`mcp_server/locking/`** — Distributed claim queue (SKIP LOCKED), file mutex (advisory locks)
-- **`mcp_server/notifications/`** — Notification queue (at-least-once delivery) and configurable channels (webhook, Slack) with event-type filtering
+- **`mcp_server/notifications/`** — Notification queue (at-least-once delivery), configurable channels (webhook, Slack) with event-type filtering, background processor with exponential-backoff retries, and dead-letter handling
 - **`mcp_server/sessions/`** -- Agent session lifecycle management (heartbeat, timeout, resumption, concurrent access)
 - **`mcp_server/transport/webhooks.py`** — Inbound webhook HTTP receiver (`POST /api/webhooks/{source}`)
 
@@ -1874,6 +1874,111 @@ Failed attempts log the key prefix only — never the full key.
 | Variable | Default | Description |
 |---|---|---|
 | `FORGEOS_API_KEY` | _(required)_ | API key for agent authentication against the MCP server |
+
+
+## Per-Agent Rate Limiting
+
+<!-- last_reviewed: 2026-03-11T00:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.middleware.rate_limiter` module enforces per-agent, per-machine
+rate limits using a sliding window algorithm. Write operations (claim, advance,
+reject, release) have stricter limits than read operations (status, list).
+
+### How It Works
+
+1. The middleware runs after `AuthMiddleware` in the Starlette stack.
+2. Each request is classified as **read** or **write** based on HTTP method
+   and path patterns.
+3. A rate-limit key is built from `agent_id:machine_id` (authenticated) or
+   `anon:<client_ip>` (unauthenticated).
+4. A sliding window tracks request timestamps per key. Requests outside the
+   window are evicted before counting.
+5. If the count exceeds the limit, a 429 response is returned with
+   `Retry-After` and rate-limit headers.
+6. Health endpoints (`/health`, `/healthz`, `/ready`, `/readiness`, `/livez`,
+   `/readyz`) bypass rate limiting.
+
+### Configuration
+
+| Parameter | Default | Description |
+|---|---|---|
+| `read_limit` | `120` | Maximum read requests per window |
+| `read_window` | `60.0` | Read window duration in seconds |
+| `write_limit` | `30` | Maximum write requests per window |
+| `write_window` | `60.0` | Write window duration in seconds |
+
+All values are configurable via `RateLimitConfig`. Source them from environment
+variables at the application layer.
+
+### Quick Start
+
+```python
+from mcp_server.middleware import RateLimitConfig, RateLimitMiddleware
+
+# Default limits (120 reads/min, 30 writes/min)
+app.add_middleware(RateLimitMiddleware)
+
+# Custom limits
+config = RateLimitConfig(read_limit=200, write_limit=50)
+app.add_middleware(RateLimitMiddleware, config=config)
+```
+
+### Response Headers
+
+Every non-health response includes rate-limit headers:
+
+| Header | Description |
+|---|---|
+| `X-RateLimit-Limit` | Maximum allowed requests for the current window |
+| `X-RateLimit-Remaining` | Requests remaining in the current window |
+| `X-RateLimit-Reset` | Seconds until the oldest tracked request expires |
+| `Retry-After` | Seconds to wait (only on 429 responses) |
+
+### 429 Response Format
+
+For MCP paths (`/mcp`), the response uses JSON-RPC error format:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "error": { "code": -32602, "message": "Rate limit exceeded. Retry after 5s." },
+  "id": null
+}
+```
+
+For REST paths, the response uses standard JSON:
+
+```json
+{
+  "error": "Rate limit exceeded",
+  "retry_after": 5
+}
+```
+
+### Write Operation Classification
+
+A request is classified as a **write** if any of these conditions hold:
+
+- HTTP method is `POST`, `PUT`, `DELETE`, or `PATCH`.
+- URL path contains `/claim`, `/advance`, `/reject`, `/release`, or `/rework`.
+
+All other requests are classified as **read**.
+
+### Public API
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `RateLimitConfig` | frozen dataclass | Read/write limit and window configuration |
+| `RateLimitMiddleware` | class | Starlette middleware enforcing per-agent rate limits |
+| `SlidingWindowLimiter` | class | In-memory sliding window rate limiter |
+
+### Structured Logging
+
+| Event | Level | Extra Fields |
+|---|---|---|
+| `rate_limit_exceeded` | WARNING | `key`, `limit`, `is_write`, `retry_after` |
 
 
 ## Auth Middleware — Unified MCP + REST Authentication
@@ -2483,19 +2588,22 @@ clear_validator_cache()  # remove all cached validators
 - **Cache key** — tool name is the cache key; schema changes require `clear_validator_cache()`.
 
 
-## Ticket Tools — `tickets.next` MCP Tool
+## Ticket Tools — `tickets.next` and `tickets.claim` MCP Tools
 
 <!-- last_reviewed: 2026-03-11T00:00:00Z -->
 <!-- audience: developers -->
 <!-- diataxis: reference -->
 
-The `mcp_server.tools.ticket_tools` module registers the `tickets.next` MCP
-tool. Agents call this tool to claim the next available ticket matching their
-role. The tool validates input via JSON Schema, delegates to the
-`TicketService` for business logic, and returns claimed ticket data or a
+The `mcp_server.tools.ticket_tools` module registers the `tickets.next` and
+`tickets.claim` MCP tools. Agents call `tickets.next` to claim the next
+available ticket matching their role, or `tickets.claim` to claim a specific
+ticket by ID. Both tools validate input via JSON Schema, delegate to the
+`TicketService` for business logic, and return claimed ticket data or a
 structured MCP error.
 
 ### How It Works
+
+**`tickets.next`** — auto-select the next eligible ticket:
 
 1. Agent sends a `tickets.next` tool call with `agent_role`, `machine_id`,
    and `operator`.
@@ -2506,6 +2614,18 @@ structured MCP error.
 4. On success, the tool returns the claimed ticket's ID, title, type, stage,
    file paths, and acceptance criteria.
 5. On failure, the tool returns a structured MCP error (code `-32602`).
+
+**`tickets.claim`** — claim a specific ticket by ID:
+
+1. Agent sends a `tickets.claim` tool call with `ticket_id`, `agent_id`,
+   `machine_id`, `operator`, and an optional `lease_duration_minutes`.
+2. Input is validated against `TICKETS_CLAIM_SCHEMA` (JSON Schema Draft 2020-12).
+3. `TicketService.claim_by_id()` resolves the agent role to an SDLC stage,
+   verifies role-stage authorization, then calls `ClaimQueue.claim_by_id()`
+   for atomic claiming.
+4. On success, the tool returns the claimed ticket data.
+5. On failure (not in READY stage, already claimed, role mismatch), the tool
+   returns a structured MCP error (code `-32602`).
 
 ### Quick Start
 
@@ -2521,7 +2641,7 @@ service = TicketService(claim_queue=queue)
 register_ticket_tools(registry, service)
 ```
 
-Calling the tool via MCP:
+Calling `tickets.next` via MCP:
 
 ```json
 {
@@ -2537,7 +2657,27 @@ Calling the tool via MCP:
 }
 ```
 
-### Input Schema
+Calling `tickets.claim` via MCP:
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "tickets.claim",
+    "arguments": {
+      "ticket_id": "FORGEOS-BE006",
+      "agent_id": "backend",
+      "machine_id": "pop-os",
+      "operator": "ReaperOAK",
+      "lease_duration_minutes": 30
+    }
+  }
+}
+```
+
+### Input Schemas
+
+**`tickets.next`:**
 
 | Parameter | Type | Required | Description |
 |---|---|---|---|
@@ -2545,9 +2685,21 @@ Calling the tool via MCP:
 | `machine_id` | `string` | Yes | Hostname of the machine running the agent |
 | `operator` | `string` | Yes | Human operator initiating the claim |
 
-All parameters require `minLength: 1`. No additional properties are accepted.
+**`tickets.claim`:**
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `ticket_id` | `string` | Yes | Human-readable ticket ID (e.g. `"FORGEOS-BE006"`) |
+| `agent_id` | `string` | Yes | Agent role name (e.g. `"backend"`, `"qa"`) |
+| `machine_id` | `string` | Yes | Hostname of the machine running the agent |
+| `operator` | `string` | Yes | Human operator initiating the claim |
+| `lease_duration_minutes` | `integer` | No | Lease duration in minutes (default 30, max 1440) |
+
+All string parameters require `minLength: 1`. No additional properties are accepted.
 
 ### Success Response
+
+Both tools return the same response shape on success:
 
 ```json
 {
@@ -2562,9 +2714,20 @@ All parameters require `minLength: 1`. No additional properties are accepted.
 
 ### Error Responses
 
+**`tickets.next`:**
+
 | Scenario | `isError` | `code` | `message` |
 |---|---|---|---|
 | No eligible ticket for role | `true` | `-32602` | `No eligible ticket for role '{role}'` |
+| Unknown agent role | `true` | `-32602` | `Unknown agent role: {role}` |
+| Invalid input (schema failure) | Raises `ToolInputValidationError` | `-32602` | Field-level error details |
+
+**`tickets.claim`:**
+
+| Scenario | `isError` | `code` | `message` |
+|---|---|---|---|
+| Ticket not claimable (wrong stage / already claimed) | `true` | `-32602` | `Ticket '{id}' is not claimable (not in READY stage or already claimed)` |
+| Claim conflict (file lock) | `true` | `-32602` | Conflict detail from `ClaimError` |
 | Unknown agent role | `true` | `-32602` | `Unknown agent role: {role}` |
 | Invalid input (schema failure) | Raises `ToolInputValidationError` | `-32602` | Field-level error details |
 
@@ -2583,6 +2746,7 @@ layer consumed by both MCP tool handlers and REST endpoints.
 | Method | Returns | Description |
 |---|---|---|
 | `claim_next(agent_role, machine_id, operator, lease_minutes)` | `NextTicketResult` | Resolve role to stage, claim next ticket atomically |
+| `claim_by_id(ticket_id, agent_role, machine_id, operator, lease_minutes)` | `NextTicketResult` | Claim a specific ticket by ID with role-stage authorization |
 
 #### NextTicketResult Fields
 
@@ -2608,10 +2772,283 @@ layer consumed by both MCP tool handlers and REST endpoints.
   `ticket_id` for correlation.
 
 
+## Ticket Tools — `tickets.advance` MCP Tool
+
+<!-- last_reviewed: 2026-03-11T00:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `tickets.advance` MCP tool moves a ticket to its next SDLC stage. It
+validates that the calling agent holds the active claim and that the transition
+is legal per the ticket's SDLC flow. Uses SERIALIZABLE transaction isolation
+for state integrity.
+
+### How It Works
+
+1. Agent sends a `tickets.advance` tool call with `ticket_id` and `agent_id`.
+2. Input is validated against `TICKETS_ADVANCE_SCHEMA` (JSON Schema).
+3. `TicketService.advance_ticket()` opens a SERIALIZABLE transaction and
+   locks the ticket row with `SELECT ... FOR UPDATE`.
+4. The stage engine (`validate_advance`) verifies the current stage is in the
+   ticket's `sdlc_flow` and computes the next stage.
+5. The ticket row is updated: stage advanced, claim cleared, status set to
+   `READY` (or `DONE` for the final stage).
+6. An `event_history` record of type `STAGE_ADVANCED` is inserted.
+7. On success, the tool returns previous and new stage information.
+
+### Input Schema
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `ticket_id` | `string` | Yes | Human-readable ticket ID (e.g. `"FORGEOS-BE006"`) |
+| `agent_id` | `string` | Yes | Agent role name that holds the active claim |
+| `evidence` | `object` | No | Completion evidence (artifacts, coverage, etc.) |
+
+### Example Request
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "tickets.advance",
+    "arguments": {
+      "ticket_id": "FORGEOS-BE006",
+      "agent_id": "Backend",
+      "evidence": {
+        "artifacts": ["src/services/stage_engine.py"],
+        "test_coverage": "100%"
+      }
+    }
+  }
+}
+```
+
+### Success Response
+
+```json
+{
+  "ticket_id": "FORGEOS-BE006",
+  "title": "Implement Stage Engine",
+  "type": "backend",
+  "previous_stage": "BACKEND",
+  "new_stage": "QA",
+  "status": "READY"
+}
+```
+
+### Error Responses
+
+| Scenario | `isError` | `code` | `message` |
+|---|---|---|---|
+| Ticket not found | `true` | `-32602` | `Ticket '{id}' not found` |
+| Agent does not hold claim | `true` | `-32602` | `Ticket is claimed by '{other}', not '{agent}'` |
+| Ticket not claimed | `true` | `-32602` | `Ticket is not currently claimed` |
+| Already at final stage | `true` | `-32602` | `Ticket is already at the final stage '{stage}'` |
+| Stage not in SDLC flow | `true` | `-32602` | `Current stage '{stage}' is not in the ticket's SDLC flow` |
+| No pool configured | `true` | `-32602` | `Pool not configured for advance operations` |
+
+### Stage Engine
+
+The `mcp_server.services.stage_engine` module provides pure-domain logic for
+SDLC stage transitions. It has zero external imports and no I/O.
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `get_next_stage(sdlc_flow, current_stage)` | function | Return the next stage in a flow, or `None` |
+| `validate_advance(ticket_id, sdlc_flow, current_stage)` | function | Validate and return next stage, or raise |
+| `InvalidTransitionError` | exception | Raised on illegal transitions |
+
+### AdvanceTicketResult Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `ticket_id` | `str` | Human-readable ticket ID |
+| `title` | `str` | Ticket title |
+| `ticket_type` | `str` | Ticket type (e.g. `"backend"`) |
+| `previous_stage` | `str` | Stage before the advance |
+| `new_stage` | `str` | Stage after the advance |
+| `status` | `str` | New status (`"READY"` or `"DONE"`) |
+
+### Design Constraints
+
+- **SERIALIZABLE isolation** — the advance transaction uses the strictest
+  PostgreSQL isolation level to prevent concurrent state corruption.
+- **Claim cleared on advance** — after advancing, the ticket is unclaimed
+  and available for the next agent in the SDLC flow.
+- **Event sourcing** — every transition creates an immutable audit record
+  with the previous stage, new stage, agent, and optional evidence.
+- **Pure domain engine** — `stage_engine.py` contains zero I/O and zero
+  external imports, making it trivially testable.
+
+
+## Ticket Tools — `tickets.sync` and `tickets.validate` MCP Tools
+
+<!-- last_reviewed: 2026-03-11T00:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.tools.ticket_tools` module registers `tickets.sync` and
+`tickets.validate` MCP tools. These tools delegate to the `SyncEngine` in
+`mcp_server.services.sync_engine` for dependency resolution and integrity
+checking. Both tools accept no parameters.
+
+### `tickets.sync` — Dependency Resolution
+
+Releases expired leases, evaluates the dependency graph for all BLOCKED
+tickets, and moves newly unblocked tickets to READY.
+
+**Steps performed:**
+
+1. Calls `scan_and_release_expired()` from the lease cleanup module to
+   release all expired leases.
+2. Queries all BLOCKED tickets that have non-empty `depends_on` arrays.
+3. For each blocked ticket, checks whether all dependencies are in DONE.
+4. If all dependencies are met, atomically updates the ticket to READY
+   and records a `dependency_resolved` event.
+
+**MCP request:**
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "tickets.sync",
+    "arguments": {}
+  }
+}
+```
+
+**Success response:**
+
+```json
+{
+  "released_count": 2,
+  "released_tickets": ["FORGEOS-BE010", "FORGEOS-BE015"],
+  "unblocked_count": 1,
+  "unblocked_tickets": ["FORGEOS-BE033"],
+  "errors": []
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `released_count` | `int` | Number of expired leases released |
+| `released_tickets` | `list[str]` | Ticket IDs whose leases were released |
+| `unblocked_count` | `int` | Number of tickets moved from BLOCKED to READY |
+| `unblocked_tickets` | `list[str]` | Ticket IDs that were unblocked |
+| `errors` | `list[str]` | Errors encountered during sync (partial success possible) |
+
+### `tickets.validate` — Integrity Check
+
+Checks every ticket for stage integrity and SDLC flow validity. Returns a
+list of integrity errors (empty list means clean).
+
+**Checks performed:**
+
+1. Each ticket's `stage` is a valid member of the SDLC stage enum.
+2. Each ticket's `stage` belongs to its own `sdlc_flow` array.
+3. Each ticket's `sdlc_flow` matches the expected flow for its `type`
+   (backend, frontend, fullstack, infra, security, docs, research,
+   architecture).
+
+**MCP request:**
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "tickets.validate",
+    "arguments": {}
+  }
+}
+```
+
+**Clean response:**
+
+```json
+{
+  "is_clean": true,
+  "error_count": 0,
+  "errors": []
+}
+```
+
+**Response with errors:**
+
+```json
+{
+  "is_clean": false,
+  "error_count": 1,
+  "errors": [
+    {
+      "ticket_id": "FORGEOS-BE099",
+      "error_type": "stage_not_in_flow",
+      "message": "Stage 'CI' is not in ticket's sdlc_flow ['READY', 'DOCS', 'VALIDATOR', 'DONE']"
+    }
+  ]
+}
+```
+
+| Error Type | Description |
+|---|---|
+| `invalid_stage` | Stage value is not a recognised SDLC stage |
+| `stage_not_in_flow` | Stage is valid but not listed in the ticket's own `sdlc_flow` |
+| `unknown_ticket_type` | Ticket type has no defined SDLC flow |
+| `flow_mismatch` | Ticket's `sdlc_flow` does not match the expected flow for its type |
+
+### Sync Engine — `mcp_server.services.sync_engine`
+
+The `SyncEngine` class orchestrates both operations. It accepts an asyncpg
+connection pool and performs all database work within transactions.
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `SyncEngine` | class | Orchestrates sync and validate operations |
+| `SyncResult` | frozen dataclass | Summary of a sync operation (released, unblocked, errors) |
+| `IntegrityError` | frozen dataclass | A single integrity violation (ticket_id, error_type, message) |
+| `ValidateResult` | frozen dataclass | List of integrity errors with `is_clean` property |
+| `VALID_STAGES` | list | All valid SDLC stage names |
+| `SDLC_FLOWS` | dict | Expected SDLC flow for each ticket type |
+
+#### SyncEngine Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `sync()` | `SyncResult` | Release expired leases and unblock tickets |
+| `validate()` | `ValidateResult` | Full integrity check across all tickets |
+
+### Error Handling
+
+| Scenario | Behavior |
+|---|---|
+| Lease release fails | Error recorded in `SyncResult.errors`; dependency resolution still runs |
+| Dependency resolution fails | Error recorded in `SyncResult.errors` |
+| Validate tool exception | Returns MCP error response with code `-32602` |
+| Sync tool exception | Returns MCP error response with code `-32602` |
+
+### Design Constraints
+
+- **Partial success** — `tickets.sync` records errors but continues processing
+  remaining steps. The caller inspects the `errors` array for failures.
+- **No input parameters** — both tools operate on the full ticket set without
+  filtering. This matches the `tickets.py --sync` and `--validate` CLI behavior.
+- **Transaction isolation** — dependency resolution wraps each ticket update in
+  its own transaction to avoid blocking other agents.
+- **Deferred import** — `sync()` imports `scan_and_release_expired` lazily to
+  avoid circular imports at module level.
+- **Frozen dataclasses** — all result types use `frozen=True, slots=True` for
+  immutability and memory efficiency.
+
+
 ## Notification Event Queue
 
+<!-- last_reviewed: 2026-03-11T00:33:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
 The `mcp_server.notifications` package provides a PostgreSQL-backed async
-notification delivery system with at-least-once semantics.
+notification delivery system with at-least-once semantics, configurable
+exponential-backoff retries, and dead-letter handling.
 
 ### Status Lifecycle
 
@@ -2619,47 +3056,56 @@ notification delivery system with at-least-once semantics.
 pending ──► processing ──► delivered
                 │
                 ▼
-             failed ──► dead_letter  (after max retries)
+             failed ──► pending       (retry scheduled)
+                │
+                ▼
+             dead_letter              (after max retries)
+                │
+                ▼
+             pending                  (admin replay)
 ```
 
 ### Quick Start
 
 ```python
-from mcp_server.notifications import NotificationQueue, NotificationStatus
+from mcp_server.notifications import (
+    NotificationQueue,
+    NotificationProcessor,
+    ProcessorConfig,
+)
 
-async with pool.acquire() as conn:
-    queue = NotificationQueue(pool)
+queue = NotificationQueue(pool)
 
-    # Enqueue a notification
-    note_id = await queue.enqueue(
-        conn, channel="email", recipient="ops@example.com",
-        payload={"subject": "Alert", "body": "Disk full"},
-    )
+# Enqueue a notification
+note_id = await queue.enqueue("ticket.claimed", payload={"ticket_id": "BE067"})
 
-    # Dequeue next pending (atomic via FOR UPDATE SKIP LOCKED)
-    note = await queue.dequeue(conn, channel="email")
+# Dequeue next pending (atomic via FOR UPDATE SKIP LOCKED)
+note = await queue.dequeue()
 
-    # Mark outcome
-    await queue.mark_delivered(conn, note.id)
+# Mark outcome
+await queue.mark_delivered(note.id)
+# — or on failure —
+await queue.mark_failed(note.id, "Connection refused")
 ```
 
 ### NotificationQueue Methods
 
-| Method | Description |
-|--------|-------------|
-| `enqueue(conn, channel, recipient, payload)` | Insert a new notification (status: `pending`) |
-| `dequeue(conn, channel)` | Atomically claim next pending notification |
-| `mark_delivered(conn, notification_id)` | Transition `processing → delivered` |
-| `mark_failed(conn, notification_id, error)` | Transition `processing → failed` or `→ dead_letter` |
-| `get_by_id(conn, notification_id)` | Retrieve a single notification by UUID |
-| `get_dead_letters(conn, channel, limit)` | List dead-lettered notifications |
-| `count_by_status(conn, channel)` | Aggregate counts grouped by status |
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `enqueue(event_type, payload, *, max_retries)` | `str` | Insert a notification (status: `pending`) |
+| `dequeue()` | `Notification \| None` | Atomically claim next eligible notification |
+| `mark_delivered(notification_id)` | `Notification` | Transition `processing → delivered` |
+| `mark_failed(notification_id, error_message)` | `Notification` | Retry or dead-letter based on retry count |
+| `get_by_id(notification_id)` | `Notification \| None` | Retrieve a single notification by UUID |
+| `get_dead_letters(*, limit)` | `list[Notification]` | List dead-lettered notifications |
+| `replay_dead_letter(notification_id)` | `Notification` | Reset a dead-letter to `pending` for redelivery |
+| `count_by_status()` | `dict[str, int]` | Aggregate counts grouped by status |
 
 ### Data Classes
 
 | Class | Description |
 |-------|-------------|
-| `Notification` | Frozen dataclass with 10 fields (id, channel, recipient, payload, status, etc.) |
+| `Notification` | Frozen dataclass (10 fields): queue item with status, retry count, and error tracking |
 | `NotificationStatus` | Enum: `pending`, `processing`, `delivered`, `failed`, `dead_letter` |
 | `InvalidTransitionError` | Raised on illegal status transitions |
 
@@ -2667,57 +3113,114 @@ async with pool.acquire() as conn:
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `id` | `UUID` | Primary key |
-| `channel` | `str` | Delivery channel (email, webhook, etc.) |
-| `recipient` | `str` | Target address |
-| `payload` | `dict` | Notification content |
+| `id` | `str` | UUID primary key |
+| `event_type` | `str` | Event identifier (e.g. `ticket.claimed`) |
+| `payload` | `dict` | Notification content (JSONB) |
 | `status` | `NotificationStatus` | Current lifecycle state |
-| `attempt` | `int` | Current retry attempt (0-based) |
-| `max_attempts` | `int` | Maximum retry attempts (default: 5) |
-| `error` | `str \| None` | Last error message |
+| `retry_count` | `int` | Current retry attempt (0-based) |
+| `max_retries` | `int` | Maximum delivery attempts (default: 5) |
+| `next_retry_at` | `datetime \| None` | Scheduled retry time (UTC) |
+| `error_message` | `str \| None` | Last error message |
 | `created_at` | `datetime` | Creation timestamp (UTC) |
 | `updated_at` | `datetime` | Last modification timestamp (UTC) |
 
-### Retry and Backoff
+### Retry and Dead-Letter Handling
 
-| Attempt | Delay (seconds) |
-|---------|-----------------|
-| 1 | 60 |
-| 2 | 120 |
-| 3 | 240 |
-| 4 | 480 |
-| 5 | 960 |
+Failed notifications retry with a configurable backoff schedule. When
+`retry_count` reaches `max_retries`, the notification moves to `dead_letter`.
 
-Backoff formula: `min(base × factor^attempt, cap)` where base = 60, factor = 2,
-cap = 3600.
+**Default backoff schedule:**
 
-### Database Schema
+| Retry | Delay |
+|-------|-------|
+| 1 | 1 minute |
+| 2 | 5 minutes |
+| 3 | 15 minutes |
+| 4+ | 1 hour |
 
-Alembic migration `004` (`20260310_000000_004_notification_queue.py`) creates:
+The schedule is configurable via `ProcessorConfig.backoff_schedule` (list of
+seconds). If `retry_count` exceeds the schedule length, the last entry is used.
 
-| Column | Type | Constraint |
-|--------|------|------------|
-| `id` | `UUID` | PK, default `gen_random_uuid()` |
-| `channel` | `VARCHAR(64)` | NOT NULL |
-| `recipient` | `VARCHAR(256)` | NOT NULL |
-| `payload` | `JSONB` | NOT NULL, default `'{}'` |
-| `status` | `notification_status` | NOT NULL, default `'pending'` |
-| `attempt` | `INTEGER` | NOT NULL, default `0` |
-| `max_attempts` | `INTEGER` | NOT NULL, default `5` |
-| `error` | `TEXT` | Nullable |
-| `created_at` | `TIMESTAMPTZ` | NOT NULL, default `now()` |
-| `updated_at` | `TIMESTAMPTZ` | NOT NULL, auto-updated via trigger |
+A fallback exponential formula (`base × 2^retry_count`, capped at 3600 s) is
+available via `compute_backoff_seconds()` when no schedule is provided.
 
-Includes a partial index on `(channel, created_at)` filtered to `status = 'pending'`
-for efficient dequeue queries.
+**Dead-letter replay:** Administrators can reset dead-lettered notifications
+to `pending` via `queue.replay_dead_letter(notification_id)`, which clears
+`retry_count`, `error_message`, and `next_retry_at`.
+
+### Background Notification Processor
+
+The `NotificationProcessor` runs as an asyncio background task, polling the
+queue and delivering notifications through configured channels.
+
+#### Quick Start
+
+```python
+from mcp_server.notifications import (
+    NotificationProcessor,
+    ProcessorConfig,
+)
+from mcp_server.notifications.channels import ChannelDispatcher
+
+config = ProcessorConfig(
+    poll_interval_seconds=5.0,
+    batch_size=10,
+    backoff_schedule=[60, 300, 900, 3600],
+    max_retries=5,
+)
+
+processor = NotificationProcessor(queue, dispatcher, config=config)
+await processor.start()
+
+# ... processor runs in the background ...
+
+await processor.stop()
+```
+
+#### ProcessorConfig Parameters
+
+| Parameter | Default | Description |
+|-----------|---------|-------------|
+| `poll_interval_seconds` | `5.0` | Seconds between poll cycles when queue is empty |
+| `batch_size` | `10` | Maximum notifications dequeued per poll cycle |
+| `backoff_schedule` | `[60, 300, 900, 3600]` | Ordered retry delays in seconds |
+| `max_retries` | `5` | Max delivery attempts before dead-lettering |
+
+#### NotificationProcessor Methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `start()` | `None` | Launch the background polling task |
+| `stop()` | `None` | Cancel the polling task and wait for cleanup |
+| `process_one(notification)` | `bool` | Deliver one notification; `True` on success |
+
+#### NotificationProcessor Properties
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `is_running` | `bool` | Whether the background loop is active |
+| `config` | `ProcessorConfig` | Active processor configuration |
+| `processed_count` | `int` | Total notifications processed since last start |
+
+#### Processing Flow
+
+1. Processor dequeues up to `batch_size` notifications per cycle.
+2. Each notification is dispatched to all matching channels via `ChannelDispatcher`.
+3. If all channels succeed (or none match), the notification is marked `delivered`.
+4. If any channel fails, `mark_failed()` increments `retry_count` and schedules
+   the next retry using the backoff schedule.
+5. When `retry_count` reaches `max_retries`, the notification moves to `dead_letter`.
+6. If the queue is empty, the processor sleeps for `poll_interval_seconds`.
 
 ### Design Constraints
 
 - **Exactly-once dequeue** — `FOR UPDATE SKIP LOCKED` prevents double-processing.
 - **Frozen notifications** — `Notification` dataclass is frozen; mutation raises `FrozenInstanceError`.
 - **Strict transitions** — only transitions in `_VALID_TRANSITIONS` are allowed.
-- **Exponential backoff** — `compute_backoff_seconds()` is a pure function with capped output.
-- **Dead-letter safety** — notifications exceeding `max_attempts` move to `dead_letter`, never retried.
+- **Configurable backoff** — schedule-based lookup with fallback exponential formula.
+- **Dead-letter safety** — notifications exceeding `max_retries` move to `dead_letter` and are never auto-retried.
+- **Replay support** — dead-lettered notifications can be manually replayed by administrators.
+- **Graceful shutdown** — `stop()` cancels the asyncio task and suppresses `CancelledError`.
 
 
 ## Audit Logging
