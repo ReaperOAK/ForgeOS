@@ -1,6 +1,6 @@
 # ForgeOS Dashboard
 
-<!-- last_reviewed: 2026-03-11T14:00:00Z -->
+<!-- last_reviewed: 2026-03-11T20:00:00Z -->
 
 > **Category:** Reference  
 > **Audience:** Developers working on the ForgeOS dashboard
@@ -54,7 +54,11 @@ dashboard/
     │       └── page.tsx       # System health dashboard (4 panels, 30s auto-refresh)
     ├── components/            # React components
     │   ├── Breadcrumb.tsx     # Breadcrumb navigation
+    │   ├── ConnectionStatusIndicator.tsx  # WebSocket status dot
     │   ├── DashboardShell.tsx # Shell layout (sidebar + top bar + content)
+    │   ├── filters/           # Filter/sort components
+    │   │   ├── FilterBar.tsx   # Filter bar with chip groups + sort
+    │   │   └── FilterChip.tsx  # Toggleable chip button
     │   ├── HealthStatusCard.tsx # Service health indicator card
     │   ├── MetricCard.tsx     # Metric display card with trend
     │   ├── MobileSidebar.tsx  # Mobile modal sidebar
@@ -70,7 +74,11 @@ dashboard/
     │   │   ├── index.ts       # Barrel re-exports (types + functions)
     │   │   ├── types.ts       # TypeScript interfaces and type aliases
     │   │   ├── client.ts      # ForgeApiClient class (fetch wrapper)
-    │   │   └── tickets.ts     # Ticket endpoint functions
+    │   │   ├── tickets.ts     # Ticket endpoint functions
+    │   │   └── websocket.ts   # WebSocket client with reconnection
+    │   ├── hooks/             # Custom React hooks
+    │   │   ├── useTicketStream.ts  # WebSocket lifecycle hook
+    │   │   └── useFilters.ts      # Filter/sort state + URL sync
     │   ├── api-client.ts      # Legacy REST API client (health checks)
     │   ├── theme.tsx          # ThemeProvider context + localStorage
     │   └── types.ts           # Shared TypeScript type definitions
@@ -199,9 +207,193 @@ a 10-second request timeout via `AbortController`.
 | `fetchPipelineOverview()` | `PipelineOverview` | `GET /api/stages` |
 | `fetchTicketHistory(id)` | `EventHistory[]` | `GET /api/tickets/:id/history` |
 
+## WebSocket Real-Time Updates
+
+<!-- last_reviewed: 2026-03-11T20:00:00Z -->
+
+The dashboard receives live ticket updates over a WebSocket connection to
+the `/ws/tickets` endpoint. No manual polling is required — ticket cards
+move between pipeline columns and detail views refresh automatically.
+
+### Architecture
+
+```
+Browser  ──WebSocket──▶  ForgeOS API  /ws/tickets
+  │                         │
+  │  TicketWebSocketClient  │  Pushes JSON events:
+  │  (lib/api/websocket.ts) │   • TICKET_STATE_CHANGE
+  │          │              │   • TICKET_CREATED
+  │    useTicketStream()    │   • TICKET_UPDATED
+  │    (hooks/useTicketStream.ts)
+  │          │
+  │  ConnectionStatusIndicator
+  │  (components/ConnectionStatusIndicator.tsx)
+```
+
+### WebSocket Client
+
+`TicketWebSocketClient` (`src/lib/api/websocket.ts`) manages the raw
+WebSocket lifecycle:
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `url` | `string` | Derived from `NEXT_PUBLIC_API_URL` | WebSocket endpoint URL |
+| `initialDelay` | `number` | `1000` | Initial reconnection delay (ms) |
+| `maxDelay` | `number` | `30000` | Maximum reconnection delay (ms) |
+| `onEvent` | `(event: WebSocketEvent) => void` | no-op | Called for every parsed event |
+| `onStatusChange` | `(status: ConnectionStatus) => void` | no-op | Called on status transitions |
+
+Methods:
+
+- **`connect()`** — opens the WebSocket. Safe to call multiple times;
+  no-ops if already connected or connecting.
+- **`disconnect()`** — closes the connection and clears pending reconnect
+  timers. The client will not attempt to reconnect after this call.
+
+**Reconnection** uses exponential backoff: on each failed attempt the delay
+doubles (1 s → 2 s → 4 s → … → cap at 30 s). The delay resets to 1 s
+after a successful connection.
+
+### useTicketStream Hook
+
+`useTicketStream` (`src/lib/hooks/useTicketStream.ts`) wraps the client
+in a React-friendly API:
+
+```tsx
+import { useTicketStream } from '@/lib/hooks/useTicketStream';
+
+const { status, reconnect } = useTicketStream({
+  enabled: true,
+  onTicketUpdate: (ticket) => {
+    // Merge updated ticket into local state
+  },
+});
+```
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `enabled` | `boolean` | `true` | Connect automatically on mount |
+| `onTicketUpdate` | `(ticket: Ticket) => void` | — | Fires for every ticket event |
+
+Returns:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `status` | `ConnectionStatus` | `'connected'`, `'connecting'`, or `'disconnected'` |
+| `reconnect` | `() => void` | Manually trigger a reconnect |
+
+The hook connects on mount (when `enabled`), disconnects on unmount, and
+stabilises callbacks with refs so the WebSocket client is never recreated
+due to callback identity changes.
+
+### ConnectionStatusIndicator
+
+`ConnectionStatusIndicator` (`src/components/ConnectionStatusIndicator.tsx`)
+renders in the dashboard shell header:
+
+| Status | Dot Color | Animation | Label |
+|--------|-----------|-----------|-------|
+| `connected` | Green | — | Connected |
+| `connecting` | Yellow | Pulse | Connecting… |
+| `disconnected` | Red | — | Disconnected |
+
+The component uses `role="status"` and `aria-live="polite"` for
+accessibility.
+
+### Event Types
+
+| Event | Payload Fields |
+|-------|---------------|
+| `TICKET_STATE_CHANGE` | `ticket_id`, `previous_stage`, `new_stage`, `previous_status`, `new_status`, `ticket`, `timestamp` |
+| `TICKET_CREATED` | `ticket`, `timestamp` |
+| `TICKET_UPDATED` | `ticket`, `timestamp` |
+
+All events carry a full `Ticket` object so consumers can update local
+state without an additional API call.
+
+## Filtering and Sorting
+
+<!-- last_reviewed: 2026-03-11T20:00:00Z -->
+
+The pipeline view includes a chip-based filter bar that lets users narrow
+the ticket list by stage, type, priority, operator, machine, or agent.
+Filter state is synced to URL query parameters so configurations are
+bookmarkable and shareable.
+
+### useFilters Hook
+
+`useFilters` (`src/lib/hooks/useFilters.ts`) manages filter and sort
+state, reading from and writing to the URL:
+
+```tsx
+import { useFilters } from '@/lib/hooks/useFilters';
+
+const {
+  filters,       // current FilterState
+  toggleFilter,  // toggle a chip on/off
+  setSort,       // change sort field
+  setSortDir,    // change sort direction
+  clearAll,      // reset all filters
+  hasActiveFilters,
+  activeFilterCount,
+} = useFilters();
+```
+
+#### FilterState Shape
+
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `stage` | `TicketStage[]` | `[]` | Active stage filters |
+| `type` | `TicketType[]` | `[]` | Active type filters |
+| `priority` | `TicketPriority[]` | `[]` | Active priority filters |
+| `operator` | `string[]` | `[]` | Active operator filters |
+| `machine` | `string[]` | `[]` | Active machine filters |
+| `agent` | `string[]` | `[]` | Active agent filters |
+| `sort` | `SortField` | `'priority'` | Sort field |
+| `sortDir` | `SortDirection` | `'desc'` | Sort direction |
+
+**URL encoding:** array filters are comma-separated
+(`?stage=QA,SECURITY&priority=high`). Sort defaults are omitted from the
+URL to keep it clean. Multiple filter dimensions combine with **AND**
+logic.
+
+### FilterBar Component
+
+`FilterBar` (`src/components/filters/FilterBar.tsx`) renders grouped
+chip sets for each filter dimension:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `filters` | `UseFiltersResult` | Return value from `useFilters()` |
+| `availableOperators` | `string[]` | Dynamic operator values from tickets |
+| `availableMachines` | `string[]` | Dynamic machine values from tickets |
+| `availableAgents` | `string[]` | Dynamic agent values from tickets |
+
+Features:
+- Static chip groups for Stage (11 values), Type (10), Priority (4)
+- Dynamic chip groups for Operator, Machine, Agent (populated from data)
+- Sort dropdown: Priority, Created Date, Last Updated, Ticket ID
+- Active filter count badge in the header
+- "Clear all" button resets every filter to its default
+
+### FilterChip Component
+
+`FilterChip` (`src/components/filters/FilterChip.tsx`) is a small
+pill-shaped toggle button:
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `label` | `string` | Display text |
+| `active` | `boolean` | Whether the chip is selected |
+| `onClick` | `() => void` | Toggle callback |
+
+Active chips use primary fill color; inactive chips use surface
+background with a hover effect. Uses `role="option"` and
+`aria-selected` for accessibility.
+
 ## Pipeline View (`/pipeline`)
 
-<!-- last_reviewed: 2026-03-11T18:00:00Z -->
+<!-- last_reviewed: 2026-03-11T20:00:00Z -->
 
 The pipeline page renders a horizontal Kanban board with 11 SDLC stage
 columns (Ready through Done). Each column shows a count badge and a
@@ -218,6 +410,11 @@ scrollable list of ticket cards.
 ### Behavior
 
 - Data loads via `fetchTickets()` on mount; manual refresh button available.
+- **Real-time updates** via `useTicketStream` — ticket cards move between
+  columns automatically when state change events arrive over WebSocket.
+- **FilterBar** at the top of the pipeline view enables filtering by stage,
+  type, priority, operator, machine, and agent. Sort controls change the
+  ordering of tickets within columns.
 - Tickets sorted within each column: critical priority first, then by
   most-recently-updated.
 - Type badges are color-coded (backend=blue, frontend=teal,
@@ -229,7 +426,7 @@ scrollable list of ticket cards.
 
 ## Ticket Detail View (`/tickets/[id]`)
 
-<!-- last_reviewed: 2026-03-11T18:00:00Z -->
+<!-- last_reviewed: 2026-03-11T20:00:00Z -->
 
 Displays full metadata and history for a single ticket, loaded by ID
 from the URL parameter.
@@ -247,6 +444,8 @@ from the URL parameter.
 ### Behavior
 
 - Fetches ticket via `fetchTicket(id)` with automatic 404 detection.
+- **Real-time updates** \u2014 the detail view subscribes to `useTicketStream`
+  and refreshes metadata when the viewed ticket changes state.
 - Metadata grid shows type, stage, claimed-by, machine, operator, lease
   expiry, rework count, and creation time.
 - Acceptance criteria rendered as a read-only checklist.

@@ -2105,3 +2105,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** dashboard/src/lib/hooks/__tests__/useFilters.test.ts, dashboard/src/components/filters/__tests__/FilterBar.test.tsx, .github/agent-output/QA/FORGEOS-FE012.md
 - **Decisions:** PASS — 49 tests (18 QA-added), 97.43% stmts, 100% branch, 97.33% lines. All 7 ACs verified. No defects found.
 - **Timestamp:** 2026-03-11T17:45:00Z
+
+### [FORGEOS-FE006] — Documentation Complete
+- **Artifacts:** dashboard/README.md, .github/agent-output/Documentation/FORGEOS-FE006.md
+- **Decisions:** WebSocket section added to README with architecture diagram, API tables, hook usage example. All 10 public symbols have JSDoc. Readability FK ≤ 10.
+- **Timestamp:** 2026-03-11T20:00:00Z
+
+### [FORGEOS-FE012] — Documentation Complete
+- **Artifacts:** dashboard/README.md, .github/agent-output/Documentation/FORGEOS-FE012.md
+- **Decisions:** Filtering/Sorting section added to README with hook usage example, FilterState shape, FilterBar/FilterChip props. All 11 public symbols have JSDoc. Readability FK ≤ 10.
+- **Timestamp:** 2026-03-11T20:00:00Z
