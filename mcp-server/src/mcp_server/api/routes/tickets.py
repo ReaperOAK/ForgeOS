@@ -6,6 +6,8 @@ Provides Starlette route handlers for:
 - ``GET /api/tickets/{ticket_id}/history`` — event/audit history with pagination
 - ``POST /api/tickets/{ticket_id}/claim`` — claim a ticket
 - ``DELETE /api/tickets/{ticket_id}/claim`` — release a claim
+- ``POST /api/tickets/{ticket_id}/advance`` — advance to next SDLC stage
+- ``POST /api/tickets/{ticket_id}/rework`` — send back to implementation stage
 
 Query parameters (list):
 - ``stage``: Filter by SDLC stage
@@ -21,7 +23,7 @@ Query parameters (history):
 - ``offset``: Pagination offset (default 0)
 
 .. meta::
-   :ticket: FORGEOS-BE034, FORGEOS-BE035, FORGEOS-BE036
+   :ticket: FORGEOS-BE034, FORGEOS-BE035, FORGEOS-BE036, FORGEOS-BE037
 """
 
 from __future__ import annotations
@@ -32,6 +34,8 @@ from pydantic import ValidationError
 from starlette.responses import JSONResponse
 
 from mcp_server.api.schemas import (
+    AdvanceRequest,
+    AdvanceResponse,
     ClaimRequest,
     ClaimResponse,
     DependencyInfo,
@@ -39,6 +43,8 @@ from mcp_server.api.schemas import (
     HistoryListResponse,
     PaginationMeta,
     ReleaseResponse,
+    ReworkRequest,
+    ReworkResponse,
     TicketDetailResponse,
     TicketListResponse,
     TicketPriorityEnum,
@@ -49,7 +55,8 @@ from mcp_server.api.schemas import (
 from mcp_server.locking.claim_queue import ClaimError, NoEligibleTicketError
 from mcp_server.observability import get_logger
 from mcp_server.server import TicketNotFoundError
-from mcp_server.services.ticket_service import ClaimOwnershipError
+from mcp_server.services.stage_engine import InvalidTransitionError
+from mcp_server.services.ticket_service import ClaimOwnershipError, ClaimValidationError
 
 if TYPE_CHECKING:
     from starlette.requests import Request
@@ -583,3 +590,190 @@ def create_claim_endpoint(
         )
 
     return claim_endpoint
+
+
+def create_advance_endpoint(
+    ticket_service_getter: Any,
+) -> Any:
+    """Create the advance endpoint handler.
+
+    Parameters
+    ----------
+    ticket_service_getter : callable
+        Returns the current :class:`TicketService` instance, or ``None``.
+
+    Returns
+    -------
+    coroutine
+        An async Starlette request handler for
+        ``POST /api/tickets/{ticket_id}/advance``.
+
+    .. meta::
+       :ticket: FORGEOS-BE037
+    """
+
+    async def advance_endpoint(request: Request) -> JSONResponse:
+        """Handle POST /api/tickets/{ticket_id}/advance."""
+        ticket_service: TicketService | None = ticket_service_getter()
+        if ticket_service is None:
+            return JSONResponse(
+                status_code=503,
+                content={"error": "Service unavailable"},
+            )
+
+        ticket_id: str = request.path_params["ticket_id"]
+
+        try:
+            body = await request.json()
+        except Exception:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Invalid or missing JSON body"},
+            )
+
+        try:
+            advance_req = AdvanceRequest(**body)
+        except ValidationError as exc:
+            return JSONResponse(
+                status_code=400,
+                content={"error": str(exc)},
+            )
+
+        try:
+            result = await ticket_service.advance_ticket(
+                ticket_id=ticket_id,
+                agent_id=advance_req.agent_id,
+                evidence=advance_req.evidence,
+            )
+        except TicketNotFoundError:
+            return JSONResponse(
+                status_code=404,
+                content={"error": f"Ticket '{ticket_id}' not found"},
+            )
+        except ClaimValidationError as exc:
+            return JSONResponse(
+                status_code=409,
+                content={"error": str(exc)},
+            )
+        except InvalidTransitionError as exc:
+            return JSONResponse(
+                status_code=409,
+                content={"error": str(exc)},
+            )
+        except Exception:
+            logger.exception(
+                "ticket_advance_failed",
+                extra={"ticket_id": ticket_id},
+            )
+            return JSONResponse(
+                status_code=500,
+                content={"error": "Internal server error"},
+            )
+
+        response = AdvanceResponse(
+            ticket_id=result.ticket_id,
+            title=result.title,
+            type=result.ticket_type,
+            previous_stage=result.previous_stage,
+            new_stage=result.new_stage,
+            status=result.status,
+        )
+
+        return JSONResponse(
+            status_code=200,
+            content=response.model_dump(mode="json"),
+        )
+
+    return advance_endpoint
+
+
+def create_rework_endpoint(
+    ticket_service_getter: Any,
+) -> Any:
+    """Create the rework endpoint handler.
+
+    Parameters
+    ----------
+    ticket_service_getter : callable
+        Returns the current :class:`TicketService` instance, or ``None``.
+
+    Returns
+    -------
+    coroutine
+        An async Starlette request handler for
+        ``POST /api/tickets/{ticket_id}/rework``.
+
+    .. meta::
+       :ticket: FORGEOS-BE037
+    """
+
+    async def rework_endpoint(request: Request) -> JSONResponse:
+        """Handle POST /api/tickets/{ticket_id}/rework."""
+        ticket_service: TicketService | None = ticket_service_getter()
+        if ticket_service is None:
+            return JSONResponse(
+                status_code=503,
+                content={"error": "Service unavailable"},
+            )
+
+        ticket_id: str = request.path_params["ticket_id"]
+
+        try:
+            body = await request.json()
+        except Exception:
+            return JSONResponse(
+                status_code=400,
+                content={"error": "Invalid or missing JSON body"},
+            )
+
+        try:
+            rework_req = ReworkRequest(**body)
+        except ValidationError as exc:
+            return JSONResponse(
+                status_code=400,
+                content={"error": str(exc)},
+            )
+
+        try:
+            result = await ticket_service.rework_ticket(
+                ticket_id=ticket_id,
+                agent_id=rework_req.agent_id,
+                reason=rework_req.reason,
+                rejection_evidence=rework_req.rejection_evidence,
+            )
+        except TicketNotFoundError:
+            return JSONResponse(
+                status_code=404,
+                content={"error": f"Ticket '{ticket_id}' not found"},
+            )
+        except ClaimValidationError as exc:
+            return JSONResponse(
+                status_code=409,
+                content={"error": str(exc)},
+            )
+        except Exception:
+            logger.exception(
+                "ticket_rework_failed",
+                extra={"ticket_id": ticket_id},
+            )
+            return JSONResponse(
+                status_code=500,
+                content={"error": "Internal server error"},
+            )
+
+        response = ReworkResponse(
+            ticket_id=result.ticket_id,
+            title=result.title,
+            type=result.ticket_type,
+            previous_stage=result.previous_stage,
+            new_stage=result.new_stage,
+            rework_count=result.rework_count,
+            escalated=result.escalated,
+        )
+
+        return JSONResponse(
+            status_code=200,
+            content=response.model_dump(mode="json"),
+        )
+
+    return rework_endpoint
