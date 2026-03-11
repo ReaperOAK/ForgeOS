@@ -4,7 +4,7 @@
   "description": "Build the dual-mode wrapper that intercepts calls originally handled by `tickets.py` and routes them to either the PostgreSQL/MCP backend or the filesystem backend depending on feature flag configuration. The wrapper reads from PostgreSQL as primary source with filesystem as fallback when the MCP server is unavailable. During the transition period, writes go to both destinations (database + filesystem) to maintain compatibility. Uses the distributed locking from FORGEOS-BE006 and MCP tools from FORGEOS-BE028.",
   "type": "backend",
   "priority": "critical",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -38,10 +38,10 @@
     "No data loss occurs when switching between modes mid-operation"
   ],
   "rework_count": 0,
-  "claimed_by": "Security Engineer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T01:58:28.045034+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -111,6 +111,15 @@
       "from_stage": "SECURITY",
       "to_stage": "SECURITY",
       "details": "Claimed by ReaperOAK@pop-os via Security Engineer, lease until 2026-03-11T01:58:28.045034+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T01:33:06.885410+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",

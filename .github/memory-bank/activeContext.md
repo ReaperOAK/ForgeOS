@@ -3827,3 +3827,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/services/pr_service.py, mcp-server/src/mcp_server/webhooks/github_handler.py, mcp-server/src/mcp_server/webhooks/__init__.py, mcp-server/src/mcp_server/services/__init__.py, mcp-server/tests/test_pr_service.py
 - **Decisions:** Used regex `FORGEOS-[A-Z]+\d+` for ticket ID extraction from PR title+branch. Registered handler eagerly in webhooks __init__.py. PRService is stateless—returns PREvent list for downstream persistence. Merge-to-main detection flags triggers_advancement.
 - **Timestamp:** 2026-03-11T01:20:00Z
+
+### [FORGEOS-BE048] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE048.md
+- **Decisions:** PASS — Pure stdlib file I/O module with zero attack surface. All STRIDE scores ≤2 (Low). OWASP 10/10 categories clear. No secrets, no network, no injection vectors. Informational note on path traversal documented for future awareness.
+- **Timestamp:** 2026-03-11T02:10:00+00:00
+
+### [FORGEOS-BE068] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE068.md
+- **Decisions:** PASS — Zero critical/high findings. Two LOW informational findings (path validation on tickets_py_path, HTTP default for MCP URL). Subprocess exec pattern is safe (no shell=True). Immutable results, typed config, proper timeouts.
+- **Timestamp:** 2026-03-11T02:10:00Z
