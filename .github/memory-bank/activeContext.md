@@ -8,6 +8,11 @@
 - **Decisions:** Client-side fetching with useEffect for interactivity; tabbed History/Dependencies to reduce scroll; relative timestamps with full-date hover; expandable event payloads; 404 via Next.js notFound()
 - **Timestamp:** 2026-03-11T20:30:00Z
 
+### [FORGEOS-FE004] — QA PASS
+- **Artifacts:** dashboard/src/components/tickets/__tests__/TicketMetadata.test.tsx, dashboard/src/components/tickets/__tests__/HistoryTimeline.test.tsx, dashboard/src/components/tickets/__tests__/DependencyTree.test.tsx, dashboard/src/app/tickets/__tests__/page.test.tsx, dashboard/src/app/tickets/__tests__/not-found.test.tsx
+- **Decisions:** 83 tests, 0 failures; Coverage: DependencyTree 100%, HistoryTimeline 97.77%/80.55%, TicketMetadata 100%/82.35%; All 8 ACs verified; No defects found
+- **Timestamp:** 2026-03-11T21:00:00Z
+
 ### [FORGEOS-FE003] — FRONTEND Complete
 - **Artifacts:** dashboard/src/app/pipeline/page.tsx, dashboard/src/components/pipeline/PipelineBoard.tsx, dashboard/src/components/pipeline/StageColumn.tsx, dashboard/src/components/pipeline/TicketCard.tsx, docs/uiux/components/pipeline-kanban-spec.md
 - **Decisions:** Combined UIDesigner + Frontend stages; used existing API client from FE002; horizontal scroll layout with 11 SDLC stage columns; Tailwind-only styling

@@ -4,7 +4,7 @@
   "description": "Implement the ticket detail page following the UIDesigner mockup (FORGEOS-UID002). Display full ticket metadata (ID, title, type, priority, stage, claimed_by, machine, operator, lease_expiry), acceptance criteria as a checklist, file paths list, and tabbed content for History (timeline of state transitions) and Dependencies (upstream depends_on and downstream dependents). Data from the ticket detail and history API endpoints.",
   "type": "frontend",
   "priority": "critical",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -95,6 +95,24 @@
       "from_stage": "FRONTEND",
       "to_stage": "QA",
       "details": "Advanced from FRONTEND to QA"
+    },
+    {
+      "timestamp": "2026-03-11T15:15:47.521205+00:00",
+      "event": "CLAIMED",
+      "agent": "QAEngineer",
+      "machine_id": "pop-os",
+      "from_stage": "QA",
+      "to_stage": "QA",
+      "details": "Claimed by reaperoak@pop-os via QAEngineer, lease until 2026-03-11T15:45:47.521189+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T15:30:36.795322+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QAEngineer",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
