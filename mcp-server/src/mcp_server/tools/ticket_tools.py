@@ -1,8 +1,9 @@
 """MCP tool implementations for ticket lifecycle operations.
 
 Registers ``tickets.next``, ``tickets.claim``, ``tickets.release``,
-``tickets.status``, ``tickets.sync``, ``tickets.validate``, and
-``tickets.advance`` tools with the dynamic :class:`ToolRegistry`.
+``tickets.status``, ``tickets.sync``, ``tickets.validate``,
+``tickets.advance``, and ``tickets.rework`` tools with the dynamic
+:class:`ToolRegistry`.
 
 Public API
 ----------
@@ -13,6 +14,7 @@ Public API
 * :data:`TICKETS_SYNC_SCHEMA` — JSON Schema for ``tickets.sync``.
 * :data:`TICKETS_VALIDATE_SCHEMA` — JSON Schema for ``tickets.validate``.
 * :data:`TICKETS_ADVANCE_SCHEMA` — JSON Schema for ``tickets.advance``.
+* :data:`TICKETS_REWORK_SCHEMA` — JSON Schema for ``tickets.rework``.
 * :func:`handle_tickets_next` — async handler for ``tickets.next``.
 * :func:`handle_tickets_claim` — async handler for ``tickets.claim``.
 * :func:`handle_tickets_release` — async handler for ``tickets.release``.
@@ -20,10 +22,11 @@ Public API
 * :func:`handle_tickets_sync` — async handler for ``tickets.sync``.
 * :func:`handle_tickets_validate` — async handler for ``tickets.validate``.
 * :func:`handle_tickets_advance` — async handler for ``tickets.advance``.
+* :func:`handle_tickets_rework` — async handler for ``tickets.rework``.
 * :func:`register_ticket_tools` — registers all ticket tools on a registry.
 
 .. meta::
-   :ticket: FORGEOS-BE028, FORGEOS-BE029, FORGEOS-BE030, FORGEOS-BE032, FORGEOS-BE033
+   :ticket: FORGEOS-BE028, FORGEOS-BE029, FORGEOS-BE030, FORGEOS-BE031, FORGEOS-BE032, FORGEOS-BE033
    :last_reviewed: 2026-03-11T00:00:00Z
 """
 
@@ -51,6 +54,7 @@ VALIDATE_TOOL_NAME = "tickets.validate"
 RELEASE_TOOL_NAME = "tickets.release"
 STATUS_TOOL_NAME = "tickets.status"
 ADVANCE_TOOL_NAME = "tickets.advance"
+REWORK_TOOL_NAME = "tickets.rework"
 
 TICKETS_NEXT_SCHEMA: dict[str, Any] = {
     "type": "object",
@@ -658,6 +662,118 @@ def _make_advance_handler(
     return _handler
 
 
+# ---------------------------------------------------------------------------
+# tickets.rework — return ticket to implementation stage (FORGEOS-BE031)
+# ---------------------------------------------------------------------------
+
+TICKETS_REWORK_SCHEMA: dict[str, Any] = {
+    "type": "object",
+    "properties": {
+        "ticket_id": {
+            "type": "string",
+            "description": (
+                "Human-readable ticket ID to rework (e.g. 'FORGEOS-BE006')."
+            ),
+            "minLength": 1,
+        },
+        "agent_id": {
+            "type": "string",
+            "description": "Agent role name that holds the active claim.",
+            "minLength": 1,
+        },
+        "reason": {
+            "type": "string",
+            "description": "Rejection reason explaining why rework is needed.",
+            "minLength": 1,
+        },
+        "rejection_evidence": {
+            "type": "object",
+            "description": (
+                "Optional structured evidence (coverage %, failing tests, etc.)."
+            ),
+            "additionalProperties": True,
+        },
+    },
+    "required": ["ticket_id", "agent_id", "reason"],
+    "additionalProperties": False,
+}
+
+
+async def handle_tickets_rework(
+    params: dict[str, Any],
+    *,
+    ticket_service: TicketService,
+) -> dict[str, Any]:
+    """Handle ``tickets.rework`` tool invocation.
+
+    Validates input against :data:`TICKETS_REWORK_SCHEMA`, then delegates
+    to :meth:`TicketService.rework_ticket` for an atomic rework operation
+    with SERIALIZABLE isolation.
+
+    Parameters
+    ----------
+    params : dict[str, Any]
+        Raw input parameters from the MCP tool call.
+    ticket_service : TicketService
+        The shared ticket service instance.
+
+    Returns
+    -------
+    dict[str, Any]
+        Updated ticket data on success, or a structured error response.
+    """
+    validate_tool_input(REWORK_TOOL_NAME, TICKETS_REWORK_SCHEMA, params)
+
+    ticket_id: str = params["ticket_id"]
+    agent_id: str = params["agent_id"]
+    reason: str = params["reason"]
+    rejection_evidence: dict[str, Any] | None = params.get("rejection_evidence")
+
+    logger.info(
+        "tickets.rework invoked",
+        extra={"ticket_id": ticket_id, "agent_id": agent_id},
+    )
+
+    try:
+        result = await ticket_service.rework_ticket(
+            ticket_id=ticket_id,
+            agent_id=agent_id,
+            reason=reason,
+            rejection_evidence=rejection_evidence,
+        )
+    except TicketNotFoundError:
+        return {
+            "isError": True,
+            "code": INVALID_PARAMS,
+            "message": f"Ticket '{ticket_id}' not found",
+        }
+    except ClaimValidationError as exc:
+        return {
+            "isError": True,
+            "code": INVALID_PARAMS,
+            "message": exc.reason,
+        }
+    except ValueError as exc:
+        return {
+            "isError": True,
+            "code": INVALID_PARAMS,
+            "message": str(exc),
+        }
+
+    return result.to_dict()
+
+
+def _make_rework_handler(
+    ticket_service: TicketService,
+) -> Any:
+    """Create a bound handler closure for the tickets.rework tool."""
+
+    async def _handler(params: dict[str, Any]) -> dict[str, Any]:
+        return await handle_tickets_rework(params, ticket_service=ticket_service)
+
+    return _handler
+
+
 def register_ticket_tools(
     registry: ToolRegistry,
     ticket_service: TicketService,
@@ -744,3 +860,14 @@ def register_ticket_tools(
         handler=_make_advance_handler(ticket_service),
     )
     logger.info("Registered advance tool: %s", ADVANCE_TOOL_NAME)
+    registry.register(
+        name=REWORK_TOOL_NAME,
+        description=(
+            "Return a ticket to its implementation stage with rejection "
+            "evidence. Increments rework_count and escalates if the maximum "
+            "rework limit (3) is reached. Releases the current claim."
+        ),
+        input_schema=TICKETS_REWORK_SCHEMA,
+        handler=_make_rework_handler(ticket_service),
+    )
+    logger.info("Registered rework tool: %s", REWORK_TOOL_NAME)

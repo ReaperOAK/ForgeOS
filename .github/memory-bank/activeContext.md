@@ -3762,3 +3762,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/migration/dual_mode.py, mcp-server/src/mcp_server/migration/config.py, mcp-server/src/mcp_server/migration/__init__.py, mcp-server/tests/test_dual_mode.py, mcp-server/tests/test_migration_config.py
 - **Decisions:** Async-first design with Protocol-based backend interface. FileMode uses asyncio subprocess to call tickets.py CLI. McpMode uses stdlib urllib for JSON-RPC (no httpx dependency). DualModeWrapper routes via FORGEOS_MODE env var with automatic health-check fallback. OperationResult is a frozen dataclass. Rework not available in MCP mode (no server-side tool yet) — wrapper falls back to file mode.
 - **Timestamp:** 2026-03-11T01:10:00Z
+
+### [FORGEOS-BE031] — tickets.rework MCP Tool
+- **Artifacts:** mcp-server/src/mcp_server/tools/ticket_tools.py, mcp-server/src/mcp_server/services/ticket_service.py, mcp-server/tests/test_rework_tool.py
+- **Decisions:** Used SERIALIZABLE isolation for rework (OperationType.REWORK already existed). Reset to sdlc_flow[1] (implementation stage). Escalation at rework_count >= max_reworks emits ESCALATED event_type. Claim released on rework via UPDATE claimed_by=NULL. 34 tests cover all 8 ACs.
+- **Timestamp:** 2025-07-17T12:00:00Z
