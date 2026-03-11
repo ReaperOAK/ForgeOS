@@ -8,6 +8,42 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Ticket Detail and History REST Endpoints** (FORGEOS-BE035) —
+  `GET /api/tickets/{ticket_id}` returns full ticket detail with resolved
+  dependency status (title, stage, `is_done` for each `depends_on` entry),
+  current claim info, acceptance criteria, and SDLC flow.
+  `GET /api/tickets/{ticket_id}/history` returns the chronological event
+  audit log from the event sourcing store with offset pagination. Pydantic
+  schemas: `DependencyInfo`, `TicketDetailResponse`, `HistoryEntry`,
+  `HistoryListResponse`. Route handlers at
+  `mcp-server/src/mcp_server/api/routes/tickets.py`, schemas at
+  `mcp-server/src/mcp_server/api/schemas.py`.
+
+- **Ticket Claim REST Endpoint** (FORGEOS-BE036) — `POST /api/tickets/{id}/claim`
+  and `DELETE /api/tickets/{id}/claim` REST endpoints at
+  `mcp-server/src/mcp_server/api/routes/tickets.py` with Pydantic request/response
+  schemas (`ClaimRequest`, `ClaimResponse`, `ReleaseResponse`) at
+  `mcp-server/src/mcp_server/api/schemas.py`. Accepts `agent_id`, `machine_id`,
+  `operator`, and optional `lease_duration_minutes` in the request body. Delegates
+  to the shared `TicketService` (same logic as MCP `tickets.claim`). Returns 200
+  with claimed ticket data on success. Error responses: 400 (invalid body / not
+  claimable), 404 (not found), 409 (already claimed / ownership mismatch), 503
+  (service unavailable). Release via DELETE with `agent_id` query parameter.
+  19 tests, CI quality score 90/100.
+
+- **State Change Notification Emitter** (FORGEOS-BE065) — Fire-and-forget
+  emitter at `mcp-server/src/mcp_server/notifications/emitter.py` that
+  converts ticket lifecycle transitions into notification queue entries.
+  `StateChangeEmitter` class with four methods: `emit_claimed()`,
+  `emit_advanced()`, `emit_released()`, `emit_reworked()`. `EventType`
+  enum maps event names (`ticket.claimed`, `ticket.advanced`,
+  `ticket.released`, `ticket.reworked`). Integrated into `TicketService`
+  via optional constructor injection — emitter is called after every
+  successful claim, advance, release, and rework operation. Exceptions
+  are caught and logged (fire-and-forget). Imported behind
+  `TYPE_CHECKING` guard to avoid circular dependencies. 21 tests,
+  100% coverage on `emitter.py`.
+
 - **Pipeline Overview and Health Endpoints** (FORGEOS-BE038) — Two REST
   endpoints at `mcp-server/src/mcp_server/api/routes/pipeline.py` and
   `mcp-server/src/mcp_server/api/routes/health.py`. `GET /api/pipeline`
