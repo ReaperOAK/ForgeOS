@@ -8,6 +8,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Ticket Advance and Rework REST Endpoints** (FORGEOS-BE037) —
+  `POST /api/tickets/{id}/advance` and `POST /api/tickets/{id}/rework` REST
+  endpoints at `mcp-server/src/mcp_server/api/routes/tickets.py` with Pydantic
+  request/response schemas (`AdvanceRequest`, `AdvanceResponse`, `ReworkRequest`,
+  `ReworkResponse`) at `mcp-server/src/mcp_server/api/schemas.py`. Advance
+  accepts `agent_id` and optional `evidence` dict; delegates to
+  `TicketService.advance_ticket()` (same logic as MCP `tickets.advance`).
+  Rework accepts `agent_id`, `reason`, and optional `rejection_evidence`;
+  delegates to `TicketService.rework_ticket()`. Returns 200 with stage
+  transition details on success. Error responses: 400 (invalid body), 404
+  (not found), 409 (claim mismatch / invalid transition), 503 (service
+  unavailable). Rework response includes `rework_count` and `escalated`
+  flag. Both use SERIALIZABLE transaction isolation. 24 tests, CI quality
+  score 98/100.
+
 - **Push Event Handler for Sync** (FORGEOS-BE061) — GitHub push event
   handler at `mcp-server/src/mcp_server/webhooks/github_handler.py` and
   `mcp-server/src/mcp_server/services/webhook_service.py`. Triggers

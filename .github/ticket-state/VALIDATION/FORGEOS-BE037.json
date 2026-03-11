@@ -4,7 +4,7 @@
   "description": "Implement `POST /api/tickets/:id/advance` and `POST /api/tickets/:id/rework` REST endpoints. These delegate to the same service layer as MCP tools `tickets.advance` (FORGEOS-BE030) and `tickets.rework` (FORGEOS-BE031). Advance accepts completion evidence; rework accepts rejection reason.",
   "type": "backend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -37,10 +37,10 @@
     "Both endpoints create event history records"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation Specialist",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-11T08:56:07.423058+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -140,6 +140,24 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Released claim from CI Reviewer: Lease expired at 2026-03-11T04:49:13.994957+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T08:26:07.423058+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-11T08:56:07.423058+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T08:30:00.000000+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "DOCS complete — CHANGELOG, README advance/rework section, schemas meta updated"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
