@@ -1,3 +1,8 @@
+### [FORGEOS-BE062] — CI Status Event Handler
+- **Artifacts:** mcp-server/src/mcp_server/webhooks/github_handler.py, mcp-server/src/mcp_server/webhooks/__init__.py, mcp-server/tests/test_ci_status_handler.py
+- **Decisions:** Used Protocol (CITicketOps) to decouple CI handler from TicketService claim mechanics. Idempotency via stage check (only CI stage tickets affected). Mapped timed_out to failure. Used frozensets for CI outcome mapping.
+- **Timestamp:** 2026-03-11T01:45:00Z
+
 ### [FORGEOS-BE047] — Background Lease Heartbeat in SDK
 - **Artifacts:** agent-sdk/src/forgeos_sdk/heartbeat.py, agent-sdk/src/forgeos_sdk/operations.py, agent-sdk/tests/test_heartbeat.py
 - **Decisions:** Used asyncio.wait_for(event.wait(), timeout) for clean cancellation instead of asyncio.sleep. Heartbeat auto-managed by TicketOperations (start on claim, stop on advance/release/rework). Opt-out via heartbeat_interval=0.
