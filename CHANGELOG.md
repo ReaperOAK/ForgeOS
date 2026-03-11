@@ -21,6 +21,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   focus ring and reduced-motion support. 18 source files, zero TypeScript
   errors, zero lint warnings, CI quality score 92/100.
 
+- **Bidirectional Sync Engine** (FORGEOS-BE071) — `SyncEngine` at
+  `mcp-server/src/mcp_server/migration/sync_engine.py` runs periodic
+  bidirectional sync cycles (configurable interval, default 60 s) between
+  filesystem tickets (`.github/tickets/`, `.github/ticket-state/`) and
+  PostgreSQL. FS→DB pass imports new/modified tickets via `TicketImporter`.
+  DB→FS pass writes back stage moves (directory placement) and claim/lease
+  metadata updates. `ConflictResolver` at `conflict_resolver.py` implements
+  database-wins conflict resolution with immutable `ConflictRecord` audit
+  entries for every divergence. Engine can be started/stopped independently
+  of the MCP server. `SyncConfig`, `SyncResult`, `SyncStats` frozen/mutable
+  dataclasses. `DatabaseReader` protocol. Structured logging on all
+  operations. CI quality score 95/100.
+
 - **Filesystem-to-Database Data Import** (FORGEOS-BE070) — Async
   `TicketImporter` at `mcp-server/src/mcp_server/migration/importer.py` that
   reads all `.github/tickets/*.json` files and imports them into PostgreSQL
