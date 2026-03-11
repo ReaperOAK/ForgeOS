@@ -8,6 +8,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Ticket List REST Endpoint** (FORGEOS-BE034) — `GET /api/tickets` REST
+  endpoint at `mcp-server/src/mcp_server/api/routes/tickets.py` with Pydantic
+  response schemas at `mcp-server/src/mcp_server/api/schemas.py`. Supports
+  filtering by `stage`, `type`, `priority`, `claimed_by`, and `machine_id`
+  query parameters. Offset-based pagination via `limit` (default 50, max 200)
+  and `offset`. Returns `TicketListResponse` with `tickets` array and
+  `PaginationMeta` (`total`, `limit`, `offset`). Enum validation at the API
+  boundary returns `400 Bad Request` for invalid filter values. Database
+  unavailability returns `503`. `TicketRepository.list_tickets()` uses
+  `COUNT(*) OVER()` window function for single-query total count. Route
+  mounted in `HTTPTransport.create_app()` with late-binding repo getter
+  for degraded-mode support.
+
 - **GitHub Webhook Signature Verification** (FORGEOS-BE060) — HMAC-SHA256
   signature verification for inbound GitHub webhooks at
   `mcp-server/src/mcp_server/webhooks/signature.py` and
