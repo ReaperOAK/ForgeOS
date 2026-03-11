@@ -4,7 +4,7 @@
   "description": "Extend the WebSocket streaming from FORGEOS-BE039 to support client-side filter subscriptions. Clients can subscribe to filtered streams (by stage, type, agent, or ticket_id) to receive only relevant events. Implement subscription management: clients send subscribe/unsubscribe messages to control their filter set.",
   "type": "backend",
   "priority": "medium",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -105,6 +105,13 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-11T09:27:57.277862+00:00",
+      "event": "CI_PASS",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "details": "CI PASS \u2014 Score 78/100, 0 critical, 4 warnings. Coverage 98%. Advanced to DOCS."
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
