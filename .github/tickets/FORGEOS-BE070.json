@@ -4,7 +4,7 @@
   "description": "Implement the initial data import that reads all existing `.github/tickets/*.json` files and `.github/ticket-state/` directory structure and imports them into PostgreSQL. Transform the JSON ticket format to the database schema (mapping fields, resolving stage from directory location, importing history arrays as event records). Handle edge cases: duplicate tickets in multiple state directories, tickets with expired leases, tickets in REWORK state. This is the first step of the migration data flow.",
   "type": "backend",
   "priority": "critical",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -36,10 +36,10 @@
     "Import summary report printed: total tickets found, imported, skipped, errors"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-11T09:40:42.238341+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -168,6 +168,22 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "DOCS complete \u2014 README section, CHANGELOG entry, documentation summary written"
+    },
+    {
+      "timestamp": "2026-03-11T09:42:47.841605+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Validator: Lease expired at 2026-03-11T09:40:42.238341+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T09:58:07.151916+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",
