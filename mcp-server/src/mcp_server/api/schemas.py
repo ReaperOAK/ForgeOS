@@ -5,7 +5,7 @@ pipeline overview, and health check responses, ensuring consistent
 serialisation across all REST endpoints.
 
 .. meta::
-   :ticket: FORGEOS-BE034, FORGEOS-BE035, FORGEOS-BE036, FORGEOS-BE038
+   :ticket: FORGEOS-BE034, FORGEOS-BE035, FORGEOS-BE036, FORGEOS-BE037, FORGEOS-BE038
 """
 
 from __future__ import annotations

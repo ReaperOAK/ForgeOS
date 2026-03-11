@@ -1,3 +1,8 @@
+### [FORGEOS-BE037] — Documentation Summary
+- **Artifacts:** CHANGELOG.md, mcp-server/README.md, mcp-server/src/mcp_server/api/schemas.py
+- **Decisions:** Added full Reference-quadrant section for advance/rework endpoints in README, matching existing endpoint doc pattern (request/response examples, error tables, schema tables, route mounting, design decisions). Updated schemas module meta to include BE037.
+- **Timestamp:** 2026-03-11T08:30:00Z
+
 ### [FORGEOS-FE001] — QA Summary
 - **Artifacts:** .github/agent-output/QA/FORGEOS-FE001.md, dashboard/jest.config.ts, dashboard/jest.setup.ts, dashboard/src/components/__tests__/*.test.tsx (8 suites), dashboard/src/lib/__tests__/*.test.ts(x) (3 suites)
 - **Decisions:** QA PASS (HIGH confidence) — 89 tests pass, 83.1% statement / 84.21% line coverage. All 7 ACs verified. Build clean, lint clean. 0 defects. Design tokens verified against FORGEOS-UID001. Test infrastructure (Jest + RTL) added.
