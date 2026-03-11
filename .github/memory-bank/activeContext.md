@@ -1,3 +1,8 @@
+### [FORGEOS-FE005] — FRONTEND Complete
+- **Artifacts:** dashboard/src/lib/graph/layout.ts, dashboard/src/components/graph/DependencyGraph.tsx, dashboard/src/components/graph/GraphControls.tsx, dashboard/src/app/graph/page.tsx, docs/uiux/components/dependency-graph-spec.md
+- **Decisions:** Pure SVG rendering (no external graph library); Sugiyama-style layered layout with Kahn's topological sort; stage colors from design-tokens.json; auto fit-to-view on mount; touch + mouse interaction support
+- **Timestamp:** 2026-03-11T15:00:00Z
+
 ### [FORGEOS-FE004] — FRONTEND Complete
 - **Artifacts:** dashboard/src/app/tickets/[id]/page.tsx, dashboard/src/components/tickets/TicketMetadata.tsx, dashboard/src/components/tickets/HistoryTimeline.tsx, dashboard/src/components/tickets/DependencyTree.tsx, docs/uiux/components/ticket-detail-spec.md
 - **Decisions:** Client-side fetching with useEffect for interactivity; tabbed History/Dependencies to reduce scroll; relative timestamps with full-date hover; expandable event payloads; 404 via Next.js notFound()
