@@ -4,7 +4,7 @@
   "description": "Implement `GET /api/stages` for a pipeline overview showing ticket counts per stage, and `GET /api/health` for server health status. The stages endpoint returns an aggregated view suitable for a Kanban-style dashboard. The health endpoint returns server uptime, database connection status, and active session count.",
   "type": "backend",
   "priority": "medium",
-  "stage": "READY",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",

@@ -3882,3 +3882,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/QA/FORGEOS-BE061.md
 - **Decisions:** QA REJECT — 3/6 ACs unmet. AC2: no ticket-branch file-filtered sync (all non-main branches skipped). AC3: zero file path filtering for .github/tickets/ or .github/ticket-state/. AC6: handler returns None instead of sync summary. 31/31 push tests pass, 79/79 webhook regression pass, 100% push-code coverage, 0 lint errors. Existing code quality good but scope incomplete.
 - **Timestamp:** 2026-03-11T03:00:00Z
+
+### [FORGEOS-BE038] — Pipeline Overview and Health Endpoints
+- **Artifacts:** mcp-server/src/mcp_server/api/routes/pipeline.py, mcp-server/src/mcp_server/api/routes/health.py, mcp-server/src/mcp_server/api/schemas.py, mcp-server/tests/test_pipeline_api.py, mcp-server/tests/test_health_api.py
+- **Decisions:** Used factory pattern (create_*_endpoint) matching existing route conventions. Health endpoint delegates to existing HealthChecker. Pipeline uses existing count_by_stage() + new count_by_stage_and_type(). Both endpoints are public read-only, no auth middleware.
+- **Timestamp:** 2026-03-11T02:10:00Z

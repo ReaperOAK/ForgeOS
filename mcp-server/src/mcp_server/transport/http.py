@@ -42,7 +42,7 @@ from pydantic_settings import BaseSettings
 from starlette.applications import Starlette
 from starlette.requests import Request
 from starlette.responses import JSONResponse
-from starlette.routing import Mount, Route
+from starlette.routing import Mount, Route, WebSocketRoute
 
 if TYPE_CHECKING:
     from mcp.server.fastmcp import FastMCP
@@ -168,6 +168,8 @@ class HTTPTransport:
             create_ticket_history_endpoint,
             create_tickets_endpoint,
         )
+        from mcp_server.api.routes.websocket import create_websocket_endpoint
+        from mcp_server.services.event_broadcaster import EventBroadcaster
 
         # Audit repo getter — deferred to account for late binding
         _audit_repo_ref: list[Any] = [None]
@@ -206,6 +208,14 @@ class HTTPTransport:
 
         health_api_handler = create_health_endpoint(_get_health_checker)
 
+        # WebSocket event broadcaster — deferred to account for late binding
+        _broadcaster_ref: list[EventBroadcaster | None] = [None]
+
+        def _get_broadcaster() -> EventBroadcaster | None:
+            return _broadcaster_ref[0]
+
+        ws_handler = create_websocket_endpoint(_get_broadcaster)
+
         routes: list[Route | Mount] = [
             Route("/health", health_endpoint, methods=["GET"]),
             Route("/api/health", health_api_handler, methods=["GET"]),
@@ -214,6 +224,7 @@ class HTTPTransport:
             Route("/api/tickets", tickets_handler, methods=["GET"]),
             Route("/api/tickets/{ticket_id}", ticket_detail_handler, methods=["GET"]),
             Route("/api/tickets/{ticket_id}/history", ticket_history_handler, methods=["GET"]),
+            WebSocketRoute("/ws/tickets", ws_handler),
             Mount(config.mount_path, app=http_starlette_app),
         ]
 
@@ -224,6 +235,7 @@ class HTTPTransport:
         app.state.ticket_repo_ref = _ticket_repo_ref  # type: ignore[attr-defined]
         app.state.event_store_ref = _event_store_ref  # type: ignore[attr-defined]
         app.state.health_checker_ref = _health_checker_ref  # type: ignore[attr-defined]
+        app.state.broadcaster_ref = _broadcaster_ref  # type: ignore[attr-defined]
         logger.info(
             "HTTP transport app created: mount_path=%s stateless=%s",
             config.mount_path,

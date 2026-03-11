@@ -210,3 +210,49 @@ class HistoryListResponse(BaseModel):
     ticket_id: str
     events: list[HistoryEntry]
     pagination: PaginationMeta
+
+
+# ---------------------------------------------------------------------------
+# Claim/Release schemas (FORGEOS-BE036)
+# ---------------------------------------------------------------------------
+
+
+class ClaimRequest(BaseModel):
+    """Request body for ``POST /api/tickets/{ticket_id}/claim``.
+
+    .. meta::
+       :ticket: FORGEOS-BE036
+    """
+
+    agent_id: str
+    machine_id: str
+    operator: str
+    lease_duration_minutes: int = 30
+
+
+class ClaimResponse(BaseModel):
+    """Response body for a successful claim.
+
+    .. meta::
+       :ticket: FORGEOS-BE036
+    """
+
+    ticket_id: str
+    title: str
+    type: str
+    stage: str
+    file_paths: list[str] = Field(default_factory=list)
+    acceptance_criteria: list[str] = Field(default_factory=list)
+
+
+class ReleaseResponse(BaseModel):
+    """Response body for a successful release.
+
+    .. meta::
+       :ticket: FORGEOS-BE036
+    """
+
+    ticket_id: str
+    previous_stage: str
+    released_by: str
+    reason: str
