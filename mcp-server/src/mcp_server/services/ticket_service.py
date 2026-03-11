@@ -18,8 +18,8 @@ Public API
 * :class:`TicketListResult` — paginated ticket list result.
 
 .. meta::
-   :ticket: FORGEOS-BE028, FORGEOS-BE030, FORGEOS-BE031, FORGEOS-BE032, FORGEOS-BE055
-   :last_reviewed: 2026-03-11T03:00:00Z
+   :ticket: FORGEOS-BE028, FORGEOS-BE030, FORGEOS-BE031, FORGEOS-BE032, FORGEOS-BE055, FORGEOS-BE065
+   :last_reviewed: 2026-03-11T04:45:00Z
 """
 
 from __future__ import annotations
