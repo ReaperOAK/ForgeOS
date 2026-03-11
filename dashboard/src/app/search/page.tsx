@@ -258,6 +258,13 @@ function SearchPageInner() {
 /*  Page export with Suspense                                          */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Full-page search view.
+ *
+ * Wraps {@link SearchPageInner} in a `Suspense` boundary because
+ * `useSearchParams()` requires it under the Next.js App Router.
+ * Renders a skeleton placeholder while the inner component loads.
+ */
 export default function SearchPage() {
     return (
         <Suspense

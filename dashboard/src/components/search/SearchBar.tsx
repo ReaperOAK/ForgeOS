@@ -10,19 +10,31 @@ import { fetchTickets } from '@/lib/api';
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
 
+/** Active search filter selections for stage, priority, and type. */
 export interface SearchFilters {
+    /** Filter by one or more SDLC stages. */
     stages?: TicketStage[];
+    /** Filter by one or more priority levels. */
     priorities?: TicketPriority[];
+    /** Filter by one or more ticket types. */
     types?: TicketType[];
 }
 
+/** A single typeahead result produced by matching tickets against the query. */
 export interface SearchResult {
+    /** Ticket identifier (e.g. `"FORGEOS-FE003"`). */
     ticketId: string;
+    /** Human-readable ticket title. */
     title: string;
+    /** Current SDLC stage. */
     stage: TicketStage;
+    /** Ticket priority level. */
     priority: TicketPriority;
+    /** Ticket type category. */
     type: TicketType;
+    /** Which field the query matched against. */
     matchField: 'id' | 'title';
+    /** Character ranges within `matchField` that matched the query. */
     matchRanges: Array<{ start: number; end: number }>;
 }
 
@@ -226,6 +238,13 @@ const stageColors: Record<string, string> = {
 /*  SearchBar Component                                                */
 /* ------------------------------------------------------------------ */
 
+/**
+ * Global combobox-style search bar.
+ *
+ * Opens with `Cmd/Ctrl + K`, debounces API queries by 300 ms, and renders
+ * a typeahead dropdown with highlighted matches and filter chips.  Recent
+ * searches are persisted in `localStorage`.
+ */
 export function SearchBar() {
     const router = useRouter();
     const inputRef = useRef<HTMLInputElement>(null);
