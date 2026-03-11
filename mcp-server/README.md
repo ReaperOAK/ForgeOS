@@ -4567,6 +4567,187 @@ resolutions within a cycle, separate from structured logging.
   the MCP server, supporting gradual rollout via feature flags.
 
 
+## Database-to-Filesystem Export
+
+<!-- last_reviewed: 2026-03-11T23:59:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.migration.exporter` module exports ticket state from PostgreSQL
+back to the filesystem format consumed by `tickets.py`. This is the rollback
+safety net: if the MCP/database system fails, the exported files restore
+filesystem-mode operations without data loss.
+
+### Usage
+
+```python
+from mcp_server.migration.exporter import (
+    ExportConfig,
+    TicketExporter,
+)
+from pathlib import Path
+
+# 1. Configure paths
+config = ExportConfig(
+    tickets_dir=Path(".github/tickets"),
+    ticket_state_dir=Path(".github/ticket-state"),
+    backup_dir=Path(".github/tickets-backup"),  # optional
+    dry_run=False,
+)
+
+# 2. Provide a database reader (implements ExportDatabaseReader protocol)
+reader = MyDatabaseReader(pool)  # must have async read_all_tickets()
+
+# 3. Run the export
+exporter = TicketExporter(config, reader)
+result = await exporter.run()
+
+# 4. Review results
+print(result.summary())
+```
+
+### ExportConfig
+
+| Parameter | Type | Default | Description |
+|---|---|---|---|
+| `tickets_dir` | `Path` | *(required)* | Target for `.github/tickets/<id>.json` master files |
+| `ticket_state_dir` | `Path` | *(required)* | Target for `.github/ticket-state/<STAGE>/<id>.json` copies |
+| `backup_dir` | `Path \| None` | `None` | Backup destination. When `None`, auto-generates a timestamped directory next to `tickets_dir` |
+| `dry_run` | `bool` | `False` | When `True`, reads and converts tickets but writes nothing to disk |
+
+`ExportConfig` is a frozen dataclass — values cannot be mutated after creation.
+
+### ExportDatabaseReader Protocol
+
+The exporter accepts any object implementing the `ExportDatabaseReader`
+protocol (runtime-checkable):
+
+```python
+class ExportDatabaseReader(Protocol):
+    async def read_all_tickets(self) -> list[dict[str, Any]]:
+        ...
+```
+
+Each dict must include at minimum: `ticket_id`, `title`, `ticket_type`,
+`priority`, `stage`, `sdlc_flow`, `depends_on`, `file_paths`,
+`acceptance_criteria`, `tags`, `rework_count`, `claimed_by`, `machine_id`,
+`operator`, `lease_expiry`, `lease_duration_minutes`, `created_at`,
+and `history`.
+
+### ExportResult and ExportStats
+
+`ExportResult` wraps the outcome of an export run.
+
+| Field | Type | Description |
+|---|---|---|
+| `stats` | `ExportStats` | Numeric counters for the run |
+| `dry_run` | `bool` | Whether this was a dry run |
+| `errors` | `list[str]` | Error messages from failed per-ticket exports |
+| `warnings` | `list[str]` | Non-fatal warnings |
+
+#### ExportStats Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `total_read` | `int` | Tickets read from the database |
+| `exported` | `int` | Tickets successfully written to disk |
+| `backed_up` | `int` | Files backed up before overwrite |
+| `errors` | `int` | Count of per-ticket export failures |
+| `active_claims` | `int` | Tickets with an active claim at export time |
+| `stage_distribution` | `dict[str, int]` | Count of exported tickets per stage directory |
+
+#### Export Summary Report
+
+Call `result.summary()` to get a human-readable report:
+
+```text
+=== EXPORT Summary ===
+Total tickets read:     10
+Exported:               8
+Backed up:              5
+Active claims:          3
+Errors:                 2
+--- Stage Distribution ---
+  BACKEND: 4
+  READY: 4
+--- Errors ---
+  - Export failed for T-005: ...
+```
+
+In dry-run mode the header reads `DRY RUN Summary`.
+
+### Non-Destructive Backup
+
+Before overwriting existing filesystem files the exporter creates a full
+backup:
+
+1. **Master tickets** — every `.json` file in `tickets_dir` is copied to
+   `<backup_dir>/tickets/`.
+2. **State copies** — every `.json` file under each stage subdirectory of
+   `ticket_state_dir` is copied to `<backup_dir>/ticket-state/<STAGE>/`.
+3. **Auto-generated backup path** — when `backup_dir` is `None`, the
+   exporter creates a timestamped directory (e.g.
+   `tickets-backup-20260311T120000Z`) next to `tickets_dir`.
+4. **Dry-run skip** — backup is skipped entirely in dry-run mode.
+
+Backup preserves file metadata via `shutil.copy2`.
+
+### API Reference
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `ExportConfig` | frozen dataclass | Export run configuration |
+| `ExportDatabaseReader` | protocol | Async interface for reading tickets from the database |
+| `ExportResult` | dataclass | Outcome of an export run (stats, errors, warnings) |
+| `ExportStats` | dataclass | Numeric counters (total, exported, backed up, errors, claims) |
+| `TicketExporter` | class | Orchestrates the full export lifecycle |
+| `ProgressCallback` | type alias | `Callable[[int, int, str], None]` — progress reporting hook |
+
+#### TicketExporter Constructor
+
+| Parameter | Type | Description |
+|---|---|---|
+| `config` | `ExportConfig` | Export run settings |
+| `reader` | `ExportDatabaseReader` | Database reader implementation |
+| `on_progress` | `ProgressCallback \| None` | Optional callback invoked per ticket `(current, total, ticket_id)` |
+
+#### TicketExporter Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `run()` | `ExportResult` | Execute the full export pipeline (async) |
+
+### Stage Name Mapping
+
+Database stage enum values are mapped to filesystem directory names using
+the shared `DB_TO_STAGE_DIR` lookup from `mcp_server.migration.transformers`.
+Notable mappings:
+
+| DB Stage | Filesystem Directory |
+|---|---|
+| `DOCUMENTATION` | `DOCS` |
+| `VALIDATOR` | `VALIDATION` |
+| `CI_REVIEW` | `CIReviewer` |
+| `PRODUCT_MANAGER` | `ProductManager` |
+
+Unmapped stages pass through unchanged.
+
+### Design Decisions
+
+- **Non-destructive** — backup before overwrite ensures no data loss even if
+  the export produces incorrect output.
+- **Protocol-based reader** — the `ExportDatabaseReader` protocol decouples
+  the exporter from any specific database driver or ORM, enabling test
+  doubles without mocking.
+- **Active claim preservation** — `claimed_by`, `machine_id`, `operator`,
+  and `lease_expiry` fields are included in exported JSON so that
+  `tickets.py` can detect and release stale claims.
+- **Idempotent output** — re-running the export overwrites files with
+  identical content when the database state has not changed.
+- **Dry-run mode** — validates the full pipeline (read, convert, report)
+  without filesystem side-effects.
+
+
 ## Admin Force Operations
 
 <!-- last_reviewed: 2026-03-11T00:00:00Z -->
