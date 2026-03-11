@@ -3917,3 +3917,33 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/services/pr_service.py, mcp-server/src/mcp_server/webhooks/github_handler.py, mcp-server/src/mcp_server/webhooks/__init__.py, mcp-server/src/mcp_server/services/__init__.py, mcp-server/tests/test_pr_service.py, .github/agent-output/QA/FORGEOS-BE063.md
 - **Decisions:** QA PASS — 34/34 tests pass, pr_service.py 100% coverage, PR-specific github_handler.py lines fully covered. All 6 ACs verified. AC2 note: Backend designed stateless handler (data extraction only, no DB persistence yet — downstream consumer responsibility). 5 pre-existing failures unrelated to BE063. Zero regressions. Lint clean.
 - **Timestamp:** 2026-03-11T03:00:00Z
+
+### [FORGEOS-BE047] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE047.md
+- **Decisions:** PASS — Score 92/100, 0 critical, 0 warnings, 91% coverage
+- **Timestamp:** 2026-03-11T02:25:00+00:00
+
+### [FORGEOS-BE031] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE031.md
+- **Decisions:** PASS — Score 95/100, 0 critical, 0 warnings, 2 suggestions (OC-003 raw int counters, OC-007 shared service class size)
+- **Timestamp:** 2026-03-11T02:05:00Z
+
+### [FORGEOS-BE041] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE041.md
+- **Decisions:** PASS — Score 85/100, 0 critical, 3 warnings (mypy no-redef, CC=13 dispatch, OC-007 method length). 95% coverage, 38/38 tests pass. Lint clean.
+- **Timestamp:** 2026-03-11T03:15:00Z
+
+### [FORGEOS-BE061] — Backend Rework #2 Complete
+- **Artifacts:** mcp-server/src/mcp_server/webhooks/github_handler.py, mcp-server/src/mcp_server/services/webhook_service.py, mcp-server/tests/test_push_event_handler.py
+- **Decisions:** Added _has_ticket_file_changes() helper with _TICKET_FILE_PREFIXES for AC2/AC3. Changed handler return type to dict|None for AC6. Updated WebhookHandler type alias and dispatch() return.
+- **Timestamp:** 2026-03-11T04:00:00Z
+
+### [FORGEOS-BE068] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE068.md
+- **Decisions:** PASS — Score 87/100, 0 critical, 2 warnings (mypy no-any-return, OC-002 else keyword), 3 suggestions (E501 line length)
+- **Timestamp:** 2026-03-11T02:30:00Z
+
+### [FORGEOS-BE036] — QA Review
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE036.md
+- **Decisions:** PASS — 19/19 claim tests pass, coverage 96%, 7/7 ACs verified, no regressions
+- **Timestamp:** 2026-03-11T02:35:00+00:00
