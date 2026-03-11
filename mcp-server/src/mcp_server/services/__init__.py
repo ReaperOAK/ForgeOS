@@ -11,9 +11,12 @@ Public API
 * :class:`MachineService` — machine auth orchestration.
 * :class:`WebhookService` — inbound webhook validation and dispatch.
 * :class:`WebhookEvent` — validated webhook event value object.
+* :class:`PRService` — PR event handler (ticket correlation, metadata extraction).
+* :class:`PREvent` — processed PR event value object.
 """
 
 from mcp_server.services.audit_service import AuditService
+from mcp_server.services.pr_service import PREvent, PRService
 from mcp_server.services.sync_engine import (
     IntegrityError,
     SyncEngine,
@@ -39,6 +42,8 @@ __all__ = [
     "ClaimValidationError",
     "IntegrityError",
     "NextTicketResult",
+    "PREvent",
+    "PRService",
     "ReleaseResult",
     "SyncEngine",
     "SyncResult",
