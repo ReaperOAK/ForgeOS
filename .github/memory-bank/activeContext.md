@@ -1,3 +1,13 @@
+### [FORGEOS-BE074] — Validation
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE074.md
+- **Decisions:** APPROVED — 10/10 DoD pass, 7/7 acceptance criteria verified, all upstream verdicts confirmed (QA/Security/CI/Docs PASS)
+- **Timestamp:** 2026-03-11T23:59:30Z
+
+### [FORGEOS-BE077] — Validation
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE077.md
+- **Decisions:** APPROVED — 10/10 DoD pass, 7/7 acceptance criteria verified, all upstream verdicts confirmed (QA/Security/CI/Docs PASS)
+- **Timestamp:** 2026-03-11T23:59:30Z
+
 ### [FORGEOS-FE003] — Security Review
 - **Artifacts:** .github/agent-output/Security/FORGEOS-FE003.md
 - **Decisions:** PASS — STRIDE max score 6/LOW, OWASP 10/10 checked, 0 findings. React JSX auto-escaping on all ticket data, encodeURIComponent on link hrefs, bounded API fetch (limit=500), no sensitive data exposed.
