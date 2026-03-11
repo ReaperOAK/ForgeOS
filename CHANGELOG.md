@@ -8,6 +8,80 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Ticket Rework MCP Tool** (FORGEOS-BE031) — `tickets.rework` MCP tool at
+  `mcp-server/src/mcp_server/tools/ticket_tools.py` backed by
+  `TicketService.rework_ticket()` at
+  `mcp-server/src/mcp_server/services/ticket_service.py`. Returns a ticket to
+  its implementation stage with rejection evidence. Validates the calling agent
+  holds the active claim. Increments `rework_count` and checks against
+  `max_reworks` (default 3). When the limit is reached, the ticket is escalated
+  instead of reworked. Uses SERIALIZABLE transaction isolation.
+  `STAGE_REJECTED` / `ESCALATED` events recorded in audit trail. `ReworkResult`
+  frozen dataclass with `to_dict()`. Input schema accepts `ticket_id`,
+  `agent_id`, `reason`, and optional `rejection_evidence`. 34 tests, CI quality
+  score 95/100.
+
+- **Idempotency Key Middleware** (FORGEOS-BE041) — Request-level idempotency
+  enforcement at `mcp-server/src/mcp_server/middleware/idempotency.py`.
+  Clients include an `X-Idempotency-Key` header on mutating requests
+  (POST, PUT, PATCH, DELETE). First request executes normally and caches
+  the response; subsequent requests with the same key return the cached
+  result without re-executing the handler. In-progress keys return
+  `409 Conflict`. Keys expire after a configurable TTL (default 24 h).
+  Missing-key behavior is configurable: `warn` (log and allow) or `reject`
+  (return 400). Pluggable `IdempotencyStore` interface with a default
+  `InMemoryIdempotencyStore`. Health endpoints excluded. 38 tests with
+  95% coverage.
+
+- **Filesystem Fallback Mode** (FORGEOS-BE049) — Filesystem fallback at
+  `agent-sdk/src/forgeos_sdk/fallback.py` that delegates ticket lifecycle
+  operations to the existing `tickets.py` CLI when the MCP server is
+  unavailable. `FilesystemFallback` class provides the same async API surface
+  as `TicketOperations` (`get_ticket`, `claim`, `advance`, `rework`, `release`,
+  `claim_next`) via subprocess calls to `tickets.py` and direct filesystem
+  reads from `.github/ticket-state/`. Three-mode selection via `FORGEOS_MODE`
+  environment variable: `mcp` (server-only), `filesystem` (CLI-only), `auto`
+  (try MCP, fall back on failure). `OperationMode` enum in `config.py`.
+  `ForgeOSClient.connect()` transparently activates fallback in auto mode on
+  connection failure. Lazy import in `_activate_fallback()` avoids circular
+  dependencies. Auto-detection of repo root via `git rev-parse` with
+  directory-walk fallback. 96% test coverage on fallback module, 65 tests
+  passing.
+
+- **Summary Handoff Helpers** (FORGEOS-BE048) — File-based summary I/O
+  utilities at `agent-sdk/src/forgeos_sdk/summary.py`.
+  `read_upstream_summary()` reads the previous stage agent's summary,
+  `write_summary()` writes the current agent's output, and
+  `delete_upstream_summary()` cleans up after processing. `STAGE_TO_AGENT`
+  maps SDLC stages to agent directory names. All functions use UTF-8
+  encoding and handle missing files gracefully. Zero third-party
+  dependencies (stdlib only). 28 tests with 100% coverage.
+
+- **Background Lease Heartbeat in SDK** (FORGEOS-BE047) — `LeaseHeartbeat`
+  class at `agent-sdk/src/forgeos_sdk/heartbeat.py` that runs a background
+  `asyncio` task to periodically call `tickets.heartbeat`, extending the
+  active ticket lease. Interval defaults to 300 s (5 min) and is configurable
+  via constructor parameter or `FORGEOS_HEARTBEAT_INTERVAL` environment
+  variable. Integrated into `TicketOperations`: heartbeat starts automatically
+  on `claim()` / `claim_next()` and stops on `advance()`, `release()`, or
+  `rework()`. Supports async context manager (`async with LeaseHeartbeat(...)`).
+  Failure-tolerant — logs warnings on heartbeat errors without crashing the
+  agent. 27 tests, 91% combined coverage.
+
+- **Dual-Mode Wrapper for tickets.py** (FORGEOS-BE068) — Migration bridge
+  at `mcp-server/src/mcp_server/migration/dual_mode.py` and `config.py` that
+  routes ticket lifecycle operations (claim, advance, release, rework, sync,
+  validate, status) to either the MCP server or the file-based `tickets.py`
+  CLI depending on the `FORGEOS_MODE` environment variable. `DualModeWrapper`
+  probes MCP server health before each operation and falls back to file mode
+  automatically when `FORGEOS_FALLBACK_ENABLED` is true. `FileMode` delegates
+  to `tickets.py` via `asyncio.subprocess`; `McpMode` sends JSON-RPC
+  `tools/call` requests over HTTP using stdlib `urllib.request`. Runtime mode
+  switching via `set_mode()`. `OperationResult` frozen dataclass for all
+  responses. `TicketOperations` runtime-checkable Protocol ensures both
+  backends expose identical async interfaces. `DualModeConfig` pydantic-settings
+  model reads `FORGEOS_*` environment variables. CI quality score 87/100.
+
 - **Role-Based Claim Restrictions** (FORGEOS-BE055) — Role-stage
   authorization at `mcp-server/src/mcp_server/auth/authorization.py` that
   enforces agents can only claim tickets matching their role's SDLC stage.

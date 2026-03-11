@@ -4,7 +4,7 @@
   "description": "Implement idempotency keys for claim and advance operations to prevent duplicate processing from retries. Clients include an idempotency key header or parameter. The server stores the key and its result; replayed requests return the cached result without re-executing. Keys expire after a configurable TTL.",
   "type": "backend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,11 +35,11 @@
     "Missing idempotency key on claim/advance operations is allowed but logged as a warning"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation Specialist",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T02:46:04.703109+00:00",
-  "lease_duration_minutes": 30,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": null,
   "history": [
     {
       "timestamp": "2026-03-05T18:06:45.293703+00:00",
@@ -138,6 +138,15 @@
       "from_stage": "DOCS",
       "to_stage": "DOCS",
       "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-11T02:46:04.703109+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T02:23:07.020556+00:00",
+      "event": "DOCS_COMPLETE",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Added Idempotency Key Middleware section to mcp-server/README.md, CHANGELOG entry. All public APIs documented."
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
@@ -153,5 +162,8 @@
     "mcp-server/src/mcp_server/middleware/idempotency.py",
     "mcp-server/src/mcp_server/middleware/__init__.py",
     "mcp-server/tests/test_idempotency.py"
+  ],
+  "completed_stages": [
+    "DOCS"
   ]
 }
