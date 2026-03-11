@@ -4303,3 +4303,23 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/services/event_broadcaster.py, mcp-server/src/mcp_server/api/routes/websocket.py, mcp-server/tests/test_filtered_subscriptions.py, mcp-server/tests/test_websocket_streaming.py
 - **Decisions:** Extended ClientFilter with types/agent_ids rather than adding fields to TicketEvent; type/agent_id matching uses payload dict lookup for backward compatibility; backpressure uses deque(maxlen=N) for automatic oldest-drop semantics
 - **Timestamp:** 2026-03-11T04:22:00+00:00
+
+### [FORGEOS-BE069] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE069.md
+- **Decisions:** PASS — Score 83/100, 0 critical, 3 warnings (_load_locked CC=16/COG=26, __init__.py import sort). 98% coverage. Complexity warnings acceptable for config parsing method.
+- **Timestamp:** 2026-03-11T12:30:00+00:00
+
+### [FORGEOS-BE050] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE050.md
+- **Decisions:** PASS — Score 99/100, 0 critical, 0 warnings, 1 suggestion (OC-007 class size)
+- **Timestamp:** 2026-03-11T07:15:00Z
+
+### [FORGEOS-BE037] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE037.md
+- **Decisions:** PASS — Score 98/100, 0 critical, 0 warnings, 24/24 tests passed, 100% schema coverage
+- **Timestamp:** 2026-03-11T05:30:00Z
+
+### [FORGEOS-BE070] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE070.md
+- **Decisions:** PASS — Score 99/100, 0 critical, 0 warnings. Ruff clean, mypy --strict clean, C901 clean. 99% coverage on 70 tests (importer.py 99%, transformers.py 100%). Object calisthenics compliant, no circular deps, all upstream verdicts (QA PASS, Security PASS) confirmed.
+- **Timestamp:** 2026-03-11T06:15:00Z
