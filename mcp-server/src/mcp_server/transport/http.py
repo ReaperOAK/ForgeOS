@@ -162,6 +162,9 @@ class HTTPTransport:
         # Build composite app with health route + MCP transport + admin API
         from mcp_server.api import create_audit_endpoint
         from mcp_server.api.routes import (
+            create_admin_force_advance_endpoint,
+            create_admin_force_release_endpoint,
+            create_admin_force_rework_endpoint,
             create_claim_endpoint,
             create_health_endpoint,
             create_pipeline_endpoint,
@@ -223,11 +226,42 @@ class HTTPTransport:
 
         ws_handler = create_websocket_endpoint(_get_broadcaster)
 
+        # Admin service getter — deferred to account for late binding
+        _admin_service_ref: list[Any] = [None]
+
+        def _get_admin_service() -> Any:
+            return _admin_service_ref[0]
+
+        admin_force_release_handler = create_admin_force_release_endpoint(
+            _get_admin_service
+        )
+        admin_force_advance_handler = create_admin_force_advance_endpoint(
+            _get_admin_service
+        )
+        admin_force_rework_handler = create_admin_force_rework_endpoint(
+            _get_admin_service
+        )
+
         routes: list[Route | Mount] = [
             Route("/health", health_endpoint, methods=["GET"]),
             Route("/api/health", health_api_handler, methods=["GET"]),
             Route("/api/pipeline", pipeline_handler, methods=["GET"]),
             Route("/api/admin/audit", audit_handler, methods=["GET"]),
+            Route(
+                "/api/admin/tickets/{ticket_id}/force-release",
+                admin_force_release_handler,
+                methods=["POST"],
+            ),
+            Route(
+                "/api/admin/tickets/{ticket_id}/force-advance",
+                admin_force_advance_handler,
+                methods=["POST"],
+            ),
+            Route(
+                "/api/admin/tickets/{ticket_id}/force-rework",
+                admin_force_rework_handler,
+                methods=["POST"],
+            ),
             Route("/api/tickets", tickets_handler, methods=["GET"]),
             Route("/api/tickets/{ticket_id}", ticket_detail_handler, methods=["GET"]),
             Route("/api/tickets/{ticket_id}/history", ticket_history_handler, methods=["GET"]),
@@ -245,6 +279,7 @@ class HTTPTransport:
         app.state.health_checker_ref = _health_checker_ref  # type: ignore[attr-defined]
         app.state.ticket_service_ref = _ticket_service_ref  # type: ignore[attr-defined]
         app.state.broadcaster_ref = _broadcaster_ref  # type: ignore[attr-defined]
+        app.state.admin_service_ref = _admin_service_ref  # type: ignore[attr-defined]
         logger.info(
             "HTTP transport app created: mount_path=%s stateless=%s",
             config.mount_path,
