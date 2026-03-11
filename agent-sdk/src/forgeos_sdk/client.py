@@ -12,11 +12,12 @@ import logging
 import random
 from contextlib import AsyncExitStack
 from enum import Enum
+from pathlib import Path
 from typing import Any
 
 from mcp.client.session import ClientSession
 
-from forgeos_sdk.config import SDKConfig, TransportType
+from forgeos_sdk.config import OperationMode, SDKConfig, TransportType
 from forgeos_sdk.exceptions import ConfigurationError
 from forgeos_sdk.exceptions import ConnectionError as SDKConnectionError
 from forgeos_sdk.transport import (
@@ -68,6 +69,8 @@ class ForgeOSClient:
         server_url: str,
         agent_id: str,
         transport_type: str = "streamable-http",
+        mode: str = "auto",
+        repo_root: Path | None = None,
     ) -> None:
         if not server_url or not server_url.strip():
             raise ConfigurationError("server_url must not be empty")
@@ -85,6 +88,16 @@ class ForgeOSClient:
                 f"Invalid transport_type '{transport_type}'. Valid options: {valid}"
             )
 
+        try:
+            self._mode = OperationMode(mode)
+        except ValueError:
+            valid = ", ".join(m.value for m in OperationMode)
+            raise ConfigurationError(
+                f"Invalid mode '{mode}'. Valid options: {valid}"
+            )
+
+        self._repo_root = repo_root
+
         # Connection state
         self._state = ConnectionState.DISCONNECTED
         self._transport: MCPTransport | None = None
@@ -94,6 +107,10 @@ class ForgeOSClient:
         self._exit_stack: AsyncExitStack | None = None
         self._reconnect_task: asyncio.Task[None] | None = None
         self._auto_reconnect: bool = True
+
+        # Fallback state
+        self._fallback_active: bool = False
+        self._fallback: Any = None  # FilesystemFallback, lazily imported
 
         # Transport-specific config (set during connect)
         self._stdio_command: str = ""
@@ -107,6 +124,7 @@ class ForgeOSClient:
                 "server_url": self._server_url,
                 "agent_id": self._agent_id,
                 "transport": self._transport_type.value,
+                "mode": self._mode.value,
             },
         )
 
@@ -114,8 +132,9 @@ class ForgeOSClient:
     def from_env(cls, overrides: dict[str, str] | None = None) -> ForgeOSClient:
         """Create a client from environment variables.
 
-        Reads ``FORGEOS_SERVER_URL``, ``FORGEOS_AGENT_ID``, and
-        ``FORGEOS_TRANSPORT`` from the environment with sensible defaults.
+        Reads ``FORGEOS_SERVER_URL``, ``FORGEOS_AGENT_ID``,
+        ``FORGEOS_TRANSPORT``, and ``FORGEOS_MODE`` from the environment
+        with sensible defaults.
 
         Parameters:
             overrides: Optional dict to override specific config values.
@@ -128,16 +147,19 @@ class ForgeOSClient:
         server_url = config.server_url
         agent_id = config.agent_id
         transport = config.transport.value
+        mode = config.mode.value
 
         if overrides:
             server_url = overrides.get("server_url", server_url)
             agent_id = overrides.get("agent_id", agent_id)
             transport = overrides.get("transport", transport)
+            mode = overrides.get("mode", mode)
 
         return cls(
             server_url=server_url,
             agent_id=agent_id,
             transport_type=transport,
+            mode=mode,
         )
 
     # ── Connection lifecycle ──────────────────────────────────────────
@@ -153,6 +175,11 @@ class ForgeOSClient:
     ) -> None:
         """Connect to the MCP server and initialize the session.
 
+        In ``filesystem`` mode, the MCP connection is skipped and the client
+        activates the filesystem fallback immediately.  In ``auto`` mode, a
+        connection failure triggers a transparent switch to fallback with a
+        warning log.
+
         For stdio transport, ``command`` is required. For HTTP/SSE transports,
         the ``server_url`` from the constructor is used.
 
@@ -164,7 +191,8 @@ class ForgeOSClient:
             auto_reconnect: Whether to enable automatic reconnection.
 
         Raises:
-            ConnectionError: If already connected or connection fails.
+            ConnectionError: If already connected or connection fails
+                (MCP mode only).
         """
         if self._state == ConnectionState.CONNECTED:
             raise SDKConnectionError("Already connected")
@@ -175,11 +203,33 @@ class ForgeOSClient:
         self._stdio_env = env
         self._headers = dict(headers) if headers else {}
 
+        # Filesystem mode — skip MCP entirely
+        if self._mode == OperationMode.FILESYSTEM:
+            self._activate_fallback()
+            logger.info(
+                "Mode=filesystem — MCP connection skipped, using fallback",
+                extra={"agent_id": self._agent_id},
+            )
+            return
+
+        # MCP or AUTO — attempt MCP connection
         self._state = ConnectionState.CONNECTING
         try:
             await self._establish_connection()
-        except Exception:
+        except Exception as exc:
             self._state = ConnectionState.DISCONNECTED
+
+            if self._mode == OperationMode.AUTO:
+                logger.warning(
+                    "MCP server unreachable — switching to filesystem fallback",
+                    extra={
+                        "agent_id": self._agent_id,
+                        "error": str(exc),
+                    },
+                )
+                self._activate_fallback()
+                return
+
             raise
 
     async def disconnect(self) -> None:
@@ -302,6 +352,17 @@ class ForgeOSClient:
         )
 
     # ── Internal helpers ──────────────────────────────────────────────
+
+    def _activate_fallback(self) -> None:
+        """Activate the filesystem fallback backend."""
+        from forgeos_sdk.fallback import FilesystemFallback
+
+        self._fallback = FilesystemFallback(
+            repo_root=self._repo_root or None,
+            agent_id=self._agent_id,
+        )
+        self._fallback_active = True
+        self._mode = OperationMode.FILESYSTEM
 
     async def _establish_connection(self) -> None:
         """Create transport, open session, run MCP initialize handshake."""
@@ -427,6 +488,21 @@ class ForgeOSClient:
     def session_id(self) -> str | None:
         """Current session ID for session resumption."""
         return self._session_id
+
+    @property
+    def mode(self) -> OperationMode:
+        """Current operation mode (mcp, filesystem, or auto)."""
+        return self._mode
+
+    @property
+    def is_fallback_active(self) -> bool:
+        """Whether the filesystem fallback is currently active."""
+        return self._fallback_active
+
+    @property
+    def fallback(self) -> Any:
+        """The :class:`FilesystemFallback` instance, or ``None``."""
+        return self._fallback
 
     # ── Context manager ───────────────────────────────────────────────
 

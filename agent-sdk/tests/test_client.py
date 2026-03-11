@@ -276,6 +276,7 @@ class TestForgeOSClientConnect:
             server_url="http://localhost:8080/mcp",
             agent_id="test",
             transport_type="sse",
+            mode="mcp",
         )
         failing = FailingTransport(fail_count=999)
 

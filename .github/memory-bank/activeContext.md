@@ -3,6 +3,11 @@
 - **Decisions:** Used asyncio.wait_for(event.wait(), timeout) for clean cancellation instead of asyncio.sleep. Heartbeat auto-managed by TicketOperations (start on claim, stop on advance/release/rework). Opt-out via heartbeat_interval=0.
 - **Timestamp:** 2026-03-11T02:00:00Z
 
+### [FORGEOS-BE065] — State Change Notification Emitter
+- **Artifacts:** mcp-server/src/mcp_server/notifications/emitter.py, mcp-server/src/mcp_server/services/ticket_service.py, mcp-server/tests/test_notification_emitter.py
+- **Decisions:** Emitter is optional in TicketService constructor to avoid breaking existing callers. emit_advanced called outside transactional block to avoid extending serializable transaction. Fire-and-forget pattern: _emit catches all exceptions and logs.
+- **Timestamp:** 2026-03-11T01:10:00Z
+
 ### [FORGEOS-BE034] — Documentation Summary
 - **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE034.md
 - **Decisions:** Added Ticket List REST Endpoint section to README (request/response/errors/schemas/design). Updated TicketRepository methods table with list_tickets and list_filtered. Added CHANGELOG entry. Existing docstrings were complete — no additions needed.
