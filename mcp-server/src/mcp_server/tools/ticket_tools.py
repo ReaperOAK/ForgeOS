@@ -1,7 +1,8 @@
 """MCP tool implementations for ticket lifecycle operations.
 
-Registers ``tickets.next``, ``tickets.claim``, ``tickets.release``, and
-``tickets.status`` tools with the dynamic :class:`ToolRegistry`.
+Registers ``tickets.next``, ``tickets.claim``, ``tickets.release``,
+``tickets.status``, ``tickets.sync``, ``tickets.validate``, and
+``tickets.advance`` tools with the dynamic :class:`ToolRegistry`.
 
 Public API
 ----------
@@ -9,15 +10,21 @@ Public API
 * :data:`TICKETS_CLAIM_SCHEMA` — JSON Schema for ``tickets.claim``.
 * :data:`TICKETS_RELEASE_SCHEMA` — JSON Schema for ``tickets.release``.
 * :data:`TICKETS_STATUS_SCHEMA` — JSON Schema for ``tickets.status``.
+* :data:`TICKETS_SYNC_SCHEMA` — JSON Schema for ``tickets.sync``.
+* :data:`TICKETS_VALIDATE_SCHEMA` — JSON Schema for ``tickets.validate``.
+* :data:`TICKETS_ADVANCE_SCHEMA` — JSON Schema for ``tickets.advance``.
 * :func:`handle_tickets_next` — async handler for ``tickets.next``.
 * :func:`handle_tickets_claim` — async handler for ``tickets.claim``.
 * :func:`handle_tickets_release` — async handler for ``tickets.release``.
 * :func:`handle_tickets_status` — async handler for ``tickets.status``.
+* :func:`handle_tickets_sync` — async handler for ``tickets.sync``.
+* :func:`handle_tickets_validate` — async handler for ``tickets.validate``.
+* :func:`handle_tickets_advance` — async handler for ``tickets.advance``.
 * :func:`register_ticket_tools` — registers all ticket tools on a registry.
 
 .. meta::
-   :ticket: FORGEOS-BE028, FORGEOS-BE029, FORGEOS-BE032
-   :last_reviewed: 2026-03-11T00:33:00Z
+   :ticket: FORGEOS-BE028, FORGEOS-BE029, FORGEOS-BE030, FORGEOS-BE032, FORGEOS-BE033
+   :last_reviewed: 2026-03-11T00:00:00Z
 """
 
 from __future__ import annotations
