@@ -4,7 +4,7 @@
   "description": "Build the shadow mode validation engine that runs both filesystem and database operations in parallel and compares results. For each ticket operation, the shadow engine executes the operation via both paths (filesystem and MCP/database), compares the outcomes, and logs any divergences. Divergences are classified by severity: CRITICAL (state mismatch), WARNING (timing difference), INFO (metadata format difference). Shadow mode is active during Phases A and B to build confidence before full cutover.",
   "type": "backend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Divergence summary dashboard endpoint returns aggregated divergence statistics"
   ],
   "rework_count": 0,
-  "claimed_by": "QAEngineer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T17:06:29.903909+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -90,6 +90,15 @@
       "from_stage": "QA",
       "to_stage": "QA",
       "details": "Claimed by ReaperOAK@pop-os via QAEngineer, lease until 2026-03-11T17:06:29.903909+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T16:40:11.480182+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QAEngineer",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",
