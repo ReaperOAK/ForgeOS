@@ -28,6 +28,10 @@ from mcp_server.notifications.config import (
     build_channel_config,
     load_channels_from_env,
 )
+from mcp_server.notifications.emitter import (
+    EventType,
+    StateChangeEmitter,
+)
 from mcp_server.notifications.processor import (
     NotificationProcessor,
     ProcessorConfig,
@@ -45,6 +49,7 @@ __all__ = [
     "ChannelStore",
     "ChannelType",
     "DeliveryResult",
+    "EventType",
     "InvalidTransitionError",
     "Notification",
     "NotificationChannel",
@@ -53,6 +58,7 @@ __all__ = [
     "NotificationStatus",
     "ProcessorConfig",
     "SlackDelivery",
+    "StateChangeEmitter",
     "WebhookDelivery",
     "build_channel_config",
     "load_channels_from_env",

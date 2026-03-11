@@ -4,7 +4,7 @@
   "description": "Implement the notification emitter that creates queue entries when ticket state changes occur. Integrate with the ticket service layer: after advance, rework, claim, or release operations, enqueue a notification containing the ticket context, change details, and actor information. Support notification types: stage_changed, ticket_claimed, ticket_released, ticket_reworked, lease_expiring.",
   "type": "backend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "READY",
   "sdlc_flow": [
     "READY",
     "BACKEND",

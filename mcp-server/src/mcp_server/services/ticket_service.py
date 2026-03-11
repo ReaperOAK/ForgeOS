@@ -41,6 +41,7 @@ from mcp_server.server import TicketNotFoundError
 from mcp_server.services.stage_engine import validate_advance
 
 if TYPE_CHECKING:
+    from mcp_server.notifications.emitter import StateChangeEmitter
     from mcp_server.repositories.claim_repo import ClaimRepository
     from mcp_server.repositories.event_repo import EventRepository
     from mcp_server.repositories.ticket_repo import TicketRepository
@@ -185,6 +186,31 @@ class AdvanceTicketResult:
         }
 
 
+@dataclass(frozen=True, slots=True)
+class ReworkResult:
+    """Typed result returned by :meth:`TicketService.rework_ticket`."""
+
+    ticket_id: str
+    title: str
+    ticket_type: str
+    previous_stage: str
+    new_stage: str
+    rework_count: int
+    escalated: bool
+
+    def to_dict(self) -> dict[str, Any]:
+        """Serialise to a plain dict suitable for MCP tool output."""
+        return {
+            "ticket_id": self.ticket_id,
+            "title": self.title,
+            "type": self.ticket_type,
+            "previous_stage": self.previous_stage,
+            "new_stage": self.new_stage,
+            "rework_count": self.rework_count,
+            "escalated": self.escalated,
+        }
+
+
 class ClaimValidationError(Exception):
     """Raised when the advancing agent does not hold the active claim."""
 
@@ -218,12 +244,14 @@ class TicketService:
         claim_repo: ClaimRepository | None = None,
         ticket_repo: TicketRepository | None = None,
         event_repo: EventRepository | None = None,
+        emitter: StateChangeEmitter | None = None,
     ) -> None:
         self._claim_queue = claim_queue
         self._pool = pool
         self._claim_repo = claim_repo
         self._ticket_repo = ticket_repo
         self._event_repo = event_repo
+        self._emitter = emitter
 
     async def claim_next(
         self,
@@ -330,6 +358,15 @@ class TicketService:
             },
         )
 
+        if self._emitter is not None:
+            await self._emitter.emit_claimed(
+                ticket_id=result.ticket_id,
+                stage=result.stage,
+                agent_id=agent_role,
+                machine_id=machine_id,
+                operator=operator,
+            )
+
         return NextTicketResult(
             ticket_id=result.ticket_id,
             title=result.title,
@@ -433,6 +470,15 @@ class TicketService:
             },
         )
 
+        if self._emitter is not None:
+            await self._emitter.emit_claimed(
+                ticket_id=result.ticket_id,
+                stage=result.stage,
+                agent_id=agent_role,
+                machine_id=machine_id,
+                operator=operator,
+            )
+
         return NextTicketResult(
             ticket_id=result.ticket_id,
             title=result.title,
@@ -489,6 +535,14 @@ class TicketService:
             new_status="READY",
             payload=payload,
         )
+
+        if self._emitter is not None:
+            await self._emitter.emit_released(
+                ticket_id=ticket_id,
+                stage=ticket.stage,
+                agent_id=agent_id,
+                reason=reason,
+            )
 
         return ReleaseResult(
             ticket_id=ticket_id,
@@ -727,14 +781,23 @@ class TicketService:
                 },
             )
 
-            return AdvanceTicketResult(
+        if self._emitter is not None:
+            await self._emitter.emit_advanced(
                 ticket_id=ticket_id,
-                title=row["title"],
-                ticket_type=row["type"],
-                previous_stage=current_stage,
+                old_stage=current_stage,
                 new_stage=next_stage,
-                status=new_status,
+                agent_id=agent_id,
+                evidence=evidence,
             )
+
+        return AdvanceTicketResult(
+            ticket_id=ticket_id,
+            title=row["title"],
+            ticket_type=row["type"],
+            previous_stage=current_stage,
+            new_stage=next_stage,
+            status=new_status,
+        )
 
     # ------------------------------------------------------------------
     # Sync & validate operations (FORGEOS-BE033)
@@ -790,3 +853,165 @@ class TicketService:
             },
         )
         return result
+
+    # ------------------------------------------------------------------
+    # Rework operation (FORGEOS-BE031)
+    # ------------------------------------------------------------------
+
+    async def rework_ticket(
+        self,
+        *,
+        ticket_id: str,
+        agent_id: str,
+        reason: str,
+        rejection_evidence: dict[str, Any] | None = None,
+    ) -> ReworkResult:
+        """Return a ticket to its implementation stage with rejection evidence.
+
+        Increments ``rework_count`` and checks against ``max_reworks``.
+        When rework_count reaches max_reworks, the ticket is escalated
+        instead of being returned to the implementation stage.
+
+        Uses SERIALIZABLE transaction isolation via :func:`transactional`
+        to prevent concurrent advance/rework conflicts.
+
+        Parameters
+        ----------
+        ticket_id : str
+            The ticket to rework.
+        agent_id : str
+            The agent requesting the rework (must hold the active claim).
+        reason : str
+            Human-readable rejection reason.
+        rejection_evidence : dict[str, Any] | None
+            Optional structured evidence (coverage, failing tests, etc.).
+
+        Returns
+        -------
+        ReworkResult
+            Result with previous/new stage, rework count, and escalation flag.
+
+        Raises
+        ------
+        ValueError
+            If the pool is not configured on this service instance.
+        TicketNotFoundError
+            If the ticket does not exist.
+        ClaimValidationError
+            If the agent does not hold the active claim.
+        """
+        if self._pool is None:
+            raise ValueError("Pool not configured for rework operations")
+
+        async with transactional(self._pool, OperationType.REWORK) as conn:
+            row = await conn.fetchrow(
+                "SELECT * FROM tickets WHERE ticket_id = $1 FOR UPDATE",
+                ticket_id,
+            )
+            if row is None:
+                raise TicketNotFoundError(f"Ticket '{ticket_id}' not found")
+
+            current_stage: str = row["stage"]
+            sdlc_flow: list[str] = row["sdlc_flow"]
+            claimed_by_name: str | None = row["claimed_by_name"]
+            rework_count: int = row["rework_count"]
+            max_reworks: int = row["max_reworks"]
+            ticket_type: str = row["type"]
+            title: str = row["title"]
+
+            if claimed_by_name is None:
+                raise ClaimValidationError(
+                    ticket_id, agent_id, "Ticket is not currently claimed"
+                )
+            if claimed_by_name != agent_id:
+                raise ClaimValidationError(
+                    ticket_id,
+                    agent_id,
+                    f"Ticket is claimed by '{claimed_by_name}', not '{agent_id}'",
+                )
+
+            new_rework_count = rework_count + 1
+            escalated = new_rework_count >= max_reworks
+
+            if escalated:
+                new_stage = current_stage
+                new_status = "ESCALATED"
+                event_type = "ESCALATED"
+            else:
+                # Implementation stage is the first stage after READY
+                new_stage = sdlc_flow[1] if len(sdlc_flow) > 1 else current_stage
+                new_status = "READY"
+                event_type = "STAGE_REJECTED"
+
+            await conn.execute(
+                """
+                UPDATE tickets
+                SET stage = $2::ticket_stage,
+                    status = $3::ticket_status,
+                    rework_count = $4,
+                    claimed_by = NULL,
+                    claimed_by_name = NULL,
+                    machine_id = NULL,
+                    operator = NULL,
+                    lease_expiry = NULL,
+                    lease_duration_minutes = NULL,
+                    updated_at = NOW()
+                WHERE ticket_id = $1
+                """,
+                ticket_id,
+                new_stage,
+                new_status,
+                new_rework_count,
+            )
+
+            payload: dict[str, Any] = {"reason": reason}
+            if rejection_evidence:
+                payload["rejection_evidence"] = rejection_evidence
+
+            await conn.execute(
+                """
+                INSERT INTO events (
+                    ticket_id, event_type,
+                    agent_name,
+                    previous_stage, new_stage,
+                    previous_status, new_status,
+                    payload
+                ) VALUES (
+                    $1, $2::event_type,
+                    $3,
+                    $4::ticket_stage, $5::ticket_stage,
+                    $6::ticket_status, $7::ticket_status,
+                    $8::jsonb
+                )
+                """,
+                ticket_id,
+                event_type,
+                agent_id,
+                current_stage,
+                new_stage,
+                "CLAIMED",
+                new_status,
+                json.dumps(payload),
+            )
+
+            logger.info(
+                "Ticket reworked",
+                extra={
+                    "ticket_id": ticket_id,
+                    "previous_stage": current_stage,
+                    "new_stage": new_stage,
+                    "rework_count": new_rework_count,
+                    "escalated": escalated,
+                    "agent_id": agent_id,
+                },
+            )
+
+            return ReworkResult(
+                ticket_id=ticket_id,
+                title=title,
+                ticket_type=ticket_type,
+                previous_stage=current_stage,
+                new_stage=new_stage,
+                rework_count=new_rework_count,
+                escalated=escalated,
+            )
