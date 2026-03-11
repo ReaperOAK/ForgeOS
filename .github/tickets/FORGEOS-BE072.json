@@ -4,7 +4,7 @@
   "description": "Implement the database-to-filesystem export capability for rollback scenarios. Export all tickets from PostgreSQL back into `.github/tickets/*.json` files and place state copies in `.github/ticket-state/<STAGE>/` directories. This is the safety net: if the MCP/database system fails, the entire state can be exported back to the filesystem format and operations can resume with the legacy `tickets.py`. Export must produce files identical in structure to the originals.",
   "type": "backend",
   "priority": "high",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Exported files can be consumed by the original tickets.py without modification"
   ],
   "rework_count": 0,
-  "claimed_by": "CIReviewer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-11T12:45:16.455159+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -71,6 +71,31 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-11T13:08:46.893060+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from CIReviewer: Lease expired at 2026-03-11T12:45:16.455159+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T13:11:04.187264+00:00",
+      "event": "CLAIMED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "CI",
+      "details": "Claimed by reaperoak@pop-os via CIReviewer, lease until 2026-03-11T13:41:04.187243+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T13:15:53.738121+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",
