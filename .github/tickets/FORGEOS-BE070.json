@@ -36,10 +36,10 @@
     "Import summary report printed: total tickets found, imported, skipped, errors"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Security Engineer",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-11T04:28:32.988368+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -116,6 +116,15 @@
       "from_stage": "QA",
       "to_stage": "SECURITY",
       "details": "Advanced from QA to SECURITY"
+    },
+    {
+      "timestamp": "2026-03-11T03:58:32.988384+00:00",
+      "event": "CLAIMED",
+      "agent": "Security Engineer",
+      "machine_id": "pop-os",
+      "from_stage": "SECURITY",
+      "to_stage": "SECURITY",
+      "details": "Claimed by ReaperOAK@pop-os via Security Engineer, lease until 2026-03-11T04:28:32.988368+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",

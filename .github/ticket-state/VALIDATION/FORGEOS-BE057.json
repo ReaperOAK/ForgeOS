@@ -34,10 +34,10 @@
     "Admin operations include a required reason field for audit trail"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Validator",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-11T04:28:33.021366+00:00",
   "lease_duration_minutes": null,
   "history": [
     {
@@ -150,6 +150,15 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "DOCS complete \u2014 README section, CHANGELOG entry, docstrings verified"
+    },
+    {
+      "timestamp": "2026-03-11T03:58:33.021382+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-11T04:28:33.021366+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
