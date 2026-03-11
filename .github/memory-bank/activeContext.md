@@ -1,3 +1,8 @@
+### [FORGEOS-BE072] — BACKEND complete
+- **Artifacts:** mcp-server/src/mcp_server/migration/exporter.py, mcp-server/tests/test_exporter.py, mcp-server/src/mcp_server/migration/__init__.py
+- **Decisions:** Protocol-based ExportDatabaseReader for testability. Reused DB_TO_STAGE_DIR from transformers.py for reverse stage mapping. Non-destructive backup with auto-timestamped directories. JSON output with indent=2 matching existing codebase style.
+- **Timestamp:** 2026-03-11T16:00:00Z
+
 ### [FORGEOS-BE071] — BACKEND complete
 - **Artifacts:** mcp-server/src/mcp_server/migration/sync_engine.py, mcp-server/src/mcp_server/migration/conflict_resolver.py, mcp-server/tests/test_sync_engine.py, mcp-server/tests/test_conflict_resolver.py
 - **Decisions:** Database-wins conflict resolution strategy. Reused existing TicketImporter for FS→DB direction. asyncio.Task-based lifecycle for start/stop independence from MCP server.

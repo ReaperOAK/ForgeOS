@@ -33,6 +33,13 @@ from mcp_server.migration.conflict_resolver import (
     ConflictResolver,
     ConflictType,
 )
+from mcp_server.migration.exporter import (
+    ExportConfig,
+    ExportDatabaseReader,
+    ExportResult,
+    ExportStats,
+    TicketExporter,
+)
 from mcp_server.migration.importer import (
     DatabaseWriter,
     ImportConfig,
@@ -63,6 +70,10 @@ __all__ = [
     "DatabaseWriter",
     "DualModeConfig",
     "DualModeWrapper",
+    "ExportConfig",
+    "ExportDatabaseReader",
+    "ExportResult",
+    "ExportStats",
     "FeatureFlagError",
     "FeatureFlagManager",
     "FileMode",
@@ -78,6 +89,7 @@ __all__ = [
     "SyncEngine",
     "SyncResult",
     "SyncStats",
+    "TicketExporter",
     "TicketImporter",
     "TicketOperations",
     "TicketTransformer",
