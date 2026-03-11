@@ -1306,7 +1306,7 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/api/`** — REST API routes and Pydantic schemas (`GET /api/tickets` ticket list endpoint)
 - **`mcp_server/services/`** — Business logic orchestration (TicketService, SyncEngine, MachineService, WebhookService)
 - **`mcp_server/middleware/`** — Unified auth middleware (MCP + REST), per-agent rate limiting, correlation ID tracking
-- **`mcp_server/tools/`** — Dynamic tool registration, schema validation, ticket tools (`tickets.next`, `tickets.claim`, `tickets.release`, `tickets.status`, `tickets.advance`, `tickets.sync`, `tickets.validate`), and FastMCP bridge
+- **`mcp_server/tools/`** — Dynamic tool registration, schema validation, ticket tools (`tickets.next`, `tickets.claim`, `tickets.release`, `tickets.status`, `tickets.advance`, `tickets.rework`, `tickets.sync`, `tickets.validate`), and FastMCP bridge
 - **`mcp_server/events/`** — Append-only event sourcing (EventStore, EventType, Event dataclass)
 - **`mcp_server/locking/`** — Distributed claim queue (SKIP LOCKED), file mutex (advisory locks)
 - **`mcp_server/notifications/`** — Notification queue (at-least-once delivery), configurable channels (webhook, Slack) with event-type filtering, background processor with exponential-backoff retries, and dead-letter handling
@@ -2158,6 +2158,159 @@ All other requests are classified as **read**.
 | Event | Level | Extra Fields |
 |---|---|---|
 | `rate_limit_exceeded` | WARNING | `key`, `limit`, `is_write`, `retry_after` |
+
+
+## Idempotency Key Middleware
+
+<!-- last_reviewed: 2026-03-11T00:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.middleware.idempotency` module prevents duplicate processing
+of mutating operations (POST, PUT, PATCH, DELETE). Clients include an
+`X-Idempotency-Key` header. The middleware caches the response for that key;
+replayed requests return the cached result without re-executing the handler.
+
+### How It Works
+
+1. Client sends a mutating request with `X-Idempotency-Key: <unique-key>`.
+2. Middleware checks the idempotency store:
+   - **No entry** — marks key *in-progress*, calls the handler, caches the
+     response.
+   - **In-progress** — returns `409 Conflict` (the earlier request is still
+     running).
+   - **Completed** — returns the cached response with
+     `X-Idempotent-Replayed: true`.
+3. Cached entries expire after a configurable TTL (default 24 hours).
+4. If the handler raises an exception, the in-progress marker is removed so
+   the client can retry with the same key.
+
+### Configuration
+
+| Parameter | Default | Description |
+|---|---|---|
+| `ttl_seconds` | `86400` | How long cached responses are retained (24 h) |
+| `missing_key_policy` | `"warn"` | `"warn"` — log and allow; `"reject"` — return 400 |
+
+All values are configurable via `IdempotencyConfig`.
+
+### Quick Start
+
+```python
+from mcp_server.middleware import (
+    IdempotencyConfig,
+    IdempotencyMiddleware,
+    MissingKeyPolicy,
+)
+
+# Default: warn on missing key, 24 h TTL
+app.add_middleware(IdempotencyMiddleware)
+
+# Strict: reject requests without a key, 1 h TTL
+config = IdempotencyConfig(
+    ttl_seconds=3600,
+    missing_key_policy=MissingKeyPolicy.REJECT,
+)
+app.add_middleware(IdempotencyMiddleware, config=config)
+```
+
+### Request Headers
+
+| Header | Direction | Description |
+|---|---|---|
+| `X-Idempotency-Key` | Request | Client-supplied unique key for the operation |
+| `X-Idempotent-Replayed` | Response | Set to `"true"` when the response is a cached replay |
+
+### 409 Conflict Response
+
+Returned when a request uses a key that is still being processed.
+
+For MCP paths (`/mcp`):
+
+```json
+{
+  "jsonrpc": "2.0",
+  "error": {
+    "code": -32602,
+    "message": "Operation with idempotency key '<key>' is still in-progress"
+  },
+  "id": null
+}
+```
+
+For REST paths:
+
+```json
+{
+  "error": "Operation with idempotency key '<key>' is still in-progress"
+}
+```
+
+### 400 Bad Request (Reject Policy)
+
+Returned when `missing_key_policy` is `REJECT` and the request has no key.
+
+For MCP paths:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "error": { "code": -32602, "message": "Missing required X-Idempotency-Key header" },
+  "id": null
+}
+```
+
+For REST paths:
+
+```json
+{
+  "error": "Missing required X-Idempotency-Key header for idempotency"
+}
+```
+
+### Excluded Paths
+
+Health and readiness endpoints bypass idempotency enforcement:
+`/health`, `/healthz`, `/ready`, `/readiness`, `/livez`, `/readyz`.
+
+### Storage Backend
+
+The middleware uses a pluggable `IdempotencyStore` interface.
+`InMemoryIdempotencyStore` is the default (suitable for single-instance
+deployments). Subclass `IdempotencyStore` for external backends
+(Redis, PostgreSQL).
+
+### Public API
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `IdempotencyConfig` | frozen dataclass | TTL and missing-key policy configuration |
+| `IdempotencyMiddleware` | class | Starlette middleware enforcing idempotency |
+| `IdempotencyStore` | ABC | Abstract interface for pluggable storage backends |
+| `InMemoryIdempotencyStore` | class | Default in-process dict-backed store |
+| `MissingKeyPolicy` | enum | `WARN` or `REJECT` for missing keys |
+| `IdempotencyEntry` | dataclass | Cached response or in-progress marker |
+| `HEADER_NAME` | constant | `"x-idempotency-key"` |
+| `DEFAULT_TTL_SECONDS` | constant | `86400` (24 hours) |
+
+### IdempotencyStore Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `get(key)` | `IdempotencyEntry \| None` | Return entry or `None` if missing/expired |
+| `set(key, entry, ttl_seconds=...)` | `None` | Store a completed entry with TTL |
+| `remove(key)` | `None` | Remove an entry (no-op if missing) |
+| `mark_in_progress(key, ttl_seconds=...)` | `None` | Mark key as in-progress |
+| `cleanup_expired()` | `None` | Remove all entries whose TTL has elapsed |
+
+### Structured Logging
+
+| Event | Level | Extra Fields |
+|---|---|---|
+| `idempotency_key_missing` | WARNING | `path`, `method` |
+| `idempotency_key_missing_rejected` | WARNING | `path`, `method` |
+| `idempotency_conflict` | INFO | `key`, `path` |
+| `idempotency_replay` | INFO | `key`, `path` |
 
 
 ## Auth Middleware — Unified MCP + REST Authentication
@@ -3364,6 +3517,126 @@ SDLC stage transitions. It has zero external imports and no I/O.
   external imports, making it trivially testable.
 
 
+## Ticket Tools — `tickets.rework` MCP Tool
+
+<!-- last_reviewed: 2026-03-11T03:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `tickets.rework` MCP tool returns a ticket to its implementation stage
+with rejection evidence. It enforces a maximum rework count (default 3).
+When the count is reached, the ticket is escalated instead of reworked.
+Uses SERIALIZABLE transaction isolation for state integrity.
+
+### How It Works
+
+1. Agent sends a `tickets.rework` tool call with `ticket_id`, `agent_id`,
+   and `reason`.
+2. Input is validated against `TICKETS_REWORK_SCHEMA` (JSON Schema).
+3. `TicketService.rework_ticket()` opens a SERIALIZABLE transaction and
+   locks the ticket row with `SELECT ... FOR UPDATE`.
+4. The service verifies the calling agent holds the active claim.
+5. `rework_count` is incremented and checked against `max_reworks`.
+6. If `rework_count < max_reworks`, the ticket moves back to its
+   implementation stage (first stage after READY in the SDLC flow).
+   The claim is released and status set to `READY`.
+7. If `rework_count >= max_reworks`, the ticket stays at its current stage,
+   status is set to `ESCALATED`, and human intervention is required.
+8. A `STAGE_REJECTED` or `ESCALATED` event is recorded in the audit trail.
+
+### Input Schema
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `ticket_id` | `string` | Yes | Human-readable ticket ID (e.g. `"FORGEOS-BE006"`) |
+| `agent_id` | `string` | Yes | Agent role name that holds the active claim |
+| `reason` | `string` | Yes | Rejection reason explaining why rework is needed |
+| `rejection_evidence` | `object` | No | Structured evidence (coverage %, failing tests, etc.) |
+
+### Example Request
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "tickets.rework",
+    "arguments": {
+      "ticket_id": "FORGEOS-BE006",
+      "agent_id": "QA",
+      "reason": "Test coverage below 80% threshold",
+      "rejection_evidence": {
+        "coverage": "62%",
+        "failing_tests": ["test_edge_case_timeout"]
+      }
+    }
+  }
+}
+```
+
+### Success Response (Rework)
+
+```json
+{
+  "ticket_id": "FORGEOS-BE006",
+  "title": "Implement Stage Engine",
+  "type": "backend",
+  "previous_stage": "QA",
+  "new_stage": "BACKEND",
+  "rework_count": 1,
+  "escalated": false
+}
+```
+
+### Success Response (Escalation)
+
+When `rework_count` reaches `max_reworks` (default 3):
+
+```json
+{
+  "ticket_id": "FORGEOS-BE006",
+  "title": "Implement Stage Engine",
+  "type": "backend",
+  "previous_stage": "QA",
+  "new_stage": "QA",
+  "rework_count": 3,
+  "escalated": true
+}
+```
+
+### Error Responses
+
+| Scenario | `isError` | `code` | `message` |
+|---|---|---|---|
+| Ticket not found | `true` | `-32602` | `Ticket '{id}' not found` |
+| Agent does not hold claim | `true` | `-32602` | `Ticket is claimed by '{other}', not '{agent}'` |
+| Ticket not claimed | `true` | `-32602` | `Ticket is not currently claimed` |
+| No pool configured | `true` | `-32602` | `Pool not configured for rework operations` |
+
+### ReworkResult Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `ticket_id` | `str` | Human-readable ticket ID |
+| `title` | `str` | Ticket title |
+| `ticket_type` | `str` | Ticket type (e.g. `"backend"`) |
+| `previous_stage` | `str` | Stage before the rework |
+| `new_stage` | `str` | Implementation stage the ticket returns to (or current stage if escalated) |
+| `rework_count` | `int` | New rework count after increment |
+| `escalated` | `bool` | `true` if the ticket was escalated instead of reworked |
+
+### Design Constraints
+
+- **SERIALIZABLE isolation** — the rework transaction uses the strictest
+  PostgreSQL isolation level to prevent concurrent advance/rework conflicts.
+- **Claim cleared on rework** — after reworking, the ticket is unclaimed
+  and available for the implementation agent to reclaim.
+- **Escalation threshold** — when `rework_count` reaches `max_reworks`
+  (default 3), the ticket is escalated for human intervention rather than
+  returned to the implementation stage.
+- **Event sourcing** — every rework creates an immutable audit record with
+  the rejection reason and optional structured evidence.
+
+
 ## Ticket Tools — `tickets.sync` and `tickets.validate` MCP Tools
 
 <!-- last_reviewed: 2026-03-11T00:00:00Z -->
@@ -4023,6 +4296,132 @@ Alembic migration 006 (`20260311_000000_006_notification_channels.py`) creates:
   `urllib.request` to avoid blocking the event loop.
 - **Immutable channels** — `NotificationChannel` is a frozen dataclass.
 - **Structured logging** — all operations include `channel_id` and `event_type`.
+
+
+## Dual-Mode Wrapper — Migration Bridge
+
+<!-- last_reviewed: 2026-03-11T03:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.migration` package provides a dual-mode wrapper that routes
+ticket lifecycle operations (claim, advance, release, rework, sync, validate,
+status) to either the MCP server or the file-based `tickets.py` CLI. This
+enables a gradual migration from file-based state management to the PostgreSQL-
+backed MCP server without a hard cutover.
+
+### How It Works
+
+1. `DualModeConfig` reads the `FORGEOS_MODE` environment variable to select the
+   active backend (`"file"` or `"mcp"`).
+2. In **file mode**, `FileMode` delegates each operation to `tickets.py` via
+   `asyncio.subprocess`.
+3. In **mcp mode**, `McpMode` sends JSON-RPC `tools/call` requests to the MCP
+   server endpoint over HTTP.
+4. `DualModeWrapper` checks MCP server health before each operation. If the
+   server is unreachable and `fallback_enabled` is `True`, the operation falls
+   back to file mode automatically.
+5. Every operation logs which mode was used for observability.
+
+### Configuration
+
+| Variable | Default | Description |
+|---|---|---|
+| `FORGEOS_MODE` | `file` | Operation mode: `mcp` routes to the MCP server, `file` uses `tickets.py` |
+| `FORGEOS_MCP_SERVER_URL` | `http://localhost:8080` | Base URL of the MCP server |
+| `FORGEOS_TICKETS_PY_PATH` | `.github/tickets.py` | Path to the `tickets.py` CLI script |
+| `FORGEOS_FALLBACK_ENABLED` | `true` | Fall back to file mode when MCP server is unreachable |
+| `FORGEOS_OPERATION_TIMEOUT` | `30` | Timeout in seconds for a single operation |
+
+Configuration is loaded from environment variables via `DualModeConfig(BaseSettings)`
+with the `FORGEOS_` prefix (pydantic-settings).
+
+### Quick Start
+
+```python
+from mcp_server.migration import DualModeWrapper, DualModeConfig, OperationMode
+
+# Default: file mode, reads FORGEOS_* env vars
+wrapper = DualModeWrapper.from_config()
+result = await wrapper.sync()
+print(result.mode_used)  # "file" or "mcp"
+print(result.success)    # True/False
+
+# Explicit MCP mode with fallback
+config = DualModeConfig(mode=OperationMode.MCP, fallback_enabled=True)
+wrapper = DualModeWrapper.from_config(config)
+result = await wrapper.status(ticket_id="FORGEOS-BE068")
+
+# Switch mode at runtime
+wrapper.set_mode(OperationMode.FILE)
+```
+
+### Supported Operations
+
+| Method | Parameters | Description |
+|---|---|---|
+| `claim(ticket_id, agent, machine_id, operator)` | 4 required | Claim a ticket for an agent |
+| `advance(ticket_id, agent)` | 2 required | Move a ticket to its next SDLC stage |
+| `release(ticket_id, reason)` | 2 required | Release a claimed ticket |
+| `rework(ticket_id, agent, reason)` | 3 required | Send a ticket back for rework |
+| `sync()` | none | Release expired leases; unblock ready tickets |
+| `validate()` | none | Run full integrity check |
+| `status(ticket_id=None)` | 1 optional | Get ticket status (single or all) |
+
+All methods are async and return `OperationResult`.
+
+### OperationResult
+
+Frozen dataclass returned by every operation:
+
+| Field | Type | Description |
+|---|---|---|
+| `success` | `bool` | Whether the operation completed without error |
+| `message` | `str` | Human-readable outcome summary |
+| `mode_used` | `str` | Which backend ran the operation (`"mcp"` or `"file"`) |
+| `data` | `dict \| None` | Optional structured payload (e.g. ticket data) |
+
+`to_dict()` serializes the result to a plain dictionary.
+
+### API Reference
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `DualModeWrapper` | class | Unified router with health-based fallback |
+| `DualModeWrapper.from_config()` | classmethod | Factory that builds a fully-wired wrapper |
+| `DualModeWrapper.set_mode(mode)` | method | Switch operational mode at runtime |
+| `DualModeWrapper.current_mode` | property | Currently active `OperationMode` |
+| `FileMode` | class | Subprocess-based `tickets.py` backend |
+| `McpMode` | class | HTTP JSON-RPC backend for MCP server |
+| `McpMode.is_healthy()` | method | Probe MCP server availability |
+| `OperationResult` | frozen dataclass | Immutable result of any ticket operation |
+| `TicketOperations` | Protocol | Async interface shared by both backends |
+| `DualModeConfig` | BaseSettings | Pydantic-settings configuration model |
+| `OperationMode` | enum | `MCP` or `FILE` |
+
+### Fallback Behavior
+
+| Scenario | Behavior |
+|---|---|
+| Mode is `file` | All operations use `FileMode` directly |
+| Mode is `mcp`, server healthy | Operations use `McpMode` |
+| Mode is `mcp`, server unhealthy, fallback enabled | Operations fall back to `FileMode` |
+| Mode is `mcp`, server unhealthy, fallback disabled | Returns failure result |
+| MCP operation fails mid-request, fallback enabled | Retries via `FileMode` |
+| Subprocess timeout | Returns failure result with timeout message |
+
+### Design Constraints
+
+- **Protocol-based interface** — `TicketOperations` runtime-checkable Protocol
+  ensures both backends expose identical async methods.
+- **No `httpx` dependency** — `McpMode` uses stdlib `urllib.request` to avoid
+  adding external HTTP dependencies.
+- **Thread-safe HTTP** — blocking HTTP calls run in `asyncio.run_in_executor()`
+  to stay async-safe.
+- **Dependency direction** — the migration package depends only on
+  `migration.config` and `mcp_server.observability` (inner to outer).
+- **Structured logging** — every operation logs mode, operation name, and
+  success status.
 
 
 ## Database Migrations

@@ -3,6 +3,11 @@
 - **Decisions:** PASS — zero critical/high findings. STRIDE max score 4 (Low). OWASP 10/10 categories pass. HMAC-SHA256 auth upstream, strict regex input validation, stage-check authorization, Protocol-based least privilege.
 - **Timestamp:** 2026-03-11T02:25:00Z
 
+### [FORGEOS-BE041] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE041.md
+- **Decisions:** Added Idempotency Key Middleware reference section to mcp-server/README.md (lifecycle, config, Quick Start, API table, error formats, logging events). Added CHANGELOG entry. Module docstring already comprehensive — no changes needed.
+- **Timestamp:** 2026-03-11T03:00:00Z
+
 ### [FORGEOS-BE062] — CI Status Event Handler
 - **Artifacts:** mcp-server/src/mcp_server/webhooks/github_handler.py, mcp-server/src/mcp_server/webhooks/__init__.py, mcp-server/tests/test_ci_status_handler.py
 - **Decisions:** Used Protocol (CITicketOps) to decouple CI handler from TicketService claim mechanics. Idempotency via stage check (only CI stage tickets affected). Mapped timed_out to failure. Used frozensets for CI outcome mapping.
@@ -3990,3 +3995,18 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE048.md
 - **Decisions:** PASS — Score 100/100, 0 critical, 0 warnings. 100% coverage (58/58 stmts), 28/28 tests. Lint and mypy --strict clean.
 - **Timestamp:** 2026-03-11T03:30:00Z
+
+### [FORGEOS-BE048] — Documentation Summary
+- **Artifacts:** agent-sdk/README.md, CHANGELOG.md, agent-sdk/src/forgeos_sdk/__init__.py, .github/agent-output/Documentation/FORGEOS-BE048.md
+- **Decisions:** Added Summary Handoff Helpers section to SDK README with code example, functions table, and STAGE_TO_AGENT mapping. Added CHANGELOG entry. Updated __init__.py module docstring with autofunction/autodata directives. Existing summary.py docstrings already complete.
+- **Timestamp:** 2026-03-11T04:15:00Z
+
+### [FORGEOS-BE065] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE065.md
+- **Decisions:** PASS — Zero critical/high findings. Parameterized queries, post-commit emission, fire-and-forget resilience, no PII in logs, no new dependencies.
+- **Timestamp:** 2026-03-11T03:10:00Z
+
+### FORGEOS-BE035 — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE035.md
+- **Decisions:** PASS — zero critical/high findings; parameterized queries, auth middleware enforced, Pydantic output schemas, bounded pagination. Two informational observations (full event replay before pagination, N+1 dep resolution) accepted as low risk.
+- **Timestamp:** 2026-03-11T03:00:00+00:00

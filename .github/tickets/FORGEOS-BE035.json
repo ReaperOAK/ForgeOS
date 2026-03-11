@@ -4,7 +4,7 @@
   "description": "Implement `GET /api/tickets/:id` for ticket detail and `GET /api/tickets/:id/history` for the event log. The detail endpoint returns the full ticket with current claim info, acceptance criteria, and dependencies. The history endpoint returns the event sourcing log (FORGEOS-BE012) as a timeline of all state changes for the ticket.",
   "type": "backend",
   "priority": "high",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Response schemas defined with Pydantic models (TicketDetailResponse, HistoryEntry)"
   ],
   "rework_count": 0,
-  "claimed_by": "Security Engineer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T02:46:04.130363+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -106,6 +106,24 @@
       "from_stage": "SECURITY",
       "to_stage": "SECURITY",
       "details": "Claimed by ReaperOAK@pop-os via Security Engineer, lease until 2026-03-11T02:46:04.130363+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T02:23:17.200370+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-11T02:23:42.455424+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "SECURITY PASS \u2014 zero critical/high findings"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
@@ -118,5 +136,8 @@
     "history",
     "phase3",
     "BLK-06-02"
+  ],
+  "completed_stages": [
+    "SECURITY"
   ]
 }
