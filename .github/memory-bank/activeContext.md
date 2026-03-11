@@ -4015,3 +4015,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE035.md
 - **Decisions:** PASS — zero critical/high findings; parameterized queries, auth middleware enforced, Pydantic output schemas, bounded pagination. Two informational observations (full event replay before pagination, N+1 dep resolution) accepted as low risk.
 - **Timestamp:** 2026-03-11T03:00:00+00:00
+
+### [FORGEOS-BE038] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE038.md
+- **Decisions:** PASS — zero critical/high findings. STRIDE max score 4 (Low). OWASP 10/10 pass. Static SQL literals, no user input in queries, public read-only endpoints by design, generic error responses, no PII exposure.
+- **Timestamp:** 2026-03-11T03:45:00Z
+
+### [FORGEOS-BE031] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, mcp-server/src/mcp_server/services/ticket_service.py, mcp-server/src/mcp_server/tools/ticket_tools.py
+- **Decisions:** Added full tickets.rework reference section to README (schema, examples, error table, ReworkResult fields, design constraints). Added ReworkResult to ticket_service.py public API docstring. Existing inline docstrings were complete — no changes needed beyond meta tags.
+- **Timestamp:** 2026-03-11T03:00:00Z

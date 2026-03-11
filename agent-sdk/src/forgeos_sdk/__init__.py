@@ -10,6 +10,10 @@ Public API
 .. autoclass:: Claim
 .. autoclass:: OperationResult
 .. autoclass:: TicketOperations
+.. autofunction:: read_upstream_summary
+.. autofunction:: write_summary
+.. autofunction:: delete_upstream_summary
+.. autodata:: STAGE_TO_AGENT
 .. autoclass:: ForgeOSError
 .. autoclass:: ConnectionError
 .. autoclass:: ConfigurationError
