@@ -1,3 +1,8 @@
+### [FORGEOS-BE071] — BACKEND complete
+- **Artifacts:** mcp-server/src/mcp_server/migration/sync_engine.py, mcp-server/src/mcp_server/migration/conflict_resolver.py, mcp-server/tests/test_sync_engine.py, mcp-server/tests/test_conflict_resolver.py
+- **Decisions:** Database-wins conflict resolution strategy. Reused existing TicketImporter for FS→DB direction. asyncio.Task-based lifecycle for start/stop independence from MCP server.
+- **Timestamp:** 2026-03-11T10:35:00Z
+
 ### [FORGEOS-BE040] — Documentation Summary
 - **Artifacts:** mcp-server/README.md, mcp-server/src/mcp_server/api/routes/websocket.py, mcp-server/src/mcp_server/services/event_broadcaster.py, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE040.md
 - **Decisions:** Expanded WebSocket Streaming README section with subscribe/unsubscribe protocol, 4-dimension OR filter logic, backpressure docs, updated API reference tables. Updated docstrings for ClientFilter and _parse_filters to reflect all 4 filter dimensions.

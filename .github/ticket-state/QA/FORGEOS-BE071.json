@@ -4,7 +4,7 @@
   "description": "Build the bidirectional synchronization engine that keeps filesystem and database in sync during the dual-mode period. Implement periodic sync (configurable interval, default 60s) that detects changes in either direction: new tickets in filesystem not in DB, stage changes in DB not reflected in filesystem, claim/lease updates. Implement conflict resolution with database-wins strategy: when both sides have diverged, the database state takes precedence. Log all resolved conflicts for audit.",
   "type": "backend",
   "priority": "high",
-  "stage": "READY",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -54,6 +54,13 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-11T10:35:00+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "details": "BACKEND complete, advanced to QA"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",
