@@ -3,13 +3,21 @@
 import Link from 'next/link';
 import type { TicketType, TicketPriority } from '@/lib/api/types';
 
+/** Props for the {@link TicketCard} component. */
 export interface TicketCardProps {
+    /** Unique ticket identifier (e.g. `'FORGEOS-BE001'`). */
     ticketId: string;
+    /** Ticket title, truncated to 50 characters in the UI. */
     title: string;
+    /** Ticket type determining the color-coded badge. */
     type: TicketType;
+    /** Ticket priority controlling the left border color and dot. */
     priority: TicketPriority;
+    /** Agent or user who claimed the ticket, or `null` if unclaimed. */
     claimedBy: string | null;
+    /** Machine hostname where the ticket is being processed. */
     machineId: string | null;
+    /** Number of times the ticket has been sent back for rework. */
     reworkCount: number;
 }
 
@@ -44,6 +52,13 @@ function truncate(text: string, max: number): string {
     return text.length > max ? text.slice(0, max) + '…' : text;
 }
 
+/**
+ * Compact ticket card rendered inside a {@link StageColumn}.
+ *
+ * Displays the ticket ID, truncated title, color-coded type badge,
+ * priority indicator dot, claim status, and optional rework count.
+ * Clicking the card navigates to the ticket detail page.
+ */
 export function TicketCard({
     ticketId,
     title,

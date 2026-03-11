@@ -199,6 +199,34 @@ a 10-second request timeout via `AbortController`.
 | `fetchPipelineOverview()` | `PipelineOverview` | `GET /api/stages` |
 | `fetchTicketHistory(id)` | `EventHistory[]` | `GET /api/tickets/:id/history` |
 
+## Pipeline View (`/pipeline`)
+
+<!-- last_reviewed: 2026-03-11T18:00:00Z -->
+
+The pipeline page renders a horizontal Kanban board with 11 SDLC stage
+columns (Ready through Done). Each column shows a count badge and a
+scrollable list of ticket cards.
+
+### Components
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `PipelineBoard` | `components/pipeline/PipelineBoard.tsx` | Groups tickets by stage and renders 11 `StageColumn` instances |
+| `StageColumn` | `components/pipeline/StageColumn.tsx` | Single column with header, count badge, and scrollable card list |
+| `TicketCard` | `components/pipeline/TicketCard.tsx` | Compact card showing ID, title, type badge, priority dot, claim status |
+
+### Behavior
+
+- Data loads via `fetchTickets()` on mount; manual refresh button available.
+- Tickets sorted within each column: critical priority first, then by
+  most-recently-updated.
+- Type badges are color-coded (backend=blue, frontend=teal,
+  infra=orange, security=red).
+- Priority shown via a left-border color and a small dot indicator.
+- Clicking a card navigates to `/tickets/{id}`.
+- Empty stages display a low-opacity placeholder message.
+- Skeleton columns render while loading.
+
 ### Error Handling
 
 All endpoint functions throw an `ApiError` on non-OK responses or network

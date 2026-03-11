@@ -3,13 +3,25 @@
 import type { Ticket } from '@/lib/api/types';
 import { TicketCard } from './TicketCard';
 
+/** Props for the {@link StageColumn} component. */
 export interface StageColumnProps {
+    /** Internal stage identifier (e.g. `'READY'`, `'BACKEND'`). */
     stage: string;
+    /** Human-readable stage label shown in the column header. */
     label: string;
+    /** CSS color for the top accent border (from design tokens). */
     accentColor: string;
+    /** Tickets currently in this stage. */
     tickets: Ticket[];
 }
 
+/**
+ * Single column in the pipeline Kanban board representing one SDLC stage.
+ *
+ * Displays a header with the stage label, a ticket count badge, and a
+ * scrollable list of {@link TicketCard} components. Shows a placeholder
+ * message when the stage has no tickets.
+ */
 export function StageColumn({
     stage,
     label,
