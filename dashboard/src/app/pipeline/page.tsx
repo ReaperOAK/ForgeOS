@@ -6,6 +6,14 @@ import { PipelineBoard } from '@/components/pipeline/PipelineBoard';
 import { fetchTickets } from '@/lib/api';
 import type { Ticket } from '@/lib/api';
 
+/**
+ * Pipeline page displaying all tickets in a horizontal Kanban board.
+ *
+ * Fetches all tickets on mount and provides a manual refresh button.
+ * Renders the {@link PipelineBoard} component with loading and error states.
+ *
+ * @returns The pipeline Kanban view page
+ */
 export default function PipelinePage() {
     const [tickets, setTickets] = useState<Ticket[]>([]);
     const [isLoading, setIsLoading] = useState(true);

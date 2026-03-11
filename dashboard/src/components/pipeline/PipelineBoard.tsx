@@ -4,8 +4,11 @@ import { useMemo } from 'react';
 import type { Ticket, TicketStage } from '@/lib/api/types';
 import { StageColumn } from './StageColumn';
 
+/** Props for the {@link PipelineBoard} component. */
 export interface PipelineBoardProps {
+    /** All tickets to distribute across stage columns. */
     tickets: Ticket[];
+    /** When `true`, renders skeleton columns instead of real data. */
     isLoading: boolean;
 }
 
@@ -42,6 +45,13 @@ function SkeletonColumn() {
     );
 }
 
+/**
+ * Horizontal Kanban board displaying 11 SDLC stage columns.
+ *
+ * Groups tickets by stage, sorts each group by priority (critical first)
+ * then by most-recently-updated, and renders a {@link StageColumn} for
+ * each stage. Shows skeleton placeholders while loading.
+ */
 export function PipelineBoard({ tickets, isLoading }: PipelineBoardProps) {
     const ticketsByStage = useMemo(() => {
         const grouped: Record<string, Ticket[]> = {};
