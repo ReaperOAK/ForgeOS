@@ -34,10 +34,10 @@
     "Mode switch logged at startup indicating which backend is active"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation Specialist",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-11T02:46:04.910154+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -132,6 +132,15 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "Advanced from CI to DOCS"
+    },
+    {
+      "timestamp": "2026-03-11T02:16:04.910171+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-11T02:46:04.910154+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-agent-sdk.md",
