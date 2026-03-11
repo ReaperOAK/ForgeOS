@@ -1,3 +1,8 @@
+### [FORGEOS-BE067] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE067.md
+- **Decisions:** Rewrote Notification Event Queue section to match current API (event_type-based, pool-injected queue). Added Background Notification Processor subsection. Corrected stale field names and backoff formula. Added CHANGELOG entry.
+- **Timestamp:** 2026-03-11T00:33:00Z
+
 ### [FORGEOS-BE034] — QA PASS (Rework #1 Re-review)
 - **Artifacts:** .github/agent-output/QA/FORGEOS-BE034.md
 - **Decisions:** PASS — Both rework defects verified fixed: (1) list_tickets() method exists with correct 7-param signature, parameterized dynamic WHERE, COUNT(*) OVER(); (2) /api/tickets route mounted in create_app() with late-binding ticket_repo_ref. 29/29 tests pass. Ruff clean. All 6 ACs satisfied. Coverage ≥90% for new code. Mutation score: N/A (unit tests with mocked repo — real SQL tested via guard tests).
@@ -3633,7 +3638,17 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** PASS — Zero critical/high findings. One NOTE-level finding (SEC-NOTE-001: no per-endpoint auth on GET /api/tickets) risk-accepted as platform-level architectural decision consistent with all existing REST endpoints. All SQL fully parameterized via asyncpg $N positional params. Enum validation defense-in-depth. Limit capped at 200. TicketSummary Pydantic model filters response fields. No IDOR risk (list endpoint). No new dependencies.
 - **Timestamp:** 2026-03-11T23:55:00Z
 
+### [FORGEOS-BE029] — Documentation Complete
+- **Artifacts:** mcp-server/README.md, mcp-server/src/mcp_server/services/ticket_service.py, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE029.md
+- **Decisions:** Expanded Ticket Tools README section to cover both tickets.next and tickets.claim; added input schema, error table, and MCP call example for tickets.claim; added claim_by_id to TicketService methods table; added BE029 CHANGELOG entry; updated ticket_service.py meta tag
+- **Timestamp:** 2026-03-11T23:50:00Z
+
 ### [FORGEOS-BE042] — Documentation Summary
 - **Artifacts:** mcp-server/README.md, CHANGELOG.md, mcp-server/src/mcp_server/middleware/__init__.py, .github/agent-output/Documentation/FORGEOS-BE042.md
 - **Decisions:** Added Per-Agent Rate Limiting reference section to README (~90 lines), CHANGELOG entry, updated Architecture description. Inline docstrings already comprehensive — no source changes needed.
+- **Timestamp:** 2026-03-11T16:00:00Z
+
+### [FORGEOS-BE045] — Documentation Summary
+- **Artifacts:** agent-sdk/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE045.md
+- **Decisions:** Added Ticket Operations section to agent-sdk README with working code examples, method reference table, and data models table. CHANGELOG entry added. Inline docstrings in operations.py and models.py already had 100% public API coverage — no source modifications needed.
 - **Timestamp:** 2026-03-11T16:00:00Z
