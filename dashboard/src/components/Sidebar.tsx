@@ -8,6 +8,7 @@ import {
     Clock,
     Users,
     HeartPulse,
+    GitBranch,
     Settings,
     ChevronLeft,
     ChevronRight,
@@ -22,6 +23,7 @@ interface SidebarProps {
 const navItems = [
     { label: 'Dashboard', icon: Home, route: '/' },
     { label: 'Pipeline', icon: LayoutDashboard, route: '/pipeline' },
+    { label: 'Graph', icon: GitBranch, route: '/graph' },
     { label: 'Claims', icon: Clock, route: '/claims' },
     { label: 'Agents', icon: Users, route: '/agents' },
     { label: 'Health', icon: HeartPulse, route: '/health' },
