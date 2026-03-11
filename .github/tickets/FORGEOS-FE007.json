@@ -38,10 +38,10 @@
     "Empty search state shows helpful placeholder text"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "DocumentationSpecialist",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-11T16:34:27.968542+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -147,6 +147,15 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "Advanced from CI to DOCS"
+    },
+    {
+      "timestamp": "2026-03-11T16:04:27.968559+00:00",
+      "event": "CLAIMED",
+      "agent": "DocumentationSpecialist",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "CI",
+      "details": "Claimed by ReaperOAK@pop-os via DocumentationSpecialist, lease until 2026-03-11T16:34:27.968542+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
