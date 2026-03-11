@@ -20,6 +20,7 @@ from mcp_server.services.webhook_service import (
 from mcp_server.webhooks.github_handler import (
     PushEventPayload,
     PushEventValidationError,
+    _has_ticket_file_changes,
     create_push_handler,
     parse_push_event,
 )
@@ -306,7 +307,18 @@ class TestCreatePushHandler:
         sync_fn = AsyncMock()
         handler = create_push_handler(sync_fn=sync_fn)
         event = _make_webhook_event(
-            payload=_make_push_payload(ref="refs/heads/feature/new-api"),
+            payload=_make_push_payload(
+                ref="refs/heads/feature/new-api",
+                commits=[
+                    {
+                        "id": "c1",
+                        "message": "update readme",
+                        "added": [],
+                        "modified": ["README.md"],
+                        "removed": [],
+                    },
+                ],
+            ),
         )
 
         await handler(event)
@@ -330,9 +342,11 @@ class TestCreatePushHandler:
         )
 
         # Should not raise — exception is caught and logged
-        await handler(event)
+        result = await handler(event)
 
         sync_fn.assert_awaited_once()
+        assert result is not None
+        assert result["error"] == "sync_failed"
 
     async def test_invalid_payload_does_not_raise(self) -> None:
         sync_fn = AsyncMock()
@@ -340,8 +354,9 @@ class TestCreatePushHandler:
         event = _make_webhook_event(payload={"bad": "data"})
 
         # Should not propagate — validation failure is logged
-        await handler(event)
+        result = await handler(event)
 
+        assert result is None
         sync_fn.assert_not_awaited()
 
     async def test_handler_uses_event_id_as_correlation(self) -> None:
@@ -355,6 +370,121 @@ class TestCreatePushHandler:
         await handler(event)
 
         sync_fn.assert_awaited_once()
+
+    async def test_main_branch_returns_sync_result(self) -> None:
+        sync_result = {"released_count": 1, "unblocked_count": 3}
+        sync_fn = AsyncMock(return_value=sync_result)
+        handler = create_push_handler(sync_fn=sync_fn)
+        event = _make_webhook_event(
+            payload=_make_push_payload(ref="refs/heads/main"),
+        )
+
+        result = await handler(event)
+
+        assert result is not None
+        assert result["acknowledged"] is True
+        assert result["sync_triggered"] is True
+        assert result["sync_result"] == sync_result
+
+    async def test_feature_branch_without_ticket_files_returns_ack(self) -> None:
+        sync_fn = AsyncMock()
+        handler = create_push_handler(sync_fn=sync_fn)
+        event = _make_webhook_event(
+            payload=_make_push_payload(
+                ref="refs/heads/feature/ui-fix",
+                commits=[
+                    {
+                        "id": "c1",
+                        "message": "fix",
+                        "added": [],
+                        "modified": ["src/app.py"],
+                        "removed": [],
+                    },
+                ],
+            ),
+        )
+
+        result = await handler(event)
+
+        assert result is not None
+        assert result["acknowledged"] is True
+        assert result["sync_triggered"] is False
+        assert result["branch"] == "feature/ui-fix"
+        sync_fn.assert_not_awaited()
+
+    async def test_feature_branch_with_ticket_files_triggers_sync(self) -> None:
+        sync_result = {"released_count": 2, "unblocked_count": 0}
+        sync_fn = AsyncMock(return_value=sync_result)
+        handler = create_push_handler(sync_fn=sync_fn)
+        event = _make_webhook_event(
+            payload=_make_push_payload(
+                ref="refs/heads/feature/ticket-update",
+                commits=[
+                    {
+                        "id": "c1",
+                        "message": "update ticket",
+                        "added": [],
+                        "modified": [".github/tickets/FORGEOS-BE001.json"],
+                        "removed": [],
+                    },
+                ],
+            ),
+        )
+
+        result = await handler(event)
+
+        sync_fn.assert_awaited_once()
+        assert result is not None
+        assert result["sync_triggered"] is True
+        assert result["sync_result"] == sync_result
+
+    async def test_feature_branch_ticket_state_files_triggers_sync(self) -> None:
+        sync_fn = AsyncMock(return_value={"released_count": 0})
+        handler = create_push_handler(sync_fn=sync_fn)
+        event = _make_webhook_event(
+            payload=_make_push_payload(
+                ref="refs/heads/dev",
+                commits=[
+                    {
+                        "id": "c1",
+                        "message": "advance ticket",
+                        "added": [".github/ticket-state/QA/FORGEOS-X1.json"],
+                        "modified": [],
+                        "removed": [".github/ticket-state/BACKEND/FORGEOS-X1.json"],
+                    },
+                ],
+            ),
+        )
+
+        result = await handler(event)
+
+        sync_fn.assert_awaited_once()
+        assert result is not None
+        assert result["sync_triggered"] is True
+
+    async def test_sync_failure_returns_error_response(self) -> None:
+        sync_fn = AsyncMock(side_effect=RuntimeError("db down"))
+        handler = create_push_handler(sync_fn=sync_fn)
+        event = _make_webhook_event(
+            payload=_make_push_payload(ref="refs/heads/main"),
+        )
+
+        result = await handler(event)
+
+        assert result is not None
+        assert result["acknowledged"] is True
+        assert result["sync_triggered"] is False
+        assert result["error"] == "sync_failed"
+
+    async def test_invalid_payload_returns_none(self) -> None:
+        sync_fn = AsyncMock()
+        handler = create_push_handler(sync_fn=sync_fn)
+        event = _make_webhook_event(payload={"bad": "data"})
+
+        result = await handler(event)
+
+        assert result is None
+        sync_fn.assert_not_awaited()
 
 
 # ================================================================== #
@@ -388,9 +518,67 @@ class TestPushHandlerRegistration:
         service = WebhookService(registry=registry)
 
         event = _make_webhook_event(
-            payload=_make_push_payload(ref="refs/heads/dev"),
+            payload=_make_push_payload(
+                ref="refs/heads/dev",
+                commits=[
+                    {
+                        "id": "c1",
+                        "message": "docs",
+                        "added": [],
+                        "modified": ["README.md"],
+                        "removed": [],
+                    },
+                ],
+            ),
         )
 
         await service.dispatch(event)
 
         sync_fn.assert_not_awaited()
+
+
+# ================================================================== #
+# _has_ticket_file_changes — file path filtering
+# ================================================================== #
+
+
+class TestHasTicketFileChanges:
+    """Tests for _has_ticket_file_changes helper."""
+
+    def test_no_commits(self) -> None:
+        assert _has_ticket_file_changes([]) is False
+
+    def test_no_ticket_files(self) -> None:
+        commits = [{"added": ["src/app.py"], "modified": ["README.md"], "removed": []}]
+        assert _has_ticket_file_changes(commits) is False
+
+    def test_ticket_file_in_modified(self) -> None:
+        commits = [{"modified": [".github/tickets/FORGEOS-BE001.json"]}]
+        assert _has_ticket_file_changes(commits) is True
+
+    def test_ticket_state_file_in_added(self) -> None:
+        commits = [{"added": [".github/ticket-state/QA/FORGEOS-X1.json"]}]
+        assert _has_ticket_file_changes(commits) is True
+
+    def test_ticket_file_in_removed(self) -> None:
+        commits = [{"removed": [".github/tickets/OLD.json"]}]
+        assert _has_ticket_file_changes(commits) is True
+
+    def test_mixed_commits_one_has_ticket(self) -> None:
+        commits = [
+            {"added": ["src/main.py"], "modified": [], "removed": []},
+            {"added": [], "modified": [".github/tickets/T1.json"], "removed": []},
+        ]
+        assert _has_ticket_file_changes(commits) is True
+
+    def test_commit_missing_file_keys(self) -> None:
+        commits = [{"id": "abc", "message": "no file keys"}]
+        assert _has_ticket_file_changes(commits) is False
+
+    def test_non_string_file_path_ignored(self) -> None:
+        commits = [{"added": [123, None], "modified": [], "removed": []}]
+        assert _has_ticket_file_changes(commits) is False
+
+    def test_partial_prefix_no_match(self) -> None:
+        commits = [{"modified": [".github/ticket"]}]
+        assert _has_ticket_file_changes(commits) is False

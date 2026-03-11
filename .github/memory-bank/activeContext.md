@@ -3957,3 +3957,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE048.md
 - **Decisions:** PASS — Score 100/100, 0 critical, 0 warnings. 100% coverage (58/58 stmts), 28/28 tests. Lint and mypy --strict clean.
 - **Timestamp:** 2026-03-11T03:30:00Z
+
+### [FORGEOS-BE065] — QA Review (Re-review after Rework #2)
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE065.md
+- **Decisions:** PASS — Rework defect fixed (emit_reworked() now called in rework_ticket()). All 6 ACs met. 21/21 tests pass, 100% coverage on emitter.py. Lint clean.
+- **Timestamp:** 2026-03-11T02:45:00Z
