@@ -1,0 +1,188 @@
+{
+  "ticket_id": "FORGEOS-BE047",
+  "title": "Implement Background Lease Heartbeat in SDK",
+  "description": "Implement automatic lease heartbeat in the agent SDK. When an agent claims a ticket, a background asyncio task periodically sends heartbeat calls to extend the lease. The heartbeat interval is configurable (default: every 5 minutes for a 30-minute lease). Heartbeat integrates with the server-side lease heartbeat mechanism (FORGEOS-BE008). The heartbeat task is automatically started on claim and stopped on advance/release/rework.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "DONE",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-05T18:06:45.278964+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "FORGEOS-BE045",
+    "FORGEOS-BE008"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "agent-sdk/src/forgeos_sdk/heartbeat.py",
+    "agent-sdk/src/forgeos_sdk/operations.py"
+  ],
+  "acceptance_criteria": [
+    "Background asyncio task sends periodic heartbeat to extend the active lease",
+    "Heartbeat interval configurable (default: lease_duration / 6, e.g., 5 min for 30 min lease)",
+    "Heartbeat automatically started when claim_next() or claim() succeeds",
+    "Heartbeat automatically stopped when advance(), release(), or rework() is called",
+    "Heartbeat failure (network error, lease already expired) raises LeaseExpiredError",
+    "Heartbeat runs as a non-blocking background task that does not interfere with agent work"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-05T18:06:45.278974+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/phase3-agent-sdk.md"
+    },
+    {
+      "timestamp": "2026-03-11T00:22:14.544235+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-11T00:34:12.800693+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "READY",
+      "to_stage": "READY",
+      "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-11T01:04:12.800673+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T00:43:02.316946+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "BACKEND",
+      "to_stage": "QA",
+      "details": "BACKEND complete \u2014 heartbeat.py created, operations.py updated, 27 tests, 99% coverage"
+    },
+    {
+      "timestamp": "2026-03-11T01:02:58.954668+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: manual release"
+    },
+    {
+      "timestamp": "2026-03-11T01:02:58.991374+00:00",
+      "event": "CLAIMED",
+      "agent": "QA Engineer",
+      "machine_id": "pop-os",
+      "from_stage": "QA",
+      "to_stage": "QA",
+      "details": "Claimed by ReaperOAK@pop-os via QA Engineer, lease until 2026-03-11T01:32:58.991359+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T01:28:27.801326+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from QA Engineer: manual release"
+    },
+    {
+      "timestamp": "2026-03-11T01:28:27.834988+00:00",
+      "event": "CLAIMED",
+      "agent": "Security Engineer",
+      "machine_id": "pop-os",
+      "from_stage": "SECURITY",
+      "to_stage": "SECURITY",
+      "details": "Claimed by ReaperOAK@pop-os via Security Engineer, lease until 2026-03-11T01:58:27.834972+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T01:34:08.023817+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-11T01:49:17.854907+00:00",
+      "event": "CLAIMED",
+      "agent": "CI Reviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "CI",
+      "details": "Claimed by ReaperOAK@pop-os via CI Reviewer, lease until 2026-03-11T02:19:17.854891+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T01:55:49.719077+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "details": "CI PASS \u2014 Score 92/100, 0 critical, 0 warnings, 91% coverage"
+    },
+    {
+      "timestamp": "2026-03-11T02:16:04.737174+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from CI Reviewer: manual release"
+    },
+    {
+      "timestamp": "2026-03-11T02:16:04.772610+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-11T02:46:04.772593+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T02:55:00.000000+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "DOCS complete \u2014 README updated (config table + heartbeat sections), CHANGELOG entry added, all docstrings verified"
+    },
+    {
+      "timestamp": "2026-03-11T02:36:35.382779+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-11T03:06:35.382761+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T02:43:37.505873+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
+    }
+  ],
+  "source_task_file": "TODO/tasks/phase3-agent-sdk.md",
+  "tags": [
+    "backend",
+    "sdk",
+    "heartbeat",
+    "lease",
+    "background",
+    "phase3",
+    "BLK-07-02"
+  ],
+  "status": "VALIDATION"
+}
