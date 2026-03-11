@@ -4,7 +4,7 @@
   "description": "Implement the stage pipeline view as a horizontal Kanban-style board following the UIDesigner mockup (FORGEOS-UID002). Display 11 stage columns (READY through DONE), each showing a count badge and a scrollable list of ticket cards. Each ticket card shows the ticket ID, truncated title, type badge (color-coded), priority indicator, and claim status. Support column collapsing for unused stages. Data sourced from the pipeline overview and ticket list API endpoints.",
   "type": "frontend",
   "priority": "critical",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -39,10 +39,10 @@
     "Pipeline data refreshes on page load and on manual refresh button click"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T16:48:34.843172+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -175,6 +175,15 @@
       "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
       "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-11T16:48:34.843172+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T16:22:41.759494+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
