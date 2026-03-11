@@ -4,7 +4,7 @@
   "description": "Implement the system health dashboard view following the UIDesigner mockup (FORGEOS-UID005). Display four health panels: Database (connection pool, query latency), MCP Server (uptime, connected agents, requests/minute), Webhooks (delivery rate, queue depth, failures), and Alerts (recent system warnings). Data sourced from the /api/health endpoint (FORGEOS-BE038). Each panel uses StatusIndicator (green/yellow/red) and MetricCard components.",
   "type": "frontend",
   "priority": "medium",
-  "stage": "UIDESIGNER",
+  "stage": "FRONTEND",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -43,7 +43,7 @@
   "claimed_by": "UIDesigner",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-11T12:45:36.419041+00:00",
+  "lease_expiry": "2026-03-11T13:51:34.892340+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -59,6 +59,22 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-11T13:08:46.892814+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from UIDesigner: Lease expired at 2026-03-11T12:45:36.419041+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T13:21:34.892357+00:00",
+      "event": "CLAIMED",
+      "agent": "UIDesigner",
+      "machine_id": "pop-os",
+      "from_stage": "UIDESIGNER",
+      "to_stage": "UIDESIGNER",
+      "details": "Claimed by reaperoak@pop-os via UIDesigner, lease until 2026-03-11T13:51:34.892340+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
