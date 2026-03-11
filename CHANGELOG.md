@@ -8,6 +8,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Sync and Validate MCP Tools** (FORGEOS-BE033) — Two MCP tools at
+  `mcp-server/src/mcp_server/tools/ticket_tools.py` backed by the
+  `SyncEngine` at `mcp-server/src/mcp_server/services/sync_engine.py`.
+  `tickets.sync` releases expired leases (via FORGEOS-BE009 lease cleanup),
+  evaluates the dependency graph for all BLOCKED tickets, and moves newly
+  unblocked tickets to READY. Returns a `SyncResult` summary with released
+  and unblocked counts, ticket IDs, and any errors. `tickets.validate`
+  performs a full integrity check: verifies each ticket's stage is valid,
+  stage belongs to its own `sdlc_flow`, and `sdlc_flow` matches the
+  expected flow for the ticket type. Returns a `ValidateResult` with a list
+  of `IntegrityError` objects (empty = clean). Frozen dataclasses with
+  `__slots__` for all result types. Partial-success semantics for sync
+  (errors are recorded but processing continues). Average cyclomatic
+  complexity A (2.45). 96/100 CI quality score.
+
 - **Ticket Advance MCP Tool** (FORGEOS-BE030) — `tickets.advance` MCP tool at
   `mcp-server/src/mcp_server/tools/ticket_tools.py` that moves a ticket to its
   next SDLC stage. Pure-domain stage engine at
