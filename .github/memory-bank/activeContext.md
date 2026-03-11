@@ -2070,3 +2070,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/migration/phases/phase_b.py, mcp-server/src/mcp_server/migration/phases/__init__.py, mcp-server/tests/migration/test_phase_b.py
 - **Decisions:** Used adapter pattern (SDKClaimAdapter/FilesystemClaimAdapter) for testability. Rolling deque for operation log. Followed Phase A lifecycle pattern (enter/validate/exit).
 - **Timestamp:** 2026-03-11T17:00:00Z
+
+### [FORGEOS-BE077] — Implement Shadow Mode Validation Engine
+- **Artifacts:** mcp-server/src/mcp_server/migration/shadow_engine.py, mcp-server/tests/migration/test_shadow_engine.py
+- **Decisions:** Used Protocol-based adapters (consistent with sync_engine.py). In-memory stats over DB storage since shadow mode is transient. Capped recent_critical at 50 entries.
+- **Timestamp:** 2026-03-11T16:50:00Z
