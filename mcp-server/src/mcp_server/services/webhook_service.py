@@ -176,7 +176,7 @@ _SOURCE_VALIDATORS: dict[
 # Handler registry
 # ---------------------------------------------------------------------------
 
-WebhookHandler = Callable[[WebhookEvent], Coroutine[Any, Any, None]]
+WebhookHandler = Callable[[WebhookEvent], Coroutine[Any, Any, dict[str, Any] | None]]
 
 
 class _HandlerRegistry:
@@ -216,7 +216,7 @@ handler_registry = _HandlerRegistry()
 # ---------------------------------------------------------------------------
 
 
-async def _default_github_handler(event: WebhookEvent) -> None:
+async def _default_github_handler(event: WebhookEvent) -> dict[str, Any] | None:
     """Default handler for GitHub webhook events — logs and discards."""
     logger.info(
         "github_webhook_received",
@@ -226,9 +226,10 @@ async def _default_github_handler(event: WebhookEvent) -> None:
             "source": event.source,
         },
     )
+    return None
 
 
-async def _default_custom_handler(event: WebhookEvent) -> None:
+async def _default_custom_handler(event: WebhookEvent) -> dict[str, Any] | None:
     """Default handler for custom webhook events — logs and discards."""
     logger.info(
         "custom_webhook_received",
@@ -238,6 +239,7 @@ async def _default_custom_handler(event: WebhookEvent) -> None:
             "source": event.source,
         },
     )
+    return None
 
 
 # Register defaults
@@ -318,7 +320,7 @@ class WebhookService:
             payload=payload,
         )
 
-    async def dispatch(self, event: WebhookEvent) -> None:
+    async def dispatch(self, event: WebhookEvent) -> dict[str, Any] | None:
         """Route *event* to the matching handler and execute it.
 
         If no handler is registered, the event is logged and dropped.
@@ -327,6 +329,11 @@ class WebhookService:
         ----------
         event : WebhookEvent
             A validated webhook event.
+
+        Returns
+        -------
+        dict[str, Any] | None
+            Handler response payload, if any.
         """
         handler = self._registry.get(event.source, event.event_type)
         if handler is None:
@@ -338,10 +345,10 @@ class WebhookService:
                     "event_type": event.event_type,
                 },
             )
-            return
+            return None
 
         try:
-            await handler(event)
+            return await handler(event)
         except Exception:
             logger.exception(
                 "webhook_handler_error",
@@ -351,6 +358,7 @@ class WebhookService:
                     "event_type": event.event_type,
                 },
             )
+            return None
 
     def process_async(self, event: WebhookEvent) -> None:
         """Schedule *event* processing as a background task.
