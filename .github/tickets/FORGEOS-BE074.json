@@ -36,10 +36,10 @@
     "Phase B entry and exit logged with timestamp and operation success ratios"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "QAEngineer",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-11T17:06:29.866072+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -73,6 +73,15 @@
       "from_stage": "READY",
       "to_stage": "BACKEND",
       "details": "Advanced from READY to BACKEND"
+    },
+    {
+      "timestamp": "2026-03-11T16:36:29.866087+00:00",
+      "event": "CLAIMED",
+      "agent": "QAEngineer",
+      "machine_id": "pop-os",
+      "from_stage": "QA",
+      "to_stage": "QA",
+      "details": "Claimed by ReaperOAK@pop-os via QAEngineer, lease until 2026-03-11T17:06:29.866072+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",
