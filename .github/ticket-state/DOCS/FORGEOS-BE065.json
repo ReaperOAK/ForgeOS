@@ -35,10 +35,10 @@
     "Emitter is called from the ticket service layer (not duplicated across MCP/REST)"
   ],
   "rework_count": 2,
-  "claimed_by": "CI Reviewer",
+  "claimed_by": "Documentation Specialist",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T03:06:35.034272+00:00",
+  "lease_expiry": "2026-03-11T03:37:12.092288+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -176,6 +176,22 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "CI PASS - Score 100/100, 0 critical, 0 warnings"
+    },
+    {
+      "timestamp": "2026-03-11T03:06:44.565547+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from CI Reviewer: Lease expired at 2026-03-11T03:06:35.034272+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T03:07:12.092305+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-11T03:37:12.092288+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-webhooks.md",

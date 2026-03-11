@@ -35,10 +35,10 @@
     "Clean disconnection handling removes client from broadcast list"
   ],
   "rework_count": 0,
-  "claimed_by": "CI Reviewer",
+  "claimed_by": "Documentation Specialist",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T03:06:34.960558+00:00",
+  "lease_expiry": "2026-03-11T03:37:12.025899+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -142,6 +142,22 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "CI stage complete \u2014 PASS, score 94/100"
+    },
+    {
+      "timestamp": "2026-03-11T03:06:44.564761+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from CI Reviewer: Lease expired at 2026-03-11T03:06:34.960558+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T03:07:12.025915+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-11T03:37:12.025899+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
