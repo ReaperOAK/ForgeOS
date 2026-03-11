@@ -8,6 +8,62 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Ticket Advance MCP Tool** (FORGEOS-BE030) — `tickets.advance` MCP tool at
+  `mcp-server/src/mcp_server/tools/ticket_tools.py` that moves a ticket to its
+  next SDLC stage. Pure-domain stage engine at
+  `mcp-server/src/mcp_server/services/stage_engine.py` validates transitions
+  against the ticket's `sdlc_flow` — no stage skipping, no reordering.
+  `TicketService.advance_ticket()` at
+  `mcp-server/src/mcp_server/services/ticket_service.py` uses SERIALIZABLE
+  transaction isolation for state integrity. Validates the calling agent holds
+  the active claim. Creates an `event_history` record of type `STAGE_ADVANCED`
+  for every transition. Clears the claim on advance so the ticket is available
+  for the next agent. Returns previous stage, new stage, and updated status.
+  `InvalidTransitionError` and `ClaimValidationError` exceptions for domain
+  error handling. `AdvanceTicketResult` frozen dataclass with `to_dict()`. 77
+  tests with 100% coverage on `stage_engine.py` and ~98% on tool/service.
+
+- **Retry Logic and Dead-Letter Handling** (FORGEOS-BE067) — Background
+  notification processor at
+  `mcp-server/src/mcp_server/notifications/processor.py` with configurable
+  exponential-backoff retries and dead-letter handling at
+  `mcp-server/src/mcp_server/notifications/queue.py`. `NotificationProcessor`
+  runs as an asyncio background task, polling the queue on a configurable
+  interval (default 5 s) and dispatching notifications through
+  `ChannelDispatcher`. Failed deliveries retry with a schedule-based backoff
+  (1 min, 5 min, 15 min, 1 hour) up to a configurable max (default 5).
+  Notifications exceeding max retries move to `dead_letter` status.
+  `replay_dead_letter()` allows administrators to reset dead-lettered
+  notifications to `pending` for redelivery. `ProcessorConfig` frozen
+  dataclass controls `poll_interval_seconds`, `batch_size`,
+  `backoff_schedule`, and `max_retries`. Graceful shutdown via `stop()`.
+  88 tests with 96% coverage.
+
+- **High-Level Ticket Operations API** (FORGEOS-BE045) — Ergonomic async
+  API for ticket lifecycle actions at
+  `agent-sdk/src/forgeos_sdk/operations.py` with Pydantic v2 data models at
+  `agent-sdk/src/forgeos_sdk/models.py`. `TicketOperations` class wraps MCP
+  tool calls (`tickets.next`, `tickets.claim`, `tickets.complete`,
+  `tickets.reject`, `tickets.release`, `tickets.status`) with typed inputs
+  and model outputs. Methods: `claim_next(role)`, `claim(ticket_id)`,
+  `advance(ticket_id, evidence)`, `rework(ticket_id, reason)`,
+  `release(ticket_id)`, `get_ticket(ticket_id)`. Data models: `Ticket`,
+  `Evidence` (with validation), `Claim`, `OperationResult`. All operations
+  are async and raise `ToolCallError` on failure. Added Ticket Operations
+  section to `agent-sdk/README.md`.
+
+- **Per-Agent Rate Limiting** (FORGEOS-BE042) — Sliding window rate
+  limiting middleware at `mcp-server/src/mcp_server/middleware/rate_limiter.py`.
+  Tracks requests per agent identity and per machine using an in-memory
+  sliding window algorithm. Write operations (claim, advance, reject, release)
+  enforce stricter limits (30/min) than read operations (120/min). Responses
+  include `X-RateLimit-Limit`, `X-RateLimit-Remaining`, `X-RateLimit-Reset`
+  headers. Rate-limited requests return HTTP 429 with `Retry-After` header
+  (JSON-RPC format for MCP paths, standard JSON for REST). Health endpoints
+  bypass rate limiting. `RateLimitConfig` frozen dataclass, `SlidingWindowLimiter`
+  engine, `RateLimitMiddleware` Starlette integration. 34 tests with 96%
+  coverage.
+
 - **Operator Machine-Scoped Permissions** (FORGEOS-BE056) — Operator-machine
   binding enforcement at `mcp-server/src/mcp_server/auth/authorization.py`
   with service orchestration at
@@ -67,6 +123,36 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   count methods support filters by identity, operation, and time range with
   a 1000-row limit cap. 49 tests with 92% coverage. Added Audit Logging
   section to `mcp-server/README.md`.
+
+- **Ticket Tools — `tickets.release` and `tickets.status`** (FORGEOS-BE032) —
+  Two MCP tools at `mcp-server/src/mcp_server/tools/ticket_tools.py`.
+  `tickets.release` allows an agent to voluntarily release a claimed ticket
+  back to READY, validating claim ownership and creating an event history
+  record. `tickets.status` supports two modes: single-ticket detail (full
+  ticket data with history and active claim) and filtered listing (by stage,
+  type, priority with pagination). Service layer at
+  `mcp-server/src/mcp_server/services/ticket_service.py` provides
+  `release_ticket()`, `get_ticket_status()`, and `list_tickets()` methods.
+  Repository layer adds `list_filtered()` query builder with parameterized
+  SQL. Domain types: `ReleaseResult`, `TicketDetail`, `TicketListResult`
+  (frozen dataclasses with `__slots__`). 80 tests with 100% pass rate.
+
+- **Ticket Tools — `tickets.claim` MCP Tool** (FORGEOS-BE029) — MCP tool
+  handler at `mcp-server/src/mcp_server/tools/ticket_tools.py` that allows
+  agents to claim a specific ticket by ID. Accepts `ticket_id`, `agent_id`,
+  `machine_id`, `operator`, and optional `lease_duration_minutes` as input
+  parameters, validated against JSON Schema. Delegates to
+  `TicketService.claim_by_id()` at
+  `mcp-server/src/mcp_server/services/ticket_service.py`, which resolves
+  the agent role to an SDLC stage via `AgentRoleMap`, validates role-stage
+  authorization via `check_role_stage_authorization()`, and calls
+  `ClaimQueue.claim_by_id()` for atomic claiming with `SELECT FOR UPDATE
+  SKIP LOCKED`. Returns claimed ticket data (ticket_id, title, type, stage,
+  file_paths, acceptance_criteria) on success, or structured MCP error when
+  the ticket is not claimable, a claim conflict occurs, or the agent role is
+  invalid. Concurrent claim attempts on the same ticket result in exactly
+  one winner. 105 ticket_tools tests and 210 claim-related tests with 100%
+  coverage.
 
 - **Ticket Tools — `tickets.next` MCP Tool** (FORGEOS-BE028) — MCP tool
   handler at `mcp-server/src/mcp_server/tools/ticket_tools.py` that allows

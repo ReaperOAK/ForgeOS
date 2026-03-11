@@ -4,7 +4,7 @@ Provides request lifecycle middleware including correlation ID tracking,
 logging integration, error enrichment, and database metadata propagation.
 
 .. meta::
-   :ticket: FORGEOS-BE019, FORGEOS-BE054
+   :ticket: FORGEOS-BE019, FORGEOS-BE054, FORGEOS-BE042
    :last_reviewed: 2026-03-11T00:00:00Z
 """
 
