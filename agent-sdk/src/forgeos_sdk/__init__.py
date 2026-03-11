@@ -22,7 +22,7 @@ Public API
 """
 
 from forgeos_sdk.client import ConnectionState, ForgeOSClient
-from forgeos_sdk.config import SDKConfig, TransportType
+from forgeos_sdk.config import OperationMode, SDKConfig, TransportType
 from forgeos_sdk.exceptions import (
     AuthenticationError,
     ClaimConflictError,
@@ -34,6 +34,7 @@ from forgeos_sdk.exceptions import (
     NetworkError,
     ToolCallError,
 )
+from forgeos_sdk.heartbeat import LeaseHeartbeat
 from forgeos_sdk.models import Claim, Evidence, OperationResult, Ticket
 from forgeos_sdk.operations import TicketOperations
 
@@ -45,6 +46,7 @@ __all__ = [
     "ConnectionState",
     "Evidence",
     "ForgeOSClient",
+    "LeaseHeartbeat",
     "OperationResult",
     "SDKConfig",
     "Ticket",

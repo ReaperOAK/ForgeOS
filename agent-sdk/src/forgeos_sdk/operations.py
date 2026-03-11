@@ -14,6 +14,7 @@ from typing import Any
 
 from forgeos_sdk.client import ForgeOSClient
 from forgeos_sdk.exceptions import ToolCallError
+from forgeos_sdk.heartbeat import LeaseHeartbeat
 from forgeos_sdk.models import Evidence, OperationResult, Ticket
 
 logger = logging.getLogger("forgeos_sdk")
@@ -27,10 +28,19 @@ class TicketOperations:
 
     Parameters:
         client: A connected ForgeOS client instance.
+        heartbeat_interval: Heartbeat interval in seconds (default: from env
+            or 300). Pass ``0`` to disable automatic heartbeats.
     """
 
-    def __init__(self, client: ForgeOSClient) -> None:
+    def __init__(
+        self,
+        client: ForgeOSClient,
+        *,
+        heartbeat_interval: float | None = None,
+    ) -> None:
         self._client = client
+        self._heartbeat_interval = heartbeat_interval
+        self._heartbeats: dict[str, LeaseHeartbeat] = {}
 
     async def _call_tool(
         self,
@@ -116,7 +126,9 @@ class TicketOperations:
                 data.get("message", "No tickets available"),
             )
 
-        return self._parse_ticket(data)
+        ticket = self._parse_ticket(data)
+        await self._start_heartbeat(ticket.ticket_id)
+        return ticket
 
     async def claim(
         self,
@@ -155,7 +167,9 @@ class TicketOperations:
             arguments["lease_minutes"] = lease_minutes
 
         data = await self._call_tool("tickets.claim", arguments)
-        return self._parse_ticket(data)
+        ticket = self._parse_ticket(data)
+        await self._start_heartbeat(ticket.ticket_id)
+        return ticket
 
     async def advance(
         self,
@@ -182,7 +196,9 @@ class TicketOperations:
         }
 
         data = await self._call_tool("tickets.complete", arguments)
-        return self._parse_ticket(data)
+        ticket = self._parse_ticket(data)
+        await self._stop_heartbeat(ticket_id)
+        return ticket
 
     async def rework(
         self,
@@ -214,7 +230,9 @@ class TicketOperations:
             arguments["evidence"] = evidence
 
         data = await self._call_tool("tickets.reject", arguments)
-        return self._parse_ticket(data)
+        ticket = self._parse_ticket(data)
+        await self._stop_heartbeat(ticket_id)
+        return ticket
 
     async def release(
         self,
@@ -248,6 +266,7 @@ class TicketOperations:
             arguments["force"] = force
 
         data = await self._call_tool("tickets.release", arguments)
+        await self._stop_heartbeat(ticket_id)
         ticket = self._parse_ticket(data) if data else None
         return OperationResult(
             success=True,
@@ -275,3 +294,36 @@ class TicketOperations:
         """
         data = await self._call_tool("tickets.status", {"ticket_id": ticket_id})
         return self._parse_ticket(data)
+
+    # ------------------------------------------------------------------
+    # Heartbeat management
+    # ------------------------------------------------------------------
+
+    async def _start_heartbeat(self, ticket_id: str) -> None:
+        """Start a background heartbeat for the given ticket.
+
+        Skips if heartbeat_interval is explicitly set to ``0``.
+        """
+        if self._heartbeat_interval is not None and self._heartbeat_interval <= 0:
+            return
+        await self._stop_heartbeat(ticket_id)
+        kwargs: dict[str, float] = {}
+        if self._heartbeat_interval is not None:
+            kwargs["interval_seconds"] = self._heartbeat_interval
+        hb = LeaseHeartbeat(self._client, ticket_id, **kwargs)
+        hb.start()
+        self._heartbeats[ticket_id] = hb
+        logger.debug("Heartbeat started for %s", ticket_id)
+
+    async def _stop_heartbeat(self, ticket_id: str) -> None:
+        """Stop and remove the heartbeat for the given ticket, if any."""
+        hb = self._heartbeats.pop(ticket_id, None)
+        if hb is not None:
+            await hb.stop()
+            logger.debug("Heartbeat stopped for %s", ticket_id)
+
+    async def stop_all_heartbeats(self) -> None:
+        """Stop all active heartbeats. Call during cleanup."""
+        ticket_ids = list(self._heartbeats.keys())
+        for tid in ticket_ids:
+            await self._stop_heartbeat(tid)
