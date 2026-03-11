@@ -4,7 +4,7 @@
   "description": "Implement idempotency keys for claim and advance operations to prevent duplicate processing from retries. Clients include an idempotency key header or parameter. The server stores the key and its result; replayed requests return the cached result without re-executing. Keys expire after a configurable TTL.",
   "type": "backend",
   "priority": "high",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Missing idempotency key on claim/advance operations is allowed but logged as a warning"
   ],
   "rework_count": 0,
-  "claimed_by": "Security Engineer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T01:58:27.767747+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -104,6 +104,15 @@
       "from_stage": "SECURITY",
       "to_stage": "SECURITY",
       "details": "Claimed by ReaperOAK@pop-os via Security Engineer, lease until 2026-03-11T01:58:27.767747+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T01:34:13.414840+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
