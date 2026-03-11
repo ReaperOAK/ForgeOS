@@ -35,10 +35,10 @@
     "Heartbeat runs as a non-blocking background task that does not interfere with agent work"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Validator",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-11T03:06:35.382761+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -153,7 +153,16 @@
       "machine_id": "pop-os",
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
-      "details": "DOCS complete — README updated (config table + heartbeat sections), CHANGELOG entry added, all docstrings verified"
+      "details": "DOCS complete \u2014 README updated (config table + heartbeat sections), CHANGELOG entry added, all docstrings verified"
+    },
+    {
+      "timestamp": "2026-03-11T02:36:35.382779+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-11T03:06:35.382761+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-agent-sdk.md",
