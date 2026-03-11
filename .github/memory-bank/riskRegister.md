@@ -412,3 +412,15 @@ Known sources list disclosed in `UnknownSourceError` details. Risk accepted — 
 
 - **Agent:** Security Engineer
 - **Timestamp:** 2026-03-11T09:00:00Z
+
+### [FORGEOS-FE001] — Frontend Scaffold Security Findings (2026-03-11T10:10:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-FE001-001 | MEDIUM | `next.config.js` does not configure security headers (CSP, X-Frame-Options, X-Content-Type-Options, HSTS, Referrer-Policy, Permissions-Policy). CWE-693, OWASP A05. STRIDE: Information Disclosure (Impact=2 × Likelihood=2 = 4). | Risk Accepted | Development scaffold. Security headers will be added in a dedicated hardening ticket before production deployment. |
+| SEC-FE001-002 | MEDIUM (downgraded from HIGH) | `npm audit` reports 4 HIGH findings: glob CLI command injection (devDependency only, unexploitable), next DoS via Image Optimizer (remotePatterns not configured), next HTTP deserialization DoS (RSC patterns not used). CWE-1395, OWASP A06. | Risk Accepted | None exploitable in current scaffold configuration. No non-breaking fix available (requires Next.js 16.x). Track for upgrade when adopted project-wide. |
+| SEC-FE001-003 | LOW | `dangerouslySetInnerHTML` in `layout.tsx` for anti-flash theme script. Hardcoded IIFE reads localStorage, calls `setAttribute('data-theme', value)`. CWE-79, OWASP A03. | Risk Accepted | Standard anti-flash pattern. Content is hardcoded string literal. `setAttribute` is not an XSS vector. `theme.tsx` validates runtime values. |
+| SEC-FE001-004 | LOW | `.env` file tracked in git. Contains `NEXT_PUBLIC_API_URL=http://localhost:3000` — public client-side variable. CWE-540. | Risk Accepted | Content is non-sensitive default dev config. `.env.local` is gitignored for actual overrides/secrets. |
+
+- **Agent:** Security Engineer
+- **Timestamp:** 2026-03-11T10:10:00Z
