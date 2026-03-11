@@ -4,7 +4,7 @@
   "description": "Implement `POST /api/tickets/:id/claim` REST endpoint for claiming a specific ticket via the dashboard or external integrations. The endpoint delegates to the same ticket service layer used by the MCP `tickets.claim` tool. Accepts agent_id, machine_id, and operator in the request body.",
   "type": "backend",
   "priority": "high",
-  "stage": "READY",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",

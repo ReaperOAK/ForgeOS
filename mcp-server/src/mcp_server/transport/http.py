@@ -162,6 +162,7 @@ class HTTPTransport:
         # Build composite app with health route + MCP transport + admin API
         from mcp_server.api import create_audit_endpoint
         from mcp_server.api.routes import (
+            create_claim_endpoint,
             create_health_endpoint,
             create_pipeline_endpoint,
             create_ticket_detail_endpoint,
@@ -191,11 +192,18 @@ class HTTPTransport:
         def _get_event_store() -> Any:
             return _event_store_ref[0]
 
+        # Ticket service getter — deferred to account for late binding
+        _ticket_service_ref: list[Any] = [None]
+
+        def _get_ticket_service() -> Any:
+            return _ticket_service_ref[0]
+
         tickets_handler = create_tickets_endpoint(_get_ticket_repo)
         ticket_detail_handler = create_ticket_detail_endpoint(_get_ticket_repo)
         ticket_history_handler = create_ticket_history_endpoint(
             _get_ticket_repo, _get_event_store
         )
+        claim_handler = create_claim_endpoint(_get_ticket_service, _get_ticket_repo)
 
         # Pipeline endpoint — public, no auth
         pipeline_handler = create_pipeline_endpoint(_get_ticket_repo)
@@ -224,6 +232,7 @@ class HTTPTransport:
             Route("/api/tickets", tickets_handler, methods=["GET"]),
             Route("/api/tickets/{ticket_id}", ticket_detail_handler, methods=["GET"]),
             Route("/api/tickets/{ticket_id}/history", ticket_history_handler, methods=["GET"]),
+            Route("/api/tickets/{ticket_id}/claim", claim_handler, methods=["POST", "DELETE"]),
             WebSocketRoute("/ws/tickets", ws_handler),
             Mount(config.mount_path, app=http_starlette_app),
         ]
@@ -235,6 +244,7 @@ class HTTPTransport:
         app.state.ticket_repo_ref = _ticket_repo_ref  # type: ignore[attr-defined]
         app.state.event_store_ref = _event_store_ref  # type: ignore[attr-defined]
         app.state.health_checker_ref = _health_checker_ref  # type: ignore[attr-defined]
+        app.state.ticket_service_ref = _ticket_service_ref  # type: ignore[attr-defined]
         app.state.broadcaster_ref = _broadcaster_ref  # type: ignore[attr-defined]
         logger.info(
             "HTTP transport app created: mount_path=%s stateless=%s",
