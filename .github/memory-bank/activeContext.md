@@ -3818,9 +3818,9 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** QA PASS — 38/38 tests pass, 94% branch coverage. All 6 ACs verified (AC4 PostgreSQL store deferred — in-memory with pluggable store abstraction, file_paths scope confirms this was intended). No regressions (1 pre-existing failure in test_correlation.py unrelated to BE041). Ruff lint clean.
 - **Timestamp:** 2026-03-11T02:15:00Z
 
-### [FORGEOS-BE061] — Implement Push Event Handler for Sync
+### [FORGEOS-BE061] — Implement Push Event Handler for Sync (Backend complete, QA REJECTED)
 - **Artifacts:** mcp-server/src/mcp_server/webhooks/github_handler.py, mcp-server/src/mcp_server/services/webhook_service.py, mcp-server/src/mcp_server/webhooks/__init__.py, mcp-server/tests/test_push_event_handler.py, mcp-server/tests/test_webhook_service.py
-- **Decisions:** Used factory pattern (create_push_handler) with injected sync callback for testability. Added push-specific payload validation (_validate_github_push_payload) since push events lack the action field. Recognized both main and master as main branches.
+- **Decisions:** Used factory pattern (create_push_handler) with injected sync callback for testability. Added push-specific payload validation (_validate_github_push_payload) since push events lack the action field. Recognized both main and master as main branches. QA REJECTED: 3/6 ACs unmet (AC2/AC3/AC6).
 - **Timestamp:** 2026-03-11T02:20:00Z
 
 ### [FORGEOS-BE063] — Implement PR Event Handler
@@ -3877,3 +3877,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE055.md
 - **Decisions:** APPROVED — 10/10 DoD items pass, all 6 ACs verified, all upstream verdicts (QA/Security/CI/Docs) confirmed PASS. CWE-862 rework fix verified in claim_by_id. 4 pre-existing pyright errors in TicketDetail not from BE055.
 - **Timestamp:** 2026-03-11T02:45:00Z
+
+### [FORGEOS-BE061] — Push Event Handler for Sync (QA REJECT — Rework #1)
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE061.md
+- **Decisions:** QA REJECT — 3/6 ACs unmet. AC2: no ticket-branch file-filtered sync (all non-main branches skipped). AC3: zero file path filtering for .github/tickets/ or .github/ticket-state/. AC6: handler returns None instead of sync summary. 31/31 push tests pass, 79/79 webhook regression pass, 100% push-code coverage, 0 lint errors. Existing code quality good but scope incomplete.
+- **Timestamp:** 2026-03-11T03:00:00Z
