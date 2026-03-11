@@ -22,8 +22,7 @@
     "FORGEOS-BE030"
   ],
   "blocked_by": [
-    "FORGEOS-BE060",
-    "FORGEOS-BE030"
+    "FORGEOS-BE060"
   ],
   "file_paths": [
     "mcp-server/src/webhooks/github_handler.py"
