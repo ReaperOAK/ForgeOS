@@ -2090,3 +2090,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** dashboard/src/lib/api/websocket.test.ts, dashboard/src/lib/hooks/useTicketStream.test.ts, dashboard/src/components/__tests__/ConnectionStatusIndicator.test.tsx
 - **Decisions:** PASS — 22 tests, 100% lines, 98.7% stmts. Added 6 edge-case tests for coverage.
 - **Timestamp:** 2026-03-11T17:35:00Z
+
+### [FORGEOS-FE012] — QA PASS
+- **Artifacts:** dashboard/src/lib/hooks/__tests__/useFilters.test.ts, dashboard/src/components/filters/__tests__/FilterBar.test.tsx, .github/agent-output/QA/FORGEOS-FE012.md
+- **Decisions:** PASS — 49 tests (18 QA-added), 97.43% stmts, 100% branch, 97.33% lines. All 7 ACs verified. No defects found.
+- **Timestamp:** 2026-03-11T17:45:00Z
