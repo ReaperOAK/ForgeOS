@@ -4386,6 +4386,187 @@ importer = TicketImporter(config, writer=writer, on_progress=on_progress)
   context via the `mcp_server.observability` logger.
 
 
+## Bidirectional Sync Engine
+
+<!-- last_reviewed: 2026-03-11T12:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.migration.sync_engine` module keeps the filesystem ticket
+state (`.github/tickets/` and `.github/ticket-state/`) synchronized with
+PostgreSQL. It runs periodic sync cycles in a background task and applies a
+**database-wins** conflict resolution strategy when the two sources diverge.
+
+### How It Works
+
+Each sync cycle performs two passes:
+
+1. **FS → DB** — Scans `.github/tickets/` for new or modified ticket JSON
+   files and imports them into the database using the `TicketImporter`.
+2. **DB → FS** — Reads current ticket state from the database and writes
+   back stage moves (moves JSON files between `ticket-state/` directories)
+   and claim/lease metadata updates to ticket JSON files on disk.
+
+Conflict resolution is handled by `ConflictResolver`. When filesystem and
+database state diverge, the database value always wins. Every resolution is
+recorded in a structured audit log.
+
+### Configuration
+
+`SyncConfig` is a frozen dataclass controlling sync behavior:
+
+| Parameter | Default | Description |
+|---|---|---|
+| `tickets_dir` | *(required)* | Path to `.github/tickets/` directory |
+| `ticket_state_dir` | *(required)* | Path to `.github/ticket-state/` directory |
+| `interval_seconds` | `60.0` | Seconds between sync cycles |
+
+### Usage
+
+```python
+from pathlib import Path
+from mcp_server.migration.sync_engine import SyncConfig, SyncEngine
+
+config = SyncConfig(
+    tickets_dir=Path(".github/tickets"),
+    ticket_state_dir=Path(".github/ticket-state"),
+    interval_seconds=60.0,
+)
+
+engine = SyncEngine(config, db_reader, db_writer)
+
+# Start periodic sync in the background
+await engine.start()
+
+# Run a single sync cycle on demand
+result = await engine.sync_once()
+print(result.stats.fs_to_db_imported)
+print(result.stats.db_to_fs_stage_moves)
+print(len(result.conflicts))
+
+# Stop the background loop
+await engine.stop()
+```
+
+The engine can be started and stopped independently of the MCP server.
+`is_running` returns `True` while the background loop is active.
+
+### Conflict Resolution Strategy
+
+The `ConflictResolver` implements a **database-wins** strategy. When both
+sides have diverged for the same ticket, the database value is treated as
+authoritative:
+
+| Conflict Type | Resolution |
+|---|---|
+| Stage mismatch (FS says BACKEND, DB says QA) | Ticket moved to QA on filesystem |
+| Claim/lease mismatch | Ticket JSON updated with DB claim metadata |
+| Generic metadata mismatch | DB value overwrites FS value |
+| Ticket exists only in FS | Imported into the database |
+| Ticket exists only in DB | Recorded for audit (no automatic FS export) |
+
+Every resolution produces an immutable `ConflictRecord` with ticket ID,
+conflict type, both values, the resolution applied, and an ISO-8601 timestamp.
+Access all records for the current cycle via `result.conflicts`.
+
+### Logging and Audit Trail
+
+All sync operations use the structured `mcp_server.observability` logger.
+Key log events:
+
+| Event | Log Level | Extra Fields |
+|---|---|---|
+| Sync engine started | INFO | `interval_seconds` |
+| Sync engine stopped | INFO | — |
+| Sync cycle complete | INFO | `fs_to_db_imported`, `fs_to_db_updated`, `db_to_fs_stage_moves`, `db_to_fs_claim_updates`, `errors`, `conflicts` |
+| Stage conflict resolved | INFO | `ticket_id`, `fs_stage`, `db_stage` |
+| Claim conflict resolved | INFO | `ticket_id`, `fs_claimed_by`, `db_claimed_by` |
+| Ticket moved to new stage | INFO | `ticket_id`, `from_stage`, `to_stage` |
+| Claim metadata updated | INFO | `ticket_id`, `claimed_by` |
+| FS→DB or DB→FS sync failed | ERROR | `error` |
+
+The `ConflictResolver` audit log provides a programmatic record of all
+resolutions within a cycle, separate from structured logging.
+
+### API Reference
+
+#### SyncEngine
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `SyncEngine` | class | Bidirectional sync between filesystem and PostgreSQL |
+| `SyncConfig` | frozen dataclass | Paths and interval configuration |
+| `SyncResult` | frozen dataclass | Outcome of a single sync cycle |
+| `SyncStats` | dataclass | Counters for imported, updated, moved, and errored tickets |
+| `DatabaseReader` | protocol | Async interface for reading ticket state from the database |
+
+##### SyncEngine Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `start()` | `None` | Start periodic sync in a background asyncio task |
+| `stop()` | `None` | Signal the loop to stop and wait for clean shutdown |
+| `sync_once()` | `SyncResult` | Execute one full bidirectional sync cycle |
+| `is_running` | `bool` | Property — `True` while the background loop is active |
+
+##### SyncResult Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `stats` | `SyncStats` | Counters for the cycle |
+| `conflicts` | `list[ConflictRecord]` | All conflict resolutions in this cycle |
+| `errors` | `list[str]` | Error messages from failed operations |
+| `started_at` | `str` | ISO-8601 timestamp when the cycle began |
+| `finished_at` | `str` | ISO-8601 timestamp when the cycle ended |
+
+##### SyncStats Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `fs_to_db_imported` | `int` | New tickets imported from filesystem |
+| `fs_to_db_updated` | `int` | Existing tickets updated from filesystem |
+| `fs_to_db_errors` | `int` | Errors during FS→DB sync |
+| `db_to_fs_stage_moves` | `int` | Tickets moved between stage directories |
+| `db_to_fs_claim_updates` | `int` | Ticket JSONs updated with DB claim data |
+| `db_to_fs_errors` | `int` | Errors during DB→FS sync |
+
+#### ConflictResolver
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `ConflictResolver` | class | Database-wins conflict resolver with audit log |
+| `ConflictRecord` | frozen dataclass | Immutable audit entry for one resolution |
+| `ConflictType` | enum | `STAGE_MISMATCH`, `CLAIM_MISMATCH`, `METADATA_MISMATCH`, `NEW_IN_FS`, `NEW_IN_DB` |
+
+##### ConflictResolver Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `resolve_stage(ticket_id, fs_stage, db_stage)` | `str` | Resolve stage mismatch — returns DB stage |
+| `resolve_claim(ticket_id, fs_claim, db_claim)` | `dict` | Resolve claim mismatch — returns DB claim |
+| `resolve_metadata(ticket_id, field, fs_val, db_val)` | `Any` | Resolve metadata mismatch — returns DB value |
+| `record_new_in_fs(ticket_id)` | `None` | Log a ticket found only on filesystem |
+| `record_new_in_db(ticket_id)` | `None` | Log a ticket found only in database |
+| `conflicts` | `list[ConflictRecord]` | Property — copy of the audit log |
+| `clear()` | `None` | Reset the audit log between cycles |
+
+### Design Decisions
+
+- **Database-wins** — the database is the authoritative source during migration.
+  Filesystem state is treated as eventually consistent. This avoids split-brain
+  scenarios when multiple operators modify tickets concurrently.
+- **Separate import and export passes** — FS→DB runs first (via `TicketImporter`),
+  then DB→FS applies authoritative state back. This ordering ensures the database
+  has the latest filesystem changes before overwriting divergent FS state.
+- **No automatic FS creation for DB-only tickets** — tickets existing only in
+  the database are recorded for audit but not exported to the filesystem. This
+  prevents the sync engine from creating unexpected files in the git workspace.
+- **Cycle-scoped conflict log** — `ConflictResolver.clear()` resets the audit
+  log at the start of each cycle, keeping the log relevant to the current run.
+- **Independent lifecycle** — the engine can start and stop without restarting
+  the MCP server, supporting gradual rollout via feature flags.
+
+
 ## Admin Force Operations
 
 <!-- last_reviewed: 2026-03-11T00:00:00Z -->
