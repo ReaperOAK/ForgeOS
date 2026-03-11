@@ -4,7 +4,7 @@
   "description": "Implement the system health dashboard view following the UIDesigner mockup (FORGEOS-UID005). Display four health panels: Database (connection pool, query latency), MCP Server (uptime, connected agents, requests/minute), Webhooks (delivery rate, queue depth, failures), and Alerts (recent system warnings). Data sourced from the /api/health endpoint (FORGEOS-BE038). Each panel uses StatusIndicator (green/yellow/red) and MetricCard components.",
   "type": "frontend",
   "priority": "medium",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -120,6 +120,24 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-11T13:57:15.990911+00:00",
+      "event": "CLAIMED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "CI",
+      "details": "Claimed by reaperoak@pop-os via CIReviewer, lease until 2026-03-11T14:27:15.990894+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T14:10:52.419895+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "system",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "Advanced from CI to DOCS"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
