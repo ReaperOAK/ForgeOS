@@ -4,7 +4,7 @@
   "description": "Build the bidirectional synchronization engine that keeps filesystem and database in sync during the dual-mode period. Implement periodic sync (configurable interval, default 60s) that detects changes in either direction: new tickets in filesystem not in DB, stage changes in DB not reflected in filesystem, claim/lease updates. Implement conflict resolution with database-wins strategy: when both sides have diverged, the database state takes precedence. Log all resolved conflicts for audit.",
   "type": "backend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Sync engine can be started/stopped independently of the MCP server"
   ],
   "rework_count": 0,
-  "claimed_by": "QA Engineer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-11T11:02:20.273418+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -68,6 +68,15 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Released claim from Backend: Lease expired at 2026-03-11T10:31:22.094893+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T10:35:58.179569+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",
