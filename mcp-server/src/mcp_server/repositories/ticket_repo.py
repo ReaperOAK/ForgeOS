@@ -311,6 +311,28 @@ class TicketRepository:
             )
             return {r["stage_name"]: r["cnt"] for r in rows}
 
+    async def count_by_stage_and_type(self) -> list[dict[str, int | str]]:
+        """Return ticket counts grouped by stage and type.
+
+        Returns:
+            A list of dicts with keys ``stage``, ``type``, ``count``.
+        """
+        async with self._pool.acquire() as conn:
+            rows = await conn.fetch(
+                """
+                SELECT stage::text AS stage_name,
+                       type::text  AS ticket_type,
+                       COUNT(*)::int AS cnt
+                FROM tickets
+                GROUP BY stage, type
+                ORDER BY stage, type
+                """
+            )
+            return [
+                {"stage": r["stage_name"], "type": r["ticket_type"], "count": r["cnt"]}
+                for r in rows
+            ]
+
     async def list_tickets(
         self,
         *,
