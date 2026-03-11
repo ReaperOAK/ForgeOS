@@ -4,7 +4,7 @@
   "description": "Implement the initial data import that reads all existing `.github/tickets/*.json` files and `.github/ticket-state/` directory structure and imports them into PostgreSQL. Transform the JSON ticket format to the database schema (mapping fields, resolving stage from directory location, importing history arrays as event records). Handle edge cases: duplicate tickets in multiple state directories, tickets with expired leases, tickets in REWORK state. This is the first step of the migration data flow.",
   "type": "backend",
   "priority": "critical",
-  "stage": "READY",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -21,7 +21,9 @@
     "FORGEOS-BE068",
     "FORGEOS-BE002"
   ],
-  "blocked_by": [],
+  "blocked_by": [
+    "FORGEOS-BE068"
+  ],
   "file_paths": [
     "mcp-server/src/migration/importer.py",
     "mcp-server/src/migration/transformers.py"
@@ -64,6 +66,33 @@
       "from_stage": "READY",
       "to_stage": "READY",
       "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-11T03:37:11.607990+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T04:00:00+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "BACKEND",
+      "to_stage": "QA",
+      "details": "BACKEND complete \u2014 importer.py and transformers.py implemented with 70 tests, 99% coverage"
+    },
+    {
+      "timestamp": "2026-03-11T04:00:00+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "BACKEND",
+      "to_stage": "QA",
+      "details": "BACKEND complete"
+    },
+    {
+      "timestamp": "2026-03-11T04:00:00+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "BACKEND",
+      "to_stage": "QA",
+      "details": "BACKEND complete"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",

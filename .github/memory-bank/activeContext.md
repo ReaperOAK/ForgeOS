@@ -4192,3 +4192,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/README.md (State Change Emitter section), CHANGELOG.md (new entry), mcp-server/src/mcp_server/services/ticket_service.py (meta tags), .github/agent-output/Documentation/FORGEOS-BE065.md
 - **Decisions:** Added dedicated reference section in README with event types, quick start, integration guide, payload structure, and design constraints. Classified as Diataxis Reference. Existing inline docstrings in emitter.py verified complete (no changes needed).
 - **Timestamp:** 2026-03-11T04:45:00Z
+
+### [FORGEOS-BE070] — Filesystem-to-Database Data Import
+- **Artifacts:** mcp-server/src/mcp_server/migration/transformers.py, mcp-server/src/mcp_server/migration/importer.py, mcp-server/tests/test_transformers.py, mcp-server/tests/test_importer.py, mcp-server/src/mcp_server/migration/__init__.py
+- **Decisions:** Used Protocol-based DatabaseWriter for DI/testability; frozen dataclasses for value objects; stage resolution picks most advanced when ticket in multiple directories; non-schema JSON fields preserved in metadata JSONB
+- **Timestamp:** 2026-03-11T04:00:00Z
