@@ -4,7 +4,7 @@
   "description": "Implement `POST /api/tickets/:id/advance` and `POST /api/tickets/:id/rework` REST endpoints. These delegate to the same service layer as MCP tools `tickets.advance` (FORGEOS-BE030) and `tickets.rework` (FORGEOS-BE031). Advance accepts completion evidence; rework accepts rejection reason.",
   "type": "backend",
   "priority": "high",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -126,6 +126,13 @@
       "from_stage": "CI",
       "to_stage": "CI",
       "details": "Claimed by ReaperOAK@pop-os via CI Reviewer, lease until 2026-03-11T04:49:13.994957+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T04:27:28.156642+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "details": "CI PASS \u2014 Score 98/100, 0 critical, 0 warnings, 24/24 tests passed"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",

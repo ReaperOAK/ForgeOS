@@ -4,7 +4,7 @@
   "description": "Implement the initial data import that reads all existing `.github/tickets/*.json` files and `.github/ticket-state/` directory structure and imports them into PostgreSQL. Transform the JSON ticket format to the database schema (mapping fields, resolving stage from directory location, importing history arrays as event records). Handle edge cases: duplicate tickets in multiple state directories, tickets with expired leases, tickets in REWORK state. This is the first step of the migration data flow.",
   "type": "backend",
   "priority": "critical",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -143,6 +143,15 @@
       "from_stage": "CI",
       "to_stage": "CI",
       "details": "Claimed by ReaperOAK@pop-os via CI Reviewer, lease until 2026-03-11T04:49:14.103410+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T06:15:00+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "CI PASS \u2014 Quality score 99/100, 0 critical, 0 warnings, 99% coverage on 70 tests"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",
