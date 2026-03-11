@@ -4,7 +4,7 @@
   "description": "Implement `POST /api/tickets/:id/claim` REST endpoint for claiming a specific ticket via the dashboard or external integrations. The endpoint delegates to the same ticket service layer used by the MCP `tickets.claim` tool. Accepts agent_id, machine_id, and operator in the request body.",
   "type": "backend",
   "priority": "high",
-  "stage": "BLOCKED",
+  "stage": "READY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -21,9 +21,7 @@
     "FORGEOS-BE029",
     "FORGEOS-BE034"
   ],
-  "blocked_by": [
-    "FORGEOS-BE034"
-  ],
+  "blocked_by": [],
   "file_paths": [
     "mcp-server/src/api/routes/tickets.py",
     "mcp-server/src/api/schemas.py"
@@ -38,10 +36,10 @@
     "Request body validated with Pydantic schema (ClaimRequest)"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Backend",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-11T01:58:28.184030+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -50,6 +48,22 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase3-ticket-api.md"
+    },
+    {
+      "timestamp": "2026-03-11T01:13:29.658227+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-11T01:28:28.184046+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "READY",
+      "to_stage": "READY",
+      "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-11T01:58:28.184030+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",

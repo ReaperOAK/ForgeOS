@@ -23,8 +23,7 @@
     "FORGEOS-BE034"
   ],
   "blocked_by": [
-    "FORGEOS-BE031",
-    "FORGEOS-BE034"
+    "FORGEOS-BE031"
   ],
   "file_paths": [
     "mcp-server/src/api/routes/tickets.py",
