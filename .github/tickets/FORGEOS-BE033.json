@@ -4,7 +4,7 @@
   "description": "Implement two MCP tools: `tickets.sync` for dependency resolution and `tickets.validate` for integrity checking. `tickets.sync` evaluates all ticket dependencies, releases expired leases (FORGEOS-BE009), and moves newly unblocked tickets to READY. `tickets.validate` performs a full integrity check: every ticket exists in exactly one stage directory equivalent, stage field matches, SDLC flows are valid, and no orphans exist.",
   "type": "backend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",

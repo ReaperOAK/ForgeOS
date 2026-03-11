@@ -1,3 +1,13 @@
+### [FORGEOS-BE033] — Documentation Summary
+- **Artifacts:** mcp-server/src/mcp_server/tools/ticket_tools.py, mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE033.md
+- **Decisions:** Added dedicated README reference section for tickets.sync and tickets.validate with MCP request/response examples, error catalog, and SyncEngine API tables. Updated architecture description to include SyncEngine. Module docstring in ticket_tools.py expanded to list sync/validate schemas and handlers.
+- **Timestamp:** 2026-03-11T01:00:00Z
+
+### [FORGEOS-BE055] — QA Report (Rework #1 Re-Review)
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE055.md
+- **Decisions:** PASS — CWE-862 fix verified. claim_by_id() now calls check_role_stage_authorization(), matching claim_next(). 200 focused tests passed, 2106 full suite passed (2 pre-existing unrelated failures). ruff clean.
+- **Timestamp:** 2026-03-11T00:35:00Z
+
 ### [FORGEOS-BE067] — Documentation Summary
 - **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE067.md
 - **Decisions:** Rewrote Notification Event Queue section to match current API (event_type-based, pool-injected queue). Added Background Notification Processor subsection. Corrected stale field names and backoff formula. Added CHANGELOG entry.
@@ -3652,3 +3662,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** agent-sdk/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE045.md
 - **Decisions:** Added Ticket Operations section to agent-sdk README with working code examples, method reference table, and data models table. CHANGELOG entry added. Inline docstrings in operations.py and models.py already had 100% public API coverage — no source modifications needed.
 - **Timestamp:** 2026-03-11T16:00:00Z
+
+### [FORGEOS-BE032] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, mcp-server/src/mcp_server/tools/ticket_tools.py, .github/agent-output/Documentation/FORGEOS-BE032.md
+- **Decisions:** Expanded Ticket Tools section from 2-tool to 4-tool coverage (next, claim, release, status) with schemas, response shapes, error tables, and dataclass reference.
+- **Timestamp:** 2026-03-11T00:33:00Z
