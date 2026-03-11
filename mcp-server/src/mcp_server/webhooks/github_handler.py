@@ -594,3 +594,39 @@ class CIStatusHandler:
         """Register ``check_run`` and ``status`` event handlers."""
         registry.register("github", "check_run", self.handle_check_run)
         registry.register("github", "status", self.handle_status)
+
+
+# ---------------------------------------------------------------------------
+# Pull Request event handler (FORGEOS-BE063)
+# ---------------------------------------------------------------------------
+
+
+async def handle_pull_request_event(event: WebhookEvent) -> None:
+    """Handle a GitHub ``pull_request`` webhook event.
+
+    Delegates to :class:`PRService` to extract ticket IDs, parse
+    PR metadata, and produce structured :class:`PREvent` objects.
+    Invalid or unrelated PRs (no ticket correlation) are logged
+    and skipped gracefully.
+
+    Parameters
+    ----------
+    event : WebhookEvent
+        A validated webhook event with ``event_type == "pull_request"``.
+    """
+    from mcp_server.services.pr_service import PRService
+
+    service = PRService()
+    results = await service.handle_pr_event(event)
+
+    for pr_event in results:
+        logger.info(
+            "pr_event_dispatched",
+            extra=pr_event.to_dict(),
+        )
+
+
+# Register the pull_request handler in the module-level registry.
+def register_pr_handler(registry: _HandlerRegistry) -> None:
+    """Register the ``pull_request`` event handler."""
+    registry.register("github", "pull_request", handle_pull_request_event)

@@ -3822,3 +3822,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/webhooks/github_handler.py, mcp-server/src/mcp_server/services/webhook_service.py, mcp-server/src/mcp_server/webhooks/__init__.py, mcp-server/tests/test_push_event_handler.py, mcp-server/tests/test_webhook_service.py
 - **Decisions:** Used factory pattern (create_push_handler) with injected sync callback for testability. Added push-specific payload validation (_validate_github_push_payload) since push events lack the action field. Recognized both main and master as main branches.
 - **Timestamp:** 2026-03-11T02:20:00Z
+
+### [FORGEOS-BE063] — Implement PR Event Handler
+- **Artifacts:** mcp-server/src/mcp_server/services/pr_service.py, mcp-server/src/mcp_server/webhooks/github_handler.py, mcp-server/src/mcp_server/webhooks/__init__.py, mcp-server/src/mcp_server/services/__init__.py, mcp-server/tests/test_pr_service.py
+- **Decisions:** Used regex `FORGEOS-[A-Z]+\d+` for ticket ID extraction from PR title+branch. Registered handler eagerly in webhooks __init__.py. PRService is stateless—returns PREvent list for downstream persistence. Merge-to-main detection flags triggers_advancement.
+- **Timestamp:** 2026-03-11T01:20:00Z
