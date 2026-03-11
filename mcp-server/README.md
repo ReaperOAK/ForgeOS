@@ -461,6 +461,7 @@ event = await event_repo.append_event(
 | `create(ticket_id, title, ...)` | `TicketRow` | Insert a new ticket |
 | `update_stage(ticket_id, new_stage, new_status)` | `TicketRow \| None` | Update stage and status |
 | `count_by_stage()` | `dict[str, int]` | Aggregate ticket counts per stage |
+| `count_by_stage_and_type()` | `list[dict]` | Aggregate ticket counts per stage and type combination |
 
 ### ClaimRepository Methods
 
@@ -1303,7 +1304,7 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/db/`** — asyncpg connection pool, health monitoring, and pool metrics
 - **`mcp_server/observability/`** — Structured JSON logging, correlation IDs, PII redaction, and health/readiness probes
 - **`mcp_server/auth/`** — Agent API key authentication, machine registration and verification, rate limiting, and identity resolution
-- **`mcp_server/api/`** — REST API routes and Pydantic schemas (`GET /api/tickets` ticket list endpoint)
+- **`mcp_server/api/`** — REST API routes and Pydantic schemas (`GET /api/tickets` list, `GET /api/tickets/{id}` detail, `GET /api/tickets/{id}/history` audit history, `POST/DELETE /api/tickets/{id}/claim`)
 - **`mcp_server/services/`** — Business logic orchestration (TicketService, SyncEngine, MachineService, WebhookService)
 - **`mcp_server/middleware/`** — Unified auth middleware (MCP + REST), per-agent rate limiting, correlation ID tracking
 - **`mcp_server/tools/`** — Dynamic tool registration, schema validation, ticket tools (`tickets.next`, `tickets.claim`, `tickets.release`, `tickets.status`, `tickets.advance`, `tickets.rework`, `tickets.sync`, `tickets.validate`), and FastMCP bridge
@@ -1364,6 +1365,10 @@ POST that returns a JSON response — no server-side session state required.
 | `/mcp` | POST | MCP JSON-RPC request endpoint |
 | `/mcp/health` | GET | Transport health check |
 | `/api/tickets` | GET | Paginated ticket list with filtering |
+| `/api/tickets/{id}` | GET | Full ticket detail with resolved dependencies |
+| `/api/tickets/{id}/history` | GET | Chronological event audit log for a ticket |
+| `/api/tickets/{id}/claim` | POST | Claim a ticket |
+| `/api/tickets/{id}/claim` | DELETE | Release a claim |
 | `/api/admin/audit` | GET | Audit log query endpoint |
 
 **Usage:**
@@ -1425,6 +1430,297 @@ python -m mcp_server
 | `HTTPTransportConfig` | `transport.http` | Pydantic config for HTTP transport |
 | `SSETransport` | `transport.sse` | SSE transport class |
 | `SSETransportConfig` | `transport.sse` | Pydantic config for SSE transport |
+
+
+## Pipeline Overview REST Endpoint
+
+<!-- last_reviewed: 2026-03-11T23:59:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `GET /api/pipeline` endpoint returns an aggregated view of ticket counts
+per SDLC stage. Suitable for Kanban-style dashboards and pipeline monitoring.
+
+### Request
+
+```http
+GET /api/pipeline
+GET /api/pipeline?group_by=type
+```
+
+#### Query Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `group_by` | `string` | *(none)* | Set to `type` to include per-type breakdowns within each stage |
+
+### Response
+
+Returns `200 OK` with a JSON body containing `stages`, `total`, and an optional
+`group_by_type` array:
+
+```json
+{
+  "stages": [
+    { "stage": "BACKEND", "count": 4 },
+    { "stage": "DONE", "count": 12 },
+    { "stage": "QA", "count": 2 },
+    { "stage": "READY", "count": 5 }
+  ],
+  "total": 23,
+  "group_by_type": null
+}
+```
+
+With `?group_by=type`:
+
+```json
+{
+  "stages": [ ... ],
+  "total": 23,
+  "group_by_type": [
+    { "stage": "BACKEND", "type": "backend", "count": 3 },
+    { "stage": "BACKEND", "type": "fullstack", "count": 1 }
+  ]
+}
+```
+
+### Error Responses
+
+| Status | Condition | Body |
+|--------|-----------|------|
+| `503` | Database unavailable | `{"error": "Database unavailable"}` |
+| `500` | Unexpected query failure | `{"error": "Internal server error"}` |
+
+### Pydantic Schemas
+
+Defined in `mcp_server.api.schemas`:
+
+| Model | Description |
+|-------|-------------|
+| `StageCount` | Stage name and ticket count |
+| `StageTypeCount` | Stage, type, and count triplet |
+| `PipelineResponse` | Top-level response with `stages`, `total`, and optional `group_by_type` |
+
+### Route Mounting
+
+The endpoint uses the same factory pattern as the ticket list endpoint.
+`create_pipeline_endpoint()` accepts a repo getter for late binding.
+
+```python
+from mcp_server.api.routes import create_pipeline_endpoint
+
+pipeline_handler = create_pipeline_endpoint(_get_ticket_repo)
+Route("/api/pipeline", pipeline_handler, methods=["GET"])
+```
+
+
+## Health Check REST Endpoint
+
+<!-- last_reviewed: 2026-03-11T23:59:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `GET /api/health` endpoint returns server health status with component-level
+checks. Returns `200` when healthy, `503` when degraded or unhealthy.
+
+### Request
+
+```http
+GET /api/health
+```
+
+No query parameters. No authentication required.
+
+### Response
+
+Returns `200 OK` when all components are healthy:
+
+```json
+{
+  "status": "healthy",
+  "version": "0.1.0",
+  "uptime_seconds": 3621.5,
+  "response_time_ms": 2.145,
+  "components": [
+    {
+   Ticket Claim REST Endpoint
+
+<!-- last_reviewed: 2026-03-11T04:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The ticket claim endpoint allows agents and integrations to claim and release
+tickets via the REST API. It delegates to the same `TicketService` used by the
+MCP `tickets.claim` tool.
+
+### Claim a Ticket
+
+```http
+POST /api/tickets/{ticket_id}/claim
+Content-Type: application/json
+
+{
+  "agent_id": "Backend",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_duration_minutes": 30
+}
+```
+
+#### Request Body
+
+| Field | Type | Required | Default | Description |
+|-------|------|----------|---------|-------------|
+| `agent_id` | `string` | Yes | — | Agent role claiming the ticket |
+| `machine_id` | `string` | Yes | — | Machine identifier |
+| `operator` | `string` | Yes | — | Human operator name |
+| `lease_duration_minutes` | `int` | No | `30` | Lease duration in minutes |
+
+#### Success Response
+
+Returns `200 OK` with the claimed ticket summary:
+
+```json
+{
+  "ticket_id": "FORGEOS-BE036",
+  "title": "Implement Ticket Claim REST Endpoint",
+  "type": "backend",
+  "stage": "BACKEND",
+  "file_paths": ["mcp-server/src/mcp_server/api/routes/tickets.py"],
+  "acceptance_criteria": ["POST /api/tickets/:id/claim accepts agent_id..."]
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Body |
+|--------|-----------|------|
+| `400` | Invalid or missing JSON body | `{"error": "Invalid or missing JSON body"}` |
+| `400` | Pydantic validation failure | `{"error": "<validation details>"}` |
+| `400` | Ticket not in a claimable stage | `{"error": "<details>"}` |
+| `404` | Ticket not found | `{"error": "Ticket 'ID' not found"}` |
+| `409` | Ticket already claimed | `{"error": "<conflict details>"}` |
+| `503` | Database or service unavailable | `{"error": "Service unavailable"}` |
+
+### Release a Claim
+
+```http
+DELETE /api/tickets/{ticket_id}/claim?agent_id=Backend&reason=manual+release
+```
+
+#### Query Parameters
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `agent_id` | `string` | Yes | Agent releasing the claim (must match current holder) |
+| `reason` | `string` | No | Reason for releasing the claim |
+
+#### Success Response
+
+Returns `200 OK` with release details:
+
+```json
+{
+  "ticket_id": "FORGEOS-BE036",
+  "previous_stage": "BACKEND",
+  "released_by": "Backend",
+  "reason": "manual release"
+}
+```
+
+#### Error Responses
+
+| Status | Condition | Body |
+|--------|-----------|------|
+| `400` | Missing `agent_id` query parameter | `{"error": "Query parameter 'agent_id' is required"}` |
+| `404` | Ticket not found | `{"error": "Ticket 'ID' not found"}` |
+| `409` | Agent does not hold the claim | `{"error": "<ownership mismatch details>"}` |
+| `503` | Service unavailable | `{"error": "Service unavailable"}` |
+
+### Pydantic Schemas
+
+Defined in `mcp_server.api.schemas`:
+
+| Model | Description |
+|-------|-------------|
+| `ClaimRequest` | Request body with `agent_id`, `machine_id`, `operator`, `lease_duration_minutes` |
+| `ClaimResponse` | Success response with `ticket_id`, `title`, `type`, `stage`, `file_paths`, `acceptance_criteria` |
+| `ReleaseResponse` | Release response with `ticket_id`, `previous_stage`, `released_by`, `reason` |
+
+### Route Mounting
+
+The endpoint is mounted via `create_claim_endpoint()` factory, which accepts
+`ticket_service_getter` and `ticket_repo_getter` callables for late binding:
+
+```python
+from mcp_server.api.routes import create_claim_endpoint
+
+claim_handler = create_claim_endpoint(_get_ticket_service, _get_ticket_repo)
+Route("/api/tickets/{ticket_id}/claim", claim_handler, methods=["POST", "DELETE"])
+```
+
+### Design Decisions
+
+- **Shared service layer** — the REST endpoint delegates to the same
+  `TicketService.claim_by_id()` and `TicketService.release_ticket()` methods
+  used by the MCP tools, ensuring consistent behavior.
+- **Factory pattern** — `create_claim_endpoint()` accepts service and repo
+  getters, keeping the route handler free of global state.
+- **Method dispatch** — a single route handler dispatches `POST` to
+  `_handle_claim` and `DELETE` to `_handle_release`, co-locating related
+  operations.
+
+
+##    "name": "database",
+      "status": "healthy",
+      "details": {
+        "pool": { "size": 10, "free": 8, "used": 2 }
+      }
+    }
+  ]
+}
+```
+
+### Error Responses
+
+| Status | Condition | Body |
+|--------|-----------|------|
+| `503` | Health checker not configured | `{"status": "degraded", "components": [{"name": "health_checker", "status": "not_configured"}], ...}` |
+| `503` | Health check raised an exception | `{"status": "unhealthy", "components": [{"name": "health_checker", "status": "error", ...}], ...}` |
+| `503` | Database unhealthy | `{"status": "unhealthy", "components": [{"name": "database", "status": "unhealthy", ...}], ...}` |
+
+All `503` responses include the full `HealthResponse` schema so clients can
+inspect component-level details.
+
+### Pydantic Schemas
+
+Defined in `mcp_server.api.schemas`:
+
+| Model | Description |
+|-------|-------------|
+| `ComponentHealth` | Component name, status, and optional details dict |
+| `HealthResponse` | Top-level response with status, version, uptime, response time, and components |
+
+### Route Mounting
+
+```python
+from mcp_server.api.routes import create_health_endpoint
+
+health_handler = create_health_endpoint(_get_health_checker)
+Route("/api/health", health_handler, methods=["GET"])
+```
+
+### Design Decisions
+
+- **Component-level granularity** — each infrastructure dependency reports its
+  own status. Clients can identify which component is degraded.
+- **Response timing** — `response_time_ms` measures wall clock time from
+  request start to response serialization.
+- **Three health states** — `healthy` (all good), `degraded` (checker
+  unavailable), `unhealthy` (check failed or database down).
+- **Factory pattern** — `create_health_endpoint()` accepts a health checker
+  getter for late binding and testability.
 
 
 ## Ticket List REST Endpoint
@@ -1538,6 +1834,290 @@ Route("/api/tickets", tickets_handler, methods=["GET"])
   descriptive `400` before the query reaches the database.
 - **Factory pattern** (`create_tickets_endpoint`) accepts a repo getter,
   enabling late binding and testability without global state.
+
+
+## Ticket Detail REST Endpoint
+
+<!-- last_reviewed: 2026-03-11T03:40:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+`GET /api/tickets/{ticket_id}` returns a single ticket with full metadata,
+current claim info, acceptance criteria, and resolved dependency status.
+
+### Request
+
+```http
+GET /api/tickets/FORGEOS-BE035
+```
+
+### Response
+
+Returns `200 OK` with a `TicketDetailResponse` body:
+
+```json
+{
+  "ticket_id": "FORGEOS-BE035",
+  "title": "Implement Ticket Detail and History Endpoints",
+  "description": "Implement GET /api/tickets/:id for ticket detail...",
+  "type": "backend",
+  "priority": "high",
+  "stage": "DONE",
+  "status": "completed",
+  "sdlc_flow": ["READY", "BACKEND", "QA", "SECURITY", "CI", "DOCS", "VALIDATION", "DONE"],
+  "claimed_by_name": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "depends_on": ["FORGEOS-BE034", "FORGEOS-BE012"],
+  "resolved_dependencies": [
+    {
+      "ticket_id": "FORGEOS-BE034",
+      "title": "Implement Ticket List REST Endpoint",
+      "stage": "DONE",
+      "is_done": true
+    },
+    {
+      "ticket_id": "FORGEOS-BE012",
+      "title": "Event Sourcing Store",
+      "stage": "DONE",
+      "is_done": true
+    }
+  ],
+  "file_paths": ["mcp-server/src/api/routes/tickets.py", "mcp-server/src/api/schemas.py"],
+  "acceptance_criteria": ["GET /api/tickets/:id returns full ticket detail..."],
+  "tags": [],
+  "rework_count": 0,
+  "source_task_file": null,
+  "created_at": "2026-03-05T18:06:45Z",
+  "updated_at": "2026-03-11T01:30:00Z",
+  "completed_at": null
+}
+```
+
+The `resolved_dependencies` array resolves each entry in `depends_on` to its
+current title, stage, and completion status. If a dependency ticket is missing
+from the database, only `ticket_id` is returned with `null` title/stage and
+`is_done: false`.
+
+### Error Responses
+
+| Status | Condition | Body |
+|--------|-----------|------|
+| `404` | Ticket ID not found | `{"error": "Ticket 'BOGUS-ID' not found"}` |
+| `503` | Database pool unavailable | `{"error": "Database unavailable"}` |
+| `500` | Unexpected query failure | `{"error": "Internal server error"}` |
+
+### Pydantic Schemas
+
+| Model | Description |
+|-------|-------------|
+| `DependencyInfo` | Resolved dependency with `ticket_id`, `title`, `stage`, `is_done` |
+| `TicketDetailResponse` | Full ticket detail with 22 fields including resolved dependencies |
+
+
+## Ticket History REST Endpoint
+
+<!-- last_reviewed: 2026-03-11T03:40:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+`GET /api/tickets/{ticket_id}/history` returns the chronological event audit
+log for a ticket from the event sourcing store.
+
+### Request
+
+```http
+GET /api/tickets/FORGEOS-BE035/history?limit=20&offset=0
+```
+
+#### Query Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `limit` | `int` | `50` | Maximum events to return (capped at 200) |
+| `offset` | `int` | `0` | Number of events to skip for pagination |
+
+### Response
+
+Returns `200 OK` with a `HistoryListResponse` body:
+
+```json
+{
+  "ticket_id": "FORGEOS-BE035",
+  "events": [
+    {
+      "event_type": "CREATED",
+      "agent_id": "TODO",
+      "machine_id": "system",
+      "timestamp": "2026-03-05T18:06:45Z",
+      "previous_stage": null,
+      "new_stage": "READY",
+      "payload": {},
+      "sequence_number": 1,
+      "aggregate_version": 1
+    },
+    {
+      "event_type": "CLAIMED",
+      "agent_id": "Backend",
+      "machine_id": "pop-os",
+      "timestamp": "2026-03-11T01:28:28Z",
+      "previous_stage": "READY",
+      "new_stage": "BACKEND",
+      "payload": {"operator": "ReaperOAK"},
+      "sequence_number": 2,
+      "aggregate_version": 2
+    }
+  ],
+  "pagination": {
+    "total": 2,
+    "limit": 20,
+    "offset": 0
+  }
+}
+```
+
+The endpoint verifies the ticket exists before querying the event store. Events
+are loaded via `EventStore.replay_ticket_events()` and paginated in memory.
+
+### Error Responses
+
+| Status | Condition | Body |
+|--------|-----------|------|
+| `404` | Ticket ID not found | `{"error": "Ticket 'BOGUS-ID' not found"}` |
+| `503` | Database or event store unavailable | `{"error": "Database unavailable"}` or `{"error": "Event store unavailable"}` |
+| `500` | Unexpected query failure | `{"error": "Internal server error"}` |
+
+### Pydantic Schemas
+
+| Model | Description |
+|-------|-------------|
+| `HistoryEntry` | Single event with `event_type`, `agent_id`, `machine_id`, `timestamp`, stage info, `payload`, and sequence metadata |
+| `HistoryListResponse` | Response with `ticket_id`, `events` array, and `PaginationMeta` |
+
+### Design Decisions
+
+- **Existence check first** — the endpoint confirms the ticket exists before
+  querying the event store, providing a clear `404` for unknown ticket IDs.
+- **Event store separation** — history data comes from the append-only event
+  store (FORGEOS-BE012), not the tickets table, preserving the event sourcing
+  pattern.
+- **Factory pattern** — `create_ticket_history_endpoint` accepts both
+  ticket repo and event store getters for late binding and testability.
+
+
+## WebSocket Ticket State Streaming
+
+<!-- last_reviewed: 2026-03-11T03:30:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.api.routes.websocket` module provides a WebSocket endpoint at
+`/ws/tickets` that streams ticket state change events to connected clients in
+real time. An `EventBroadcaster` service manages client connections, optional
+filtering, and heartbeat pings.
+
+### How It Works
+
+1. A client opens a WebSocket connection to `/ws/tickets`.
+2. Optional query parameters narrow which events the client receives.
+3. The `EventBroadcaster` registers the client and applies its filter.
+4. When a ticket state change occurs, `EventBroadcaster.publish()` serializes
+   the event and delivers it to every matching client.
+5. A background ping loop detects stale connections and removes them.
+6. On disconnect, the client is automatically unregistered.
+
+### Query Parameters
+
+| Parameter | Format | Description |
+|---|---|---|
+| `ticket_ids` | Comma-separated IDs | Only receive events for these tickets (e.g. `FORGEOS-BE039,FORGEOS-BE040`) |
+| `stages` | Comma-separated stages | Only receive events involving these SDLC stages (e.g. `BACKEND,QA`) |
+
+When no parameters are provided, the client receives all events.
+
+### Event Message Format
+
+Each message is a JSON object:
+
+```json
+{
+  "ticket_id": "FORGEOS-BE039",
+  "event_type": "ticket.claimed",
+  "old_stage": "READY",
+  "new_stage": "BACKEND",
+  "timestamp": "2026-03-11T01:28:28Z",
+  "payload": {
+    "agent_id": "Backend",
+    "machine_id": "pop-os"
+  }
+}
+```
+
+| Field | Type | Description |
+|---|---|---|
+| `ticket_id` | `string` | The ticket identifier |
+| `event_type` | `string` | State change type (e.g. `ticket.claimed`, `ticket.advanced`) |
+| `old_stage` | `string` | SDLC stage before the change |
+| `new_stage` | `string` | SDLC stage after the change |
+| `timestamp` | `string` | ISO 8601 timestamp |
+| `payload` | `object` | Additional event data (agent, reason, etc.) |
+
+### Connection Example
+
+```python
+import asyncio
+import websockets
+
+async def stream_tickets():
+    uri = "ws://localhost:8080/ws/tickets?stages=BACKEND,QA"
+    async with websockets.connect(uri) as ws:
+        async for message in ws:
+            print(message)
+
+asyncio.run(stream_tickets())
+```
+
+### API Reference
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `create_websocket_endpoint` | function | Factory that returns a Starlette WebSocket handler |
+| `EventBroadcaster` | class | Manages client registry, filtering, and fan-out delivery |
+| `TicketEvent` | frozen dataclass | Immutable ticket state change event with JSON serialization |
+| `ClientFilter` | frozen dataclass | Per-client filter criteria (ticket IDs and/or stages) |
+| `WebSocketLike` | protocol | Minimal interface for WebSocket-like objects (testing) |
+| `matches_filter` | function | Checks whether an event passes a client's filter |
+
+#### EventBroadcaster Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `register(ws, filter)` | `None` | Add a WebSocket client to the broadcast list |
+| `unregister(ws)` | `None` | Remove a client (safe to call if not registered) |
+| `publish(event)` | `int` | Broadcast an event; returns number of clients delivered to |
+| `start()` | `None` | Start the background heartbeat ping loop |
+| `stop()` | `None` | Stop the ping loop and clear all clients |
+| `client_count` | `int` | Property — number of connected clients |
+
+#### EventBroadcaster Constructor
+
+| Parameter | Default | Description |
+|---|---|---|
+| `ping_interval` | `30.0` | Seconds between heartbeat pings |
+
+### Design Decisions
+
+- **Filter-at-client** — Each client carries its own `ClientFilter`, so a
+  single broadcaster serves all clients without per-topic fan-out queues.
+- **Heartbeat via ping bytes** — The broadcaster sends `b"ping"` frames on a
+  configurable interval (default 30 s) to detect stale connections. Failed
+  pings remove the client immediately.
+- **Factory pattern** — `create_websocket_endpoint()` accepts a broadcaster
+  getter for deferred wiring, matching the project's dependency injection
+  conventions.
+- **Protocol-based testing** — `WebSocketLike` protocol allows test doubles
+  without importing Starlette WebSocket internals.
 
 
 ## Webhook Receiver
@@ -4047,7 +4627,128 @@ await queue.mark_failed(note.id, "Connection refused")
 | `enqueue(event_type, payload, *, max_retries)` | `str` | Insert a notification (status: `pending`) |
 | `dequeue()` | `Notification \| None` | Atomically claim next eligible notification |
 | `mark_delivered(notification_id)` | `Notification` | Transition `processing → delivered` |
-| `mark_failed(notification_id, error_message)` | `Notification` | Retry or dead-letter based on retry count |
+| `State Change Emitter
+
+<!-- last_reviewed: 2026-03-11T04:45:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.notifications.emitter` module provides a fire-and-forget
+emitter that converts ticket lifecycle transitions into notification queue
+entries. Inject `StateChangeEmitter` into `TicketService` to emit events
+automatically on claim, advance, release, and rework operations.
+
+### Event Types
+
+| Enum Value | String | Trigger |
+|------------|--------|---------|
+| `EventType.TICKET_CLAIMED` | `ticket.claimed` | Agent claims a ticket |
+| `EventType.TICKET_ADVANCED` | `ticket.advanced` | Ticket moves to its next SDLC stage |
+| `EventType.TICKET_RELEASED` | `ticket.released` | Claim is released (ticket returns to READY) |
+| `EventType.TICKET_REWORKED` | `ticket.reworked` | Ticket is rejected and sent back for rework |
+
+### Quick Start
+
+```python
+from mcp_server.notifications import NotificationQueue, StateChangeEmitter
+
+queue = NotificationQueue(pool)
+emitter = StateChangeEmitter(queue=queue)
+
+# Emit a claim event
+await emitter.emit_claimed(
+    ticket_id="FORGEOS-BE065",
+    stage="BACKEND",
+    agent_id="backend",
+    machine_id="pop-os",
+    operator="ReaperOAK",
+)
+
+# Emit an advance event
+await emitter.emit_advanced(
+    ticket_id="FORGEOS-BE065",
+    old_stage="BACKEND",
+    new_stage="QA",
+    agent_id="backend",
+    evidence={"tests_passed": 42, "coverage": 100},
+)
+```
+
+### Integration with TicketService
+
+Pass a `StateChangeEmitter` instance to the `TicketService` constructor.
+The service calls the emitter after each successful state transition.
+If the emitter is `None`, notifications are silently skipped.
+
+```python
+from mcp_server.services.ticket_service import TicketService
+
+service = TicketService(
+    claim_queue=queue,
+    pool=pool,
+    emitter=emitter,  # optional — pass None to disable
+)
+```
+
+The emitter is called at these points in `TicketService`:
+
+| Method | Emitter Call |
+|--------|--------------|
+| `claim_next()` | `emit_claimed()` |
+| `claim_by_id()` | `emit_claimed()` |
+| `release_ticket()` | `emit_released()` |
+| `advance_ticket()` | `emit_advanced()` |
+| `rework_ticket()` | `emit_reworked()` |
+
+### StateChangeEmitter Methods
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `emit_claimed(ticket_id, stage, agent_id, machine_id, operator)` | All keyword-only | Enqueue a `ticket.claimed` event |
+| `emit_advanced(ticket_id, old_stage, new_stage, agent_id, evidence)` | `evidence` optional | Enqueue a `ticket.advanced` event |
+| `emit_released(ticket_id, stage, agent_id, reason)` | `reason` optional | Enqueue a `ticket.released` event |
+| `emit_reworked(ticket_id, old_stage, new_stage, agent_id, reason)` | All required | Enqueue a `ticket.reworked` event |
+
+### Payload Structure
+
+All events produce a JSON payload with these common fields:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `ticket_id` | `str` | The affected ticket identifier |
+| `old_stage` | `str` | Stage before the transition |
+| `new_stage` | `str` | Stage after the transition |
+| `agent_id` | `str` | Agent that triggered the event |
+| `timestamp` | `str` | ISO 8601 UTC timestamp |
+
+Additional fields vary by event type:
+
+| Event | Extra Fields |
+|-------|--------------|
+| `ticket.claimed` | `machine_id`, `operator` |
+| `ticket.advanced` | `evidence` (optional dict) |
+| `ticket.released` | `reason` |
+| `ticket.reworked` | `reason` |
+
+### Error Handling
+
+All `emit_*` methods are fire-and-forget. Exceptions from
+`NotificationQueue.enqueue()` are caught, logged via structured logging,
+and swallowed. A notification failure never blocks a ticket state transition.
+
+### Design Constraints
+
+- **Fire-and-forget** — emitter exceptions never propagate to callers.
+- **Optional injection** — `TicketService` works without an emitter (pass `None`).
+- **TYPE_CHECKING guard** — `StateChangeEmitter` is imported behind
+  `TYPE_CHECKING` in `ticket_service.py` to avoid circular imports.
+- **No retry logic** — the emitter delegates retries to the notification
+  queue and processor layers.
+- **Keyword-only constructors** — `StateChangeEmitter(queue=...)` prevents
+  positional argument errors.
+
+
+## mark_failed(notification_id, error_message)` | `Notification` | Retry or dead-letter based on retry count |
 | `get_by_id(notification_id)` | `Notification \| None` | Retrieve a single notification by UUID |
 | `get_dead_letters(*, limit)` | `list[Notification]` | List dead-lettered notifications |
 | `replay_dead_letter(notification_id)` | `Notification` | Reset a dead-letter to `pending` for redelivery |
