@@ -10,7 +10,7 @@ Every resolution is recorded in a structured audit log accessible via
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
 from enum import Enum
 from typing import Any
