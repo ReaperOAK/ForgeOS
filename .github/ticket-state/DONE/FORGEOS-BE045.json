@@ -4,7 +4,7 @@
   "description": "Implement the high-level Python API that agents use for ticket operations. Create methods: `claim_next(role)`, `claim(ticket_id)`, `advance(ticket_id, evidence)`, `rework(ticket_id, reason)`, `release(ticket_id)`, `get_ticket(ticket_id)`, and `heartbeat(ticket_id)`. Each method calls the corresponding MCP tool via the client connection. Define Pydantic models for Ticket, Claim, and operation responses.",
   "type": "backend",
   "priority": "critical",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -37,10 +37,10 @@
     "Pydantic models define Ticket, Claim, OperationResult with proper field types"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T00:44:00.104906+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "completed_at": "2026-03-10T22:38:21+00:00",
   "artifacts": [
@@ -216,6 +216,15 @@
       "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
       "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-11T00:44:00.104906+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T00:21:10.133505+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-agent-sdk.md",
