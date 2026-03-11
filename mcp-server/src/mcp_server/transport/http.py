@@ -161,7 +161,13 @@ class HTTPTransport:
 
         # Build composite app with health route + MCP transport + admin API
         from mcp_server.api import create_audit_endpoint
-        from mcp_server.api.routes import create_tickets_endpoint
+        from mcp_server.api.routes import (
+            create_health_endpoint,
+            create_pipeline_endpoint,
+            create_ticket_detail_endpoint,
+            create_ticket_history_endpoint,
+            create_tickets_endpoint,
+        )
 
         # Audit repo getter — deferred to account for late binding
         _audit_repo_ref: list[Any] = [None]
@@ -177,12 +183,37 @@ class HTTPTransport:
         def _get_ticket_repo() -> Any:
             return _ticket_repo_ref[0]
 
+        # Event store getter — deferred to account for late binding
+        _event_store_ref: list[Any] = [None]
+
+        def _get_event_store() -> Any:
+            return _event_store_ref[0]
+
         tickets_handler = create_tickets_endpoint(_get_ticket_repo)
+        ticket_detail_handler = create_ticket_detail_endpoint(_get_ticket_repo)
+        ticket_history_handler = create_ticket_history_endpoint(
+            _get_ticket_repo, _get_event_store
+        )
+
+        # Pipeline endpoint — public, no auth
+        pipeline_handler = create_pipeline_endpoint(_get_ticket_repo)
+
+        # Health API endpoint — public, no auth
+        _health_checker_ref: list[Any] = [None]
+
+        def _get_health_checker() -> Any:
+            return _health_checker_ref[0]
+
+        health_api_handler = create_health_endpoint(_get_health_checker)
 
         routes: list[Route | Mount] = [
             Route("/health", health_endpoint, methods=["GET"]),
+            Route("/api/health", health_api_handler, methods=["GET"]),
+            Route("/api/pipeline", pipeline_handler, methods=["GET"]),
             Route("/api/admin/audit", audit_handler, methods=["GET"]),
             Route("/api/tickets", tickets_handler, methods=["GET"]),
+            Route("/api/tickets/{ticket_id}", ticket_detail_handler, methods=["GET"]),
+            Route("/api/tickets/{ticket_id}/history", ticket_history_handler, methods=["GET"]),
             Mount(config.mount_path, app=http_starlette_app),
         ]
 
@@ -191,6 +222,8 @@ class HTTPTransport:
         # Store the audit repo ref on the app for late binding by lifespan
         app.state.audit_repo_ref = _audit_repo_ref  # type: ignore[attr-defined]
         app.state.ticket_repo_ref = _ticket_repo_ref  # type: ignore[attr-defined]
+        app.state.event_store_ref = _event_store_ref  # type: ignore[attr-defined]
+        app.state.health_checker_ref = _health_checker_ref  # type: ignore[attr-defined]
         logger.info(
             "HTTP transport app created: mount_path=%s stateless=%s",
             config.mount_path,
