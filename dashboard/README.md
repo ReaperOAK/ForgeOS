@@ -51,7 +51,7 @@ dashboard/
     │   ├── layout.tsx         # Root layout with ThemeProvider
     │   ├── page.tsx           # Dashboard overview (metric cards)
     │   └── health/
-    │       └── page.tsx       # Health check page (API connectivity)
+    │       └── page.tsx       # System health dashboard (4 panels, 30s auto-refresh)
     ├── components/            # React components
     │   ├── Breadcrumb.tsx     # Breadcrumb navigation
     │   ├── DashboardShell.tsx # Shell layout (sidebar + top bar + content)
@@ -60,7 +60,11 @@ dashboard/
     │   ├── MobileSidebar.tsx  # Mobile modal sidebar
     │   ├── Sidebar.tsx        # Desktop collapsible sidebar
     │   ├── ThemeToggle.tsx    # Dark/light theme toggle
-    │   └── TopBar.tsx         # Top bar with breadcrumbs and menu
+    │   ├── TopBar.tsx         # Top bar with breadcrumbs and menu
+    │   └── health/            # Health dashboard components
+    │       ├── HealthPanel.tsx      # Panel container with status + badge
+    │       ├── MetricCard.tsx       # Metric value with trend and severity
+    │       └── StatusIndicator.tsx  # Green/yellow/red status dot
     ├── lib/                   # Shared utilities
     │   ├── api-client.ts      # REST API client with timeout
     │   ├── theme.tsx          # ThemeProvider context + localStorage
@@ -124,6 +128,35 @@ endpoint URL, response time, and last check timestamp.
 
 Renders a sun/moon toggle button that switches between dark and light
 themes via the `useTheme()` hook.
+
+### Health Dashboard (`/health`)
+
+The system health page displays four panels sourced from the
+`/api/health` endpoint. Data auto-refreshes every 30 seconds.
+
+| Panel | Metrics |
+|-------|---------|
+| **Database** | Connection pool utilization, P50 / P99 latency |
+| **MCP Server** | Uptime, connected agents, requests/min |
+| **Webhooks** | Success rate, pending queue, failed deliveries |
+| **Alerts** | Recent warnings in chronological order |
+
+#### StatusIndicator
+
+Colored dot that maps a `StatusLevel` (`healthy`, `degraded`,
+`critical`, `unknown`) to green, yellow, red, or grey. Supports
+a pulse animation for critical status.
+
+#### MetricCard (health)
+
+Card showing a labeled value with optional unit, trend arrow
+(up / down / flat), and severity border (normal / warning / critical).
+Renders a skeleton placeholder while loading.
+
+#### HealthPanel
+
+Section container with a header (title, status dot, alert badge)
+and a body slot for child metric cards.
 
 ## API Client
 

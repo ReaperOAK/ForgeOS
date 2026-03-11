@@ -1,14 +1,24 @@
 'use client';
 
+/** Direction of a metric's recent change. */
 export type TrendDirection = 'up' | 'down' | 'flat';
+
+/** Visual severity level applied to a metric value. */
 export type Severity = 'normal' | 'warning' | 'critical';
 
+/** Props for {@link MetricCard}. */
 interface MetricCardProps {
+  /** Human-readable metric name shown above the value. */
   label: string;
+  /** Current numeric or string value to display. */
   value: string | number;
+  /** Optional unit suffix (e.g. "ms", "%"). */
   unit?: string;
+  /** Trend arrow with direction and descriptive text (e.g. "+12%"). */
   trend?: { direction: TrendDirection; value: string };
+  /** Applies a colored left border and tints the value text. */
   severity?: Severity;
+  /** Renders a skeleton placeholder when `true`. */
   loading?: boolean;
 }
 
@@ -36,6 +46,19 @@ const trendColor: Record<TrendDirection, string> = {
   flat: 'text-muted',
 };
 
+/**
+ * Displays a single metric with its label, value, optional unit,
+ * trend indicator, and severity styling.
+ *
+ * Shows a skeleton loader when `loading` is `true`. Uses
+ * `role="status"` for accessibility.
+ *
+ * @example
+ * ```tsx
+ * <MetricCard label="P99 Latency" value={42} unit="ms" />
+ * <MetricCard label="Failures" value={3} severity="warning" />
+ * ```
+ */
 export function MetricCard({
   label,
   value,

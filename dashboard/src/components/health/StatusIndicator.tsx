@@ -1,11 +1,17 @@
 'use client';
 
+/** Traffic-light status level for system health indicators. */
 export type StatusLevel = 'healthy' | 'degraded' | 'critical' | 'unknown';
 
+/** Props for {@link StatusIndicator}. */
 interface StatusIndicatorProps {
+  /** Current health status — drives the dot color. */
   status: StatusLevel;
+  /** Override the default human-readable label (e.g. "Healthy"). */
   label?: string;
+  /** Dot diameter: `sm` (6 px), `md` (8 px), or `lg` (12 px). */
   size?: 'sm' | 'md' | 'lg';
+  /** Adds a pulse-ring animation when `status` is `critical`. */
   pulse?: boolean;
 }
 
@@ -29,6 +35,19 @@ const textMap: Record<StatusLevel, string> = {
   unknown: 'Unknown',
 };
 
+/**
+ * Colored dot with an optional label indicating system health.
+ *
+ * Renders green (healthy), yellow (degraded), red (critical), or
+ * grey (unknown). Includes `role="status"` and `aria-live="polite"`
+ * for assistive technology.
+ *
+ * @example
+ * ```tsx
+ * <StatusIndicator status="healthy" size="sm" />
+ * <StatusIndicator status="critical" pulse />
+ * ```
+ */
 export function StatusIndicator({
   status,
   label,

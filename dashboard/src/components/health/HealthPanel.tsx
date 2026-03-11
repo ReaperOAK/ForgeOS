@@ -3,13 +3,31 @@
 import type { ReactNode } from 'react';
 import { StatusIndicator, type StatusLevel } from './StatusIndicator';
 
+/** Props for {@link HealthPanel}. */
 interface HealthPanelProps {
+  /** Panel heading displayed in the header bar. */
   title: string;
+  /** Optional health status indicator rendered beside the title. */
   status?: StatusLevel;
+  /** Optional alert badge rendered on the right side of the header. */
   badge?: { count: number };
+  /** Panel body content — typically {@link MetricCard} components. */
   children: ReactNode;
 }
 
+/**
+ * Card container for a group of health metrics.
+ *
+ * Renders a bordered section with a header (title, status dot, badge)
+ * and a body slot for child metric cards.
+ *
+ * @example
+ * ```tsx
+ * <HealthPanel title="Database" status="healthy">
+ *   <MetricCard label="Pool" value="5/20" />
+ * </HealthPanel>
+ * ```
+ */
 export function HealthPanel({ title, status, badge, children }: HealthPanelProps) {
   const titleId = `health-panel-${title.toLowerCase().replace(/\s+/g, '-')}`;
 
