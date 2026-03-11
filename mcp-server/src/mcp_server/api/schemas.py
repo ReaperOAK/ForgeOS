@@ -1,10 +1,11 @@
 """Pydantic response/request schemas for the REST API.
 
-Defines typed models for ticket list responses, ensuring consistent
+Defines typed models for ticket list, detail, history, claim, release,
+pipeline overview, and health check responses, ensuring consistent
 serialisation across all REST endpoints.
 
 .. meta::
-   :ticket: FORGEOS-BE034
+   :ticket: FORGEOS-BE034, FORGEOS-BE035, FORGEOS-BE036, FORGEOS-BE038
 """
 
 from __future__ import annotations
@@ -256,3 +257,62 @@ class ReleaseResponse(BaseModel):
     previous_stage: str
     released_by: str
     reason: str
+
+
+# ---------------------------------------------------------------------------
+# Advance/Rework schemas (FORGEOS-BE037)
+# ---------------------------------------------------------------------------
+
+
+class AdvanceRequest(BaseModel):
+    """Request body for ``POST /api/tickets/{ticket_id}/advance``.
+
+    .. meta::
+       :ticket: FORGEOS-BE037
+    """
+
+    agent_id: str
+    evidence: dict[str, Any] | None = None
+
+
+class AdvanceResponse(BaseModel):
+    """Response body for a successful advance.
+
+    .. meta::
+       :ticket: FORGEOS-BE037
+    """
+
+    ticket_id: str
+    title: str
+    type: str
+    previous_stage: str
+    new_stage: str
+    status: str
+
+
+class ReworkRequest(BaseModel):
+    """Request body for ``POST /api/tickets/{ticket_id}/rework``.
+
+    .. meta::
+       :ticket: FORGEOS-BE037
+    """
+
+    agent_id: str
+    reason: str
+    rejection_evidence: dict[str, Any] | None = None
+
+
+class ReworkResponse(BaseModel):
+    """Response body for a successful rework.
+
+    .. meta::
+       :ticket: FORGEOS-BE037
+    """
+
+    ticket_id: str
+    title: str
+    type: str
+    previous_stage: str
+    new_stage: str
+    rework_count: int
+    escalated: bool

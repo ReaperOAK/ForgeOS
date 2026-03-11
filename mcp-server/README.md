@@ -1725,7 +1725,7 @@ Route("/api/health", health_handler, methods=["GET"])
 
 ## Ticket List REST Endpoint
 
-<!-- last_reviewed: 2026-03-11T01:30:00Z -->
+<!-- last_reviewed: 2026-03-11T03:40:00Z -->
 <!-- audience: developers -->
 <!-- diataxis: reference -->
 
