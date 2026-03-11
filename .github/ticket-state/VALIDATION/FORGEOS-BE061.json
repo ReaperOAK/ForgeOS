@@ -4,7 +4,7 @@
   "description": "Implement the GitHub push event handler that triggers `tickets.sync` when relevant pushes are detected. On push events to the main branch or ticket-related branches, invoke the sync engine (FORGEOS-BE033) to re-evaluate dependencies and unblock tickets. Filter push events to only trigger sync when ticket-related files are modified (`.github/tickets/`, `.github/ticket-state/`).",
   "type": "backend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
