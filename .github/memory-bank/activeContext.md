@@ -3967,3 +3967,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/QA/FORGEOS-BE039.md, mcp-server/tests/test_event_broadcaster.py, mcp-server/tests/test_websocket_streaming.py
 - **Decisions:** PASS — 43/43 tests pass, 99% coverage (144 stmts, 1 miss), all 6 ACs verified. No regressions (5 pre-existing failures unrelated).
 - **Timestamp:** 2026-03-11T03:30:00Z
+
+### [FORGEOS-BE038] — QA Review
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE038.md, mcp-server/tests/test_pipeline_api.py, mcp-server/tests/test_health_api.py
+- **Decisions:** PASS — 21/21 tests pass, 100% coverage (199 stmts, 0 miss), 4/6 ACs fully met, 2 partial (AC2 missing claims/blocked counts, AC3 missing MCP sessions). Zero regressions (4 pre-existing failures unrelated).
+- **Timestamp:** 2026-03-11T03:45:00Z
+
+### [FORGEOS-BE049] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE049.md
+- **Decisions:** PASS — Score 78/100, 0 critical, 4 warnings (all pre-existing in connection code), fallback.py 96% coverage, config.py 100% coverage
+- **Timestamp:** 2026-03-11T03:45:00Z
