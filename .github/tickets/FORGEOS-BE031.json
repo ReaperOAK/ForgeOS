@@ -4,7 +4,7 @@
   "description": "Implement the `tickets.rework` MCP tool that returns a ticket to its implementation stage with rejection evidence. The tool enforces the maximum rework count (3 attempts). When rework_count reaches 3, the ticket is escalated rather than reworked. The rework operation releases the current claim, increments the rework counter, and moves the ticket back to the appropriate implementation stage.",
   "type": "backend",
   "priority": "high",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -36,10 +36,10 @@
     "Current claim released on successful rework"
   ],
   "rework_count": 0,
-  "claimed_by": "Security Engineer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T01:58:27.694635+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -107,6 +107,15 @@
       "from_stage": "SECURITY",
       "to_stage": "SECURITY",
       "details": "Claimed by ReaperOAK@pop-os via Security Engineer, lease until 2026-03-11T01:58:27.694635+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T01:34:11.358951+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",

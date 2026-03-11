@@ -3842,3 +3842,23 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE041.md
 - **Decisions:** PASS — Zero critical/high findings. Two medium/low findings: (1) SEC-BE041-001 unbounded key length (CWE-770, Medium, accepted — rate limiter + TTL mitigate), (2) SEC-BE041-002 key echo in 409 response (CWE-209, Low, accepted — opaque UUID, JSON API). Clean STRIDE/OWASP. No secrets, no new deps.
 - **Timestamp:** 2026-03-11T02:30:00Z
+
+### [FORGEOS-BE049] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE049.md
+- **Decisions:** PASS — Zero critical/high findings. 1 informational CWE-22 note (theoretical path traversal in ticket_id, mitigated by trusted inputs). Subprocess security clean: list-form args, timeouts, no shell injection. OWASP 10/10 checked. STRIDE max score 2 (LOW).
+- **Timestamp:** 2026-03-11T02:05:00Z
+
+### [FORGEOS-BE047] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE047.md
+- **Decisions:** PASS — Zero critical/high findings. One low-severity note (SEC-BE047-001: no lower-bound validation on heartbeat interval, CWE-20, mitigated by TicketOperations guard). STRIDE max score 8 (Low). OWASP 10/10 pass. No secrets, no injection vectors, proper error handling, server-side authz delegation. No new dependencies.
+- **Timestamp:** 2026-03-11T01:35:00Z
+
+### [FORGEOS-BE049] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE049.md
+- **Decisions:** PASS — Zero critical/high findings. 1 informational CWE-22 note (theoretical path traversal in ticket_id, mitigated by trusted inputs). Subprocess security clean: list-form args, timeouts, no shell injection. OWASP 10/10 checked. STRIDE max score 2 (LOW).
+- **Timestamp:** 2026-03-11T02:05:00Z
+
+### [FORGEOS-BE031] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE031.md
+- **Decisions:** PASS — Zero critical/high findings. Parameterized SQL, JSON Schema validation, SERIALIZABLE isolation, claim-based authz, max-rework escalation all verified.
+- **Timestamp:** 2026-03-11T01:32:53Z
