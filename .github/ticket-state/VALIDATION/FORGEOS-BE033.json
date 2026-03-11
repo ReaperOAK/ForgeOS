@@ -39,10 +39,10 @@
     "Validate returns a list of integrity errors (empty list means clean)"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation Specialist",
+  "claimed_by": "Validator",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T00:33:15.285207+00:00",
+  "lease_expiry": "2026-03-11T00:44:00.029591+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -205,13 +205,20 @@
       "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-11T00:33:15.285207+00:00"
     },
     {
-      "timestamp": "2026-03-11T01:00:00.000000+00:00",
-      "event": "DOCS_COMPLETE",
-      "agent": "Documentation",
+      "timestamp": "2026-03-11T00:13:59.676707+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Documentation Specialist: manual release"
+    },
+    {
+      "timestamp": "2026-03-11T00:14:00.029608+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
       "machine_id": "pop-os",
-      "from_stage": "DOCS",
+      "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
-      "details": "DOCS complete. Updated ticket_tools.py docstrings, README sync/validate reference section, CHANGELOG entry. Moved to VALIDATION."
+      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-11T00:44:00.029591+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",

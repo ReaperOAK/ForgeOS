@@ -1300,7 +1300,7 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/db/`** — asyncpg connection pool, health monitoring, and pool metrics
 - **`mcp_server/observability/`** — Structured JSON logging, correlation IDs, PII redaction, and health/readiness probes
 - **`mcp_server/auth/`** — Agent API key authentication, machine registration and verification, rate limiting, and identity resolution
-- **`mcp_server/services/`** — Business logic orchestration (TicketService, MachineService, WebhookService)
+- **`mcp_server/services/`** — Business logic orchestration (TicketService, SyncEngine, MachineService, WebhookService)
 - **`mcp_server/middleware/`** — Unified auth middleware (MCP + REST), per-agent rate limiting, correlation ID tracking
 - **`mcp_server/tools/`** — Dynamic tool registration, schema validation, ticket tools (`tickets.next`, `tickets.claim`, `tickets.release`, `tickets.status`, `tickets.advance`, `tickets.sync`, `tickets.validate`), and FastMCP bridge
 - **`mcp_server/events/`** — Append-only event sourcing (EventStore, EventType, Event dataclass)
@@ -2588,18 +2588,17 @@ clear_validator_cache()  # remove all cached validators
 - **Cache key** — tool name is the cache key; schema changes require `clear_validator_cache()`.
 
 
-## Ticket Tools — `tickets.next` and `tickets.claim` MCP Tools
+## Ticket Tools — `tickets.next`, `tickets.claim`, `tickets.release`, and `tickets.status` MCP Tools
 
-<!-- last_reviewed: 2026-03-11T00:00:00Z -->
+<!-- last_reviewed: 2026-03-11T00:33:00Z -->
 <!-- audience: developers -->
 <!-- diataxis: reference -->
 
-The `mcp_server.tools.ticket_tools` module registers the `tickets.next` and
-`tickets.claim` MCP tools. Agents call `tickets.next` to claim the next
-available ticket matching their role, or `tickets.claim` to claim a specific
-ticket by ID. Both tools validate input via JSON Schema, delegate to the
-`TicketService` for business logic, and return claimed ticket data or a
-structured MCP error.
+The `mcp_server.tools.ticket_tools` module registers seven MCP tools for
+ticket lifecycle management. This section covers the four core tools:
+`tickets.next`, `tickets.claim`, `tickets.release`, and `tickets.status`.
+Each tool validates input via JSON Schema, delegates to `TicketService` for
+business logic, and returns structured data or MCP errors.
 
 ### How It Works
 
@@ -2627,6 +2626,28 @@ structured MCP error.
 5. On failure (not in READY stage, already claimed, role mismatch), the tool
    returns a structured MCP error (code `-32602`).
 
+**`tickets.release`** — release a claimed ticket back to READY:
+
+1. Agent sends a `tickets.release` call with `ticket_id`, `agent_id`, and
+   an optional `reason`.
+2. Input is validated against `TICKETS_RELEASE_SCHEMA`.
+3. `TicketService.release_ticket()` verifies the requesting agent holds the
+   active claim. If not, a `ClaimOwnershipError` is returned.
+4. The claim is cleared, an event history record is created with event type
+   `RELEASED`, and the ticket moves back to READY.
+5. Returns a `ReleaseResult` with `ticket_id`, `previous_stage`,
+   `released_by`, and `reason`.
+
+**`tickets.status`** — query ticket detail or list:
+
+1. Agent sends a `tickets.status` call with either `ticket_id` for detail
+   or filter parameters (`stage`, `type`, `priority`, `page`, `page_size`)
+   for a paginated list.
+2. With `ticket_id`: returns full `TicketDetail` including history, active
+   claim, dependencies, and acceptance criteria.
+3. Without `ticket_id`: returns a `TicketListResult` with paginated ticket
+   summaries. Filters can be combined.
+
 ### Quick Start
 
 ```python
@@ -2639,40 +2660,6 @@ service = TicketService(claim_queue=queue)
 
 # Register the tool on a ToolRegistry
 register_ticket_tools(registry, service)
-```
-
-Calling `tickets.next` via MCP:
-
-```json
-{
-  "method": "tools/call",
-  "params": {
-    "name": "tickets.next",
-    "arguments": {
-      "agent_role": "backend",
-      "machine_id": "pop-os",
-      "operator": "ReaperOAK"
-    }
-  }
-}
-```
-
-Calling `tickets.claim` via MCP:
-
-```json
-{
-  "method": "tools/call",
-  "params": {
-    "name": "tickets.claim",
-    "arguments": {
-      "ticket_id": "FORGEOS-BE006",
-      "agent_id": "backend",
-      "machine_id": "pop-os",
-      "operator": "ReaperOAK",
-      "lease_duration_minutes": 30
-    }
-  }
-}
 ```
 
 ### Input Schemas
@@ -2695,11 +2682,79 @@ Calling `tickets.claim` via MCP:
 | `operator` | `string` | Yes | Human operator initiating the claim |
 | `lease_duration_minutes` | `integer` | No | Lease duration in minutes (default 30, max 1440) |
 
-All string parameters require `minLength: 1`. No additional properties are accepted.
+**`tickets.release`:**
 
-### Success Response
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `ticket_id` | `string` | Yes | Ticket ID to release |
+| `agent_id` | `string` | Yes | Agent role that holds the active claim |
+| `reason` | `string` | No | Optional reason for releasing the ticket |
 
-Both tools return the same response shape on success:
+**`tickets.status`:**
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `ticket_id` | `string` | No | Specific ticket ID for full detail |
+| `stage` | `string` | No | Filter by SDLC stage |
+| `type` | `string` | No | Filter by ticket type |
+| `priority` | `string` | No | Filter by priority |
+| `page` | `integer` | No | Page number (1-based, default 1) |
+| `page_size` | `integer` | No | Results per page (1–100, default 20) |
+
+When `ticket_id` is provided, filter parameters are ignored.
+
+### Example Calls
+
+Calling `tickets.release` via MCP:
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "tickets.release",
+    "arguments": {
+      "ticket_id": "FORGEOS-BE032",
+      "agent_id": "backend",
+      "reason": "Reassigning to another agent"
+    }
+  }
+}
+```
+
+Calling `tickets.status` for a single ticket:
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "tickets.status",
+    "arguments": {
+      "ticket_id": "FORGEOS-BE032"
+    }
+  }
+}
+```
+
+Calling `tickets.status` with filters:
+
+```json
+{
+  "method": "tools/call",
+  "params": {
+    "name": "tickets.status",
+    "arguments": {
+      "stage": "READY",
+      "priority": "high",
+      "page": 1,
+      "page_size": 10
+    }
+  }
+}
+```
+
+### Response Shapes
+
+**`tickets.next` / `tickets.claim` success:**
 
 ```json
 {
@@ -2709,6 +2764,70 @@ Both tools return the same response shape on success:
   "stage": "BACKEND",
   "file_paths": ["mcp-server/src/mcp_server/locking/claim_queue.py"],
   "acceptance_criteria": ["Claim queue uses SKIP LOCKED"]
+}
+```
+
+**`tickets.release` success:**
+
+```json
+{
+  "ticket_id": "FORGEOS-BE032",
+  "previous_stage": "BACKEND",
+  "released_by": "backend",
+  "reason": "Reassigning to another agent"
+}
+```
+
+**`tickets.status` detail response:**
+
+```json
+{
+  "ticket_id": "FORGEOS-BE032",
+  "title": "Implement tickets.release and tickets.status Tools",
+  "description": "...",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BACKEND",
+  "status": "CLAIMED",
+  "file_paths": ["mcp-server/src/tools/ticket_tools.py"],
+  "acceptance_criteria": ["..."],
+  "depends_on": ["FORGEOS-BE028"],
+  "current_claim": {
+    "claimed_by": "uuid",
+    "claimed_by_name": "backend",
+    "machine_id": "pop-os",
+    "operator": "ReaperOAK",
+    "lease_expiry": "2026-03-11T01:00:00+00:00"
+  },
+  "history": [
+    {
+      "event_type": "CLAIMED",
+      "agent_name": "backend",
+      "previous_stage": "READY",
+      "new_stage": "BACKEND",
+      "created_at": "2026-03-10T22:27:49+00:00"
+    }
+  ]
+}
+```
+
+**`tickets.status` list response:**
+
+```json
+{
+  "tickets": [
+    {
+      "ticket_id": "FORGEOS-BE033",
+      "title": "...",
+      "type": "backend",
+      "priority": "high",
+      "stage": "READY",
+      "status": "READY"
+    }
+  ],
+  "total": 1,
+  "page": 1,
+  "page_size": 10
 }
 ```
 
@@ -2731,6 +2850,20 @@ Both tools return the same response shape on success:
 | Unknown agent role | `true` | `-32602` | `Unknown agent role: {role}` |
 | Invalid input (schema failure) | Raises `ToolInputValidationError` | `-32602` | Field-level error details |
 
+**`tickets.release`:**
+
+| Scenario | `isError` | `code` | `message` |
+|---|---|---|---|
+| Ticket not found | `true` | `-32602` | `Ticket '{id}' not found` |
+| No active claim | `true` | `-32602` | `Ticket '{id}' has no active claim` |
+| Agent doesn't own claim | `true` | `-32602` | `Agent '{id}' does not own the claim on '{ticket}'` |
+
+**`tickets.status`:**
+
+| Scenario | `isError` | `code` | `message` |
+|---|---|---|---|
+| Ticket not found (by ID) | `true` | `-32602` | `Ticket '{id}' not found` |
+
 ### Ticket Service
 
 The `mcp_server.services.ticket_service` module provides a shared orchestration
@@ -2739,7 +2872,11 @@ layer consumed by both MCP tool handlers and REST endpoints.
 | Symbol | Kind | Description |
 |---|---|---|
 | `TicketService` | class | Coordinates claim queue, role mapping, and ticket operations |
-| `NextTicketResult` | frozen dataclass | Typed result with ticket ID, title, type, stage, file paths, and acceptance criteria |
+| `NextTicketResult` | frozen dataclass | Claim result with ticket ID, title, type, stage, file paths, criteria |
+| `ReleaseResult` | frozen dataclass | Release result with ticket ID, previous stage, agent, and reason |
+| `TicketDetail` | frozen dataclass | Full ticket detail with history, claim, dependencies, and criteria |
+| `TicketListResult` | frozen dataclass | Paginated list of ticket summaries |
+| `ClaimOwnershipError` | exception | Raised when releasing agent does not own the active claim |
 
 #### TicketService Methods
 
@@ -2747,17 +2884,44 @@ layer consumed by both MCP tool handlers and REST endpoints.
 |---|---|---|
 | `claim_next(agent_role, machine_id, operator, lease_minutes)` | `NextTicketResult` | Resolve role to stage, claim next ticket atomically |
 | `claim_by_id(ticket_id, agent_role, machine_id, operator, lease_minutes)` | `NextTicketResult` | Claim a specific ticket by ID with role-stage authorization |
+| `release_ticket(ticket_id, agent_id, reason)` | `ReleaseResult` | Release a claim, move ticket to READY, create event |
+| `get_ticket_status(ticket_id)` | `TicketDetail` | Full detail with history and active claim |
+| `list_tickets(stage, ticket_type, priority, page, page_size)` | `TicketListResult` | Paginated, filtered ticket listing |
 
-#### NextTicketResult Fields
+#### ReleaseResult Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `ticket_id` | `str` | Released ticket ID |
+| `previous_stage` | `str` | Stage the ticket was in before release |
+| `released_by` | `str` | Agent that released the ticket |
+| `reason` | `str` | Optional release reason |
+
+#### TicketDetail Fields
 
 | Field | Type | Description |
 |---|---|---|
 | `ticket_id` | `str` | Human-readable ticket ID |
 | `title` | `str` | Ticket title |
-| `ticket_type` | `str` | Ticket type (e.g. `"backend"`) |
-| `stage` | `str` | Current SDLC stage after claiming |
-| `file_paths` | `list[str]` | Files within the ticket scope |
-| `acceptance_criteria` | `list[str]` | Ticket acceptance criteria |
+| `description` | `str` | Full description |
+| `ticket_type` | `str` | Ticket type |
+| `priority` | `str` | Priority level |
+| `stage` | `str` | Current SDLC stage |
+| `status` | `str` | Current status |
+| `file_paths` | `list[str]` | Files within ticket scope |
+| `acceptance_criteria` | `list[str]` | Acceptance criteria |
+| `depends_on` | `list[str]` | Dependency ticket IDs |
+| `current_claim` | `dict \| None` | Active claim details (if any) |
+| `history` | `list[dict]` | Event history records |
+
+#### TicketListResult Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `tickets` | `list[dict]` | Ticket summaries (id, title, type, priority, stage, status) |
+| `total` | `int` | Count of tickets in the current page |
+| `page` | `int` | Current page number |
+| `page_size` | `int` | Page size |
 
 ### Design Constraints
 
@@ -2767,7 +2931,10 @@ layer consumed by both MCP tool handlers and REST endpoints.
   `ToolRegistry` under `TYPE_CHECKING` only, avoiding runtime circular imports.
 - **Closure binding** — `_make_handler()` creates a closure that binds the
   `TicketService` instance, matching the `ToolRegistry` handler protocol.
-- **No retry loops** — returns an error immediately if no ticket is available.
+- **Ownership validation** — `tickets.release` validates that the requesting
+  agent holds the active claim before releasing. Non-owners receive an error.
+- **Event sourcing** — every release creates an event history record for
+  audit and traceability.
 - **Structured logging** — all operations log `agent_role`, `machine_id`, and
   `ticket_id` for correlation.
 
