@@ -2065,3 +2065,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-FE007.md
 - **Decisions:** APPROVED with HIGH confidence. 11/11 DoD items PASS. 55 tests pass (3 suites). TSC clean. No TODOs. No console. Upstream: QA ✅, Security ✅, CI ✅, Docs ✅. 7/7 ACs verified.
 - **Timestamp:** 2026-03-11T19:00:00Z
+
+### [FORGEOS-BE074] — Implement Migration Phase B — SDK with Fallback
+- **Artifacts:** mcp-server/src/mcp_server/migration/phases/phase_b.py, mcp-server/src/mcp_server/migration/phases/__init__.py, mcp-server/tests/migration/test_phase_b.py
+- **Decisions:** Used adapter pattern (SDKClaimAdapter/FilesystemClaimAdapter) for testability. Rolling deque for operation log. Followed Phase A lifecycle pattern (enter/validate/exit).
+- **Timestamp:** 2026-03-11T17:00:00Z
