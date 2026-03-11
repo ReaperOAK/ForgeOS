@@ -4851,6 +4851,299 @@ The gate requires **zero discrepancies** to hold continuously for
   interfering with agent operations or the dispatcher-claim protocol.
 
 
+## Migration Phase B — SDK with Fallback
+
+<!-- last_reviewed: 2026-03-11T23:59:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.migration.phases.phase_b` module implements Phase B of the
+filesystem-to-database migration. Agents use the ForgeOS SDK for the CLAIM
+operation (MCP primary, filesystem fallback). WORK commits remain git-based.
+The phase exits only when 95%+ operations succeed via MCP for 48+ consecutive
+hours.
+
+### How It Works
+
+1. The `claim` feature flag is set to `dual` mode via `FeatureFlagManager`.
+2. `PhaseB.enter()` verifies the flag, records the entry timestamp, and
+   activates the dual-mode claim pipeline.
+3. `PhaseB.execute_claim()` attempts the MCP SDK path first. If the server
+   is unreachable, it falls back to `tickets.py` transparently.
+4. Every operation records which backend handled it (`MCP` or `FALLBACK`)
+   in a rolling window (default 10 000 records).
+5. `PhaseB.validate()` evaluates the transition gate — whether the MCP
+   success percentage meets the configured threshold for the required
+   duration.
+6. `PhaseB.exit()` logs exit metrics and returns the final transition
+   report.
+
+### Quick Start
+
+```python
+from mcp_server.migration.phases import PhaseB, PhaseBConfig
+
+config = PhaseBConfig(
+    flags_config_path=Path("config/migration-flags.yaml"),
+    transition_gate_mcp_percent=95.0,
+    transition_gate_hours=48.0,
+)
+
+phase_b = PhaseB(config, sdk_adapter=my_sdk, fs_adapter=my_fs)
+await phase_b.enter()
+
+result = await phase_b.execute_claim(
+    "FORGEOS-BE074",
+    agent_name="Backend",
+    machine_id="pop-os",
+    operator="ReaperOAK",
+)
+
+report = phase_b.validate()
+if report.can_transition:
+    await phase_b.exit()
+```
+
+### PhaseBConfig
+
+Frozen dataclass controlling Phase B behavior:
+
+| Parameter | Default | Description |
+|---|---|---|
+| `flags_config_path` | *(required)* | Path to the migration-flags YAML file |
+| `transition_gate_mcp_percent` | `95.0` | Minimum MCP success % to exit Phase B |
+| `transition_gate_hours` | `48.0` | Hours of sustained success required |
+| `max_operation_log_size` | `10000` | Rolling window size for operation records |
+
+### PhaseB Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `enter()` | `None` | Verify `claim` flag is `dual`, activate phase |
+| `exit()` | `TransitionReport` | Build final report, deactivate phase |
+| `execute_claim(ticket_id, ...)` | `dict` | Dual-mode claim: MCP primary, filesystem fallback |
+| `validate()` | `TransitionReport` | Evaluate transition gate criteria |
+| `get_fallback_operations()` | `list[OperationRecord]` | Operations that used the fallback backend |
+| `get_success_ratio()` | `dict` | Summary of MCP vs fallback success counts |
+
+### PhaseB Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `status` | `PhaseBStatus` | Current lifecycle state (`INACTIVE`, `ACTIVE`, `TRANSITIONING`) |
+| `entered_at` | `str \| None` | ISO-8601 entry timestamp |
+| `exited_at` | `str \| None` | ISO-8601 exit timestamp |
+| `operation_log` | `list[OperationRecord]` | Snapshot of the rolling operation log |
+
+### TransitionReport
+
+Result of evaluating the Phase B transition gate:
+
+| Field | Type | Description |
+|---|---|---|
+| `total_operations` | `int` | Total operations in the window |
+| `mcp_successes` | `int` | Operations that succeeded via MCP |
+| `fallback_operations` | `int` | Operations handled by fallback |
+| `mcp_success_percent` | `float` | Percentage of operations via MCP |
+| `can_transition` | `bool` | Whether the gate criteria are met |
+| `gate_met_since` | `str \| None` | ISO-8601 timestamp when the gate was first met |
+| `gate_met_hours` | `float` | Hours the gate has been continuously met |
+| `validated_at` | `str` | ISO-8601 timestamp of this report |
+
+### Adapter Interfaces
+
+Phase B uses two pluggable adapters for testability:
+
+| Adapter | Method | Description |
+|---|---|---|
+| `SDKClaimAdapter` | `claim(ticket_id, ...)` | Performs a claim via the MCP SDK |
+| `FilesystemClaimAdapter` | `claim(ticket_id, ...)` | Performs a claim via `tickets.py` |
+
+Both adapters raise exceptions on failure. Phase B catches MCP failures and
+retries via the filesystem adapter before raising `RuntimeError` if both fail.
+
+### OperationRecord
+
+Frozen dataclass tracking each operation:
+
+| Field | Type | Description |
+|---|---|---|
+| `operation` | `str` | Operation name (e.g. `"claim"`) |
+| `ticket_id` | `str` | Target ticket |
+| `backend` | `OperationBackend` | `MCP` or `FALLBACK` |
+| `success` | `bool` | Whether the operation succeeded |
+| `timestamp` | `str` | ISO-8601 timestamp |
+| `error` | `str` | Error message (empty on success) |
+
+### Error Handling
+
+| Scenario | Behavior |
+|---|---|
+| `enter()` when already active | `RuntimeError` |
+| `claim` flag not `dual` on entry | `ValueError` |
+| `execute_claim()` when not active | `RuntimeError` |
+| MCP claim fails | Falls back to filesystem transparently |
+| Both MCP and filesystem fail | `RuntimeError` with combined error details |
+| `exit()` when not active | `RuntimeError` |
+
+### Design Constraints
+
+- **Dual-mode only** — Phase B runs only when the `claim` flag is `dual`.
+  The `work` flag remains `filesystem` throughout.
+- **Rolling window** — operation records are stored in a bounded `deque`
+  (default 10 000 entries) to prevent unbounded memory growth.
+- **Gate requires history** — the transition gate needs positive operation
+  counts. An empty log yields `can_transition=False`.
+- **Structured logging** — all lifecycle events include `entered_at`,
+  `mcp_success_percent`, and `total_operations` in structured log extra.
+
+
+## Shadow Mode Validation Engine
+
+<!-- last_reviewed: 2026-03-11T23:59:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.migration.shadow_engine` module intercepts ticket operations,
+executes them via both filesystem and database paths, compares results
+field-by-field, and logs divergences with severity classification. Shadow mode
+runs alongside Phases A and B to build confidence before full cutover.
+
+### How It Works
+
+1. The `ShadowEngine` receives two adapters: one for the filesystem path
+   and one for the database path.
+2. When `intercept()` is called, both adapters execute the same operation.
+3. The `DivergenceClassifier` compares results on five fields:
+   `ticket_id`, `stage`, `claimed_by`, `lease_expiry`, `dependencies`.
+4. Divergences are classified by severity: `CRITICAL` (stage/claim mismatch),
+   `WARNING` (timing >5 s), `INFO` (format differences).
+5. CRITICAL divergences emit structured `ERROR`-level log entries as alerts.
+6. Statistics are aggregated for the dashboard endpoint.
+
+### Quick Start
+
+```python
+from mcp_server.migration.shadow_engine import ShadowEngine, ShadowConfig
+
+config = ShadowConfig(
+    enabled_operations=frozenset({"claim", "advance", "sync"}),
+    max_report_history=10_000,
+)
+
+engine = ShadowEngine(
+    config=config,
+    fs_adapter=my_fs_adapter,
+    db_adapter=my_db_adapter,
+)
+
+report = await engine.intercept("claim", "FORGEOS-BE077")
+stats = engine.get_stats()
+print(f"Critical divergences: {stats.critical_count}")
+```
+
+### ShadowConfig
+
+Frozen dataclass controlling shadow mode:
+
+| Parameter | Default | Description |
+|---|---|---|
+| `enabled_operations` | All 7 operations | Set of operation names to shadow |
+| `max_report_history` | `10000` | Maximum reports retained in memory |
+
+Valid operations: `sync`, `claim`, `advance`, `rework`, `release`, `status`,
+`validate`.
+
+### ShadowEngine Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `is_enabled(operation)` | `bool` | Whether shadow mode is active for the operation |
+| `intercept(operation, ticket_id, ...)` | `DivergenceReport` | Execute via both paths and compare |
+| `get_stats()` | `DivergenceStats` | Aggregated divergence statistics |
+| `get_reports()` | `list[DivergenceReport]` | Stored divergence reports |
+| `get_stats_dict()` | `dict` | JSON-serializable stats for the dashboard |
+| `reset()` | `None` | Clear all reports and statistics |
+
+The `intercept()` method accepts either pre-computed `fs_result` / `db_result`
+dicts or live adapters via `fs_adapter` / `db_adapter` keyword arguments.
+
+### DivergenceClassifier
+
+Stateless classifier for field-level differences:
+
+| Method | Returns | Description |
+|---|---|---|
+| `classify_field(field_name, fs_value, db_value)` | `DivergenceLevel` | CRITICAL for `stage`/`claimed_by`, INFO otherwise |
+| `classify_timing(fs_seconds, db_seconds)` | `DivergenceLevel \| None` | WARNING if difference > 5 s |
+| `compare(fs_result, db_result, fs_duration, db_duration)` | `list[Divergence]` | Full field-by-field comparison |
+
+### TicketOperationAdapter Protocol
+
+Runtime-checkable protocol for filesystem and database adapters:
+
+```python
+class TicketOperationAdapter(Protocol):
+    async def execute(self, operation: str, ticket_id: str, **kwargs) -> dict[str, Any]: ...
+```
+
+### Divergence Data Classes
+
+**Divergence** — a single field-level mismatch:
+
+| Field | Type | Description |
+|---|---|---|
+| `field` | `str` | Compared field name |
+| `fs_value` | `Any` | Filesystem path value |
+| `db_value` | `Any` | Database path value |
+| `level` | `DivergenceLevel` | `CRITICAL`, `WARNING`, or `INFO` |
+
+**DivergenceReport** — report for one intercepted operation:
+
+| Field | Type | Description |
+|---|---|---|
+| `operation` | `str` | Operation name |
+| `ticket_id` | `str` | Target ticket |
+| `divergences` | `list[Divergence]` | Field-level divergences found |
+| `fs_duration_seconds` | `float` | Filesystem path execution time |
+| `db_duration_seconds` | `float` | Database path execution time |
+| `timestamp` | `str` | ISO-8601 comparison timestamp |
+
+**DivergenceStats** — aggregated statistics:
+
+| Field | Type | Description |
+|---|---|---|
+| `total_operations` | `int` | Total intercepted operations |
+| `total_divergences` | `int` | Total divergences found |
+| `critical_count` | `int` | CRITICAL-level count |
+| `warning_count` | `int` | WARNING-level count |
+| `info_count` | `int` | INFO-level count |
+| `by_operation` | `dict[str, int]` | Per-operation divergence counts |
+| `by_field` | `dict[str, int]` | Per-field divergence counts |
+| `recent_critical` | `list[dict]` | Most recent CRITICAL reports (max 50) |
+
+### Error Handling
+
+| Scenario | Behavior |
+|---|---|
+| Operation not enabled | Returns empty `DivergenceReport` (no adapters executed) |
+| Adapter raises exception | Exception propagates to caller (not swallowed) |
+| Report history exceeds limit | Oldest half is trimmed |
+| CRITICAL divergence detected | `logger.error()` alert emitted with correlation context |
+
+### Design Constraints
+
+- **Non-blocking** — shadow mode does not affect the primary operation path.
+  Comparison happens after both paths complete.
+- **Configurable scope** — each operation type can be independently enabled
+  or disabled via `ShadowConfig.enabled_operations`.
+- **Bounded memory** — report history is trimmed at `max_report_history`.
+- **Structured alerting** — CRITICAL divergences emit structured ERROR logs
+  with `operation`, `ticket_id`, `field`, and values for automated monitoring.
+- **Value normalization** — `_values_equal()` handles `None`, list ordering,
+  and string coercion for cross-path comparison.
+
+
 ## Database-to-Filesystem Export
 
 <!-- last_reviewed: 2026-03-11T23:59:00Z -->
