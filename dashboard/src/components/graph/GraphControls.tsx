@@ -3,13 +3,25 @@
 import { useCallback } from 'react';
 import { ZoomIn, ZoomOut, Maximize2 } from 'lucide-react';
 
+/** Props for {@link GraphControls}. */
 interface GraphControlsProps {
+  /** Current zoom scale (1 = 100 %). */
   scale: number;
+  /** Callback to increase zoom by one step. */
   onZoomIn: () => void;
+  /** Callback to decrease zoom by one step. */
   onZoomOut: () => void;
+  /** Callback to reset zoom and centre the graph in the viewport. */
   onFitToView: () => void;
 }
 
+/**
+ * Floating toolbar for controlling the dependency graph viewport.
+ *
+ * Renders zoom-in, zoom-out, and fit-to-view buttons with the current
+ * zoom percentage.  Positioned at the bottom-right corner of the graph
+ * container.
+ */
 export function GraphControls({
   scale,
   onZoomIn,

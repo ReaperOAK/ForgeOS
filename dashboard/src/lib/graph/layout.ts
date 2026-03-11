@@ -5,26 +5,43 @@
  * to produce readable, non-overlapping node positions.
  */
 
+/** A positioned ticket node in the dependency graph. */
 export interface GraphNode {
+  /** Unique ticket identifier (e.g. `"FORGEOS-FE003"`). */
   id: string;
+  /** Human-readable ticket title. */
   title: string;
+  /** Current SDLC stage name. */
   stage: string;
+  /** IDs of upstream dependencies this ticket depends on. */
   dependsOn: string[];
+  /** Computed left-offset in SVG coordinates. */
   x: number;
+  /** Computed top-offset in SVG coordinates. */
   y: number;
+  /** Node width in pixels. */
   width: number;
+  /** Node height in pixels. */
   height: number;
 }
 
+/** A directed edge between two graph nodes (dependency → dependent). */
 export interface GraphEdge {
+  /** Source node ID (the upstream dependency). */
   from: string;
+  /** Target node ID (the downstream dependent). */
   to: string;
 }
 
+/** Complete graph layout ready for SVG rendering. */
 export interface GraphLayout {
+  /** All positioned nodes. */
   nodes: GraphNode[];
+  /** All directed edges. */
   edges: GraphEdge[];
+  /** Total canvas width in pixels. */
   width: number;
+  /** Total canvas height in pixels. */
   height: number;
 }
 

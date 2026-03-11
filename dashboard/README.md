@@ -256,6 +256,40 @@ from the URL parameter.
 - Dependency tab shows upstream (depends-on) and downstream (depended-by)
   tickets as clickable links with resolved/unresolved status dots.
 
+---
+
+## Dependency Graph (`/graph`)
+
+Full-project DAG visualisation of ticket dependencies.
+
+### Files
+
+| File | Purpose |
+|------|---------|
+| `src/app/graph/page.tsx` | Page shell — paginates all tickets and passes them to `DependencyGraph` |
+| `src/components/graph/DependencyGraph.tsx` | Interactive SVG graph with zoom, pan, and touch support |
+| `src/components/graph/GraphControls.tsx` | Floating toolbar (zoom in / out / fit-to-view) |
+| `src/lib/graph/layout.ts` | Sugiyama-style DAG layout engine (topological sort → layer assignment → positioning) |
+
+### Layout Algorithm
+
+1. **Topological sort** — Kahn's algorithm orders nodes from source to sink.
+2. **Layer assignment** — longest-path heuristic places each node in a column
+   based on its maximum upstream depth.
+3. **Positioning** — columns flow left-to-right; nodes within a column stack
+   top-to-bottom.
+
+Constants: `NODE_WIDTH = 180`, `NODE_HEIGHT = 56`, `HORIZONTAL_GAP = 80`,
+`VERTICAL_GAP = 100`, `PADDING = 60`.
+
+### Interactions
+
+- **Mouse wheel** — zoom in / out (range 20 %–300 %).
+- **Click-drag on canvas** — pan the viewport.
+- **Touch** — single-finger pan, two-finger pinch-zoom.
+- **Click a node** — navigate to `/tickets/{id}`.
+- **Hover a node** — highlight connected edges.
+
 ### Error Handling
 
 All endpoint functions throw an `ApiError` on non-OK responses or network
