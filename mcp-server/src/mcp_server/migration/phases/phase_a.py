@@ -96,7 +96,15 @@ class PhaseAConfig:
 
 @dataclass
 class Discrepancy:
-    """A single mismatch between filesystem and database state."""
+    """A single mismatch between filesystem and database state.
+
+    Attributes:
+        ticket_id: The ticket with mismatched state.
+        field: Which field diverges (e.g. ``"stage"``, ``"claimed_by"``,
+            or ``"existence"``).
+        fs_value: Value found on the filesystem.
+        db_value: Value found in the database.
+    """
 
     ticket_id: str
     field: str
@@ -106,7 +114,20 @@ class Discrepancy:
 
 @dataclass
 class ValidationReport:
-    """Result of comparing database state against filesystem truth."""
+    """Result of comparing database state against filesystem truth.
+
+    Attributes:
+        discrepancies: Mismatches found between FS and DB.
+        fs_ticket_count: Number of tickets found on the filesystem.
+        db_ticket_count: Number of tickets found in the database.
+        validated_at: ISO-8601 timestamp of this validation run.
+        can_transition: ``True`` when the phase may safely advance
+            (zero discrepancies held for ``transition_gate_hours``).
+        zero_discrepancy_since: ISO-8601 timestamp when the current
+            zero-discrepancy window started, or ``None``.
+        zero_discrepancy_hours: Hours elapsed since discrepancies
+            last dropped to zero.
+    """
 
     discrepancies: list[Discrepancy] = field(default_factory=list)
     fs_ticket_count: int = 0
