@@ -23,8 +23,7 @@
     "FORGEOS-BE039"
   ],
   "blocked_by": [
-    "FORGEOS-FE003",
-    "FORGEOS-BE039"
+    "FORGEOS-FE003"
   ],
   "file_paths": [
     "dashboard/src/lib/api/websocket.ts",

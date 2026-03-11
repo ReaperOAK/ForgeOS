@@ -35,10 +35,10 @@
     "Handler returns the sync summary as the webhook response payload"
   ],
   "rework_count": 2,
-  "claimed_by": "Documentation Specialist",
+  "claimed_by": "Validator",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T04:01:35.011859+00:00",
+  "lease_expiry": "2026-03-11T04:28:39.551894+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -192,6 +192,22 @@
       "from_stage": "DOCS",
       "to_stage": "DOCS",
       "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-11T04:01:35.011859+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T03:58:39.517299+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Documentation Specialist: manual release"
+    },
+    {
+      "timestamp": "2026-03-11T03:58:39.551911+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-11T04:28:39.551894+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-webhooks.md",

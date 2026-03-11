@@ -24,8 +24,7 @@
     "FORGEOS-UID005"
   ],
   "blocked_by": [
-    "FORGEOS-FE001",
-    "FORGEOS-BE038"
+    "FORGEOS-FE001"
   ],
   "file_paths": [
     "dashboard/src/app/health/page.tsx",
