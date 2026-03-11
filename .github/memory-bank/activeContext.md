@@ -1,3 +1,8 @@
+### [FORGEOS-BE070] — Documentation Summary
+- **Artifacts:** CHANGELOG.md, mcp-server/README.md, .github/agent-output/Documentation/FORGEOS-BE070.md
+- **Decisions:** Added Filesystem-to-Database Data Import reference section to README (Quick Start, ImportConfig, DatabaseWriter protocol, ImportResult/Stats, TicketTransformer methods, stage/event mapping tables, TransformedTicket/Event, progress callback, error handling, design constraints). Placed between Migration Feature Flags and Admin Force Operations to group migration docs. Existing source docstrings were already comprehensive — no additions needed.
+- **Timestamp:** 2026-03-11T09:00:00Z
+
 ### [FORGEOS-BE037] — Documentation Summary
 - **Artifacts:** CHANGELOG.md, mcp-server/README.md, mcp-server/src/mcp_server/api/schemas.py
 - **Decisions:** Added full Reference-quadrant section for advance/rework endpoints in README, matching existing endpoint doc pattern (request/response examples, error tables, schema tables, route mounting, design decisions). Updated schemas module meta to include BE037.
