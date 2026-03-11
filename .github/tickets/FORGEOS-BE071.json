@@ -35,10 +35,10 @@
     "Sync engine can be started/stopped independently of the MCP server"
   ],
   "rework_count": 0,
-  "claimed_by": "Backend",
+  "claimed_by": "QA Engineer",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-11T10:31:22.094893+00:00",
+  "lease_expiry": "2026-03-11T11:02:20.273418+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -61,6 +61,13 @@
       "agent": "Backend",
       "machine_id": "pop-os",
       "details": "BACKEND complete, advanced to QA"
+    },
+    {
+      "timestamp": "2026-03-11T10:31:54.604943+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: Lease expired at 2026-03-11T10:31:22.094893+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",
