@@ -165,9 +165,11 @@ class HTTPTransport:
             create_admin_force_advance_endpoint,
             create_admin_force_release_endpoint,
             create_admin_force_rework_endpoint,
+            create_advance_endpoint,
             create_claim_endpoint,
             create_health_endpoint,
             create_pipeline_endpoint,
+            create_rework_endpoint,
             create_ticket_detail_endpoint,
             create_ticket_history_endpoint,
             create_tickets_endpoint,
@@ -206,6 +208,10 @@ class HTTPTransport:
             _get_ticket_repo, _get_event_store
         )
         claim_handler = create_claim_endpoint(_get_ticket_service, _get_ticket_repo)
+
+        # Advance/Rework endpoints — delegate to ticket service
+        advance_handler = create_advance_endpoint(_get_ticket_service)
+        rework_handler = create_rework_endpoint(_get_ticket_service)
 
         # Pipeline endpoint — public, no auth
         pipeline_handler = create_pipeline_endpoint(_get_ticket_repo)
@@ -266,6 +272,8 @@ class HTTPTransport:
             Route("/api/tickets/{ticket_id}", ticket_detail_handler, methods=["GET"]),
             Route("/api/tickets/{ticket_id}/history", ticket_history_handler, methods=["GET"]),
             Route("/api/tickets/{ticket_id}/claim", claim_handler, methods=["POST", "DELETE"]),
+            Route("/api/tickets/{ticket_id}/advance", advance_handler, methods=["POST"]),
+            Route("/api/tickets/{ticket_id}/rework", rework_handler, methods=["POST"]),
             WebSocketRoute("/ws/tickets", ws_handler),
             Mount(config.mount_path, app=http_starlette_app),
         ]
