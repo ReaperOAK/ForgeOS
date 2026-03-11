@@ -131,4 +131,74 @@ describe('FilterBar', () => {
       'Ticket filters',
     );
   });
+
+  it('renders dynamic machine chips when provided', () => {
+    const result = makeFiltersResult();
+    render(
+      <FilterBar filters={result} availableMachines={['pop-os', 'ubuntu']} />,
+    );
+    expect(screen.getByText('Machine')).toBeInTheDocument();
+    expect(screen.getByText('pop-os')).toBeInTheDocument();
+    expect(screen.getByText('ubuntu')).toBeInTheDocument();
+  });
+
+  it('hides machine group when array is empty', () => {
+    const result = makeFiltersResult();
+    render(<FilterBar filters={result} availableMachines={[]} />);
+    expect(screen.queryByText('Machine')).not.toBeInTheDocument();
+  });
+
+  it('renders dynamic agent chips when provided', () => {
+    const result = makeFiltersResult();
+    render(
+      <FilterBar filters={result} availableAgents={['agent-alpha', 'agent-beta']} />,
+    );
+    expect(screen.getByText('Agent')).toBeInTheDocument();
+    expect(screen.getByText('agent-alpha')).toBeInTheDocument();
+    expect(screen.getByText('agent-beta')).toBeInTheDocument();
+  });
+
+  it('hides agent group when array is empty', () => {
+    const result = makeFiltersResult();
+    render(<FilterBar filters={result} availableAgents={[]} />);
+    expect(screen.queryByText('Agent')).not.toBeInTheDocument();
+  });
+
+  it('toggles operator filter on chip click', async () => {
+    const user = userEvent.setup();
+    const result = makeFiltersResult();
+    render(
+      <FilterBar filters={result} availableOperators={['alice']} />,
+    );
+    await user.click(screen.getByText('alice'));
+    expect(result.toggleFilter).toHaveBeenCalledWith('operator', 'alice');
+  });
+
+  it('toggles machine filter on chip click', async () => {
+    const user = userEvent.setup();
+    const result = makeFiltersResult();
+    render(
+      <FilterBar filters={result} availableMachines={['pop-os']} />,
+    );
+    await user.click(screen.getByText('pop-os'));
+    expect(result.toggleFilter).toHaveBeenCalledWith('machine', 'pop-os');
+  });
+
+  it('toggles agent filter on chip click', async () => {
+    const user = userEvent.setup();
+    const result = makeFiltersResult();
+    render(
+      <FilterBar filters={result} availableAgents={['agent-alpha']} />,
+    );
+    await user.click(screen.getByText('agent-alpha'));
+    expect(result.toggleFilter).toHaveBeenCalledWith('agent', 'agent-alpha');
+  });
+
+  it('renders all sort options in dropdown', () => {
+    const result = makeFiltersResult();
+    render(<FilterBar filters={result} />);
+    const select = screen.getByLabelText('Sort by:') as HTMLSelectElement;
+    const options = Array.from(select.options).map((o) => o.value);
+    expect(options).toEqual(['priority', 'created_at', 'updated_at', 'ticket_id']);
+  });
 });
