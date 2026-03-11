@@ -36,10 +36,10 @@
     "Import summary report printed: total tickets found, imported, skipped, errors"
   ],
   "rework_count": 0,
-  "claimed_by": "CI Reviewer",
+  "claimed_by": "Documentation Specialist",
   "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T04:49:14.103410+00:00",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-11T08:56:07.423058+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -152,6 +152,13 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "CI PASS \u2014 Quality score 99/100, 0 critical, 0 warnings, 99% coverage on 70 tests"
+    },
+    {
+      "timestamp": "2026-03-11T08:22:46.403247+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from CI Reviewer: Lease expired at 2026-03-11T04:49:14.103410+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",
