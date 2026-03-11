@@ -225,4 +225,106 @@ describe('TicketWebSocketClient', () => {
 
     client.disconnect();
   });
+
+  it('skips connect when already OPEN or CONNECTING', () => {
+    const client = new TicketWebSocketClient({
+      url: 'ws://test/ws/tickets',
+    });
+
+    client.connect();
+    mockInstances[0].simulateOpen();
+    expect(mockInstances).toHaveLength(1);
+
+    // Second connect while OPEN should be no-op
+    client.connect();
+    expect(mockInstances).toHaveLength(1);
+
+    client.disconnect();
+  });
+
+  it('falls back to disconnected and schedules reconnect when constructor throws', () => {
+    const statuses: ConnectionStatus[] = [];
+
+    // Make WebSocket constructor throw BEFORE creating the client
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (globalThis as any).WebSocket = class {
+      static OPEN = 1;
+      static CONNECTING = 0;
+      static CLOSED = 3;
+      static CLOSING = 2;
+      constructor() {
+        throw new Error('Network error');
+      }
+    };
+
+    const client = new TicketWebSocketClient({
+      url: 'ws://test/ws/tickets',
+      initialDelay: 500,
+      onStatusChange: (s) => statuses.push(s),
+    });
+
+    client.connect();
+    expect(statuses).toContain('connecting');
+    expect(statuses).toContain('disconnected');
+
+    // Restore mock and verify reconnection is scheduled
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (globalThis as any).WebSocket = class extends MockWebSocket {
+      static override OPEN = 1;
+      static override CONNECTING = 0;
+      static override CLOSED = 3;
+      static CLOSING = 2;
+      constructor() {
+        super();
+        mockInstances.push(this);
+      }
+    };
+
+    jest.advanceTimersByTime(500);
+    expect(mockInstances.length).toBeGreaterThanOrEqual(1);
+
+    client.disconnect();
+  });
+
+  it('dispatches TICKET_CREATED events', () => {
+    const events: WebSocketEvent[] = [];
+    const client = new TicketWebSocketClient({
+      url: 'ws://test/ws/tickets',
+      onEvent: (e) => events.push(e),
+    });
+
+    client.connect();
+    mockInstances[0].simulateOpen();
+
+    mockInstances[0].simulateMessage({
+      type: 'TICKET_CREATED',
+      ticket: { ticket_id: 'T-002' },
+      timestamp: new Date().toISOString(),
+    });
+
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe('TICKET_CREATED');
+    client.disconnect();
+  });
+
+  it('dispatches TICKET_UPDATED events', () => {
+    const events: WebSocketEvent[] = [];
+    const client = new TicketWebSocketClient({
+      url: 'ws://test/ws/tickets',
+      onEvent: (e) => events.push(e),
+    });
+
+    client.connect();
+    mockInstances[0].simulateOpen();
+
+    mockInstances[0].simulateMessage({
+      type: 'TICKET_UPDATED',
+      ticket: { ticket_id: 'T-003' },
+      timestamp: new Date().toISOString(),
+    });
+
+    expect(events).toHaveLength(1);
+    expect(events[0].type).toBe('TICKET_UPDATED');
+    client.disconnect();
+  });
 });

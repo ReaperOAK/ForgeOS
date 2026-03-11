@@ -2085,3 +2085,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** dashboard/src/lib/hooks/useFilters.ts, dashboard/src/components/filters/FilterBar.tsx, dashboard/src/components/filters/FilterChip.tsx
 - **Decisions:** URL-synced state via useSearchParams for bookmarkability. Client-side AND filtering. Suspense boundary for SSR compat. Design tokens only.
 - **Timestamp:** 2025-07-25T12:10:00Z
+
+### [FORGEOS-FE006] — QA PASS
+- **Artifacts:** dashboard/src/lib/api/websocket.test.ts, dashboard/src/lib/hooks/useTicketStream.test.ts, dashboard/src/components/__tests__/ConnectionStatusIndicator.test.tsx
+- **Decisions:** PASS — 22 tests, 100% lines, 98.7% stmts. Added 6 edge-case tests for coverage.
+- **Timestamp:** 2026-03-11T17:35:00Z
