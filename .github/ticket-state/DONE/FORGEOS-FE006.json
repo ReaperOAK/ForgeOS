@@ -4,7 +4,7 @@
   "description": "Implement WebSocket connectivity for real-time ticket state updates following BLK-06-03 output. Connect to the `/ws/tickets` WebSocket endpoint (FORGEOS-BE039) to receive live state change events. Create a React hook (`useTicketStream`) that manages the WebSocket connection lifecycle and dispatches updates to the pipeline board and ticket detail views. Handle reconnection on disconnect with exponential backoff.",
   "type": "frontend",
   "priority": "high",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -38,10 +38,10 @@
     "WebSocket disconnection does not crash the application; falls back to manual refresh"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T18:11:28.787663+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -165,6 +165,15 @@
       "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
       "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-11T18:11:28.787663+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T17:44:52.748486+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",

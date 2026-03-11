@@ -2115,3 +2115,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** dashboard/README.md, .github/agent-output/Documentation/FORGEOS-FE012.md
 - **Decisions:** Filtering/Sorting section added to README with hook usage example, FilterState shape, FilterBar/FilterChip props. All 11 public symbols have JSDoc. Readability FK ≤ 10.
 - **Timestamp:** 2026-03-11T20:00:00Z
+
+### [FORGEOS-FE006] — Validation APPROVED
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-FE006.md
+- **Decisions:** APPROVED — 11/11 DoD pass, 7/7 AC verified, 22/22 tests pass, lint clean, tsc clean
+- **Timestamp:** 2026-03-11T22:30:00Z
+
+### [FORGEOS-FE012] — Validation APPROVED
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-FE012.md
+- **Decisions:** APPROVED — 11/11 DoD pass, 7/7 AC verified, 49/49 tests pass, lint clean (2 systemic eslint config warnings noted), tsc clean
+- **Timestamp:** 2026-03-11T22:30:00Z
