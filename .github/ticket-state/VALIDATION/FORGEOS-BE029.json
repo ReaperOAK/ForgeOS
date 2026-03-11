@@ -35,10 +35,10 @@
     "Lease expiry set according to configurable lease_duration_minutes"
   ],
   "rework_count": 1,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Validator",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-11T00:43:59.919348+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -224,6 +224,15 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "DOCS complete \u2014 README updated with tickets.claim docs, CHANGELOG entry added, service meta tag updated"
+    },
+    {
+      "timestamp": "2026-03-11T00:13:59.919366+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-11T00:43:59.919348+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",

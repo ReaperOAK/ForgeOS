@@ -4,7 +4,7 @@
   "description": "Implement the `tickets.claim` MCP tool that allows agents to claim a specific ticket by ID. Unlike `tickets.next` which auto-selects, this tool targets a known ticket. The tool validates that the ticket exists, is in the READY stage, and the requesting agent's role matches the ticket's current SDLC stage. Uses the same service layer as `tickets.next`.",
   "type": "backend",
   "priority": "critical",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Lease expiry set according to configurable lease_duration_minutes"
   ],
   "rework_count": 1,
-  "claimed_by": "Documentation Specialist",
+  "claimed_by": "Validator",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T00:33:15.172718+00:00",
+  "lease_expiry": "2026-03-11T00:43:59.919348+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -215,6 +215,24 @@
       "from_stage": "DOCS",
       "to_stage": "DOCS",
       "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-11T00:33:15.172718+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T23:50:00+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "DOCS complete \u2014 README updated with tickets.claim docs, CHANGELOG entry added, service meta tag updated"
+    },
+    {
+      "timestamp": "2026-03-11T00:13:59.919366+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-11T00:43:59.919348+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
