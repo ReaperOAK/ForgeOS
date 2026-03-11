@@ -22,13 +22,47 @@ from mcp_server.migration.dual_mode import (
     OperationResult,
     TicketOperations,
 )
+from mcp_server.migration.feature_flags import (
+    FeatureFlagError,
+    FeatureFlagManager,
+    FlagMode,
+    OperationFlag,
+)
+from mcp_server.migration.importer import (
+    DatabaseWriter,
+    ImportConfig,
+    ImportResult,
+    ImportStats,
+    TicketImporter,
+)
+from mcp_server.migration.transformers import (
+    TicketTransformer,
+    TransformError,
+    TransformResult,
+    TransformedEvent,
+    TransformedTicket,
+)
 
 __all__ = [
+    "DatabaseWriter",
     "DualModeConfig",
     "DualModeWrapper",
+    "FeatureFlagError",
+    "FeatureFlagManager",
     "FileMode",
+    "FlagMode",
+    "ImportConfig",
+    "ImportResult",
+    "ImportStats",
     "McpMode",
+    "OperationFlag",
     "OperationMode",
     "OperationResult",
+    "TicketImporter",
     "TicketOperations",
+    "TicketTransformer",
+    "TransformError",
+    "TransformResult",
+    "TransformedEvent",
+    "TransformedTicket",
 ]

@@ -4177,3 +4177,18 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** agent-sdk/src/forgeos_sdk/runner_hooks.py, agent-sdk/tests/test_runner_hooks.py, agent-sdk/src/forgeos_sdk/__init__.py
 - **Decisions:** Used TicketOperations internally for MCP integration; catch all exceptions in hooks returning HookResult (never crash runner); HookConfig via env vars for granular enable/disable
 - **Timestamp:** 2026-03-11T03:40:00+00:00
+
+### [FORGEOS-BE037] — Backend Complete
+- **Artifacts:** mcp-server/src/mcp_server/api/routes/tickets.py, mcp-server/src/mcp_server/api/schemas.py, mcp-server/src/mcp_server/api/routes/__init__.py, mcp-server/src/mcp_server/transport/http.py, mcp-server/tests/test_ticket_advance_rework_api.py
+- **Decisions:** Reused existing factory pattern (create_*_endpoint) and ticket service delegation pattern; added 4 Pydantic schemas (AdvanceRequest/Response, ReworkRequest/Response)
+- **Timestamp:** 2026-03-11T04:30:00Z
+
+### [FORGEOS-BE069] — Backend Implementation
+- **Artifacts:** mcp-server/src/mcp_server/migration/feature_flags.py, config/migration-flags.yaml, mcp-server/tests/test_feature_flags.py
+- **Decisions:** YAML-based config with 4-level scoped evaluation (env > agent > operation > global). PyYAML added as dependency. Thread-safe reload with hash-based change detection. All ops default to filesystem mode.
+- **Timestamp:** 2026-03-11T08:00:00Z
+
+### [FORGEOS-BE065] — Documentation
+- **Artifacts:** mcp-server/README.md (State Change Emitter section), CHANGELOG.md (new entry), mcp-server/src/mcp_server/services/ticket_service.py (meta tags), .github/agent-output/Documentation/FORGEOS-BE065.md
+- **Decisions:** Added dedicated reference section in README with event types, quick start, integration guide, payload structure, and design constraints. Classified as Diataxis Reference. Existing inline docstrings in emitter.py verified complete (no changes needed).
+- **Timestamp:** 2026-03-11T04:45:00Z

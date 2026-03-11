@@ -1,0 +1,48 @@
+# ForgeOS Migration Feature Flags
+#
+# Controls which operations use file-based (tickets.py) or MCP-backed mode.
+#
+# Mode values:
+#   filesystem  — legacy file-based mode via tickets.py (default, safest)
+#   dual        — run both backends, compare results (verification)
+#   database    — MCP server / PostgreSQL only
+#
+# Rollout:
+#   rollout_percentage: 0-100  — percentage of calls routed to database mode
+#                                (only meaningful when mode is "database")
+#
+# Scopes (evaluated highest-to-lowest priority):
+#   1. Environment variable: FORGEOS_FLAG_{OPERATION}=true/false/mode
+#   2. Agent-specific override under "agents:" section
+#   3. Operation-specific setting under "operations:" section
+#   4. Global default under "global:" section
+
+global:
+  mode: filesystem
+
+operations:
+  sync:
+    mode: filesystem
+  claim:
+    mode: filesystem
+  advance:
+    mode: filesystem
+  release:
+    mode: filesystem
+  rework:
+    mode: filesystem
+  status:
+    mode: filesystem
+  validate:
+    mode: filesystem
+
+# Agent-specific overrides (uncomment to enable):
+# agents:
+#   Backend:
+#     sync:
+#       mode: dual
+#     status:
+#       mode: database
+#   QA:
+#     status:
+#       mode: dual
