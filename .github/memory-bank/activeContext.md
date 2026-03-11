@@ -43,6 +43,11 @@
 - **Decisions:** APPROVED with HIGH confidence. 10/10 DoD items pass. 7/7 ACs independently verified. 80 tests pass. Ruff clean, mypy clean, no TODOs, no console output. Upstream verdicts confirmed: QA ✅, Security ✅, CI ✅, Docs ✅.
 - **Timestamp:** 2026-03-11T01:15:00Z
 
+### [FORGEOS-BE068] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE068.md
+- **Decisions:** Added Dual-Mode Wrapper reference section to README (config, usage, API reference, fallback matrix). Added CHANGELOG entry. Existing docstrings in dual_mode.py, config.py, __init__.py were already comprehensive — no changes needed.
+- **Timestamp:** 2026-03-11T03:00:00Z
+
 ### [FORGEOS-BE055] — Security Review (Re-review)
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE055.md
 - **Decisions:** PASS — CWE-862 fix verified. Both `claim_next` and `claim_by_id` now call `check_role_stage_authorization()` before DB claim. STRIDE all LOW. OWASP 10/10 pass. Zero SARIF findings.
