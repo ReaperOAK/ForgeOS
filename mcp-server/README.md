@@ -42,6 +42,7 @@ The server reads configuration from environment variables with the `FORGEOS_` pr
 | `FORGEOS_DATABASE_URL` | `postgresql://forgeos:forgeos@localhost:5432/forgeos` | PostgreSQL connection URI |
 | `FORGEOS_DB_MIN_POOL_SIZE` | `2` | Minimum connection pool size |
 | `FORGEOS_DB_MAX_POOL_SIZE` | `10` | Maximum connection pool size |
+| `GITHUB_WEBHOOK_SECRET` | *(none)* | HMAC-SHA256 secret for GitHub webhook signature verification. When set, inbound GitHub webhooks must include a valid `X-Hub-Signature-256` header. |
 
 ### 3. Start the server
 
@@ -1308,6 +1309,7 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/notifications/`** — Notification queue (at-least-once delivery), configurable channels (webhook, Slack) with event-type filtering, background processor with exponential-backoff retries, and dead-letter handling
 - **`mcp_server/sessions/`** -- Agent session lifecycle management (heartbeat, timeout, resumption, concurrent access)
 - **`mcp_server/transport/webhooks.py`** — Inbound webhook HTTP receiver (`POST /api/webhooks/{source}`)
+- **`mcp_server/webhooks/`** — GitHub webhook signature verification (HMAC-SHA256) and event handling
 
 ### Error Handling
 
@@ -1544,6 +1546,65 @@ If no handler matches, the event is logged and dropped.
 | Body is not a JSON object | 400 | `{"error": "Payload must be a JSON object"}` |
 | Unknown source | 400 | `{"error": "Unknown webhook source: ...", "details": {...}}` |
 | Missing required fields | 400 | `{"error": "... missing required fields: ...", "details": {...}}` |
+
+### GitHub Webhook Signature Verification
+
+<!-- last_reviewed: 2026-03-11T23:59:00Z -->
+
+When `GITHUB_WEBHOOK_SECRET` is set, the server verifies inbound GitHub
+webhooks using HMAC-SHA256 signatures. Requests missing or failing
+signature verification are rejected before payload validation.
+
+#### How It Works
+
+1. The receiver reads the `X-Hub-Signature-256` header from the request.
+2. `compute_signature()` computes `sha256=<HMAC-SHA256(secret, body)>`.
+3. `verify_signature()` compares the expected and received signatures using
+   `hmac.compare_digest()` (constant-time) to prevent timing attacks.
+4. `verify_github_request()` orchestrates the check and extracts the event
+   type from the `X-GitHub-Event` header.
+
+#### Configuration
+
+Set the `GITHUB_WEBHOOK_SECRET` environment variable to the same secret
+configured in your GitHub repository's webhook settings. When the variable
+is unset or empty, signature verification is skipped.
+
+```bash
+export GITHUB_WEBHOOK_SECRET="your-webhook-secret"
+```
+
+#### Sending a Signed Webhook
+
+```bash
+SECRET="your-webhook-secret"
+BODY='{"action": "completed", "ref": "refs/heads/main"}'
+SIG="sha256=$(echo -n "$BODY" | openssl dgst -sha256 -hmac "$SECRET" | cut -d' ' -f2)"
+
+curl -X POST http://localhost:8080/api/webhooks/github \
+  -H "Content-Type: application/json" \
+  -H "X-GitHub-Event: push" \
+  -H "X-Hub-Signature-256: $SIG" \
+  -d "$BODY"
+```
+
+#### Error Responses
+
+| Condition | Status | Response Body |
+|-----------|--------|---------------|
+| `X-Hub-Signature-256` header missing | 401 | `{"error": "Missing X-Hub-Signature-256 header"}` |
+| Signature does not match | 403 | `{"error": "Invalid webhook signature"}` |
+
+#### API Reference
+
+| Symbol | Module | Description |
+|--------|--------|-------------|
+| `get_webhook_secret()` | `webhooks.signature` | Load the secret from `GITHUB_WEBHOOK_SECRET` env var |
+| `compute_signature()` | `webhooks.signature` | Compute `sha256=<hex>` HMAC for a payload |
+| `verify_signature()` | `webhooks.signature` | Constant-time signature comparison |
+| `verify_github_request()` | `webhooks.github_handler` | Verify request and extract event type |
+| `GitHubSignatureError` | `webhooks.github_handler` | Raised on signature mismatch (403) |
+| `GitHubSignatureMissingError` | `webhooks.github_handler` | Raised when header is absent (401) |
 
 ### Design Constraints
 
