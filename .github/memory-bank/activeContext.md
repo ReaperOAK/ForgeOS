@@ -1,3 +1,8 @@
+### [FORGEOS-FE004] — FRONTEND Complete
+- **Artifacts:** dashboard/src/app/tickets/[id]/page.tsx, dashboard/src/components/tickets/TicketMetadata.tsx, dashboard/src/components/tickets/HistoryTimeline.tsx, dashboard/src/components/tickets/DependencyTree.tsx, docs/uiux/components/ticket-detail-spec.md
+- **Decisions:** Client-side fetching with useEffect for interactivity; tabbed History/Dependencies to reduce scroll; relative timestamps with full-date hover; expandable event payloads; 404 via Next.js notFound()
+- **Timestamp:** 2026-03-11T20:30:00Z
+
 ### [FORGEOS-FE003] — FRONTEND Complete
 - **Artifacts:** dashboard/src/app/pipeline/page.tsx, dashboard/src/components/pipeline/PipelineBoard.tsx, dashboard/src/components/pipeline/StageColumn.tsx, dashboard/src/components/pipeline/TicketCard.tsx, docs/uiux/components/pipeline-kanban-spec.md
 - **Decisions:** Combined UIDesigner + Frontend stages; used existing API client from FE002; horizontal scroll layout with 11 SDLC stage columns; Tailwind-only styling
