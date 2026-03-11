@@ -1,7 +1,8 @@
 'use client';
 
-import { Menu, Search, Bell } from 'lucide-react';
+import { Menu, Bell } from 'lucide-react';
 import { Breadcrumb } from '@/components/Breadcrumb';
+import { SearchBar } from '@/components/search/SearchBar';
 import type { BreadcrumbItem } from '@/lib/types';
 
 interface TopBarProps {
@@ -26,13 +27,11 @@ export function TopBar({ breadcrumbs, onMenuToggle }: TopBarProps) {
                 <Breadcrumb items={breadcrumbs} />
             </div>
 
+            <div className="flex items-center gap-2 flex-1 justify-center px-4 hidden sm:flex">
+                <SearchBar />
+            </div>
+
             <div className="flex items-center gap-2">
-                <button
-                    className="p-2 rounded-md hover:bg-surface-alt focus-ring hidden sm:flex"
-                    aria-label="Search"
-                >
-                    <Search size={18} aria-hidden="true" />
-                </button>
                 <button
                     className="p-2 rounded-md hover:bg-surface-alt focus-ring relative"
                     aria-label="Notifications, 0 unread"

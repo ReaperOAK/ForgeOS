@@ -4,7 +4,7 @@
   "description": "Implement the global search interface following the UIDesigner mockup (FORGEOS-UID003). Build a search bar with type-ahead suggestions as the user types. Support filtering by stage, type, priority, and agent via filter chips. Display search results as a list of ticket cards with highlighted matching terms. Support search by ticket ID, title keyword, and file path.",
   "type": "frontend",
   "priority": "medium",
-  "stage": "READY",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -57,6 +57,42 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-11T14:48:34.312197+00:00",
+      "event": "CLAIMED",
+      "agent": "UIDesigner",
+      "machine_id": "pop-os",
+      "from_stage": "READY",
+      "to_stage": "READY",
+      "details": "Claimed by reaperoak@pop-os via UIDesigner, lease until 2026-03-11T15:18:34.312181+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T15:14:01.419753+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "UIDesigner",
+      "machine_id": "system",
+      "from_stage": "READY",
+      "to_stage": "UIDESIGNER",
+      "details": "Advanced from READY to UIDESIGNER"
+    },
+    {
+      "timestamp": "2026-03-11T15:14:06.948174+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "UIDesigner",
+      "machine_id": "system",
+      "from_stage": "UIDESIGNER",
+      "to_stage": "FRONTEND",
+      "details": "Advanced from UIDESIGNER to FRONTEND"
+    },
+    {
+      "timestamp": "2026-03-11T15:14:11.745552+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "FrontendEngineer",
+      "machine_id": "system",
+      "from_stage": "FRONTEND",
+      "to_stage": "QA",
+      "details": "Advanced from FRONTEND to QA"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
