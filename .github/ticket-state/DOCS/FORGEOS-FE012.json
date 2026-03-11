@@ -4,7 +4,7 @@
   "description": "Implement comprehensive filtering and sorting controls for the dashboard views. Build a shared FilterBar component with filter chips for stage, type, priority, operator, machine, and agent. Filters apply to the pipeline view, search results, and claims monitor. Implement URL-based filter state so filter configurations are bookmarkable and shareable. Support sort options on list views (by priority, creation date, last updated).",
   "type": "frontend",
   "priority": "medium",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -38,10 +38,10 @@
     "Clear all filters button resets to default unfiltered view"
   ],
   "rework_count": 0,
-  "claimed_by": "CIReviewer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T17:48:36.861232+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -129,6 +129,15 @@
       "from_stage": "CI",
       "to_stage": "CI",
       "details": "Claimed by ReaperOAK@pop-os via CIReviewer, lease until 2026-03-11T17:48:36.861232+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T17:27:26.434049+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "system",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "Advanced from CI to DOCS"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
