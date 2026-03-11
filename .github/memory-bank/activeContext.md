@@ -4172,3 +4172,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE061.md
 - **Decisions:** PASS — Score 99/100, 0 critical, 0 warnings, 1 suggestion (pre-existing mypy arg-type in webhook_service base class)
 - **Timestamp:** 2026-03-11T07:30:00Z
+
+### [FORGEOS-BE050] — Implement agent-runner.py Integration Hooks
+- **Artifacts:** agent-sdk/src/forgeos_sdk/runner_hooks.py, agent-sdk/tests/test_runner_hooks.py, agent-sdk/src/forgeos_sdk/__init__.py
+- **Decisions:** Used TicketOperations internally for MCP integration; catch all exceptions in hooks returning HookResult (never crash runner); HookConfig via env vars for granular enable/disable
+- **Timestamp:** 2026-03-11T03:40:00+00:00
