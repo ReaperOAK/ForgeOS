@@ -91,4 +91,18 @@ describe('useTicketStream', () => {
     expect(mockDisconnect).toHaveBeenCalled();
     expect(mockConnect).toHaveBeenCalledTimes(2); // initial + reconnect
   });
+
+  it('handles events without onTicketUpdate callback', () => {
+    renderHook(() => useTicketStream());
+
+    // Should not throw when no callback provided
+    expect(() => {
+      act(() => {
+        capturedOnEvent?.({
+          type: 'TICKET_CREATED',
+          ticket: { ticket_id: 'T-002' },
+        });
+      });
+    }).not.toThrow();
+  });
 });
