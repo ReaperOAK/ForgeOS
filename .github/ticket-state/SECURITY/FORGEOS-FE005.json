@@ -4,7 +4,7 @@
   "description": "Implement the interactive dependency graph (DAG visualization) following the UIDesigner mockup (FORGEOS-UID003). Render all tickets as nodes in a directed acyclic graph with dependency edges. Nodes are color-coded by current stage. Support zoom, pan, fit-to-view, and click-to-navigate-to-detail. Use a graph rendering library (e.g., react-flow, d3-dag, or cytoscape.js). Replace the static `todo_visual.py --dot` output with this interactive view.",
   "type": "frontend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -95,6 +95,24 @@
       "from_stage": "FRONTEND",
       "to_stage": "QA",
       "details": "Advanced from FRONTEND to QA"
+    },
+    {
+      "timestamp": "2026-03-11T15:15:47.555143+00:00",
+      "event": "CLAIMED",
+      "agent": "QAEngineer",
+      "machine_id": "pop-os",
+      "from_stage": "QA",
+      "to_stage": "QA",
+      "details": "Claimed by reaperoak@pop-os via QAEngineer, lease until 2026-03-11T15:45:47.555127+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T15:35:08.920593+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QAEngineer",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
