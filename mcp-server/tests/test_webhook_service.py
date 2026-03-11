@@ -139,10 +139,22 @@ class TestWebhookServiceValidation:
     def test_github_with_header_event_type(self) -> None:
         event = self.service.validate_payload(
             source="github",
-            payload={"action": "completed"},
+            payload={
+                "ref": "refs/heads/main",
+                "commits": [],
+                "repository": {"name": "test", "full_name": "org/test"},
+            },
             event_type_header="push",
         )
         assert event.event_type == "push"
+
+    def test_github_with_non_push_header_event_type(self) -> None:
+        event = self.service.validate_payload(
+            source="github",
+            payload={"action": "completed"},
+            event_type_header="check_run",
+        )
+        assert event.event_type == "check_run"
 
     def test_custom_valid(self) -> None:
         event = self.service.validate_payload(
