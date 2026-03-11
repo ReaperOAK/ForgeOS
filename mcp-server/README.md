@@ -2549,6 +2549,143 @@ await validate_operator_machine_access(pool, "uuid-...", "pop-os", "operator")
 - **Admin bypass** — based on the `role` field in the `operators` table, not on a separate privilege table.
 
 
+## Role-Based Claim Restrictions
+
+<!-- last_reviewed: 2026-03-11T00:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.auth.authorization` module enforces role-based claim
+restrictions so that agents can only claim tickets at the SDLC stage
+matching their role. A backend agent may only claim tickets in the BACKEND
+stage, a QA agent in the QA stage, and so on. The mapping is configurable
+for future role additions.
+
+### How It Works
+
+1. `RoleStagePolicy` maintains a mapping of agent role names to authorized
+   SDLC stages. The default policy covers all 14 agent types.
+2. When `claim_next()` or `claim_by_id()` is called on `TicketService`,
+   `check_role_stage_authorization()` validates the agent's role against
+   the ticket's current stage before the claim proceeds.
+3. Mismatched role-stage pairs are rejected with `RoleStageMismatchError`
+   (HTTP 403) containing the agent role, ticket stage, and authorized stage.
+4. Operators (role `"operator"`) and admins (role `"admin"`) bypass the
+   check when no `role_override` is specified.
+5. When an operator provides a `role_override`, the override role is
+   validated against the policy instead.
+
+### Default Role-Stage Mapping
+
+| Agent Role | Authorized Stage |
+|---|---|
+| `architect` | `ARCHITECT` |
+| `research` | `RESEARCH` |
+| `product_manager` | `PRODUCT_MANAGER` |
+| `ui_designer` | `UI_DESIGN` |
+| `backend` | `BACKEND` |
+| `devops` | `BACKEND` |
+| `frontend` | `FRONTEND` |
+| `qa` | `QA` |
+| `security` | `SECURITY` |
+| `ci` | `CI` |
+| `documentation` | `DOCUMENTATION` |
+| `validator` | `VALIDATOR` |
+| `todo` | *(none — does not process stages)* |
+| `dispatcher` | *(none — does not process stages)* |
+
+### Quick Start
+
+```python
+from mcp_server.auth.authorization import (
+    check_role_stage_authorization,
+    RoleStagePolicy,
+    RoleStageMismatchError,
+)
+
+# Validate that a backend agent can claim a BACKEND ticket
+check_role_stage_authorization("backend", "BACKEND")  # passes
+
+# Mismatched role-stage raises RoleStageMismatchError
+try:
+    check_role_stage_authorization("backend", "QA")
+except RoleStageMismatchError as e:
+    print(e)  # "Agent role 'backend' is authorized for stage 'BACKEND', not 'QA'"
+
+# Operator bypass (no role_override)
+check_role_stage_authorization("operator", "BACKEND")  # passes
+
+# Operator with role_override validates the override role
+check_role_stage_authorization("operator", "BACKEND", role_override="backend")  # passes
+check_role_stage_authorization("operator", "QA", role_override="backend")  # raises
+
+# Custom policy with overrides or new roles
+custom = RoleStagePolicy(overrides={"my_agent": "CUSTOM_STAGE"})
+check_role_stage_authorization("my_agent", "CUSTOM_STAGE", policy=custom)  # passes
+```
+
+### API Reference
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `RoleStagePolicy` | class | Configurable role-to-stage mapping with defaults for all 14 agent types |
+| `RoleStageMismatchError` | exception | Raised when agent role does not match ticket stage (403) |
+| `check_role_stage_authorization` | function | Enforce role-stage match; raises `RoleStageMismatchError` on mismatch |
+| `OPERATOR_ROLE` | constant | Role string (`"operator"`) that can bypass stage checks |
+| `ADMIN_ROLE` | constant | Role string (`"admin"`) that bypasses all authorization checks |
+
+### RoleStagePolicy Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `stage_for_role(role)` | `str \| None` | Authorized SDLC stage for the role, or `None` |
+| `is_authorized_role(role)` | `bool` | Whether the role is registered in the policy |
+| `all_roles()` | `list[str]` | All registered role names |
+| `add_role(role, stage)` | `None` | Add or update a role-stage mapping at runtime |
+| `remove_role(role)` | `None` | Remove a role from the mapping |
+
+### check_role_stage_authorization Parameters
+
+| Parameter | Type | Required | Description |
+|---|---|---|---|
+| `agent_role` | `str` | Yes | The claiming agent's role (e.g. `"backend"`) |
+| `ticket_stage` | `str` | Yes | The ticket's current SDLC stage (e.g. `"BACKEND"`) |
+| `role_override` | `str \| None` | No | Operator override — validates this role instead |
+| `policy` | `RoleStagePolicy \| None` | No | Custom policy; defaults to the module-level default |
+
+### Error Handling
+
+| Scenario | Behavior |
+|---|---|
+| Role matches stage | Authorization passes silently |
+| Role-stage mismatch | Raises `RoleStageMismatchError` (403) with descriptive message |
+| Unknown role | Raises `RoleStageMismatchError` with `unknown_agent_role` reason |
+| Role with no stage (e.g. `todo`) | Raises `RoleStageMismatchError` with `role_has_no_stage` reason |
+| Empty `agent_role` or `ticket_stage` | Raises `RoleStageMismatchError` with validation reason |
+| Operator without `role_override` | Bypasses check entirely |
+| Admin without `role_override` | Bypasses check entirely |
+| Operator with `role_override` | Validates the override role against the policy |
+
+### Integration with TicketService
+
+Both `claim_next()` and `claim_by_id()` on `TicketService` call
+`check_role_stage_authorization()` before delegating to the `ClaimQueue`.
+This ensures role-stage enforcement applies to both the MCP tool path
+(`tickets.next`, `tickets.claim`) and the REST API path.
+
+### Design Constraints
+
+- **Configurable mapping** — `RoleStagePolicy` accepts constructor overrides
+  and runtime mutations via `add_role()` / `remove_role()`. The default
+  mapping is not hardcoded into the authorization function.
+- **Case-insensitive** — roles are normalized to lowercase, stages to
+  uppercase before comparison.
+- **Structured logging** — all authorization decisions (pass, bypass,
+  mismatch, unknown role) are logged with `agent_role` and `ticket_stage`.
+- **No database dependency** — role-stage authorization is a pure in-memory
+  check. No database calls are needed.
+
+
 ## Event Sourcing
 
 The `mcp_server/events/` package provides an append-only event store that

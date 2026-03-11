@@ -17,7 +17,7 @@ Public API
 * :class:`TicketListResult` — paginated ticket list result.
 
 .. meta::
-   :ticket: FORGEOS-BE028, FORGEOS-BE030, FORGEOS-BE032
+   :ticket: FORGEOS-BE028, FORGEOS-BE030, FORGEOS-BE032, FORGEOS-BE055
    :last_reviewed: 2026-03-11T00:00:00Z
 """
 

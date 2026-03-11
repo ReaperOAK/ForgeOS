@@ -3767,3 +3767,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/tools/ticket_tools.py, mcp-server/src/mcp_server/services/ticket_service.py, mcp-server/tests/test_rework_tool.py
 - **Decisions:** Used SERIALIZABLE isolation for rework (OperationType.REWORK already existed). Reset to sdlc_flow[1] (implementation stage). Escalation at rework_count >= max_reworks emits ESCALATED event_type. Claim released on rework via UPDATE claimed_by=NULL. 34 tests cover all 8 ACs.
 - **Timestamp:** 2025-07-17T12:00:00Z
+
+### [FORGEOS-BE055] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, mcp-server/src/mcp_server/auth/authorization.py, mcp-server/src/mcp_server/services/ticket_service.py
+- **Decisions:** Added README reference section (Diátaxis Reference) covering RoleStagePolicy, check_role_stage_authorization, default mapping table, error handling, and TicketService integration. Placed after Operator Machine-Scoped Permissions section. Updated module docstring metadata with last_reviewed and ticket references.
+- **Timestamp:** 2026-03-11T00:00:00Z
+
+### [FORGEOS-BE048] — Summary Handoff Helpers (QA PASS)
+- **Artifacts:** agent-sdk/src/forgeos_sdk/summary.py, agent-sdk/tests/test_summary.py, agent-sdk/src/forgeos_sdk/__init__.py
+- **Decisions:** QA PASS — 28/28 tests pass, 100% coverage (58/58 statements), zero lint errors, all 6 ACs met. 297/297 full regression suite clean. No defects found.
+- **Timestamp:** 2026-03-11T01:45:00Z
