@@ -35,10 +35,10 @@
     "Missing idempotency key on claim/advance operations is allowed but logged as a warning"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Validator",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-11T03:06:35.310215+00:00",
   "lease_duration_minutes": null,
   "history": [
     {
@@ -147,6 +147,15 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "Added Idempotency Key Middleware section to mcp-server/README.md, CHANGELOG entry. All public APIs documented."
+    },
+    {
+      "timestamp": "2026-03-11T02:36:35.310233+00:00",
+      "event": "CLAIMED",
+      "agent": "Validator",
+      "machine_id": "pop-os",
+      "from_stage": "VALIDATION",
+      "to_stage": "VALIDATION",
+      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-11T03:06:35.310215+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
