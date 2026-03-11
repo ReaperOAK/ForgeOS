@@ -1805,3 +1805,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE040.md
 - **Decisions:** PASS — Score 78/100, 0 critical, 4 warnings (3 CC violations from 4-dimension filter model, 1 pyright strict Unknown propagation). Coverage 98%.
 - **Timestamp:** 2026-03-11T10:15:00Z
+
+### [FORGEOS-FE001] — Documentation Summary
+- **Artifacts:** dashboard/README.md (created), CHANGELOG.md (updated), README.md (updated)
+- **Decisions:** Diátaxis Reference quadrant for dashboard README. Documented theme anti-flash pattern with three-layer explanation. Subset of design tokens shown for quick reference rather than full listing.
+- **Timestamp:** 2026-03-11T18:00:00Z
