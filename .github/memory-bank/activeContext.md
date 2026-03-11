@@ -1735,3 +1735,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** agent-sdk/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE050.md
 - **Decisions:** Added Runner Hooks section to agent-sdk/README.md covering HookResult, HookConfig, pre_claim_check(), post_advance_or_rework() with code examples and env var table. CHANGELOG entry added. Inline docstrings already comprehensive — no additions needed.
 - **Timestamp:** 2026-03-11T09:50:00Z
+
+### [FORGEOS-BE069] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE069.md
+- **Decisions:** Added Migration Feature Flags Reference section to mcp-server/README.md with full API docs, usage examples, resolution order, error handling, and design constraints. Added architecture bullet for mcp_server/migration/. CHANGELOG entry added. Inline docstrings already comprehensive — no additions needed.
+- **Timestamp:** 2026-03-11T12:45:00Z

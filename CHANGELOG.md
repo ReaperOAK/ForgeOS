@@ -8,6 +8,22 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Feature Flag System for Migration** (FORGEOS-BE069) — YAML-based feature
+  flag system at `mcp-server/src/mcp_server/migration/feature_flags.py` that
+  controls per-operation routing between filesystem, dual, and database modes
+  during the migration from `tickets.py` to MCP-backed operations. Each of the
+  7 operations (`sync`, `claim`, `advance`, `rework`, `release`, `status`,
+  `validate`) has an independent mode flag loaded from
+  `config/migration-flags.yaml`. Four-level resolution: environment variable
+  override → agent-specific → operation-specific → global default. Gradual
+  rollout via `rollout_percentage` (0–100). Auto-reload detects config file
+  changes without server restart. Content-addressed caching (SHA-256) prevents
+  redundant re-parsing. Thread-safe with `threading.Lock`. Structured change
+  logging on every flag transition. `FeatureFlagManager`, `FlagMode` enum,
+  `OperationFlag` frozen dataclass, `FeatureFlagError`. `DualModeConfig`
+  pydantic-settings model at `config.py` for `FORGEOS_*` environment variables.
+  60 tests, 98% coverage, CI quality score 83/100.
+
 - **agent-runner.py Integration Hooks** (FORGEOS-BE050) — `RunnerHooks`
   class at `agent-sdk/src/forgeos_sdk/runner_hooks.py` providing lifecycle
   hooks for the two-commit protocol. `pre_claim_check()` validates ticket

@@ -4,7 +4,7 @@
   "description": "Implement a feature flag system that controls the migration mode per operation type. Each operation (sync, claim, advance, rework, release, status, validate) has an independent flag with values: `filesystem` (legacy only), `dual` (both), or `database` (MCP only). Flags are loaded from a YAML configuration file and can be updated without restart via file watch or API endpoint. This allows gradual, per-operation cutover from filesystem to database mode.",
   "type": "backend",
   "priority": "critical",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",

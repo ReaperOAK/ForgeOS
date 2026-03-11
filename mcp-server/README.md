@@ -1311,6 +1311,7 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/events/`** — Append-only event sourcing (EventStore, EventType, Event dataclass)
 - **`mcp_server/locking/`** — Distributed claim queue (SKIP LOCKED), file mutex (advisory locks)
 - **`mcp_server/notifications/`** — Notification queue (at-least-once delivery), configurable channels (webhook, Slack) with event-type filtering, background processor with exponential-backoff retries, and dead-letter handling
+- **`mcp_server/migration/`** — Dual-mode migration wrapper and YAML-based feature flag system for per-operation mode switching (filesystem / dual / database)
 - **`mcp_server/sessions/`** -- Agent session lifecycle management (heartbeat, timeout, resumption, concurrent access)
 - **`mcp_server/transport/webhooks.py`** — Inbound webhook HTTP receiver (`POST /api/webhooks/{source}`)
 - **`mcp_server/webhooks/`** — GitHub webhook signature verification (HMAC-SHA256), push event handling, and CI status event handler (check_run/status → ticket advance or rework)
@@ -3891,6 +3892,167 @@ This ensures role-stage enforcement applies to both the MCP tool path
   mismatch, unknown role) are logged with `agent_role` and `ticket_stage`.
 - **No database dependency** — role-stage authorization is a pure in-memory
   check. No database calls are needed.
+
+
+## Migration Feature Flags
+
+<!-- last_reviewed: 2026-03-11T12:30:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.migration.feature_flags` module provides a YAML-based feature
+flag system that controls per-operation routing between file-based (`tickets.py`)
+and MCP-backed ticket operations during the migration from filesystem to database
+mode.
+
+### Concepts
+
+Each ticket operation (`sync`, `claim`, `advance`, `rework`, `release`, `status`,
+`validate`) has an independent mode flag:
+
+| Mode | Behavior |
+|------|----------|
+| `filesystem` | Legacy file-based mode via `tickets.py` (default, safest) |
+| `dual` | Run both backends, compare results for verification |
+| `database` | MCP server / PostgreSQL only |
+
+### Resolution Order
+
+Flags resolve in priority order (highest wins):
+
+1. **Environment variable** — `FORGEOS_FLAG_{OPERATION}` (e.g. `FORGEOS_FLAG_SYNC=database`)
+2. **Agent-specific** — per-agent, per-operation overrides in YAML
+3. **Operation-specific** — per-operation defaults in YAML
+4. **Global** — fallback mode for all operations
+
+### Configuration File
+
+Flags are loaded from `config/migration-flags.yaml`:
+
+```yaml
+global:
+  mode: filesystem
+
+operations:
+  sync:
+    mode: dual
+  status:
+    mode: database
+    rollout_percentage: 25
+
+agents:
+  Backend:
+    claim:
+      mode: dual
+```
+
+### Gradual Rollout
+
+Set `rollout_percentage` (0–100) on any operation to route that percentage of
+calls to `database` mode while the remainder uses `filesystem`. This enables
+controlled, incremental migration.
+
+### Auto-Reload
+
+When `auto_reload=True`, the manager checks the config file's mtime on every
+`get_mode()` call. If the file changed, it reloads automatically — no server
+restart needed. A content hash (SHA-256) prevents redundant re-parsing when
+the mtime changes but content is identical.
+
+Force a manual reload at any time with `reload()`.
+
+### Quick Start
+
+```python
+from mcp_server.migration import FeatureFlagManager, FlagMode
+
+# Load from default path (config/migration-flags.yaml) with auto-reload
+manager = FeatureFlagManager.from_config(auto_reload=True)
+
+# Resolve mode for an operation
+mode = manager.get_mode("sync")
+if mode == FlagMode.DATABASE:
+    # route to MCP server
+    ...
+
+# Resolve with agent-specific override
+mode = manager.get_mode("claim", agent="Backend")
+
+# Get all flags for monitoring
+flags = manager.get_all_flags()
+```
+
+### Environment Variable Overrides
+
+Set `FORGEOS_FLAG_{OPERATION}` to override any YAML configuration:
+
+| Value | Resolves To |
+|-------|-------------|
+| `true`, `enabled`, `1`, `database` | `FlagMode.DATABASE` |
+| `false`, `disabled`, `0`, `filesystem` | `FlagMode.FILESYSTEM` |
+| `dual` | `FlagMode.DUAL` |
+
+Example: `FORGEOS_FLAG_SYNC=database` forces sync to database mode regardless
+of YAML config.
+
+### API Reference
+
+| Symbol | Type | Description |
+|--------|------|-------------|
+| `FlagMode` | enum | `FILESYSTEM`, `DUAL`, `DATABASE` |
+| `OperationFlag` | frozen dataclass | Resolved flag with operation, mode, rollout, and source |
+| `FeatureFlagManager` | class | Loads YAML config, resolves flags with scoped overrides |
+| `FeatureFlagError` | exception | Invalid configuration (bad mode, unknown operation, parse error) |
+| `VALID_OPERATIONS` | frozenset | `{sync, claim, advance, rework, release, status, validate}` |
+| `DEFAULT_CONFIG_PATH` | Path | `config/migration-flags.yaml` |
+
+#### FeatureFlagManager Methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `load()` | `None` | Parse the YAML file and update internal state |
+| `reload()` | `None` | Force a full reload (invalidates cache) |
+| `get_mode(operation, agent=None)` | `FlagMode` | Resolve the effective mode using the 4-level priority chain |
+| `get_all_flags()` | `dict` | Serializable snapshot of all flag state (for monitoring) |
+| `from_config(config_path=None, auto_reload=False)` | `FeatureFlagManager` | Class method factory — creates and loads a manager |
+
+#### OperationFlag
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `operation` | `str` | The operation name |
+| `mode` | `FlagMode` | Resolved mode |
+| `rollout_percentage` | `int \| None` | Percentage of calls routed to database (0–100) |
+| `source` | `str` | Origin: `"env"`, `"agent"`, `"operation"`, or `"global"` |
+
+`OperationFlag.evaluate()` returns the effective `FlagMode`, applying rollout
+percentage when set.
+
+### Change Logging
+
+Every flag value change emits a structured log entry with the scope, operation,
+old value, and new value. This provides an audit trail for migration transitions.
+
+### Error Handling
+
+| Scenario | Behavior |
+|----------|----------|
+| Unknown operation name | Raises `FeatureFlagError` with valid operations list |
+| Invalid mode value | Raises `FeatureFlagError` with valid modes list |
+| Invalid rollout percentage | Raises `FeatureFlagError` (must be 0–100) |
+| Non-dict YAML structure | Raises `FeatureFlagError` |
+| Config file missing | Raises `FileNotFoundError` |
+| `get_mode()` before `load()` | Raises `FeatureFlagError` |
+| Config file temporarily unavailable during auto-reload | Silently skips reload |
+
+### Design Constraints
+
+- **Thread-safe** — all state mutations hold a `threading.Lock`.
+- **Content-addressed caching** — SHA-256 hash prevents redundant re-parsing.
+- **Immutable flags** — `OperationFlag` is a frozen dataclass.
+- **Validated operations** — only the 7 known operations are accepted.
+- **Safe YAML** — uses `yaml.safe_load()` exclusively (no arbitrary code execution).
+- **No external state** — flags are derived purely from the YAML file and environment variables.
 
 
 ## Admin Force Operations
