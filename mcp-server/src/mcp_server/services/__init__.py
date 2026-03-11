@@ -13,9 +13,15 @@ Public API
 * :class:`WebhookEvent` — validated webhook event value object.
 * :class:`PRService` — PR event handler (ticket correlation, metadata extraction).
 * :class:`PREvent` — processed PR event value object.
+* :class:`EventBroadcaster` — real-time WebSocket event broadcaster.
 """
 
 from mcp_server.services.audit_service import AuditService
+from mcp_server.services.event_broadcaster import (
+    ClientFilter,
+    EventBroadcaster,
+    TicketEvent,
+)
 from mcp_server.services.pr_service import PREvent, PRService
 from mcp_server.services.sync_engine import (
     IntegrityError,
@@ -40,6 +46,8 @@ __all__ = [
     "AuditService",
     "ClaimOwnershipError",
     "ClaimValidationError",
+    "ClientFilter",
+    "EventBroadcaster",
     "IntegrityError",
     "NextTicketResult",
     "PREvent",
@@ -48,6 +56,7 @@ __all__ = [
     "SyncEngine",
     "SyncResult",
     "TicketDetail",
+    "TicketEvent",
     "TicketListResult",
     "TicketService",
     "ValidateResult",
