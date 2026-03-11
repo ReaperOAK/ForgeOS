@@ -3817,3 +3817,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/middleware/idempotency.py, mcp-server/tests/test_idempotency.py, mcp-server/src/mcp_server/middleware/__init__.py
 - **Decisions:** QA PASS — 38/38 tests pass, 94% branch coverage. All 6 ACs verified (AC4 PostgreSQL store deferred — in-memory with pluggable store abstraction, file_paths scope confirms this was intended). No regressions (1 pre-existing failure in test_correlation.py unrelated to BE041). Ruff lint clean.
 - **Timestamp:** 2026-03-11T02:15:00Z
+
+### [FORGEOS-BE061] — Implement Push Event Handler for Sync
+- **Artifacts:** mcp-server/src/mcp_server/webhooks/github_handler.py, mcp-server/src/mcp_server/services/webhook_service.py, mcp-server/src/mcp_server/webhooks/__init__.py, mcp-server/tests/test_push_event_handler.py, mcp-server/tests/test_webhook_service.py
+- **Decisions:** Used factory pattern (create_push_handler) with injected sync callback for testability. Added push-specific payload validation (_validate_github_push_payload) since push events lack the action field. Recognized both main and master as main branches.
+- **Timestamp:** 2026-03-11T02:20:00Z

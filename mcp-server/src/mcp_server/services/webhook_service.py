@@ -87,6 +87,7 @@ class UnknownSourceError(WebhookValidationError):
 # ---------------------------------------------------------------------------
 
 _GITHUB_REQUIRED_FIELDS: frozenset[str] = frozenset({"action"})
+_GITHUB_PUSH_REQUIRED_FIELDS: frozenset[str] = frozenset({"ref", "commits", "repository"})
 _CUSTOM_REQUIRED_FIELDS: frozenset[str] = frozenset({"event_type"})
 
 
@@ -111,6 +112,36 @@ def _validate_github_payload(payload: dict[str, Any]) -> str:
             "GitHub payload 'action' must be a non-empty string",
         )
     return action.strip()
+
+
+def _validate_github_push_payload(payload: dict[str, Any]) -> str:
+    """Validate a GitHub push event payload.
+
+    Push events carry ``ref``, ``commits``, and ``repository`` fields
+    instead of ``action``.
+
+    Returns
+    -------
+    str
+        ``"push"`` — the event type for push events.
+    """
+    missing = _GITHUB_PUSH_REQUIRED_FIELDS - set(payload.keys())
+    if missing:
+        raise WebhookValidationError(
+            f"GitHub push payload missing required fields: {sorted(missing)}",
+            details={"missing_fields": sorted(missing)},
+        )
+    ref = payload.get("ref")
+    if not isinstance(ref, str) or not ref.strip():
+        raise WebhookValidationError(
+            "GitHub push payload 'ref' must be a non-empty string",
+        )
+    commits = payload.get("commits")
+    if not isinstance(commits, list):
+        raise WebhookValidationError(
+            "GitHub push payload 'commits' must be a list",
+        )
+    return "push"
 
 
 def _validate_custom_payload(payload: dict[str, Any]) -> str:
@@ -271,8 +302,12 @@ class WebhookService:
 
         # GitHub: prefer the header-provided event type, but still validate body
         if source_lower == WebhookSource.GITHUB.value and event_type_header:
-            _validate_github_payload(payload)  # validate body structure
-            event_type = event_type_header.strip()
+            header_stripped = event_type_header.strip()
+            if header_stripped == "push":
+                _validate_github_push_payload(payload)
+            else:
+                _validate_github_payload(payload)  # validate body structure
+            event_type = header_stripped
         else:
             event_type = validator(payload)
 
