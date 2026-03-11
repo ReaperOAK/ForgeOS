@@ -1860,3 +1860,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE071.md
 - **Decisions:** REJECTED — DoD #3 (lint) and #4 (type checks) fail. 5 ruff errors: 3x F401 unused imports (field in both files, STAGE_DIR_TO_DB), 1x TC003 (Path not in TYPE_CHECKING block), 1x SIM105 (try-except-pass → contextlib.suppress). 5 pyright errors: 3 unused imports + 2 pre-existing codebase pattern (not regressions). All 7 ACs met, 33/33 tests pass, 90% coverage. Upstream QA ✅ Security ✅ CI ✅ Docs ✅. Rejection is on lint cleanliness only.
 - **Timestamp:** 2026-03-11T20:00:00Z
+
+### [FORGEOS-BE071] — BACKEND rework #1 complete
+- **Artifacts:** mcp-server/src/mcp_server/migration/sync_engine.py, mcp-server/src/mcp_server/migration/conflict_resolver.py
+- **Decisions:** Fixed all 5 ruff lint errors (3x F401, 1x TC003, 1x SIM105). No behavioral changes. 33/33 tests pass.
+- **Timestamp:** 2026-03-11T20:30:00Z

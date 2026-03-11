@@ -18,12 +18,15 @@ The engine can be started and stopped independently of the MCP server.
 from __future__ import annotations
 
 import asyncio
+import contextlib
 import json
 import shutil
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from datetime import datetime, timezone
-from pathlib import Path
-from typing import Any, Protocol, runtime_checkable
+from typing import TYPE_CHECKING, Any, Protocol, runtime_checkable
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 from mcp_server.migration.conflict_resolver import ConflictRecord, ConflictResolver
 from mcp_server.migration.importer import (
@@ -32,7 +35,7 @@ from mcp_server.migration.importer import (
     ImportResult,
     TicketImporter,
 )
-from mcp_server.migration.transformers import DB_TO_STAGE_DIR, STAGE_DIR_TO_DB
+from mcp_server.migration.transformers import DB_TO_STAGE_DIR
 from mcp_server.observability import get_logger
 
 logger = get_logger("migration.sync_engine")
@@ -163,10 +166,8 @@ class SyncEngine:
 
         self._stop_event.set()
         assert self._task is not None
-        try:
+        with contextlib.suppress(asyncio.CancelledError):
             await self._task
-        except asyncio.CancelledError:
-            pass
         self._task = None
         logger.info("Sync engine stopped")
 
