@@ -3747,3 +3747,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/middleware/idempotency.py, mcp-server/src/mcp_server/middleware/__init__.py, mcp-server/tests/test_idempotency.py
 - **Decisions:** Used Starlette BaseHTTPMiddleware following rate_limiter pattern. In-memory store with abstract IdempotencyStore base for pluggable backends. MissingKeyPolicy enum (WARN default, REJECT for strict). Monotonic time for TTL to avoid clock drift. In-progress marker for 409 conflict detection.
 - **Timestamp:** 2026-03-11T01:45:00Z
+
+### [FORGEOS-BE049] — Filesystem Fallback Mode
+- **Artifacts:** agent-sdk/src/forgeos_sdk/fallback.py, agent-sdk/src/forgeos_sdk/client.py, agent-sdk/src/forgeos_sdk/config.py, agent-sdk/tests/test_fallback.py
+- **Decisions:** Delegated mutations to tickets.py CLI via subprocess (avoids reimplementing state machine). Direct JSON reads for get_ticket. OperationMode enum (mcp/filesystem/auto) in SDKConfig. Auto mode catches connection errors and transparently switches to fallback. Lazy import of FilesystemFallback to avoid circular imports.
+- **Timestamp:** 2026-03-11T19:30:00Z
+
+### [FORGEOS-BE068] — Dual-Mode Wrapper for tickets.py
+- **Artifacts:** mcp-server/src/mcp_server/migration/dual_mode.py, mcp-server/src/mcp_server/migration/config.py, mcp-server/src/mcp_server/migration/__init__.py, mcp-server/tests/test_dual_mode.py, mcp-server/tests/test_migration_config.py
+- **Decisions:** Async-first design with Protocol-based backend interface. FileMode uses asyncio subprocess to call tickets.py CLI. McpMode uses stdlib urllib for JSON-RPC (no httpx dependency). DualModeWrapper routes via FORGEOS_MODE env var with automatic health-check fallback. OperationResult is a frozen dataclass. Rework not available in MCP mode (no server-side tool yet) — wrapper falls back to file mode.
+- **Timestamp:** 2026-03-11T01:10:00Z
