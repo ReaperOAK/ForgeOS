@@ -4,7 +4,7 @@
   "description": "Implement a feature flag system that controls the migration mode per operation type. Each operation (sync, claim, advance, rework, release, status, validate) has an independent flag with values: `filesystem` (legacy only), `dual` (both), or `database` (MCP only). Flags are loaded from a YAML configuration file and can be updated without restart via file watch or API endpoint. This allows gradual, per-operation cutover from filesystem to database mode.",
   "type": "backend",
   "priority": "critical",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -36,10 +36,10 @@
     "Structured log entry emitted on every flag change with old and new values"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-11T09:40:42.238341+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -139,6 +139,22 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Released claim from Documentation Specialist: Lease expired at 2026-03-11T08:56:07.423058+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T09:42:47.840609+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Validator: Lease expired at 2026-03-11T09:40:42.238341+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T09:50:07.553804+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",
