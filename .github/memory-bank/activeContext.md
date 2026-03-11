@@ -1,3 +1,8 @@
+### [FORGEOS-FE002] — UIDESIGNER complete
+- **Artifacts:** docs/uiux/components/api-client-spec.md, .github/agent-output/UIDesigner/FORGEOS-FE002.md
+- **Decisions:** Code-only library ticket — produced interface specs matching backend types. Extended existing ApiClient pattern. Claims derived from ticket filter, no separate endpoint. SSE excluded (separate ticket).
+- **Timestamp:** 2026-03-11T14:00:00Z
+
 ### [FORGEOS-FE011] — UIDESIGNER complete
 - **Artifacts:** docs/uiux/components/health-dashboard-spec.md, .github/agent-output/UIDesigner/FORGEOS-FE011.md
 - **Decisions:** Extended existing MetricCard/HealthStatusCard patterns rather than replacing. Client-side status computation from thresholds. Nested surfaceAlt for visual depth. In-place 150ms fade refresh rather than skeleton loading.

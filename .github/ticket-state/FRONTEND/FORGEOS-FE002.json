@@ -4,7 +4,7 @@
   "description": "Implement the REST API client library for the dashboard. Create TypeScript interfaces matching the backend API response models (Ticket, Claim, StageTransition, EventHistory, PipelineOverview). Implement API functions for all ticket endpoints: list tickets with filters, get ticket detail, get ticket history. Use fetch with proper error handling, response typing, and request/response interceptors for authentication headers.",
   "type": "frontend",
   "priority": "critical",
-  "stage": "UIDESIGNER",
+  "stage": "FRONTEND",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -39,10 +39,10 @@
     "Base URL configurable via NEXT_PUBLIC_API_URL environment variable"
   ],
   "rework_count": 0,
-  "claimed_by": "UIDesigner",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-11T12:45:36.410351+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -58,6 +58,31 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-11T13:08:46.892350+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from UIDesigner: Lease expired at 2026-03-11T12:45:36.410133+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T13:21:34.859303+00:00",
+      "event": "CLAIMED",
+      "agent": "UIDesigner",
+      "machine_id": "pop-os",
+      "from_stage": "UIDESIGNER",
+      "to_stage": "UIDESIGNER",
+      "details": "Claimed by reaperoak@pop-os via UIDesigner, lease until 2026-03-11T13:51:34.859287+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T13:26:27.743214+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "UIDesigner",
+      "machine_id": "system",
+      "from_stage": "FRONTEND",
+      "to_stage": "QA",
+      "details": "Advanced from FRONTEND to QA"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
