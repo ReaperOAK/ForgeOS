@@ -3887,3 +3887,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/api/routes/pipeline.py, mcp-server/src/mcp_server/api/routes/health.py, mcp-server/src/mcp_server/api/schemas.py, mcp-server/tests/test_pipeline_api.py, mcp-server/tests/test_health_api.py
 - **Decisions:** Used factory pattern (create_*_endpoint) matching existing route conventions. Health endpoint delegates to existing HealthChecker. Pipeline uses existing count_by_stage() + new count_by_stage_and_type(). Both endpoints are public read-only, no auth middleware.
 - **Timestamp:** 2026-03-11T02:10:00Z
+
+### [FORGEOS-BE062] — Implement CI Status Event Handler (QA PASS)
+- **Artifacts:** mcp-server/src/mcp_server/webhooks/github_handler.py, mcp-server/tests/test_ci_status_handler.py, .github/agent-output/QA/FORGEOS-BE062.md
+- **Decisions:** QA PASS — 31/31 tests pass, CI-specific code ~96% coverage (5 uncovered lines in empty-branch edge case). 2434/2439 full suite pass (5 pre-existing failures unrelated). All 6 ACs verified: check_run+status events processed, success→advance, failure→rework, CI-stage-only guard, failure detail extraction, idempotency via stage check. Zero lint errors, zero regressions.
+- **Timestamp:** 2026-03-11T02:35:00Z
