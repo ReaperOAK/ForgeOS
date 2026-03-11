@@ -4065,3 +4065,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE063.md
 - **Decisions:** PASS — Score 99/100, 0 critical, 0 warnings, 1 suggestion (OC-007 entity size)
 - **Timestamp:** 2026-03-11T02:30:00Z
+
+### [FORGEOS-BE063] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE063.md
+- **Decisions:** Added PR Event Handler subsection under Webhook Receiver in README (how it works, actions table, advancement detection, quick start, API reference, field tables). CHANGELOG entry added. Existing docstrings comprehensive — no code changes needed.
+- **Timestamp:** 2026-03-11T03:10:00Z
+
+### [FORGEOS-BE062] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE062.md
+- **Decisions:** Added CI Status Event Handler reference section to README under Webhook Receiver; CHANGELOG entry with full feature description; inline docstrings already complete — no changes needed.
+- **Timestamp:** 2026-03-11T04:10:00Z
