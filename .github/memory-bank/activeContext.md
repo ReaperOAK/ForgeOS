@@ -1,3 +1,8 @@
+### [FORGEOS-BE034] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE034.md
+- **Decisions:** Added Ticket List REST Endpoint section to README (request/response/errors/schemas/design). Updated TicketRepository methods table with list_tickets and list_filtered. Added CHANGELOG entry. Existing docstrings were complete — no additions needed.
+- **Timestamp:** 2026-03-11T01:30:00Z
+
 ### [FORGEOS-BE067] — Validation: APPROVED
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE067.md
 - **Decisions:** APPROVED with HIGH confidence. 10/10 DoD items pass. 6/6 ACs verified. 88 tests pass, processor.py 97% + queue.py 96% coverage. Ruff clean, mypy clean, no TODOs, no console. Upstream: QA ✅, Security ✅, CI ✅ (97/100), Docs ✅.

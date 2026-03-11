@@ -456,6 +456,8 @@ event = await event_repo.append_event(
 | `get_by_id(ticket_id)` | `TicketRow \| None` | Fetch one ticket by human-readable ID |
 | `list_by_stage(stage, limit, offset)` | `list[TicketRow]` | List tickets in a stage, ordered by priority then creation date |
 | `list_by_type(ticket_type, limit, offset)` | `list[TicketRow]` | Filter tickets by type |
+| `list_tickets(stage, ticket_type, priority, claimed_by, machine_id, limit, offset)` | `tuple[list[TicketRow], int]` | Multi-filter list with total count via `COUNT(*) OVER()` |
+| `list_filtered(stage, ticket_type, priority, limit, offset)` | `list[TicketRow]` | Combined filter list (stage, type, priority) |
 | `create(ticket_id, title, ...)` | `TicketRow` | Insert a new ticket |
 | `update_stage(ticket_id, new_stage, new_status)` | `TicketRow \| None` | Update stage and status |
 | `count_by_stage()` | `dict[str, int]` | Aggregate ticket counts per stage |
@@ -1301,6 +1303,7 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/db/`** — asyncpg connection pool, health monitoring, and pool metrics
 - **`mcp_server/observability/`** — Structured JSON logging, correlation IDs, PII redaction, and health/readiness probes
 - **`mcp_server/auth/`** — Agent API key authentication, machine registration and verification, rate limiting, and identity resolution
+- **`mcp_server/api/`** — REST API routes and Pydantic schemas (`GET /api/tickets` ticket list endpoint)
 - **`mcp_server/services/`** — Business logic orchestration (TicketService, SyncEngine, MachineService, WebhookService)
 - **`mcp_server/middleware/`** — Unified auth middleware (MCP + REST), per-agent rate limiting, correlation ID tracking
 - **`mcp_server/tools/`** — Dynamic tool registration, schema validation, ticket tools (`tickets.next`, `tickets.claim`, `tickets.release`, `tickets.status`, `tickets.advance`, `tickets.sync`, `tickets.validate`), and FastMCP bridge
@@ -1360,6 +1363,8 @@ POST that returns a JSON response — no server-side session state required.
 |------|--------|-------------|
 | `/mcp` | POST | MCP JSON-RPC request endpoint |
 | `/mcp/health` | GET | Transport health check |
+| `/api/tickets` | GET | Paginated ticket list with filtering |
+| `/api/admin/audit` | GET | Audit log query endpoint |
 
 **Usage:**
 
@@ -1420,6 +1425,119 @@ python -m mcp_server
 | `HTTPTransportConfig` | `transport.http` | Pydantic config for HTTP transport |
 | `SSETransport` | `transport.sse` | SSE transport class |
 | `SSETransportConfig` | `transport.sse` | Pydantic config for SSE transport |
+
+
+## Ticket List REST Endpoint
+
+<!-- last_reviewed: 2026-03-11T01:30:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `GET /api/tickets` endpoint returns a paginated, filtered list of tickets.
+It is mounted on the Starlette application alongside the MCP transport and
+health check routes.
+
+### Request
+
+```http
+GET /api/tickets?stage=READY&type=backend&priority=high&limit=20&offset=0
+```
+
+#### Query Parameters
+
+| Parameter | Type | Default | Description |
+|-----------|------|---------|-------------|
+| `stage` | `string` | *(all)* | Filter by SDLC stage (e.g. `READY`, `BACKEND`, `QA`) |
+| `type` | `string` | *(all)* | Filter by ticket type (e.g. `backend`, `frontend`, `infra`) |
+| `priority` | `string` | *(all)* | Filter by priority (`critical`, `high`, `medium`, `low`) |
+| `claimed_by` | `string` | *(all)* | Filter by the agent name that holds the claim |
+| `machine_id` | `string` | *(all)* | Filter by the machine identifier |
+| `limit` | `int` | `50` | Maximum rows to return (capped at 200) |
+| `offset` | `int` | `0` | Number of rows to skip for pagination |
+
+All parameters are optional. Omitting all filters returns every ticket.
+
+### Response
+
+Returns `200 OK` with a JSON body containing `tickets` and `pagination`:
+
+```json
+{
+  "tickets": [
+    {
+      "ticket_id": "FORGEOS-BE034",
+      "title": "Implement Ticket List REST Endpoint",
+      "type": "backend",
+      "priority": "high",
+      "stage": "DONE",
+      "status": "completed",
+      "claimed_by_name": null,
+      "machine_id": null,
+      "operator": null,
+      "rework_count": 1,
+      "tags": [],
+      "created_at": "2026-03-05T18:06:45Z",
+      "updated_at": "2026-03-11T01:15:00Z"
+    }
+  ],
+  "pagination": {
+    "total": 1,
+    "limit": 50,
+    "offset": 0
+  }
+}
+```
+
+### Error Responses
+
+| Status | Condition | Body |
+|--------|-----------|------|
+| `400` | Invalid enum value for `stage`, `type`, or `priority` | `{"error": "Invalid value for 'stage': 'BOGUS'. Must be one of: [...]"}` |
+| `503` | Database pool unavailable | `{"error": "Database unavailable"}` |
+| `500` | Unexpected query failure | `{"error": "Internal server error"}` |
+
+### Pydantic Schemas
+
+Defined in `mcp_server.api.schemas`:
+
+| Model | Description |
+|-------|-------------|
+| `TicketStageEnum` | Valid SDLC stage values (13 members) |
+| `TicketTypeEnum` | Valid ticket type values (10 members) |
+| `TicketPriorityEnum` | Valid priority values (`critical`, `high`, `medium`, `low`) |
+| `TicketSummary` | Summary fields returned per ticket in list responses |
+| `PaginationMeta` | `total`, `limit`, `offset` metadata |
+| `TicketListResponse` | Top-level response with `tickets` and `pagination` |
+
+### Route Mounting
+
+The endpoint is mounted in `HTTPTransport.create_app()` using a late-binding
+pattern. The transport creates a `_ticket_repo_ref` list that is populated by
+the server lifespan once the database pool is ready. This allows the endpoint
+to return `503 Database unavailable` when the server starts without a database.
+
+```python
+from mcp_server.api.routes import create_tickets_endpoint
+
+# Late-binding getter
+_ticket_repo_ref: list[Any] = [None]
+def _get_ticket_repo() -> Any:
+    return _ticket_repo_ref[0]
+
+tickets_handler = create_tickets_endpoint(_get_ticket_repo)
+Route("/api/tickets", tickets_handler, methods=["GET"])
+```
+
+### Design Decisions
+
+- **Offset pagination** chosen over cursor-based for simplicity. Suitable for
+  the expected ticket volume (hundreds, not millions).
+- **`COUNT(*) OVER()` window function** computes the total matching count in a
+  single query, avoiding a separate `COUNT` round-trip.
+- **Enum validation at the API boundary** rejects invalid filter values with a
+  descriptive `400` before the query reaches the database.
+- **Factory pattern** (`create_tickets_endpoint`) accepts a repo getter,
+  enabling late binding and testability without global state.
 
 
 ## Webhook Receiver
