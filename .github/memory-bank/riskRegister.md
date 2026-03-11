@@ -403,3 +403,12 @@ Known sources list disclosed in `UnknownSourceError` details. Risk accepted — 
 
 - **Agent:** Security Engineer
 - **Timestamp:** 2026-03-11T23:55:00Z
+
+### [FORGEOS-BE040] — Unbounded Filter Cardinality (2026-03-11T09:00:00Z)
+
+| ID | Severity | Description | Status | Mitigation |
+|----|----------|-------------|--------|------------|
+| SEC-BE040-001 | MEDIUM | `_build_filter_from_message()` in websocket.py accepts arbitrary-length lists for filter dimensions (ticket_ids, stages, types, agent_ids) without cardinality limits. A malicious client could send a subscribe message with millions of filter values, causing memory pressure from frozenset construction. CWE-770, STRIDE: DoS (Impact=3 × Likelihood=3 = 9). | Risk Accepted | Internal tool, memory freed on disconnect. Future hardening: add `MAX_FILTER_SIZE = 1000` and truncate/reject oversized filter lists. |
+
+- **Agent:** Security Engineer
+- **Timestamp:** 2026-03-11T09:00:00Z
