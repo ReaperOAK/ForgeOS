@@ -2075,3 +2075,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/migration/shadow_engine.py, mcp-server/tests/migration/test_shadow_engine.py
 - **Decisions:** Used Protocol-based adapters (consistent with sync_engine.py). In-memory stats over DB storage since shadow mode is transient. Capped recent_critical at 50 entries.
 - **Timestamp:** 2026-03-11T16:50:00Z
+
+### [FORGEOS-FE006] — WebSocket Real-Time Updates
+- **Artifacts:** dashboard/src/lib/api/websocket.ts, dashboard/src/lib/hooks/useTicketStream.ts, dashboard/src/components/ConnectionStatusIndicator.tsx
+- **Decisions:** Exponential backoff (1s-30s) for reconnect. Callback-ref pattern to avoid re-creating WS client. Integrated into pipeline page + ticket detail page.
+- **Timestamp:** 2025-07-25T12:00:00Z
+
+### [FORGEOS-FE012] — Dashboard Filtering and Sorting
+- **Artifacts:** dashboard/src/lib/hooks/useFilters.ts, dashboard/src/components/filters/FilterBar.tsx, dashboard/src/components/filters/FilterChip.tsx
+- **Decisions:** URL-synced state via useSearchParams for bookmarkability. Client-side AND filtering. Suspense boundary for SSR compat. Design tokens only.
+- **Timestamp:** 2025-07-25T12:10:00Z
