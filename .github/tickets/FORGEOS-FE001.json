@@ -42,10 +42,10 @@
     "Build produces zero TypeScript errors and zero lint warnings"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Documentation Specialist",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-11T11:02:20.273418+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
