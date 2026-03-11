@@ -4,7 +4,7 @@
   "description": "Extend the WebSocket streaming from FORGEOS-BE039 to support client-side filter subscriptions. Clients can subscribe to filtered streams (by stage, type, agent, or ticket_id) to receive only relevant events. Implement subscription management: clients send subscribe/unsubscribe messages to control their filter set.",
   "type": "backend",
   "priority": "medium",
-  "stage": "READY",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -62,6 +62,15 @@
       "from_stage": "READY",
       "to_stage": "READY",
       "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-11T04:28:32.806657+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T04:15:46.520946+00:00",
+      "event": "BACKEND_COMPLETE",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "BACKEND",
+      "to_stage": "QA",
+      "details": "Filtered WebSocket subscriptions implemented with TDD. 80 tests passing."
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
@@ -72,5 +81,12 @@
     "subscriptions",
     "phase3",
     "BLK-06-03"
+  ],
+  "completed_at": "2026-03-11T04:15:46.520933+00:00",
+  "artifacts": [
+    "mcp-server/src/mcp_server/services/event_broadcaster.py",
+    "mcp-server/src/mcp_server/api/routes/websocket.py",
+    "mcp-server/tests/test_filtered_subscriptions.py",
+    "mcp-server/tests/test_websocket_streaming.py"
   ]
 }

@@ -6,7 +6,7 @@ IDs or SDLC stages, and a configurable heartbeat ping to detect stale
 connections.
 
 .. meta::
-   :ticket: FORGEOS-BE039
+   :ticket: FORGEOS-BE039, FORGEOS-BE040
 """
 
 from __future__ import annotations
@@ -14,6 +14,7 @@ from __future__ import annotations
 import asyncio
 import contextlib
 import json
+from collections import deque
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from typing import Any, Protocol
@@ -49,6 +50,8 @@ class ClientFilter:
 
     ticket_ids: frozenset[str] | None = None
     stages: frozenset[str] | None = None
+    types: frozenset[str] | None = None
+    agent_ids: frozenset[str] | None = None
 
 
 @dataclass(frozen=True, slots=True)
@@ -103,20 +106,40 @@ def matches_filter(event: TicketEvent, client_filter: ClientFilter) -> bool:
 
     Returns ``True`` when no filters are set (wildcard), or when the
     event matches at least one of the configured filter dimensions.
+    Multiple filter dimensions are combined with OR logic.
     """
-    if client_filter.ticket_ids is None and client_filter.stages is None:
+    has_any = (
+        client_filter.ticket_ids is not None
+        or client_filter.stages is not None
+        or client_filter.types is not None
+        or client_filter.agent_ids is not None
+    )
+    if not has_any:
         return True
 
     if client_filter.ticket_ids is not None and event.ticket_id in client_filter.ticket_ids:
         return True
 
-    return (
-        client_filter.stages is not None
-        and (event.old_stage in client_filter.stages or event.new_stage in client_filter.stages)
-    )
+    if client_filter.stages is not None and (
+        event.old_stage in client_filter.stages or event.new_stage in client_filter.stages
+    ):
+        return True
+
+    if client_filter.types is not None:
+        event_type = event.payload.get("type")
+        if event_type is not None and event_type in client_filter.types:
+            return True
+
+    if client_filter.agent_ids is not None:
+        event_agent = event.payload.get("agent_id")
+        if event_agent is not None and event_agent in client_filter.agent_ids:
+            return True
+
+    return False
 
 
 _DEFAULT_PING_INTERVAL_SECONDS = 30.0
+_DEFAULT_BUFFER_LIMIT = 256
 
 
 class EventBroadcaster:
@@ -131,10 +154,22 @@ class EventBroadcaster:
     :meth:`start` and stop it with :meth:`stop`.
     """
 
-    def __init__(self, *, ping_interval: float = _DEFAULT_PING_INTERVAL_SECONDS) -> None:
+    def __init__(
+        self,
+        *,
+        ping_interval: float = _DEFAULT_PING_INTERVAL_SECONDS,
+        buffer_limit: int = _DEFAULT_BUFFER_LIMIT,
+    ) -> None:
         self._clients: dict[WebSocketLike, ClientFilter] = {}
+        self._buffers: dict[WebSocketLike, deque[str]] = {}
         self._ping_interval = ping_interval
+        self._buffer_limit = buffer_limit
         self._ping_task: asyncio.Task[None] | None = None
+
+    @property
+    def buffer_limit(self) -> int:
+        """Return the per-client buffer limit."""
+        return self._buffer_limit
 
     @property
     def client_count(self) -> int:
@@ -157,6 +192,7 @@ class EventBroadcaster:
         """
         filt = client_filter or ClientFilter()
         self._clients[ws] = filt
+        self._buffers[ws] = deque(maxlen=self._buffer_limit)
         logger.info(
             "WebSocket client registered",
             extra={"client_count": len(self._clients)},
@@ -168,6 +204,7 @@ class EventBroadcaster:
         Safe to call even if the client is not registered.
         """
         removed = self._clients.pop(ws, None)
+        self._buffers.pop(ws, None)
         if removed is not None:
             logger.info(
                 "WebSocket client unregistered",
@@ -205,10 +242,38 @@ class EventBroadcaster:
                 )
                 failed.append(ws)
 
+            # Track the event in the per-client backpressure buffer.
+            # deque(maxlen=N) automatically drops the oldest entry.
+            buf = self._buffers.get(ws)
+            if buf is not None:
+                buf.append(message)
+
         for ws in failed:
             self._clients.pop(ws, None)
+            self._buffers.pop(ws, None)
 
         return delivered
+
+    async def update_filter(self, ws: WebSocketLike, new_filter: ClientFilter) -> None:
+        """Update the filter for an already-registered client.
+
+        No-op if the client is not registered.
+        """
+        if ws not in self._clients:
+            return
+        self._clients[ws] = new_filter
+        logger.info(
+            "WebSocket client filter updated",
+            extra={"client_count": len(self._clients)},
+        )
+
+    def get_filter(self, ws: WebSocketLike) -> ClientFilter | None:
+        """Return the current filter for a registered client, or None."""
+        return self._clients.get(ws)
+
+    def get_buffer(self, ws: WebSocketLike) -> deque[str] | None:
+        """Return the backpressure buffer for a client, or None."""
+        return self._buffers.get(ws)
 
     async def _ping_loop(self) -> None:
         """Periodically send ping frames to detect stale connections."""
@@ -241,4 +306,5 @@ class EventBroadcaster:
                 await self._ping_task
             self._ping_task = None
         self._clients.clear()
+        self._buffers.clear()
         logger.info("EventBroadcaster stopped")
