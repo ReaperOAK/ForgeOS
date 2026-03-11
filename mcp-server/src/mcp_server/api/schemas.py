@@ -11,6 +11,7 @@ from __future__ import annotations
 
 from datetime import datetime  # noqa: TC003
 from enum import Enum
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -87,4 +88,125 @@ class TicketListResponse(BaseModel):
     """Response body for ``GET /api/tickets``."""
 
     tickets: list[TicketSummary]
+    pagination: PaginationMeta
+
+
+# ---------------------------------------------------------------------------
+# Pipeline schemas (FORGEOS-BE038)
+# ---------------------------------------------------------------------------
+
+
+class StageCount(BaseModel):
+    """Ticket count for a single SDLC stage."""
+
+    stage: str
+    count: int
+
+
+class StageTypeCount(BaseModel):
+    """Ticket count for a stage+type combination."""
+
+    stage: str
+    type: str
+    count: int
+
+
+class PipelineResponse(BaseModel):
+    """Response body for ``GET /api/pipeline``."""
+
+    stages: list[StageCount]
+    total: int
+    group_by_type: list[StageTypeCount] | None = None
+
+
+# ---------------------------------------------------------------------------
+# Health schemas (FORGEOS-BE038)
+# ---------------------------------------------------------------------------
+
+
+class ComponentHealth(BaseModel):
+    """Health status of a single server component."""
+
+    name: str
+    status: str
+    details: dict[str, object] | None = None
+
+
+class HealthResponse(BaseModel):
+    """Response body for ``GET /api/health``."""
+
+    status: str
+    version: str
+    uptime_seconds: float
+    response_time_ms: float
+    components: list[ComponentHealth]
+
+
+class DependencyInfo(BaseModel):
+    """Resolved dependency status for a ticket's depends_on entry."""
+
+    ticket_id: str
+    title: str | None = None
+    stage: str | None = None
+    is_done: bool = False
+
+
+class TicketDetailResponse(BaseModel):
+    """Response body for ``GET /api/tickets/{ticket_id}``.
+
+    .. meta::
+       :ticket: FORGEOS-BE035
+    """
+
+    ticket_id: str
+    title: str
+    description: str
+    type: str
+    priority: str
+    stage: str
+    status: str
+    sdlc_flow: list[str] = Field(default_factory=list)
+    claimed_by_name: str | None = None
+    machine_id: str | None = None
+    operator: str | None = None
+    lease_expiry: datetime | None = None
+    depends_on: list[str] = Field(default_factory=list)
+    resolved_dependencies: list[DependencyInfo] = Field(default_factory=list)
+    file_paths: list[str] = Field(default_factory=list)
+    acceptance_criteria: list[str] = Field(default_factory=list)
+    tags: list[str] = Field(default_factory=list)
+    rework_count: int = 0
+    source_task_file: str | None = None
+    created_at: datetime
+    updated_at: datetime
+    completed_at: datetime | None = None
+
+
+class HistoryEntry(BaseModel):
+    """A single event in a ticket's audit history.
+
+    .. meta::
+       :ticket: FORGEOS-BE035
+    """
+
+    event_type: str
+    agent_id: str
+    machine_id: str
+    timestamp: datetime
+    previous_stage: str | None = None
+    new_stage: str | None = None
+    payload: dict[str, Any] = Field(default_factory=dict)
+    sequence_number: int = 0
+    aggregate_version: int = 0
+
+
+class HistoryListResponse(BaseModel):
+    """Response body for ``GET /api/tickets/{ticket_id}/history``.
+
+    .. meta::
+       :ticket: FORGEOS-BE035
+    """
+
+    ticket_id: str
+    events: list[HistoryEntry]
     pagination: PaginationMeta

@@ -1,9 +1,11 @@
-"""Ticket list REST endpoint.
+"""Ticket REST endpoints.
 
-Provides a Starlette route handler for querying tickets at
-``GET /api/tickets`` with filtering and pagination.
+Provides Starlette route handlers for:
+- ``GET /api/tickets`` — list with filtering and pagination
+- ``GET /api/tickets/{ticket_id}`` — full ticket detail with resolved deps
+- ``GET /api/tickets/{ticket_id}/history`` — event/audit history with pagination
 
-Query parameters:
+Query parameters (list):
 - ``stage``: Filter by SDLC stage
 - ``type``: Filter by ticket type
 - ``priority``: Filter by priority
@@ -12,8 +14,12 @@ Query parameters:
 - ``limit``: Max rows (default 50, max 200)
 - ``offset``: Pagination offset (default 0)
 
+Query parameters (history):
+- ``limit``: Max rows (default 50, max 200)
+- ``offset``: Pagination offset (default 0)
+
 .. meta::
-   :ticket: FORGEOS-BE034
+   :ticket: FORGEOS-BE034, FORGEOS-BE035
 """
 
 from __future__ import annotations
@@ -23,7 +29,11 @@ from typing import TYPE_CHECKING, Any
 from starlette.responses import JSONResponse
 
 from mcp_server.api.schemas import (
+    DependencyInfo,
+    HistoryEntry,
+    HistoryListResponse,
     PaginationMeta,
+    TicketDetailResponse,
     TicketListResponse,
     TicketPriorityEnum,
     TicketStageEnum,
@@ -35,6 +45,7 @@ from mcp_server.observability import get_logger
 if TYPE_CHECKING:
     from starlette.requests import Request
 
+    from mcp_server.events.event_store import EventStore
     from mcp_server.repositories.ticket_repo import TicketRepository
 
 logger = get_logger("api.routes.tickets")
@@ -168,3 +179,209 @@ def create_tickets_endpoint(ticket_repo_getter: Any) -> Any:
         )
 
     return tickets_endpoint
+
+
+def create_ticket_detail_endpoint(ticket_repo_getter: Any) -> Any:
+    """Create the ticket detail endpoint handler.
+
+    Parameters
+    ----------
+    ticket_repo_getter : callable
+        A callable that returns the current ``TicketRepository`` instance,
+        or ``None`` if the database is unavailable.
+
+    Returns
+    -------
+    coroutine
+        An async Starlette request handler for ``GET /api/tickets/{ticket_id}``.
+    """
+
+    async def ticket_detail_endpoint(request: Request) -> JSONResponse:
+        """Handle GET /api/tickets/{ticket_id} requests."""
+        ticket_repo: TicketRepository | None = ticket_repo_getter()
+        if ticket_repo is None:
+            return JSONResponse(
+                status_code=503,
+                content={"error": "Database unavailable"},
+            )
+
+        ticket_id: str = request.path_params["ticket_id"]
+
+        try:
+            ticket = await ticket_repo.get_by_id(ticket_id)
+        except Exception:
+            logger.exception("ticket_detail_query_failed", extra={"ticket_id": ticket_id})
+            return JSONResponse(
+                status_code=500,
+                content={"error": "Internal server error"},
+            )
+
+        if ticket is None:
+            return JSONResponse(
+                status_code=404,
+                content={"error": f"Ticket '{ticket_id}' not found"},
+            )
+
+        # Resolve dependency statuses
+        resolved_deps: list[DependencyInfo] = []
+        for dep_id in ticket.depends_on:
+            try:
+                dep_ticket = await ticket_repo.get_by_id(dep_id)
+            except Exception:
+                logger.warning(
+                    "dependency_lookup_failed",
+                    extra={"ticket_id": ticket_id, "dep_id": dep_id},
+                )
+                dep_ticket = None
+
+            if dep_ticket is not None:
+                resolved_deps.append(
+                    DependencyInfo(
+                        ticket_id=dep_id,
+                        title=dep_ticket.title,
+                        stage=dep_ticket.stage,
+                        is_done=dep_ticket.stage == "DONE",
+                    )
+                )
+            else:
+                resolved_deps.append(
+                    DependencyInfo(ticket_id=dep_id)
+                )
+
+        response = TicketDetailResponse(
+            ticket_id=ticket.ticket_id,
+            title=ticket.title,
+            description=ticket.description,
+            type=ticket.type,
+            priority=ticket.priority,
+            stage=ticket.stage,
+            status=ticket.status,
+            sdlc_flow=ticket.sdlc_flow,
+            claimed_by_name=ticket.claimed_by_name,
+            machine_id=ticket.machine_id,
+            operator=ticket.operator,
+            lease_expiry=ticket.lease_expiry,
+            depends_on=ticket.depends_on,
+            resolved_dependencies=resolved_deps,
+            file_paths=ticket.file_paths,
+            acceptance_criteria=ticket.acceptance_criteria,
+            tags=ticket.tags,
+            rework_count=ticket.rework_count,
+            source_task_file=ticket.source_task_file,
+            created_at=ticket.created_at,
+            updated_at=ticket.updated_at,
+            completed_at=ticket.completed_at,
+        )
+
+        return JSONResponse(
+            status_code=200,
+            content=response.model_dump(mode="json"),
+        )
+
+    return ticket_detail_endpoint
+
+
+def create_ticket_history_endpoint(
+    ticket_repo_getter: Any, event_store_getter: Any
+) -> Any:
+    """Create the ticket history endpoint handler.
+
+    Parameters
+    ----------
+    ticket_repo_getter : callable
+        A callable that returns the current ``TicketRepository`` instance.
+    event_store_getter : callable
+        A callable that returns the current ``EventStore`` instance.
+
+    Returns
+    -------
+    coroutine
+        An async Starlette request handler for
+        ``GET /api/tickets/{ticket_id}/history``.
+    """
+
+    async def ticket_history_endpoint(request: Request) -> JSONResponse:
+        """Handle GET /api/tickets/{ticket_id}/history requests."""
+        ticket_repo: TicketRepository | None = ticket_repo_getter()
+        if ticket_repo is None:
+            return JSONResponse(
+                status_code=503,
+                content={"error": "Database unavailable"},
+            )
+
+        event_store: EventStore | None = event_store_getter()
+        if event_store is None:
+            return JSONResponse(
+                status_code=503,
+                content={"error": "Event store unavailable"},
+            )
+
+        ticket_id: str = request.path_params["ticket_id"]
+        params = request.query_params
+        limit = _parse_int(params.get("limit"), _DEFAULT_LIMIT, _MAX_LIMIT)
+        offset = _parse_int(params.get("offset"), 0)
+
+        # Verify ticket exists
+        try:
+            ticket = await ticket_repo.get_by_id(ticket_id)
+        except Exception:
+            logger.exception(
+                "ticket_history_lookup_failed",
+                extra={"ticket_id": ticket_id},
+            )
+            return JSONResponse(
+                status_code=500,
+                content={"error": "Internal server error"},
+            )
+
+        if ticket is None:
+            return JSONResponse(
+                status_code=404,
+                content={"error": f"Ticket '{ticket_id}' not found"},
+            )
+
+        # Retrieve events from the event store
+        try:
+            all_events = event_store.replay_ticket_events(ticket_id)
+        except Exception:
+            logger.exception(
+                "ticket_history_events_failed",
+                extra={"ticket_id": ticket_id},
+            )
+            return JSONResponse(
+                status_code=500,
+                content={"error": "Internal server error"},
+            )
+
+        total = len(all_events)
+        paginated = all_events[offset : offset + limit]
+
+        entries = [
+            HistoryEntry(
+                event_type=ev.event_type.value
+                if hasattr(ev.event_type, "value")
+                else str(ev.event_type),
+                agent_id=ev.agent_id,
+                machine_id=ev.machine_id,
+                timestamp=ev.timestamp,
+                previous_stage=ev.previous_stage,
+                new_stage=ev.new_stage,
+                payload=ev.payload,
+                sequence_number=ev.sequence_number,
+                aggregate_version=ev.aggregate_version,
+            )
+            for ev in paginated
+        ]
+
+        response = HistoryListResponse(
+            ticket_id=ticket_id,
+            events=entries,
+            pagination=PaginationMeta(total=total, limit=limit, offset=offset),
+        )
+
+        return JSONResponse(
+            status_code=200,
+            content=response.model_dump(mode="json"),
+        )
+
+    return ticket_history_endpoint

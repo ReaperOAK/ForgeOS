@@ -3867,3 +3867,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/services/ticket_service.py, mcp-server/tests/test_notification_emitter.py
 - **Decisions:** Added emit_reworked() call after transaction block in rework_ticket(), matching claim/release/advance pattern. Restructured return to store result in variable.
 - **Timestamp:** 2026-03-11T02:30:00Z
+
+### [FORGEOS-BE035] — Ticket Detail and History Endpoints
+- **Artifacts:** mcp-server/src/mcp_server/api/schemas.py, mcp-server/src/mcp_server/api/routes/tickets.py, mcp-server/src/mcp_server/api/routes/__init__.py, mcp-server/src/mcp_server/transport/http.py, mcp-server/tests/test_ticket_detail_history_api.py
+- **Decisions:** Used EventStore.replay_ticket_events() for history rather than direct DB query; paginate in-memory after replay for simplicity since event count per ticket is bounded; resolve dependency status eagerly via sequential get_by_id calls
+- **Timestamp:** 2026-03-11T02:10:00+00:00
