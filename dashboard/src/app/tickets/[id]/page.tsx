@@ -1,27 +1,24 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'next/navigation';
 import { notFound } from 'next/navigation';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
-import type { TicketDetail } from '@/lib/api';
+import type { Ticket, TicketDetail } from '@/lib/api';
 import { fetchTicket, isApiError } from '@/lib/api';
 import { TicketMetadata } from '@/components/tickets/TicketMetadata';
 import { HistoryTimeline } from '@/components/tickets/HistoryTimeline';
 import { DependencyTree } from '@/components/tickets/DependencyTree';
+import { useTicketStream } from '@/lib/hooks/useTicketStream';
 
 type Tab = 'history' | 'dependencies';
 
 /**
- * Ticket detail page that loads a single ticket by URL parameter.
+ * Ticket detail page with real-time WebSocket updates.
  *
- * Fetches ticket data via {@link fetchTicket}, renders the
- * {@link TicketMetadata} panel, and provides tabbed views for
- * {@link HistoryTimeline} and {@link DependencyTree}.
- * Triggers the Next.js `notFound()` handler for missing tickets.
- *
- * @returns The ticket detail page
+ * Fetches ticket data via {@link fetchTicket} and subscribes to live
+ * updates for the currently viewed ticket via {@link useTicketStream}.
  */
 export default function TicketDetailPage() {
     const params = useParams<{ id: string }>();
@@ -32,6 +29,21 @@ export default function TicketDetailPage() {
     const [error, setError] = useState<string | null>(null);
     const [is404, setIs404] = useState(false);
     const [activeTab, setActiveTab] = useState<Tab>('history');
+
+    const handleTicketUpdate = useCallback(
+        (updated: Ticket) => {
+            if (updated.ticket_id === ticketId) {
+                setTicket((prev) =>
+                    prev
+                        ? { ...prev, ...updated }
+                        : { ...updated, dependency_status: [] },
+                );
+            }
+        },
+        [ticketId],
+    );
+
+    useTicketStream({ onTicketUpdate: handleTicketUpdate });
 
     useEffect(() => {
         let cancelled = false;

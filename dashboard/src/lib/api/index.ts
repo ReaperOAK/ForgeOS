@@ -27,3 +27,13 @@ export {
 } from './tickets';
 
 export { apiClient, isApiError, buildQueryString } from './client';
+
+export { TicketWebSocketClient } from './websocket';
+export type {
+  WebSocketEvent,
+  TicketStateChangeEvent,
+  TicketCreatedEvent,
+  TicketUpdatedEvent,
+  ConnectionStatus as WsConnectionStatus,
+  WebSocketClientOptions,
+} from './websocket';
