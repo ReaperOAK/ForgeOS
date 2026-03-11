@@ -4,7 +4,7 @@
   "description": "Implement the handler for GitHub pull request events. Link pull requests to ticket IDs by parsing the PR title or branch name for ticket ID patterns (e.g., `[FORGEOS-BE028]` or branch `FORGEOS-BE028/feature`). Store the PR URL and status on the ticket record. Update ticket metadata when PRs are opened, merged, or closed.",
   "type": "backend",
   "priority": "medium",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Ticket IDs not found in the database produce a warning log but do not error"
   ],
   "rework_count": 0,
-  "claimed_by": "CI Reviewer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T02:46:04.564511+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -130,6 +130,42 @@
       "from_stage": "CI",
       "to_stage": "CI",
       "details": "Claimed by ReaperOAK@pop-os via CI Reviewer, lease until 2026-03-11T02:46:04.564511+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T02:28:23.832758+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "system",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "Advanced from CI to DOCS"
+    },
+    {
+      "timestamp": "2026-03-11T02:28:31.585413+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
+    },
+    {
+      "timestamp": "2026-03-11T02:28:45.433975+00:00",
+      "event": "REWORK",
+      "agent": "CIReviewer",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "BACKEND",
+      "details": "Rework #1: Double-advance correction: moving back to DOCS"
+    },
+    {
+      "timestamp": "2026-03-11T02:29:15.886961+00:00",
+      "event": "STATE_CORRECTED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "BACKEND",
+      "to_stage": "DOCS",
+      "details": "Corrected double-advance: CI->DOCS is the correct destination after CI PASS."
     }
   ],
   "source_task_file": "TODO/tasks/phase3-webhooks.md",
@@ -140,5 +176,11 @@
     "pullrequest",
     "phase3",
     "BLK-09-01"
+  ],
+  "completed_stages": [
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI"
   ]
 }
