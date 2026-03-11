@@ -3672,3 +3672,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE060.md
 - **Decisions:** PASS — Score 90/100, 0 critical, 2 warnings (receive_webhook CC=11, 118 lines)
 - **Timestamp:** 2026-03-11T16:30:00Z
+
+### [FORGEOS-BE030] — Documentation Summary
+- **Artifacts:** mcp-server/src/mcp_server/tools/ticket_tools.py, mcp-server/src/mcp_server/services/ticket_service.py, mcp-server/README.md, CHANGELOG.md
+- **Decisions:** Added full tickets.advance reference section to README with input schema, examples, error responses, and stage engine API. Updated module docstrings to include advance-related public APIs.
+- **Timestamp:** 2026-03-11T15:30:00Z

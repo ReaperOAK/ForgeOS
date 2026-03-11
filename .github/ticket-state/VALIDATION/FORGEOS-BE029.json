@@ -4,7 +4,7 @@
   "description": "Implement the `tickets.claim` MCP tool that allows agents to claim a specific ticket by ID. Unlike `tickets.next` which auto-selects, this tool targets a known ticket. The tool validates that the ticket exists, is in the READY stage, and the requesting agent's role matches the ticket's current SDLC stage. Uses the same service layer as `tickets.next`.",
   "type": "backend",
   "priority": "critical",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Lease expiry set according to configurable lease_duration_minutes"
   ],
   "rework_count": 1,
-  "claimed_by": "Documentation Specialist",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T00:33:15.172718+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -215,6 +215,15 @@
       "from_stage": "DOCS",
       "to_stage": "DOCS",
       "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-11T00:33:15.172718+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T23:50:00+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "DOCS complete \u2014 README updated with tickets.claim docs, CHANGELOG entry added, service meta tag updated"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",

@@ -7,15 +7,17 @@ consume this service — keeping business logic in one place.
 
 Public API
 ----------
-* :class:`TicketService` — claim, query, release, and manage tickets.
+* :class:`TicketService` — claim, query, release, advance, and manage tickets.
 * :class:`NextTicketResult` — typed result of :meth:`TicketService.claim_next`.
+* :class:`AdvanceTicketResult` — typed result of :meth:`TicketService.advance_ticket`.
 * :class:`ClaimOwnershipError` — raised when release caller is not the claim owner.
+* :class:`ClaimValidationError` — raised when the advancing agent does not hold the claim.
 * :class:`ReleaseResult` — typed result of :meth:`TicketService.release_ticket`.
 * :class:`TicketDetail` — full ticket detail with history and claim.
 * :class:`TicketListResult` — paginated ticket list result.
 
 .. meta::
-   :ticket: FORGEOS-BE028, FORGEOS-BE032
+   :ticket: FORGEOS-BE028, FORGEOS-BE030, FORGEOS-BE032
    :last_reviewed: 2026-03-11T00:00:00Z
 """
 

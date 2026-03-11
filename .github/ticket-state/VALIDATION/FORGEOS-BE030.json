@@ -4,7 +4,7 @@
   "description": "Implement the `tickets.advance` MCP tool that moves a ticket to its next SDLC stage. The tool enforces the SDLC flow order per ticket type (backend, frontend, fullstack, etc.) and uses SERIALIZABLE transaction isolation (FORGEOS-BE010) for state transition integrity. Creates an event history record (FORGEOS-BE012) for every transition. Implements the stage engine that validates transitions against the ticket's sdlc_flow.",
   "type": "backend",
   "priority": "critical",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -168,6 +168,15 @@
       "from_stage": "DOCS",
       "to_stage": "DOCS",
       "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-11T00:33:15.213265+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T00:07:49.443215+00:00",
+      "event": "DOCS_COMPLETE",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "DOCS stage completed by Documentation Specialist on pop-os"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
