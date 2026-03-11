@@ -7,14 +7,17 @@ import { MetricCard, type Severity } from '@/components/health/MetricCard';
 import type { StatusLevel } from '@/components/health/StatusIndicator';
 import { apiClient } from '@/lib/api-client';
 
+/** Auto-refresh interval in milliseconds (30 seconds). */
 const REFRESH_INTERVAL = 30_000;
 
+/** Shape of database health metrics from `/api/health`. */
 interface DatabaseHealth {
     pool: { active: number; max: number };
     latency: { p50: number; p99: number };
     latencyTrend?: { p50: string; p99: string };
 }
 
+/** Shape of MCP server health metrics from `/api/health`. */
 interface McpHealth {
     uptime: string;
     connectedAgents: number;
@@ -23,12 +26,14 @@ interface McpHealth {
     requestTrend?: string;
 }
 
+/** Shape of webhook delivery metrics from `/api/health`. */
 interface WebhookHealth {
     successRate: number;
     pendingQueue: number;
     failedDeliveries: number;
 }
 
+/** A single alert entry returned by the health endpoint. */
 interface AlertEntry {
     id: string;
     severity: 'critical' | 'warning' | 'info';
@@ -36,6 +41,7 @@ interface AlertEntry {
     timestamp: string;
 }
 
+/** Aggregate response shape from the `/api/health` endpoint. */
 interface HealthData {
     database: DatabaseHealth;
     mcp: McpHealth;
@@ -50,6 +56,7 @@ const defaultHealth: HealthData = {
     alerts: [],
 };
 
+/** Derive database panel status from pool utilization and P99 latency. */
 function computeDbStatus(db: DatabaseHealth): StatusLevel {
     const utilization = db.pool.max > 0 ? db.pool.active / db.pool.max : 0;
     if (utilization > 0.9 || db.latency.p99 > 100) return 'critical';
@@ -57,18 +64,21 @@ function computeDbStatus(db: DatabaseHealth): StatusLevel {
     return 'healthy';
 }
 
+/** Derive MCP server panel status from agent count and request rate. */
 function computeMcpStatus(mcp: McpHealth): StatusLevel {
     if (mcp.connectedAgents === 0) return 'critical';
     if (mcp.requestsPerMin === 0) return 'degraded';
     return 'healthy';
 }
 
+/** Derive webhook panel status from success rate and failure count. */
 function computeWebhookStatus(wh: WebhookHealth): StatusLevel {
     if (wh.successRate < 90) return 'critical';
     if (wh.successRate < 98 || wh.failedDeliveries > 5) return 'degraded';
     return 'healthy';
 }
 
+/** Map a failure count to a visual severity for the MetricCard. */
 function failedSeverity(count: number): Severity {
     if (count > 10) return 'critical';
     if (count > 0) return 'warning';
@@ -87,6 +97,16 @@ const alertColor = {
     info: 'text-info',
 } as const;
 
+/**
+ * System Health dashboard page.
+ *
+ * Renders four panels — Database, MCP Server, Webhooks, and Alerts —
+ * populated from the `/api/health` endpoint. Data auto-refreshes
+ * every 30 seconds and can be manually refreshed via the toolbar
+ * button.
+ *
+ * @route `/health`
+ */
 export default function HealthPage() {
     const [health, setHealth] = useState<HealthData>(defaultHealth);
     const [loading, setLoading] = useState(true);
