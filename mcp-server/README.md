@@ -1312,7 +1312,7 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/notifications/`** — Notification queue (at-least-once delivery), configurable channels (webhook, Slack) with event-type filtering, background processor with exponential-backoff retries, and dead-letter handling
 - **`mcp_server/sessions/`** -- Agent session lifecycle management (heartbeat, timeout, resumption, concurrent access)
 - **`mcp_server/transport/webhooks.py`** — Inbound webhook HTTP receiver (`POST /api/webhooks/{source}`)
-- **`mcp_server/webhooks/`** — GitHub webhook signature verification (HMAC-SHA256) and event handling
+- **`mcp_server/webhooks/`** — GitHub webhook signature verification (HMAC-SHA256), push event handling, and CI status event handler (check_run/status → ticket advance or rework)
 
 ### Error Handling
 
@@ -1736,6 +1736,202 @@ curl -X POST http://localhost:8080/api/webhooks/github \
   `event_type` for correlation.
 - **No external dependencies** — uses Starlette (already a dependency) and
   stdlib only.
+
+
+### CI Status Event Handler
+
+<!-- last_reviewed: 2026-03-11T23:59:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.webhooks.github_handler` module includes a `CIStatusHandler`
+that processes GitHub `check_run` and `status` events. When CI checks pass for
+a ticket's branch, the handler advances the ticket past the CI stage. When CI
+checks fail, it triggers a rework with the failure reason.
+
+#### How It Works
+
+1. GitHub sends a `check_run` (completed) or `status` event via webhook.
+2. The handler extracts the branch name from the event payload.
+3. `extract_ticket_id_from_branch()` matches the `FORGEOS-XXNNN` pattern
+   in the branch name (case-insensitive).
+4. The handler queries the ticket's current stage via `CITicketOps`.
+5. If the ticket is in the `CI` stage:
+   - **success** conclusion → `advance_ci()` moves the ticket forward.
+   - **failure** or **timed_out** → `fail_ci()` records the failure for rework.
+   - Other conclusions (e.g. `neutral`, `skipped`) are logged and ignored.
+6. Tickets not in the `CI` stage are silently ignored (idempotency).
+
+#### Supported Events
+
+| Event | Trigger | Branch Source |
+|-------|---------|---------------|
+| `check_run` | `action: "completed"` | `check_run.check_suite.head_branch` |
+| `status` | Always (filtered by `state`) | `branches[0].name` |
+
+#### CI Outcome Mapping
+
+| GitHub Value | Mapped Conclusion | Action |
+|-------------|-------------------|--------|
+| `success` (check_run conclusion or status state) | `success` | Advance ticket |
+| `failure` (check_run conclusion or status state) | `failure` | Record failure / rework |
+| `timed_out` (check_run conclusion) | `failure` | Record failure / rework |
+| `error` (status state) | `failure` | Record failure / rework |
+| `pending` (status state) | — | Ignored |
+| Other (e.g. `neutral`, `skipped`) | — | Ignored |
+
+#### Quick Start
+
+```python
+from mcp_server.webhooks.github_handler import CIStatusHandler
+from mcp_server.services.webhook_service import handler_registry
+
+# Implement the CITicketOps protocol
+class MyCITicketOps:
+    async def get_ticket_stage(self, ticket_id: str) -> str | None: ...
+    async def advance_ci(self, ticket_id: str, evidence: dict) -> None: ...
+    async def fail_ci(self, ticket_id: str, reason: str, evidence: dict) -> None: ...
+
+handler = CIStatusHandler(MyCITicketOps())
+handler.register(handler_registry)
+```
+
+#### API Reference
+
+| Symbol | Module | Description |
+|--------|--------|-------------|
+| `CIStatusHandler` | `webhooks.github_handler` | Handles `check_run` and `status` events for CI automation |
+| `CITicketOps` | `webhooks.github_handler` | Runtime-checkable protocol for ticket operations |
+| `extract_ticket_id_from_branch()` | `webhooks.github_handler` | Extract `FORGEOS-XXNNN` ticket ID from a branch name |
+| `CI_AGENT_ID` | `webhooks.github_handler` | Agent identity constant (`"ci-status-handler"`) |
+
+#### CIStatusHandler Methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `handle_check_run(event)` | `None` | Process a `check_run` completed event |
+| `handle_status(event)` | `None` | Process a `status` event |
+| `register(registry)` | `None` | Register both handlers in the webhook registry |
+
+#### CITicketOps Protocol Methods
+
+| Method | Returns | Description |
+|--------|---------|-------------|
+| `get_ticket_stage(ticket_id)` | `str \| None` | Return the current SDLC stage, or `None` if not found |
+| `advance_ci(ticket_id, evidence)` | `None` | Advance the ticket past the CI stage |
+| `fail_ci(ticket_id, reason, evidence)` | `None` | Record CI failure for rework |
+
+#### Evidence Payload
+
+Both `advance_ci` and `fail_ci` receive an evidence dict:
+
+```python
+{
+    "check_name": "lint / ruff",       # Check name or status context
+    "conclusion": "success",           # Mapped conclusion
+    "output_summary": "All checks...", # Output summary (may be empty)
+    "agent": "ci-status-handler"        # Agent identity
+}
+```
+
+### PR Event Handler
+
+<!-- last_reviewed: 2026-03-11T23:59:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.services.pr_service` module correlates GitHub `pull_request`
+webhook events to ForgeOS tickets. Ticket IDs are extracted from the PR title
+and head branch name using the pattern `FORGEOS-<PREFIX><DIGITS>` (e.g.
+`FORGEOS-BE028`). Multiple tickets can be linked to the same PR.
+
+#### How It Works
+
+1. `handle_pull_request_event()` in `webhooks.github_handler` receives a
+   validated `WebhookEvent` with `event_type == "pull_request"`.
+2. `extract_pr_metadata()` parses the payload into a `PRMetadata` dataclass
+   (number, title, URL, author, branch, base branch, reviewers, labels).
+3. `extract_ticket_ids()` scans the PR title and branch for ticket IDs using
+   the regex `FORGEOS-[A-Z]+\d+`. Results are de-duplicated in discovery order.
+4. For each correlated ticket ID, a `PREvent` is produced with the resolved
+   `PRAction` and advancement flag.
+5. When no ticket IDs are found, a warning is logged and an empty list is
+   returned — no error is raised.
+
+#### Supported Actions
+
+| GitHub Action | Merged Flag | `PRAction` | Description |
+|---------------|-------------|------------|-------------|
+| `opened` | — | `OPENED` | PR created |
+| `closed` | `false` | `CLOSED` | PR closed without merge |
+| `closed` | `true` | `MERGED` | PR merged |
+| `synchronize` | — | `SYNCHRONIZE` | New commits pushed |
+| *(other)* | — | `OTHER` | Unrecognised action |
+
+#### Advancement Detection
+
+A PR merge triggers advancement when **both** conditions are met:
+
+- `PRAction` is `MERGED`
+- The base branch is `main` or `master`
+
+The `triggers_advancement` flag and `merge_target` field on `PREvent` capture
+this so downstream consumers can decide whether to advance the ticket stage.
+
+#### Quick Start
+
+The handler is registered automatically when `mcp_server.webhooks` is imported:
+
+```python
+from mcp_server.webhooks import handle_pull_request_event
+```
+
+No manual registration is needed. To register explicitly:
+
+```python
+from mcp_server.services.webhook_service import handler_registry
+from mcp_server.webhooks.github_handler import register_pr_handler
+
+register_pr_handler(handler_registry)
+```
+
+#### API Reference
+
+| Symbol | Module | Description |
+|--------|--------|-------------|
+| `PRAction` | `services.pr_service` | Enum — `OPENED`, `CLOSED`, `MERGED`, `SYNCHRONIZE`, `OTHER` |
+| `PRMetadata` | `services.pr_service` | Frozen dataclass — parsed PR payload fields |
+| `PREvent` | `services.pr_service` | Frozen dataclass — correlated event for one ticket |
+| `extract_ticket_ids()` | `services.pr_service` | Extract unique ticket IDs from title and branch |
+| `extract_pr_metadata()` | `services.pr_service` | Parse a `pull_request` webhook payload |
+| `PRService` | `services.pr_service` | Async service — produces `PREvent` list from a `WebhookEvent` |
+| `handle_pull_request_event()` | `webhooks.github_handler` | Async handler dispatched by the webhook registry |
+| `register_pr_handler()` | `webhooks.github_handler` | Register the handler in a `HandlerRegistry` |
+
+#### PREvent Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `ticket_id` | `str` | Correlated ForgeOS ticket ID |
+| `action` | `PRAction` | Resolved action enum |
+| `metadata` | `PRMetadata` | Full PR metadata |
+| `triggers_advancement` | `bool` | `True` when merged into main/master |
+| `merge_target` | `str \| None` | Base branch name on merge, else `None` |
+| `timestamp` | `datetime` | UTC timestamp of event processing |
+
+#### PRMetadata Fields
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `number` | `int` | PR number |
+| `title` | `str` | PR title |
+| `url` | `str` | HTML URL of the PR |
+| `author` | `str` | GitHub login of the PR author |
+| `branch` | `str` | Head branch name |
+| `base_branch` | `str` | Target branch name |
+| `reviewers` | `list[str]` | Requested reviewer logins |
+| `labels` | `list[str]` | Label names |
+| `merged` | `bool` | Whether the PR was merged |
 
 
 ## Observability — Structured JSON Logging

@@ -8,6 +8,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **PR Event Handler** (FORGEOS-BE063) — GitHub `pull_request` webhook handler
+  at `mcp-server/src/mcp_server/services/pr_service.py` and
+  `mcp-server/src/mcp_server/webhooks/github_handler.py`. Extracts ticket IDs
+  from PR titles and branch names using regex `FORGEOS-[A-Z]+\d+`. Correlates
+  each PR to one or more tickets, producing `PREvent` objects with action,
+  metadata, and advancement detection. Supported actions: `opened`, `closed`,
+  `merged`, `synchronize`. Merges into `main`/`master` set
+  `triggers_advancement=True`. `PRService` async service, `PRAction` enum,
+  `PRMetadata` and `PREvent` frozen dataclasses. Registered automatically via
+  `webhooks/__init__.py`. 34 tests, 100% coverage on `pr_service.py`.
+
 - **Ticket Rework MCP Tool** (FORGEOS-BE031) — `tickets.rework` MCP tool at
   `mcp-server/src/mcp_server/tools/ticket_tools.py` backed by
   `TicketService.rework_ticket()` at
@@ -223,6 +234,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   `SlackDelivery` protocol implementations. Alembic migration 006 creates the
   `notification_channels` table and `channel_type` enum. 62 tests with 93%
   coverage.
+
+- **CI Status Event Handler** (FORGEOS-BE062) — Automated CI-to-ticket
+  lifecycle handler at
+  `mcp-server/src/mcp_server/webhooks/github_handler.py`. `CIStatusHandler`
+  processes GitHub `check_run` (completed) and `status` events, extracting
+  ticket IDs from branch names via `extract_ticket_id_from_branch()` regex.
+  CI success (`success` conclusion) advances tickets past the CI stage;
+  CI failure (`failure`, `timed_out`, `error`) triggers rework with
+  failure details (check name, output summary). Only tickets in the `CI`
+  stage are affected — duplicate or out-of-stage events are handled
+  idempotently. `CITicketOps` runtime-checkable protocol decouples the
+  handler from concrete ticket storage. 31 tests, 84% coverage, CI
+  quality score 92/100.
 
 - **Webhook HTTP Receiver Endpoint** (FORGEOS-BE059) — Inbound webhook
   endpoint at `mcp-server/src/mcp_server/transport/webhooks.py` exposing

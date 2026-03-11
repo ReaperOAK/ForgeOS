@@ -4,7 +4,7 @@
   "description": "Implement the handler for GitHub pull request events. Link pull requests to ticket IDs by parsing the PR title or branch name for ticket ID patterns (e.g., `[FORGEOS-BE028]` or branch `FORGEOS-BE028/feature`). Store the PR URL and status on the ticket record. Update ticket metadata when PRs are opened, merged, or closed.",
   "type": "backend",
   "priority": "medium",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -175,6 +175,15 @@
       "from_stage": "DOCS",
       "to_stage": "DOCS",
       "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-11T03:06:35.168591+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T02:43:54.402331+00:00",
+      "event": "DOCS_COMPLETE",
+      "agent": "Documentation",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "PR Event Handler docs \u2014 README subsection, CHANGELOG entry. All public APIs documented."
     }
   ],
   "source_task_file": "TODO/tasks/phase3-webhooks.md",
