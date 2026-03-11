@@ -4,7 +4,7 @@
   "description": "Implement the system health dashboard view following the UIDesigner mockup (FORGEOS-UID005). Display four health panels: Database (connection pool, query latency), MCP Server (uptime, connected agents, requests/minute), Webhooks (delivery rate, queue depth, failures), and Alerts (recent system warnings). Data sourced from the /api/health endpoint (FORGEOS-BE038). Each panel uses StatusIndicator (green/yellow/red) and MetricCard components.",
   "type": "frontend",
   "priority": "medium",
-  "stage": "READY",
+  "stage": "UIDESIGNER",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -40,10 +40,10 @@
     "Health data refreshes every 30 seconds automatically"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "UIDesigner",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-11T12:45:36.419206+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
