@@ -1,3 +1,18 @@
+### [FORGEOS-BE039] — QA Summary
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE069.md, mcp-server/tests/test_feature_flags.py
+- **Decisions:** QA PASS (HIGH confidence) — 60 tests pass, 98% coverage, 0 defects, 0 regressions. All 7 ACs verified. Lint clean.
+- **Timestamp:** 2026-03-11T09:40:00Z
+
+### [FORGEOS-BE067] — QA Summary
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE037.md
+- **Decisions:** QA PASS (HIGH confidence) — 24 tests pass, 100% coverage on advance/rework endpoints, 100% coverage on schemas. All 7 ACs verified. 0 defects. Lint clean. No regressions.
+- **Timestamp:** 2026-03-11T05:15:00Z
+
+### [FORGEOS-BE065] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE065.md
+- **Decisions:** APPROVED (HIGH confidence) — 10/10 DoD items pass. 21 tests, 100% coverage on emitter.py. Lint clean. All upstream verdicts verified (QA PASS, Security PASS, CI PASS, Docs PASS). All 6 ACs met after rework #2.
+- **Timestamp:** 2026-03-11T05:00:00Z
+
 ### [FORGEOS-BE041] — Validation Summary
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE041.md
 - **Decisions:** APPROVED (HIGH confidence) — 10/10 DoD items pass. 38 tests, 95% coverage. Lint clean. All upstream verdicts verified (QA, Security, CI, Docs). AC4 partial (in-memory store, abstract interface for PostgreSQL extensibility).
@@ -4197,3 +4212,38 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/migration/transformers.py, mcp-server/src/mcp_server/migration/importer.py, mcp-server/tests/test_transformers.py, mcp-server/tests/test_importer.py, mcp-server/src/mcp_server/migration/__init__.py
 - **Decisions:** Used Protocol-based DatabaseWriter for DI/testability; frozen dataclasses for value objects; stage resolution picks most advanced when ticket in multiple directories; non-schema JSON fields preserved in metadata JSONB
 - **Timestamp:** 2026-03-11T04:00:00Z
+
+### [FORGEOS-BE036] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE036.md
+- **Decisions:** APPROVED (HIGH confidence) — 10/10 DoD items pass. 19/19 tests pass, 96% coverage. Ruff clean. All 7 ACs verified. Upstream: QA ✅, Security ✅, CI ✅ (90/100), Docs ✅. Pre-existing mypy error in _validate_enum from BE034 — not BE036 scope.
+- **Timestamp:** 2026-03-11T04:45:00Z
+
+### [FORGEOS-BE061] — Documentation
+- **Artifacts:** mcp-server/README.md (Push Event Handler section), CHANGELOG.md (new entry), .github/agent-output/Documentation/FORGEOS-BE061.md
+- **Decisions:** Added dedicated reference section in README with sync trigger rules, response payloads, quick start, API reference, and design constraints. Classified as Diátaxis Reference. Existing inline docstrings verified complete (no changes needed).
+- **Timestamp:** 2026-03-11T05:00:00Z
+
+### [FORGEOS-BE050] — QA Review
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE050.md, agent-sdk/src/forgeos_sdk/runner_hooks.py, agent-sdk/tests/test_runner_hooks.py
+- **Decisions:** PASS — 28/28 tests pass, 325/325 SDK regression pass, 99% coverage, ruff clean. All 6 ACs verified. No defects.
+- **Timestamp:** 2026-03-11T04:15:00Z
+
+### [FORGEOS-BE057] — Documentation Summary
+- **Artifacts:** CHANGELOG.md, mcp-server/README.md, .github/agent-output/Documentation/FORGEOS-BE057.md
+- **Decisions:** Added full Admin Force Operations reference section to README with endpoint table, request/response examples, error codes, AdminService API, audit trail docs, and design constraints. Existing inline docstrings were already comprehensive — no code-level doc changes needed.
+- **Timestamp:** 2026-03-11T04:15:00Z
+
+### [FORGEOS-BE036] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE036.md
+- **Decisions:** APPROVED (HIGH confidence) — 10/10 DoD items pass. 19/19 tests pass, 96% coverage. Ruff clean. All 7 ACs verified. Upstream: QA PASS, Security PASS, CI PASS (90/100), Docs PASS.
+- **Timestamp:** 2026-03-11T04:45:00Z
+
+### [FORGEOS-BE038] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE038.md
+- **Decisions:** APPROVED (HIGH confidence) — 10/10 DoD items pass. 21 tests, 100% coverage on pipeline.py + health.py. Lint clean, type checks clean. All upstream verdicts verified (QA PASS, Security PASS, CI PASS 95/100, Docs PASS).
+- **Timestamp:** 2026-03-11T04:45:00Z
+
+### [FORGEOS-BE035] — Validation: APPROVED
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE035.md
+- **Decisions:** APPROVED — 10/10 DoD items pass; all upstream verdicts (QA, Security, CI, Docs) independently confirmed PASS; 29/29 tests pass; all 6 acceptance criteria verified in code
+- **Timestamp:** 2026-03-11T04:15:00Z

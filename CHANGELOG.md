@@ -8,6 +8,33 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Push Event Handler for Sync** (FORGEOS-BE061) — GitHub push event
+  handler at `mcp-server/src/mcp_server/webhooks/github_handler.py` and
+  `mcp-server/src/mcp_server/services/webhook_service.py`. Triggers
+  `tickets.sync` on push events to main branches or when ticket-related
+  files (`.github/tickets/`, `.github/ticket-state/`) are modified.
+  `create_push_handler()` factory injects the sync callback for decoupled
+  operation. `parse_push_event()` validates payloads into a frozen
+  `PushEventPayload` dataclass. `_has_ticket_file_changes()` inspects
+  commit file lists for ticket paths. Non-ticket pushes are acknowledged
+  without triggering sync. Handler returns the sync summary as the
+  response payload. 31 tests, CI quality score 99/100.
+
+- **Admin Force Operations** (FORGEOS-BE057) — Three admin-only POST
+  endpoints at `mcp-server/src/mcp_server/api/routes/admin.py` backed by
+  `AdminService` at `mcp-server/src/mcp_server/services/admin_service.py`.
+  `POST /api/admin/tickets/{id}/force-release` releases any active claim
+  regardless of owner. `POST /api/admin/tickets/{id}/force-advance` moves
+  a ticket to the next SDLC stage bypassing claim checks.
+  `POST /api/admin/tickets/{id}/force-rework` returns a ticket to its
+  implementation stage with escalation when `max_reworks` is exceeded.
+  All operations require admin role authentication (403 for non-admin),
+  a mandatory `reason` field for audit trail, and create audit log entries
+  with `elevated_operation=true`. Service layer uses SERIALIZABLE
+  transactions. Typed frozen-dataclass results (`ForceReleaseResult`,
+  `ForceAdvanceResult`, `ForceReworkResult`) with `to_dict()` serialization.
+  41 tests, CI quality score 99/100.
+
 - **Ticket Detail and History REST Endpoints** (FORGEOS-BE035) —
   `GET /api/tickets/{ticket_id}` returns full ticket detail with resolved
   dependency status (title, stage, `is_done` for each `depends_on` entry),
