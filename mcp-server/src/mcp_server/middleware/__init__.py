@@ -4,7 +4,7 @@ Provides request lifecycle middleware including correlation ID tracking,
 logging integration, error enrichment, and database metadata propagation.
 
 .. meta::
-   :ticket: FORGEOS-BE019, FORGEOS-BE054, FORGEOS-BE042
+   :ticket: FORGEOS-BE019, FORGEOS-BE054, FORGEOS-BE042, FORGEOS-BE041
    :last_reviewed: 2026-03-11T00:00:00Z
 """
 
@@ -28,6 +28,13 @@ from mcp_server.middleware.correlation import (
     get_db_correlation_metadata,
     set_correlation_id,
 )
+from mcp_server.middleware.idempotency import (
+    IdempotencyConfig,
+    IdempotencyMiddleware,
+    IdempotencyStore,
+    InMemoryIdempotencyStore,
+    MissingKeyPolicy,
+)
 from mcp_server.middleware.rate_limiter import (
     RateLimitConfig,
     RateLimitMiddleware,
@@ -39,7 +46,12 @@ __all__ = [
     "AuthContext",
     "AuthMiddleware",
     "CorrelationIdFilter",
+    "IdempotencyConfig",
+    "IdempotencyMiddleware",
+    "IdempotencyStore",
     "IdentityType",
+    "InMemoryIdempotencyStore",
+    "MissingKeyPolicy",
     "RateLimitConfig",
     "RateLimitMiddleware",
     "SlidingWindowLimiter",

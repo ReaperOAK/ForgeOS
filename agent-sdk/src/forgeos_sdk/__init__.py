@@ -34,9 +34,16 @@ from forgeos_sdk.exceptions import (
     NetworkError,
     ToolCallError,
 )
+from forgeos_sdk.fallback import FilesystemFallback
 from forgeos_sdk.heartbeat import LeaseHeartbeat
 from forgeos_sdk.models import Claim, Evidence, OperationResult, Ticket
 from forgeos_sdk.operations import TicketOperations
+from forgeos_sdk.summary import (
+    STAGE_TO_AGENT,
+    delete_upstream_summary,
+    read_upstream_summary,
+    write_summary,
+)
 
 __version__ = "0.1.0"
 __app_name__ = "forgeos-agent-sdk"
@@ -45,8 +52,10 @@ __all__ = [
     "Claim",
     "ConnectionState",
     "Evidence",
+    "FilesystemFallback",
     "ForgeOSClient",
     "LeaseHeartbeat",
+    "OperationMode",
     "OperationResult",
     "SDKConfig",
     "Ticket",
@@ -61,4 +70,8 @@ __all__ = [
     "LeaseExpiredError",
     "InvalidTransitionError",
     "NetworkError",
+    "STAGE_TO_AGENT",
+    "read_upstream_summary",
+    "write_summary",
+    "delete_upstream_summary",
 ]
