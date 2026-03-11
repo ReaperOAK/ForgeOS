@@ -4137,3 +4137,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/README.md, CHANGELOG.md
 - **Decisions:** Added WebSocket Streaming reference section to README (Diátaxis: Reference). Docstrings already comprehensive — no changes needed. CHANGELOG entry added under [Unreleased].
 - **Timestamp:** 2026-03-11T03:40:00Z
+
+### [FORGEOS-BE057] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE057.md
+- **Decisions:** PASS — Score 99/100, 0 critical, 0 warnings, 1 suggestion (mypy no-any-return)
+- **Timestamp:** 2026-03-11T04:00:00Z
+
+### [FORGEOS-BE038] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, CHANGELOG.md, mcp-server/src/mcp_server/api/schemas.py, .github/agent-output/Documentation/FORGEOS-BE038.md
+- **Decisions:** Added two reference sections (Pipeline Overview, Health Check) to README following existing endpoint section pattern. Updated schemas module docstring. CHANGELOG entry added.
+- **Timestamp:** 2026-03-11T03:45:00Z
