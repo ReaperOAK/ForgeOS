@@ -3,6 +3,11 @@
 - **Decisions:** Code-only library ticket — produced interface specs matching backend types. Extended existing ApiClient pattern. Claims derived from ticket filter, no separate endpoint. SSE excluded (separate ticket).
 - **Timestamp:** 2026-03-11T14:00:00Z
 
+### [FORGEOS-FE002] — FRONTEND complete
+- **Artifacts:** dashboard/src/lib/api/types.ts, dashboard/src/lib/api/client.ts, dashboard/src/lib/api/tickets.ts, dashboard/src/lib/api/index.ts
+- **Decisions:** Created new ForgeApiClient class in api/ subdirectory rather than modifying existing api-client.ts. Structured ApiError with code/details fields. encodeURIComponent on URL path params for safety. Direct T return from get<T>() matching spec signatures.
+- **Timestamp:** 2026-03-11T14:30:00Z
+
 ### [FORGEOS-FE011] — UIDESIGNER complete
 - **Artifacts:** docs/uiux/components/health-dashboard-spec.md, .github/agent-output/UIDesigner/FORGEOS-FE011.md
 - **Decisions:** Extended existing MetricCard/HealthStatusCard patterns rather than replacing. Client-side status computation from thresholds. Nested surfaceAlt for visual depth. In-place 150ms fade refresh rather than skeleton loading.
