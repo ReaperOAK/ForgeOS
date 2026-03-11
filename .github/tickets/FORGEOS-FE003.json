@@ -4,7 +4,7 @@
   "description": "Implement the stage pipeline view as a horizontal Kanban-style board following the UIDesigner mockup (FORGEOS-UID002). Display 11 stage columns (READY through DONE), each showing a count badge and a scrollable list of ticket cards. Each ticket card shows the ticket ID, truncated title, type badge (color-coded), priority indicator, and claim status. Support column collapsing for unused stages. Data sourced from the pipeline overview and ticket list API endpoints.",
   "type": "frontend",
   "priority": "critical",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -94,6 +94,24 @@
       "from_stage": "FRONTEND",
       "to_stage": "QA",
       "details": "Advanced from FRONTEND to QA"
+    },
+    {
+      "timestamp": "2026-03-11T15:15:47.481020+00:00",
+      "event": "CLAIMED",
+      "agent": "QAEngineer",
+      "machine_id": "pop-os",
+      "from_stage": "QA",
+      "to_stage": "QA",
+      "details": "Claimed by reaperoak@pop-os via QAEngineer, lease until 2026-03-11T15:45:47.481001+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T15:24:31.515977+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QAEngineer",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
