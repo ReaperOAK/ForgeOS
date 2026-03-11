@@ -452,3 +452,64 @@ class TestTicketServiceIntegration:
         payload = mock_queue.enqueue.call_args.kwargs["payload"]
         assert payload["ticket_id"] == "FORGEOS-BE011"
         assert mock_queue.enqueue.call_args.kwargs["event_type"] == "ticket.released"
+
+    @pytest.mark.asyncio()
+    async def test_rework_emits_notification(self) -> None:
+        from mcp_server.notifications.emitter import StateChangeEmitter
+        from mcp_server.services.ticket_service import TicketService
+
+        mock_queue = AsyncMock()
+        mock_queue.enqueue = AsyncMock(return_value="n-003")
+        emitter = StateChangeEmitter(queue=mock_queue)
+
+        # Build a fake asyncpg row with dict-like access
+        fake_row = {
+            "ticket_id": "FORGEOS-BE012",
+            "stage": "QA",
+            "sdlc_flow": ["READY", "BACKEND", "QA", "SECURITY"],
+            "claimed_by_name": "qa-agent",
+            "rework_count": 0,
+            "max_reworks": 3,
+            "type": "backend",
+            "title": "Test rework ticket",
+        }
+
+        mock_conn = AsyncMock()
+        mock_conn.fetchrow = AsyncMock(return_value=fake_row)
+        mock_conn.execute = AsyncMock()
+
+        mock_pool = AsyncMock()
+
+        service = TicketService(
+            claim_queue=AsyncMock(),
+            emitter=emitter,
+        )
+        service._pool = mock_pool
+
+        with patch(
+            "mcp_server.services.ticket_service.transactional",
+        ) as mock_transactional:
+            mock_transactional.return_value.__aenter__ = AsyncMock(
+                return_value=mock_conn
+            )
+            mock_transactional.return_value.__aexit__ = AsyncMock(return_value=False)
+
+            result = await service.rework_ticket(
+                ticket_id="FORGEOS-BE012",
+                agent_id="qa-agent",
+                reason="Tests failing",
+            )
+
+        assert result.ticket_id == "FORGEOS-BE012"
+        assert result.previous_stage == "QA"
+        assert result.new_stage == "BACKEND"
+
+        mock_queue.enqueue.assert_awaited_once()
+        call_kwargs = mock_queue.enqueue.call_args.kwargs
+        assert call_kwargs["event_type"] == "ticket.reworked"
+        payload = call_kwargs["payload"]
+        assert payload["ticket_id"] == "FORGEOS-BE012"
+        assert payload["old_stage"] == "QA"
+        assert payload["new_stage"] == "BACKEND"
+        assert payload["agent_id"] == "qa-agent"
+        assert payload["reason"] == "Tests failing"
