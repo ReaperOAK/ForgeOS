@@ -121,6 +121,12 @@ def verify_github_request(
 
 _MAIN_BRANCHES: frozenset[str] = frozenset({"main", "master"})
 
+# Paths that indicate ticket-related file changes.
+_TICKET_FILE_PREFIXES: tuple[str, ...] = (
+    ".github/tickets/",
+    ".github/ticket-state/",
+)
+
 
 class PushEventValidationError(Exception):
     """Raised when a push event payload fails structural validation."""
@@ -226,13 +232,34 @@ def parse_push_event(payload: dict[str, Any]) -> PushEventPayload:
 
 
 # ---------------------------------------------------------------------------
+# Ticket file change detection
+# ---------------------------------------------------------------------------
+
+
+def _has_ticket_file_changes(commits: list[dict[str, Any]]) -> bool:
+    """Return ``True`` if any commit touches ticket-related files.
+
+    Inspects the ``added``, ``modified``, and ``removed`` arrays of each
+    commit for paths starting with :data:`_TICKET_FILE_PREFIXES`.
+    """
+    for commit in commits:
+        for key in ("added", "modified", "removed"):
+            for file_path in commit.get(key, []):
+                if isinstance(file_path, str) and file_path.startswith(
+                    _TICKET_FILE_PREFIXES
+                ):
+                    return True
+    return False
+
+
+# ---------------------------------------------------------------------------
 # Push event handler factory
 # ---------------------------------------------------------------------------
 
 
 def create_push_handler(
     sync_fn: SyncCallback | None = None,
-) -> Callable[[WebhookEvent], Coroutine[Any, Any, None]]:
+) -> Callable[[WebhookEvent], Coroutine[Any, Any, dict[str, Any] | None]]:
     """Create an async push event handler with an injected sync callback.
 
     Parameters
@@ -243,11 +270,11 @@ def create_push_handler(
 
     Returns
     -------
-    Callable[[WebhookEvent], Coroutine[Any, Any, None]]
+    Callable[[WebhookEvent], Coroutine[Any, Any, dict[str, Any] | None]]
         An async handler suitable for registration in the webhook registry.
     """
 
-    async def _handle_push(event: WebhookEvent) -> None:
+    async def _handle_push(event: WebhookEvent) -> dict[str, Any] | None:
         correlation_id = event.event_id
 
         try:
@@ -257,7 +284,7 @@ def create_push_handler(
                 "push_event_validation_failed",
                 extra={"correlation_id": correlation_id},
             )
-            return
+            return None
 
         log_extra: dict[str, Any] = {
             "correlation_id": correlation_id,
@@ -269,19 +296,41 @@ def create_push_handler(
             "is_main_branch": push.is_main_branch,
         }
 
-        if not push.is_main_branch:
-            logger.info("push_non_main_acknowledged", extra=log_extra)
-            return
+        # Decide whether sync is needed:
+        # - Main branch pushes always trigger sync
+        # - Non-main branch pushes trigger sync only if ticket files changed
+        trigger_sync = push.is_main_branch or _has_ticket_file_changes(
+            push.commits
+        )
 
-        # Main branch push — trigger sync
-        logger.info("push_main_branch_detected", extra=log_extra)
+        if not trigger_sync:
+            logger.info("push_non_main_acknowledged", extra=log_extra)
+            return {
+                "acknowledged": True,
+                "branch": push.branch,
+                "sync_triggered": False,
+            }
+
+        # Sync needed — main branch or ticket-file changes detected
+        trigger_reason = (
+            "main_branch" if push.is_main_branch else "ticket_files_modified"
+        )
+        logger.info(
+            "push_sync_trigger_detected",
+            extra={**log_extra, "trigger_reason": trigger_reason},
+        )
 
         if sync_fn is None:
             logger.warning(
                 "push_sync_skipped_no_engine",
                 extra={"correlation_id": correlation_id},
             )
-            return
+            return {
+                "acknowledged": True,
+                "branch": push.branch,
+                "sync_triggered": False,
+                "reason": "no_sync_engine",
+            }
 
         try:
             sync_result = await sync_fn()
@@ -292,11 +341,23 @@ def create_push_handler(
                     "sync_result": sync_result,
                 },
             )
+            return {
+                "acknowledged": True,
+                "branch": push.branch,
+                "sync_triggered": True,
+                "sync_result": sync_result,
+            }
         except Exception:
             logger.exception(
                 "push_sync_failed",
                 extra={"correlation_id": correlation_id},
             )
+            return {
+                "acknowledged": True,
+                "branch": push.branch,
+                "sync_triggered": False,
+                "error": "sync_failed",
+            }
 
     return _handle_push
 
