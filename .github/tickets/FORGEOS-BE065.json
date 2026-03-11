@@ -4,7 +4,7 @@
   "description": "Implement the notification emitter that creates queue entries when ticket state changes occur. Integrate with the ticket service layer: after advance, rework, claim, or release operations, enqueue a notification containing the ticket context, change details, and actor information. Support notification types: stage_changed, ticket_claimed, ticket_released, ticket_reworked, lease_expiring.",
   "type": "backend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "BACKEND",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,11 +34,11 @@
     "Notification payload includes ticket_id, event_type, actor, timestamp, and change details",
     "Emitter is called from the ticket service layer (not duplicated across MCP/REST)"
   ],
-  "rework_count": 0,
-  "claimed_by": "QA Engineer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T01:32:59.197710+00:00",
+  "rework_count": 1,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -79,6 +79,15 @@
       "from_stage": "QA",
       "to_stage": "QA",
       "details": "Claimed by ReaperOAK@pop-os via QA Engineer, lease until 2026-03-11T01:32:59.197710+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T01:09:39.859097+00:00",
+      "event": "REWORK",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "BACKEND",
+      "details": "Rework #1: AC #4 not met: rework_ticket() in TicketService does not call emit_reworked(). The emitter method exists but is not integrated into the rework operation. Missing integration test as well."
     }
   ],
   "source_task_file": "TODO/tasks/phase3-webhooks.md",
