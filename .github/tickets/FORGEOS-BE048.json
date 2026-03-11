@@ -33,10 +33,10 @@
     "Both methods use UTF-8 encoding and handle missing files gracefully"
   ],
   "rework_count": 0,
-  "claimed_by": "CI Reviewer",
+  "claimed_by": "Documentation Specialist",
   "machine_id": "pop-os",
   "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T02:19:17.930349+00:00",
+  "lease_expiry": "2026-03-11T02:46:04.838927+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -131,6 +131,22 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "CI PASS \u2014 Score 100/100, 0 critical, 0 warnings. 100% coverage, 28/28 tests."
+    },
+    {
+      "timestamp": "2026-03-11T02:16:04.805517+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from CI Reviewer: manual release"
+    },
+    {
+      "timestamp": "2026-03-11T02:16:04.838944+00:00",
+      "event": "CLAIMED",
+      "agent": "Documentation Specialist",
+      "machine_id": "pop-os",
+      "from_stage": "DOCS",
+      "to_stage": "DOCS",
+      "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-11T02:46:04.838927+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-agent-sdk.md",
