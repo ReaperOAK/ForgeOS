@@ -497,6 +497,12 @@ mcp-server/                Python MCP Server (FastMCP + asyncpg + Pydantic)
   alembic/                 PostgreSQL schema migrations
   tests/                   Pytest test suite
 
+dashboard/                 Next.js 14+ dashboard (App Router + Tailwind CSS)
+  src/app/                 App Router pages (overview, health check)
+  src/components/          React components (sidebar, metric cards, etc.)
+  src/lib/                 API client, theme provider, types
+  src/styles/              CSS custom properties (design tokens)
+
 infra/                     Infrastructure and DevOps
   docker-compose.yml       Production Docker stack
   scripts/                 setup.sh, seed.sh, backup.sh, restore.sh

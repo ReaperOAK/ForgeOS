@@ -8,6 +8,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Dashboard Web Application Scaffold** (FORGEOS-FE001) — Next.js 14+
+  dashboard at `dashboard/` using App Router, TypeScript strict mode, and
+  Tailwind CSS. Dark/light theme system with CSS custom properties sourced
+  from UIDesigner design tokens (FORGEOS-UID001) and localStorage persistence.
+  Dashboard shell layout with collapsible desktop sidebar, mobile drawer,
+  top bar with breadcrumbs, and main content area. Overview page with metric
+  cards (Active Tickets, Active Agents, Services Healthy, Blocked Tickets).
+  Health check page verifying connectivity to `/api/health`. REST API client
+  module with configurable base URL (`NEXT_PUBLIC_API_URL`) and 10-second
+  timeout. Anti-flash inline script prevents theme flicker on load. Accessible
+  focus ring and reduced-motion support. 18 source files, zero TypeScript
+  errors, zero lint warnings, CI quality score 92/100.
+
 - **Filesystem-to-Database Data Import** (FORGEOS-BE070) — Async
   `TicketImporter` at `mcp-server/src/mcp_server/migration/importer.py` that
   reads all `.github/tickets/*.json` files and imports them into PostgreSQL
