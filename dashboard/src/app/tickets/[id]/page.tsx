@@ -13,6 +13,16 @@ import { DependencyTree } from '@/components/tickets/DependencyTree';
 
 type Tab = 'history' | 'dependencies';
 
+/**
+ * Ticket detail page that loads a single ticket by URL parameter.
+ *
+ * Fetches ticket data via {@link fetchTicket}, renders the
+ * {@link TicketMetadata} panel, and provides tabbed views for
+ * {@link HistoryTimeline} and {@link DependencyTree}.
+ * Triggers the Next.js `notFound()` handler for missing tickets.
+ *
+ * @returns The ticket detail page
+ */
 export default function TicketDetailPage() {
     const params = useParams<{ id: string }>();
     const ticketId = params.id;

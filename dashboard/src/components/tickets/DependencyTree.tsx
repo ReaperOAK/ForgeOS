@@ -3,7 +3,9 @@
 import Link from 'next/link';
 import type { DependencyStatus, TicketDetail } from '@/lib/api';
 
+/** Props for the {@link DependencyTree} component. */
 interface DependencyTreeProps {
+    /** Full ticket detail including dependency status and depends_on. */
     ticket: TicketDetail;
 }
 
@@ -64,6 +66,13 @@ function SimpleLink({ ticketId }: { ticketId: string }) {
     );
 }
 
+/**
+ * Two-section dependency view for a ticket.
+ *
+ * Shows upstream dependencies (tickets this ticket depends on) with
+ * resolved/unresolved status dots and downstream dependents as
+ * clickable links to their detail pages.
+ */
 export function DependencyTree({ ticket }: DependencyTreeProps) {
     const upstream = ticket.dependency_status;
     const downstream = ticket.depends_on.length > 0

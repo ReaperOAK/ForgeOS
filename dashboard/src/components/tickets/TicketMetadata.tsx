@@ -2,7 +2,9 @@
 
 import type { TicketDetail } from '@/lib/api';
 
+/** Props for the {@link TicketMetadata} component. */
 interface TicketMetadataProps {
+    /** Full ticket detail object returned by the API. */
     ticket: TicketDetail;
 }
 
@@ -49,6 +51,13 @@ function Field({ label, children }: { label: string; children: React.ReactNode }
     );
 }
 
+/**
+ * Metadata panel displaying all ticket fields.
+ *
+ * Renders the ticket header (ID, title, priority/status badges),
+ * description, an 8-field metadata grid, acceptance criteria checklist,
+ * file paths list, and tags.
+ */
 export function TicketMetadata({ ticket }: TicketMetadataProps) {
     return (
         <section

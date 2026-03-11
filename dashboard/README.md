@@ -227,6 +227,35 @@ scrollable list of ticket cards.
 - Empty stages display a low-opacity placeholder message.
 - Skeleton columns render while loading.
 
+## Ticket Detail View (`/tickets/[id]`)
+
+<!-- last_reviewed: 2026-03-11T18:00:00Z -->
+
+Displays full metadata and history for a single ticket, loaded by ID
+from the URL parameter.
+
+### Components
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `TicketDetailPage` | `app/tickets/[id]/page.tsx` | Page shell with tab navigation (History / Dependencies) |
+| `TicketNotFound` | `app/tickets/[id]/not-found.tsx` | Custom 404 error page for invalid ticket IDs |
+| `TicketMetadata` | `components/tickets/TicketMetadata.tsx` | Header, description, metadata grid, acceptance criteria, file paths |
+| `HistoryTimeline` | `components/tickets/HistoryTimeline.tsx` | Vertical timeline of ticket lifecycle events |
+| `DependencyTree` | `components/tickets/DependencyTree.tsx` | Upstream/downstream dependency links with status indicators |
+
+### Behavior
+
+- Fetches ticket via `fetchTicket(id)` with automatic 404 detection.
+- Metadata grid shows type, stage, claimed-by, machine, operator, lease
+  expiry, rework count, and creation time.
+- Acceptance criteria rendered as a read-only checklist.
+- File paths displayed in monospace font.
+- History tab shows events with relative timestamps, agent names, and
+  expandable JSON payload details.
+- Dependency tab shows upstream (depends-on) and downstream (depended-by)
+  tickets as clickable links with resolved/unresolved status dots.
+
 ### Error Handling
 
 All endpoint functions throw an `ApiError` on non-OK responses or network
