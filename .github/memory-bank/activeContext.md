@@ -1920,3 +1920,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** dashboard/src/app/health/page.tsx, dashboard/src/components/health/HealthPanel.tsx, dashboard/src/components/health/MetricCard.tsx, dashboard/src/components/health/StatusIndicator.tsx, dashboard/README.md, .github/agent-output/Documentation/FORGEOS-FE011.md
 - **Decisions:** Added TSDoc to all exported components, types, interfaces, and helper functions. Updated README with health dashboard section, project tree, and component docs.
 - **Timestamp:** 2026-03-11T15:10:00Z
+
+### [FORGEOS-FE002] — Documentation Summary
+- **Artifacts:** dashboard/src/lib/api/types.ts, dashboard/src/lib/api/client.ts, dashboard/README.md, .github/agent-output/Documentation/FORGEOS-FE002.md
+- **Decisions:** Added TSDoc to 13 interfaces (types.ts) and all exports (client.ts). Rewrote README API Client section with endpoint table, error handling guide, and data types reference. tickets.ts already documented; index.ts is re-exports only.
+- **Timestamp:** 2026-03-11T14:15:00Z

@@ -1,6 +1,6 @@
 # ForgeOS Dashboard
 
-<!-- last_reviewed: 2026-03-11 -->
+<!-- last_reviewed: 2026-03-11T14:00:00Z -->
 
 > **Category:** Reference  
 > **Audience:** Developers working on the ForgeOS dashboard
@@ -66,7 +66,12 @@ dashboard/
     │       ├── MetricCard.tsx       # Metric value with trend and severity
     │       └── StatusIndicator.tsx  # Green/yellow/red status dot
     ├── lib/                   # Shared utilities
-    │   ├── api-client.ts      # REST API client with timeout
+    │   ├── api/               # REST API client library
+    │   │   ├── index.ts       # Barrel re-exports (types + functions)
+    │   │   ├── types.ts       # TypeScript interfaces and type aliases
+    │   │   ├── client.ts      # ForgeApiClient class (fetch wrapper)
+    │   │   └── tickets.ts     # Ticket endpoint functions
+    │   ├── api-client.ts      # Legacy REST API client (health checks)
     │   ├── theme.tsx          # ThemeProvider context + localStorage
     │   └── types.ts           # Shared TypeScript type definitions
     └── styles/
@@ -160,8 +165,21 @@ and a body slot for child metric cards.
 
 ## API Client
 
-The REST API client at `src/lib/api-client.ts` handles communication with
-the ForgeOS backend.
+The typed REST API client lives in `src/lib/api/`. Import everything from
+the barrel module:
+
+```typescript
+import {
+  fetchTickets,
+  fetchTicket,
+  fetchPipelineOverview,
+  fetchTicketHistory,
+  isApiError,
+  type Ticket,
+  type TicketFilters,
+  type PipelineOverview,
+} from '@/lib/api';
+```
 
 ### Configuration
 
@@ -169,19 +187,53 @@ the ForgeOS backend.
 |----------|---------|-------------|
 | `NEXT_PUBLIC_API_URL` | `http://localhost:3000` | ForgeOS API base URL |
 
-### Usage
+The client reads the environment variable at construction time and applies
+a 10-second request timeout via `AbortController`.
+
+### Endpoint Functions
+
+| Function | Return Type | Backend Endpoint |
+|----------|-------------|------------------|
+| `fetchTickets(filters?)` | `PaginatedResponse<Ticket>` | `GET /api/tickets` |
+| `fetchTicket(id)` | `TicketDetail` | `GET /api/tickets/:id` |
+| `fetchPipelineOverview()` | `PipelineOverview` | `GET /api/stages` |
+| `fetchTicketHistory(id)` | `EventHistory[]` | `GET /api/tickets/:id/history` |
+
+### Error Handling
+
+All endpoint functions throw an `ApiError` on non-OK responses or network
+failures. Use the `isApiError` type guard to narrow caught values:
 
 ```typescript
-import { apiClient } from '@/lib/api-client';
-
-// Generic GET request
-const response = await apiClient.get<MyType>('/api/tickets');
-
-// Health check (returns { healthy, responseTime, message? })
-const health = await apiClient.healthCheck();
+try {
+  const tickets = await fetchTickets({ stage: 'QA' });
+} catch (err) {
+  if (isApiError(err)) {
+    console.error(`API ${err.status}: ${err.message}`);
+  }
+}
 ```
 
-Requests include a 10-second timeout via `AbortController`.
+Timeout and network errors set `status: 0` and `code: 'NETWORK_ERROR'`.
+
+### Data Types
+
+The main domain types are defined in `src/lib/api/types.ts`:
+
+| Type | Description |
+|------|-------------|
+| `Ticket` | Core ticket entity (id, stage, status, priority, etc.) |
+| `TicketDetail` | Ticket extended with dependency resolution status |
+| `Claim` | Active agent claim on a ticket |
+| `StageTransition` | Stage or status change record |
+| `EventHistory` | Single audit trail entry |
+| `PipelineOverview` | Per-stage ticket counts snapshot |
+| `PaginatedResponse<T>` | Generic list wrapper with pagination info |
+| `TicketFilters` | Query parameters for `fetchTickets` |
+| `ApiError` | Structured error with status code and message |
+
+Enum-like union types: `TicketStage`, `TicketStatus`, `TicketType`,
+`TicketPriority`, `EventType`.
 
 ## TypeScript Configuration
 
