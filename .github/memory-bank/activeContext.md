@@ -1,3 +1,8 @@
+### [FORGEOS-BE040] — QA Summary
+- **Artifacts:** .github/agent-output/QA/FORGEOS-BE040.md, mcp-server/src/mcp_server/services/event_broadcaster.py, mcp-server/src/mcp_server/api/routes/websocket.py, mcp-server/tests/test_filtered_subscriptions.py
+- **Decisions:** QA PASS (HIGH confidence) — 53 tests pass (37 new + 16 regression), 85% coverage (95% websocket.py, 78% event_broadcaster.py — misses are pre-existing BE039 lifecycle code). All 6 ACs verified. Lint clean. 0 defects.
+- **Timestamp:** 2026-03-11T04:50:00Z
+
 ### [FORGEOS-BE070] — QA Summary
 - **Artifacts:** .github/agent-output/QA/FORGEOS-BE070.md, mcp-server/src/mcp_server/migration/importer.py, mcp-server/src/mcp_server/migration/transformers.py
 - **Decisions:** QA PASS (HIGH confidence) — 70 tests pass, 99% coverage, 0 defects, 0 regressions. All 7 ACs verified.
