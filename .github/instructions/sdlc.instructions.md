@@ -15,35 +15,21 @@ RULE: Dispatcher-claim protocol applies per stage: ReaperOAK performs CLAIM comm
 ### Available Stages
 
 ```
-READY | ARCHITECT | RESEARCH | BACKEND | FRONTEND | QA | SECURITY | CI | DOCS | VALIDATION | DONE
+READY > RESEARCH > PM > ARCHITECT > DevOps > BACKEND > UIDesigner > FRONTEND > QA > SECURITY > CI > DOCS  > VALIDATION > DONE
 ```
 
-### SDLC Flows by Ticket Type
-
-| Type | Flow |
-|------|------|
-| backend | READY → BACKEND → QA → SECURITY → CI → DOCS → VALIDATION → DONE |
-| frontend | READY → FRONTEND → QA → SECURITY → CI → DOCS → VALIDATION → DONE |
-| fullstack | READY → BACKEND → FRONTEND → QA → SECURITY → CI → DOCS → VALIDATION → DONE |
-| infra | READY → BACKEND → QA → SECURITY → CI → DOCS → VALIDATION → DONE |
-| security | READY → SECURITY → QA → CI → DOCS → VALIDATION → DONE |
-| docs | READY → DOCS → VALIDATION → DONE |
-| research | READY → RESEARCH → DOCS → VALIDATION → DONE |
-| architecture | READY → ARCHITECT → DOCS → VALIDATION → DONE |
-
-PROHIBITED: Skipping any stage in the ticket's defined flow.
-PROHIBITED: Reordering stages.
-RULE: tickets.py enforces flow order per ticket type.
-
-## 2. Stage Definitions
+## Stage Definitions
 
 | Stage | Description | Owner |
 |-------|-------------|-------|
 | READY | Dependencies met, eligible for claim | System (tickets.py) |
-| ARCHITECT | Architecture design, ADRs, API contracts | Architect |
 | RESEARCH | Evidence-based research, PoC, analysis | Research Analyst |
-| BACKEND | Server-side implementation, APIs, business logic | Backend / DevOps |
-| FRONTEND | UI implementation, components, layouts | UIDesigner (mockup), Frontend Engineer |
+| PM | Project management, stakeholder communication | Product Manager |
+| ARCHITECT | Architecture design, ADRs, API contracts | Architect |
+| DevOps | Infrastructure, deployment, monitoring | DevOps Engineer |
+| BACKEND | Server-side implementation, APIs, business logic | Backend |
+| UIDesigner | UI/UX design, mockups, prototypes, import from figma/stitch | UIDesigner |
+| FRONTEND | UI implementation, components, layouts | Frontend Engineer |
 | QA | Test coverage, functional verification, mutation testing | QA Engineer |
 | SECURITY | Vulnerability scan, STRIDE, OWASP review | Security Engineer |
 | CI | Lint, type checks, complexity analysis | CI Reviewer |
@@ -51,20 +37,9 @@ RULE: tickets.py enforces flow order per ticket type.
 | VALIDATION | Independent DoD review, upstream verdict verification | Validator |
 | DONE | Lifecycle complete | System |
 
-## 3. Post-Implementation Chain
 
-REQUIRED: After implementation stage completes, execute in strict order:
-1. QA Engineer
-2. Security Engineer
-3. CI Reviewer
-4. Documentation Specialist
-5. Validator
 
-RULE: Any rejection returns ticket to REWORK.
-PROHIBITED: Skipping any step in the chain.
-PROHIBITED: Reordering the chain.
-
-## 4. Rework Rules
+## Rework Rules
 
 RULE: REWORK is a side-state entered on rejection by QA, Security, Validator, or CI.
 RULE: Maximum 3 combined rework attempts per ticket.
@@ -85,11 +60,13 @@ REQUIRED: Every ticket must satisfy ALL items. Validator verifies independently.
 8. No console errors (structured logger only)
 9. No unhandled promises
 10. No TODO comments in code
+11. Ui designs exists in figma/stitch and in codebase.
 
 ## 6. Stage Transition Guards
 
 RULE: Implementation stage varies by ticket type (ARCHITECT, RESEARCH, BACKEND, FRONTEND, or SECURITY).
 RULE: Claim commit locks the ticket within its current stage directory.
+example:
 
 | From | To | Guard |
 |------|----|-------|
@@ -109,7 +86,6 @@ RULE: Claim commit locks the ticket within its current stage directory.
 
 ## 7. TODO Agent Decomposition
 
-RULE: Only ReaperOAK may invoke TODO agent.
 REQUIRED: Decomposition order for multi-step work:
 1. Strategic Mode (L0->L1): Vision to capabilities
 2. Planning Mode (L1->L2): Capabilities to execution blocks

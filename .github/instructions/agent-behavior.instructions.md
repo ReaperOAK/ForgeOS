@@ -12,11 +12,11 @@ RULE: One worker handles exactly one ticket.
 RULE: One invocation handles exactly one SDLC stage.
 RULE: Workers are ephemeral and stateless.
 RULE: No worker reuse across tickets.
-PROHIBITED: Multi-ticket references in worker output.
+Allowed: Multi-ticket references in worker output.
 PROHIBITED: Cross-ticket file modifications.
 
-RULE: Worker termination triggers:
-- Cross-ticket reference detected
+RULE: Worker termination 
+Triggers:
 - Out-of-scope file modification
 - Protocol violation
 
@@ -30,7 +30,7 @@ RULE: Agents derive context ONLY from:
 5. Agent chunk files (`.github/vibecoding/chunks/{Agent}.agent/`)
 
 PROHIBITED: Expecting context injection from ReaperOAK.
-PROHIBITED: Reading other agents' summaries outside the chain.
+Allowed: Reading other agents' summaries outside the chain.
 RULE: Context is filesystem-derived. Period.
 
 ## 3. ReaperOAK Dispatcher Contract
@@ -50,6 +50,7 @@ PROHIBITED for ReaperOAK:
 - Optimizing batching
 - Injecting context into agents
 - Implementing any product code
+- Reading/modifying files 
 - Running build/test commands
 
 RULE: ReaperOAK calls one subagent per READY ticket.
@@ -60,35 +61,31 @@ RULE: Git + tickets.py enforce safety. Not ReaperOAK.
 
 | Agent | Processes Stage |
 |-------|----------------|
-| Architect | ARCHITECT |
 | Research Analyst | RESEARCH |
+| Product Manager | PM |
+| Architect | ARCHITECT |
+| TODO | Ticket creation only |
+| DevOps Engineer | BACKEND (infra tickets) |
 | Backend | BACKEND |
+| UIDesigner | UI |
 | Frontend Engineer | FRONTEND |
-| UIDesigner | FRONTEND (UI phase, before Frontend) |
 | QA Engineer | QA |
 | Security Engineer | SECURITY |
 | CI Reviewer | CI |
 | Documentation Specialist | DOCS |
 | Validator | VALIDATION |
-| TODO | Ticket creation only (not a stage) |
-| Product Manager | Requirements only (not a stage) |
-| DevOps Engineer | BACKEND (infra tickets) |
 
 ## 5. Scope Enforcement
 
-REQUIRED: Every agent's output must reference only its assigned ticket.
-REQUIRED: Modified files must be within ticket's declared file_paths.
 PROHIBITED: Modifying files outside ticket scope.
-PROHIBITED: Referencing other ticket IDs.
 
 ## 6. Forbidden Actions (All Agents)
 
 PROHIBITED: `git add .` / `git add -A` / `git add --all`
 PROHIBITED: Force pushing or deleting branches.
-PROHIBITED: Deploying to any environment.
-PROHIBITED: Modifying `systemPatterns.md` (except ReaperOAK).
-PROHIBITED: Modifying `decisionLog.md` (except ReaperOAK).
-PROHIBITED: Direct agent-to-agent communication.
+PROHIBITED: Deploying to any environment. (allowed for DevOps agent)
+PROHIBITED: Modifying `systemPatterns.md` (except ReaperOAK and Documentation agent).
+PROHIBITED: Modifying `decisionLog.md` (except ReaperOAK and Documentation agent).
 PROHIBITED: Processing unclaimed tickets.
 PROHIBITED: Holding claims on multiple tickets per agent instance.
 

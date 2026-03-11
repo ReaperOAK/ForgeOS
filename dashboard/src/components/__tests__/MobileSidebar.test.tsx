@@ -25,23 +25,23 @@ jest.mock('@/components/ThemeToggle', () => ({
 describe('MobileSidebar', () => {
     it('renders nothing when closed', () => {
         const { container } = render(
-            <MobileSidebar isOpen={false} onClose={() => {}} />,
+            <MobileSidebar isOpen={false} onClose={() => { }} />,
         );
         expect(container.firstChild).toBeNull();
     });
 
     it('renders dialog when open', () => {
-        render(<MobileSidebar isOpen={true} onClose={() => {}} />);
+        render(<MobileSidebar isOpen={true} onClose={() => { }} />);
         expect(screen.getByRole('dialog')).toBeInTheDocument();
     });
 
     it('has aria-modal="true" when open', () => {
-        render(<MobileSidebar isOpen={true} onClose={() => {}} />);
+        render(<MobileSidebar isOpen={true} onClose={() => { }} />);
         expect(screen.getByRole('dialog')).toHaveAttribute('aria-modal', 'true');
     });
 
     it('renders close button with aria-label', () => {
-        render(<MobileSidebar isOpen={true} onClose={() => {}} />);
+        render(<MobileSidebar isOpen={true} onClose={() => { }} />);
         expect(
             screen.getByRole('button', { name: 'Close navigation' }),
         ).toBeInTheDocument();
@@ -64,7 +64,7 @@ describe('MobileSidebar', () => {
     });
 
     it('renders all navigation items', () => {
-        render(<MobileSidebar isOpen={true} onClose={() => {}} />);
+        render(<MobileSidebar isOpen={true} onClose={() => { }} />);
         expect(screen.getByText('Dashboard')).toBeInTheDocument();
         expect(screen.getByText('Pipeline')).toBeInTheDocument();
         expect(screen.getByText('Claims')).toBeInTheDocument();
@@ -74,18 +74,18 @@ describe('MobileSidebar', () => {
     });
 
     it('renders ForgeOS branding', () => {
-        render(<MobileSidebar isOpen={true} onClose={() => {}} />);
+        render(<MobileSidebar isOpen={true} onClose={() => { }} />);
         expect(screen.getByText('ForgeOS')).toBeInTheDocument();
     });
 
     it('renders user info', () => {
-        render(<MobileSidebar isOpen={true} onClose={() => {}} />);
+        render(<MobileSidebar isOpen={true} onClose={() => { }} />);
         expect(screen.getByText('ReaperOAK')).toBeInTheDocument();
         expect(screen.getByText('Operator')).toBeInTheDocument();
     });
 
     it('renders ThemeToggle', () => {
-        render(<MobileSidebar isOpen={true} onClose={() => {}} />);
+        render(<MobileSidebar isOpen={true} onClose={() => { }} />);
         expect(screen.getByTestId('theme-toggle')).toBeInTheDocument();
     });
 

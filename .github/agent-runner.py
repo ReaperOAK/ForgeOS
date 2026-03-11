@@ -43,40 +43,45 @@ REPO_ROOT = ROOT.parent
 
 # Agent role → stage mapping (which stage directory does each agent process)
 AGENT_TO_STAGE = {
-    "Architect": "ARCHITECT",
     "Research": "RESEARCH",
+    "ProductManager": "PM",
+    "Architect": "ARCHITECT",
+    "DevOps": "DEVOPS",
     "Backend": "BACKEND",
+    "UIDesigner": "UIDESIGNER",
     "Frontend": "FRONTEND",
-    "UIDesigner": "FRONTEND",  # UIDesigner also works from FRONTEND dir
     "QA": "QA",
     "Security": "SECURITY",
     "CIReviewer": "CI",
     "Documentation": "DOCS",
     "Validator": "VALIDATION",
-    "DevOps": "BACKEND",  # DevOps tickets route through BACKEND stage
 }
 
 # What stage feeds into each agent's stage (previous stage in various flows)
 AGENT_SOURCE_STAGES = {
-    "Architect": ["READY"],
     "Research": ["READY"],
-    "Backend": ["READY", "ARCHITECT"],
-    "Frontend": ["READY", "BACKEND"],
-    "UIDesigner": ["READY"],
-    "QA": ["BACKEND", "FRONTEND", "ARCHITECT", "RESEARCH", "SECURITY"],
-    "Security": ["QA"],
-    "CIReviewer": ["SECURITY"],
-    "Documentation": ["CI"],
+    "ProductManager": ["READY"],
+    "Architect": ["READY"],
+    "DevOps": ["READY"],
+    "Backend": ["READY"],
+    "UIDesigner": ["READY", "BACKEND"],
+    "Frontend": ["UIDESIGNER"],
+    "QA": ["BACKEND", "FRONTEND", "DEVOPS", "SECURITY", "ARCHITECT", "RESEARCH", "PM"],
+    "Security": ["READY", "QA"],
+    "CIReviewer": ["SECURITY", "QA"],
+    "Documentation": ["CI", "READY", "RESEARCH", "ARCHITECT", "PM"],
     "Validator": ["DOCS"],
-    "DevOps": ["READY", "ARCHITECT"],
 }
 
 # Previous agent name mapping for summary handoff
 STAGE_TO_AGENT_NAME = {
     "READY": None,
-    "ARCHITECT": "Architect",
     "RESEARCH": "Research",
+    "PM": "ProductManager",
+    "ARCHITECT": "Architect",
+    "DEVOPS": "DevOps",
     "BACKEND": "Backend",
+    "UIDESIGNER": "UIDesigner",
     "FRONTEND": "Frontend",
     "QA": "QA",
     "SECURITY": "Security",
@@ -167,11 +172,7 @@ def find_claimable_tickets(agent: str) -> list[dict]:
             try:
                 current_idx = None
                 for i, s in enumerate(sdlc):
-                    # Map SDLC flow stage to directory
-                    effective = s
-                    if s == "UIDESIGNER":
-                        effective = "FRONTEND"
-                    if effective == src_stage or s == src_stage:
+                    if s == src_stage:
                         current_idx = i
                         break
 
@@ -180,12 +181,9 @@ def find_claimable_tickets(agent: str) -> list[dict]:
 
                 if current_idx + 1 < len(sdlc):
                     next_stage = sdlc[current_idx + 1]
-                    next_dir = next_stage
-                    if next_stage == "UIDESIGNER":
-                        next_dir = "FRONTEND"
 
                     # Check if this agent handles the next stage
-                    if next_dir != target_stage and next_stage != target_stage:
+                    if next_stage != target_stage:
                         continue
                 else:
                     continue
@@ -382,8 +380,7 @@ def execute_work_commit(
     sdlc = ticket.get("sdlc_flow", [])
     current_idx = None
     for i, s in enumerate(sdlc):
-        effective = s if s != "UIDESIGNER" else "FRONTEND"
-        if effective == found_stage or s == found_stage:
+        if s == found_stage:
             current_idx = i
             break
 
@@ -392,7 +389,7 @@ def execute_work_commit(
         return False
 
     next_sdlc_stage = sdlc[current_idx + 1]
-    next_dir = next_sdlc_stage if next_sdlc_stage != "UIDESIGNER" else "FRONTEND"
+    next_dir = next_sdlc_stage
 
     # Step 1: Write summary file
     summary_dir = AGENT_OUTPUT_DIR / agent

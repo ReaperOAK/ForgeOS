@@ -22,8 +22,7 @@
     "FORGEOS-BE050"
   ],
   "blocked_by": [
-    "FORGEOS-BE074",
-    "FORGEOS-BE050"
+    "FORGEOS-BE074"
   ],
   "file_paths": [
     ".github/agent-runner.py",

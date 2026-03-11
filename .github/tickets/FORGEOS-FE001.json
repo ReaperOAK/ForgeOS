@@ -4,7 +4,7 @@
   "description": "Scaffold the dashboard web application using Next.js (App Router) with TypeScript. Set up the project structure, install core dependencies (React 18+, Next.js 14+, TypeScript, Tailwind CSS), configure the theme system from UIDesigner design tokens (FORGEOS-UID001), and create the dashboard shell layout with sidebar navigation, top bar, and content area. Verify connectivity to the REST API health endpoint (FORGEOS-BE038).",
   "type": "frontend",
   "priority": "critical",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -42,10 +42,10 @@
     "Build produces zero TypeScript errors and zero lint warnings"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-11T11:21:21.374883+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -149,6 +149,22 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "DOCS complete. Created dashboard/README.md, updated CHANGELOG.md and root README.md."
+    },
+    {
+      "timestamp": "2026-03-11T11:46:47.725145+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Validator: Lease expired at 2026-03-11T11:21:21.374883+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T12:10:37.769649+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",

@@ -2,7 +2,7 @@
 name: 'UIDesigner'
 description: 'Generates UI mockups, iterates on designs via Google Stitch, produces component specs and design tokens for Frontend Engineer. Uses Playwright for visual validation.'
 user-invokable: false
-tools: [vscode, execute, read, agent, edit, search, web, browser, 'awesome-copilot/*', 'com.figma.mcp/mcp/*', 'io.github.upstash/context7/*', 'markitdown/*', 'memory/*', 'playwright/*', 'sequentialthinking/*', 'stitch/*', vscode.mermaid-chat-features/renderMermaidDiagram, todo]
+tools: [vscode, execute, read, agent, edit, search, web, browser, 'awesome-copilot/*', 'com.figma.mcp/mcp/*', 'firecrawl/*', 'github/*', 'io.github.upstash/context7/*', 'markitdown/*', 'memory/*', 'microsoft-docs/*', 'mongodb/*', 'playwright/*', 'sentry/*', 'sequentialthinking/*', 'stitch/*', 'terraform/*', vscode.mermaid-chat-features/renderMermaidDiagram, ms-azuretools.vscode-containers/containerToolsConfig, todo]
 model: Claude Opus 4.6 (copilot)
 ---
 
