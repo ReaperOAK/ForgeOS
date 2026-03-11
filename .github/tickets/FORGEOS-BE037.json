@@ -4,7 +4,7 @@
   "description": "Implement `POST /api/tickets/:id/advance` and `POST /api/tickets/:id/rework` REST endpoints. These delegate to the same service layer as MCP tools `tickets.advance` (FORGEOS-BE030) and `tickets.rework` (FORGEOS-BE031). Advance accepts completion evidence; rework accepts rejection reason.",
   "type": "backend",
   "priority": "high",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -37,10 +37,10 @@
     "Both endpoints create event history records"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-11T09:40:42.238341+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -158,6 +158,15 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "DOCS complete \u2014 CHANGELOG, README advance/rework section, schemas meta updated"
+    },
+    {
+      "timestamp": "2026-03-11T09:35:43.254040+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
