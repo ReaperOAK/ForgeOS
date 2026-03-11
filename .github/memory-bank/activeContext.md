@@ -1855,3 +1855,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE072.md
 - **Decisions:** PASS — Score 84/100, 0 critical, 3 warnings (F401 unused import, pyright strict-mode type annotations). Lint clean (default config), mypy clean, 32/32 tests pass, 96% coverage, max cyclomatic complexity 9. Upstream QA+Security verified PASS.
 - **Timestamp:** 2026-03-11T19:30:00Z
+
+### [FORGEOS-BE071] — Validation: REJECTED (Rework #1)
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE071.md
+- **Decisions:** REJECTED — DoD #3 (lint) and #4 (type checks) fail. 5 ruff errors: 3x F401 unused imports (field in both files, STAGE_DIR_TO_DB), 1x TC003 (Path not in TYPE_CHECKING block), 1x SIM105 (try-except-pass → contextlib.suppress). 5 pyright errors: 3 unused imports + 2 pre-existing codebase pattern (not regressions). All 7 ACs met, 33/33 tests pass, 90% coverage. Upstream QA ✅ Security ✅ CI ✅ Docs ✅. Rejection is on lint cleanliness only.
+- **Timestamp:** 2026-03-11T20:00:00Z
