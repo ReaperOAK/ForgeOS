@@ -106,9 +106,19 @@ PROHIBITED: Cross-agent summary reading outside the chain.
 RULE: Summary directories:
 ```
 .github/agent-output/
-    Architect/  Research/  Backend/  Frontend/
-    QA/  Security/  CIReviewer/  Documentation/
-    Validator/  TODO/  DevOps/  ProductManager/  UIDesigner/
+    Architect/  
+    Research/  
+    Backend/  
+    Frontend/
+    QA/  
+    Security/  
+    CIReviewer/  
+    Documentation/
+    Validator/  
+    TODO/  
+    DevOps/  
+    ProductManager/  
+    UIDesigner/
 ```
 
 RULE: Context flows ONLY via filesystem. ReaperOAK does NOT inject context.

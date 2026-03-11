@@ -34,14 +34,14 @@ describe('Sidebar', () => {
     });
 
     it('renders navigation with accessible label', () => {
-        render(<Sidebar isCollapsed={false} onToggleCollapse={() => {}} />);
+        render(<Sidebar isCollapsed={false} onToggleCollapse={() => { }} />);
         expect(
             screen.getByRole('navigation', { name: 'Main navigation' }),
         ).toBeInTheDocument();
     });
 
     it('renders all nav items when expanded', () => {
-        render(<Sidebar isCollapsed={false} onToggleCollapse={() => {}} />);
+        render(<Sidebar isCollapsed={false} onToggleCollapse={() => { }} />);
         expect(screen.getByText('Dashboard')).toBeInTheDocument();
         expect(screen.getByText('Pipeline')).toBeInTheDocument();
         expect(screen.getByText('Claims')).toBeInTheDocument();
@@ -51,30 +51,30 @@ describe('Sidebar', () => {
     });
 
     it('renders ForgeOS branding when expanded', () => {
-        render(<Sidebar isCollapsed={false} onToggleCollapse={() => {}} />);
+        render(<Sidebar isCollapsed={false} onToggleCollapse={() => { }} />);
         expect(screen.getByText('ForgeOS')).toBeInTheDocument();
     });
 
     it('hides branding when collapsed', () => {
-        render(<Sidebar isCollapsed={true} onToggleCollapse={() => {}} />);
+        render(<Sidebar isCollapsed={true} onToggleCollapse={() => { }} />);
         expect(screen.queryByText('ForgeOS')).not.toBeInTheDocument();
     });
 
     it('hides nav labels when collapsed', () => {
-        render(<Sidebar isCollapsed={true} onToggleCollapse={() => {}} />);
+        render(<Sidebar isCollapsed={true} onToggleCollapse={() => { }} />);
         expect(screen.queryByText('Dashboard')).not.toBeInTheDocument();
         expect(screen.queryByText('Pipeline')).not.toBeInTheDocument();
     });
 
     it('shows collapse button with correct aria-label when expanded', () => {
-        render(<Sidebar isCollapsed={false} onToggleCollapse={() => {}} />);
+        render(<Sidebar isCollapsed={false} onToggleCollapse={() => { }} />);
         expect(
             screen.getByRole('button', { name: 'Collapse sidebar' }),
         ).toBeInTheDocument();
     });
 
     it('shows expand button with correct aria-label when collapsed', () => {
-        render(<Sidebar isCollapsed={true} onToggleCollapse={() => {}} />);
+        render(<Sidebar isCollapsed={true} onToggleCollapse={() => { }} />);
         expect(
             screen.getByRole('button', { name: 'Expand sidebar' }),
         ).toBeInTheDocument();
@@ -91,31 +91,31 @@ describe('Sidebar', () => {
 
     it('marks active route with aria-current="page"', () => {
         mockPathname.mockReturnValue('/health');
-        render(<Sidebar isCollapsed={false} onToggleCollapse={() => {}} />);
+        render(<Sidebar isCollapsed={false} onToggleCollapse={() => { }} />);
         const healthLink = screen.getByRole('link', { name: 'Health' });
         expect(healthLink).toHaveAttribute('aria-current', 'page');
     });
 
     it('does not mark inactive routes with aria-current', () => {
         mockPathname.mockReturnValue('/');
-        render(<Sidebar isCollapsed={false} onToggleCollapse={() => {}} />);
+        render(<Sidebar isCollapsed={false} onToggleCollapse={() => { }} />);
         const pipelineLink = screen.getByRole('link', { name: 'Pipeline' });
         expect(pipelineLink).not.toHaveAttribute('aria-current');
     });
 
     it('renders user info when expanded', () => {
-        render(<Sidebar isCollapsed={false} onToggleCollapse={() => {}} />);
+        render(<Sidebar isCollapsed={false} onToggleCollapse={() => { }} />);
         expect(screen.getByText('ReaperOAK')).toBeInTheDocument();
         expect(screen.getByText('Operator')).toBeInTheDocument();
     });
 
     it('hides user info when collapsed', () => {
-        render(<Sidebar isCollapsed={true} onToggleCollapse={() => {}} />);
+        render(<Sidebar isCollapsed={true} onToggleCollapse={() => { }} />);
         expect(screen.queryByText('ReaperOAK')).not.toBeInTheDocument();
     });
 
     it('renders ThemeToggle with compact prop matching collapse state', () => {
-        render(<Sidebar isCollapsed={true} onToggleCollapse={() => {}} />);
+        render(<Sidebar isCollapsed={true} onToggleCollapse={() => { }} />);
         expect(screen.getByTestId('theme-toggle')).toHaveAttribute(
             'data-compact',
             'true',

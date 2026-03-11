@@ -41,8 +41,9 @@ TICKET_STATE_DIR = ROOT / ".github" / "ticket-state"
 TICKETS_DIR = ROOT / ".github" / "tickets"
 
 STAGE_ORDER: list[str] = [
-    "READY", "ARCHITECT", "RESEARCH", "BACKEND", "FRONTEND",
-    "QA", "SECURITY", "CI", "DOCS", "VALIDATION", "DONE",
+    "READY", "RESEARCH", "PM", "ARCHITECT", "DEVOPS", "BACKEND",
+    "UIDESIGNER", "FRONTEND", "QA", "SECURITY", "CI", "DOCS",
+    "VALIDATION", "DONE",
 ]
 
 PRIORITY_ORDER: dict[str, int] = {
@@ -50,8 +51,9 @@ PRIORITY_ORDER: dict[str, int] = {
 }
 
 STAGE_EMOJI: dict[str, str] = {
-    "READY": "\U0001f7e2", "ARCHITECT": "\U0001f4d0", "RESEARCH": "\U0001f50d",
-    "BACKEND": "\u2699\ufe0f", "FRONTEND": "\U0001f5a5\ufe0f", "QA": "\U0001f9ea",
+    "READY": "\U0001f7e2", "RESEARCH": "\U0001f50d", "PM": "\U0001f4cb",
+    "ARCHITECT": "\U0001f4d0", "DEVOPS": "\U0001f6e0\ufe0f", "BACKEND": "\u2699\ufe0f",
+    "UIDESIGNER": "\U0001f3a8", "FRONTEND": "\U0001f5a5\ufe0f", "QA": "\U0001f9ea",
     "SECURITY": "\U0001f512", "CI": "\U0001f504", "DOCS": "\U0001f4dd",
     "VALIDATION": "\u2705", "DONE": "\U0001f3c1",
 }
@@ -568,8 +570,8 @@ def generate_html(tickets: dict[str, Ticket], stats: BoardStats) -> str:
     pct = f"{done / stats.total * 100:.1f}" if stats.total else "0.0"
     in_progress = sum(
         stats.by_stage.get(s, 0) for s in
-        ["BACKEND", "FRONTEND", "ARCHITECT", "RESEARCH", "QA",
-         "SECURITY", "CI", "DOCS", "VALIDATION"]
+        ["RESEARCH", "PM", "ARCHITECT", "DEVOPS", "BACKEND",
+         "UIDESIGNER", "FRONTEND", "QA", "SECURITY", "CI", "DOCS", "VALIDATION"]
     )
     ready_count = stats.by_stage.get("READY", 0)
 
@@ -682,8 +684,8 @@ def _build_rows(tickets: dict[str, Ticket]) -> str:
         "DONE": '<span class="badge done">Done</span>',
         "READY": '<span class="badge ready">Ready</span>',
     }
-    active_stages = {"BACKEND", "FRONTEND", "ARCHITECT", "RESEARCH",
-                     "QA", "SECURITY", "CI", "DOCS", "VALIDATION"}
+    active_stages = {"RESEARCH", "PM", "ARCHITECT", "DEVOPS", "BACKEND",
+                     "UIDESIGNER", "FRONTEND", "QA", "SECURITY", "CI", "DOCS", "VALIDATION"}
 
     rows: list[str] = []
     for t in sorted(tickets.values(),

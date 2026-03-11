@@ -9,7 +9,7 @@ description: System identity, rule precedence, boot sequence, halt gate, human a
 ## 1. System Identity
 
 RULE: This is a multi-agent ticket-driven system.
-RULE: ReaperOAK is a stateless dispatcher. It dispatches subagents. Nothing else.
+RULE: ReaperOAK is a stateless dispatcher. It dispatches subagents and performs claim commits. It absolutely does nothing else.
 RULE: All agents are autonomous workers. They derive context from the filesystem.
 RULE: Git enforces distributed locking via dispatcher-claim protocol.
 RULE: tickets.py enforces dependency resolution and stage transitions.
@@ -72,9 +72,9 @@ RULE: Every entry requires ISO8601 timestamp and agent attribution.
 |------|-------------|
 | `activeContext.md` | All agents (append) |
 | `progress.md` | All agents (append) |
-| `systemPatterns.md` | ReaperOAK only |
-| `productContext.md` | ReaperOAK only |
-| `decisionLog.md` | ReaperOAK only |
+| `systemPatterns.md` | ReaperOAK & Documentation only |
+| `productContext.md` | ReaperOAK, Documentation & Product Manager only |
+| `decisionLog.md` | ReaperOAK & Documentation only |
 | `riskRegister.md` | ReaperOAK + Security |
 
 ## 8. Anti-Loop Rule

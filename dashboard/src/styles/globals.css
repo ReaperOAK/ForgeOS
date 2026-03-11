@@ -1,0 +1,94 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+
+    :root,
+    [data-theme='dark'] {
+        --color-primary: #06b6d4;
+        --color-primary-hover: #0891b2;
+        --color-primary-muted: #164e63;
+        --color-secondary: #94a3b8;
+        --color-secondary-hover: #cbd5e1;
+        --color-accent: #8b5cf6;
+        --color-surface: #1e293b;
+        --color-surface-alt: #162032;
+        --color-background: #0f172a;
+        --color-border: #334155;
+        --color-border-subtle: #1e293b;
+        --color-text: #f8fafc;
+        --color-text-muted: #94a3b8;
+        --color-text-inverse: #0f172a;
+        --color-error: #ef4444;
+        --color-error-muted: #7f1d1d;
+        --color-warning: #eab308;
+        --color-warning-muted: #713f12;
+        --color-success: #16a34a;
+        --color-success-muted: #14532d;
+        --color-info: #3b82f6;
+        --color-info-muted: #1e3a5f;
+        --color-scrim: rgba(15, 23, 42, 0.6);
+        --color-focus: #06b6d4;
+    }
+
+    [data-theme='light'] {
+        --color-primary: #2563eb;
+        --color-primary-hover: #1d4ed8;
+        --color-primary-muted: #dbeafe;
+        --color-secondary: #64748b;
+        --color-secondary-hover: #475569;
+        --color-accent: #7c3aed;
+        --color-surface: #ffffff;
+        --color-surface-alt: #f8fafc;
+        --color-background: #f1f5f9;
+        --color-border: #e2e8f0;
+        --color-border-subtle: #f1f5f9;
+        --color-text: #0f172a;
+        --color-text-muted: #64748b;
+        --color-text-inverse: #ffffff;
+        --color-error: #dc2626;
+        --color-error-muted: #fee2e2;
+        --color-warning: #d97706;
+        --color-warning-muted: #fef3c7;
+        --color-success: #16a34a;
+        --color-success-muted: #dcfce7;
+        --color-info: #2563eb;
+        --color-info-muted: #dbeafe;
+        --color-scrim: rgba(15, 23, 42, 0.3);
+        --color-focus: #2563eb;
+    }
+
+    html {
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    body {
+        background-color: var(--color-background);
+        color: var(--color-text);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+
+        *,
+        *::before,
+        *::after {
+            animation-duration: 0.01ms !important;
+            animation-iteration-count: 1 !important;
+            transition-duration: 0.01ms !important;
+        }
+    }
+}
+
+@layer components {
+    .focus-ring {
+        @apply outline-none ring-2 ring-focus ring-offset-2 ring-offset-background;
+    }
+
+    .theme-transition {
+        transition: color 250ms ease-in-out, background-color 250ms ease-in-out,
+            border-color 250ms ease-in-out;
+    }
+}

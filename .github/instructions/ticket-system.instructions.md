@@ -19,15 +19,18 @@ RULE: State directory is source of truth for current stage.
 ```
 .github/ticket-state/
     READY/       — Unblocked, available for claim
-    ARCHITECT/   — Being processed by Architect
     RESEARCH/    — Being processed by Research Analyst
+    ProductManager/          — Being processed by Product Manager
+    ARCHITECT/   — Being processed by Architect
+    DevOps/       — Being processed by DevOps Engineer
     BACKEND/     — Being processed by Backend Engineer
-    FRONTEND/    — Being processed by Frontend or UIDesigner
+    UIDesigner/  — Being processed by UIDesigner
+    FRONTEND/    — Being processed by Frontend Engineer
     QA/          — Being processed by QA Engineer
     SECURITY/    — Being processed by Security Engineer
-    CI/          — Being processed by CI Reviewer
+    CIReviewer/  — Being processed by CI Reviewer
     DOCS/        — Being processed by Documentation Specialist
-    VALIDATION/  — Being processed by Validator
+    VALIDATOR/  — Being processed by Validator
     DONE/        — Completed
 ```
 
@@ -73,25 +76,10 @@ RULE: tickets.py evaluates dependencies, not agents.
 RULE: No agent may manually move tickets to READY.
 PROHIBITED: Agents reasoning about dependencies. tickets.py handles this.
 
-## 5. SDLC Flows by Ticket Type
-
-| Type | Flow |
-|------|------|
-| backend | READY -> BACKEND -> QA -> SECURITY -> CI -> DOCS -> VALIDATION -> DONE |
-| frontend | READY -> FRONTEND -> QA -> SECURITY -> CI -> DOCS -> VALIDATION -> DONE |
-| fullstack | READY -> BACKEND -> FRONTEND -> QA -> SECURITY -> CI -> DOCS -> VALIDATION -> DONE |
-| infra | READY -> BACKEND -> QA -> SECURITY -> CI -> DOCS -> VALIDATION -> DONE |
-| security | READY -> SECURITY -> QA -> CI -> DOCS -> VALIDATION -> DONE |
-| docs | READY -> DOCS -> VALIDATION -> DONE |
-| research | READY -> RESEARCH -> DOCS -> VALIDATION -> DONE |
-| architecture | READY -> ARCHITECT -> DOCS -> VALIDATION -> DONE |
-
-RULE: No stage may be skipped. Order is enforced by tickets.py.
 
 ## 6. UI Gate
 
-RULE: Frontend tickets require UIDesigner artifacts before implementation.
-REQUIRED: Mockup at `docs/uiux/mockups/{ticket-id}.md` with APPROVED status.
+RULE: Frontend tickets require UIDesigner artifacts to exist in figma/stitch and codebase before implementation.
 RULE: Missing UI artifacts => ticket is BLOCKED.
 RULE: Backend-only tickets skip this gate.
 

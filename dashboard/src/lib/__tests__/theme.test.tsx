@@ -119,7 +119,7 @@ describe('ThemeProvider', () => {
 describe('useTheme', () => {
     it('throws when used outside ThemeProvider', () => {
         // Suppress console.error for this test
-        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {});
+        const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => { });
         expect(() => render(<ThemeConsumer />)).toThrow(
             'useTheme must be used within ThemeProvider',
         );

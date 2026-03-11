@@ -44,27 +44,32 @@ STATE_DIR = ROOT / "ticket-state"
 AGENT_OUTPUT_DIR = ROOT / "agent-output"
 
 STAGES = [
-    "READY", "ARCHITECT", "RESEARCH", "BACKEND", "FRONTEND",
-    "QA", "SECURITY", "CI", "DOCS", "VALIDATION", "DONE"
+    "READY", "RESEARCH", "PM", "ARCHITECT", "DEVOPS", "BACKEND",
+    "UIDESIGNER", "FRONTEND", "QA", "SECURITY", "CI", "DOCS",
+    "VALIDATION", "DONE",
 ]
 
 # SDLC flow templates by ticket type
 SDLC_FLOWS = {
     "backend": ["READY", "BACKEND", "QA", "SECURITY", "CI", "DOCS", "VALIDATION", "DONE"],
     "frontend": ["READY", "UIDESIGNER", "FRONTEND", "QA", "SECURITY", "CI", "DOCS", "VALIDATION", "DONE"],
-    "fullstack": ["READY", "BACKEND", "FRONTEND", "QA", "SECURITY", "CI", "DOCS", "VALIDATION", "DONE"],
-    "infra": ["READY", "BACKEND", "QA", "SECURITY", "CI", "DOCS", "VALIDATION", "DONE"],
+    "fullstack": ["READY", "BACKEND", "UIDESIGNER", "FRONTEND", "QA", "SECURITY", "CI", "DOCS", "VALIDATION", "DONE"],
+    "infra": ["READY", "DEVOPS", "QA", "SECURITY", "CI", "DOCS", "VALIDATION", "DONE"],
     "security": ["READY", "SECURITY", "QA", "CI", "DOCS", "VALIDATION", "DONE"],
     "docs": ["READY", "DOCS", "VALIDATION", "DONE"],
     "research": ["READY", "RESEARCH", "DOCS", "VALIDATION", "DONE"],
     "architecture": ["READY", "ARCHITECT", "DOCS", "VALIDATION", "DONE"],
+    "pm": ["READY", "PM", "DOCS", "VALIDATION", "DONE"],
 }
 
 # Stage directory to agent name mapping
 STAGE_TO_AGENT = {
-    "ARCHITECT": "Architect",
     "RESEARCH": "Research",
+    "PM": "ProductManager",
+    "ARCHITECT": "Architect",
+    "DEVOPS": "DevOps",
     "BACKEND": "Backend",
+    "UIDESIGNER": "UIDesigner",
     "FRONTEND": "Frontend",
     "QA": "QA",
     "SECURITY": "Security",
@@ -73,10 +78,9 @@ STAGE_TO_AGENT = {
     "VALIDATION": "Validator",
 }
 
-# Map for UIDESIGNER stage (uses FRONTEND directory but UIDesigner agent)
-STAGE_TO_STATE_DIR = {
-    "UIDESIGNER": "FRONTEND",  # UIDesigner tickets live in FRONTEND state dir
-}
+# Map stage names to physical directory names (when they differ)
+# Empty means all stages use their stage name as directory name
+STAGE_TO_STATE_DIR: dict[str, str] = {}
 
 DEFAULT_LEASE_MINUTES = 30
 

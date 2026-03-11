@@ -22,8 +22,7 @@
     "FORGEOS-BE050"
   ],
   "blocked_by": [
-    "FORGEOS-BE073",
-    "FORGEOS-BE050"
+    "FORGEOS-BE073"
   ],
   "file_paths": [
     "mcp-server/src/migration/phases/phase_b.py",

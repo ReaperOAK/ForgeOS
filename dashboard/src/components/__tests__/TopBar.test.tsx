@@ -33,7 +33,7 @@ describe('TopBar', () => {
     });
 
     it('renders menu toggle button for mobile', () => {
-        render(<TopBar breadcrumbs={[]} onMenuToggle={() => {}} />);
+        render(<TopBar breadcrumbs={[]} onMenuToggle={() => { }} />);
         expect(
             screen.getByRole('button', { name: 'Open navigation menu' }),
         ).toBeInTheDocument();
