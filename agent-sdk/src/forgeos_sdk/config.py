@@ -20,6 +20,19 @@ class TransportType(str, Enum):
     STDIO = "stdio"
 
 
+class OperationMode(str, Enum):
+    """SDK operation mode controlling MCP vs filesystem fallback.
+
+    - ``MCP``: Always use MCP server; fail if unreachable.
+    - ``FILESYSTEM``: Always use filesystem fallback via ``tickets.py``.
+    - ``AUTO``: Try MCP first, fall back to filesystem on connection failure.
+    """
+
+    MCP = "mcp"
+    FILESYSTEM = "filesystem"
+    AUTO = "auto"
+
+
 class SDKConfig(BaseSettings):
     """ForgeOS Agent SDK configuration.
 
@@ -29,6 +42,7 @@ class SDKConfig(BaseSettings):
     - ``FORGEOS_AGENT_ID`` — Agent identifier (default: ``unknown-agent``)
     - ``FORGEOS_TRANSPORT`` — Transport type (default: ``streamable-http``)
     - ``FORGEOS_API_KEY`` — API key for authentication (optional)
+    - ``FORGEOS_MODE`` — Operation mode: ``mcp``, ``filesystem``, or ``auto`` (default)
     """
 
     model_config = {"env_prefix": "FORGEOS_"}
@@ -37,6 +51,7 @@ class SDKConfig(BaseSettings):
     agent_id: str = "unknown-agent"
     transport: TransportType = TransportType.STREAMABLE_HTTP
     api_key: str | None = None
+    mode: OperationMode = OperationMode.AUTO
 
     @field_validator("server_url", "agent_id")
     @classmethod
