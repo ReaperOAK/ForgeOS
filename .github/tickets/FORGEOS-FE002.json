@@ -4,7 +4,7 @@
   "description": "Implement the REST API client library for the dashboard. Create TypeScript interfaces matching the backend API response models (Ticket, Claim, StageTransition, EventHistory, PipelineOverview). Implement API functions for all ticket endpoints: list tickets with filters, get ticket detail, get ticket history. Use fetch with proper error handling, response typing, and request/response interceptors for authentication headers.",
   "type": "frontend",
   "priority": "critical",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -97,6 +97,24 @@
       "timestamp": "2026-03-11T13:35:58.573223+00:00",
       "event": "STAGE_COMPLETED",
       "agent": "FrontendEngineer",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
+    },
+    {
+      "timestamp": "2026-03-11T13:40:31.717145+00:00",
+      "event": "CLAIMED",
+      "agent": "QAEngineer",
+      "machine_id": "pop-os",
+      "from_stage": "QA",
+      "to_stage": "QA",
+      "details": "Claimed by reaperoak@pop-os via QAEngineer, lease until 2026-03-11T14:10:31.717129+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T13:44:18.613027+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QAEngineer",
       "machine_id": "system",
       "from_stage": "QA",
       "to_stage": "SECURITY",
