@@ -3777,3 +3777,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** agent-sdk/src/forgeos_sdk/summary.py, agent-sdk/tests/test_summary.py, agent-sdk/src/forgeos_sdk/__init__.py
 - **Decisions:** QA PASS — 28/28 tests pass, 100% coverage (58/58 statements), zero lint errors, all 6 ACs met. 297/297 full regression suite clean. No defects found.
 - **Timestamp:** 2026-03-11T01:45:00Z
+
+### [FORGEOS-BE065] — State Change Notification Emitter (QA REJECT — Rework #1)
+- **Artifacts:** mcp-server/src/mcp_server/notifications/emitter.py, mcp-server/src/mcp_server/services/ticket_service.py, mcp-server/tests/test_notification_emitter.py
+- **Decisions:** QA REJECT — AC #4 not met: `rework_ticket()` in TicketService does not call `emit_reworked()`. Emitter module is correct (100% coverage, 20/20 tests pass, 129 regression tests clean). Missing integration of emit_reworked into TicketService and missing integration test for rework emission.
+- **Timestamp:** 2026-03-11T02:15:00Z
