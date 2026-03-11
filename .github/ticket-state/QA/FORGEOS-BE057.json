@@ -4,7 +4,7 @@
   "description": "Implement admin-only elevated operations: force-release (release any claim regardless of owner), force-advance (advance any ticket regardless of claim status), and system configuration updates (rate limits, lease duration). These operations require admin role authentication and produce audit log entries with elevated-operation flag.",
   "type": "backend",
   "priority": "medium",
-  "stage": "READY",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,11 +34,11 @@
     "Admin operations include a required reason field for audit trail"
   ],
   "rework_count": 0,
-  "claimed_by": "Backend",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T02:19:17.147295+00:00",
-  "lease_duration_minutes": 30,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": null,
   "history": [
     {
       "timestamp": "2026-03-05T18:06:45.284480+00:00",
@@ -62,6 +62,15 @@
       "from_stage": "READY",
       "to_stage": "READY",
       "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-11T02:19:17.147295+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T02:04:59.575592+00:00",
+      "event": "STAGE_ADVANCED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "BACKEND",
+      "to_stage": "QA",
+      "details": "BACKEND complete \u2014 admin force operations implemented with 41 tests"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
@@ -73,5 +82,6 @@
     "operations",
     "phase3",
     "BLK-08-02"
-  ]
+  ],
+  "status": "READY"
 }
