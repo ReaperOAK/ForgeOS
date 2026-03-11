@@ -4,7 +4,7 @@
   "description": "Implement `GET /api/tickets/:id` for ticket detail and `GET /api/tickets/:id/history` for the event log. The detail endpoint returns the full ticket with current claim info, acceptance criteria, and dependencies. The history endpoint returns the event sourcing log (FORGEOS-BE012) as a timeline of all state changes for the ticket.",
   "type": "backend",
   "priority": "high",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
