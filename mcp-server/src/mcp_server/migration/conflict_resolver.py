@@ -81,7 +81,14 @@ class ConflictResolver:
     ) -> str:
         """Resolve a stage mismatch — database wins.
 
-        Returns the *db_stage* value and logs the resolution.
+        Args:
+            ticket_id: Human-readable ticket identifier.
+            fs_stage: Stage directory name found on the filesystem.
+            db_stage: Authoritative stage value from the database.
+
+        Returns:
+            The *db_stage* value.  A :class:`ConflictRecord` is appended
+            to the audit log.
         """
         record = ConflictRecord(
             ticket_id=ticket_id,
@@ -111,7 +118,14 @@ class ConflictResolver:
     ) -> dict[str, Any]:
         """Resolve a claim/lease mismatch — database wins.
 
-        Returns the *db_claim* dict and logs the resolution.
+        Args:
+            ticket_id: Human-readable ticket identifier.
+            fs_claim: Claim metadata extracted from the filesystem JSON.
+            db_claim: Authoritative claim metadata from the database.
+
+        Returns:
+            The *db_claim* dict.  A :class:`ConflictRecord` is appended
+            to the audit log.
         """
         record = ConflictRecord(
             ticket_id=ticket_id,
@@ -142,7 +156,15 @@ class ConflictResolver:
     ) -> Any:
         """Resolve a generic metadata mismatch — database wins.
 
-        Returns the *db_value* and logs the resolution.
+        Args:
+            ticket_id: Human-readable ticket identifier.
+            field_name: Name of the divergent metadata field.
+            fs_value: Value found on the filesystem.
+            db_value: Authoritative value from the database.
+
+        Returns:
+            The *db_value*.  A :class:`ConflictRecord` is appended to
+            the audit log.
         """
         record = ConflictRecord(
             ticket_id=ticket_id,
