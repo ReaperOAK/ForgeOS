@@ -4,7 +4,7 @@
   "description": "Implement admin-only elevated operations: force-release (release any claim regardless of owner), force-advance (advance any ticket regardless of claim status), and system configuration updates (rate limits, lease duration). These operations require admin role authentication and produce audit log entries with elevated-operation flag.",
   "type": "backend",
   "priority": "medium",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,10 +34,10 @@
     "Admin operations include a required reason field for audit trail"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T04:28:33.021366+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": null,
   "history": [
     {
@@ -159,6 +159,15 @@
       "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
       "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-11T04:28:33.021366+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T04:04:55.058224+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-auth.md",
