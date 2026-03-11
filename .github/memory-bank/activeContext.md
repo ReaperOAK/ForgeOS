@@ -1,3 +1,8 @@
+### [FORGEOS-BE040] — Documentation Summary
+- **Artifacts:** mcp-server/README.md, mcp-server/src/mcp_server/api/routes/websocket.py, mcp-server/src/mcp_server/services/event_broadcaster.py, CHANGELOG.md, .github/agent-output/Documentation/FORGEOS-BE040.md
+- **Decisions:** Expanded WebSocket Streaming README section with subscribe/unsubscribe protocol, 4-dimension OR filter logic, backpressure docs, updated API reference tables. Updated docstrings for ClientFilter and _parse_filters to reflect all 4 filter dimensions.
+- **Timestamp:** 2026-03-11T15:00:00Z
+
 ### [FORGEOS-BE070] — Validation: APPROVED
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE070.md
 - **Decisions:** APPROVED with HIGH confidence. 10/10 DoD items pass. 7/7 ACs verified. 70 tests pass, 99% coverage (importer.py 99%, transformers.py 100%). Ruff clean, pyright strict has pre-existing codebase-wide pattern (not a regression). No TODOs, no console. Upstream: QA ✅, Security ✅, CI ✅, Docs ✅.
