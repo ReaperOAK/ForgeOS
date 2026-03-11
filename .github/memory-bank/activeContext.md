@@ -3902,3 +3902,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/src/mcp_server/services/event_broadcaster.py, mcp-server/src/mcp_server/api/routes/websocket.py, mcp-server/tests/test_event_broadcaster.py, mcp-server/tests/test_websocket_streaming.py
 - **Decisions:** Used in-memory pub/sub EventBroadcaster with WebSocketLike protocol for testability. Deferred binding via app.state.broadcaster_ref. OR-semantics for filters (ticket_ids, stages). Background asyncio ping loop for heartbeat.
 - **Timestamp:** 2026-03-11T02:00:00Z
+
+### [FORGEOS-BE063] — Implement PR Event Handler (QA PASS)
+- **Artifacts:** mcp-server/src/mcp_server/services/pr_service.py, mcp-server/src/mcp_server/webhooks/github_handler.py, mcp-server/src/mcp_server/webhooks/__init__.py, mcp-server/src/mcp_server/services/__init__.py, mcp-server/tests/test_pr_service.py, .github/agent-output/QA/FORGEOS-BE063.md
+- **Decisions:** QA PASS — 34/34 tests pass, pr_service.py 100% coverage, PR-specific github_handler.py lines fully covered. All 6 ACs verified. AC2 note: Backend designed stateless handler (data extraction only, no DB persistence yet — downstream consumer responsibility). 5 pre-existing failures unrelated to BE063. Zero regressions. Lint clean.
+- **Timestamp:** 2026-03-11T03:00:00Z
