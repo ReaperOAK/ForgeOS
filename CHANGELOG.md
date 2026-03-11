@@ -8,6 +8,21 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Role-Based Claim Restrictions** (FORGEOS-BE055) — Role-stage
+  authorization at `mcp-server/src/mcp_server/auth/authorization.py` that
+  enforces agents can only claim tickets matching their role's SDLC stage.
+  `RoleStagePolicy` maps all 14 agent roles to authorized stages (e.g.
+  `backend` → `BACKEND`, `qa` → `QA`). `check_role_stage_authorization()`
+  validates role-stage match before claim; mismatches raise
+  `RoleStageMismatchError` (HTTP 403) with descriptive error including
+  agent role, ticket stage, and authorized stage. Operator role can claim
+  on behalf of any agent role via `role_override` parameter. Admin and
+  operator roles bypass checks when no override is specified. Policy is
+  configurable via constructor overrides and runtime `add_role()` /
+  `remove_role()` mutations. Integrated into `TicketService.claim_next()`
+  and `claim_by_id()` for both MCP and REST paths. 60 role-stage
+  authorization tests, 99% coverage on authorization module.
+
 - **Ticket List REST Endpoint** (FORGEOS-BE034) — `GET /api/tickets` REST
   endpoint at `mcp-server/src/mcp_server/api/routes/tickets.py` with Pydantic
   response schemas at `mcp-server/src/mcp_server/api/schemas.py`. Supports

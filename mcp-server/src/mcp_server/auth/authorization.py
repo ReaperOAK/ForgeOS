@@ -30,6 +30,7 @@ Security
 
 .. meta::
    :ticket: FORGEOS-BE056, FORGEOS-BE055
+   :last_reviewed: 2026-03-11T00:00:00Z
 """
 
 from __future__ import annotations
