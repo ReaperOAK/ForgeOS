@@ -3862,3 +3862,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE031.md
 - **Decisions:** PASS — Zero critical/high findings. Parameterized SQL, JSON Schema validation, SERIALIZABLE isolation, claim-based authz, max-rework escalation all verified.
 - **Timestamp:** 2026-03-11T01:32:53Z
+
+### [FORGEOS-BE065] — Backend Rework #2 Complete
+- **Artifacts:** mcp-server/src/mcp_server/services/ticket_service.py, mcp-server/tests/test_notification_emitter.py
+- **Decisions:** Added emit_reworked() call after transaction block in rework_ticket(), matching claim/release/advance pattern. Restructured return to store result in variable.
+- **Timestamp:** 2026-03-11T02:30:00Z

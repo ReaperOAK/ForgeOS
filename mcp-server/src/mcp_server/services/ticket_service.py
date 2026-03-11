@@ -1006,7 +1006,7 @@ class TicketService:
                 },
             )
 
-            return ReworkResult(
+            result = ReworkResult(
                 ticket_id=ticket_id,
                 title=title,
                 ticket_type=ticket_type,
@@ -1015,3 +1015,14 @@ class TicketService:
                 rework_count=new_rework_count,
                 escalated=escalated,
             )
+
+        if self._emitter is not None:
+            await self._emitter.emit_reworked(
+                ticket_id=ticket_id,
+                old_stage=current_stage,
+                new_stage=new_stage,
+                agent_id=agent_id,
+                reason=reason,
+            )
+
+        return result
