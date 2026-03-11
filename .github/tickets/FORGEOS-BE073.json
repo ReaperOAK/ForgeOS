@@ -4,7 +4,7 @@
   "description": "Implement Migration Phase A: agents continue using the filesystem (via `tickets.py` and `agent-runner.py`) as-is, but the bidirectional sync engine (FORGEOS-BE071) runs in the background, mirroring all filesystem changes to the database. This phase requires zero changes to agent behavior. The filesystem fallback mode from the SDK (FORGEOS-BE049) is the default. Phase A is the read-only validation period where database contents are verified against filesystem truth.",
   "type": "backend",
   "priority": "critical",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -36,10 +36,10 @@
     "Phase A entry and exit logged with timestamp and validation results"
   ],
   "rework_count": 0,
-  "claimed_by": "CIReviewer",
-  "machine_id": "pop-os",
-  "operator": "ReaperOAK",
-  "lease_expiry": "2026-03-11T16:14:35.924072+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -127,6 +127,15 @@
       "from_stage": "CI",
       "to_stage": "CI",
       "details": "Claimed by ReaperOAK@pop-os via CIReviewer, lease until 2026-03-11T16:14:35.924072+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T15:46:44.101287+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "system",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "Advanced from CI to DOCS"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",
