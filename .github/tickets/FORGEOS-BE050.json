@@ -4,7 +4,7 @@
   "description": "Implement integration hooks that connect the agent SDK to the existing `agent-runner.py` two-commit protocol. The SDK manages ticket state via MCP while `agent-runner.py` continues to handle git operations (git add, git commit, git push). Provide hook points: `pre_claim()`, `post_claim()`, `pre_commit()`, `post_commit()` that `agent-runner.py` can call at appropriate lifecycle stages.",
   "type": "backend",
   "priority": "medium",
-  "stage": "READY",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -63,6 +63,15 @@
       "from_stage": "READY",
       "to_stage": "READY",
       "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-11T03:37:11.470158+00:00"
+    },
+    {
+      "timestamp": "2026-03-11T03:23:34.965192+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "BACKEND",
+      "to_stage": "QA",
+      "details": "BACKEND complete \u2014 runner_hooks.py implemented, 28 tests, 99% coverage"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-agent-sdk.md",
@@ -74,5 +83,6 @@
     "git",
     "phase3",
     "BLK-07-02"
-  ]
+  ],
+  "status": "IN_PROGRESS"
 }

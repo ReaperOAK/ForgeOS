@@ -23,6 +23,9 @@ Public API
 .. autoclass:: LeaseExpiredError
 .. autoclass:: InvalidTransitionError
 .. autoclass:: NetworkError
+.. autoclass:: RunnerHooks
+.. autoclass:: HookConfig
+.. autoclass:: HookResult
 """
 
 from forgeos_sdk.client import ConnectionState, ForgeOSClient
@@ -42,6 +45,7 @@ from forgeos_sdk.fallback import FilesystemFallback
 from forgeos_sdk.heartbeat import LeaseHeartbeat
 from forgeos_sdk.models import Claim, Evidence, OperationResult, Ticket
 from forgeos_sdk.operations import TicketOperations
+from forgeos_sdk.runner_hooks import HookConfig, HookResult, RunnerHooks
 from forgeos_sdk.summary import (
     STAGE_TO_AGENT,
     delete_upstream_summary,
@@ -58,9 +62,12 @@ __all__ = [
     "Evidence",
     "FilesystemFallback",
     "ForgeOSClient",
+    "HookConfig",
+    "HookResult",
     "LeaseHeartbeat",
     "OperationMode",
     "OperationResult",
+    "RunnerHooks",
     "SDKConfig",
     "Ticket",
     "TicketOperations",
