@@ -23,8 +23,7 @@
     "FORGEOS-BE034"
   ],
   "blocked_by": [
-    "FORGEOS-FE001",
-    "FORGEOS-BE034"
+    "FORGEOS-FE001"
   ],
   "file_paths": [
     "dashboard/src/lib/api/client.ts",

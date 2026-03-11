@@ -4,7 +4,7 @@
   "description": "Implement automatic lease heartbeat in the agent SDK. When an agent claims a ticket, a background asyncio task periodically sends heartbeat calls to extend the lease. The heartbeat interval is configurable (default: every 5 minutes for a 30-minute lease). Heartbeat integrates with the server-side lease heartbeat mechanism (FORGEOS-BE008). The heartbeat task is automatically started on claim and stopped on advance/release/rework.",
   "type": "backend",
   "priority": "high",
-  "stage": "SECURITY",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Heartbeat runs as a non-blocking background task that does not interfere with agent work"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Security Engineer",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-11T01:58:27.834972+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -90,13 +90,20 @@
       "details": "Claimed by ReaperOAK@pop-os via QA Engineer, lease until 2026-03-11T01:32:58.991359+00:00"
     },
     {
-      "timestamp": "2026-03-11T01:11:47.939067+00:00",
-      "event": "STAGE_COMPLETED",
-      "agent": "QA",
+      "timestamp": "2026-03-11T01:28:27.801326+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
       "machine_id": "system",
-      "from_stage": "QA",
+      "details": "Released claim from QA Engineer: manual release"
+    },
+    {
+      "timestamp": "2026-03-11T01:28:27.834988+00:00",
+      "event": "CLAIMED",
+      "agent": "Security Engineer",
+      "machine_id": "pop-os",
+      "from_stage": "SECURITY",
       "to_stage": "SECURITY",
-      "details": "Advanced from QA to SECURITY"
+      "details": "Claimed by ReaperOAK@pop-os via Security Engineer, lease until 2026-03-11T01:58:27.834972+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-agent-sdk.md",

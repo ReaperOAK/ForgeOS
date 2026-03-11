@@ -4,7 +4,7 @@
   "description": "Implement `GET /api/tickets/:id` for ticket detail and `GET /api/tickets/:id/history` for the event log. The detail endpoint returns the full ticket with current claim info, acceptance criteria, and dependencies. The history endpoint returns the event sourcing log (FORGEOS-BE012) as a timeline of all state changes for the ticket.",
   "type": "backend",
   "priority": "high",
-  "stage": "BLOCKED",
+  "stage": "READY",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -21,9 +21,7 @@
     "FORGEOS-BE034",
     "FORGEOS-BE012"
   ],
-  "blocked_by": [
-    "FORGEOS-BE034"
-  ],
+  "blocked_by": [],
   "file_paths": [
     "mcp-server/src/api/routes/tickets.py",
     "mcp-server/src/api/schemas.py"
@@ -37,10 +35,10 @@
     "Response schemas defined with Pydantic models (TicketDetailResponse, HistoryEntry)"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Backend",
+  "machine_id": "pop-os",
+  "operator": "ReaperOAK",
+  "lease_expiry": "2026-03-11T01:58:28.118964+00:00",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -49,6 +47,22 @@
       "agent": "TODO",
       "machine_id": "system",
       "details": "Ticket created from TODO/tasks/phase3-ticket-api.md"
+    },
+    {
+      "timestamp": "2026-03-11T01:13:29.670678+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-11T01:28:28.118981+00:00",
+      "event": "CLAIMED",
+      "agent": "Backend",
+      "machine_id": "pop-os",
+      "from_stage": "READY",
+      "to_stage": "READY",
+      "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-11T01:58:28.118964+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/phase3-ticket-api.md",
