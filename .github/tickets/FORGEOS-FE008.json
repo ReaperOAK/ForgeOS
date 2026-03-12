@@ -4,7 +4,7 @@
   "description": "Implement the active claims monitor view following the UIDesigner mockup (FORGEOS-UID004). Display a table of all currently claimed tickets with columns for ticket ID, agent, machine, operator, stage, and a real-time lease countdown timer. The countdown timer shows remaining lease time, turns yellow at <5 minutes, and red at <1 minute. Data updates in real-time via WebSocket. Support sorting by lease remaining and filtering by agent/machine.",
   "type": "frontend",
   "priority": "high",
-  "stage": "DOCS",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -38,10 +38,10 @@
     "Real-time updates via WebSocket connection from FORGEOS-FE006"
   ],
   "rework_count": 0,
-  "claimed_by": "Documentation Specialist",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-12T10:00:49Z",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -105,6 +105,15 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "Advanced from CI to DOCS"
+    },
+    {
+      "timestamp": "2026-03-12T09:34:12.305822+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation Specialist",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",

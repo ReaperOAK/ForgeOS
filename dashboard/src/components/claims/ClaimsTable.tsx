@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { ArrowUp, ArrowDown, Inbox } from 'lucide-react';
 import { LeaseCountdown } from './LeaseCountdown';
 
+/** A single row in the active claims table. */
 export interface ClaimRow {
     ticketId: string;
     ticketTitle: string;
@@ -15,9 +16,13 @@ export interface ClaimRow {
     claimedAt: string;
 }
 
+/** Column fields available for sorting the claims table. */
 export type SortField = 'ticket' | 'agent' | 'machine' | 'operator' | 'stage' | 'leaseRemaining';
+
+/** Sort direction for table columns. */
 export type SortDirection = 'asc' | 'desc';
 
+/** Props accepted by the {@link ClaimsTable} component. */
 export interface ClaimsTableProps {
     claims: ClaimRow[];
     sortField: SortField;
