@@ -2150,3 +2150,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** docs/uiux/mockups/FORGEOS-FE010.md, .github/agent-output/UIDesigner/FORGEOS-FE010.md
 - **Decisions:** Generated 3 Stitch screens (desktop grid, mobile stack, empty state). Reused existing design tokens (success, secondary, surface, primary). MachineCard with online/offline status dot, AgentList with clickable links to /claims?agent={name}. Responsive grid 3/2/1 columns. All 7 AC verified. Accessibility checklist PASS.
 - **Timestamp:** 2026-03-12T00:00:00Z
+
+### [FORGEOS-FE008] — Frontend Complete
+- **Artifacts:** dashboard/src/app/claims/page.tsx, dashboard/src/components/claims/ClaimsTable.tsx, dashboard/src/components/claims/LeaseCountdown.tsx
+- **Decisions:** Used Map for O(1) WebSocket updates; card layout on mobile; throttled aria-live; onExpire fires once via ref guard
+- **Timestamp:** 2026-03-12T01:30:00Z
+
+### [FORGEOS-FE010] — FRONTEND Complete
+- **Artifacts:** dashboard/src/app/machines/page.tsx, dashboard/src/components/machines/MachineCard.tsx, dashboard/src/components/machines/AgentList.tsx, dashboard/src/components/Sidebar.tsx
+- **Decisions:** Derived machine data from claimed tickets aggregated by machine_id. Used existing TicketWebSocketClient for real-time. 10-min heartbeat threshold. Added "Machines" nav to Sidebar with Monitor icon.
+- **Timestamp:** 2026-03-12T01:00:00Z
