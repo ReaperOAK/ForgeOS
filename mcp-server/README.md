@@ -5181,6 +5181,108 @@ Frozen dataclass tracking each DB-to-FS export cycle:
   `error_rate`, and `total_operations` in structured log extra.
 
 
+## Runner Adapter — agent-runner.py Migration Evolution
+
+<!-- last_reviewed: 2026-03-12T16:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.migration.runner_adapter` module routes `agent-runner.py`
+claim and advance operations to the correct backend (git or SDK) based on the
+current migration phase. It preserves the two-commit protocol while migrating
+the state management layer.
+
+### Phase Routing
+
+| Phase | Claim Backend | Advance Backend | Fallback |
+|-------|---------------|-----------------|----------|
+| A | Git | Git | — |
+| B | SDK (primary) | Git | Git fallback on SDK failure |
+| C | SDK only | SDK | None (fails hard) |
+
+### Quick Start
+
+```python
+from mcp_server.migration.runner_adapter import (
+    MigrationPhase,
+    RunnerAdapter,
+    RunnerAdapterConfig,
+)
+
+# Phase A — pure git (default)
+config = RunnerAdapterConfig(phase=MigrationPhase.PHASE_A)
+adapter = RunnerAdapter(config, git_claimer=my_git_claimer)
+
+result = await adapter.claim("FORGEOS-BE079", "Backend", "pop-os", "reaperoak")
+assert result.backend == "git"
+
+# Phase B — SDK with git fallback
+config_b = RunnerAdapterConfig(phase=MigrationPhase.PHASE_B)
+adapter_b = RunnerAdapter(config_b, sdk_client=my_sdk, git_claimer=my_git)
+
+result = await adapter_b.claim("FORGEOS-BE079", "Backend", "pop-os", "reaperoak")
+# result.backend is "sdk" or "git_fallback"
+
+# Phase C — SDK only, no fallback
+config_c = RunnerAdapterConfig(phase=MigrationPhase.PHASE_C)
+adapter_c = RunnerAdapter(config_c, sdk_client=my_sdk)
+
+result = await adapter_c.advance("FORGEOS-BE079", "Backend")
+assert result.backend == "sdk"
+```
+
+### API Reference
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `MigrationPhase` | enum | `PHASE_A`, `PHASE_B`, `PHASE_C` — migration routing target |
+| `MigrationPhase.from_string(value)` | classmethod | Parse `"A"`, `"B"`, `"C"` (defaults to `PHASE_A`) |
+| `RunnerAdapterConfig` | frozen dataclass | Holds the active `MigrationPhase` |
+| `RunnerAdapter` | class | Routes claim/advance operations by phase |
+| `AdaptedResult` | frozen dataclass | Operation outcome with backend attribution |
+| `SDKClient` | protocol | Async `claim()` + `advance()` interface for MCP SDK |
+| `GitClaimer` | protocol | Async `claim()` interface for git-based operations |
+
+### RunnerAdapter Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `claim(ticket_id, agent, machine, operator)` | `AdaptedResult` | Route claim to git or SDK based on phase |
+| `advance(ticket_id, agent)` | `AdaptedResult` | Route advance to git or SDK based on phase |
+| `phase` | `MigrationPhase` | Property — current migration phase |
+
+### AdaptedResult Fields
+
+| Field | Type | Description |
+|---|---|---|
+| `success` | `bool` | Whether the operation succeeded |
+| `backend` | `str` | Backend used: `"sdk"`, `"git"`, or `"git_fallback"` |
+| `data` | `dict[str, Any]` | Response payload from the backend |
+| `error` | `str \| None` | Error message (on failure) |
+
+### Error Handling
+
+| Scenario | Behavior |
+|---|---|
+| Phase A, no git claimer | Returns `AdaptedResult(success=False, error=...)` |
+| Phase B, SDK fails | Falls back to git; returns `backend="git_fallback"` |
+| Phase B, SDK fails + no git claimer | `RuntimeError` |
+| Phase C, no SDK client | `RuntimeError` |
+| Phase C, SDK call fails | Exception propagates (no fallback) |
+| Unknown phase string in `from_string()` | Defaults to `PHASE_A` with warning log |
+
+### Design Constraints
+
+- **Config-driven** — switching phases requires only a `RunnerAdapterConfig`
+  change, not code modifications in `agent-runner.py`.
+- **Protocol-based** — `SDKClient` and `GitClaimer` are runtime-checkable
+  protocols for testability and loose coupling.
+- **Two-commit protocol preserved** — the adapter handles claim/advance
+  routing only. WORK commits (git push of code changes) are unchanged.
+- **Structured logging** — all routing decisions log `phase`, `ticket_id`,
+  and `backend` via `mcp_server.observability.get_logger`.
+
+
 ## Shadow Mode Validation Engine
 
 <!-- last_reviewed: 2026-03-11T23:59:00Z -->
