@@ -93,7 +93,7 @@ describe('ClaimsPage', () => {
     });
 
     it('shows loading state initially', () => {
-        mockFetchTickets.mockReturnValue(new Promise(() => {})); // never resolves
+        mockFetchTickets.mockReturnValue(new Promise(() => { })); // never resolves
         render(<ClaimsPage />);
         expect(screen.getByText('Loading claims…')).toBeInTheDocument();
     });
