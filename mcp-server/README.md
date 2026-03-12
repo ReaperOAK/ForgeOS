@@ -1,6 +1,6 @@
 # ForgeOS MCP Server
 
-<!-- last_reviewed: 2026-03-11T23:59:00Z -->
+<!-- last_reviewed: 2026-03-12T22:00:00Z -->
 <!-- audience: developers -->
 <!-- diataxis: reference -->
 
@@ -1440,7 +1440,7 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/events/`** — Append-only event sourcing (EventStore, EventType, Event dataclass)
 - **`mcp_server/locking/`** — Distributed claim queue (SKIP LOCKED), file mutex (advisory locks)
 - **`mcp_server/notifications/`** — Notification queue (at-least-once delivery), configurable channels (webhook, Slack) with event-type filtering, background processor with exponential-backoff retries, and dead-letter handling
-- **`mcp_server/migration/`** — Dual-mode migration wrapper, YAML-based feature flag system for per-operation mode switching (filesystem / dual / database), bidirectional sync engine (FS ↔ DB), database-wins conflict resolver, Phase A lifecycle manager (background sync with filesystem as source of truth), Phase B dual-mode claim pipeline (MCP primary, filesystem fallback), and Phase C full-MCP controller (database-only operations, periodic DB-to-FS export, zero-writes transition gate)
+- **`mcp_server/migration/`** — Dual-mode migration wrapper, YAML-based feature flag system for per-operation mode switching (filesystem / dual / database), bidirectional sync engine (FS ↔ DB), database-wins conflict resolver, Phase A lifecycle manager (background sync with filesystem as source of truth), Phase B dual-mode claim pipeline (MCP primary, filesystem fallback), Phase C full-MCP controller (database-only operations, periodic DB-to-FS export, zero-writes transition gate), and Phase D filesystem deprecation (database is sole source of truth, cleanup archival, deprecation interceptor)
 - **`mcp_server/sessions/`** -- Agent session lifecycle management (heartbeat, timeout, resumption, concurrent access)
 - **`mcp_server/transport/webhooks.py`** — Inbound webhook HTTP receiver (`POST /api/webhooks/{source}`)
 - **`mcp_server/webhooks/`** — GitHub webhook signature verification (HMAC-SHA256), push event handling, and CI status event handler (check_run/status → ticket advance or rework)
@@ -5179,6 +5179,220 @@ Frozen dataclass tracking each DB-to-FS export cycle:
   or modified by Phase C.
 - **Structured logging** — all lifecycle events include `entered_at`,
   `error_rate`, and `total_operations` in structured log extra.
+
+
+## Migration Phase D — Filesystem Deprecated
+
+<!-- last_reviewed: 2026-03-12T22:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.migration.phases.phase_d` module implements the final phase
+of the filesystem-to-database migration. The filesystem ticket state is fully
+deprecated. The database is the sole source of truth. The sync engine and
+dual-mode wrapper are deactivated. Feature flags collapse to a single
+`migration_complete=true` sentinel. Any code that attempts filesystem ticket
+operations receives a deprecation warning.
+
+The `mcp_server.migration.cleanup` module provides `MigrationCleanup` — an
+archival tool that moves the legacy `.github/ticket-state/` and
+`.github/tickets/` directories to a timestamped archive location.
+
+### How It Works
+
+1. All feature flags must already be in `database` mode (verified on entry).
+2. `PhaseD.enter()` deactivates the sync engine, dual-mode wrapper, and
+   filesystem fallback code path. It sets `migration_complete=true` and logs
+   final migration statistics.
+3. Any code that attempts filesystem ticket operations during Phase D
+   receives a deprecation warning via `FilesystemDeprecationInterceptor`.
+4. `MigrationCleanup.archive()` moves `.github/ticket-state/` and
+   `.github/tickets/` into a timestamped subdirectory for safe archival.
+5. `PhaseD.exit()` logs the final migration report and completes the
+   lifecycle.
+
+### Lifecycle
+
+```text
+INACTIVE  ──enter()──►  ACTIVE  ──exit()──►  INACTIVE
+                           │
+               log_filesystem_deprecation()
+               get_migration_report()
+```
+
+### Quick Start
+
+```python
+from pathlib import Path
+from mcp_server.migration.phases import PhaseD, PhaseDConfig
+
+config = PhaseDConfig(
+    flags_config_path=Path("config/migration-flags.yaml"),
+    migration_started_at="2026-03-01T00:00:00Z",
+    total_operations=15000,
+    total_errors=12,
+)
+
+phase = PhaseD(config)
+
+# Enter Phase D — deactivates sync, sets migration_complete flag
+report = await phase.enter()
+print(f"Error rate: {report.error_rate}%")
+print(f"Duration: {report.migration_duration_hours} hours")
+
+# Deprecation warnings for any filesystem access attempts
+phase.log_filesystem_deprecation("claim", "FORGEOS-BE076")
+
+# Exit Phase D — migration lifecycle complete
+final_report = await phase.exit()
+```
+
+### PhaseDConfig
+
+Frozen dataclass controlling Phase D behaviour.
+
+| Parameter | Default | Description |
+|---|---|---|
+| `flags_config_path` | *(required)* | Path to `config/migration-flags.yaml` |
+| `migration_started_at` | `""` | ISO-8601 timestamp of Phase A entry |
+| `total_operations` | `0` | Cumulative operation count across all phases |
+| `total_errors` | `0` | Cumulative error count across all phases |
+
+### PhaseD Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `enter()` | `MigrationReport` | Verify flags, deactivate sync/dual-mode, set `migration_complete`, log stats |
+| `exit()` | `MigrationReport` | Build final report, set status to INACTIVE |
+| `log_filesystem_deprecation(op, ticket_id)` | `None` | Emit deprecation warning for a filesystem operation attempt |
+| `get_migration_report()` | `MigrationReport` | Build a snapshot of current migration statistics |
+
+### PhaseD Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `status` | `PhaseDStatus` | `INACTIVE`, `ACTIVE`, or `TRANSITIONING` |
+| `entered_at` | `str \| None` | ISO-8601 entry timestamp |
+| `exited_at` | `str \| None` | ISO-8601 exit timestamp |
+| `sync_engine_disabled` | `bool` | Whether the sync engine was deactivated |
+| `dual_mode_disabled` | `bool` | Whether the dual-mode wrapper was deactivated |
+| `filesystem_fallback_disabled` | `bool` | Whether the SDK fallback code path is disabled |
+| `migration_complete_flag` | `bool` | Whether `migration_complete=true` is set |
+| `deprecation_interceptor` | `FilesystemDeprecationInterceptor` | The interceptor instance |
+
+### PhaseDStatus
+
+| Value | Meaning |
+|---|---|
+| `INACTIVE` | Phase D is not running |
+| `ACTIVE` | Filesystem deprecated; database is sole source of truth |
+| `TRANSITIONING` | `exit()` is in progress |
+
+### MigrationReport
+
+Returned by `enter()`, `exit()`, and `get_migration_report()`.
+
+| Field | Type | Description |
+|---|---|---|
+| `total_operations` | `int` | Cumulative operations across all phases |
+| `total_errors` | `int` | Cumulative errors across all phases |
+| `error_rate` | `float` | Overall error rate as a percentage |
+| `migration_started_at` | `str` | ISO-8601 timestamp of Phase A entry |
+| `migration_completed_at` | `str` | ISO-8601 timestamp of Phase D entry |
+| `migration_duration_hours` | `float` | Total duration in hours |
+| `sync_engine_disabled` | `bool` | Sync engine deactivated |
+| `dual_mode_disabled` | `bool` | Dual-mode wrapper deactivated |
+| `filesystem_fallback_disabled` | `bool` | SDK fallback code path disabled |
+| `migration_complete_flag` | `bool` | `migration_complete` flag set |
+| `validated_at` | `str` | ISO-8601 timestamp of this report |
+
+### FilesystemDeprecationInterceptor
+
+Logs a deprecation warning when filesystem ticket operations are attempted.
+Call `intercept(operation, ticket_id)` from any code path that formerly wrote
+to the filesystem.
+
+| Method / Property | Returns | Description |
+|---|---|---|
+| `intercept(operation, ticket_id)` | `None` | Log deprecation warning with structured context |
+| `warning_count` | `int` | Number of deprecation warnings emitted |
+
+### Migration Cleanup
+
+The `mcp_server.migration.cleanup` module archives the legacy filesystem
+ticket directories. The cleanup is **non-destructive**: files are *moved*
+(not deleted) to `{archive_dir}/{timestamp}/` so they can be restored.
+
+```python
+from pathlib import Path
+from mcp_server.migration.cleanup import CleanupConfig, MigrationCleanup
+
+config = CleanupConfig(
+    ticket_state_dir=Path(".github/ticket-state"),
+    tickets_dir=Path(".github/tickets"),
+    archive_dir=Path(".github/archive/migration"),
+)
+
+cleanup = MigrationCleanup(config)
+result = await cleanup.archive()
+print(f"Archived {result.archived_files} files to {result.archive_path}")
+
+# Verify the archive
+verification = await cleanup.verify_archive(result.archive_path)
+print(f"Valid: {verification['valid']}")
+```
+
+#### CleanupConfig
+
+| Parameter | Default | Description |
+|---|---|---|
+| `ticket_state_dir` | *(required)* | Path to `.github/ticket-state/` |
+| `tickets_dir` | *(required)* | Path to `.github/tickets/` |
+| `archive_dir` | `.github/archive/migration` | Base directory for archived data |
+
+#### MigrationCleanup Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `archive()` | `ArchiveResult` | Archive filesystem ticket state directories |
+| `verify_archive(path)` | `dict` | Verify archive exists and contains expected content |
+
+#### ArchiveResult
+
+| Field | Type | Description |
+|---|---|---|
+| `success` | `bool` | Whether the archive completed without errors |
+| `archive_path` | `str` | Destination directory where files were moved |
+| `archived_files` | `int` | Number of files archived |
+| `archived_dirs` | `int` | Number of directories archived |
+| `errors` | `list[str]` | Errors encountered during archival |
+| `timestamp` | `str` | ISO-8601 timestamp of the operation |
+
+### Error Handling
+
+| Scenario | Behaviour |
+|---|---|
+| Flags not in `database` mode | `ValueError` raised on `enter()` |
+| `enter()` called while active | `RuntimeError` raised |
+| `exit()` called while inactive | `RuntimeError` raised |
+| `log_filesystem_deprecation()` while inactive | `RuntimeError` raised |
+| Source directory does not exist (cleanup) | Warning logged, nothing archived |
+| Source is not a directory (cleanup) | Error recorded in `ArchiveResult` |
+| OS error during file move (cleanup) | Error recorded in `ArchiveResult` |
+
+### Design Constraints
+
+- **Database is sole source of truth** — all ticket operations use the
+  database exclusively. No filesystem reads or writes for ticket state.
+- **Non-destructive archival** — `MigrationCleanup` moves files to a
+  timestamped archive. Original directories are removed only after a
+  successful copy.
+- **WORK commits unchanged** — git-based code commits are not affected
+  by Phase D. Only ticket state management is deprecated.
+- **Structured logging** — all lifecycle events include structured
+  context dicts for observability.
+- **Feature flag gate** — Phase D entry requires all flags in `database`
+  mode. This prevents accidental entry before Phase C completion.
 
 
 ## Runner Adapter — agent-runner.py Migration Evolution
