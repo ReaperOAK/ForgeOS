@@ -2200,3 +2200,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** dashboard/src/components/machines/__tests__/AgentList.test.tsx, dashboard/src/components/machines/__tests__/MachineCard.test.tsx, dashboard/src/app/machines/__tests__/page.test.tsx, .github/agent-output/QA/FORGEOS-FE010.md
 - **Decisions:** QA PASS — 46/46 tests pass, coverage 94% stmt / 84% branch / 93% func / 97% line, 7/7 AC verified, 0 defects
 - **Timestamp:** 2026-03-12T09:10:00Z
+
+### [FORGEOS-BE075] — Validation APPROVED
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-BE075.md
+- **Decisions:** APPROVED — 10/10 DoD pass, 7/7 AC verified, 29/29 tests pass, 100% coverage, lint clean, mypy clean
+- **Timestamp:** 2026-03-12T17:00:00Z
