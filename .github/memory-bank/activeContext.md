@@ -2190,3 +2190,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/README.md (Runner Adapter section, ~100 lines), .github/agent-output/Documentation/FORGEOS-BE079.md
 - **Decisions:** All 14 public symbols in runner_adapter.py and all agent-runner.py functions already had docstrings; added README reference section with phase routing table, quick start, API reference, error handling matrix; no CHANGELOG needed (internal migration infrastructure)
 - **Timestamp:** 2026-03-12T16:30:00Z
+
+### [FORGEOS-FE008] — QA PASS
+- **Artifacts:** dashboard/src/components/claims/__tests__/LeaseCountdown.test.tsx, dashboard/src/components/claims/__tests__/ClaimsTable.test.tsx, dashboard/src/app/claims/__tests__/page.test.tsx, .github/agent-output/QA/FORGEOS-FE008.md
+- **Decisions:** QA PASS — 68/68 tests pass, coverage ≥80% all files (ClaimsTable 91%, LeaseCountdown 100%, page 90%), 7/7 AC verified, 0 defects
+- **Timestamp:** 2026-03-12T08:30:00Z
