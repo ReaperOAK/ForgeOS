@@ -1,0 +1,151 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CIReviewer",
+          "version": "1.0.0",
+          "informationUri": "https://github.com/ForgeOS/.github/agents/CIReviewer.agent.md",
+          "rules": [
+            {
+              "id": "TYPE-001",
+              "name": "ReExportNotExplicit",
+              "shortDescription": {
+                "text": "Module re-export not explicitly declared"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            },
+            {
+              "id": "TYPE-002",
+              "name": "ComparisonOverlap",
+              "shortDescription": {
+                "text": "Non-overlapping enum literal comparison in test assertion"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            },
+            {
+              "id": "OC-002",
+              "name": "NoElseKeyword",
+              "shortDescription": {
+                "text": "Object calisthenics: avoid ELSE keyword, use early returns"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              }
+            },
+            {
+              "id": "COV-001",
+              "name": "UncoveredLines",
+              "shortDescription": {
+                "text": "Lines not covered by test suite"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "TYPE-001",
+          "level": "note",
+          "message": {
+            "text": "Module 'mcp_server.migration.rollback' does not explicitly export attribute 'RollbackReason'. Import directly from 'mcp_server.migration.health_monitor' or add to __all__."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mcp-server/tests/migration/test_rollback.py"
+                },
+                "region": {
+                  "startLine": 16
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "TYPE-002",
+          "level": "note",
+          "message": {
+            "text": "Non-overlapping equality check between RollbackState.IDLE and RollbackState.ROLLED_BACK literals. Known mypy false positive in test state-transition assertions."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mcp-server/tests/migration/test_rollback.py"
+                },
+                "region": {
+                  "startLine": 325
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "OC-002",
+          "level": "warning",
+          "message": {
+            "text": "Two 'else' branches in check_health method. Consider early-return pattern for the healthy/unhealthy branch to improve readability."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mcp-server/src/mcp_server/migration/health_monitor.py"
+                },
+                "region": {
+                  "startLine": 105,
+                  "endLine": 125
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "COV-001",
+          "level": "note",
+          "message": {
+            "text": "2 lines uncovered in health_monitor.py (lines 98, 138). Edge cases: no-probe early return and time-based window pruning. Coverage: 98%."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "mcp-server/src/mcp_server/migration/health_monitor.py"
+                },
+                "region": {
+                  "startLine": 98
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "properties": {
+            "qualityScore": 92,
+            "verdict": "PASS",
+            "criticalCount": 0,
+            "warningCount": 1,
+            "suggestionCount": 3,
+            "coverage": 99.0,
+            "maxCyclomaticComplexity": 5,
+            "averageCyclomaticComplexity": 1.67
+          }
+        }
+      ]
+    }
+  ]
+}
