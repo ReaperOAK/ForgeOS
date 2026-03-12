@@ -1,0 +1,206 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CIReviewer",
+          "version": "1.0.0",
+          "informationUri": "https://github.com/ForgeOS/forgeos",
+          "rules": [
+            {
+              "id": "CI-LINT-001",
+              "name": "F541-ExtraneousFString",
+              "shortDescription": { "text": "f-string without placeholders" },
+              "defaultConfiguration": { "level": "warning" }
+            },
+            {
+              "id": "CI-TYPE-001",
+              "name": "MypyArgType",
+              "shortDescription": { "text": "Incompatible argument type" },
+              "defaultConfiguration": { "level": "warning" }
+            },
+            {
+              "id": "CI-COMPLEXITY-001",
+              "name": "CyclomaticComplexityHigh",
+              "shortDescription": { "text": "Cyclomatic complexity exceeds threshold of 10" },
+              "defaultConfiguration": { "level": "warning" }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "CI-LINT-001",
+          "level": "warning",
+          "message": { "text": "f-string without any placeholders (F541). Remove extraneous f prefix." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": ".github/agent-runner.py" },
+                "region": { "startLine": 225 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CI-LINT-001",
+          "level": "warning",
+          "message": { "text": "f-string without any placeholders (F541). Remove extraneous f prefix." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": ".github/agent-runner.py" },
+                "region": { "startLine": 269 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CI-LINT-001",
+          "level": "warning",
+          "message": { "text": "f-string without any placeholders (F541). Remove extraneous f prefix." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": ".github/agent-runner.py" },
+                "region": { "startLine": 297 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CI-LINT-001",
+          "level": "warning",
+          "message": { "text": "f-string without any placeholders (F541). Remove extraneous f prefix." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": ".github/agent-runner.py" },
+                "region": { "startLine": 353 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CI-LINT-001",
+          "level": "warning",
+          "message": { "text": "f-string without any placeholders (F541). Remove extraneous f prefix." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": ".github/agent-runner.py" },
+                "region": { "startLine": 462 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CI-LINT-001",
+          "level": "warning",
+          "message": { "text": "f-string without any placeholders (F541). Remove extraneous f prefix." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": ".github/agent-runner.py" },
+                "region": { "startLine": 606 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CI-LINT-001",
+          "level": "warning",
+          "message": { "text": "f-string without any placeholders (F541). Remove extraneous f prefix." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": ".github/agent-runner.py" },
+                "region": { "startLine": 657 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CI-LINT-001",
+          "level": "warning",
+          "message": { "text": "f-string without any placeholders (F541). Remove extraneous f prefix." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": ".github/agent-runner.py" },
+                "region": { "startLine": 668 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CI-LINT-001",
+          "level": "warning",
+          "message": { "text": "f-string without any placeholders (F541). Remove extraneous f prefix." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": ".github/agent-runner.py" },
+                "region": { "startLine": 670 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CI-LINT-001",
+          "level": "warning",
+          "message": { "text": "f-string without any placeholders (F541). Remove extraneous f prefix." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": ".github/agent-runner.py" },
+                "region": { "startLine": 671 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CI-TYPE-001",
+          "level": "warning",
+          "message": { "text": "Argument 1 to 'get' of 'dict' has incompatible type 'str | None'; expected 'str' [arg-type]" },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": ".github/agent-runner.py" },
+                "region": { "startLine": 402 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CI-COMPLEXITY-001",
+          "level": "warning",
+          "message": { "text": "Function 'main()' has cyclomatic complexity 31 (grade E), exceeding threshold of 10." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": ".github/agent-runner.py" },
+                "region": { "startLine": 523 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "CI-COMPLEXITY-001",
+          "level": "warning",
+          "message": { "text": "Function 'execute_work_commit()' has cyclomatic complexity 22 (grade D), exceeding threshold of 10." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": ".github/agent-runner.py" },
+                "region": { "startLine": 332 }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
