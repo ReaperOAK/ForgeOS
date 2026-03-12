@@ -59,7 +59,7 @@
       "event": "CLAIMED",
       "agent": "Backend",
       "machine_id": "pop-os",
-      "details": "CLAIM by Backend on pop-os (reaperoak)"
+      "details": "CLAIM by Backend on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-10T15:13:34.234847+00:00",
@@ -80,14 +80,14 @@
       "event": "CLAIMED",
       "agent": "QA",
       "machine_id": "pop-os",
-      "details": "CLAIM by QA on pop-os (ReaperOAK)"
+      "details": "CLAIM by QA on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-10T16:43:33.456255+00:00",
       "event": "CLAIMED",
       "agent": "QA",
       "machine_id": "pop-os",
-      "details": "CLAIM by QA on pop-os (ReaperOAK)"
+      "details": "CLAIM by QA on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-10T16:47:17.671764+00:00",
@@ -110,7 +110,7 @@
       "event": "CLAIMED",
       "agent": "Validator",
       "machine_id": "pop-os",
-      "details": "CLAIM by Validator on pop-os (ReaperOAK)"
+      "details": "CLAIM by Validator on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-10T18:09:19.605395+00:00",
@@ -198,7 +198,7 @@
       "machine_id": "pop-os",
       "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
-      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-10T21:11:43.553023+00:00"
+      "details": "Claimed by Ticketer@pop-os via Validator, lease until 2026-03-10T21:11:43.553023+00:00"
     },
     {
       "timestamp": "2026-03-10T20:47:33.026100+00:00",

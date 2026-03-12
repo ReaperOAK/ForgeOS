@@ -1712,7 +1712,7 @@ export function isValidTransition(type: TicketType, from: TicketStage, to: Ticke
 | CI | CI only | CI only | Yes | **Yes** | No | Own | Own | Yes | Yes | No |
 | Documentation | DOCUMENTATION only | DOCUMENTATION only | Yes | No | No | Own | Own | Yes | Yes | No |
 | Validator | VALIDATOR only | VALIDATOR only | Yes | **Yes** | No | Own | Own | Yes | Yes | No |
-| ReaperOAK | All stages | No | No | No | No | No | No | Yes | Yes | No |
+| Ticketer | All stages | No | No | No | No | No | No | Yes | Yes | No |
 | Admin | All | All | All | All | All | All | All | All | All | **Yes** |
 
 ### 7.3 JWT Tokens (Future — v2)
@@ -2061,7 +2061,7 @@ app.get('/health', async (req, res) => {
 │  ┌──────────────┐     ┌──────────────┐     ┌──────────────┐            │
 │  │  Machine A   │     │  Machine B   │     │  Machine N   │  Machines  │
 │  │ ┌──────────┐ │     │ ┌──────────┐ │     │ ┌──────────┐ │            │
-│  │ │ReaperOAK │ │     │ │ReaperOAK │ │     │ │ReaperOAK │ │            │
+│  │ │Ticketer │ │     │ │Ticketer │ │     │ │Ticketer │ │            │
 │  │ │  + Agents│ │     │ │  + Agents│ │     │ │  + Agents│ │            │
 │  │ └────┬─────┘ │     │ └────┬─────┘ │     │ └────┬─────┘ │            │
 │  └──────┼───────┘     └──────┼───────┘     └──────┼───────┘            │

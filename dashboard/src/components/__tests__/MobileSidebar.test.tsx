@@ -80,7 +80,7 @@ describe('MobileSidebar', () => {
 
     it('renders user info', () => {
         render(<MobileSidebar isOpen={true} onClose={() => { }} />);
-        expect(screen.getByText('ReaperOAK')).toBeInTheDocument();
+        expect(screen.getByText('Ticketer')).toBeInTheDocument();
         expect(screen.getByText('Operator')).toBeInTheDocument();
     });
 

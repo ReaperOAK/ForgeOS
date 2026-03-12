@@ -105,13 +105,13 @@ describe('Sidebar', () => {
 
     it('renders user info when expanded', () => {
         render(<Sidebar isCollapsed={false} onToggleCollapse={() => { }} />);
-        expect(screen.getByText('ReaperOAK')).toBeInTheDocument();
+        expect(screen.getByText('Ticketer')).toBeInTheDocument();
         expect(screen.getByText('Operator')).toBeInTheDocument();
     });
 
     it('hides user info when collapsed', () => {
         render(<Sidebar isCollapsed={true} onToggleCollapse={() => { }} />);
-        expect(screen.queryByText('ReaperOAK')).not.toBeInTheDocument();
+        expect(screen.queryByText('Ticketer')).not.toBeInTheDocument();
     });
 
     it('renders ThemeToggle with compact prop matching collapse state', () => {

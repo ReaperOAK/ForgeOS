@@ -63,7 +63,7 @@
       "machine_id": "pop-os",
       "from_stage": "READY",
       "to_stage": "READY",
-      "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-11T18:11:28.949621+00:00"
+      "details": "Claimed by Ticketer@pop-os via Backend, lease until 2026-03-11T18:11:28.949621+00:00"
     },
     {
       "timestamp": "2026-03-11T18:03:16.216327+00:00",
@@ -87,19 +87,19 @@
       "timestamp": "2026-03-12T14:10:00+00:00",
       "event": "STAGE_COMPLETED",
       "agent": "Security",
-      "machine_id": "reaperoak-dev",
+      "machine_id": "Ticketer-dev",
       "from_stage": "SECURITY",
       "to_stage": "CI",
-      "details": "SECURITY PASS by reaperoak@reaperoak-dev \u2014 0 critical, 0 high, 2 low/informational findings. Advancing to CI."
+      "details": "SECURITY PASS by Ticketer@Ticketer-dev \u2014 0 critical, 0 high, 2 low/informational findings. Advancing to CI."
     },
     {
       "timestamp": "2026-03-12T08:05:53.334385+00:00",
       "event": "STAGE_COMPLETED",
       "agent": "CIReviewer",
-      "machine_id": "reaperoak-dev",
+      "machine_id": "Ticketer-dev",
       "from_stage": "CI",
       "to_stage": "DOCS",
-      "details": "CI PASS by reaperoak@reaperoak-dev \u2014 Score 78/100, 0 critical, 4 warnings, 94% coverage. Advancing to DOCS."
+      "details": "CI PASS by Ticketer@Ticketer-dev \u2014 Score 78/100, 0 critical, 4 warnings, 94% coverage. Advancing to DOCS."
     },
     {
       "timestamp": "2026-03-12T08:25:25.252468+00:00",

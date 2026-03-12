@@ -63,7 +63,7 @@ describe('claimTicket', () => {
         ticketId: 'FORGEOS-TEST-1',
         agent: 'operator',
         machine: 'dashboard',
-        operator: 'reaperoak',
+        operator: 'Ticketer',
     };
 
     it('sends POST to /api/tickets/:id/claim with correct body', async () => {
@@ -75,7 +75,7 @@ describe('claimTicket', () => {
             expect.objectContaining({
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ agent: 'operator', machine: 'dashboard', operator: 'reaperoak' }),
+                body: JSON.stringify({ agent: 'operator', machine: 'dashboard', operator: 'Ticketer' }),
             }),
         );
         expect(result).toEqual(successResponse);

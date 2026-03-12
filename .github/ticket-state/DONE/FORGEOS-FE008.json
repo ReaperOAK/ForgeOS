@@ -62,14 +62,14 @@
       "timestamp": "2026-03-12T00:00:00.000000+00:00",
       "event": "STAGE_COMPLETE",
       "agent": "UIDesigner",
-      "machine_id": "reaperoak-dev",
+      "machine_id": "Ticketer-dev",
       "details": "UIDESIGNER complete \u2014 mockup approved, moved to FRONTEND"
     },
     {
       "timestamp": "2026-03-12T01:30:00.000000+00:00",
       "event": "STAGE_COMPLETE",
       "agent": "Frontend",
-      "machine_id": "reaperoak-dev",
+      "machine_id": "Ticketer-dev",
       "details": "FRONTEND complete \u2014 3 components implemented, moved to QA"
     },
     {

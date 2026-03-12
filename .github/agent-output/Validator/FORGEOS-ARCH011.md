@@ -1,6 +1,6 @@
 # FORGEOS-ARCH011 — Validation Report
 
-> **Ticket:** FORGEOS-ARCH011 | **Agent:** Validator | **Machine:** pop-os | **Operator:** ReaperOAK  
+> **Ticket:** FORGEOS-ARCH011 | **Agent:** Validator | **Machine:** pop-os | **Operator:** Ticketer  
 > **Date:** 2026-03-07T15:10:00Z | **Confidence:** HIGH
 
 ## Verdict: **APPROVED**

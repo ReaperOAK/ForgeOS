@@ -64,7 +64,7 @@
       "machine_id": "pop-os",
       "from_stage": "READY",
       "to_stage": "READY",
-      "details": "Claimed by reaperoak@pop-os via Backend, lease until 2026-03-05T23:51:09.695345+00:00"
+      "details": "Claimed by Ticketer@pop-os via Backend, lease until 2026-03-05T23:51:09.695345+00:00"
     },
     {
       "timestamp": "2026-03-05T23:29:32.618857+00:00",
@@ -80,7 +80,7 @@
       "machine_id": "forgeos-dev",
       "from_stage": "READY",
       "to_stage": "READY",
-      "details": "Claimed by reaperoak@forgeos-dev via Backend, lease until 2026-03-07T07:56:00.429814+00:00"
+      "details": "Claimed by Ticketer@forgeos-dev via Backend, lease until 2026-03-07T07:56:00.429814+00:00"
     },
     {
       "timestamp": "2026-03-07T07:29:08.056013+00:00",
@@ -134,7 +134,7 @@
       "machine_id": "forgeos-dev",
       "from_stage": "SECURITY",
       "to_stage": "SECURITY",
-      "details": "Claimed by reaperoak@forgeos-dev via Security, lease until 2026-03-07T08:23:07.752428+00:00"
+      "details": "Claimed by Ticketer@forgeos-dev via Security, lease until 2026-03-07T08:23:07.752428+00:00"
     },
     {
       "timestamp": "2026-03-07T07:55:30.324835+00:00",
@@ -152,7 +152,7 @@
       "machine_id": "forgeos-dev",
       "from_stage": "CI",
       "to_stage": "CI",
-      "details": "Claimed by reaperoak@forgeos-dev via CIReviewer, lease until 2026-03-07T08:30:06.350684+00:00"
+      "details": "Claimed by Ticketer@forgeos-dev via CIReviewer, lease until 2026-03-07T08:30:06.350684+00:00"
     },
     {
       "timestamp": "2026-03-07T08:07:17.211339+00:00",
@@ -233,7 +233,7 @@
       "machine_id": "forgeos-dev",
       "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
-      "details": "Claimed by reaperoak@forgeos-dev via Validator, lease until 2026-03-07T08:51:02.244471+00:00"
+      "details": "Claimed by Ticketer@forgeos-dev via Validator, lease until 2026-03-07T08:51:02.244471+00:00"
     },
     {
       "timestamp": "2026-03-07T08:24:32.364706+00:00",

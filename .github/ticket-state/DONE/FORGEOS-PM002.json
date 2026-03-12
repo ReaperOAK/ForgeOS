@@ -23,7 +23,7 @@
   "acceptance_criteria": [
     "At least 5 user stories for Human Operator persona covering: ticket status view, claim monitoring, manual intervention, dashboard interaction, migration control",
     "At least 5 user stories for AI Agent persona covering: claim ticket, advance ticket, heartbeat lease, report results, handle rework",
-    "At least 5 user stories for ReaperOAK Dispatcher persona covering: scan ready tickets, dispatch agents, advance pipeline, handle escalations, sync state",
+    "At least 5 user stories for Ticketer Dispatcher persona covering: scan ready tickets, dispatch agents, advance pipeline, handle escalations, sync state",
     "At least 5 user stories for System Administrator persona covering: configure auth, monitor health, manage agents, handle failures, audit trail",
     "Each user story has acceptance criteria (Given/When/Then format)",
     "Stories prioritized using MoSCoW method (Must/Should/Could/Won't)",

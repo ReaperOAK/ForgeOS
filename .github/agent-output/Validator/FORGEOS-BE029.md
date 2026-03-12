@@ -2,7 +2,7 @@
 
 **Agent:** Validator
 **Machine:** pop-os
-**Operator:** ReaperOAK
+**Operator:** Ticketer
 **Verdict:** APPROVED
 **Confidence:** HIGH
 

@@ -14,13 +14,13 @@ Source block: BLK-03-01 (Product Requirements Document)
 
 ### Description
 
-Define the user personas for the ForgeOS distributed orchestration platform. Document 4 personas — Human Operator, AI Agent, ReaperOAK Dispatcher, and System Administrator — each with goals, constraints, interaction patterns, frequency of use, and pain points with the current filesystem-based system. These personas drive all subsequent user story and UX work.
+Define the user personas for the ForgeOS distributed orchestration platform. Document 4 personas — Human Operator, AI Agent, Ticketer Dispatcher, and System Administrator — each with goals, constraints, interaction patterns, frequency of use, and pain points with the current filesystem-based system. These personas drive all subsequent user story and UX work.
 
 ### Acceptance Criteria
 
 - [ ] Human Operator persona defined: goals (manage tickets, monitor agents), constraints (CLI + dashboard), interaction frequency (daily)
 - [ ] AI Agent persona defined: goals (claim work, report results), constraints (programmatic only, no UI), interaction frequency (continuous)
-- [ ] ReaperOAK Dispatcher persona defined: goals (dispatch agents, advance pipeline), constraints (stateless, no reasoning), interaction frequency (continuous)
+- [ ] Ticketer Dispatcher persona defined: goals (dispatch agents, advance pipeline), constraints (stateless, no reasoning), interaction frequency (continuous)
 - [ ] System Administrator persona defined: goals (maintain platform, handle escalations), constraints (full access), interaction frequency (weekly)
 - [ ] Each persona has documented pain points with the current filesystem-based system
 - [ ] Interaction pattern diagrams showing how each persona uses the platform
@@ -44,7 +44,7 @@ Capture user stories for the ForgeOS platform covering all capability domains. P
 
 - [ ] At least 5 user stories for Human Operator persona covering: ticket status view, claim monitoring, manual intervention, dashboard interaction, migration control
 - [ ] At least 5 user stories for AI Agent persona covering: claim ticket, advance ticket, heartbeat lease, report results, handle rework
-- [ ] At least 5 user stories for ReaperOAK Dispatcher persona covering: scan ready tickets, dispatch agents, advance pipeline, handle escalations, sync state
+- [ ] At least 5 user stories for Ticketer Dispatcher persona covering: scan ready tickets, dispatch agents, advance pipeline, handle escalations, sync state
 - [ ] At least 5 user stories for System Administrator persona covering: configure auth, monitor health, manage agents, handle failures, audit trail
 - [ ] Each user story has acceptance criteria (Given/When/Then format)
 - [ ] Stories prioritized using MoSCoW method (Must/Should/Could/Won't)

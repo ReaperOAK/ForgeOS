@@ -31,14 +31,14 @@
     ".github/agents/DevOps.agent.md",
     ".github/agents/UIDesigner.agent.md",
     ".github/agents/ProductManager.agent.md",
-    ".github/agents/ReaperOAK.agent.md",
+    ".github/agents/Ticketer.agent.md",
     ".github/agents/TODO.agent.md"
   ],
   "acceptance_criteria": [
     "All 14 agent files updated with MCP tool authorization section listing permitted tools per RBAC matrix",
     "Backend agent: authorized for tickets.next(BACKEND), tickets.claim(BACKEND), tickets.complete, tickets.spawn, tickets.release(own), tickets.extend(own)",
     "QA agent: authorized for tickets.next(QA), tickets.claim(QA), tickets.complete, tickets.reject, tickets.release(own), tickets.extend(own)",
-    "ReaperOAK agent: authorized for tickets.next(all stages), tickets.stats, tickets.graph (no claim/complete)",
+    "Ticketer agent: authorized for tickets.next(all stages), tickets.stats, tickets.graph (no claim/complete)",
     "Each agent file documents FORGEOS_MCP_URL and FORGEOS_API_KEY environment variables",
     "Workflow steps updated: replace \"python3 tickets.py --claim\" with \"tickets.claim MCP tool call\"",
     "Fallback mechanism documented: if MCP unreachable, use tickets.py CLI directly",

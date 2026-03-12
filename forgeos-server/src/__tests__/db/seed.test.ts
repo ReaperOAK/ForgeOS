@@ -80,7 +80,7 @@ describe('Seed — seed.ts', () => {
       expect(projectCall[0]).toContain('INSERT INTO projects');
       expect(projectCall[0]).toContain('ON CONFLICT (name) DO UPDATE');
       expect(projectCall[1][0]).toBe('ForgeOS');
-      expect(projectCall[1][2]).toBe('https://github.com/ReaperOAK/ForgeOS');
+      expect(projectCall[1][2]).toBe('https://github.com/Ticketer/ForgeOS');
       expect(projectCall[1][3]).toBe(30);  // default_lease_minutes
       expect(projectCall[1][4]).toBe(120); // max_lease_minutes
     });

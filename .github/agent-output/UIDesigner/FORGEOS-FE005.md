@@ -3,7 +3,7 @@
 **Ticket:** FORGEOS-FE005 — Implement Interactive Dependency Graph  
 **Agent:** UIDesigner  
 **Machine:** pop-os  
-**Operator:** reaperoak  
+**Operator:** Ticketer  
 **Timestamp:** 2026-03-11T15:00:00Z  
 **Confidence:** HIGH
 

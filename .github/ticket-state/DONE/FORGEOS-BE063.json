@@ -61,7 +61,7 @@
       "machine_id": "pop-os",
       "from_stage": "READY",
       "to_stage": "READY",
-      "details": "Claimed by ReaperOAK@pop-os via Backend, lease until 2026-03-11T01:32:59.485491+00:00"
+      "details": "Claimed by Ticketer@pop-os via Backend, lease until 2026-03-11T01:32:59.485491+00:00"
     },
     {
       "timestamp": "2026-03-11T01:20:00.000000+00:00",
@@ -86,7 +86,7 @@
       "machine_id": "pop-os",
       "from_stage": "QA",
       "to_stage": "QA",
-      "details": "Claimed by ReaperOAK@pop-os via QA Engineer, lease until 2026-03-11T01:58:27.628228+00:00"
+      "details": "Claimed by Ticketer@pop-os via QA Engineer, lease until 2026-03-11T01:58:27.628228+00:00"
     },
     {
       "timestamp": "2026-03-11T01:45:50.308913+00:00",
@@ -104,7 +104,7 @@
       "machine_id": "pop-os",
       "from_stage": "SECURITY",
       "to_stage": "SECURITY",
-      "details": "Claimed by ReaperOAK@pop-os via Security Engineer, lease until 2026-03-11T02:19:17.645338+00:00"
+      "details": "Claimed by Ticketer@pop-os via Security Engineer, lease until 2026-03-11T02:19:17.645338+00:00"
     },
     {
       "timestamp": "2026-03-11T02:30:00.000000+00:00",
@@ -129,7 +129,7 @@
       "machine_id": "pop-os",
       "from_stage": "CI",
       "to_stage": "CI",
-      "details": "Claimed by ReaperOAK@pop-os via CI Reviewer, lease until 2026-03-11T02:46:04.564511+00:00"
+      "details": "Claimed by Ticketer@pop-os via CI Reviewer, lease until 2026-03-11T02:46:04.564511+00:00"
     },
     {
       "timestamp": "2026-03-11T02:28:23.832758+00:00",
@@ -174,7 +174,7 @@
       "machine_id": "pop-os",
       "from_stage": "DOCS",
       "to_stage": "DOCS",
-      "details": "Claimed by ReaperOAK@pop-os via Documentation Specialist, lease until 2026-03-11T03:06:35.168591+00:00"
+      "details": "Claimed by Ticketer@pop-os via Documentation Specialist, lease until 2026-03-11T03:06:35.168591+00:00"
     },
     {
       "timestamp": "2026-03-11T02:43:54.402331+00:00",
@@ -199,7 +199,7 @@
       "machine_id": "pop-os",
       "from_stage": "VALIDATION",
       "to_stage": "VALIDATION",
-      "details": "Claimed by ReaperOAK@pop-os via Validator, lease until 2026-03-11T03:37:12.233152+00:00"
+      "details": "Claimed by Ticketer@pop-os via Validator, lease until 2026-03-11T03:37:12.233152+00:00"
     },
     {
       "timestamp": "2026-03-11T03:16:54.518128+00:00",

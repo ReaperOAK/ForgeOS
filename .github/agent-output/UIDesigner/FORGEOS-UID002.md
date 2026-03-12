@@ -2,7 +2,7 @@
 
 > **Ticket:** FORGEOS-UID002 — Design Pipeline and Ticket Detail Views
 > **Agent:** UIDesigner | **Stage:** FRONTEND (UI Phase)
-> **Machine:** pop-os | **Operator:** ReaperOAK
+> **Machine:** pop-os | **Operator:** Ticketer
 > **Date:** 2026-03-10T00:00:00Z | **Confidence:** HIGH
 
 ---

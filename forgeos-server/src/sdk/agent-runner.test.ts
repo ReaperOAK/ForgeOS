@@ -190,7 +190,7 @@ describe('AgentRunner.claimTicket', () => {
     vi.stubGlobal('fetch', vi.fn().mockResolvedValue(mockResponse));
 
     const runner = new AgentRunner(makeConfig());
-    const result = await runner.claimTicket('TASK-001', 'Backend', 'pop-os', 'reaperoak');
+    const result = await runner.claimTicket('TASK-001', 'Backend', 'pop-os', 'Ticketer');
 
     expect(result.source).toBe('mcp');
     expect(result.ticket.ticket_id).toBe('TASK-001');

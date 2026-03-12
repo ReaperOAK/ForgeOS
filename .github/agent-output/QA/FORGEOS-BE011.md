@@ -6,7 +6,7 @@
 - **Stage:** QA → SECURITY
 - **Agent:** QA
 - **Machine:** pop-os
-- **Operator:** reaperoak
+- **Operator:** Ticketer
 - **Verdict:** PASS
 - **Confidence:** HIGH
 - **Completed:** 2026-03-10T13:10:00+00:00

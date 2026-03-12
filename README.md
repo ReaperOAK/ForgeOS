@@ -1,6 +1,6 @@
 # Vibecoding
 
-[![MCP Server CI](https://github.com/ReaperOAK/ForgeOS/actions/workflows/mcp-server-ci.yml/badge.svg)](https://github.com/ReaperOAK/ForgeOS/actions/workflows/mcp-server-ci.yml)
+[![MCP Server CI](https://github.com/Ticketer/ForgeOS/actions/workflows/mcp-server-ci.yml/badge.svg)](https://github.com/Ticketer/ForgeOS/actions/workflows/mcp-server-ci.yml)
 
 **Autonomous Software Agency Engine**
 
@@ -12,7 +12,7 @@ Version 9.1.0 | Built on GitHub Copilot Agent Infrastructure
 ## Quick Start
 
 ```bash
-git clone https://github.com/ReaperOAK/ForgeOS.git
+git clone https://github.com/Ticketer/ForgeOS.git
 cd ForgeOS
 make setup   # checks prerequisites, installs deps, creates .env
 make up      # starts PostgreSQL, MCP Server, and pgAdmin
@@ -64,7 +64,7 @@ The runtime infrastructure consists of:
   filtering, and ticket detail views.
 
 ```
-ReaperOAK (CTO / Elastic Multi-Worker Parallel Orchestrator)
+Ticketer (CTO / Elastic Multi-Worker Parallel Orchestrator)
 |
 +--- Strategic Layer ----------------------------------------
 |    Research Analyst      Evidence research, PoC, tech radar
@@ -86,10 +86,10 @@ ReaperOAK (CTO / Elastic Multi-Worker Parallel Orchestrator)
      CI Reviewer           Complexity, lint, SARIF findings
 ```
 
-**ReaperOAK** is the singular orchestrator. It never writes code. It selects
+**Ticketer** is the singular orchestrator. It never writes code. It selects
 tickets, assigns workers from elastic pools, drives each ticket through its
 lifecycle, reacts to events, and enforces commits. All inter-agent
-communication routes through ReaperOAK — there is no direct agent-to-agent
+communication routes through Ticketer — there is no direct agent-to-agent
 messaging.
 
 ### Key Properties
@@ -157,7 +157,7 @@ controlled pivots without halting unaffected work.
 
 ### Event Queue
 
-An ordered log of all system events. ReaperOAK consumes events and routes
+An ordered log of all system events. Ticketer consumes events and routes
 them to the appropriate handler. Event types include TASK_STARTED,
 TASK_COMPLETED, TASK_FAILED, WORKER_SPAWNED, WORKER_TERMINATED,
 POOL_SCALED_UP, POOL_SCALED_DOWN, SDR_PROPOSED, SDR_APPROVED,
@@ -317,7 +317,7 @@ through the SDR (Strategic Decision Record) protocol.
 
 1. A strategic-layer agent (Research, Architect, Product Manager) identifies
    a necessary direction change and proposes an SDR.
-2. ReaperOAK evaluates the SDR. Scope expansions require operator approval.
+2. Ticketer evaluates the SDR. Scope expansions require operator approval.
    Priority reshuffling can be auto-approved.
 3. On approval, affected tickets are re-prioritized, new tickets are generated
    by the TODO Agent, and obsolete tickets are cancelled.
@@ -515,7 +515,7 @@ TODO/                      Task decomposition artifacts
 ## Example Execution Flow
 
 **Scenario:** 5 conflict-free READY tickets trigger elastic pool spawning.
-ReaperOAK launches 5 workers in parallel. One triggers a strategic review.
+Ticketer launches 5 workers in parallel. One triggers a strategic review.
 Only that ticket pauses. The others continue to completion.
 
 ```
@@ -547,7 +547,7 @@ T+20:00  BE-011 completes -> enters post-execution chain
          BE-011 -> DONE. Worker terminated.
 
 T+22:00  BE-010 triggers NEEDS_INPUT_FROM (Architect).
-         BE-010 pauses at BACKEND. ReaperOAK routes question.
+         BE-010 pauses at BACKEND. Ticketer routes question.
          All other tickets continue unaffected.
 
 T+25:00  FE-001 completes -> full chain -> DONE
@@ -677,7 +677,7 @@ It is a programmable engineering organization.
 
 ```bash
 # Clone the repository
-git clone https://github.com/ReaperOAK/ForgeOS.git
+git clone https://github.com/Ticketer/ForgeOS.git
 cd ForgeOS
 
 # One-command setup — checks prerequisites, installs deps, creates .env
@@ -697,12 +697,12 @@ The live Kanban dashboard is available at **http://localhost:3000/dashboard**.
 1. **MCP Connections.** Configure required MCP servers in your VS Code
    settings. At minimum: file system, terminal, and Git access.
 
-2. **Worker Pool Sizes.** Pool bounds are defined in the ReaperOAK agent
-   definition at `.github/agents/ReaperOAK.agent.md` (Section 7). Adjust
+2. **Worker Pool Sizes.** Pool bounds are defined in the Ticketer agent
+   definition at `.github/agents/Ticketer.agent.md` (Section 7). Adjust
    `minSize` and `maxSize` per role based on your workload profile.
 
 3. **Git Provider.** Ensure Git is configured for the target repository.
-  ReaperOAK enforces two-commit protocol per stage with explicit scoped staging.
+  Ticketer enforces two-commit protocol per stage with explicit scoped staging.
 
 4. **Optional Integrations.** Connect Stitch MCP for UI design, Playwright
    for E2E testing, Sentry for monitoring, MongoDB for data operations,
@@ -817,11 +817,11 @@ Coverage artifacts are uploaded with 7-day retention.
 
 ### Starting the Engine
 
-Invoke ReaperOAK in GitHub Copilot Agent Mode. The boot protocol
+Invoke Ticketer in GitHub Copilot Agent Mode. The boot protocol
 (`agents.md`) loads automatically, reads memory bank state, checks the
 guardian circuit breaker, and initializes the scheduling loop.
 
-From there, provide a project vision or feature request. ReaperOAK will:
+From there, provide a project vision or feature request. Ticketer will:
 
 1. Invoke the TODO Agent to decompose work into tickets
 2. Evaluate ticket dependencies and build the execution DAG

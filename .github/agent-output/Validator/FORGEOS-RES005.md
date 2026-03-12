@@ -1,7 +1,7 @@
 # FORGEOS-RES005 — Validation Report
 
 > **Agent:** Validator | **Stage:** VALIDATION | **Date:** 2026-03-06
-> **Verdict:** APPROVED | **Confidence:** HIGH | **Machine:** pop-os | **Operator:** reaperoak
+> **Verdict:** APPROVED | **Confidence:** HIGH | **Machine:** pop-os | **Operator:** Ticketer
 
 ## Ticket Summary
 

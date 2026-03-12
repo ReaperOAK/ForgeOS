@@ -1,6 +1,6 @@
 # FORGEOS-ARCH002 — Validation Report
 
-> **Agent:** Validator | **Machine:** pop-os | **Operator:** reaperoak
+> **Agent:** Validator | **Machine:** pop-os | **Operator:** Ticketer
 > **Ticket:** FORGEOS-ARCH002 — ADR: PostgreSQL as Primary State Store
 > **Stage:** VALIDATION → DONE | **Verdict:** APPROVED | **Confidence:** HIGH (95%)
 

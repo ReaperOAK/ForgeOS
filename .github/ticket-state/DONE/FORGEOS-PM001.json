@@ -1,7 +1,7 @@
 {
   "ticket_id": "FORGEOS-PM001",
   "title": "Define User Personas for Orchestration Platform",
-  "description": "Define the user personas for the ForgeOS distributed orchestration platform. Document 4 personas \u2014 Human Operator, AI Agent, ReaperOAK Dispatcher, and System Administrator \u2014 each with goals, constraints, interaction patterns, frequency of use, and pain points with the current filesystem-based system. These personas drive all subsequent user story and UX work.",
+  "description": "Define the user personas for the ForgeOS distributed orchestration platform. Document 4 personas \u2014 Human Operator, AI Agent, Ticketer Dispatcher, and System Administrator \u2014 each with goals, constraints, interaction patterns, frequency of use, and pain points with the current filesystem-based system. These personas drive all subsequent user story and UX work.",
   "type": "docs",
   "priority": "critical",
   "stage": "DONE",
@@ -23,7 +23,7 @@
   "acceptance_criteria": [
     "Human Operator persona defined: goals (manage tickets, monitor agents), constraints (CLI + dashboard), interaction frequency (daily)",
     "AI Agent persona defined: goals (claim work, report results), constraints (programmatic only, no UI), interaction frequency (continuous)",
-    "ReaperOAK Dispatcher persona defined: goals (dispatch agents, advance pipeline), constraints (stateless, no reasoning), interaction frequency (continuous)",
+    "Ticketer Dispatcher persona defined: goals (dispatch agents, advance pipeline), constraints (stateless, no reasoning), interaction frequency (continuous)",
     "System Administrator persona defined: goals (maintain platform, handle escalations), constraints (full access), interaction frequency (weekly)",
     "Each persona has documented pain points with the current filesystem-based system",
     "Interaction pattern diagrams showing how each persona uses the platform",
@@ -57,7 +57,7 @@
       "machine_id": "forgeos-dev",
       "from_stage": "READY",
       "to_stage": "READY",
-      "details": "Claimed by reaperoak@forgeos-dev via Documentation Specialist, lease until 2026-03-07T07:49:58.838412+00:00"
+      "details": "Claimed by Ticketer@forgeos-dev via Documentation Specialist, lease until 2026-03-07T07:49:58.838412+00:00"
     },
     {
       "timestamp": "2026-03-07T07:24:03.658007+00:00",

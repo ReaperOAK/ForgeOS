@@ -3,7 +3,7 @@
 ## Stage: QA
 ## Agent: QA Engineer
 ## Machine: pop-os
-## Operator: ReaperOAK
+## Operator: Ticketer
 ## Timestamp: 2026-03-07T13:59:00Z
 
 ## Verdict: PASS

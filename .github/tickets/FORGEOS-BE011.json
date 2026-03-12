@@ -60,7 +60,7 @@
       "event": "CLAIMED",
       "agent": "Backend",
       "machine_id": "pop-os",
-      "details": "Claimed by Backend on pop-os (reaperoak)"
+      "details": "Claimed by Backend on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-10T12:25:00+00:00",
@@ -74,7 +74,7 @@
       "event": "CLAIMED",
       "agent": "QA",
       "machine_id": "pop-os",
-      "details": "Claimed by QA on pop-os (reaperoak)"
+      "details": "Claimed by QA on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-10T12:40:08.802162+00:00",
@@ -99,7 +99,7 @@
       "event": "CLAIMED",
       "agent": "Security",
       "machine_id": "pop-os",
-      "details": "Claimed by Security on pop-os (reaperoak)"
+      "details": "Claimed by Security on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-10T23:55:00+00:00",
@@ -115,7 +115,7 @@
       "event": "CLAIMED",
       "agent": "Documentation",
       "machine_id": "pop-os",
-      "details": "Claimed by Documentation on pop-os (reaperoak)"
+      "details": "Claimed by Documentation on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-11T00:35:00+00:00",
@@ -131,7 +131,7 @@
       "event": "CLAIMED",
       "agent": "Validator",
       "machine_id": "pop-os",
-      "details": "Claimed by Validator on pop-os (reaperoak)"
+      "details": "Claimed by Validator on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-10T14:25:34.074298+00:00",

@@ -24,7 +24,7 @@ tags: [product, personas, phase1, BLK-03-01]
 1. [Overview](#1-overview)
 2. [Persona 1: Human Operator](#2-persona-1-human-operator)
 3. [Persona 2: AI Agent](#3-persona-2-ai-agent)
-4. [Persona 3: ReaperOAK Dispatcher](#4-persona-3-reaperoak-dispatcher)
+4. [Persona 3: Ticketer Dispatcher](#4-persona-3-Ticketer-dispatcher)
 5. [Persona 4: System Administrator](#5-persona-4-system-administrator)
 6. [Persona Comparison Matrix](#6-persona-comparison-matrix)
 7. [Interaction Pattern Diagrams](#7-interaction-pattern-diagrams)
@@ -40,7 +40,7 @@ ForgeOS is a distributed multi-agent orchestration platform that coordinates AI 
 |---------|------|-----------|-----------|
 | Human Operator | Manages tickets, monitors agents | Daily | CLI + Dashboard |
 | AI Agent | Claims work, executes tasks, reports results | Continuous | MCP JSON-RPC (programmatic) |
-| ReaperOAK Dispatcher | Dispatches agents, advances pipeline | Continuous | MCP JSON-RPC (automated) |
+| Ticketer Dispatcher | Dispatches agents, advances pipeline | Continuous | MCP JSON-RPC (automated) |
 | System Administrator | Maintains platform, handles escalations | Weekly | Full access (CLI + DB + Dashboard) |
 
 ---
@@ -148,15 +148,15 @@ ForgeOS is a distributed multi-agent orchestration platform that coordinates AI 
 
 ---
 
-## 4. Persona 3: ReaperOAK Dispatcher
+## 4. Persona 3: Ticketer Dispatcher
 
 ### 4.1 Profile
 
 | Attribute | Detail |
 |-----------|--------|
-| **Name** | ReaperOAK |
+| **Name** | Ticketer |
 | **Role** | Stateless dispatcher that orchestrates the multi-agent pipeline. Scans for READY tickets and dispatches the correct subagent for each one. |
-| **Technical skill** | N/A — ReaperOAK follows a fixed dispatch algorithm with zero reasoning |
+| **Technical skill** | N/A — Ticketer follows a fixed dispatch algorithm with zero reasoning |
 | **Interaction frequency** | Continuous (runs in a loop while tickets exist in READY state) |
 | **Primary interface** | Programmatic only — invokes subagents via CLI or MCP tool calls |
 
@@ -171,11 +171,11 @@ ForgeOS is a distributed multi-agent orchestration platform that coordinates AI 
 
 | Constraint | Detail |
 |------------|--------|
-| **Stateless** | ReaperOAK retains no state between dispatch cycles. Every cycle starts with a fresh scan of the READY directory. |
-| **No reasoning** | ReaperOAK does NOT analyze code, compute file overlap, calculate safe parallel sets, reason about dependencies, or optimize batching. |
-| **No implementation** | ReaperOAK does NOT write code, modify files, run tests, or implement any product features. |
-| **No context injection** | ReaperOAK does NOT inject context into subagents. Agents derive context from the filesystem independently. |
-| **Dispatch only** | ReaperOAK calls one subagent per READY ticket. No grouping logic. No dependency reasoning. No conflict analysis. |
+| **Stateless** | Ticketer retains no state between dispatch cycles. Every cycle starts with a fresh scan of the READY directory. |
+| **No reasoning** | Ticketer does NOT analyze code, compute file overlap, calculate safe parallel sets, reason about dependencies, or optimize batching. |
+| **No implementation** | Ticketer does NOT write code, modify files, run tests, or implement any product features. |
+| **No context injection** | Ticketer does NOT inject context into subagents. Agents derive context from the filesystem independently. |
+| **Dispatch only** | Ticketer calls one subagent per READY ticket. No grouping logic. No dependency reasoning. No conflict analysis. |
 | **Interface** | Invokes subagents programmatically. Does not use the dashboard or CLI for monitoring. |
 
 ### 4.4 Interaction Patterns
@@ -191,11 +191,11 @@ ForgeOS is a distributed multi-agent orchestration platform that coordinates AI 
 
 | Pain Point | Impact | Detail |
 |------------|--------|--------|
-| **Sequential dispatch** | High | ReaperOAK dispatches agents one at a time by scanning a filesystem directory. There is no event-driven trigger — it must poll the READY directory repeatedly. |
-| **No visibility into agent status** | High | Once a subagent is dispatched, ReaperOAK has no way to monitor its progress. It can only check whether the ticket has moved to a new stage directory after the agent finishes. |
+| **Sequential dispatch** | High | Ticketer dispatches agents one at a time by scanning a filesystem directory. There is no event-driven trigger — it must poll the READY directory repeatedly. |
+| **No visibility into agent status** | High | Once a subagent is dispatched, Ticketer has no way to monitor its progress. It can only check whether the ticket has moved to a new stage directory after the agent finishes. |
 | **Stale claim detection is slow** | Medium | Identifying expired claims requires reading every ticket JSON and comparing timestamps. In the filesystem model, there is no index or query — just sequential file reads. |
-| **No prioritization** | Medium | ReaperOAK dispatches tickets in directory listing order (alphabetical by filename). It does not sort by priority, age, or criticality. Critical tickets may wait behind low-priority ones. |
-| **No parallel safety** | High | Because ReaperOAK lacks file conflict analysis (by design), two agents dispatched simultaneously may attempt to modify the same files. The only safety net is `git push` conflict detection, which is late and expensive. |
+| **No prioritization** | Medium | Ticketer dispatches tickets in directory listing order (alphabetical by filename). It does not sort by priority, age, or criticality. Critical tickets may wait behind low-priority ones. |
+| **No parallel safety** | High | Because Ticketer lacks file conflict analysis (by design), two agents dispatched simultaneously may attempt to modify the same files. The only safety net is `git push` conflict detection, which is late and expensive. |
 | **Directory scanning overhead** | Low | Scanning 11 directories and parsing JSON files is adequate for small ticket counts (< 50) but does not scale to hundreds of active tickets. |
 
 ---
@@ -255,7 +255,7 @@ ForgeOS is a distributed multi-agent orchestration platform that coordinates AI 
 
 ## 6. Persona Comparison Matrix
 
-| Dimension | Human Operator | AI Agent | ReaperOAK Dispatcher | System Administrator |
+| Dimension | Human Operator | AI Agent | Ticketer Dispatcher | System Administrator |
 |-----------|---------------|----------|---------------------|---------------------|
 | **Goal** | Manage and monitor | Execute and report | Dispatch and advance | Maintain and recover |
 | **Interface** | CLI + Dashboard | MCP JSON-RPC | Programmatic dispatch | Full access (all interfaces) |
@@ -303,7 +303,7 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A[Agent invoked by ReaperOAK] --> B[Read STOP_ALL]
+    A[Agent invoked by Ticketer] --> B[Read STOP_ALL]
     B -->|STOP| C[Halt immediately]
     B -->|Clear| D[Read instruction files]
 
@@ -334,11 +334,11 @@ flowchart TD
     style S fill:#4CAF50,color:#fff
 ```
 
-### 7.3 ReaperOAK Dispatch Loop
+### 7.3 Ticketer Dispatch Loop
 
 ```mermaid
 flowchart TD
-    A[ReaperOAK starts] --> B[Scan ticket-state/READY/]
+    A[Ticketer starts] --> B[Scan ticket-state/READY/]
     B --> C{Any unclaimed tickets?}
 
     C -->|No| D[Terminate — pipeline idle]
@@ -402,7 +402,7 @@ flowchart TD
 ```mermaid
 sequenceDiagram
     participant Op as Human Operator
-    participant Oak as ReaperOAK
+    participant Oak as Ticketer
     participant Agent as AI Agent
     participant Admin as System Admin
 
@@ -445,20 +445,20 @@ This section aggregates pain points across all personas, ranked by severity and 
 
 | Rank | Pain Point | Affected Personas | Severity | Root Cause |
 |------|-----------|-------------------|----------|------------|
-| 1 | **Git push contention** | AI Agent, ReaperOAK | Critical | Two-commit protocol uses git push as distributed lock. Concurrent agents collide frequently. |
+| 1 | **Git push contention** | AI Agent, Ticketer | Critical | Two-commit protocol uses git push as distributed lock. Concurrent agents collide frequently. |
 | 2 | **No real-time updates** | Human Operator, System Admin | High | Dashboard is static HTML. No SSE, no polling, no live data. |
 | 3 | **No centralized logging** | System Admin | High | Logs spread across terminal output, git history, and markdown files. |
 | 4 | **No atomic operations** | AI Agent | High | Gap between CLAIM and WORK commits creates orphan risk. |
-| 5 | **No file conflict detection** | AI Agent, ReaperOAK | High | No mutex prevents two agents from editing the same file. |
-| 6 | **No visibility into agent status** | ReaperOAK, Human Operator | High | No progress reporting between CLAIM and completion. |
+| 5 | **No file conflict detection** | AI Agent, Ticketer | High | No mutex prevents two agents from editing the same file. |
+| 6 | **No visibility into agent status** | Ticketer, Human Operator | High | No progress reporting between CLAIM and completion. |
 | 7 | **Git state fragility** | System Admin, Human Operator | High | Misconfigured git staging can corrupt ticket state. |
-| 8 | **Sequential dispatch** | ReaperOAK | High | Directory polling is the only trigger mechanism. No event-driven dispatch. |
+| 8 | **Sequential dispatch** | Ticketer | High | Directory polling is the only trigger mechanism. No event-driven dispatch. |
 | 9 | **Manual sync required** | Human Operator | Medium | Dependency resolution requires explicit `tickets.py --sync` invocation. |
 | 10 | **Hardcoded configuration** | System Admin | Medium | Lease duration, max reworks, and SDLC flows require code changes to modify. |
 | 11 | **No role-based access control** | Human Operator, System Admin | Medium | Any git write access grants full ticket manipulation capability. |
 | 12 | **Mixed code and state in git** | System Admin | Medium | Ticket state commits pollute git history alongside product code. |
 | 13 | **Scattered state** | Human Operator | Medium | Ticket data, agent output, and memory bank are in separate directory trees. |
-| 14 | **File scanning overhead** | AI Agent, ReaperOAK | Medium | Directory traversal and JSON parsing does not scale beyond ~50 active tickets. |
+| 14 | **File scanning overhead** | AI Agent, Ticketer | Medium | Directory traversal and JSON parsing does not scale beyond ~50 active tickets. |
 | 15 | **Limited error feedback** | AI Agent | Medium | String error messages are not machine-parseable. No structured error codes. |
 | 16 | **No health monitoring** | System Admin | High | No endpoint, heartbeat, or alerting mechanism in the filesystem-based system. |
 
@@ -473,7 +473,7 @@ This section aggregates pain points across all personas, ranked by severity and 
 | No file conflict detection | `file_locks` table with partial unique index prevents two agents from claiming overlapping files. |
 | No visibility into agents | `sessions` table and `agents` table track active connections and current claims. SSE broadcasts status changes. |
 | Git state fragility | Ticket state lives in PostgreSQL, not in git-tracked JSON files. State is protected by ACID transactions. |
-| Sequential dispatch | `pg_notify` enables event-driven dispatch. ReaperOAK can listen for READY events instead of polling directories. |
+| Sequential dispatch | `pg_notify` enables event-driven dispatch. Ticketer can listen for READY events instead of polling directories. |
 | Manual sync required | `resolve_dependencies()` SQL function auto-fires when any ticket reaches DONE. No manual sync needed. |
 | Hardcoded configuration | `system_config` table allows runtime updates to lease duration, max reworks, and rate limits. |
 | No RBAC | `agents` table with `role` field + RLS policies enforce role-based access at the database level. |

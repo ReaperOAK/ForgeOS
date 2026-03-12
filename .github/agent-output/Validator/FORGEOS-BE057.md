@@ -42,7 +42,7 @@
 | 6 | Required reason field | ✅ | `_parse_reason()` validates non-empty string; returns 400 on missing/blank |
 
 ## Protocol Compliance
-- Git history shows CLAIM commits by ReaperOAK and WORK commits by respective agents for all stages
+- Git history shows CLAIM commits by Ticketer and WORK commits by respective agents for all stages
 - No `git add .` detected in commit history
 - Summary handoff chain followed: Backend → QA → Security → CI → Docs → Validation
 

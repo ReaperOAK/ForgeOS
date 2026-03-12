@@ -9,7 +9,7 @@
 |---|-----------|--------|----------|
 | 1 | Human Operator persona: goals (manage tickets, monitor agents), constraints (CLI + dashboard), frequency (daily) | PASS | Section 2: 5 goals, constraints table (CLI + dashboard), frequency "Daily" |
 | 2 | AI Agent persona: goals (claim work, report results), constraints (programmatic only, no UI), frequency (continuous) | PASS | Section 3: 5 goals, constraints "Programmatic MCP tool calls only. No UI", frequency "Continuous" |
-| 3 | ReaperOAK Dispatcher persona: goals (dispatch agents, advance pipeline), constraints (stateless, no reasoning), frequency (continuous) | PASS | Section 4: 4 goals, constraints "Stateless" + "No reasoning", frequency "Continuous" |
+| 3 | Ticketer Dispatcher persona: goals (dispatch agents, advance pipeline), constraints (stateless, no reasoning), frequency (continuous) | PASS | Section 4: 4 goals, constraints "Stateless" + "No reasoning", frequency "Continuous" |
 | 4 | System Administrator persona: goals (maintain platform, handle escalations), constraints (full access), frequency (weekly) | PASS | Section 5: 6 goals, constraints "Full access", frequency "Weekly + on-demand" |
 | 5 | Pain points with filesystem-based system documented per persona | PASS | Sections 2.5, 3.5, 4.5, 5.5 each have 5–7 pain points. Section 8 aggregates 16 ranked pain points with distributed platform solutions. |
 | 6 | Interaction pattern diagrams | PASS | Section 7: 5 Mermaid diagrams (7.1–7.5) covering all four personas plus cross-persona interaction |

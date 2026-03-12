@@ -2078,12 +2078,12 @@ function initClaimsMonitor() {
 
 function loadDemoClaimsData() {
   state.claims.data = [
-    { ticket: 'FORGEOS-BE001', agent: 'Backend', machine: 'pop-os', operator: 'reaperoak', leaseRemaining: 1620 },
-    { ticket: 'FORGEOS-BE003', agent: 'Backend', machine: 'dev-server', operator: 'reaperoak', leaseRemaining: 420 },
-    { ticket: 'FORGEOS-UID004', agent: 'Frontend', machine: 'pop-os', operator: 'reaperoak', leaseRemaining: 1740 },
+    { ticket: 'FORGEOS-BE001', agent: 'Backend', machine: 'pop-os', operator: 'Ticketer', leaseRemaining: 1620 },
+    { ticket: 'FORGEOS-BE003', agent: 'Backend', machine: 'dev-server', operator: 'Ticketer', leaseRemaining: 420 },
+    { ticket: 'FORGEOS-UID004', agent: 'Frontend', machine: 'pop-os', operator: 'Ticketer', leaseRemaining: 1740 },
     { ticket: 'FORGEOS-QA002', agent: 'QA', machine: 'ci-runner-01', operator: 'alice', leaseRemaining: 45 },
     { ticket: 'FORGEOS-SEC001', agent: 'Security', machine: 'sec-box', operator: 'bob', leaseRemaining: 0 },
-    { ticket: 'FORGEOS-DO005', agent: 'Documentation', machine: 'pop-os', operator: 'reaperoak', leaseRemaining: 890 },
+    { ticket: 'FORGEOS-DO005', agent: 'Documentation', machine: 'pop-os', operator: 'Ticketer', leaseRemaining: 890 },
   ];
   renderClaims();
 }

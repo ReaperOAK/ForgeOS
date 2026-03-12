@@ -25,7 +25,7 @@ LABEL maintainer="ForgeOS DevOps <devops@forgeos.local>"
 LABEL org.opencontainers.image.title="ForgeOS PostgreSQL"
 LABEL org.opencontainers.image.description="PostgreSQL 17 Alpine with ForgeOS init scripts"
 LABEL org.opencontainers.image.version="17.0"
-LABEL org.opencontainers.image.source="https://github.com/ReaperOAK/ForgeOS"
+LABEL org.opencontainers.image.source="https://github.com/Ticketer/ForgeOS"
 
 # ---------------------------------------------------------------------------
 # Install health check script

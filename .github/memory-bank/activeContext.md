@@ -1297,7 +1297,7 @@
 
 ### [FORGEOS-PM001] — Documentation Summary
 - **Artifacts:** docs/product/user-personas.md
-- **Decisions:** Created user personas document with 4 personas (Human Operator, AI Agent, ReaperOAK Dispatcher, System Administrator). Used Reference quadrant (Diátaxis). Included 5 Mermaid interaction diagrams and 16 ranked pain points with distributed platform solutions. Context derived from system-gap-analysis.md (FORGEOS-RES009) and system-components.md (FORGEOS-ARCH001).
+- **Decisions:** Created user personas document with 4 personas (Human Operator, AI Agent, Ticketer Dispatcher, System Administrator). Used Reference quadrant (Diátaxis). Included 5 Mermaid interaction diagrams and 16 ranked pain points with distributed platform solutions. Context derived from system-gap-analysis.md (FORGEOS-RES009) and system-components.md (FORGEOS-ARCH001).
 - **Timestamp:** 2026-03-07T07:30:00Z
 
 ### [TASK-FOS-08-002] — Docker Compose Infra
@@ -1336,12 +1336,12 @@ compaction_threshold: 50
 
 > **Schema Version:** 1.0
 > **Owner:** Shared
-> **Write Access:** All subagents may APPEND entries. ReaperOAK may also edit.
+> **Write Access:** All subagents may APPEND entries. Ticketer may also edit.
 > **Lock Rules:** Subagents may only append timestamped entries. They may NOT
-> delete, modify, or overwrite existing entries. Only ReaperOAK may archive or
+> delete, modify, or overwrite existing entries. Only Ticketer may archive or
 > compact old entries.
 > **Update Protocol:** Append new entry with timestamp, agent name, and content.
-> Entries older than 50 items may be archived by ReaperOAK to
+> Entries older than 50 items may be archived by Ticketer to
 > `activeContext.archive.md`.
 
 ---
@@ -1350,7 +1350,7 @@ compaction_threshold: 50
 
 <!-- What is the system currently working on? Updated per-session. -->
 
-### [2026-02-28T00:00:00Z] ReaperOAK — Session 14
+### [2026-02-28T00:00:00Z] Ticketer — Session 14
 
 - **Focus:** Worker-Pool Adaptive Engine v8.0.0 — complete architecture upgrade
 - **Status:** COMPLETE — all core files rewritten/updated
@@ -1362,13 +1362,13 @@ compaction_threshold: 50
 - **Status:** Claude Code fully configured alongside GitHub Copilot
 - **Next Steps:** Test hooks and slash commands, begin project work
 
-### [2026-02-21T00:00:00Z] ReaperOAK
+### [2026-02-21T00:00:00Z] Ticketer
 
 - **Focus:** Initial vibecoding system setup
 - **Status:** Building multi-agent infrastructure
 - **Next Steps:** Generate subagent files, create orchestration rules
 
-### [2025-07-26T00:00:00Z] ReaperOAK
+### [2025-07-26T00:00:00Z] Ticketer
 
 - **Focus:** TODO Agent & Execution Governance — fix two architectural flaws
 - **Status:** Complete — all changes validated, fix loop resolved
@@ -1382,7 +1382,7 @@ compaction_threshold: 50
 
 ### [2026-02-28T00:00:00Z] Worker-Pool Adaptive Engine v8.0.0
 
-- **ReaperOAK.agent.md** — COMPLETE REWRITE (811→1077 lines). 20 sections. Worker pool model, two-layer orchestration, continuous scheduling, SDR protocol, updated 9-state machine (READY→LOCKED→IMPLEMENTING→QA_REVIEW→VALIDATION→DOCUMENTATION→CI_REVIEW→COMMIT→DONE), event-driven loop, conflict detection (5 types), two worked examples.
+- **Ticketer.agent.md** — COMPLETE REWRITE (811→1077 lines). 20 sections. Worker pool model, two-layer orchestration, continuous scheduling, SDR protocol, updated 9-state machine (READY→LOCKED→IMPLEMENTING→QA_REVIEW→VALIDATION→DOCUMENTATION→CI_REVIEW→COMMIT→DONE), event-driven loop, conflict detection (5 types), two worked examples.
 - **ARCHITECTURE.instructions.md** — COMPLETE REWRITE (1194→1728 lines, 32 sections). Version v8.0.0. Added §30 Two-Layer Orchestration Model, §31 Strategic Layer & SDR Protocol. All sections updated with worker pool model, continuous scheduling, SDR references.
 - **agents.md** — Updated (191→233 lines). Worker Pool Model, Two-Layer Orchestration, Strategy Evolution paragraphs added. TODO Agent SDR restriction noted.
 - **_cross-cutting-protocols.md** — Updated (209→241 lines). §8.1 Worker Pool Events (4 types), §10 Strategic Event Types (6 types) added.
@@ -1395,7 +1395,7 @@ compaction_threshold: 50
 ### [2026-02-23T00:00:00Z] Claude Code
 
 - Created `CLAUDE.md` — primary Claude Code instruction file (equivalent to
-  ReaperOAK.agent.md for Claude Code)
+  Ticketer.agent.md for Claude Code)
 - Created `.claude/settings.json` — hooks configuration for governance audit,
   prompt logging, and session tracking
 - Created `.claude/hooks/` — 3 hook scripts adapted from Copilot hooks:
@@ -1404,7 +1404,7 @@ compaction_threshold: 50
   memory-bank-update, review, plan, security-audit, debug
 - System now supports both GitHub Copilot and Claude Code as vibecoding agents
 
-### [2026-02-21T00:00:00Z] ReaperOAK
+### [2026-02-21T00:00:00Z] Ticketer
 
 - Created `.github/instructions/ARCHITECTURE.instructions.md` — full system architecture
 - Created `.github/memory-bank/` — persistent state system
@@ -1456,7 +1456,7 @@ compaction_threshold: 50
 - **Context bloat diagnosed:** agent files were 585-1,052 lines each, consuming
   too much context window, preventing delegation behavior
 - **All 12 agent files slimmed** (total: 7,787 → 826 lines, ~89% reduction):
-  - ReaperOAK: 1,052 → 84 lines
+  - Ticketer: 1,052 → 84 lines
   - Architect: 666 → 61 | Backend: 711 → 68 | Frontend: 716 → 64
   - QA: 774 → 66 | Security: 769 → 65 | DevOps: 780 → 69
   - Documentation: 807 → 68 | Research: 704 → 68 | ProductManager: 585 → 67
@@ -1467,30 +1467,30 @@ compaction_threshold: 50
 
 ### [2026-02-25] Session 6 — Force Delegation
 
-- ReaperOAK still self-implementing instead of delegating — root cause: agent
+- Ticketer still self-implementing instead of delegating — root cause: agent
   file said "Self-execute quick tasks (< 5 min)" which the model used as escape
   hatch to do everything itself
-- Rewrote ReaperOAK.agent.md (84 → 102 lines) with CARDINAL RULE section:
+- Rewrote Ticketer.agent.md (84 → 102 lines) with CARDINAL RULE section:
   "YOU DO NOT IMPLEMENT" — zero self-implementation, mandatory parallel
   delegation via `runSubagent`
-- Explicit whitelist of what ReaperOAK MAY do (read files, memory bank, git
+- Explicit whitelist of what Ticketer MAY do (read files, memory bank, git
   status) vs what it MUST delegate (all code, tests, docs, architecture, etc.)
 - Added delegation workflow: Read → Plan → Delegate (parallel) → Validate →
   Report
-- Reinforced in `agents.md` boot file: "ReaperOAK is a PURE ORCHESTRATOR"
+- Reinforced in `agents.md` boot file: "Ticketer is a PURE ORCHESTRATOR"
 
 ### [2026-02-26] Session 7 — Cross-Agent Communication
 
-- Tested Kanban build: ReaperOAK successfully delegated to 4 agents in parallel
+- Tested Kanban build: Ticketer successfully delegated to 4 agents in parallel
   but (a) did all the thinking itself (architecture, API contracts, DB schema)
   instead of letting Architect do it, (b) agents couldn't see each other's
   output — Backend didn't read Architect's contracts, QA didn't read Backend's code
 - **Root cause:** No dependency model — all agents launched flat in parallel with
-  specs baked into the prompt by ReaperOAK, bypassing domain expertise
+  specs baked into the prompt by Ticketer, bypassing domain expertise
 - **Fix: Phased Delegation with File-Based Handoff**
-  - ReaperOAK now uses dependency phases (SPEC → BUILD → VALIDATE → DOCUMENT)
+  - Ticketer now uses dependency phases (SPEC → BUILD → VALIDATE → DOCUMENT)
   - Within each phase: all agents run in parallel (no cap)
-  - Between phases: ReaperOAK validates, then launches next phase
+  - Between phases: Ticketer validates, then launches next phase
   - Each phase's files on disk become the next phase's input
   - Delegation prompt template now includes "Upstream artifacts" field
 - All 10 subagent MANDATORY FIRST STEPS updated: step 3 = "Read upstream
@@ -1498,7 +1498,7 @@ compaction_threshold: 50
 - Cross-cutting protocols: added §6 "Cross-Agent Communication (File-Based
   Handoff)" — agents must read upstream, align with prior contracts, write
   clean deliverables, and stop+report if upstream is missing
-- **Next:** Fresh ReaperOAK session, re-test with Kanban prompt — expect phased
+- **Next:** Fresh Ticketer session, re-test with Kanban prompt — expect phased
   execution with Architect/PM first, then Backend/Frontend/DevOps, then QA/Security
 
 ## Session 8 — Self-Improving System Migration (2025-07-25)
@@ -1511,7 +1511,7 @@ compaction_threshold: 50
 1. **Shared Context Layer** — Created workflow-state.json, artifacts-manifest.json, feedback-log.md in memory bank
 2. **UIDesigner Agent** — New agent with Google Stitch integration, Playwright visual validation, component specs
 3. **Self-Improvement System** — Proposals directory, RETROSPECTIVE phase, auto-reject rules
-4. **ReaperOAK Upgrade** — 6-phase SDLC (added RETROSPECTIVE), state management obligations, proposal handling
+4. **Ticketer Upgrade** — 6-phase SDLC (added RETROSPECTIVE), state management obligations, proposal handling
 5. **Schema Extensions** — Delegation packet: phase, upstream_artifacts, mcp_grants, fix_loop_context, output_contract fields
 6. **Architecture Update** — ARCHITECTURE.instructions.md v4.0.0 with UIDesigner, shared context layer, §18 self-improvement
 7. **Catalog + ACL** — UIDesigner entries in catalog.yml, tool-acl.yaml, design: tag
@@ -1532,7 +1532,7 @@ compaction_threshold: 50
 - `.github/memory-bank/feedback-log.md`
 
 ### Files Modified (7)
-- `.github/agents/ReaperOAK.agent.md` — RETROSPECTIVE, UIDesigner, state mgmt, proposals
+- `.github/agents/Ticketer.agent.md` — RETROSPECTIVE, UIDesigner, state mgmt, proposals
 - `.github/vibecoding/catalog.yml` — UIDesigner + design tag
 - `.github/sandbox/tool-acl.yaml` — UIDesigner section
 - `.github/tasks/delegation-packet-schema.json` — UIDesigner + 5 new fields
@@ -1553,7 +1553,7 @@ compaction_threshold: 50
 
 ### Changes Made
 1. **TODO Agent** — New agent (13th) for granular task decomposition, L2 autonomy, constrained terminal access
-2. **DECOMPOSE Phase** — New Phase 0 in SDLC: ReaperOAK delegates to TODO Agent before SPEC
+2. **DECOMPOSE Phase** — New Phase 0 in SDLC: Ticketer delegates to TODO Agent before SPEC
 3. **UI/UX Gate** — Mandatory check between DECOMPOSE and SPEC, keyword detection, requires UIDesigner tasks for UI work
 4. **TODO-Driven Delegation** — Max 3 tasks/cycle (5 for SPEC), task-driven delegation with specific IDs
 5. **Loop Detection** — 4 new signals: TODO stall, zero-progress cycle, blocked dependency chain, max-task-per-cycle violation
@@ -1574,7 +1574,7 @@ compaction_threshold: 50
 - `docs/architecture/todo-execution-governance.md` (1,374 lines) — design spec
 
 ### Files Modified (7)
-- `.github/agents/ReaperOAK.agent.md` — DECOMPOSE, UI/UX Gate, TODO-Driven Delegation
+- `.github/agents/Ticketer.agent.md` — DECOMPOSE, UI/UX Gate, TODO-Driven Delegation
 - `.github/tasks/delegation-packet-schema.json` — TODO agent, DECOMPOSE phase, todo_task_id
 - `.github/guardian/loop-detection-rules.md` — 4 new signals
 - `.github/vibecoding/catalog.yml` — TODO chunks under agent: and general: tags
@@ -1588,7 +1588,7 @@ compaction_threshold: 50
 
 ---
 
-### [2026-02-26T00:00:00Z] ReaperOAK — Session 10
+### [2026-02-26T00:00:00Z] Ticketer — Session 10
 
 - **Focus:** SDLC Enforcement Upgrade — production-grade task lifecycle
 - **Status:** COMPLETE
@@ -1626,7 +1626,7 @@ compaction_threshold: 50
 
 ### Files Modified (9)
 - `.github/instructions/ARCHITECTURE.instructions.md` — v4.1.0 → v5.0.0 (Validator, SDLC, DoD, init, gates, governance)
-- `.github/agents/ReaperOAK.agent.md` — Task-Level SDLC Loop, Validator in tables
+- `.github/agents/Ticketer.agent.md` — Task-Level SDLC Loop, Validator in tables
 - `.github/tasks/delegation-packet-schema.json` — Validator enum, sdlc_stage, dod_checklist, initialization_checklist
 - `.github/guardian/loop-detection-rules.md` — 5 new detection signals
 - `.github/vibecoding/catalog.yml` — validation: and sdlc-enforcement: tags
@@ -1640,11 +1640,11 @@ compaction_threshold: 50
 ### [2026-02-27T00:00:00Z] Ticket-Driven Event-Based Engine (Session 13)
 
 - **Focus:** Complete orchestration model replacement — phase-based → ticket-driven
-- **Agent:** ReaperOAK
+- **Agent:** Ticketer
 - **Scope:** TDSA-BE001 through TDSA-DOC001 (7 tasks, all DONE)
 
 ### Key Changes
-- **ReaperOAK.agent.md** — COMPLETE REWRITE (833→810 lines). 20 sections. Ticket-driven event loop replaces phased model. 9-state machine: BACKLOG → READY → LOCKED → IMPLEMENTING → REVIEW → VALIDATED → DOCUMENTED → COMMITTED → DONE. Mandatory per-ticket post-execution chain: QA → Validator → Doc → CI Reviewer → Commit. Event emission protocol (9 types). Anti-one-shot guardrails. Commit enforcement per ticket.
+- **Ticketer.agent.md** — COMPLETE REWRITE (833→810 lines). 20 sections. Ticket-driven event loop replaces phased model. 9-state machine: BACKLOG → READY → LOCKED → IMPLEMENTING → REVIEW → VALIDATED → DOCUMENTED → COMMITTED → DONE. Mandatory per-ticket post-execution chain: QA → Validator → Doc → CI Reviewer → Commit. Event emission protocol (9 types). Anti-one-shot guardrails. Commit enforcement per ticket.
 - **TODO.agent.md** — Updated (133→175 lines). Ticket Compatibility section added. L3 tasks = tickets entering BACKLOG. 9-state backward compat mapping.
 - **_cross-cutting-protocols.md** — Updated (102→209 lines). Section 8: Event Emission Protocol (9 event types, structured payloads). Section 9: Anti-One-Shot Guardrails (scope enforcement, 2-pass minimum, anti-batch detection).
 - **agents.md** — Updated (200→191 lines). Boot protocol references ticket-driven event loop, 9-state machine, post-execution chain, event emission §8, anti-one-shot §9.
@@ -1666,20 +1666,20 @@ compaction_threshold: 50
 ### [2026-02-28T12:00:00Z] Elastic Multi-Worker Parallel Execution Engine v8.1.0 (Session 14 continued)
 
 - **Focus:** Elastic auto-scaling pools, dynamic worker IDs, parallel dispatch
-- **Agent:** ReaperOAK (orchestrator), Backend workers (implementers)
+- **Agent:** Ticketer (orchestrator), Backend workers (implementers)
 - **Scope:** EWPE-BE001 through EWPE-BE003 (3 tasks, all DONE)
 - **DAG:** BE001 → (BE002 || BE003) — parallel execution after critical path
 
 ### Key Changes
-- **ReaperOAK.agent.md** — Updated (1077→1453 lines, v8.0.0→v8.1.0). §7 elastic pool registry with minSize/maxSize/scalingPolicy, dynamic worker IDs `{Role}Worker-{shortUuid}`, Worker Instance Schema, 5-state Worker Lifecycle, One-Ticket-One-Worker Rule. §9 auto-scaling + parallel dispatch. §10 6th conflict type (mutual exclusion). §13 4 new scaling events. §15 worker termination on multi-ticket violation. §20-§22 elastic examples.
+- **Ticketer.agent.md** — Updated (1077→1453 lines, v8.0.0→v8.1.0). §7 elastic pool registry with minSize/maxSize/scalingPolicy, dynamic worker IDs `{Role}Worker-{shortUuid}`, Worker Instance Schema, 5-state Worker Lifecycle, One-Ticket-One-Worker Rule. §9 auto-scaling + parallel dispatch. §10 6th conflict type (mutual exclusion). §13 4 new scaling events. §15 worker termination on multi-ticket violation. §20-§22 elastic examples.
 - **ARCHITECTURE.instructions.md** — Updated (1728→1960 lines, v8.0.0→v8.1.0). §2 elastic pool table. §5 3-phase scheduling. §6.8 dynamic lock IDs. §8 4 new elastic events (16 total routing entries). §11 full elastic pool rewrite. §32 dynamic worker ID examples.
 - **agents.md** — Updated (233→238 lines). Worker Pool Model paragraph rewritten with elastic pools, dynamic worker IDs, parallel dispatch.
 - **_cross-cutting-protocols.md** — Updated (241→245 lines). §8.1 now 6 events including WORKER_SPAWNED, WORKER_TERMINATED, POOL_SCALED_UP, POOL_SCALED_DOWN.
 
 ### Verification Results
 - 0 static worker IDs across all 4 files
-- Dynamic worker ID refs: ReaperOAK=93, ARCHITECTURE=54, agents=2, _cross-cutting=1
-- Elastic event refs: ReaperOAK=42, ARCHITECTURE=30, _cross-cutting=4
+- Dynamic worker ID refs: Ticketer=93, ARCHITECTURE=54, agents=2, _cross-cutting=1
+- Elastic event refs: Ticketer=42, ARCHITECTURE=30, _cross-cutting=4
 - Both canonical files confirmed at v8.1.0
 
 ### What to Do Next
@@ -1707,7 +1707,7 @@ Implementing OIP v1.0.0 — 7-part protocol upgrade from v8.1.0 to v8.2.0:
 
 ### Changes Made
 
-**ReaperOAK.agent.md** — v8.1.0→v8.2.0 (1454→1863 lines, +409). Added §19-§26 (OIP core). Renumbered §19-§22→§27-§30. ComplianceWorker pool in §7. PROTOCOL_VIOLATION + REPAIR_COMPLETED events in §13. Health Sweep in §9 scheduling loop.
+**Ticketer.agent.md** — v8.1.0→v8.2.0 (1454→1863 lines, +409). Added §19-§26 (OIP core). Renumbered §19-§22→§27-§30. ComplianceWorker pool in §7. PROTOCOL_VIOLATION + REPAIR_COMPLETED events in §13. Health Sweep in §9 scheduling loop.
 
 **ARCHITECTURE.instructions.md** — v8.1.0→v8.2.0 (1961→2092 lines, +131). §33 OIP overview (6 subsections). §5.1 health sweep in scheduling loop. §8.1 two new events. §8.3 two routing entries. §10.4 scoped git. §15.2 memory gate.
 
@@ -1715,8 +1715,8 @@ Implementing OIP v1.0.0 — 7-part protocol upgrade from v8.1.0 to v8.2.0:
 
 **agents.md** — (238→292 lines, +54). §6 OIP memory enforcement. §9 OIP reference section (scoped git, memory gate, single-ticket, evidence, ComplianceWorker, health sweep).
 
-### OIP-ARCH-001 — ReaperOAK.agent.md OIP Core
-- **Artifacts:** .github/agents/ReaperOAK.agent.md
+### OIP-ARCH-001 — Ticketer.agent.md OIP Core
+- **Artifacts:** .github/agents/Ticketer.agent.md
 - **Decisions:** OIP sections §19-§26 placed before worked examples; ComplianceWorker added as new pool role
 - **Timestamp:** 2026-03-01T00:00:00Z
 
@@ -1749,7 +1749,7 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 
 ### SH-001 — Governance Policy Files
 - **Artifacts:** .github/governance/lifecycle.md, worker_policy.md, commit_policy.md, memory_policy.md, ui_policy.md, security_policy.md, event_protocol.md, context_injection.md, performance_monitoring.md
-- **Decisions:** 9 policy files extracted from ReaperOAK §§, each under 250-line limit
+- **Decisions:** 9 policy files extracted from Ticketer §§, each under 250-line limit
 - **Timestamp:** 2026-03-01T02:00:00Z
 
 ### SH-002 — Core Governance Authority
@@ -1757,8 +1757,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** Canonical authority file indexes all governance policies; version tracking in governance files only (NOT agent frontmatter)
 - **Timestamp:** 2026-03-01T02:10:00Z
 
-### SH-003 — ReaperOAK Transformation
-- **Artifacts:** .github/agents/ReaperOAK.agent.md
+### SH-003 — Ticketer Transformation
+- **Artifacts:** .github/agents/Ticketer.agent.md
 - **Decisions:** Rewritten from scratch: 1864→723 lines (61% reduction), 24 sections, zero maxSize/minSize, governance references replace inline policy
 - **Timestamp:** 2026-03-01T02:20:00Z
 
@@ -1783,18 +1783,18 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Timestamp:** 2026-03-01T03:00:00Z
 
 ### What to Do Next
-- Rechunk ReaperOAK.agent.md (was 3 chunks for 1864 lines, now 821 lines — may need 2)
+- Rechunk Ticketer.agent.md (was 3 chunks for 1864 lines, now 821 lines — may need 2)
 - Update ARCHITECTURE.instructions.md chunks if stale
 - Verify all agent chunk files still align with new governance references
 - Run full system test with real ticket execution
-- Consider adding OIP worked example (§31) to ReaperOAK.agent.md
+- Consider adding OIP worked example (§31) to Ticketer.agent.md
 
 ---
 
 ## Session 17 — Operational Concurrency Floor (OCF) v9.1.0
 
-### OCF-001 — ReaperOAK Scheduler OCF
-- **Artifacts:** .github/agents/ReaperOAK.agent.md
+### OCF-001 — Ticketer Scheduler OCF
+- **Artifacts:** .github/agents/Ticketer.agent.md
 - **Decisions:** Added §25 OCF specification (background ticket taxonomy, preemption, throttle, anti-recursion). Updated §6 scheduling loop with CONCURRENCY FLOOR PHASE between AUTO-SCALE and ASSIGNMENT. MIN_ACTIVE_WORKERS=10. Two work classes: Class A (primary) and Class B (background). 10 background ticket types. Version bumped to v9.1.0.
 - **Timestamp:** 2026-03-01T04:00:00Z
 
@@ -1804,7 +1804,7 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Timestamp:** 2026-03-01T04:00:00Z
 
 ### What to Do Next
-- Rechunk ReaperOAK.agent.md (now 821 lines with §25 OCF)
+- Rechunk Ticketer.agent.md (now 821 lines with §25 OCF)
 - Update ARCHITECTURE.instructions.md chunks (now 2227 lines with §34 OCF)
 - Test OCF scheduling loop with mixed Class A/B ticket scenarios
 - Verify preemption behavior under load

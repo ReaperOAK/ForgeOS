@@ -1,19 +1,19 @@
 ---
 id: product-context
 version: "1.0"
-owner: [ReaperOAK, ProductManager]
-write_access: [ReaperOAK, ProductManager]
+owner: [Ticketer, ProductManager]
+write_access: [Ticketer, ProductManager]
 append_only: false
 ---
 
 # Product Context
 
 > **Schema Version:** 1.0
-> **Owner:** ReaperOAK, ProductManager
-> **Write Access:** ReaperOAK, ProductManager
+> **Owner:** Ticketer, ProductManager
+> **Write Access:** Ticketer, ProductManager
 > **Lock Rules:** Other subagents may read but NEVER modify this file.
 > **Update Protocol:** Append new sections with timestamp. Never delete existing
-> entries. Major milestone changes require ReaperOAK approval.
+> entries. Major milestone changes require Ticketer approval.
 
 ---
 
@@ -23,7 +23,7 @@ append_only: false
 
 ### [2026-02-21] Initial Creation
 
-- **Updated by:** ReaperOAK
+- **Updated by:** Ticketer
 - **Change:** Initial memory bank creation
 
 ---

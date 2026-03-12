@@ -63,7 +63,7 @@ function makeTicket(overrides: Partial<Ticket> = {}): Ticket {
         claimed_by: 'agent-uuid',
         claimed_by_name: 'Backend',
         machine_id: 'pop-os',
-        operator: 'reaperoak',
+        operator: 'Ticketer',
         lease_expiry: new Date(fiveMinutesAgo.getTime() + 30 * 60_000).toISOString(),
         lease_duration_minutes: 30,
         depends_on: [],

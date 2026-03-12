@@ -45,14 +45,14 @@ function makePushEvent(
     before: '0000000000000000000000000000000000000000',
     after: 'abc123def456789012345678901234567890abcd',
     repository: {
-      full_name: 'reaperoak/ForgeOS',
+      full_name: 'Ticketer/ForgeOS',
       name: 'ForgeOS',
-      html_url: 'https://github.com/reaperoak/ForgeOS',
+      html_url: 'https://github.com/Ticketer/ForgeOS',
     },
-    pusher: { name: 'reaperoak', email: 'oak@example.com' },
+    pusher: { name: 'Ticketer', email: 'oak@example.com' },
     commits,
     head_commit: commits.length > 0 ? (commits[commits.length - 1] ?? null) : null,
-    compare: 'https://github.com/reaperoak/ForgeOS/compare/0000...abc1',
+    compare: 'https://github.com/Ticketer/ForgeOS/compare/0000...abc1',
     ...overrides,
   };
 }

@@ -60,7 +60,7 @@
       "event": "CLAIMED",
       "agent": "Backend",
       "machine_id": "pop-os",
-      "details": "CLAIM by Backend on pop-os (ReaperOAK)"
+      "details": "CLAIM by Backend on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-07T13:00:00.000000+00:00",
@@ -81,7 +81,7 @@
       "event": "CLAIMED",
       "agent": "QA",
       "machine_id": "pop-os",
-      "details": "CLAIM by QA on pop-os (ReaperOAK)"
+      "details": "CLAIM by QA on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-07T14:31:36.547057+00:00",

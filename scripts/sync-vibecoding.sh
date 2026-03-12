@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# sync-vibecoding.sh — One-way sync from ReaperOAK/vibecoding into this project
+# sync-vibecoding.sh — One-way sync from Ticketer/vibecoding into this project
 #
 # Syncs:
 #   - Configured directories and files from upstream (see CONFIG section below)
@@ -26,7 +26,7 @@
 
 set -euo pipefail
 
-REPO="https://github.com/ReaperOAK/vibecoding.git"
+REPO="https://github.com/Ticketer/vibecoding.git"
 BRANCH="${1:-main}"
 DRY_RUN="${DRY_RUN:-}"
 PROJECT_ROOT="$(cd "$(dirname "$0")/.." && pwd)"
@@ -124,7 +124,7 @@ else
   STASHED=true
 fi
 
-echo "==> Syncing from ReaperOAK/vibecoding (branch: $BRANCH)..."
+echo "==> Syncing from Ticketer/vibecoding (branch: $BRANCH)..."
 echo "    Project root: $PROJECT_ROOT"
 echo "    Temp dir: $TMPDIR"
 [[ -n "$DRY_RUN" ]] && echo "    *** DRY RUN — no files will be modified ***"
@@ -176,7 +176,7 @@ fi
 # --- Summary ---
 echo ""
 echo "==> Sync complete!"
-echo "    Source: ReaperOAK/vibecoding@$BRANCH"
+echo "    Source: Ticketer/vibecoding@$BRANCH"
 echo "    Synced directories: ${SYNC_DIRECTORIES[*]}"
 echo "    Synced files: ${SYNC_FILES[*]}"
 echo "    Exceptions configured in DIR_EXCEPTIONS"

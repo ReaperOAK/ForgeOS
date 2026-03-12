@@ -6,7 +6,7 @@
 - **Stage:** CI → DOCS
 - **Agent:** CIReviewer
 - **Machine:** pop-os
-- **Operator:** reaperoak
+- **Operator:** Ticketer
 - **Verdict:** PASS
 - **Quality Score:** 93/100
 - **Confidence:** HIGH

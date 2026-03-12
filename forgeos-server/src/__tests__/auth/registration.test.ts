@@ -384,7 +384,7 @@ describe('createOrUpdateSession', () => {
       agent_id: 'agent-uuid-001',
       session_token: 'mcp-session-token-123',
       machine_id: 'pop-os',
-      operator: 'reaperoak',
+      operator: 'Ticketer',
       last_seen: '2026-03-07T12:00:00Z',
       expires_at: '2026-03-07T13:00:00Z',
     };
@@ -394,7 +394,7 @@ describe('createOrUpdateSession', () => {
       agent_id: 'agent-uuid-001',
       session_token: 'mcp-session-token-123',
       machine_id: 'pop-os',
-      operator: 'reaperoak',
+      operator: 'Ticketer',
       expires_in_minutes: 60,
     });
 

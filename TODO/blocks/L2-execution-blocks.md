@@ -229,7 +229,7 @@ Define measurable quality attributes and fitness functions for the platform. Spe
 | **L3 Ticket Estimate** | 3–5 |
 
 **Description:**
-Produce the Product Requirements Document for the distributed orchestration platform. Define user personas (Human Operator, AI Agent, ReaperOAK Dispatcher, System Administrator), capture user stories for each persona, specify non-functional requirements, document migration acceptance criteria, define dashboard UX requirements, and create a priority matrix mapping requirements to capabilities.
+Produce the Product Requirements Document for the distributed orchestration platform. Define user personas (Human Operator, AI Agent, Ticketer Dispatcher, System Administrator), capture user stories for each persona, specify non-functional requirements, document migration acceptance criteria, define dashboard UX requirements, and create a priority matrix mapping requirements to capabilities.
 
 **Acceptance Criteria (high-level):**
 - 4 user personas documented with goals, constraints, and interaction patterns

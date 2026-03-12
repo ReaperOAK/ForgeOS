@@ -5,7 +5,7 @@
 **Type:** docs
 **Priority:** medium
 **Dependencies:** TASK-FOS-02-001, TASK-FOS-03-002
-**Files:** .github/agents/Backend.agent.md, .github/agents/Frontend.agent.md, .github/agents/QA.agent.md, .github/agents/Security.agent.md, .github/agents/Architect.agent.md, .github/agents/Research.agent.md, .github/agents/Documentation.agent.md, .github/agents/CIReviewer.agent.md, .github/agents/Validator.agent.md, .github/agents/DevOps.agent.md, .github/agents/UIDesigner.agent.md, .github/agents/ProductManager.agent.md, .github/agents/ReaperOAK.agent.md, .github/agents/TODO.agent.md
+**Files:** .github/agents/Backend.agent.md, .github/agents/Frontend.agent.md, .github/agents/QA.agent.md, .github/agents/Security.agent.md, .github/agents/Architect.agent.md, .github/agents/Research.agent.md, .github/agents/Documentation.agent.md, .github/agents/CIReviewer.agent.md, .github/agents/Validator.agent.md, .github/agents/DevOps.agent.md, .github/agents/UIDesigner.agent.md, .github/agents/ProductManager.agent.md, .github/agents/Ticketer.agent.md, .github/agents/TODO.agent.md
 
 ### Description
 Update all 14 .github/agents/*.agent.md files to reference the new MCP-based ticket operations. Each agent file should document: (1) which MCP tools the agent is authorized to use (based on the RBAC matrix from Architecture §7.2), (2) the MCP server URL configuration (FORGEOS_MCP_URL env var), (3) updated workflow steps using tickets.claim/tickets.complete instead of tickets.py CLI, (4) the filesystem fallback mechanism when MCP is unavailable. Agent files should retain their existing structure (role, stage, scope, forbidden actions) while adding MCP integration sections.
@@ -14,7 +14,7 @@ Update all 14 .github/agents/*.agent.md files to reference the new MCP-based tic
 - [ ] All 14 agent files updated with MCP tool authorization section listing permitted tools per RBAC matrix
 - [ ] Backend agent: authorized for tickets.next(BACKEND), tickets.claim(BACKEND), tickets.complete, tickets.spawn, tickets.release(own), tickets.extend(own)
 - [ ] QA agent: authorized for tickets.next(QA), tickets.claim(QA), tickets.complete, tickets.reject, tickets.release(own), tickets.extend(own)
-- [ ] ReaperOAK agent: authorized for tickets.next(all stages), tickets.stats, tickets.graph (no claim/complete)
+- [ ] Ticketer agent: authorized for tickets.next(all stages), tickets.stats, tickets.graph (no claim/complete)
 - [ ] Each agent file documents FORGEOS_MCP_URL and FORGEOS_API_KEY environment variables
 - [ ] Workflow steps updated: replace "python3 tickets.py --claim" with "tickets.claim MCP tool call"
 - [ ] Fallback mechanism documented: if MCP unreachable, use tickets.py CLI directly

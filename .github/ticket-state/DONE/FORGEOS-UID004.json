@@ -55,7 +55,7 @@
       "event": "CLAIMED",
       "agent": "UIDesigner",
       "machine_id": "pop-os",
-      "details": "Claimed by UIDesigner on pop-os (reaperoak)"
+      "details": "Claimed by UIDesigner on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-09T20:30:10.055905+00:00",
@@ -71,14 +71,14 @@
       "event": "CLAIMED",
       "agent": "Frontend",
       "machine_id": "pop-os",
-      "details": "Claimed by Frontend on pop-os (reaperoak)"
+      "details": "Claimed by Frontend on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-10T13:45:00+00:00",
       "event": "CLAIMED",
       "agent": "Frontend",
       "machine_id": "pop-os",
-      "details": "Claimed by Frontend on pop-os (reaperoak) \u2014 re-claim after lease expiry"
+      "details": "Claimed by Frontend on pop-os (Ticketer) \u2014 re-claim after lease expiry"
     },
     {
       "timestamp": "2026-03-10T14:30:00+00:00",
@@ -103,7 +103,7 @@
       "event": "CLAIMED",
       "agent": "Frontend",
       "machine_id": "pop-os",
-      "details": "Claimed by Frontend on pop-os (reaperoak) - REWORK 1"
+      "details": "Claimed by Frontend on pop-os (Ticketer) - REWORK 1"
     },
     {
       "timestamp": "2026-03-10T09:10:00Z",
@@ -119,7 +119,7 @@
       "event": "CLAIMED",
       "agent": "QA",
       "machine_id": "pop-os",
-      "details": "Claimed by QA on pop-os (reaperoak) - rework #1 re-verification"
+      "details": "Claimed by QA on pop-os (Ticketer) - rework #1 re-verification"
     },
     {
       "timestamp": "2026-03-10T15:05:00+00:00",
@@ -135,7 +135,7 @@
       "event": "CLAIMED",
       "agent": "Security",
       "machine_id": "pop-os",
-      "details": "Claimed by Security on pop-os (reaperoak)"
+      "details": "Claimed by Security on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-10T18:00:00+00:00",
@@ -151,7 +151,7 @@
       "event": "CLAIMED",
       "agent": "Documentation",
       "machine_id": "pop-os",
-      "details": "Claimed by Documentation on pop-os (reaperoak)"
+      "details": "Claimed by Documentation on pop-os (Ticketer)"
     },
     {
       "action": "STAGE_COMPLETED",

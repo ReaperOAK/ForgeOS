@@ -21,7 +21,7 @@
 
 | # | Criterion | Status | Evidence |
 |---|-----------|--------|----------|
-| 1 | seed.ts creates default "ForgeOS" project with repo_url and lease settings | ✅ | `DEFAULT_PROJECT_NAME='ForgeOS'`, `DEFAULT_REPO_URL='https://github.com/ReaperOAK/ForgeOS'`, `DEFAULT_LEASE_MINUTES=30`, `MAX_LEASE_MINUTES=120`. INSERT with ON CONFLICT DO UPDATE. |
+| 1 | seed.ts creates default "ForgeOS" project with repo_url and lease settings | ✅ | `DEFAULT_PROJECT_NAME='ForgeOS'`, `DEFAULT_REPO_URL='https://github.com/Ticketer/ForgeOS'`, `DEFAULT_LEASE_MINUTES=30`, `MAX_LEASE_MINUTES=120`. INSERT with ON CONFLICT DO UPDATE. |
 | 2 | seed.ts creates admin agent with generated API key; plaintext printed once to stdout | ✅ | `generateApiKey()` uses `crypto.randomBytes(32)` with `fos_` prefix. `process.stdout.write` prints key once. Test verifies single print. |
 | 3 | import.ts reads all .github/tickets/*.json excluding ticket-schema.json | ✅ | `EXCLUDED_FILES = new Set(['ticket-schema.json'])`. Filter applied in `readdirSync` result. |
 | 4 | Import derives stage from .github/ticket-state/ directory | ✅ | `deriveStageFromFilesystem()` scans all 11 stage directories. Maps DOCS→DOCUMENTATION, VALIDATION→VALIDATOR. Falls back to JSON stage. |

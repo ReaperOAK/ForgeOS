@@ -1,8 +1,8 @@
 ---
 id: decision-log
 version: "1.0"
-owner: ReaperOAK
-write_access: [ReaperOAK]
+owner: Ticketer
+write_access: [Ticketer]
 append_only: true
 immutable_to_subagents: true
 ---
@@ -10,10 +10,10 @@ immutable_to_subagents: true
 # Decision Log
 
 > **Schema Version:** 1.0
-> **Owner:** ReaperOAK (EXCLUSIVE)
-> **Write Access:** ReaperOAK ONLY — this file is IMMUTABLE to all subagents
+> **Owner:** Ticketer (EXCLUSIVE)
+> **Write Access:** Ticketer ONLY — this file is IMMUTABLE to all subagents
 > **Lock Rules:** No subagent may modify, delete, or overwrite any entry.
-> Subagents may propose decisions via `activeContext.md` but only ReaperOAK
+> Subagents may propose decisions via `activeContext.md` but only Ticketer
 > records them here.
 > **Update Protocol:** Append-only. Each entry requires: date, context,
 > decision, rationale, alternatives considered, and consequences.
@@ -37,19 +37,19 @@ immutable_to_subagents: true
 
 ## Decisions
 
-### DEC-001: Adopt Supervisor Pattern with ReaperOAK as Singular Orchestrator
+### DEC-001: Adopt Supervisor Pattern with Ticketer as Singular Orchestrator
 
 - **Date:** 2026-02-21
 - **Context:** Repository has 3 competing orchestration patterns (GEM, RUG,
   Edge-AI) with no unified authority
-- **Decision:** ReaperOAK serves as the exclusive supervisor. All subagents
-  report to ReaperOAK. No peer-to-peer agent communication.
+- **Decision:** Ticketer serves as the exclusive supervisor. All subagents
+  report to Ticketer. No peer-to-peer agent communication.
 - **Rationale:** Single source of truth prevents authority fragmentation,
   context degradation, and conflicting directives. Mirrors proven enterprise
   supervisor patterns.
 - **Alternatives:** Peer-to-peer mesh (rejected: coordination overhead),
   hierarchical chain (rejected: latency multiplication)
-- **Consequences:** All delegation flows through ReaperOAK; slight bottleneck
+- **Consequences:** All delegation flows through Ticketer; slight bottleneck
   at orchestrator but gains determinism and auditability
 - **Status:** Active
 
@@ -72,14 +72,14 @@ immutable_to_subagents: true
 - **Date:** 2026-02-21
 - **Context:** Risk of memory poisoning if any subagent can overwrite
   architectural truth
-- **Decision:** Only ReaperOAK may write to `systemPatterns.md` and
+- **Decision:** Only Ticketer may write to `systemPatterns.md` and
   `decisionLog.md`. All other agents have read-only access.
 - **Rationale:** Prevents cascading corruption if a subagent hallucinates or
   is compromised. Ensures architectural consistency.
 - **Alternatives:** Subagent proposals with approval gate (rejected:
   complexity; proposals happen via activeContext.md instead)
 - **Consequences:** Subagents must propose changes through activeContext.md
-  and wait for ReaperOAK to formalize them
+  and wait for Ticketer to formalize them
 - **Status:** Active
 
 ### DEC-004: Maximum 4 Parallel Subagents

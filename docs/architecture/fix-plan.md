@@ -749,7 +749,7 @@ The existing `db/seed.ts` is well-designed. It needs to be:
 
 | Entity | Data |
 |--------|------|
-| Project | name: `ForgeOS`, repo_url: `https://github.com/ReaperOAK/ForgeOS` |
+| Project | name: `ForgeOS`, repo_url: `https://github.com/Ticketer/ForgeOS` |
 | Admin Agent | name: `admin`, role: `admin`, permissions: `["*"]` |
 
 Already implemented in `seed.ts`.
@@ -761,7 +761,7 @@ Create `forgeos-server/src/db/seed-demo.ts` for optional demo/test data:
 ```sql
 -- Demo project (if not exists)
 INSERT INTO projects (name, description, repo_url)
-VALUES ('ForgeOS', 'ForgeOS Orchestration Engine', 'https://github.com/ReaperOAK/ForgeOS')
+VALUES ('ForgeOS', 'ForgeOS Orchestration Engine', 'https://github.com/Ticketer/ForgeOS')
 ON CONFLICT (name) DO NOTHING;
 
 -- Demo agents (common SDLC roles)

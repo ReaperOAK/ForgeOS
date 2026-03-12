@@ -26,7 +26,7 @@ upstream: docs/product/user-personas.md
 2. [MoSCoW Priority Legend](#2-moscow-priority-legend)
 3. [Persona 1: Human Operator Stories](#3-persona-1-human-operator-stories)
 4. [Persona 2: AI Agent Stories](#4-persona-2-ai-agent-stories)
-5. [Persona 3: ReaperOAK Dispatcher Stories](#5-persona-3-reaperoak-dispatcher-stories)
+5. [Persona 3: Ticketer Dispatcher Stories](#5-persona-3-Ticketer-dispatcher-stories)
 6. [Persona 4: System Administrator Stories](#6-persona-4-system-administrator-stories)
 7. [Story Map Summary](#7-story-map-summary)
 8. [Traceability Matrix](#8-traceability-matrix)
@@ -382,13 +382,13 @@ task first.
 
 ---
 
-## 5. Persona 3: ReaperOAK Dispatcher Stories
+## 5. Persona 3: Ticketer Dispatcher Stories
 
 ### RO-01: Scan for Ready Tickets
 
 **Priority:** Must
 
-**As** ReaperOAK, **I want to** scan for all unclaimed tickets in the READY
+**As** Ticketer, **I want to** scan for all unclaimed tickets in the READY
 stage, **so that** I can dispatch the appropriate agent for each one.
 
 **Acceptance Criteria:**
@@ -413,7 +413,7 @@ stage, **so that** I can dispatch the appropriate agent for each one.
 
 **Priority:** Must
 
-**As** ReaperOAK, **I want to** dispatch the correct agent type for each READY
+**As** Ticketer, **I want to** dispatch the correct agent type for each READY
 ticket based on the ticket's SDLC flow and current stage, **so that** the right
 specialist handles each piece of work.
 
@@ -439,7 +439,7 @@ specialist handles each piece of work.
 
 **Priority:** Must
 
-**As** ReaperOAK, **I want to** detect when an agent has finished its work and
+**As** Ticketer, **I want to** detect when an agent has finished its work and
 ensure the ticket moves to the next stage, **so that** the pipeline progresses
 without manual intervention.
 
@@ -466,7 +466,7 @@ without manual intervention.
 
 **Priority:** Should
 
-**As** ReaperOAK, **I want to** detect tickets that have reached the ESCALATED
+**As** Ticketer, **I want to** detect tickets that have reached the ESCALATED
 state after 3 failed rework cycles, **so that** I can notify the system
 administrator and stop dispatching agents for that ticket.
 
@@ -493,7 +493,7 @@ administrator and stop dispatching agents for that ticket.
 
 **Priority:** Must
 
-**As** ReaperOAK, **I want to** trigger a full state synchronization that
+**As** Ticketer, **I want to** trigger a full state synchronization that
 evaluates dependencies, releases expired claims, and moves unblocked tickets to
 READY, **so that** the ticket state machine remains consistent.
 
@@ -520,7 +520,7 @@ READY, **so that** the ticket state machine remains consistent.
 
 **Priority:** Could
 
-**As** ReaperOAK, **I want to** dispatch agents to tickets in priority order
+**As** Ticketer, **I want to** dispatch agents to tickets in priority order
 (critical first, then high, medium, low), **so that** the most important work is
 processed before lower-priority items.
 
@@ -724,7 +724,7 @@ operational conditions.
 | | AG-04 | Report Results with Structured Evidence | Must |
 | | AG-05 | Handle Rework After Rejection | Must |
 | | AG-06 | Discover Available Tickets by Stage | Should |
-| **ReaperOAK** | RO-01 | Scan for Ready Tickets | Must |
+| **Ticketer** | RO-01 | Scan for Ready Tickets | Must |
 | | RO-02 | Dispatch Agents to Tickets | Must |
 | | RO-03 | Advance Pipeline After Agent Completion | Must |
 | | RO-04 | Handle Escalated Tickets | Should |

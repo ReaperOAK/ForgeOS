@@ -17,7 +17,7 @@
 
 ### 1.1 Vision Statement
 
-ForgeOS transforms a file-based AI development orchestration system into a distributed AI software factory. Multiple ReaperOAK dispatcher agents running on multiple machines coordinate autonomous subagents (Architect, Backend, Frontend, QA, Security, etc.) through a deterministic SDLC pipeline backed by PostgreSQL and exposed via MCP (Model Context Protocol). The result is a self-bootstrapping, multi-machine, fault-tolerant development orchestration platform.
+ForgeOS transforms a file-based AI development orchestration system into a distributed AI software factory. Multiple Ticketer dispatcher agents running on multiple machines coordinate autonomous subagents (Architect, Backend, Frontend, QA, Security, etc.) through a deterministic SDLC pipeline backed by PostgreSQL and exposed via MCP (Model Context Protocol). The result is a self-bootstrapping, multi-machine, fault-tolerant development orchestration platform.
 
 ### 1.2 Problem Statement
 
@@ -39,7 +39,7 @@ ForgeOS transforms a file-based AI development orchestration system into a distr
 
 | Persona | Role | Primary Need | Anti-pattern |
 |---------|------|-------------|--------------|
-| **ReaperOAK** (Dispatcher) | Stateless orchestrator scanning for work | Discover available tickets and dispatch the correct subagent efficiently | Must NOT analyze code, compute dependencies, or implement |
+| **Ticketer** (Dispatcher) | Stateless orchestrator scanning for work | Discover available tickets and dispatch the correct subagent efficiently | Must NOT analyze code, compute dependencies, or implement |
 | **Subagent** (Worker) | Specialized AI agent (Backend, QA, Security, etc.) | Claim work atomically, execute stage, advance to next | Must NOT cross ticket scope or claim multiple tickets |
 | **Human Operator** | Developer running agents on their machine | Monitor multi-machine progress, intervene when needed | Must NOT bypass the SDLC pipeline |
 | **System Administrator** | Platform maintainer | Audit agent actions, manage access, configure the system | Must NOT modify ticket state without audit trail |
@@ -73,10 +73,10 @@ ForgeOS transforms a file-based AI development orchestration system into a distr
 
 ## 2. User Stories
 
-### 2.1 ReaperOAK (Dispatcher) Stories
+### 2.1 Ticketer (Dispatcher) Stories
 
 #### US-01: Discover Available Work
-**As** ReaperOAK, **I want** to call `tickets.next` with a stage filter **so that** I can discover unblocked tickets ready for a specific agent type.
+**As** Ticketer, **I want** to call `tickets.next` with a stage filter **so that** I can discover unblocked tickets ready for a specific agent type.
 
 **INVEST:** Independent (no side effects), Valuable (core dispatch loop), Estimable (single query), Small (one tool call), Testable (returns ticket or empty).
 
@@ -84,39 +84,39 @@ ForgeOS transforms a file-based AI development orchestration system into a distr
 ```gherkin
 Given tickets exist in READY stage with type "backend"
   And no other agent has claimed them
-When ReaperOAK calls tickets.next with stage="BACKEND"
+When Ticketer calls tickets.next with stage="BACKEND"
 Then the system returns the highest-priority unclaimed ticket
   And the ticket has status READY
   And the response includes ticket_id, type, priority, and file_paths
 
 Given all READY tickets are claimed by other agents
-When ReaperOAK calls tickets.next with stage="BACKEND"
+When Ticketer calls tickets.next with stage="BACKEND"
 Then the system returns an empty result with message "No tickets available"
 
 Given a ticket has an expired lease (lease_expiry < NOW())
-When ReaperOAK calls tickets.next
+When Ticketer calls tickets.next
 Then the expired-lease ticket is eligible for return
 ```
 
 #### US-02: Dispatch Subagent for Ticket
-**As** ReaperOAK, **I want** to view the complete dependency graph via `tickets.graph` **so that** I can understand which tickets are blocked and which are available.
+**As** Ticketer, **I want** to view the complete dependency graph via `tickets.graph` **so that** I can understand which tickets are blocked and which are available.
 
 **Acceptance Criteria:**
 ```gherkin
 Given 20 tickets exist with inter-dependencies
-When ReaperOAK calls tickets.graph
+When Ticketer calls tickets.graph
 Then the system returns a DAG structure with nodes (tickets) and edges (dependencies)
   And each node includes: ticket_id, stage, status, claimed_by
   And blocked tickets are marked with their unmet dependencies
 ```
 
 #### US-03: Monitor System Health
-**As** ReaperOAK, **I want** to call `tickets.stats` **so that** I can see aggregate system state before dispatching.
+**As** Ticketer, **I want** to call `tickets.stats` **so that** I can see aggregate system state before dispatching.
 
 **Acceptance Criteria:**
 ```gherkin
 Given tickets exist across multiple stages
-When ReaperOAK calls tickets.stats
+When Ticketer calls tickets.stats
 Then the system returns counts per stage (READY: N, BACKEND: M, QA: K, ...)
   And active claims count with lease health (healthy, expiring_soon, expired)
   And average time-in-stage per stage
@@ -590,7 +590,7 @@ Then the commit is accepted
 | Security | SECURITY only | SECURITY only | Yes | Yes | No | Own claims | Own claims | Yes | Yes | No |
 | Frontend | FRONTEND only | FRONTEND only | Yes | No | Yes | Own claims | Own claims | Yes | Yes | No |
 | Architect | ARCHITECT only | ARCHITECT only | Yes | No | Yes | Own claims | Own claims | Yes | Yes | No |
-| ReaperOAK | All stages | No | No | No | No | No | No | Yes | Yes | No |
+| Ticketer | All stages | No | No | No | No | No | No | Yes | Yes | No |
 | Admin | All | All | All | All | All | All | All | Yes | Yes | Yes |
 
 #### FR-19: Machine Registration
@@ -1276,7 +1276,7 @@ Any rejection in the chain returns the ticket to REWORK, which re-enters at the 
 | Term | Definition |
 |------|-----------|
 | **MCP** | Model Context Protocol — standardized protocol for AI tool interaction |
-| **ReaperOAK** | Stateless dispatcher agent that scans for available work and dispatches subagents |
+| **Ticketer** | Stateless dispatcher agent that scans for available work and dispatches subagents |
 | **Subagent** | Specialized AI agent (Backend, QA, Security, etc.) that performs a specific SDLC stage |
 | **SDLC** | Software Development Lifecycle — the staged pipeline tickets traverse |
 | **SKIP LOCKED** | PostgreSQL clause that skips rows locked by other transactions instead of blocking |

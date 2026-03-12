@@ -18,7 +18,7 @@ const baseClaims: ClaimRow[] = [
         ticketTitle: 'Implement health check',
         agent: 'Backend',
         machine: 'pop-os',
-        operator: 'reaperoak',
+        operator: 'Ticketer',
         leaseExpiry: futureISO(600),
         stage: 'BACKEND',
         claimedAt: '2026-03-12T01:00:00Z',
@@ -80,7 +80,7 @@ describe('ClaimsTable', () => {
 
     it('renders operator names', () => {
         render(<ClaimsTable {...defaultProps} />);
-        expect(screen.getAllByText('reaperoak').length).toBeGreaterThanOrEqual(1);
+        expect(screen.getAllByText('Ticketer').length).toBeGreaterThanOrEqual(1);
         expect(screen.getAllByText('oak').length).toBeGreaterThanOrEqual(1);
     });
 

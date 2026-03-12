@@ -30,7 +30,7 @@ export interface SeedResult {
 // ── Constants ────────────────────────────────────────────────────────────────
 
 const DEFAULT_PROJECT_NAME = 'ForgeOS';
-const DEFAULT_REPO_URL = 'https://github.com/ReaperOAK/ForgeOS';
+const DEFAULT_REPO_URL = 'https://github.com/Ticketer/ForgeOS';
 const DEFAULT_LEASE_MINUTES = 30;
 const MAX_LEASE_MINUTES = 120;
 const ADMIN_AGENT_NAME = 'admin';

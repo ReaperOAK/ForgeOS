@@ -413,7 +413,7 @@ The MCP protocol as used by ForgeOS follows this pattern:
       "ticket_id": "FORGEOS-ARCH001",
       "agent_name": "Architect",
       "machine_id": "pop-os",
-      "operator": "reaperoak"
+      "operator": "Ticketer"
     }
   }
 }

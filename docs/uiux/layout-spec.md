@@ -112,7 +112,7 @@ The dashboard uses a top-bar navigation pattern (not sidebar-first) for maximum 
 │   ⚠️ Blocked         │
 │───────────────────────│
 │                       │
-│ 👤 ReaperOAK         │
+│ 👤 Ticketer         │
 │ ⚙ Settings  ? Help   │
 └──────────────────────┘
 ```

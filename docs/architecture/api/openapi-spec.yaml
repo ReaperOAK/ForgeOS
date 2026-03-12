@@ -406,7 +406,7 @@ components:
           nullable: true
           description: Human operator who initiated the agent
           examples:
-            - reaperoak
+            - Ticketer
         lease_expiry:
           type: string
           format: date-time
@@ -641,7 +641,7 @@ components:
           type: string
           description: Human operator who initiated the claim
           examples:
-            - reaperoak
+            - Ticketer
         lease_minutes:
           type: integer
           minimum: 1
@@ -1170,7 +1170,7 @@ paths:
                         claimed_by: 660e8400-e29b-41d4-a716-446655440001
                         claimed_by_name: Backend Engineer
                         machine_id: forgeos-dev
-                        operator: reaperoak
+                        operator: Ticketer
                         lease_expiry: "2026-03-07T08:30:00Z"
                         lease_duration_minutes: 30
                         depends_on:
@@ -1295,7 +1295,7 @@ paths:
                 value:
                   agent_name: Backend Engineer
                   machine_id: forgeos-dev
-                  operator: reaperoak
+                  operator: Ticketer
                   lease_minutes: 30
       responses:
         '200':
@@ -1639,7 +1639,7 @@ paths:
                         agent_id: 660e8400-e29b-41d4-a716-446655440001
                         agent_name: Backend Engineer
                         machine_id: forgeos-dev
-                        operator: reaperoak
+                        operator: Ticketer
                         previous_stage: READY
                         new_stage: BACKEND
                         previous_status: READY
