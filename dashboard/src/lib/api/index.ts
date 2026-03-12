@@ -28,6 +28,22 @@ export {
 
 export { apiClient, isApiError, buildQueryString } from './client';
 
+export type {
+  ClaimRequest,
+  ReleaseRequest,
+  AdvanceRequest,
+  ForceReleaseRequest,
+  OperationResponse,
+  OperatorAction,
+} from './operations';
+
+export {
+  claimTicket,
+  releaseTicket,
+  advanceTicket,
+  forceReleaseTicket,
+} from './operations';
+
 export { TicketWebSocketClient } from './websocket';
 export type {
   WebSocketEvent,
