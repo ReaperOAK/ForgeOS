@@ -1,0 +1,136 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "ForgeOS-CI-Reviewer",
+          "version": "1.0.0",
+          "rules": [
+            {
+              "id": "OC-007",
+              "name": "EntitySizeExceeded",
+              "shortDescription": { "text": "Entity exceeds 50-line threshold (Object Calisthenics Rule 7)" },
+              "defaultConfiguration": { "level": "warning" }
+            },
+            {
+              "id": "OC-002",
+              "name": "ElseKeywordUsed",
+              "shortDescription": { "text": "Use early returns/guard clauses instead of else (Object Calisthenics Rule 2)" },
+              "defaultConfiguration": { "level": "note" }
+            },
+            {
+              "id": "TEST-INFO",
+              "name": "TestWarning",
+              "shortDescription": { "text": "Non-blocking test framework warning" },
+              "defaultConfiguration": { "level": "note" }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "OC-007",
+          "level": "warning",
+          "message": { "text": "OperatorActions.tsx is 373 lines, exceeding the 50-line entity threshold. Logic is well-extracted into hooks/callbacks; JSX template with accessibility markup constitutes bulk." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": "dashboard/src/components/operator/OperatorActions.tsx" },
+                "region": { "startLine": 88, "endLine": 356 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "OC-007",
+          "level": "warning",
+          "message": { "text": "ConfirmationModal.tsx is 311 lines, exceeding the 50-line entity threshold. Accessible modal patterns require substantial JSX. Component is self-contained." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": "dashboard/src/components/operator/ConfirmationModal.tsx" },
+                "region": { "startLine": 51, "endLine": 311 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "OC-002",
+          "level": "note",
+          "message": { "text": "else keyword used in handleActionClick. Consider using early return pattern." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": "dashboard/src/components/operator/OperatorActions.tsx" },
+                "region": { "startLine": 194 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "OC-002",
+          "level": "note",
+          "message": { "text": "else if used in focus restoration effect. Minor — clear branching logic." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": "dashboard/src/components/operator/ConfirmationModal.tsx" },
+                "region": { "startLine": 77 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "OC-002",
+          "level": "note",
+          "message": { "text": "else if used in focus trap Tab handler. Standard keyboard navigation pattern." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": "dashboard/src/components/operator/ConfirmationModal.tsx" },
+                "region": { "startLine": 114 }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "TEST-INFO",
+          "level": "note",
+          "message": { "text": "React act() warnings in OperatorActions tests for concurrent state updates in finally block. Non-blocking — test correctness unaffected." },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": { "uri": "dashboard/src/__tests__/components/operator/OperatorActions.test.tsx" },
+                "region": { "startLine": 1 }
+              }
+            }
+          ]
+        }
+      ],
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "properties": {
+            "qualityScore": 88,
+            "verdict": "PASS",
+            "criticalCount": 0,
+            "warningCount": 2,
+            "suggestionCount": 2,
+            "coverageStatements": 93.52,
+            "coverageBranches": 87.8,
+            "coverageFunctions": 93.33,
+            "coverageLines": 94.9,
+            "testsTotal": 69,
+            "testsPassed": 69,
+            "testsFailed": 0,
+            "lintErrors": 0,
+            "lintWarnings": 0,
+            "typeErrors": 0
+          }
+        }
+      ]
+    }
+  ]
+}

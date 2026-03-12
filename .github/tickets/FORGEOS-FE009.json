@@ -4,7 +4,7 @@
   "description": "Implement authenticated operator action controls following the UIDesigner mockup (FORGEOS-UID004). Add action buttons for Claim, Release, Advance, and Force-Release operations. Each action calls the corresponding REST endpoint (FORGEOS-BE036 for claim, FORGEOS-BE037 for advance/rework). Destructive actions (force-release, force-advance) show a confirmation modal requiring explicit reason input. All actions require authentication via the auth system (FORGEOS-BE055 role-based restrictions).",
   "type": "frontend",
   "priority": "high",
-  "stage": "CI",
+  "stage": "DOCS",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -84,6 +84,15 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "SECURITY PASS \u2014 0 critical/high findings. 3 informational notes. STRIDE max score 6 (Low). OWASP 10/10."
+    },
+    {
+      "timestamp": "2026-03-12T10:22:00Z",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "pop-os",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "CI review PASS (Score 88/100). 0 critical, 2 warnings (OC-007 entity size). 69/69 tests, 93.52% coverage."
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
