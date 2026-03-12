@@ -70,14 +70,14 @@ export class TicketWebSocketClient {
     this.initialDelay = options.initialDelay ?? 1_000;
     this.maxDelay = options.maxDelay ?? 30_000;
     this.currentDelay = this.initialDelay;
-    this.onEvent = options.onEvent ?? (() => {});
-    this.onStatusChange = options.onStatusChange ?? (() => {});
+    this.onEvent = options.onEvent ?? (() => { });
+    this.onStatusChange = options.onStatusChange ?? (() => { });
   }
 
   /** Initiate connection. Safe to call multiple times. */
   connect(): void {
     if (this.ws?.readyState === WebSocket.OPEN ||
-        this.ws?.readyState === WebSocket.CONNECTING) {
+      this.ws?.readyState === WebSocket.CONNECTING) {
       return;
     }
 

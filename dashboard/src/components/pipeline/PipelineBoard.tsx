@@ -18,18 +18,18 @@ const PIPELINE_STAGES: {
     label: string;
     color: string;
 }[] = [
-    { stage: 'READY', label: 'Ready', color: '#06B6D4' },
-    { stage: 'RESEARCH', label: 'Research', color: '#A855F7' },
-    { stage: 'ARCHITECT', label: 'Architect', color: '#8B5CF6' },
-    { stage: 'BACKEND', label: 'Backend', color: '#3B82F6' },
-    { stage: 'FRONTEND', label: 'Frontend', color: '#14B8A6' },
-    { stage: 'QA', label: 'QA', color: '#F97316' },
-    { stage: 'SECURITY', label: 'Security', color: '#EF4444' },
-    { stage: 'CI', label: 'CI', color: '#EAB308' },
-    { stage: 'DOCUMENTATION', label: 'Docs', color: '#64748B' },
-    { stage: 'VALIDATOR', label: 'Validation', color: '#16A34A' },
-    { stage: 'DONE', label: 'Done', color: '#22C55E' },
-];
+        { stage: 'READY', label: 'Ready', color: '#06B6D4' },
+        { stage: 'RESEARCH', label: 'Research', color: '#A855F7' },
+        { stage: 'ARCHITECT', label: 'Architect', color: '#8B5CF6' },
+        { stage: 'BACKEND', label: 'Backend', color: '#3B82F6' },
+        { stage: 'FRONTEND', label: 'Frontend', color: '#14B8A6' },
+        { stage: 'QA', label: 'QA', color: '#F97316' },
+        { stage: 'SECURITY', label: 'Security', color: '#EF4444' },
+        { stage: 'CI', label: 'CI', color: '#EAB308' },
+        { stage: 'DOCUMENTATION', label: 'Docs', color: '#64748B' },
+        { stage: 'VALIDATOR', label: 'Validation', color: '#16A34A' },
+        { stage: 'DONE', label: 'Done', color: '#22C55E' },
+    ];
 
 function SkeletonColumn() {
     return (
@@ -74,9 +74,9 @@ export function PipelineBoard({ tickets, isLoading }: PipelineBoardProps) {
             grouped[stage].sort(
                 (a, b) =>
                     (priorityOrder[a.priority] ?? 9) -
-                        (priorityOrder[b.priority] ?? 9) ||
+                    (priorityOrder[b.priority] ?? 9) ||
                     new Date(b.updated_at).getTime() -
-                        new Date(a.updated_at).getTime(),
+                    new Date(a.updated_at).getTime(),
             );
         }
         return grouped;

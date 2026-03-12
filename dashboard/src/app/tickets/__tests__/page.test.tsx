@@ -31,7 +31,7 @@ jest.mock('next/link', () => {
 
 // Mock lucide-react
 jest.mock('lucide-react', () => ({
-    ArrowLeft: ({ size, ...props }: { size?: number; [key: string]: unknown }) => (
+    ArrowLeft: ({ size, ...props }: { size?: number;[key: string]: unknown }) => (
         <svg data-testid="arrow-left" {...props} />
     ),
 }));
@@ -110,7 +110,7 @@ describe('TicketDetailPage', () => {
     });
 
     it('shows loading skeleton while fetching', () => {
-        fetchTicket.mockReturnValue(new Promise(() => {})); // never resolves
+        fetchTicket.mockReturnValue(new Promise(() => { })); // never resolves
         render(<TicketDetailPage />);
         expect(screen.getByRole('status', { name: /Loading ticket/ })).toBeInTheDocument();
     });

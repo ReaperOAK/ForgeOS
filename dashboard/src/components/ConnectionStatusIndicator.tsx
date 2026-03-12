@@ -32,9 +32,8 @@ export function ConnectionStatusIndicator({
       aria-label={`WebSocket ${config.label}`}
     >
       <span
-        className={`w-2.5 h-2.5 rounded-full ${config.color} ${
-          config.pulse ? 'animate-pulse' : ''
-        }`}
+        className={`w-2.5 h-2.5 rounded-full ${config.color} ${config.pulse ? 'animate-pulse' : ''
+          }`}
         aria-hidden="true"
       />
       <span className="text-xs text-muted hidden sm:inline">

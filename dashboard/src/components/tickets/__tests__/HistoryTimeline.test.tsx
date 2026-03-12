@@ -72,7 +72,7 @@ describe('HistoryTimeline', () => {
     });
 
     it('shows loading skeleton initially', () => {
-        fetchTicketHistory.mockReturnValue(new Promise(() => {})); // never resolves
+        fetchTicketHistory.mockReturnValue(new Promise(() => { })); // never resolves
         render(<HistoryTimeline ticketId="FORGEOS-FE004" />);
         expect(screen.getByRole('status', { name: /Loading history/ })).toBeInTheDocument();
     });

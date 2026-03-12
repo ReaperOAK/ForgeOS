@@ -17,11 +17,10 @@ export function FilterChip({ label, active, onClick }: FilterChipProps) {
       role="option"
       aria-selected={active}
       onClick={onClick}
-      className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full border transition-colors focus-ring ${
-        active
+      className={`inline-flex items-center px-2.5 py-1 text-xs font-medium rounded-full border transition-colors focus-ring ${active
           ? 'bg-primary text-inverse border-primary'
           : 'bg-surface text-secondary border-border hover:bg-surface-alt'
-      }`}
+        }`}
     >
       {label}
       {active && (

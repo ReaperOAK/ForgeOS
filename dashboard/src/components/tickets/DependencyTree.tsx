@@ -42,8 +42,8 @@ function DependencyLink({
             </Link>
             <span
                 className={`text-xs px-1.5 py-0.5 rounded font-medium ${dep.is_resolved
-                        ? 'bg-success-muted text-success'
-                        : 'bg-warning-muted text-warning'
+                    ? 'bg-success-muted text-success'
+                    : 'bg-warning-muted text-warning'
                     }`}
             >
                 {dep.status}

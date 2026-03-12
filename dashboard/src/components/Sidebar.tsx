@@ -68,8 +68,8 @@ export function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
                                 <Link
                                     href={route}
                                     className={`flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${isActive
-                                            ? 'bg-primary-muted text-primary'
-                                            : 'text-muted hover:bg-surface-alt hover:text-foreground'
+                                        ? 'bg-primary-muted text-primary'
+                                        : 'text-muted hover:bg-surface-alt hover:text-foreground'
                                         } focus-ring`}
                                     aria-current={isActive ? 'page' : undefined}
                                     title={isCollapsed ? label : undefined}
