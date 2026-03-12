@@ -1,3 +1,8 @@
+### [FORGEOS-FE008] — Documentation Complete
+- **Artifacts:** CHANGELOG.md, dashboard/README.md, dashboard/src/app/claims/page.tsx, dashboard/src/components/claims/ClaimsTable.tsx, .github/agent-output/Documentation/FORGEOS-FE008.md
+- **Decisions:** Added Active Claims Monitor section to dashboard README with component table, behavior, LeaseCountdown states, accessibility, and data types. JSDoc/TSDoc on all public exports. CHANGELOG entry added.
+- **Timestamp:** 2026-03-12T12:00:00Z
+
 ### [FORGEOS-FE010] — Documentation Complete
 - **Artifacts:** CHANGELOG.md, dashboard/README.md, dashboard/src/components/machines/MachineCard.tsx, .github/agent-output/Documentation/FORGEOS-FE010.md
 - **Decisions:** Added Machines View section to README, TSDoc on MachineCardProps and formatRelativeTime, CHANGELOG entry for multi-machine status view

@@ -8,6 +8,10 @@ import { useTicketStream } from '@/lib/hooks/useTicketStream';
 import { fetchTickets } from '@/lib/api';
 import type { Ticket } from '@/lib/api';
 
+/**
+ * Converts a Ticket into a ClaimRow for the claims table.
+ * Returns null if the ticket has no active claim or no lease expiry.
+ */
 function ticketToClaimRow(ticket: Ticket): ClaimRow | null {
     if (!ticket.claimed_by && !ticket.claimed_by_name) return null;
     if (!ticket.lease_expiry) return null;
@@ -24,6 +28,13 @@ function ticketToClaimRow(ticket: Ticket): ClaimRow | null {
     };
 }
 
+/**
+ * Active Claims Monitor page.
+ *
+ * Displays all currently claimed tickets in a sortable table with real-time
+ * lease countdown timers. Data loads via REST on mount and stays current
+ * through WebSocket events from the `useTicketStream` hook.
+ */
 export default function ClaimsPage() {
     const [claims, setClaims] = useState<Map<string, ClaimRow>>(new Map());
     const [sortField, setSortField] = useState<SortField>('leaseRemaining');
