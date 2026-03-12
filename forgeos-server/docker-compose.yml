@@ -5,8 +5,10 @@ services:
       POSTGRES_DB: forgeos
       POSTGRES_USER: forgeos
       POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
     healthcheck:
-      test: ["CMD", "pg_isready", "-U", "forgeos", "-d", "forgeos"]
+      test: [ "CMD", "pg_isready", "-U", "forgeos", "-d", "forgeos" ]
       interval: 10s
       retries: 5
       start_period: 30s
@@ -37,20 +39,28 @@ services:
       - db_password
     restart: unless-stopped
 
-  mcp-server:
+  forgeos-server:
     build:
       context: .
       dockerfile: Dockerfile
     environment:
-      DATABASE_URL: postgresql://forgeos:forgeos@pgbouncer:6432/forgeos
-      PORT: 3000
+      DATABASE_URL: postgresql://forgeos:forgeos@postgres:5432/forgeos
+      PORT: ${PORT:-3000}
       NODE_ENV: production
-      # Add other required env vars as needed
+      ADMIN_API_KEY: ${ADMIN_API_KEY:-forgeos-dev-key}
+      POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:3000/health" ]
+      interval: 15s
+      retries: 3
+      start_period: 10s
     depends_on:
       postgres:
         condition: service_healthy
       pgbouncer:
         condition: service_started
+    ports:
+      - "${PORT:-3000}:3000"
     volumes:
       - ../:/workspace:ro
     restart: unless-stopped

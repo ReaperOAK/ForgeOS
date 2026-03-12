@@ -78,8 +78,8 @@ export type AppConfig = z.infer<typeof configSchema>;
  * import { loadConfig, AppConfig } from './config';
  *
  * const cfg: AppConfig = loadConfig();
- * console.log(cfg.PORT);       // 3000 (default)
- * console.log(cfg.NODE_ENV);    // 'development' (default)
+ * logger.info(cfg.PORT);       // 3000 (default)
+ * logger.info(cfg.NODE_ENV);    // 'development' (default)
  * ```
  */
 export function loadConfig(): AppConfig {
@@ -103,8 +103,8 @@ export function loadConfig(): AppConfig {
  * ```typescript
  * import { config } from './config';
  *
- * console.log(config.DATABASE_URL);
- * console.log(config.LOG_LEVEL);
+ * logger.info(config.DATABASE_URL);
+ * logger.info(config.LOG_LEVEL);
  * ```
  */
 export const config = loadConfig();

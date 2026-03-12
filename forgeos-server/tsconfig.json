@@ -13,7 +13,11 @@
         "declaration": true,
         "declarationMap": true,
         "sourceMap": true,
-        "isolatedModules": true
+        "isolatedModules": true,
+        "noUncheckedIndexedAccess": true,
+        "noImplicitReturns": true,
+        "noUnusedLocals": true,
+        "noUnusedParameters": true
     },
     "include": [
         "src/**/*.ts"
@@ -21,7 +25,7 @@
     "exclude": [
         "node_modules",
         "dist",
-        "**/*.test.ts",
-        "**/*.spec.ts"
+        "**/*.spec.ts",
+        "**/*.test.ts"
     ]
 }

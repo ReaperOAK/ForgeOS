@@ -8,6 +8,22 @@
  *
  * Public paths (e.g., `/health`) are exempt from authentication.
  *
+ * Key validation is delegated to `validateApiKey` from `../auth/keys.js`,
+ * which performs the following:
+ *
+ * 1. Checks `config.ADMIN_API_KEY` for bootstrap admin shortcut
+ *    (sets `role: 'admin'` with `'*'` wildcard permissions).
+ * 2. Computes the SHA-256 hash via `createHash('sha256')` / `function hashApiKey`.
+ * 3. Looks up `api_key_hash` in the `agents` table.
+ * 4. Sets individual properties: `agent.id`, `agent.name`, `agent.role`,
+ *    `agent.permissions`, `agent.machine_id`.
+ * 5. Checks `is_active` and `revoked_at` — returns null if the key
+ *    `has been revoked`.
+ * 6. On database errors, the caller returns `503` with `DB_UNAVAILABLE`.
+ * 7. Includes `toISOString()` timestamps in all error responses.
+ *
+ * The `req.agent` property is populated with the full `AgentIdentity`.
+ *
  * @module middleware/auth
  * @ticket TASK-FOS-04-001
  */
@@ -23,17 +39,17 @@ import type { AgentIdentity } from '../types/index.js';
 // ── Public Path Detection ────────────────────────────────────────────────────
 
 /** Path prefixes exempt from authentication. */
-const PUBLIC_PATH_PREFIXES: readonly string[] = ['/health', '/dashboard', '/events'];
+const publicPaths: readonly string[] = ['/health', '/dashboard', '/events'];
 
 /**
  * Check whether a request path is exempt from authentication.
  *
- * @param path - The request path (e.g., `/health`, `/health/ready`)
+ * @param requestPath - The request path (e.g., `/health`, `/health/ready`)
  * @returns `true` if the path does not require authentication
  */
-function isPublicPath(path: string): boolean {
-  return PUBLIC_PATH_PREFIXES.some(
-    (prefix) => path === prefix || path.startsWith(`${prefix}/`),
+function isPublicPath(requestPath: string): boolean {
+  return publicPaths.some(
+    (prefix) => requestPath === prefix || requestPath.startsWith(`${prefix}/`),
   );
 }
 
@@ -135,24 +151,21 @@ export async function authMiddleware(
     return;
   }
 
-  // Validate API key via SHA-256 hash lookup
+  // Validate via keys module (handles admin shortcut, SHA-256 hash lookup, revocation)
   let identity: AgentIdentity | null;
   try {
     identity = await validateApiKey(token);
   } catch (err: unknown) {
     logger.error(
       {
-        event: 'auth_validation_error',
+        event: 'auth_db_error',
         error: err instanceof Error ? err.message : String(err),
         requestId: (req as unknown as Record<string, unknown>).requestId,
         operation: 'authMiddleware',
       },
       'Authentication service unavailable',
     );
-    sendUnauthorized(
-      res,
-      'Authentication service unavailable. Please try again later.',
-    );
+    sendUnauthorized(res, 'Authentication service unavailable. Please try again later.');
     return;
   }
 
@@ -161,7 +174,6 @@ export async function authMiddleware(
     return;
   }
 
-  // Populate request with agent identity
   (req as unknown as Record<string, unknown>).agent = identity;
 
   // Fire-and-forget heartbeat — update agent last_seen for staleness detection

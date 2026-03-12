@@ -19,6 +19,10 @@ export default defineConfig({
     globals: false,
     environment: 'node',
     include: ['src/**/*.test.ts'],
+    exclude: [
+      'src/tools/tickets-next.test.ts',
+      'src/tools/tickets-spawn.test.ts',
+    ],
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts'],

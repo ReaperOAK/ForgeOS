@@ -63,6 +63,6 @@ async function seedDemo(): Promise<void> {
 }
 
 seedDemo().catch((err) => {
-    console.error('Demo seed failed:', err);
+    logger.error({ err }, 'Demo seed failed');
     process.exit(1);
 });

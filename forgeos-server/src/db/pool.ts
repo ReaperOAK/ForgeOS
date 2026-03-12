@@ -155,7 +155,7 @@ export interface PoolHealthStats {
  *
  * const stats = await healthCheck();
  * if (!stats.connected) {
- *   console.error('DB unreachable', stats.latencyMs);
+ *   logger.error('DB unreachable', stats.latencyMs);
  * }
  * ```
  */

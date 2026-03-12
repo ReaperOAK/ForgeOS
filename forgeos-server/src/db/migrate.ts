@@ -107,7 +107,7 @@ function getMigrationFiles(): string[] {
  * import { runMigrations } from './db/migrate.js';
  *
  * const applied = await runMigrations();
- * console.log(`Applied ${applied} migration(s)`);
+ * logger.info(`Applied ${applied} migration(s)`);
  * ```
  */
 export async function runMigrations(): Promise<number> {

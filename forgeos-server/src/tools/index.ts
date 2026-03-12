@@ -1,7 +1,7 @@
 /**
  * MCP Tool Registration — barrel file for all ForgeOS MCP tools.
  *
- * Registers each tool on the McpServer instance via `server.tool()`.
+ * Registers each tool on the McpServer instance via the tool registration API.
  * Each tool module exports a Zod schema and an async handler.
  *
  * @module tools
@@ -18,6 +18,7 @@ import { ticketsExtendSchema, ticketsExtendHandler } from './tickets-extend.js';
 import { ticketsUpdateSchema, ticketsUpdateHandler } from './tickets-update.js';
 import { ticketsReleaseSchema, ticketsReleaseHandler } from './tickets-release.js';
 import { ticketsStatsSchema, ticketsStatsHandler } from './tickets-stats.js';
+import { ticketsGraphSchema, ticketsGraphHandler } from './tickets-graph.js';
 
 /**
  * Register all MCP tools on the server.
@@ -96,5 +97,13 @@ export function registerTools(server: McpServer): void {
     'Get aggregate system statistics: per-stage counts, per-status counts, claim health, average time-in-stage, rework distribution.',
     ticketsStatsSchema.shape,
     async (params) => ticketsStatsHandler(params),
+  );
+
+  // ── tickets.graph ────────────────────────────────────────────────────────
+  server.tool(
+    'tickets.graph',
+    'Return the ticket dependency graph showing parent-child and depends_on relationships.',
+    ticketsGraphSchema.shape,
+    async (params) => ticketsGraphHandler(params),
   );
 }
