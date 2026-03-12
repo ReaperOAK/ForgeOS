@@ -4,7 +4,7 @@
   "description": "Implement the multi-machine status view following the UIDesigner mockup (FORGEOS-UID004). Display a grid of machine cards showing hostname, online/offline status indicator, last heartbeat timestamp, and list of currently running agents. Each machine card expands to show the agent-to-ticket mapping. Data sourced from the pipeline overview and claims data, updated in real-time via WebSocket.",
   "type": "frontend",
   "priority": "medium",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -78,6 +78,13 @@
       "agent": "QA Engineer",
       "machine_id": "pop-os",
       "details": "QA PASS. 46 tests, 94% stmt coverage, 84% branch, 93% func, 97% line. All 7 AC verified. Moving to SECURITY."
+    },
+    {
+      "timestamp": "2026-03-12T17:30:00Z",
+      "event": "STAGE_COMPLETE",
+      "agent": "Security Engineer",
+      "machine_id": "pop-os",
+      "details": "SECURITY PASS. STRIDE max 4/LOW, OWASP 10/10, 0 critical/high findings. React auto-escaping, encodeURIComponent, bounded API, WS backoff. Moving to CI."
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
@@ -91,5 +98,5 @@
     "phase4",
     "BLK-10-03"
   ],
-  "current_stage": "SECURITY"
+  "current_stage": "CI"
 }
