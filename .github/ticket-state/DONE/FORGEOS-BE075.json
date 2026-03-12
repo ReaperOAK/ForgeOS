@@ -35,10 +35,10 @@
     "Phase C entry and exit logged with timestamp and error rates"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-12T09:07:35Z",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -117,6 +117,13 @@
       "from_stage": "VALIDATION",
       "to_stage": "DONE",
       "details": "VALIDATION APPROVED \u2014 10/10 DoD pass, 7/7 AC verified, 29/29 tests, 100% coverage, lint clean, mypy clean. Advanced from VALIDATION to DONE"
+    },
+    {
+      "timestamp": "2026-03-12T09:23:04.737478+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Validator: Lease expired at 2026-03-12T09:07:35Z"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",
