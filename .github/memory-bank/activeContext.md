@@ -1,3 +1,8 @@
+### [FORGEOS-FE010] — Documentation Complete
+- **Artifacts:** CHANGELOG.md, dashboard/README.md, dashboard/src/components/machines/MachineCard.tsx, .github/agent-output/Documentation/FORGEOS-FE010.md
+- **Decisions:** Added Machines View section to README, TSDoc on MachineCardProps and formatRelativeTime, CHANGELOG entry for multi-machine status view
+- **Timestamp:** 2026-03-12T20:30:00Z
+
 ### [FORGEOS-FE010] — Security Review
 - **Artifacts:** .github/agent-output/Security/FORGEOS-FE010.md
 - **Decisions:** PASS — STRIDE max 4/LOW, OWASP 10/10, 0 critical/high findings. React auto-escaping, encodeURIComponent on URLs, bounded API (limit=200), WS exponential backoff. 2 informational notes (pre-existing).

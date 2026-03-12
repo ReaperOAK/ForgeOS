@@ -1,6 +1,6 @@
 # ForgeOS Dashboard
 
-<!-- last_reviewed: 2026-03-11T20:00:00Z -->
+<!-- last_reviewed: 2026-03-12T12:00:00Z -->
 
 > **Category:** Reference  
 > **Audience:** Developers working on the ForgeOS dashboard
@@ -49,12 +49,17 @@ dashboard/
 └── src/
     ├── app/                   # Next.js App Router pages
     │   ├── layout.tsx         # Root layout with ThemeProvider
-    │   ├── page.tsx           # Dashboard overview (metric cards)
-    │   └── health/
-    │       └── page.tsx       # System health dashboard (4 panels, 30s auto-refresh)
+    │   ├── page.tsx           # Dashboard overview (metric cards)    │   ├── claims/
+    │   │   └── page.tsx       # Active claims monitor (lease countdowns)    │   ├── health/
+    │   │   └── page.tsx       # System health dashboard (4 panels, 30s auto-refresh)
+    │   └── machines/
+    │       └── page.tsx       # Multi-machine status view (real-time grid)
     ├── components/            # React components
     │   ├── Breadcrumb.tsx     # Breadcrumb navigation
     │   ├── ConnectionStatusIndicator.tsx  # WebSocket status dot
+    │   ├── claims/            # Active claims monitor
+    │   │   ├── ClaimsTable.tsx  # Sortable claims table + mobile cards
+    │   │   └── LeaseCountdown.tsx  # Real-time lease countdown timer
     │   ├── DashboardShell.tsx # Shell layout (sidebar + top bar + content)
     │   ├── filters/           # Filter/sort components
     │   │   ├── FilterBar.tsx   # Filter bar with chip groups + sort
@@ -65,10 +70,13 @@ dashboard/
     │   ├── Sidebar.tsx        # Desktop collapsible sidebar
     │   ├── ThemeToggle.tsx    # Dark/light theme toggle
     │   ├── TopBar.tsx         # Top bar with breadcrumbs and menu
-    │   └── health/            # Health dashboard components
-    │       ├── HealthPanel.tsx      # Panel container with status + badge
-    │       ├── MetricCard.tsx       # Metric value with trend and severity
-    │       └── StatusIndicator.tsx  # Green/yellow/red status dot
+    │   ├── health/            # Health dashboard components
+    │   │   ├── HealthPanel.tsx      # Panel container with status + badge
+    │   │   ├── MetricCard.tsx       # Metric value with trend and severity
+    │   │   └── StatusIndicator.tsx  # Green/yellow/red status dot
+    │   └── machines/          # Machine status view components
+    │       ├── MachineCard.tsx      # Individual machine card with status + agents
+    │       └── AgentList.tsx        # Agent list with clickable links to claims
     ├── lib/                   # Shared utilities
     │   ├── api/               # REST API client library
     │   │   ├── index.ts       # Barrel re-exports (types + functions)
@@ -171,6 +179,59 @@ Renders a skeleton placeholder while loading.
 Section container with a header (title, status dot, alert badge)
 and a body slot for child metric cards.
 
+## Machines View (`/machines`)
+
+<!-- last_reviewed: 2026-03-12T20:00:00Z -->
+
+The machines page shows a real-time grid of operator machines with
+online/offline status, last heartbeat times, and lists of running agents.
+Data is sourced from claimed tickets and updated via WebSocket.
+
+### Components
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `MachinesPage` | `app/machines/page.tsx` | Page shell: fetches claimed tickets, aggregates by machine, renders grid |
+| `MachineCard` | `components/machines/MachineCard.tsx` | Card showing hostname, status dot, heartbeat time, and agent list |
+| `AgentList` | `components/machines/AgentList.tsx` | List of agents with links to `/claims?agent=…` |
+
+### Behavior
+
+- Fetches all `CLAIMED` and `IN_PROGRESS` tickets on mount, then
+  aggregates them by `machine_id` into machine cards.
+- **Real-time updates** via `TicketWebSocketClient` — cards appear, update,
+  or disappear as ticket state changes arrive over WebSocket.
+- **Online/offline status** determined by heartbeat recency: a machine is
+  online if its last heartbeat is within 10 minutes (`HEARTBEAT_THRESHOLD_MS`).
+- Relative timestamps refresh every 30 seconds without a full re-fetch.
+- Machines sorted: online first, then alphabetical by hostname.
+- Responsive grid layout: 3 columns on desktop, 2 on tablet, 1 on mobile.
+- Each machine card has a unique top-border accent color from a rotating
+  palette.
+- Clicking an agent name navigates to `/claims?agent={name}`.
+- Empty state with illustration when no machines are active.
+- Error state with a retry button on fetch failure.
+- Skeleton cards render while loading.
+
+### Key Interfaces
+
+```typescript
+interface MachineCardProps {
+  hostname: string;
+  status: 'online' | 'offline';
+  lastHeartbeat: string;   // ISO-8601
+  agents: AgentInfo[];
+  machineColor?: string;   // top-border accent
+}
+
+interface AgentInfo {
+  agentName: string;
+  ticketId: string;
+  stage: string;
+  claimedAt: string;       // ISO-8601
+}
+```
+
 ## API Client
 
 The typed REST API client lives in `src/lib/api/`. Import everything from
@@ -209,7 +270,7 @@ a 10-second request timeout via `AbortController`.
 
 ## WebSocket Real-Time Updates
 
-<!-- last_reviewed: 2026-03-11T20:00:00Z -->
+<!-- last_reviewed: 2026-03-12T20:00:00Z -->
 
 The dashboard receives live ticket updates over a WebSocket connection to
 the `/ws/tickets` endpoint. No manual polling is required — ticket cards
@@ -313,7 +374,7 @@ state without an additional API call.
 
 ## Filtering and Sorting
 
-<!-- last_reviewed: 2026-03-11T20:00:00Z -->
+<!-- last_reviewed: 2026-03-12T20:00:00Z -->
 
 The pipeline view includes a chip-based filter bar that lets users narrow
 the ticket list by stage, type, priority, operator, machine, or agent.
@@ -393,7 +454,7 @@ background with a hover effect. Uses `role="option"` and
 
 ## Pipeline View (`/pipeline`)
 
-<!-- last_reviewed: 2026-03-11T20:00:00Z -->
+<!-- last_reviewed: 2026-03-12T20:00:00Z -->
 
 The pipeline page renders a horizontal Kanban board with 11 SDLC stage
 columns (Ready through Done). Each column shows a count badge and a
@@ -426,7 +487,7 @@ scrollable list of ticket cards.
 
 ## Ticket Detail View (`/tickets/[id]`)
 
-<!-- last_reviewed: 2026-03-11T20:00:00Z -->
+<!-- last_reviewed: 2026-03-12T20:00:00Z -->
 
 Displays full metadata and history for a single ticket, loaded by ID
 from the URL parameter.
@@ -454,6 +515,74 @@ from the URL parameter.
   expandable JSON payload details.
 - Dependency tab shows upstream (depends-on) and downstream (depended-by)
   tickets as clickable links with resolved/unresolved status dots.
+
+---
+
+## Active Claims Monitor (`/claims`)
+
+<!-- last_reviewed: 2026-03-12T12:00:00Z -->
+
+Displays all currently claimed tickets in a sortable table with real-time
+lease countdown timers. Designed for operators who need to monitor which
+agents hold active claims and how much lease time remains.
+
+### Components
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `ClaimsPage` | `app/claims/page.tsx` | Page shell — loads claims via REST, subscribes to WebSocket updates |
+| `ClaimsTable` | `components/claims/ClaimsTable.tsx` | Sortable data table with mobile card layout fallback |
+| `LeaseCountdown` | `components/claims/LeaseCountdown.tsx` | Real-time per-second countdown timer with urgency states |
+
+### Behavior
+
+- Claims load via `fetchTickets()` on mount; only tickets with an active
+  claim and lease expiry are displayed.
+- **Real-time updates** via `useTicketStream` — new claims appear, released
+  claims disappear, and lease times stay current without page refresh.
+- **Sortable columns:** Ticket, Agent, Machine, Operator, Stage, Lease
+  Remaining. Default sort: lease remaining ascending (expiring soonest first).
+- **Responsive layout:** table on desktop/tablet, card list on mobile.
+- Loading state shows skeleton rows/cards.
+- Empty state shows an inbox icon with explanatory text.
+
+### LeaseCountdown States
+
+The countdown timer transitions through four visual states based on
+remaining time:
+
+| State | Condition | Indicator | Color |
+|-------|-----------|-----------|-------|
+| Normal | ≥ 5 min remaining | Solid green dot + MM:SS | Green |
+| Warning | < 5 min remaining | Pulsing yellow dot + MM:SS | Yellow |
+| Critical | < 1 min remaining | Pulsing red dot + MM:SS | Red |
+| Expired | 0 sec remaining | "EXPIRED" badge | Red |
+
+Warning and critical thresholds are configurable via
+`warningThreshold` (default 300 s) and `criticalThreshold` (default 60 s)
+props on `LeaseCountdown`.
+
+### Accessibility
+
+- Table uses `role="table"` and `role="columnheader"` with `aria-sort`.
+- Sort headers are keyboard-focusable and support Enter/Space activation.
+- `LeaseCountdown` uses `role="timer"` with throttled `aria-live="polite"`
+  announcements (30 s intervals when normal, 10 s when warning, 5 s when
+  critical).
+- Row visual urgency is communicated via colored left borders, not color
+  alone.
+- Mobile card list uses `role="list"` with `aria-label`.
+
+### Data Types
+
+| Type | Description |
+|------|-------------|
+| `ClaimRow` | Flat row model: ticketId, ticketTitle, agent, machine, operator, leaseExpiry, stage, claimedAt |
+| `SortField` | Union of sortable column identifiers |
+| `SortDirection` | `'asc'` or `'desc'` |
+| `ClaimsTableProps` | Props for the `ClaimsTable` component |
+| `LeaseCountdownProps` | Props for the `LeaseCountdown` component |
+| `CountdownState` | Internal urgency state: normal, warning, critical, expired |
 
 ---
 
