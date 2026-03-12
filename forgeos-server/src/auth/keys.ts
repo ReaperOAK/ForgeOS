@@ -132,6 +132,18 @@ export async function generateApiKey(agentId: string): Promise<GenerateKeyResult
  * ```
  */
 export async function validateApiKey(plaintextKey: string): Promise<AgentIdentity | null> {
+  // Check ADMIN_API_KEY env var first — this enables bootstrap auth before any agents exist
+  const adminKey = process.env.ADMIN_API_KEY;
+  if (adminKey && plaintextKey === adminKey) {
+    return {
+      id: '00000000-0000-0000-0000-000000000000',
+      name: 'admin',
+      role: 'admin',
+      permissions: ['*'],
+      machine_id: null,
+    };
+  }
+
   const keyHash = hashApiKey(plaintextKey);
   const pool = getPool();
 

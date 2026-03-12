@@ -37,10 +37,6 @@ forgeos-server/        # ForgeOS MCP Server (TypeScript/Express)
     webhooks/          # GitHub push reconciliation
   docker-compose.yml   # PostgreSQL + PgBouncer + MCP Server
   Dockerfile           # Multi-stage Docker build
-mcp-server/            # Python MCP Server (FastMCP + asyncpg)
-  src/mcp_server/      # Server, tools, config, error hierarchy
-  alembic/             # PostgreSQL schema migrations
-  tests/               # Pytest test suite
 infra/                 # Infrastructure and DevOps
   docker-compose.yml   # Production Docker stack
   scripts/             # setup.sh, seed.sh, backup.sh, restore.sh
@@ -54,7 +50,6 @@ docs/uiux/            # UI/UX design artifacts
 
 - **ReaperOAK**: Stateless dispatcher. Scans READY tickets, dispatches workers, advances lifecycle.
 - **ForgeOS MCP Server** (`forgeos-server/`): TypeScript/Express server exposing 11 ticket lifecycle tools over Model Context Protocol (MCP) via Streamable HTTP transport. Backed by PostgreSQL 17 with Row-Level Security, stored functions for atomic ticket operations, and LISTEN/NOTIFY for real-time SSE.
-- **Python MCP Server** (`mcp-server/`): Alternative MCP server built on the official Python SDK with FastMCP, asyncpg, and Pydantic.
 - **PostgreSQL 17**: Primary data store with event-sourcing audit trail, file-level mutex for concurrent access, and dependency resolution.
 - **Real-Time Dashboard**: Live Kanban board at http://localhost:3000/dashboard with SSE-driven updates, stage filtering, and ticket detail views.
 - **Distributed execution**: Multiple operators on multiple machines via Git-native locking.

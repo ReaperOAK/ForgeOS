@@ -150,11 +150,7 @@ test-coverage: ## Run tests with coverage report
 lint: ## Run linters (ESLint for TS, Ruff for Python)
 	@printf "$(GREEN)▶ Linting …$(RESET)\n"
 	cd $(SERVER_DIR) && npm run lint || true
-	@if command -v ruff >/dev/null 2>&1; then \
-		ruff check mcp-server/; \
-	else \
-		printf "$(YELLOW)⚠  ruff not installed — skipping Python lint$(RESET)\n"; \
-	fi
+
 	@printf "$(GREEN)✔ Lint complete.$(RESET)\n"
 
 .PHONY: typecheck
@@ -171,11 +167,7 @@ format: ## Auto-format code (Prettier + Ruff)
 	else \
 		printf "$(YELLOW)⚠  prettier not available — skipping TS format$(RESET)\n"; \
 	fi
-	@if command -v ruff >/dev/null 2>&1; then \
-		ruff format mcp-server/; \
-	else \
-		printf "$(YELLOW)⚠  ruff not installed — skipping Python format$(RESET)\n"; \
-	fi
+
 	@printf "$(GREEN)✔ Formatting complete.$(RESET)\n"
 
 # ---------------------------------------------------------------------------

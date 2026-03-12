@@ -8,6 +8,7 @@
 
 import { config } from './config.js';
 import { runMigrations } from './db/migrate.js';
+import { seed } from './db/seed.js';
 import { closePool } from './db/pool.js';
 import { logger } from './middleware/logging.js';
 import {
@@ -41,6 +42,11 @@ async function main(): Promise<void> {
   logger.info('Running database migrations...');
   await runMigrations();
   logger.info('Migrations complete');
+
+  // ── 1b. Seed default data ─────────────────────────
+  logger.info('Seeding default data...');
+  await seed();
+  logger.info('Seed complete');
 
   // ── 2. Create Express app ─────────────────────────
   const app = createApp(config);

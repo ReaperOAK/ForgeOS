@@ -16,7 +16,10 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { registerTools } from './tools/index.js';
 import { authMiddleware } from './middleware/auth.js';
+import { requestIdMiddleware } from './middleware/request-id.js';
+import { errorHandler } from './middleware/error-handler.js';
 import { requestLogger, logger } from './middleware/logging.js';
+import { createApiRouter } from './api/index.js';
 import { pool, healthCheck } from './db/pool.js';
 import type { AppConfig } from './config.js';
 
@@ -42,8 +45,13 @@ const sseClients = new Set<Response>();
 export function createApp(_config: AppConfig): express.Express {
   const app = express();
 
-  // ── Middleware ──────────────────────────────────────
-  app.use(express.json());
+  // ── Middleware (order matters) ──────────────────────
+  // Skip express.json() for /mcp — the MCP SDK transport reads the raw body stream itself
+  app.use((req, res, next) => {
+    if (req.path === '/mcp') return next();
+    express.json()(req, res, next);
+  });
+  app.use(requestIdMiddleware);
   app.use(requestLogger);
   app.use(authMiddleware);
 
@@ -85,22 +93,25 @@ export function createApp(_config: AppConfig): express.Express {
   const dashboardPath = path.join(__dirname, 'dashboard');
   app.use('/dashboard', express.static(dashboardPath));
 
+  // ── REST API ───────────────────────────────────────
+  app.use('/api', createApiRouter());
+
   // ── MCP Endpoint ───────────────────────────────────
-  const mcpServer = new McpServer({
-    name: 'forgeos',
-    version: '1.0.0',
-  });
-
-  registerTools(mcpServer);
-
-  // Streamable HTTP transport for MCP
-  app.post('/mcp', async (req: Request, res: Response) => {
+  // Stateless mode: SDK requires a fresh transport AND server per request
+  // to avoid transport-reuse errors and connection conflicts.
+  app.all('/mcp', async (req: Request, res: Response) => {
     try {
+      const mcpServer = new McpServer({
+        name: 'forgeos',
+        version: '1.0.0',
+      });
+      registerTools(mcpServer);
       const transport = new StreamableHTTPServerTransport({
         sessionIdGenerator: undefined, // stateless
       });
       await mcpServer.connect(transport);
-      await transport.handleRequest(req, res, req.body as Record<string, unknown>);
+      await transport.handleRequest(req, res);
+      await transport.close();
     } catch (err) {
       logger.error({ err }, 'MCP request failed');
       if (!res.headersSent) {
@@ -109,36 +120,8 @@ export function createApp(_config: AppConfig): express.Express {
     }
   });
 
-  // Handle GET and DELETE for SSE-based MCP transport
-  app.get('/mcp', async (req: Request, res: Response) => {
-    try {
-      const transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: undefined,
-      });
-      await mcpServer.connect(transport);
-      await transport.handleRequest(req, res);
-    } catch (err) {
-      logger.error({ err }, 'MCP GET request failed');
-      if (!res.headersSent) {
-        res.status(500).json({ error: 'MCP_ERROR', message: 'Internal server error' });
-      }
-    }
-  });
-
-  app.delete('/mcp', async (req: Request, res: Response) => {
-    try {
-      const transport = new StreamableHTTPServerTransport({
-        sessionIdGenerator: undefined,
-      });
-      await mcpServer.connect(transport);
-      await transport.handleRequest(req, res);
-    } catch (err) {
-      logger.error({ err }, 'MCP DELETE request failed');
-      if (!res.headersSent) {
-        res.status(500).json({ error: 'MCP_ERROR', message: 'Internal server error' });
-      }
-    }
-  });
+  // ── Error handler (must be last) ───────────────────
+  app.use(errorHandler);
 
   return app;
 }

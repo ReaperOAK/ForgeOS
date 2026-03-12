@@ -162,23 +162,29 @@ export async function runMigrations(): Promise<number> {
     const sql = fs.readFileSync(filePath, 'utf-8');
     const checksum = computeChecksum(sql);
 
+    // Migrations with .notx. in the filename run without a transaction.
+    // Required for ALTER TYPE ... ADD VALUE which cannot run inside a tx block.
+    const noTx = file.includes('.notx.');
+
     const client = await pool.connect();
     try {
-      await client.query('BEGIN');
+      if (!noTx) await client.query('BEGIN');
       await client.query(sql);
       await client.query(
         'INSERT INTO schema_migrations (name, checksum) VALUES ($1, $2)',
         [file, checksum],
       );
-      await client.query('COMMIT');
+      if (!noTx) await client.query('COMMIT');
       logger.info(
         { event: 'migration_applied', migration: file, checksum },
         'Migration applied',
       );
     } catch (err) {
-      await client.query('ROLLBACK').catch(() => {
-        /* ignore rollback errors on already-failed connection */
-      });
+      if (!noTx) {
+        await client.query('ROLLBACK').catch(() => {
+          /* ignore rollback errors on already-failed connection */
+        });
+      }
       logger.error(
         { event: 'migration_failed', migration: file, err },
         'Migration failed',

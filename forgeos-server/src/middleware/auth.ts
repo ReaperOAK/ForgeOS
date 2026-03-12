@@ -23,7 +23,7 @@ import type { AgentIdentity } from '../types/index.js';
 // ── Public Path Detection ────────────────────────────────────────────────────
 
 /** Path prefixes exempt from authentication. */
-const PUBLIC_PATH_PREFIXES: readonly string[] = ['/health'];
+const PUBLIC_PATH_PREFIXES: readonly string[] = ['/health', '/dashboard', '/events'];
 
 /**
  * Check whether a request path is exempt from authentication.

@@ -29,6 +29,9 @@ COPY --from=builder /app/dist/ ./dist/
 COPY --from=builder /app/node_modules/ ./node_modules/
 COPY package.json ./
 
+# Copy SQL migration files (not emitted by tsc).
+COPY src/db/migrations/ ./dist/db/migrations/
+
 # Dashboard static assets (created in a later phase; see TASK-FOS-08-004).
 COPY src/dashboard/ ./dist/dashboard/
 

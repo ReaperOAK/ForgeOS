@@ -834,8 +834,8 @@ BEGIN
 
     INSERT INTO events (ticket_id, event_type, agent_id, agent_name, previous_status, new_status, payload)
     VALUES (p_ticket_id,
-            CASE WHEN p_force THEN 'FORCE_RELEASED' ELSE 'RELEASED' END,
-            p_agent_id, p_agent_name, 'CLAIMED', 'READY',
+            (CASE WHEN p_force THEN 'FORCE_RELEASED' ELSE 'RELEASED' END)::event_type,
+            p_agent_id, p_agent_name, 'CLAIMED'::ticket_status, 'READY'::ticket_status,
             jsonb_build_object('reason', COALESCE(p_reason, 'voluntary_release'), 'forced', p_force));
 
     RETURN NEXT v_ticket;
