@@ -155,7 +155,7 @@ securityPolicy:
 ┌─────────────────────────────────────────────┐
 │ HUMAN TRUST ZONE                            │
 │ ┌─────────────────────────────────────────┐ │
-│ │ ORCHESTRATOR ZONE (ReaperOAK)           │ │
+│ │ ORCHESTRATOR ZONE (Ticketer)           │ │
 │ │  - Can delegate tasks                   │ │
 │ │  - Can elevate autonomy                 │ │
 │ │  - Cannot modify security policies      │ │
@@ -188,7 +188,7 @@ securityPolicy:
    tools (delete, deploy, force-push) require L3 autonomy + human approval.
 
 3. **Privilege Escalation Prevention:** Agents cannot elevate their own
-   autonomy level. Only ReaperOAK can set autonomy levels per delegation
+   autonomy level. Only Ticketer can set autonomy levels per delegation
    packet. Requests for L3 are logged and justified.
 
 4. **Output Sanitization:** Agent outputs that flow into other systems
@@ -377,7 +377,7 @@ Clarity: ?/10 | Impact: ?/10 | TOTAL: ?/50
 
 ## 15. Delegation Input/Output Contract
 
-### Input (from ReaperOAK)
+### Input (from Ticketer)
 
 ```yaml
 taskId: string
@@ -392,7 +392,7 @@ dagNodeId: string
 dependencies: string[]
 ```
 
-### Output (to ReaperOAK)
+### Output (to Ticketer)
 
 ```yaml
 taskId: string
@@ -456,7 +456,7 @@ blockers: string[]
 - AI bias detected in production → Escalate to ProductManager + human
 - Dependency with critical CVE → Escalate to DevOps for immediate update
 - Policy-as-config violation → Escalate with specific policy reference
-- Agent privilege escalation possible → Escalate to ReaperOAK immediately
+- Agent privilege escalation possible → Escalate to Ticketer immediately
 - Zero Trust gap at service boundary → Escalate to Architect + DevOps
 - Responsible AI violation → Escalate with RAI-ADR recommendation
 

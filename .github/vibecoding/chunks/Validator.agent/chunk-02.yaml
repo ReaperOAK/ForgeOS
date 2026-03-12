@@ -127,7 +127,7 @@ When issuing REJECTED, provide:
 | Second rejection | Re-delegate with emphasis on specific failing items |
 | Third rejection | **ESCALATE TO USER** — max rework cycles exceeded |
 | Agent disputes rejection | Validator cannot override own rejection; user decides |
-| Ambiguous finding | Set confidence to LOW and flag for ReaperOAK review |
+| Ambiguous finding | Set confidence to LOW and flag for Ticketer review |
 
 ### Rejection Response Template
 

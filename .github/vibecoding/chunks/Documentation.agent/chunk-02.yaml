@@ -210,7 +210,7 @@ Clarity: ?/10 | Impact: ?/10 | TOTAL: ?/50
 
 ## 15. Delegation Input/Output Contract
 
-### Input (from ReaperOAK)
+### Input (from Ticketer)
 
 ```yaml
 taskId: string
@@ -227,7 +227,7 @@ dagNodeId: string
 dependencies: string[]
 ```
 
-### Output (to ReaperOAK)
+### Output (to Ticketer)
 
 ```yaml
 taskId: string
@@ -280,7 +280,7 @@ for every completed task:
 
 ### Doc-Update Report
 
-After checking all 5 items, return a **doc-update report** to ReaperOAK:
+After checking all 5 items, return a **doc-update report** to Ticketer:
 
 ```yaml
 task_id: "{TASK_ID}"
@@ -311,7 +311,7 @@ doc_update_report:
 
 1. DOC-04 (CHANGELOG) MUST always be `updated` — never `not_applicable`
 2. If unable to update a doc due to missing context, report with
-   `status: "blocked"` and `reason: "{explanation}"` — ReaperOAK will resolve
+   `status: "blocked"` and `reason: "{explanation}"` — Ticketer will resolve
 3. Documentation updates are append-only — never delete existing content
 4. If a task introduces a new module, DOC-01 (README) MUST be `updated`
 5. The doc-update report is the exit gate for the Documentation step in the
@@ -320,12 +320,12 @@ doc_update_report:
 ## 17. Escalation Triggers
 
 - Code contradicts documentation → Escalate to relevant agent (Backend/Frontend)
-- Readability target unreachable for technical content → Escalate to ReaperOAK
+- Readability target unreachable for technical content → Escalate to Ticketer
 - Missing design spec for documented feature → Escalate to Architect
 - User-facing content needs brand review → Escalate to ProductManager
 - Documentation infrastructure broken (linters, CI) → Escalate to DevOps
 - Security-sensitive documentation → Escalate to Security for review
-- Diátaxis quadrant unclear → Escalate to ReaperOAK for classification
+- Diátaxis quadrant unclear → Escalate to Ticketer for classification
 
 ## 18. Memory Bank Access
 

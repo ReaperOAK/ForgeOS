@@ -2,7 +2,7 @@
 id: sandbox-tool-acl
 version: "1.0"
 description: "Per-agent tool access control lists for sandboxed execution"
-locked_by: ReaperOAK
+locked_by: Ticketer
 immutable: true
 ---
 
@@ -258,7 +258,7 @@ agents:
         - "TODO/.gitkeep"
       denied:
         - "**"
-    notes: "Decomposes features into granular tracked tasks; invokable only by ReaperOAK. Write scope is allowlist-only — denied: '**' blocks all paths not explicitly listed in allowed."
+    notes: "Decomposes features into granular tracked tasks; invokable only by Ticketer. Write scope is allowlist-only — denied: '**' blocks all paths not explicitly listed in allowed."
 
   Validator:
     description: "Independent SDLC compliance reviewer. Read-heavy, write-limited to validation reports."
@@ -294,7 +294,7 @@ agents:
         - ".github/memory-bank/feedback-log.md"
       denied:
         - "**"
-    notes: "Independent SDLC compliance reviewer; invokable only by ReaperOAK at VALIDATION stage. Write scope is allowlist-only — denied: '**' blocks all paths not explicitly listed in allowed."
+    notes: "Independent SDLC compliance reviewer; invokable only by Ticketer at VALIDATION stage. Write scope is allowlist-only — denied: '**' blocks all paths not explicitly listed in allowed."
 
 # Apply Proposal Requirements
 apply_proposal:
@@ -302,7 +302,7 @@ apply_proposal:
   requires:
     - agent produces apply_proposal.json with full plan
     - human reviews and approves via PR labeled HUMAN_APPROVAL
-    - ReaperOAK validates approval signature
+    - Ticketer validates approval signature
     - only then may DevOps execute apply
   format:
     type: object

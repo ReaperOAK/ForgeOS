@@ -6,7 +6,7 @@ Runs on any machine by any operator. Implements the dispatcher-claim / worker-wo
 protocol for claiming and processing tickets through the Git-native SDLC pipeline.
 
 Usage:
-  # Dispatcher (ReaperOAK) claims a ticket before launching a subagent:
+  # Dispatcher (Ticketer) claims a ticket before launching a subagent:
   python agent-runner.py --claim-only --agent Backend --operator Owais --ticket TASK-001-01-01
 
   # Subagent completes work (Commit 2 only — claim was already done by dispatcher):
@@ -18,10 +18,10 @@ Usage:
 
 This script:
 1. Identifies claimable tickets for the given agent role
-2. Executes Commit 1 (CLAIM) via --claim-only (called by ReaperOAK/dispatcher)
+2. Executes Commit 1 (CLAIM) via --claim-only (called by Ticketer/dispatcher)
 3. After agent work, executes Commit 2 (WORK) via --complete (called by subagent)
 
-Subagents NEVER perform claim commits — only ReaperOAK (dispatcher) does.
+Subagents NEVER perform claim commits — only Ticketer (dispatcher) does.
 The actual agent work is done by the human+AI pair via Copilot prompts.
 This script handles the git protocol bookkeeping.
 """
@@ -208,9 +208,9 @@ def find_claimable_tickets(agent: str) -> list[dict]:
 
 def execute_claim(ticket_id: str, agent: str, machine_id: str, operator: str) -> bool:
     """
-    Execute Commit 1 — CLAIM PHASE (called by ReaperOAK/dispatcher only).
+    Execute Commit 1 — CLAIM PHASE (called by Ticketer/dispatcher only).
 
-    Subagents NEVER call this directly. ReaperOAK performs the claim
+    Subagents NEVER call this directly. Ticketer performs the claim
     before dispatching the subagent via --claim-only.
 
     1. git pull --rebase
@@ -532,7 +532,7 @@ def main():
     parser.add_argument("--ticket", help="Specific ticket ID to claim")
     parser.add_argument("--list-ready", action="store_true", help="List all READY tickets")
     parser.add_argument("--list-claimable", action="store_true", help="List tickets claimable by agent")
-    parser.add_argument("--claim-only", action="store_true", help="Execute claim only (Commit 1) — used by ReaperOAK/dispatcher")
+    parser.add_argument("--claim-only", action="store_true", help="Execute claim only (Commit 1) — used by Ticketer/dispatcher")
     parser.add_argument("--complete", metavar="TICKET_ID", help="Execute work commit (Commit 2) for a pre-claimed ticket — used by subagents")
     parser.add_argument("--modified-files", nargs="*", default=[], help="Files modified during work (for --complete)")
     parser.add_argument("--summary-file", help="Path to summary .md file (for --complete; auto-detected if omitted)")

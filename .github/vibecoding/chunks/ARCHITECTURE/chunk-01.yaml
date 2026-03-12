@@ -3,12 +3,12 @@ source: "./.github/instructions/ARCHITECTURE.instructions.md"
 chunk_index: 1
 token_estimate: 3943
 hash: "78e99ad05ab5329cccbf4f09aa22115d1c1ff53e25c5d401c3343a900fa67004"
-summary: "# Vibecoding Multi-Agent System Architecture  > **Version:** 3.0.0 > **Owner:** ReaperOAK (CTO / Supervisor Orchestra..."
+summary: "# Vibecoding Multi-Agent System Architecture  > **Version:** 3.0.0 > **Owner:** Ticketer (CTO / Supervisor Orchestra..."
 ---
 # Vibecoding Multi-Agent System Architecture
 
 > **Version:** 3.0.0
-> **Owner:** ReaperOAK (CTO / Supervisor Orchestrator)
+> **Owner:** Ticketer (CTO / Supervisor Orchestrator)
 > **Last Updated:** 2025-07-24
 
 ---
@@ -16,7 +16,7 @@ summary: "# Vibecoding Multi-Agent System Architecture  > **Version:** 3.0.0 > *
 ## 1. System Overview
 
 This architecture implements a **Supervisor Pattern** multi-agent vibecoding
-system with ReaperOAK as the singular CTO and orchestrator. All subagents
+system with Ticketer as the singular CTO and orchestrator. All subagents
 operate within bounded scopes, follow Plan-Act-Reflect loops with RUG
 discipline, and route destructive operations through human approval gates.
 
@@ -27,7 +27,7 @@ discipline, and route destructive operations through human approval gates.
 3. **Least privilege** — minimal tool access per agent
 4. **Zero hallucinated authority** — agents cannot claim capabilities they lack
 5. **Immutable truth sources** — `systemPatterns.md` and `decisionLog.md` are
-   controlled by ReaperOAK only
+   controlled by Ticketer only
 6. **Human-in-the-loop for destructive ops** — always
 7. **Confidence-gated progression** — no phase transition without assessed confidence
 8. **DAG-first decomposition** — all multi-task work starts with dependency graph
@@ -39,7 +39,7 @@ discipline, and route destructive operations through human approval gates.
 ## 2. Agent Topology
 
 ```
-ReaperOAK (Supervisor / CTO)
+Ticketer (Supervisor / CTO)
 │
 ├── Cross-Cutting Protocols ─── _cross-cutting-protocols.md (inherited by ALL)
 │
@@ -59,7 +59,7 @@ ReaperOAK (Supervisor / CTO)
 
 | Agent | Domain Expertise | Can Read | Can Write | Can Execute | Cannot Do |
 |-------|-----------------|----------|-----------|-------------|-----------|
-| **ReaperOAK** | Orchestration, DAG construction, QA integration | Everything | systemPatterns, decisionLog, activeContext, progress | Delegate, validate, approve | Direct file edits in multi-agent mode |
+| **Ticketer** | Orchestration, DAG construction, QA integration | Everything | systemPatterns, decisionLog, activeContext, progress | Delegate, validate, approve | Direct file edits in multi-agent mode |
 | **ProductManager** | EARS notation, INVEST stories, DDD context mapping | All memory bank | activeContext, progress | GitHub issues | Edit code, deploy, modify architecture |
 | **Architect** | Well-Architected Pillars, API contracts, DAG task graphs | All memory bank, codebase | activeContext, progress | Analysis tools | Edit production code, deploy |
 | **Backend** | TDD, Object Calisthenics, RFC 7807, N+1 detection | Assigned files, systemPatterns | Source code (scoped dirs) | Terminal, tests | Frontend files, infra, security config |
@@ -73,7 +73,7 @@ ReaperOAK (Supervisor / CTO)
 
 ### Structured Autonomy Levels
 
-Each agent operates at a defined autonomy level. ReaperOAK can adjust
+Each agent operates at a defined autonomy level. Ticketer can adjust
 levels based on task criticality.
 
 | Level | Name | Behavior | Approval Required |
@@ -103,7 +103,7 @@ levels based on task criticality.
 
 ### 3.1 Context Loading Strategy
 
-At session start, ReaperOAK loads context using a 4-priority system:
+At session start, Ticketer loads context using a 4-priority system:
 
 | Priority | Category | Action | Budget |
 |----------|----------|--------|--------|
@@ -148,12 +148,12 @@ contextBudget:
 
 ## 4. Delegation Packet Format
 
-Every task delegated from ReaperOAK to a subagent uses this canonical format:
+Every task delegated from Ticketer to a subagent uses this canonical format:
 
 ```yaml
 packet:
   taskId: "TASK-{timestamp}-{seq}"
-  delegatedBy: "ReaperOAK"
+  delegatedBy: "Ticketer"
   assignedTo: "{subagent-name}"
   autonomyLevel: "L1 | L2 | L3"
   objective: "Clear, measurable description of what must be accomplished"
@@ -249,7 +249,7 @@ See `orchestration.rules.instructions.md` §1 for full state definitions and tra
 ## 7. Merge Protocol
 
 1. Subagent completes work → signals REVIEW state
-2. ReaperOAK's Reviewer lane validates:
+2. Ticketer's Reviewer lane validates:
    - Requirements coverage check
    - Correctness/syntax validation
    - No forbidden file modifications
@@ -261,7 +261,7 @@ See `orchestration.rules.instructions.md` §1 for full state definitions and tra
 5. File conflict detection:
    - Before merge, diff analysis on all modified files
    - If parallel branches modified same file → sequential resolution
-   - Conflicting changes escalated to ReaperOAK for manual merge
+   - Conflicting changes escalated to Ticketer for manual merge
 
 ---
 
@@ -280,13 +280,13 @@ Key constraints:
 ## 9. Conflict Resolution Policy
 
 1. **Intra-agent conflict:** Re-run with explicit context of the contradiction
-2. **Inter-agent conflict:** ReaperOAK resolves using `systemPatterns.md`
+2. **Inter-agent conflict:** Ticketer resolves using `systemPatterns.md`
 3. **Agent vs. instruction conflict:** Instruction file wins always
 4. **Confidence disagreement:** Higher-evidence position wins
 5. **Precedence hierarchy:**
 
    ```
-   Human directive > ReaperOAK decision > systemPatterns.md >
+   Human directive > Ticketer decision > systemPatterns.md >
    domain instruction > cross-cutting protocols > general instruction >
    agent default behavior
    ```
@@ -359,16 +359,16 @@ Located at `.github/memory-bank/`:
 
 | File | Owner | Write Access | Purpose |
 |------|-------|-------------|---------|
-| `productContext.md` | ReaperOAK | ReaperOAK, ProductManager | Project vision, goals, constraints |
-| `systemPatterns.md` | ReaperOAK | ReaperOAK ONLY | Architecture decisions, code conventions |
+| `productContext.md` | Ticketer | Ticketer, ProductManager | Project vision, goals, constraints |
+| `systemPatterns.md` | Ticketer | Ticketer ONLY | Architecture decisions, code conventions |
 | `activeContext.md` | Shared | All subagents (append) | Current focus, recent changes |
 | `progress.md` | Shared | All subagents (append) | Completed milestones, pending work |
-| `decisionLog.md` | ReaperOAK | ReaperOAK ONLY | Trade-off records, rationale |
-| `riskRegister.md` | Security | Security, ReaperOAK | Identified risks, mitigations |
+| `decisionLog.md` | Ticketer | Ticketer ONLY | Trade-off records, rationale |
+| `riskRegister.md` | Security | Security, Ticketer | Identified risks, mitigations |
 
 **Immutability Rules:**
 
-- `systemPatterns.md` and `decisionLog.md` are append-only by ReaperOAK
+- `systemPatterns.md` and `decisionLog.md` are append-only by Ticketer
 - No subagent may delete or overwrite entries in these files
 - Subagents may only append timestamped entries to `activeContext.md` and `progress.md`
 

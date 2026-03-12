@@ -1,6 +1,6 @@
 ---
 name: Takeover
-agent: ReaperOAK
+agent: Ticketer
 model: Claude Opus 4.6 (copilot)
 description: Initializes legacy repository takeover. Guides structured reconstruction before resuming normal autonomous ticket-driven execution.
 ---
@@ -25,11 +25,17 @@ You must perform structured reconstruction.
 
 # PHASE 0 — BOOT SEQUENCE
 
-Before any work, execute:
+Before any work, execute the full 11-step boot sequence:
 1. Read `.github/guardian/STOP_ALL` — if contains `STOP`: halt, zero edits.
 2. Read all `.github/instructions/*.instructions.md` (6 files).
-3. Run `python3 .github/tickets.py --sync`
-4. Run `python3 .github/tickets.py --status --json`
+3. Read your agent file: `.github/agents/{YourAgent}.agent.md` — internalize the Assigned Tool Loadout.
+4. Run `python3 .github/tickets.py --sync`
+5. Run `python3 .github/tickets.py --status --json`
+6. Read `.github/vibecoding/chunks/{YourAgent}.agent/` (all files).
+7. Read `.github/vibecoding/catalog.yml`; load task-relevant chunks.
+8. Invoke `sequentialthinking` to plan execution before touching any files.
+
+All agents operate under strict Tool Loadouts per `agents.md` §0.1. No tool browsing or hallucination outside assigned loadout.
 
 ---
 
@@ -145,7 +151,7 @@ Before feature work, execute in parallel:
 
 Each ticket must:
 - Follow full SDLC through file-based state machine (`.github/ticket-state/`)
-- Use dispatcher-claim protocol per stage: ReaperOAK performs Commit 1 (CLAIM) before dispatch, subagent performs Commit 2 (WORK) only
+- Use dispatcher-claim protocol per stage: Ticketer performs Commit 1 (CLAIM) before dispatch, subagent performs Commit 2 (WORK) only
 - Traverse per ticket type (e.g., backend): READY → BACKEND → QA → SECURITY → CI → DOCS → VALIDATION → DONE
 - Write agent summary to `.github/agent-output/{AgentName}/{ticket-id}.md`
 - Read upstream summary from previous stage agent before starting
@@ -163,8 +169,8 @@ python3 .github/tickets.py --sync
 python3 .github/tickets.py --status
 ```
 
-Parallel execution allowed — ReaperOAK claims via push-based distributed lock before dispatching (push failure = another operator claimed first).
-ReaperOAK dispatches one subagent per READY ticket. No grouping, no batching.
+Parallel execution allowed — Ticketer claims via push-based distributed lock before dispatching (push failure = another operator claimed first).
+Ticketer dispatches one subagent per READY ticket. No grouping, no batching.
 For N READY tickets, N workers run in parallel (using N `runSubagent` calls). No grouping or batching logic. No dependency reasoning.
 
 ---
@@ -182,11 +188,15 @@ Only after:
 
 Then continue normal autonomous execution:
 - Ticket by ticket via `python3 .github/tickets.py --sync` + `--status --json`
-- Dispatcher-claim protocol enforced: ReaperOAK performs CLAIM commit (ticket JSON only) → subagent performs WORK commit (code + summary + advance)
+- Dispatcher-claim protocol enforced: Ticketer performs CLAIM commit (ticket JSON only) → subagent performs WORK commit (code + summary + advance)
+- Ticketer is a dumb dispatcher — it NEVER reads/writes codebase files. Its toolset is restricted to `memory/*`, `execute/*`, `github/*`, and `sequentialthinking/*`
+- All agents follow their Assigned Tool Loadout from `.github/agents/{Agent}.agent.md` — no out-of-scope tool usage
 - Parallelized across operators/machines with push-based distributed locking
 - Full SDLC loop through stage directories
 - Agent summary handoff via `.github/agent-output/{AgentName}/{ticket-id}.md`
 - Strict scoped git rules (explicit staging only, no `git add .`)
+- Agents use `oraios/serena/*` for code navigation and atomic edits
+- Each agent invokes `sequentialthinking` to plan before touching files
 - Memory bank updates per `.github/instructions/core.instructions.md`
 
 ---
@@ -200,6 +210,8 @@ Then continue normal autonomous execution:
 5. Prefer incremental stabilization.
 6. Maintain compatibility unless explicitly approved.
 7. Generate migration tickets instead of silent rewrites.
+8. All agents must operate within their Assigned Tool Loadout — no tool browsing or hallucination.
+9. Ticketer is a dumb dispatcher — it NEVER reads/writes codebase files, only dispatches and advances.
 
 ---
 

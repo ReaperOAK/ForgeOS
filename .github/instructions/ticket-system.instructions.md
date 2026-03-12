@@ -85,10 +85,10 @@ RULE: Backend-only tickets skip this gate.
 
 ## 7. Parallelism
 
-RULE: ReaperOAK dispatches one subagent per READY ticket.
-RULE: ReaperOAK performs claim commit before dispatching each subagent.
-RULE: ReaperOAK does NOT compute safe parallel groups.
-RULE: ReaperOAK does NOT reason about file conflicts.
+RULE: Ticketer dispatches one subagent per READY ticket.
+RULE: Ticketer performs claim commit before dispatching each subagent.
+RULE: Ticketer does NOT compute safe parallel groups.
+RULE: Ticketer does NOT reason about file conflicts.
 RULE: Subagents do NOT perform claim commits — they receive pre-claimed tickets.
 RULE: Git push conflicts on the claim commit are the safety mechanism.
 PROHIBITED: Grouping logic in the dispatcher.

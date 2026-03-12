@@ -3,12 +3,12 @@ source: "./.github/instructions/orchestration.rules.instructions.md"
 chunk_index: 1
 token_estimate: 3963
 hash: "0359ff9d44272338dd090536b35df0817c8cc5742b65372b5a4fbd4cbf31c405"
-summary: "# Orchestration Rules  > **Version:** 2.0.0 > **Owner:** ReaperOAK (CTO / Supervisor Orchestrator) > **Authority:** T..."
+summary: "# Orchestration Rules  > **Version:** 2.0.0 > **Owner:** Ticketer (CTO / Supervisor Orchestrator) > **Authority:** T..."
 ---
 # Orchestration Rules
 
 > **Version:** 2.0.0
-> **Owner:** ReaperOAK (CTO / Supervisor Orchestrator)
+> **Owner:** Ticketer (CTO / Supervisor Orchestrator)
 > **Authority:** This file defines the canonical rules for task execution,
 > concurrency, DAG construction, confidence-gated progression, and integration
 > validation. All agents MUST comply.
@@ -42,13 +42,13 @@ stateDiagram-v2
 
 | State | Owner | Entry Condition | Exit Condition |
 |-------|-------|-----------------|----------------|
-| PENDING | ReaperOAK | Task created, dependencies not yet met | All dependencies MERGED |
+| PENDING | Ticketer | Task created, dependencies not yet met | All dependencies MERGED |
 | IN_PROGRESS | Assigned Agent | Agent begins execution | Agent signals completion or failure |
-| REVIEW | ReaperOAK + QA | Agent output ready for validation | Validation pass or fail |
-| MERGED | ReaperOAK | Validated and integrated | Terminal state |
-| BLOCKED | ReaperOAK | Cannot proceed due to external factor | Blocker resolved |
-| REJECTED | ReaperOAK | QA validation failed | Retry with fix delta |
-| FAILED | ReaperOAK | Max retries (3) exceeded | Escalate to human |
+| REVIEW | Ticketer + QA | Agent output ready for validation | Validation pass or fail |
+| MERGED | Ticketer | Validated and integrated | Terminal state |
+| BLOCKED | Ticketer | Cannot proceed due to external factor | Blocker resolved |
+| REJECTED | Ticketer | QA validation failed | Retry with fix delta |
+| FAILED | Ticketer | Max retries (3) exceeded | Escalate to human |
 | ESCALATED | Human | Autonomous resolution impossible | Human provides resolution |
 
 ### Transition Rules
@@ -56,7 +56,7 @@ stateDiagram-v2
 1. **PENDING → IN_PROGRESS:** Only when ALL dependency tasks are MERGED
 2. **IN_PROGRESS → REVIEW:** Agent must provide evidence (test output, files
    changed, validation results)
-3. **REVIEW → MERGED:** ReaperOAK's Reviewer lane confirms:
+3. **REVIEW → MERGED:** Ticketer's Reviewer lane confirms:
    - Success criteria from delegation packet are met
    - No forbidden files were modified
    - Evidence expectations satisfied
@@ -74,7 +74,7 @@ stateDiagram-v2
 
 ### 2.1 Task Decomposition into DAG
 
-ReaperOAK MUST decompose every multi-agent objective into a **Directed Acyclic
+Ticketer MUST decompose every multi-agent objective into a **Directed Acyclic
 Graph** (DAG) before delegating. The DAG makes dependencies explicit, enables
 maximum parallelism, and prevents circular delegation.
 
@@ -179,7 +179,7 @@ If a session expires mid-DAG, the checkpoint enables exact resumption.
 ### 3.1 Confidence Assessment Protocol
 
 Before transitioning between major phases (Analysis → Design → Implementation
-→ Validation), ReaperOAK MUST assess confidence:
+→ Validation), Ticketer MUST assess confidence:
 
 | Level | Range | Action |
 |-------|-------|--------|
@@ -204,7 +204,7 @@ Before transitioning between major phases (Analysis → Design → Implementatio
 ```yaml
 confidenceGate:
   phase: "Design → Implementation"
-  assessedBy: "ReaperOAK"
+  assessedBy: "Ticketer"
   timestamp: "2025-01-15T10:30:00Z"
   overallConfidence: 85
   factors:
@@ -247,7 +247,7 @@ Every agent MUST follow this sequence before generating any output:
 
 ### 4.2 RUG Violation Detection
 
-ReaperOAK detects RUG violations when:
+Ticketer detects RUG violations when:
 
 | Signal | Detection | Action |
 |--------|-----------|--------|
@@ -280,7 +280,7 @@ ReaperOAK detects RUG violations when:
 
 ### File Ownership Protocol
 
-Before launching a parallel batch, ReaperOAK MUST:
+Before launching a parallel batch, Ticketer MUST:
 
 1. **Declare file ownership** for each subagent in the batch:
 
@@ -303,18 +303,18 @@ Before launching a parallel batch, ReaperOAK MUST:
 
 Since we operate in a file-system environment without true locks:
 
-1. **Pre-batch:** ReaperOAK records owned files per agent in
+1. **Pre-batch:** Ticketer records owned files per agent in
    `activeContext.md`
 2. **During execution:** Each agent checks its delegation packet for scope
    boundaries before any write operation
-3. **Post-batch:** ReaperOAK diffs all modified files against ownership
+3. **Post-batch:** Ticketer diffs all modified files against ownership
    declarations. Any out-of-scope modification triggers REJECTED state.
 
 ---
 
 ## 6. Integration Validation Gate
 
-After every parallel batch completes, ReaperOAK runs an integration
+After every parallel batch completes, Ticketer runs an integration
 validation gate before proceeding:
 
 ### Gate Checklist
@@ -344,7 +344,7 @@ validation gate before proceeding:
 
 ### 7.1 Token Budget Management
 
-Every DAG has a token budget. ReaperOAK tracks consumption:
+Every DAG has a token budget. Ticketer tracks consumption:
 
 ```yaml
 tokenBudget:
@@ -441,7 +441,7 @@ A task is suspected of infinite looping if ANY of the following are true:
 3. **Progress assertion:** After each Plan-Act-Reflect cycle, agent must
    demonstrate measurable progress (new files, passing tests, etc.). If no
    progress after 2 cycles, escalate.
-4. **Delegation depth limit:** Maximum delegation chain depth of 2 (ReaperOAK
+4. **Delegation depth limit:** Maximum delegation chain depth of 2 (Ticketer
    → Subagent → Sub-subagent). No deeper nesting.
 
 ### Recovery from Detected Loop
@@ -450,13 +450,13 @@ A task is suspected of infinite looping if ANY of the following are true:
 2. Capture current state and error context
 3. Move task to FAILED state
 4. Log loop detection to `activeContext.md` with diagnostics
-5. Escalate to ReaperOAK for alternative approach or human intervention
+5. Escalate to Ticketer for alternative approach or human intervention
 
 ---
 
 ## 10. Delegation Protocol
 
-### Pre-Delegation Checklist (ReaperOAK)
+### Pre-Delegation Checklist (Ticketer)
 
 Before delegating any task:
 
@@ -472,7 +472,7 @@ Before delegating any task:
 - [ ] Confidence level assessed (≥70% to proceed)
 - [ ] Cross-cutting protocols reference included
 
-### Post-Delegation Checklist (ReaperOAK)
+### Post-Delegation Checklist (Ticketer)
 
 After receiving subagent output:
 

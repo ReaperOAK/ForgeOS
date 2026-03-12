@@ -88,7 +88,7 @@ governance principles.
 
 | Component | Location | Purpose |
 |-----------|----------|---------|
-| `CLAUDE.md` | Repository root | Primary instruction file (equivalent to `ReaperOAK.agent.md`) |
+| `CLAUDE.md` | Repository root | Primary instruction file (equivalent to `Ticketer.agent.md`) |
 | `.claude/settings.json` | `.claude/` | Hooks configuration for governance and logging |
 | `.claude/hooks/` | `.claude/hooks/` | Governance audit, prompt logging, session logging |
 | `.claude/commands/` | `.claude/commands/` | Slash commands (memory-bank-read, memory-bank-update, review, plan, security-audit, debug) |

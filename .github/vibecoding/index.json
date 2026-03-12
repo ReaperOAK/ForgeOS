@@ -93,8 +93,8 @@
     ]
   },
   {
-    "path": "./.github/agents/ReaperOAK.agent.md",
-    "title": "1. Core Identity & Operating Contract (ReaperOAK)",
+    "path": "./.github/agents/Ticketer.agent.md",
+    "title": "1. Core Identity & Operating Contract (Ticketer)",
     "token_estimate": 11281,
     "first_512_chars_hash": "094258aed80aea8182a9fabe313c6aa2e231a7f4bb12f2b0c66223f56e473e77",
     "category_guess": [

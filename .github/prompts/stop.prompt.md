@@ -81,7 +81,7 @@ Update memory bank files (append-only, per ownership rules in `core.instructions
 |------|--------|
 | `.github/memory-bank/activeContext.md` | Append session summary: what was worked on, current state |
 | `.github/memory-bank/progress.md` | Append: tickets completed this session, completion percentage |
-| `.github/memory-bank/decisionLog.md` | Append: session decisions and trade-offs (ReaperOAK only) |
+| `.github/memory-bank/decisionLog.md` | Append: session decisions and trade-offs (Ticketer only) |
 | `.github/memory-bank/riskRegister.md` | Append: new risks identified, resolved risks |
 | `.github/memory-bank/feedback-log.md` | Append: QA/Validator/CI feedback from this session |
 
@@ -164,6 +164,7 @@ Checklist:
 - [ ] No ticket skipped documentation (check feedback-log.md for Doc entries per DONE ticket)
 - [ ] No `git add .` in recent commits
 - [ ] No uncommitted changes (`git status --porcelain` is empty)
+- [ ] All agents operated within their Assigned Tool Loadout (no out-of-scope tool usage in agent summaries)
 
 If any violation found, spawn the appropriate agent to fix it:
 - Missing QA → `runSubagent("QA Engineer", ...)`
@@ -241,5 +242,13 @@ Session complete.
 - Resume point: .github/memory-bank/RESUME_POINT.md
 - Next continuation: invoke continue.prompt.md
 ```
+
+**Operating constraints (same as continue.prompt.md):**
+
+- Ticketer is a dumb dispatcher — it NEVER reads/writes codebase files. Its toolset is restricted to `memory/*`, `execute/*`, `github/*`, and `sequentialthinking/*`
+- All agents follow their Assigned Tool Loadout from `.github/agents/{Agent}.agent.md`
+- Scoped git only — no `git add .` / `git add -A` / `git add --all`
+- Agents use `oraios/serena/*` for code navigation and atomic edits
+- Each agent invokes `sequentialthinking` to plan before touching files
 
 Stop. No further execution.

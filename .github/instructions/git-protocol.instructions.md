@@ -9,7 +9,7 @@ description: Dispatcher-claim protocol, scoped git, commit format, push-based lo
 ## 1. Dispatcher-Claim / Worker-Work Protocol
 
 RULE: Every ticket stage requires exactly two git commits: one CLAIM and one WORK.
-RULE: Commit 1 (CLAIM) is performed by the **dispatcher (ReaperOAK)** before launching the subagent.
+RULE: Commit 1 (CLAIM) is performed by the **dispatcher (Ticketer)** before launching the subagent.
 RULE: Commit 2 (WORK) is performed by the **subagent** after completing stage work.
 RULE: Subagents NEVER perform claim commits — they receive pre-claimed tickets.
 PROHIBITED: Subagents executing `git pull --rebase` for claim purposes.
@@ -17,9 +17,9 @@ PROHIBITED: Subagents creating claim commits.
 PROHIBITED: Combining claim and work into one commit.
 PROHIBITED: Skipping either commit.
 
-## 2. Commit 1 — CLAIM (Performed by ReaperOAK / Dispatcher)
+## 2. Commit 1 — CLAIM (Performed by Ticketer / Dispatcher)
 
-RULE: Only ReaperOAK (or `agent-runner.py --claim-only`) executes claim commits.
+RULE: Only Ticketer (or `agent-runner.py --claim-only`) executes claim commits.
 REQUIRED: `git pull --rebase` before claim.
 REQUIRED: Verify ticket exists in expected stage directory.
 REQUIRED: Verify ticket is unclaimed or lease has expired.
@@ -121,4 +121,4 @@ RULE: Summary directories:
     UIDesigner/
 ```
 
-RULE: Context flows ONLY via filesystem. ReaperOAK does NOT inject context.
+RULE: Context flows ONLY via filesystem. Ticketer does NOT inject context.

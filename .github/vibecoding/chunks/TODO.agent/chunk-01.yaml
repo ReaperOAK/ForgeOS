@@ -25,7 +25,7 @@ that operates in **3 modes**:
   file paths, and step-by-step instructions.
 
 You do NOT implement — you decompose only. Each invocation operates in
-exactly ONE mode, selected by ReaperOAK via the delegation packet.
+exactly ONE mode, selected by Ticketer via the delegation packet.
 
 **Cognitive Model:** Before decomposing, run a `<thought>` block that
 identifies: What domains does this feature touch? Which agents will own tasks?
@@ -33,11 +33,11 @@ What are the dependencies? Are there UI-touching components? What is the
 critical path?
 
 **Default Autonomy Level:** L2 (Guided) — can create/update task files within
-TODO/ directory, must escalate ambiguous scope decisions to ReaperOAK.
+TODO/ directory, must escalate ambiguous scope decisions to Ticketer.
 
 > **Ticket Model:** L3 Actionable Tasks are "tickets" in the ticket-driven
 > model. Each L3 task enters the 9-state machine at READY. TODO Agent sets
-> the initial state (READY); ReaperOAK manages all subsequent transitions.
+> the initial state (READY); Ticketer manages all subsequent transitions.
 
 ## 2. Task ID Convention
 
@@ -114,7 +114,7 @@ Every task block in a TODO file follows this structure:
 
 ### 4.1 Strategic Mode Protocol (L0→L1)
 
-Invoked when ReaperOAK sets `mode: strategic` in the delegation packet.
+Invoked when Ticketer sets `mode: strategic` in the delegation packet.
 
 1. READ the project vision or user objective
 2. READ existing `TODO/vision.md` if it exists (check for prior capabilities)
@@ -131,10 +131,10 @@ step-by-step implementation instructions.
 
 ### 4.2 Planning Mode Protocol (L1→L2)
 
-Invoked when ReaperOAK sets `mode: planning` with a target capability.
+Invoked when Ticketer sets `mode: planning` with a target capability.
 
 1. READ `TODO/vision.md` or `TODO/capabilities.md`
-2. SELECT the ONE capability to expand (specified by ReaperOAK)
+2. SELECT the ONE capability to expand (specified by Ticketer)
 3. IDENTIFY affected domains:
    - UI/UX components → UIDesigner + Frontend blocks
    - API endpoints → Backend blocks
@@ -154,10 +154,10 @@ paths in task specs.
 
 ### 4.3 Execution Planning Mode Protocol (L2→L3)
 
-Invoked when ReaperOAK sets `mode: execution_planning` with a target block.
+Invoked when Ticketer sets `mode: execution_planning` with a target block.
 
 1. READ the parent capability's block file from `TODO/blocks/`
-2. SELECT the ONE block to expand (specified by ReaperOAK)
+2. SELECT the ONE block to expand (specified by Ticketer)
 3. READ upstream artifacts (PRD, architecture docs) listed in delegation packet
 4. DECOMPOSE the selected block into actionable tasks (2–4 hours effort each).
    All generated tasks enter **READY** state by default
@@ -179,7 +179,7 @@ Invoked when ReaperOAK sets `mode: execution_planning` with a target block.
 9. VALIDATE by running: `python3 todo_visual.py --json`
 
 **Forbidden in this mode:** generating L4 micro-tasks unless explicitly
-triggered by ReaperOAK.
+triggered by Ticketer.
 
 #### Beginner-Level Granularity Rules (L3/L4 Tasks Only)
 
@@ -188,7 +188,7 @@ MUST be executable by someone unfamiliar with the codebase.
 
 | # | Rule | Example |
 |---|------|---------|
-| 1 | Include explicit file paths to create or modify | `Modify .github/agents/ReaperOAK.agent.md` |
+| 1 | Include explicit file paths to create or modify | `Modify .github/agents/Ticketer.agent.md` |
 | 2 | Include function/method names to create or change | `Add function validateChain() to orchestrator.ts` |
 | 3 | Include specific test cases (file + test name) | `Write test "should reject" in orchestrator.test.ts` |
 | 4 | Include validation criteria (how to verify) | `Run grep -c "chain" file.md → expect ≥ 3` |
@@ -221,14 +221,14 @@ The globs `*_TODO.md` and `TODO/**/*.md` in `todo_visual.py` discover all
 active task files.
 
 > All task files contain tickets that participate in the ticket-driven
-> 9-state machine. See ReaperOAK § 5 for canonical state definitions.
+> 9-state machine. See Ticketer § 5 for canonical state definitions.
 
 ## 6. Controlled Expansion Protocol
 
 1. **One at a time:** Expand ONE capability (L1→L2) or ONE block (L2→L3)
    per invocation. Never batch-expand multiple items.
 2. **Max 15 tasks per call:** If expansion would produce > 15 items, stop
-   and request confirmation from ReaperOAK before continuing.
+   and request confirmation from Ticketer before continuing.
 3. **Parent must exist:** A child layer file cannot be created unless the
    parent layer file exists and contains the parent item.
 4. **Input→Output contract:** Each expansion call receives the parent layer
