@@ -38,7 +38,7 @@
   "claimed_by": "Backend",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-12T09:29:04Z",
+  "lease_expiry": "2026-03-12T09:55:44Z",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -54,6 +54,13 @@
       "agent": "tickets.py",
       "machine_id": "system",
       "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-12T09:24:19.442549+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: manual release"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",

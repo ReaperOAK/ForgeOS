@@ -41,7 +41,7 @@
   "claimed_by": "CI Reviewer",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-12T09:29:04Z",
+  "lease_expiry": "2026-03-12T09:55:44Z",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -89,6 +89,13 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "SECURITY PASS \u2014 0 critical/high findings, 2 informational notes. Advanced to CI."
+    },
+    {
+      "timestamp": "2026-03-12T09:24:19.408919+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from CI Reviewer: manual release"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
