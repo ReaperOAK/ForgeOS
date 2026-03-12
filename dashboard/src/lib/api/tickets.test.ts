@@ -108,7 +108,7 @@ describe('fetchTicket', () => {
     claimed_by: 'agent-1',
     claimed_by_name: 'QA',
     machine_id: 'pop-os',
-    operator: 'reaperoak',
+    operator: 'Ticketer',
     lease_expiry: '2026-03-11T14:00:00Z',
     lease_duration_minutes: 30,
     depends_on: [],

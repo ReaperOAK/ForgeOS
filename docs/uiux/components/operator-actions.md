@@ -96,7 +96,7 @@ Full specification in [mockup document](../mockups/FORGEOS-UID004.md#36-authuser
 
 **Visual states:**
 ```
-Authenticated:   [👤] reaperoak ✓
+Authenticated:   [👤] Ticketer ✓
 Unauthenticated: [🔒] Sign In
 Loading:         [░░] ░░░░░░░░
 ```

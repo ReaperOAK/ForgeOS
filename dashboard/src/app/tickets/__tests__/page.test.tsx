@@ -86,7 +86,7 @@ const mockTicket: TicketDetail = {
     claimed_by: 'agent-1',
     claimed_by_name: 'FrontendEngineer',
     machine_id: 'pop-os',
-    operator: 'reaperoak',
+    operator: 'Ticketer',
     lease_expiry: '2026-03-11T15:30:00Z',
     lease_duration_minutes: 30,
     depends_on: ['FORGEOS-FE002'],

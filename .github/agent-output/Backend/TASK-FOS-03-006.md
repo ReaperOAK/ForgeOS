@@ -6,7 +6,7 @@
 **Stage:** BACKEND → QA  
 **Agent:** Backend  
 **Machine:** pop-os  
-**Operator:** reaperoak  
+**Operator:** Ticketer  
 
 ## Artifacts Created/Modified
 

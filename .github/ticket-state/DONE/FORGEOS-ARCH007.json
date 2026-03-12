@@ -58,7 +58,7 @@
       "event": "CLAIMED",
       "agent": "Architect",
       "machine_id": "pop-os",
-      "details": "Claimed by Architect on pop-os (ReaperOAK)"
+      "details": "Claimed by Architect on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-07T13:13:00.282120+00:00",
@@ -72,7 +72,7 @@
       "event": "CLAIMED",
       "agent": "Documentation",
       "machine_id": "pop-os",
-      "details": "Claimed by Documentation on pop-os (ReaperOAK)"
+      "details": "Claimed by Documentation on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-07T14:50:00+00:00",

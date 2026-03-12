@@ -55,7 +55,7 @@
       "event": "CLAIMED",
       "agent": "Research",
       "machine_id": "pop-os",
-      "details": "Claimed by Research on pop-os (reaperoak)"
+      "details": "Claimed by Research on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-07T13:00:00+00:00",
@@ -69,7 +69,7 @@
       "event": "CLAIMED",
       "agent": "Documentation",
       "machine_id": "pop-os",
-      "details": "Claimed by Documentation on pop-os (ReaperOAK)"
+      "details": "Claimed by Documentation on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-07T15:07:44.195249+00:00",

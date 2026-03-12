@@ -4,7 +4,7 @@
 **Ticket:** TASK-FOS-03-001 — tickets.next — Find Next Available Ticket
 **Stage:** VALIDATION → DONE
 **Machine:** forgeos-dev
-**Operator:** reaperoak
+**Operator:** Ticketer
 **Timestamp:** 2026-03-07T13:55:00Z
 **Verdict:** APPROVED
 **Confidence:** HIGH

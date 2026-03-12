@@ -2,7 +2,7 @@
 
 **Ticket:** FORGEOS-FE001 — Scaffold Dashboard Web Application
 **Stage:** VALIDATION
-**Validator:** pop-os (reaperoak)
+**Validator:** pop-os (Ticketer)
 **Date:** 2026-03-11T19:30:00Z
 **Confidence:** HIGH
 
@@ -57,5 +57,5 @@
 - dashboard/src/lib/api-client.ts
 - .github/memory-bank/activeContext.md
 
-**Validator:** pop-os (reaperoak)
+**Validator:** pop-os (Ticketer)
 **Timestamp:** 2026-03-11T19:30:00Z

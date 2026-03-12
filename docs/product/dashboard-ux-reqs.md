@@ -708,7 +708,7 @@ Phase 3 (Enhancement):
 │ ┌─ Metadata ──────────────────────────────┐  │
 │ │ Created:    2026-03-05 (2 days ago)     │  │
 │ │ Claimed by: Backend on pop-os           │  │
-│ │ Operator:   ReaperOAK                   │  │
+│ │ Operator:   Ticketer                   │  │
 │ │ Lease:      ⏱ 22:15 remaining           │  │
 │ │ Rework:     0/3                         │  │
 │ └─────────────────────────────────────────┘  │

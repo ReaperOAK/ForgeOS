@@ -2,7 +2,7 @@
 
 This repository implements a **multi-agent vibecoding system** — a ticket-driven
 AI development infrastructure where specialized agents collaborate under
-ReaperOAK (stateless dispatcher).
+Ticketer (stateless dispatcher).
 
 ## Repository Structure
 
@@ -48,7 +48,7 @@ docs/uiux/            # UI/UX design artifacts
 
 ## Architecture
 
-- **ReaperOAK**: Stateless dispatcher. Scans READY tickets, dispatches workers, advances lifecycle.
+- **Ticketer**: Stateless dispatcher. Scans READY tickets, dispatches workers, advances lifecycle.
 - **ForgeOS MCP Server** (`forgeos-server/`): TypeScript/Express server exposing 11 ticket lifecycle tools over Model Context Protocol (MCP) via Streamable HTTP transport. Backed by PostgreSQL 17 with Row-Level Security, stored functions for atomic ticket operations, and LISTEN/NOTIFY for real-time SSE.
 - **PostgreSQL 17**: Primary data store with event-sourcing audit trail, file-level mutex for concurrent access, and dependency resolution.
 - **Real-Time Dashboard**: Live Kanban board at http://localhost:3000/dashboard with SSE-driven updates, stage filtering, and ticket detail views.

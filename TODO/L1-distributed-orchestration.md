@@ -82,7 +82,7 @@ Transform the ForgeOS repository from a file-based ticket orchestration system i
 **Description:** Define the product requirements document (PRD) for the distributed orchestration platform. Capture user stories, acceptance criteria, and non-functional requirements from the perspective of operators, agents, and the system itself.
 
 **Scope:**
-- User personas: Human Operator, AI Agent, ReaperOAK Dispatcher, System Administrator
+- User personas: Human Operator, AI Agent, Ticketer Dispatcher, System Administrator
 - User stories for each persona across all capability domains
 - Non-functional requirements (availability, latency, throughput, scalability targets)
 - Migration acceptance criteria (dual-mode operation, rollback plan, data integrity)

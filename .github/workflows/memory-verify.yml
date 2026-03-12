@@ -79,7 +79,7 @@ jobs:
           if [[ "$VIOLATIONS" -gt 0 ]]; then
             echo "" >> "$GITHUB_STEP_SUMMARY"
             echo "> **systemPatterns.md** and **decisionLog.md** are append-only." >> "$GITHUB_STEP_SUMMARY"
-            echo "> Only ReaperOAK may archive old entries. Deletions are not permitted." >> "$GITHUB_STEP_SUMMARY"
+            echo "> Only Ticketer may archive old entries. Deletions are not permitted." >> "$GITHUB_STEP_SUMMARY"
             exit 1
           fi
 

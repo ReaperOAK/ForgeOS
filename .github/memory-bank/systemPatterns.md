@@ -1,8 +1,8 @@
 ---
 id: system-patterns
 version: "1.0"
-owner: ReaperOAK
-write_access: [ReaperOAK]
+owner: Ticketer
+write_access: [Ticketer]
 append_only: true
 immutable_to_subagents: true
 ---
@@ -10,8 +10,8 @@ immutable_to_subagents: true
 # System Patterns
 
 > **Schema Version:** 1.0
-> **Owner:** ReaperOAK (EXCLUSIVE)
-> **Write Access:** ReaperOAK ONLY — this file is IMMUTABLE to all subagents
+> **Owner:** Ticketer (EXCLUSIVE)
+> **Write Access:** Ticketer ONLY — this file is IMMUTABLE to all subagents
 > **Lock Rules:** No subagent may modify, delete, or overwrite any entry.
 > Subagents attempting to modify this file must be rejected and the attempt
 > logged.
@@ -27,7 +27,7 @@ immutable_to_subagents: true
 
 ### [2026-02-21] Initial Creation
 
-- **Updated by:** ReaperOAK
+- **Updated by:** Ticketer
 - **Change:** Initial system patterns establishment
 
 ---
@@ -39,7 +39,7 @@ immutable_to_subagents: true
 ### ADR-001: Multi-Agent Supervisor Pattern
 
 - **Date:** 2026-02-21
-- **Decision:** Use Supervisor Pattern with ReaperOAK as singular orchestrator
+- **Decision:** Use Supervisor Pattern with Ticketer as singular orchestrator
 - **Rationale:** Prevents authority fragmentation, ensures single source of
   truth for delegation, validation, and state
 - **Alternatives Considered:** Peer-to-peer agents, hierarchical delegation
@@ -59,7 +59,7 @@ immutable_to_subagents: true
 
 - **Date:** 2026-02-21
 - **Decision:** `systemPatterns.md` and `decisionLog.md` are append-only,
-  controlled exclusively by ReaperOAK
+  controlled exclusively by Ticketer
 - **Rationale:** Prevents memory poisoning, ensures architectural consistency
   across sessions
 - **Status:** Active

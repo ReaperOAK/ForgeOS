@@ -85,9 +85,9 @@
 
 ## Git Protocol Observations
 
-- **DOCS stage:** Two-commit protocol followed correctly — CLAIM commit `e207ce1` by ReaperOAK, WORK commit `274853f` by Documentation.
+- **DOCS stage:** Two-commit protocol followed correctly — CLAIM commit `e207ce1` by Ticketer, WORK commit `274853f` by Documentation.
 - **Documentation WORK commit files:** Properly scoped — modified only ticket state files, agent output, memory bank, CHANGELOG, and the research document.
-- **RESEARCH stage:** CLAIM commit(s) present (`d3015fa`, `2097750`) by ReaperOAK. No dedicated `[FORGEOS-RES011] RESEARCH complete` WORK commit found in git log — the Research work may have been bundled with another commit. This is a minor protocol deviation in commit message referencing but does NOT affect content quality or deliverable completeness.
+- **RESEARCH stage:** CLAIM commit(s) present (`d3015fa`, `2097750`) by Ticketer. No dedicated `[FORGEOS-RES011] RESEARCH complete` WORK commit found in git log — the Research work may have been bundled with another commit. This is a minor protocol deviation in commit message referencing but does NOT affect content quality or deliverable completeness.
 - **No `git add .` usage detected** in the FORGEOS-RES011 commit files (file lists are explicit and scoped).
 
 ---

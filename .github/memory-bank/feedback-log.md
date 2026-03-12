@@ -32,14 +32,14 @@ append_only: true
 ### [2026-02-27T12:00:00Z] Validator → Backend
 - **Session:** Progressive Refinement TODO Architecture BUILD
 - **Phase:** VALIDATE
-- **Subject Artifact:** TODO.agent.md, chunk-01.yaml, chunk-02.yaml, ReaperOAK.agent.md, agents.md
+- **Subject Artifact:** TODO.agent.md, chunk-01.yaml, chunk-02.yaml, Ticketer.agent.md, agents.md
 - **Feedback Type:** suggestion
 - **Severity:** low
 - **Signal:** 3 advisory findings: (1) L3 Layer Model table says "2–4 hours" but forbidden action #3 caps at 90 min — inconsistent text. (2) SDLC summary table DECOMPOSE output still shows `TODO/{PROJECT}_TODO.md` instead of progressive refinement paths. (3) Chunk hash values are PENDING_RECOMPUTE.
 - **Evidence:** docs/reviews/validation/TODO-PROGRESSIVE-REFINEMENT-validation.yaml
 - **Resolution:** pending
 
-### [2026-03-06T00:00:00Z] ReaperOAK → System
+### [2026-03-06T00:00:00Z] Ticketer → System
 - **Session:** shutdown-001
 - **Phase:** SHUTDOWN
 - **Subject Artifact:** workflow-state.json, progress.md, activeContext.md, decisionLog.md

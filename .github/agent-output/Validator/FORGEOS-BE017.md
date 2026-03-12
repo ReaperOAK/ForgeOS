@@ -6,7 +6,7 @@
 **Ticket:** FORGEOS-BE017 — Implement SSE/HTTP Transport for Remote Agents
 **Stage:** VALIDATION
 **Machine:** pop-os
-**Operator:** reaperoak
+**Operator:** Ticketer
 **Confidence:** HIGH
 
 ---

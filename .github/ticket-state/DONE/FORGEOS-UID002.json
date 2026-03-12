@@ -130,7 +130,7 @@
       "event": "CLAIMED",
       "agent": "Documentation",
       "machine_id": "pop-os",
-      "details": "CLAIM by Documentation on pop-os (reaperoak)"
+      "details": "CLAIM by Documentation on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-10T09:36:00.000000+00:00",
@@ -146,7 +146,7 @@
       "event": "CLAIMED",
       "agent": "Validator",
       "machine_id": "pop-os",
-      "details": "CLAIM by Validator on pop-os (reaperoak)"
+      "details": "CLAIM by Validator on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-10T10:06:00+00:00",

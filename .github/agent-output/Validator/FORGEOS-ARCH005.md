@@ -42,4 +42,4 @@
 **APPROVED** — Ticket FORGEOS-ARCH005 is validated and ready for DONE transition.
 
 ---
-*Validator: pop-os (reaperoak), 2026-03-06*
+*Validator: pop-os (Ticketer), 2026-03-06*

@@ -37,7 +37,7 @@ SAMPLE_TICKET = {
     "claimed_by": "backend-agent",
     "claimed_by_name": "Backend",
     "machine_id": "pop-os",
-    "operator": "ReaperOAK",
+    "operator": "Ticketer",
     "rework_count": 0,
 }
 

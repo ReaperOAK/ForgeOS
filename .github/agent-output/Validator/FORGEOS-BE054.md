@@ -67,7 +67,7 @@
 
 ## Git Protocol Verification
 
-- Claim commits by ReaperOAK: ✅ (visible in git log)
+- Claim commits by Ticketer: ✅ (visible in git log)
 - Work commits by subagents: ✅ (BACKEND, QA, SECURITY, CI, DOCS all have explicit commits)
 - No `git add .` detected in ticket commits
 

@@ -45,7 +45,7 @@
 | Docs | PASS | ✅ README, CHANGELOG, __init__.py all updated |
 
 ## Git Protocol Compliance
-- CLAIM commits by ReaperOAK at each stage ✅
+- CLAIM commits by Ticketer at each stage ✅
 - WORK commits by respective agents ✅
 - No `git add .` or wildcard staging detected ✅
 

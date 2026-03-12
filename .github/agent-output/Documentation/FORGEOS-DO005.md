@@ -29,7 +29,7 @@ Added GitHub Actions status badge at the top of the README, immediately
 below the `# Vibecoding` heading:
 
 ```markdown
-[![MCP Server CI](https://github.com/ReaperOAK/ForgeOS/actions/workflows/mcp-server-ci.yml/badge.svg)](https://github.com/ReaperOAK/ForgeOS/actions/workflows/mcp-server-ci.yml)
+[![MCP Server CI](https://github.com/Ticketer/ForgeOS/actions/workflows/mcp-server-ci.yml/badge.svg)](https://github.com/Ticketer/ForgeOS/actions/workflows/mcp-server-ci.yml)
 ```
 
 ### 3. README.md — Continuous Integration Section Added

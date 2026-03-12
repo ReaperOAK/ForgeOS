@@ -3,7 +3,7 @@ ticket: FORGEOS-FE008
 stage: VALIDATION
 agent: Validator
 machine: pop-os
-operator: reaperoak
+operator: Ticketer
 timestamp: 2026-03-12T15:30:00Z
 verdict: APPROVED
 confidence: HIGH

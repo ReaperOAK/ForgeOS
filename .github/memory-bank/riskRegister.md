@@ -1,8 +1,8 @@
 ---
 id: risk-register
 version: "1.0"
-owner: [Security, ReaperOAK]
-write_access: [Security, ReaperOAK]
+owner: [Security, Ticketer]
+write_access: [Security, Ticketer]
 append_only: true
 ---
 
@@ -10,8 +10,8 @@ append_only: true
 
 > **Schema Version:** 1.0
 > **Owner:** Security Agent
-> **Write Access:** Security agent (append), ReaperOAK (full)
-> **Lock Rules:** Only Security agent and ReaperOAK may write. All other
+> **Write Access:** Security agent (append), Ticketer (full)
+> **Lock Rules:** Only Security agent and Ticketer may write. All other
 > subagents have read-only access. No entry may be deleted — only marked as
 > mitigated or accepted.
 > **Update Protocol:** Append new risks with timestamp, severity, and
@@ -43,7 +43,7 @@ append_only: true
 ### RISK-001: Memory Poisoning via Subagent Hallucination
 
 - **Date Identified:** 2026-02-21
-- **Identified By:** ReaperOAK
+- **Identified By:** Ticketer
 - **Severity:** High
 - **Likelihood:** Medium
 - **Category:** Security
@@ -52,7 +52,7 @@ append_only: true
 - **Impact:** Downstream agents make decisions based on false context, producing
   incorrect code or architecture
 - **Mitigation:** `systemPatterns.md` and `decisionLog.md` are write-locked to
-  ReaperOAK only. Subagents can only append to `activeContext.md` and
+  Ticketer only. Subagents can only append to `activeContext.md` and
   `progress.md`. All entries are timestamped and attributed.
 - **Status:** Mitigated
 - **Evidence:** Lock rules enforced in memory bank file headers
@@ -60,7 +60,7 @@ append_only: true
 ### RISK-002: Prompt Injection in External Content
 
 - **Date Identified:** 2026-02-21
-- **Identified By:** ReaperOAK
+- **Identified By:** Ticketer
 - **Severity:** Critical
 - **Likelihood:** Medium
 - **Category:** Security
@@ -77,7 +77,7 @@ append_only: true
 ### RISK-003: Token Runaway / Infinite Loop
 
 - **Date Identified:** 2026-02-21
-- **Identified By:** ReaperOAK
+- **Identified By:** Ticketer
 - **Severity:** High
 - **Likelihood:** Low
 - **Category:** Operational
@@ -85,7 +85,7 @@ append_only: true
   excessive tokens/compute without producing results
 - **Impact:** Cost runaway, context window exhaustion, system stall
 - **Mitigation:** Maximum retry limit (3) per task. Timeout budgets in
-  delegation packets. Loop counter in Plan-Act-Reflect cycle. ReaperOAK
+  delegation packets. Loop counter in Plan-Act-Reflect cycle. Ticketer
   monitors iteration count.
 - **Status:** Mitigated
 - **Evidence:** Orchestration rules define loop detection heuristic
@@ -93,7 +93,7 @@ append_only: true
 ### RISK-004: Unauthorized Privilege Escalation
 
 - **Date Identified:** 2026-02-21
-- **Identified By:** ReaperOAK
+- **Identified By:** Ticketer
 - **Severity:** Critical
 - **Likelihood:** Low
 - **Category:** Security

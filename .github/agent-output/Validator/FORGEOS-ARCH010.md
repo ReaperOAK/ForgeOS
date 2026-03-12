@@ -5,7 +5,7 @@
 - **Title:** Design Error Catalog and API Standards
 - **Type:** architecture
 - **Flow:** READY → ARCHITECT → DOCS → VALIDATION → DONE
-- **Agent:** Validator on pop-os (ReaperOAK)
+- **Agent:** Validator on pop-os (Ticketer)
 
 ## Verdict: APPROVED ✅
 

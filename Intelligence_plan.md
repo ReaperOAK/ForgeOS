@@ -6,7 +6,7 @@ With the Tickets MCP running flawlessly on PostgreSQL, Workflow and Concurrency 
 
 IMPORTANT
 
-All legacy concepts and mentions of "ReaperOAK" are dead. The orchestrator is exclusively ForgeOS.
+All legacy concepts and mentions of "Ticketer" are dead. The orchestrator is exclusively ForgeOS.
 The file-system ticket state is deprecated. Agents must be permanently severed from local `.github/ticket-state/` directories.
 
 --------------------------------------------------

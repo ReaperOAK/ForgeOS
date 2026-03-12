@@ -3,7 +3,7 @@
 **Ticket:** FORGEOS-BE006 -- Implement Ticket Claim Queue with SKIP LOCKED
 **Agent:** Documentation
 **Machine:** pop-os
-**Operator:** ReaperOAK
+**Operator:** Ticketer
 **Timestamp:** 2026-03-10T17:30:00Z
 **Verdict:** PASS
 **Confidence:** HIGH

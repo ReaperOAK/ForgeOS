@@ -119,7 +119,7 @@ Full suite (29 files): 26 passed, 3 failed. All 3 failures are pre-existing and 
 
 | Check | Result |
 |-------|--------|
-| CLAIM commit by dispatcher | ✅ `2631749` — `[TASK-FOS-05-002] CLAIM by Backend on pop-os (ReaperOAK)` |
+| CLAIM commit by dispatcher | ✅ `2631749` — `[TASK-FOS-05-002] CLAIM by Backend on pop-os (Ticketer)` |
 | WORK commit by subagent | ✅ `9a15be1` — `[TASK-FOS-05-002] BACKEND complete by Backend on pop-os` |
 | Scoped git staging | ✅ 11 files explicitly staged (no `git add .`) |
 | Security WORK commit | ✅ `edfc0a7` — 3 files explicitly staged |

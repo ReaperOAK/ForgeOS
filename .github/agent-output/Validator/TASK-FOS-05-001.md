@@ -11,7 +11,7 @@
 | **Type** | frontend |
 | **Stage** | VALIDATION → DONE |
 | **Priority** | high |
-| **Processed By** | Validator on pop-os (reaperoak) |
+| **Processed By** | Validator on pop-os (Ticketer) |
 | **Date** | 2026-03-10T20:50:00Z |
 
 ## Verdict

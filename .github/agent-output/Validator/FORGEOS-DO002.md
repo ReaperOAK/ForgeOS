@@ -60,7 +60,7 @@
 
 | Check | Status | Evidence |
 |-------|--------|---------|
-| CLAIM commit by dispatcher | ✅ PASS | Commit `18849a0`: `[FORGEOS-DO002] CLAIM by DevOps on pop-os (ReaperOAK)` — scoped to ticket JSON only (2 files). |
+| CLAIM commit by dispatcher | ✅ PASS | Commit `18849a0`: `[FORGEOS-DO002] CLAIM by DevOps on pop-os (Ticketer)` — scoped to ticket JSON only (2 files). |
 | WORK commit by subagent | ✅ PASS | Commit `231e81f`: `[FORGEOS-DO002] BACKEND complete by DevOps on pop-os` — 7 files (3 implementation + 4 ticket/agent artifacts). |
 | Scoped git (no `git add .`) | ✅ PASS | Both commits contain only explicitly staged files within ticket scope. |
 | Commit message format | ✅ PASS | Both follow `[TICKET-ID] ACTION by AGENT on MACHINE` format. |

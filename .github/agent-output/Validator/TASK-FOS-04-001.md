@@ -65,18 +65,18 @@ Git log for TASK-FOS-04-001:
 40eaec3 [TASK-FOS-04-001] CI complete by CIReviewer on pop-os
 aa58c0d [TASK-FOS-04-001] Fix stage: correct to QA for review
 2b640d1 [TASK-FOS-04-001] BACKEND complete by Backend on pop-os
-8172798 [TASK-FOS-04-001] CLAIM by Backend on pop-os (ReaperOAK)
+8172798 [TASK-FOS-04-001] CLAIM by Backend on pop-os (Ticketer)
 4784643 [TASK-FOS-04-001] QA complete by QA on pop-os
-f407978 [TASK-FOS-04-001] CLAIM by QA on pop-os (ReaperOAK)
-e6f1f3a [TASK-FOS-04-001] CLAIM by Backend on pop-os (ReaperOAK)
+f407978 [TASK-FOS-04-001] CLAIM by QA on pop-os (Ticketer)
+e6f1f3a [TASK-FOS-04-001] CLAIM by Backend on pop-os (Ticketer)
 ```
 
 **Dispatcher-claim protocol:**
-- ✅ Initial Backend CLAIM (e6f1f3a) by ReaperOAK
+- ✅ Initial Backend CLAIM (e6f1f3a) by Ticketer
 - ❌ Initial Backend WORK commit missing (caused rework #1)
-- ✅ QA CLAIM (f407978) by ReaperOAK
+- ✅ QA CLAIM (f407978) by Ticketer
 - ✅ QA WORK (4784643): QA complete (REJECT → rework)
-- ✅ Rework CLAIM (8172798) by ReaperOAK
+- ✅ Rework CLAIM (8172798) by Ticketer
 - ✅ Rework WORK (2b640d1): BACKEND complete
 - ⚠️ Stage correction commit (aa58c0d): Corrected double-advance
 - ✅ CI WORK (40eaec3): CI complete

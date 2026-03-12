@@ -38,7 +38,7 @@
   "rework_count": 0,
   "claimed_by": null,
   "machine_id": "pop-os",
-  "operator": "reaperoak",
+  "operator": "Ticketer",
   "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
@@ -61,7 +61,7 @@
       "event": "CLAIMED",
       "agent": "Backend",
       "machine_id": "pop-os",
-      "details": "Claimed by Backend on pop-os (reaperoak)"
+      "details": "Claimed by Backend on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-10T12:14:20.218484+00:00",
@@ -75,7 +75,7 @@
       "event": "CLAIMED",
       "agent": "QA",
       "machine_id": "pop-os",
-      "details": "Claimed by QA on pop-os (reaperoak)"
+      "details": "Claimed by QA on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-10T12:40:35.435481+00:00",
@@ -96,7 +96,7 @@
       "event": "CLAIMED",
       "agent": "CIReviewer",
       "machine_id": "pop-os",
-      "details": "Claimed by CIReviewer on pop-os (reaperoak)"
+      "details": "Claimed by CIReviewer on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-10T13:15:23.832421+00:00",
@@ -110,7 +110,7 @@
       "event": "CLAIMED",
       "agent": "Documentation",
       "machine_id": "pop-os",
-      "details": "Claimed by Documentation on pop-os (reaperoak)"
+      "details": "Claimed by Documentation on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-10T14:25:30.602241+00:00",

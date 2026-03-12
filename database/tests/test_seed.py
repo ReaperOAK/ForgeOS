@@ -559,7 +559,7 @@ class TestResolveSource:
         # When run from the repo root, .github/tickets/ should be found
         original_cwd = os.getcwd()
         try:
-            os.chdir("/home/reaperoak/Documents/ForgeOS")
+            os.chdir("/home/Ticketer/Documents/ForgeOS")
             result = resolve_source(None)
             assert result.endswith(".github/tickets")
         finally:

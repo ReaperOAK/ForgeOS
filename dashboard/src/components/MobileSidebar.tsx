@@ -88,7 +88,7 @@ export function MobileSidebar({ isOpen, onClose }: MobileSidebarProps) {
               RO
             </div>
             <div>
-              <p className="text-sm font-medium">ReaperOAK</p>
+              <p className="text-sm font-medium">Ticketer</p>
               <p className="text-xs text-muted">Operator</p>
             </div>
           </div>

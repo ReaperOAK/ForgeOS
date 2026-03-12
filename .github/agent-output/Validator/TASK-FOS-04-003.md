@@ -108,9 +108,9 @@ These observations document process gaps in the upstream pipeline but do not ind
 
 | Check | Result |
 |-------|--------|
-| Backend CLAIM commit by ReaperOAK | ✅ `2ed67fb` |
+| Backend CLAIM commit by Ticketer | ✅ `2ed67fb` |
 | Backend WORK commit | ✅ `011ddc0` |
-| QA CLAIM commit by ReaperOAK | ✅ `9129cfe` |
+| QA CLAIM commit by Ticketer | ✅ `9129cfe` |
 | QA WORK commit | ✅ `6d3d478` |
 | Security CLAIM+WORK commits | ⚠️ Absent — batch-advanced |
 | CI CLAIM+WORK commits | ⚠️ Absent — batch-advanced |

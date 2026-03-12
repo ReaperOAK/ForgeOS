@@ -41,7 +41,7 @@ const mockEvents: EventHistory[] = [
         agent_id: 'agent-1',
         agent_name: 'FrontendEngineer',
         machine_id: 'pop-os',
-        operator: 'reaperoak',
+        operator: 'Ticketer',
         previous_stage: 'READY',
         new_stage: 'FRONTEND',
         previous_status: 'READY',
@@ -56,7 +56,7 @@ const mockEvents: EventHistory[] = [
         agent_id: 'agent-1',
         agent_name: 'FrontendEngineer',
         machine_id: 'pop-os',
-        operator: 'reaperoak',
+        operator: 'Ticketer',
         previous_stage: 'FRONTEND',
         new_stage: 'QA',
         previous_status: 'CLAIMED',
@@ -115,7 +115,7 @@ describe('HistoryTimeline', () => {
         render(<HistoryTimeline ticketId="FORGEOS-FE004" />);
 
         await waitFor(() => {
-            const ops = screen.getAllByText('reaperoak');
+            const ops = screen.getAllByText('Ticketer');
             expect(ops.length).toBeGreaterThanOrEqual(1);
         });
     });

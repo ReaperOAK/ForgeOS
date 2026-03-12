@@ -60,7 +60,7 @@
       "event": "CLAIMED",
       "agent": "Backend",
       "machine_id": "pop-os",
-      "details": "Claimed by Backend on pop-os (reaperoak)"
+      "details": "Claimed by Backend on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-09T20:57:32.762098+00:00",
@@ -83,7 +83,7 @@
       "event": "CLAIMED",
       "agent": "Security",
       "machine_id": "pop-os",
-      "details": "Claimed by Security on pop-os (reaperoak)"
+      "details": "Claimed by Security on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-10T14:30:00+00:00",
@@ -108,7 +108,7 @@
       "event": "CLAIMED",
       "agent": "Documentation",
       "machine_id": "pop-os",
-      "details": "Claimed by Documentation on pop-os (reaperoak)"
+      "details": "Claimed by Documentation on pop-os (Ticketer)"
     },
     {
       "timestamp": "2026-03-10T16:00:00+00:00",

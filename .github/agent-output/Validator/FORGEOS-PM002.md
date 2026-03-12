@@ -4,7 +4,7 @@
 **Ticket:** FORGEOS-PM002 — Capture User Stories Across All Capabilities
 **Stage:** VALIDATION
 **Machine:** pop-os
-**Operator:** ReaperOAK
+**Operator:** Ticketer
 **Date:** 2026-03-07T15:15:00Z
 **Verdict:** APPROVED
 **Confidence:** HIGH (96%)
@@ -36,7 +36,7 @@
 |---|-----------|--------|----------|
 | AC1 | ≥5 Human Operator stories (status, claims, intervention, dashboard, migration) | **PASS** | 6 stories: HO-01 (status), HO-02 (claims), HO-03 (intervention), HO-04 (dashboard), HO-05 (migration), HO-06 (dependency graph) |
 | AC2 | ≥5 AI Agent stories (claim, advance, heartbeat, results, rework) | **PASS** | 6 stories: AG-01 (claim), AG-02 (advance), AG-03 (heartbeat), AG-04 (results), AG-05 (rework), AG-06 (discover) |
-| AC3 | ≥5 ReaperOAK stories (scan, dispatch, advance, escalations, sync) | **PASS** | 6 stories: RO-01 (scan), RO-02 (dispatch), RO-03 (advance), RO-04 (escalations), RO-05 (sync), RO-06 (priority) |
+| AC3 | ≥5 Ticketer stories (scan, dispatch, advance, escalations, sync) | **PASS** | 6 stories: RO-01 (scan), RO-02 (dispatch), RO-03 (advance), RO-04 (escalations), RO-05 (sync), RO-06 (priority) |
 | AC4 | ≥5 System Admin stories (auth, health, agents, failures, audit) | **PASS** | 6 stories: SA-01 (auth), SA-02 (health), SA-03 (agents), SA-04 (failures), SA-05 (audit), SA-06 (runtime config) |
 | AC5 | Each story has Given/When/Then acceptance criteria | **PASS** | All 24 stories have multiple Given/When/Then blocks verified |
 | AC6 | MoSCoW prioritization applied | **PASS** | 17 Must, 5 Should, 2 Could — each story has explicit Priority field |

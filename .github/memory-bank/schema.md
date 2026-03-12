@@ -1,7 +1,7 @@
 ---
 id: memory-bank-schema
 version: "2.0"
-locked_by: ReaperOAK
+locked_by: Ticketer
 immutable: true
 ---
 
@@ -14,9 +14,9 @@ immutable: true
 header:
   version: string (semver)
   hash: string (sha256 of body)
-  locked_by: "ReaperOAK"
+  locked_by: "Ticketer"
   immutable: true
-writers: ["ReaperOAK"]
+writers: ["Ticketer"]
 append_only: true
 change_requires: ["decisionLog.md entry", "human approval PR"]
 ```
@@ -59,7 +59,7 @@ fields:
   diff_hash: string (sha256)
   tests_passed: boolean
   predecessor_hash: string (sha256 of previous entry)
-writers: ["ReaperOAK"]
+writers: ["Ticketer"]
 append_only: true
 immutable: true
 ```
@@ -74,7 +74,7 @@ fields:
   milestone_severity: enum [LOW, MEDIUM, HIGH]
   updated_at: string (ISO8601)
 writers: ["all agents"]
-milestone_done_approvers: ["CIReviewer", "ReaperOAK"]
+milestone_done_approvers: ["CIReviewer", "Ticketer"]
 ```
 
 ### riskRegister.md
@@ -90,7 +90,7 @@ fields:
   mitigation: string
   status: enum [OPEN, MITIGATED, ACCEPTED, CLOSED]
   predecessor_hash: string (sha256)
-writers: ["Security", "ReaperOAK"]
+writers: ["Security", "Ticketer"]
 append_only: true
 ```
 
@@ -105,9 +105,9 @@ fields:
   phases: object (per-phase status, agents, outputs)
   fix_loop_count: integer (0-3)
   blockers: array of objects
-writers: ["ReaperOAK"]
+writers: ["Ticketer"]
 append_only: false
-notes: "ReaperOAK-exclusive state machine. Reset per session."
+notes: "Ticketer-exclusive state machine. Reset per session."
 ```
 
 ### artifacts-manifest.json
@@ -122,9 +122,9 @@ fields:
       phase: string
       created_at: string (ISO8601)
   dependency_graph: object (artifact → upstream artifacts)
-writers: ["ReaperOAK"]
+writers: ["Ticketer"]
 append_only: false
-notes: "Versioned build outputs tracking. Updated by ReaperOAK after each phase."
+notes: "Versioned build outputs tracking. Updated by Ticketer after each phase."
 ```
 
 ### feedback-log.md

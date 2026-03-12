@@ -3,7 +3,7 @@ ticket: FORGEOS-FE008
 stage: SECURITY
 agent: Security Engineer
 machine: pop-os
-operator: reaperoak
+operator: Ticketer
 timestamp: 2026-03-12T09:10:00Z
 status: PASS
 confidence: HIGH

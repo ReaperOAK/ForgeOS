@@ -1232,7 +1232,7 @@ const runner = new AgentRunner();
 
 // 1. Claim
 const claim = await runner.claimTicket(
-  'TASK-001', 'Backend', 'pop-os', 'reaperoak'
+  'TASK-001', 'Backend', 'pop-os', 'Ticketer'
 );
 
 // 2. Do work ...

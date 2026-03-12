@@ -304,13 +304,13 @@ describe('Admin Routes', () => {
       const uuid = '550e8400-e29b-41d4-a716-446655440000';
       const mockSession = {
         id: 'session-001', agent_id: uuid, session_token: 'mcp-token-123',
-        machine_id: 'pop-os', operator: 'reaperoak',
+        machine_id: 'pop-os', operator: 'Ticketer',
         last_seen: '2026-03-07T12:00:00Z', expires_at: '2026-03-07T13:00:00Z',
       };
       mockCreateOrUpdateSession.mockResolvedValueOnce(mockSession);
       const req = createMockReq({
         params: { id: uuid },
-        body: { session_token: 'mcp-token-123', machine_id: 'pop-os', operator: 'reaperoak', expires_in_minutes: 60 },
+        body: { session_token: 'mcp-token-123', machine_id: 'pop-os', operator: 'Ticketer', expires_in_minutes: 60 },
       });
       const res = createMockRes();
       await handler!(req as Request, res as unknown as Response, vi.fn());

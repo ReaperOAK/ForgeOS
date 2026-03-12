@@ -1,7 +1,7 @@
 # FORGEOS-RES012 — Validation Report
 
 > **Agent:** Validator | **Stage:** VALIDATION | **Date:** 2026-03-07T16:00:00Z
-> **Confidence:** HIGH (95%) | **Machine:** pop-os | **Operator:** ReaperOAK
+> **Confidence:** HIGH (95%) | **Machine:** pop-os | **Operator:** Ticketer
 
 ---
 

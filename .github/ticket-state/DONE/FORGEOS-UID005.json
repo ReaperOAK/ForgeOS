@@ -61,7 +61,7 @@
       "event": "CLAIMED",
       "agent": "UIDesigner",
       "machine_id": "pop-os",
-      "details": "Claimed by reaperoak@pop-os via UIDesigner, lease until 2026-03-10T02:30:00+00:00"
+      "details": "Claimed by Ticketer@pop-os via UIDesigner, lease until 2026-03-10T02:30:00+00:00"
     },
     {
       "timestamp": "2026-03-09T20:20:02.040431+00:00",
@@ -86,7 +86,7 @@
       "event": "CLAIMED",
       "agent": "Frontend",
       "machine_id": "pop-os",
-      "details": "Claimed by reaperoak@pop-os via Frontend, lease until 2026-03-09T21:12:47.038544+00:00"
+      "details": "Claimed by Ticketer@pop-os via Frontend, lease until 2026-03-09T21:12:47.038544+00:00"
     },
     {
       "timestamp": "2026-03-09T21:13:03.630054+00:00",
@@ -129,14 +129,14 @@
       "event": "CLAIMED",
       "agent": "Documentation",
       "machine_id": "pop-os",
-      "details": "Claimed by reaperoak@pop-os via Documentation, lease until 2026-03-10T09:58:10.542978+00:00"
+      "details": "Claimed by Ticketer@pop-os via Documentation, lease until 2026-03-10T09:58:10.542978+00:00"
     },
     {
       "event": "STAGE_COMPLETED",
       "stage": "DOCS",
       "agent": "Documentation",
       "machine": "pop-os",
-      "operator": "reaperoak",
+      "operator": "Ticketer",
       "timestamp": "2026-03-10T09:48:13Z",
       "evidence": {
         "artifacts": [
@@ -153,7 +153,7 @@
       "stage": "VALIDATION",
       "agent": "Validator",
       "machine": "pop-os",
-      "operator": "reaperoak",
+      "operator": "Ticketer",
       "timestamp": "2026-03-10T16:00:00Z",
       "evidence": {
         "artifacts": [

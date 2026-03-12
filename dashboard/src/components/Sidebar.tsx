@@ -92,7 +92,7 @@ export function Sidebar({ isCollapsed, onToggleCollapse }: SidebarProps) {
                             RO
                         </div>
                         <div>
-                            <p className="text-sm font-medium">ReaperOAK</p>
+                            <p className="text-sm font-medium">Ticketer</p>
                             <p className="text-xs text-muted">Operator</p>
                         </div>
                     </div>

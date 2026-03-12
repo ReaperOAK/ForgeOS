@@ -3,7 +3,7 @@
 ## Verdict: **PASS**
 
 **Confidence:** HIGH
-**Agent:** Security | **Machine:** pop-os | **Operator:** ReaperOAK
+**Agent:** Security | **Machine:** pop-os | **Operator:** Ticketer
 **Date:** 2026-03-10T22:15:00+00:00
 
 ---

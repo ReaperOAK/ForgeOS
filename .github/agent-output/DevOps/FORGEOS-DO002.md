@@ -4,7 +4,7 @@
 **Ticket:** FORGEOS-DO002 — Configure PostgreSQL Container with Init Scripts
 **Stage:** BACKEND
 **Machine:** pop-os
-**Operator:** ReaperOAK
+**Operator:** Ticketer
 **Timestamp:** 2026-03-07T13:38:00+00:00
 **Confidence:** HIGH
 

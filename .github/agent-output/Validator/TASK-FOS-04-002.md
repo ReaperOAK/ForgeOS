@@ -4,7 +4,7 @@
 **Ticket:** TASK-FOS-04-002
 **Stage:** VALIDATION
 **Machine:** pop-os
-**Operator:** reaperoak
+**Operator:** Ticketer
 **Date:** 2026-03-10T16:00:00+00:00
 
 ---

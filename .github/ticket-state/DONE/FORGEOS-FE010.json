@@ -62,14 +62,14 @@
       "timestamp": "2026-03-12T00:00:00Z",
       "event": "STAGE_COMPLETE",
       "agent": "UIDesigner",
-      "machine_id": "reaperoak-dev",
+      "machine_id": "Ticketer-dev",
       "details": "UIDESIGNER complete. Mockup approved at docs/uiux/mockups/FORGEOS-FE010.md. 3 Stitch screens generated. Moving to FRONTEND."
     },
     {
       "timestamp": "2026-03-12T01:00:00Z",
       "event": "STAGE_COMPLETE",
       "agent": "Frontend",
-      "machine_id": "reaperoak-dev",
+      "machine_id": "Ticketer-dev",
       "details": "FRONTEND complete. 3 components created, Sidebar updated. Moving to QA."
     },
     {
