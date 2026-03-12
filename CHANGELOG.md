@@ -8,6 +8,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Operator Workbench Actions** (FORGEOS-FE009) — `OperatorActions` component
+  at `dashboard/src/components/operator/OperatorActions.tsx` renders a 2×2
+  action toolbar for ticket lifecycle operations: Claim, Release, Advance, and
+  Force Release. Buttons are state-aware — enabled/disabled based on ticket
+  claim status and user authentication. Destructive actions (advance,
+  force-release) open a `ConfirmationModal`
+  (`dashboard/src/components/operator/ConfirmationModal.tsx`) requiring text
+  input before execution. Operations API client at
+  `dashboard/src/lib/api/operations.ts` provides typed POST functions with
+  10-second timeout and structured `ApiError` handling. Accessible: ARIA
+  toolbar, live region announcements, focus trap in modal, Ctrl+Enter shortcut.
+  69 tests, 93% coverage, CI quality score 88/100.
+
 - **Migration Phase D — Filesystem Deprecated** (FORGEOS-BE076) — `PhaseD`
   at `mcp-server/src/mcp_server/migration/phases/phase_d.py` implements the
   final migration phase. The filesystem ticket state is fully deprecated and

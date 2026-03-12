@@ -4,21 +4,43 @@ import { useState, useCallback, useEffect, useRef } from 'react';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
+/** Visual style variant for the confirmation modal. */
 export type ModalVariant = 'danger' | 'warning';
 
+/**
+ * Props for the {@link ConfirmationModal} component.
+ *
+ * @remarks
+ * The modal requires the user to provide text input (e.g., a reason or
+ * evidence) before confirming. Use `minInputLength` to enforce a minimum.
+ * Keyboard shortcuts: Escape to close, Ctrl/Cmd+Enter to confirm.
+ */
 export interface ConfirmationModalProps {
+  /** Whether the modal is visible. */
   isOpen: boolean;
+  /** Called when the user dismisses the modal (Escape, backdrop click, or Cancel button). */
   onClose: () => void;
+  /** Called with the user-entered text when the confirm button is clicked. */
   onConfirm: (inputText: string) => void;
+  /** Visual style — `'danger'` for destructive actions, `'warning'` for cautionary ones. */
   variant: ModalVariant;
+  /** Modal heading text. */
   title: string;
+  /** Body description explaining the action. */
   description: string;
+  /** Warning banner text shown in an alert box. */
   warningText: string;
+  /** Label for the text input field. */
   inputLabel: string;
+  /** Placeholder text for the input field. */
   inputPlaceholder: string;
+  /** Text shown on the confirm button. */
   confirmLabel: string;
+  /** Minimum character count required before the confirm button is enabled. Defaults to `0`. */
   minInputLength?: number;
+  /** When `true`, disables all interactive elements and shows a loading state. */
   isLoading?: boolean;
+  /** When `true`, renders a multi-line `<textarea>` instead of a single-line `<input>`. */
   multiline?: boolean;
 }
 
@@ -41,6 +63,38 @@ const VARIANT_STYLES = {
 
 // ── Component ────────────────────────────────────────────────────────────────
 
+/**
+ * Accessible confirmation dialog for destructive or important operator actions.
+ *
+ * Renders a modal overlay with a warning banner, a text input field, and
+ * confirm / cancel buttons. Includes a focus trap, Escape-to-close, and
+ * Ctrl/Cmd+Enter to confirm.
+ *
+ * @remarks
+ * - The modal restores focus to the previously focused element on close.
+ * - Input auto-focuses when the modal opens.
+ * - Uses `role="dialog"`, `aria-modal`, and `aria-labelledby`/`aria-describedby`
+ *   for screen reader support.
+ * - On mobile, the modal slides up from the bottom (`items-end`);
+ *   on desktop it centers vertically.
+ *
+ * @example
+ * ```tsx
+ * <ConfirmationModal
+ *   isOpen={showModal}
+ *   onClose={() => setShowModal(false)}
+ *   onConfirm={(reason) => handleForceRelease(reason)}
+ *   variant="danger"
+ *   title="Force Release Ticket"
+ *   description="This will remove another operator's claim."
+ *   warningText="The current claim holder will be notified."
+ *   inputLabel="Reason"
+ *   inputPlaceholder="Explain why this is necessary..."
+ *   confirmLabel="Force Release"
+ *   minInputLength={10}
+ * />
+ * ```
+ */
 export function ConfirmationModal({
   isOpen,
   onClose,
