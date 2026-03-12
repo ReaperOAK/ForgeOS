@@ -9,6 +9,7 @@ import {
     Users,
     HeartPulse,
     GitBranch,
+    Monitor,
     Settings,
     ChevronLeft,
     ChevronRight,
@@ -26,6 +27,7 @@ const navItems = [
     { label: 'Graph', icon: GitBranch, route: '/graph' },
     { label: 'Claims', icon: Clock, route: '/claims' },
     { label: 'Agents', icon: Users, route: '/agents' },
+    { label: 'Machines', icon: Monitor, route: '/machines' },
     { label: 'Health', icon: HeartPulse, route: '/health' },
     { label: 'Settings', icon: Settings, route: '/settings' },
 ];
