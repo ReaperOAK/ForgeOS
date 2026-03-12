@@ -92,14 +92,14 @@ describe('MachinesPage', () => {
 
     it('renders skeleton loading state initially', async () => {
         // Never resolve to keep loading state
-        mockGet.mockReturnValue(new Promise(() => {}));
+        mockGet.mockReturnValue(new Promise(() => { }));
         render(<MachinesPage />);
         expect(screen.getByText('Loading...')).toBeInTheDocument();
         expect(screen.getByLabelText('Loading machines')).toBeInTheDocument();
     });
 
     it('marks loading grid with aria-busy=true', () => {
-        mockGet.mockReturnValue(new Promise(() => {}));
+        mockGet.mockReturnValue(new Promise(() => { }));
         render(<MachinesPage />);
         expect(screen.getByLabelText('Loading machines')).toHaveAttribute(
             'aria-busy',

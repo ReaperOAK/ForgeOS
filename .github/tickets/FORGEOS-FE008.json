@@ -88,7 +88,7 @@
       "machine_id": "pop-os",
       "from_stage": "SECURITY",
       "to_stage": "CI",
-      "details": "SECURITY PASS — 0 critical/high findings, 2 informational notes. Advanced to CI."
+      "details": "SECURITY PASS \u2014 0 critical/high findings, 2 informational notes. Advanced to CI."
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
