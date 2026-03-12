@@ -8,6 +8,33 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Active Claims Monitor** (FORGEOS-FE008) — `/claims` page at
+  `dashboard/src/app/claims/page.tsx` showing all currently claimed tickets
+  in a sortable table with real-time lease countdown timers.
+  `ClaimsTable` component (`dashboard/src/components/claims/ClaimsTable.tsx`)
+  renders a responsive data table on desktop/tablet and card layout on mobile
+  with sorting by ticket, agent, machine, operator, stage, or lease remaining.
+  `LeaseCountdown` component (`dashboard/src/components/claims/LeaseCountdown.tsx`)
+  ticks every second through normal → warning (<5 min) → critical (<1 min) →
+  expired states with pulsing color indicators. Data loads via REST on mount
+  and stays current through WebSocket events (`useTicketStream`). Accessible:
+  `role="timer"` with throttled `aria-live`, keyboard-navigable sort headers,
+  `aria-sort` attributes. Skeleton loading and empty states included.
+  68 tests, CI quality score 93/100.
+
+- **Multi-Machine Status View** (FORGEOS-FE010) — `/machines` page at
+  `dashboard/src/app/machines/page.tsx` showing a real-time grid of operator
+  machines. Each `MachineCard` displays hostname, online/offline status
+  indicator (green/gray dot), last heartbeat as relative time, and an
+  expandable `AgentList` of currently running agents with their claimed
+  tickets. Online/offline status derived from heartbeat recency (10-minute
+  threshold). Responsive grid layout (3 columns desktop, 2 tablet, 1 mobile).
+  Clicking an agent name navigates to the claims view filtered by that agent.
+  Real-time updates via WebSocket — cards appear, update, or disappear as
+  ticket state changes. Empty state, error state with retry, and skeleton
+  loading cards. Relative timestamps refresh every 30 seconds. 46 tests,
+  94% statement coverage, CI quality score 84/100.
+
 - **Database-to-Filesystem Export** (FORGEOS-BE072) — `TicketExporter` at
   `mcp-server/src/mcp_server/migration/exporter.py` reads all tickets from
   PostgreSQL and generates `.github/tickets/*.json` master files plus

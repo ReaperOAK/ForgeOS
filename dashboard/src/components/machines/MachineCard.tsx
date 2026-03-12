@@ -2,14 +2,24 @@
 
 import { AgentList, type AgentInfo } from './AgentList';
 
+/** Props for {@link MachineCard}. */
 export interface MachineCardProps {
+    /** Machine hostname displayed as the card title. */
     hostname: string;
+    /** Online/offline status derived from heartbeat recency. */
     status: 'online' | 'offline';
+    /** ISO-8601 timestamp of the last heartbeat from this machine. */
     lastHeartbeat: string;
+    /** Agents currently running on this machine. */
     agents: AgentInfo[];
+    /** Optional top-border accent color for visual distinction. */
     machineColor?: string;
 }
 
+/**
+ * Convert an ISO-8601 timestamp to a human-readable relative time string.
+ * Returns values like "just now", "3 minutes ago", "2 hours ago", "1 day ago".
+ */
 function formatRelativeTime(isoTimestamp: string): string {
     const now = Date.now();
     const then = new Date(isoTimestamp).getTime();
