@@ -35,10 +35,10 @@
     "Phase C entry and exit logged with timestamp and error rates"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Security",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-12T13:50:27.969228",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -92,5 +92,6 @@
     "primary",
     "phase4",
     "BLK-11-02"
-  ]
+  ],
+  "current_stage": "SECURITY"
 }
