@@ -4,7 +4,7 @@
   "description": "Implement Migration Phase C: agents use the SDK exclusively for ticket operations (claim, advance, rework, release, sync). Feature flags set all operations to `database` mode. The filesystem becomes read-only \u2014 the export (FORGEOS-BE072) runs periodically to keep filesystem in sync as a backup, but no agent writes to the filesystem for ticket state. WORK commits (code changes) remain git-based. The SDK no longer attempts filesystem fallback; failures are surfaced as errors.",
   "type": "backend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Phase C entry and exit logged with timestamp and error rates"
   ],
   "rework_count": 0,
-  "claimed_by": "Security",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-12T13:50:27.969228",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -81,6 +81,15 @@
       "from_stage": "BACKEND",
       "to_stage": "QA",
       "details": "Advanced from BACKEND to QA"
+    },
+    {
+      "timestamp": "2026-03-12T07:54:57.279198+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "reaperoak-dev",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "SECURITY PASS \u2014 0 critical, 0 high, 0 medium findings. Advanced from SECURITY to CI"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",
@@ -93,5 +102,5 @@
     "phase4",
     "BLK-11-02"
   ],
-  "current_stage": "SECURITY"
+  "current_stage": "CI"
 }
