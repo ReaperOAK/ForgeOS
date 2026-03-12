@@ -13,6 +13,12 @@ Phase B — SDK with Fallback:
     Agents use the ForgeOS SDK for the CLAIM operation (MCP primary,
     filesystem fallback).  WORK commits remain git-based.  The phase
     exits when 95%+ operations succeed via MCP for 48+ hours.
+
+Phase C — Full MCP:
+    All ticket operations go through the MCP SDK exclusively.  All
+    feature flags are set to ``database`` mode.  The filesystem becomes
+    read-only — a periodic DB-to-FS export maintains backup copies.
+    The phase exits after zero filesystem writes for 72+ hours.
 """
 
 from mcp_server.migration.phases.phase_a import (

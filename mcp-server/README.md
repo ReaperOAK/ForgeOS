@@ -1440,7 +1440,7 @@ The server uses the **FastMCP** high-level API from the [MCP Python SDK](https:/
 - **`mcp_server/events/`** — Append-only event sourcing (EventStore, EventType, Event dataclass)
 - **`mcp_server/locking/`** — Distributed claim queue (SKIP LOCKED), file mutex (advisory locks)
 - **`mcp_server/notifications/`** — Notification queue (at-least-once delivery), configurable channels (webhook, Slack) with event-type filtering, background processor with exponential-backoff retries, and dead-letter handling
-- **`mcp_server/migration/`** — Dual-mode migration wrapper, YAML-based feature flag system for per-operation mode switching (filesystem / dual / database), bidirectional sync engine (FS ↔ DB), database-wins conflict resolver, and Phase A lifecycle manager (background sync with filesystem as source of truth)
+- **`mcp_server/migration/`** — Dual-mode migration wrapper, YAML-based feature flag system for per-operation mode switching (filesystem / dual / database), bidirectional sync engine (FS ↔ DB), database-wins conflict resolver, Phase A lifecycle manager (background sync with filesystem as source of truth), Phase B dual-mode claim pipeline (MCP primary, filesystem fallback), and Phase C full-MCP controller (database-only operations, periodic DB-to-FS export, zero-writes transition gate)
 - **`mcp_server/sessions/`** -- Agent session lifecycle management (heartbeat, timeout, resumption, concurrent access)
 - **`mcp_server/transport/webhooks.py`** — Inbound webhook HTTP receiver (`POST /api/webhooks/{source}`)
 - **`mcp_server/webhooks/`** — GitHub webhook signature verification (HMAC-SHA256), push event handling, and CI status event handler (check_run/status → ticket advance or rework)
@@ -4996,6 +4996,189 @@ Frozen dataclass tracking each operation:
   counts. An empty log yields `can_transition=False`.
 - **Structured logging** — all lifecycle events include `entered_at`,
   `mcp_success_percent`, and `total_operations` in structured log extra.
+
+
+## Migration Phase C — Full MCP
+
+<!-- last_reviewed: 2026-03-12T00:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.migration.phases.phase_c` module implements Phase C of the
+filesystem-to-database migration. All ticket operations go through the MCP
+SDK exclusively — feature flags are set to `database` mode for every
+operation. The filesystem becomes read-only. A periodic database-to-filesystem
+export maintains backup copies. The phase exits only when **zero filesystem
+writes** are detected for **72+ consecutive hours**.
+
+### How It Works
+
+1. All feature flags are set to `database` mode via `FeatureFlagManager`.
+2. `PhaseC.enter()` verifies every flag, clears operation/export logs, and
+   activates the full-MCP pipeline.
+3. `PhaseC.execute_operation()` routes all operations (claim, advance,
+   rework, release, sync) through the SDK adapter. **No filesystem
+   fallback** — errors propagate directly to agents.
+4. `PhaseC.run_export()` runs a single DB-to-FS export cycle via the
+   `ExportAdapter`, maintaining filesystem state as a backup.
+5. `PhaseC.validate()` detects filesystem writes and evaluates the
+   transition gate — zero writes for `transition_gate_hours`.
+6. `PhaseC.exit()` logs exit metrics and returns the final
+   `TransitionReport`.
+
+### Lifecycle
+
+```text
+INACTIVE  ──enter()──►  ACTIVE  ──exit()──►  INACTIVE
+                           │
+              execute_operation() / run_export() / validate()
+```
+
+### Quick Start
+
+```python
+from pathlib import Path
+from mcp_server.migration.phases import PhaseC, PhaseCConfig
+
+config = PhaseCConfig(
+    flags_config_path=Path("config/migration-flags.yaml"),
+    transition_gate_hours=72.0,
+    export_interval_seconds=300.0,
+)
+
+phase_c = PhaseC(config, sdk_adapter, exporter, write_detector)
+await phase_c.enter()
+
+# Execute all operations via MCP — no fallback
+result = await phase_c.execute_operation("claim", "FORGEOS-BE074")
+
+# Run a periodic DB-to-FS export
+export = await phase_c.run_export()
+
+# Check transition gate
+report = await phase_c.validate()
+if report.can_transition:
+    final_report = await phase_c.exit()
+```
+
+### PhaseCConfig
+
+Frozen dataclass controlling Phase C behavior:
+
+| Parameter | Default | Description |
+|---|---|---|
+| `flags_config_path` | *(required)* | Path to the migration-flags YAML file |
+| `transition_gate_hours` | `72.0` | Hours of zero filesystem writes required to exit Phase C |
+| `export_interval_seconds` | `300.0` | Interval between periodic DB-to-FS exports (seconds) |
+| `max_operation_log_size` | `10000` | Rolling window size for operation records |
+
+### PhaseC Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `enter()` | `None` | Verify all flags are `database`, activate phase |
+| `exit()` | `TransitionReport` | Build final report, deactivate phase |
+| `execute_operation(operation, ticket_id, **kwargs)` | `dict` | Execute via MCP SDK — no fallback |
+| `run_export()` | `ExportRecord` | Run one DB-to-FS export cycle |
+| `validate()` | `TransitionReport` | Evaluate the zero-writes transition gate |
+| `get_operation_stats()` | `dict` | Summary of operation success/failure counts |
+
+### PhaseC Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `status` | `PhaseCStatus` | Current lifecycle state (`INACTIVE`, `ACTIVE`, `TRANSITIONING`) |
+| `entered_at` | `str \| None` | ISO-8601 entry timestamp |
+| `exited_at` | `str \| None` | ISO-8601 exit timestamp |
+| `export_history` | `list[ExportRecord]` | Snapshot of the export history |
+| `intercepts_work_commits` | `bool` | Always `False` — git WORK commits are unaffected |
+
+### PhaseCStatus
+
+| Value | Meaning |
+|---|---|
+| `INACTIVE` | Phase C is not running |
+| `ACTIVE` | Full-MCP mode; all operations go through the SDK |
+| `TRANSITIONING` | `exit()` is in progress (final validation) |
+
+### TransitionReport
+
+Result of evaluating the Phase C transition gate:
+
+| Field | Type | Description |
+|---|---|---|
+| `total_operations` | `int` | Total operations executed |
+| `successes` | `int` | Operations that succeeded |
+| `failures` | `int` | Operations that failed |
+| `error_rate` | `float` | Percentage of failed operations |
+| `filesystem_writes` | `int` | Filesystem writes detected since entry |
+| `can_transition` | `bool` | Whether the zero-writes gate is satisfied |
+| `zero_writes_since` | `str \| None` | ISO-8601 timestamp when zero-writes started |
+| `zero_writes_hours` | `float` | Hours elapsed in the current zero-writes window |
+| `total_exports` | `int` | Number of export cycles executed |
+| `validated_at` | `str` | ISO-8601 timestamp of this report |
+
+### Adapter Interfaces
+
+Phase C uses three pluggable protocol adapters for testability:
+
+| Adapter | Method | Description |
+|---|---|---|
+| `SDKOperationAdapter` | `execute(operation, ticket_id, **kwargs)` | Routes all ticket operations via MCP SDK |
+| `ExportAdapter` | `export()` | Runs a full DB-to-FS export cycle |
+| `FilesystemWriteDetector` | `detect_writes_since(since_iso)` | Detects filesystem writes to ticket state files |
+
+All adapters raise exceptions on failure. Phase C propagates errors
+directly — there is no fallback mechanism.
+
+### OperationRecord
+
+Frozen dataclass tracking each operation:
+
+| Field | Type | Description |
+|---|---|---|
+| `operation` | `str` | Operation name (e.g. `"claim"`, `"advance"`) |
+| `ticket_id` | `str` | Target ticket |
+| `success` | `bool` | Whether the operation succeeded |
+| `timestamp` | `str` | ISO-8601 timestamp |
+| `error` | `str` | Error message (empty on success) |
+
+### ExportRecord
+
+Frozen dataclass tracking each DB-to-FS export cycle:
+
+| Field | Type | Description |
+|---|---|---|
+| `success` | `bool` | Whether the export succeeded |
+| `timestamp` | `str` | ISO-8601 timestamp |
+| `details` | `dict` | Export statistics (e.g. `exported`, `errors`) |
+| `error` | `str` | Error message (empty on success) |
+
+### Error Handling
+
+| Scenario | Behavior |
+|---|---|
+| `enter()` when already active | `RuntimeError` |
+| Any flag not in `database` mode on entry | `ValueError` listing all non-database flags |
+| `execute_operation()` when not active | `RuntimeError` |
+| SDK operation fails | Error propagated directly — no fallback |
+| Export fails | `ExportRecord` with `success=False`; error logged |
+| `exit()` when not active | `RuntimeError` |
+
+### Design Constraints
+
+- **Database-only** — all feature flags must be `database`. No dual-mode,
+  no filesystem fallback.
+- **Rolling window** — operation records are stored in a bounded `deque`
+  (default 10 000 entries) to prevent unbounded memory growth.
+- **Unbounded exports** — export records use a plain `list` since Phase C
+  is transitional. Consider adding a `maxlen` for long-running deployments.
+- **Transition gate** — requires zero filesystem writes for the configured
+  gate period. Any write resets the window.
+- **WORK commits unchanged** — git-based code commits are not intercepted
+  or modified by Phase C.
+- **Structured logging** — all lifecycle events include `entered_at`,
+  `error_rate`, and `total_operations` in structured log extra.
 
 
 ## Shadow Mode Validation Engine
