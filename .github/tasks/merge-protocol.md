@@ -1,7 +1,7 @@
 ---
 id: merge-protocol
 version: "1.0"
-locked_by: ReaperOAK
+locked_by: Ticketer
 immutable: true
 ---
 
@@ -30,7 +30,7 @@ pipeline. No code reaches `main` without human approval.
    b. Applies patch with git apply --check first
    c. Runs lint, test, build checks
    d. Creates PR targeting main with label needs-human-review
-5. ReaperOAK reviews PR:
+5. Ticketer reviews PR:
    a. Validates patch scope matches delegation packet allowed_paths
    b. Confirms no forbidden_paths were touched
    c. Verifies evidence_requirements from packet are met
@@ -60,7 +60,7 @@ pipeline. No code reaches `main` without human approval.
 
 - PRs created by sandbox workflow carry label `needs-human-review`
 - Branch protection on `main` requires at least 1 human approval
-- ReaperOAK validation_signature is necessary but NOT sufficient — human must also approve
+- Ticketer validation_signature is necessary but NOT sufficient — human must also approve
 - No GitHub Actions bot may merge to main
 
 ## Conflict Resolution
@@ -68,8 +68,8 @@ pipeline. No code reaches `main` without human approval.
 If patch does not apply cleanly:
 1. Claim status set to FAILED with reason: CONFLICT
 2. Agent is notified via delegation retry (max 3 retries)
-3. After 3 failures, escalate to ReaperOAK for manual resolution
-4. ReaperOAK may re-delegate with updated base
+3. After 3 failures, escalate to Ticketer for manual resolution
+4. Ticketer may re-delegate with updated base
 
 ## Rollback Protocol
 
