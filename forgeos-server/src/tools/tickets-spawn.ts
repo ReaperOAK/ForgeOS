@@ -32,7 +32,6 @@ import type {
   Ticket,
   TicketsSpawnOutput,
   TicketType,
-  TicketPriority,
 } from '../types/index.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 

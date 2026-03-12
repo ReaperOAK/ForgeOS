@@ -99,7 +99,7 @@ export function createApp(_config: AppConfig): express.Express {
   // ── MCP Endpoint ───────────────────────────────────
   // Stateless mode: SDK requires a fresh transport AND server per request
   // to avoid transport-reuse errors and connection conflicts.
-  app.all('/mcp', async (req: Request, res: Response) => {
+  const handleMcpRequest = async (req: Request, res: Response) => {
     try {
       const mcpServer = new McpServer({
         name: 'forgeos',
@@ -118,7 +118,11 @@ export function createApp(_config: AppConfig): express.Express {
         res.status(500).json({ error: 'MCP_ERROR', message: 'Internal server error' });
       }
     }
-  });
+  };
+
+  app.post('/mcp', handleMcpRequest);
+  app.get('/mcp', handleMcpRequest);
+  app.delete('/mcp', handleMcpRequest);
 
   // ── Error handler (must be last) ───────────────────
   app.use(errorHandler);

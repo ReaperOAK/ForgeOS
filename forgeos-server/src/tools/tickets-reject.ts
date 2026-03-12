@@ -35,7 +35,6 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
  */
 export const ticketsRejectSchema = z.object({
   ticket_id: z.string().min(1).describe('Human-readable ticket ID to reject'),
-  agent_name: z.string().min(1).describe('Name of the agent performing the rejection'),
   reason: z.string().min(10).describe('Why the ticket was rejected (min 10 chars)'),
   evidence: z.record(z.unknown()).optional()
     .describe('Optional structured evidence supporting the rejection'),
@@ -84,12 +83,12 @@ export const ticketsRejectSchema = z.object({
 export async function ticketsRejectHandler(
   params: z.infer<typeof ticketsRejectSchema>,
 ): Promise<CallToolResult> {
-  const { ticket_id, agent_name, reason, evidence } = params;
+  const { ticket_id, reason, evidence } = params;
+  const agentName = 'system';
 
-  logger.info({ ticket_id, agent_name, reason }, 'tickets.reject called');
+  logger.info({ ticket_id, agent_name: agentName, reason }, 'tickets.reject called');
 
   try {
-    const agentName = agent_name;
     const agentResult = await pool.query<{ id: string }>(
       'SELECT id FROM agents WHERE name = $1 LIMIT 1',
       [agentName],

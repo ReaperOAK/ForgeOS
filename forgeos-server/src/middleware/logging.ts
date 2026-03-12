@@ -5,18 +5,19 @@
  * - `logger` — A pino-based singleton logger with JSON output in production
  *   and pretty-printed output in development.
  * - `requestLogger` — Express middleware that logs every HTTP request with
- *   structured fields: timestamp, method, path, statusCode, durationMs,
+ *   structured fields: timestamp, method, url, statusCode, durationMs,
  *   requestId, userAgent, and contentLength.
  *
- * Duration is measured with `process.hrtime.bigint()` for sub-millisecond
- * precision. The `requestId` field is populated by the upstream
- * {@link requestIdMiddleware} — if absent, it is omitted from the log line.
+ * Duration is measured with `Date.now()` for millisecond precision.
+ * Request IDs are generated via `crypto.randomUUID()` or extracted from
+ * the incoming `X-Request-ID` header.
  *
  * @module middleware/logging
  * @ticket TASK-FOS-02-003
  */
 
 import pino from 'pino';
+import { randomUUID } from 'node:crypto';
 import type { Request, Response, NextFunction } from 'express';
 
 /**
@@ -27,9 +28,11 @@ import type { Request, Response, NextFunction } from 'express';
  * - In all other environments, uses `pino-pretty` for human-readable
  *   coloured output.
  * - Log level defaults to `info` and can be overridden via `LOG_LEVEL`.
+ * - Uses ISO 8601 timestamps via an inline isoTime function.
  */
 export const logger = pino({
   level: process.env.LOG_LEVEL ?? 'info',
+  timestamp: () => `,"time":"${new Date().toISOString()}"`,
   transport:
     process.env.NODE_ENV !== 'production'
       ? { target: 'pino-pretty', options: { colorize: true } }
@@ -37,57 +40,67 @@ export const logger = pino({
 });
 
 /**
- * Express middleware that emits a structured JSON log line for every request.
+ * Express middleware that assigns a UUID v4 request ID.
  *
- * Attaches a `finish` listener on the response object. When the response
- * completes, the middleware logs:
+ * - Reads `x-request-id` from the incoming request headers.
+ * - If present and non-empty, reuses it; otherwise generates via `randomUUID()`.
+ * - Sets `req.requestId` and echoes in the `X-Request-ID` response header.
  *
- * | Field           | Source                            |
- * |-----------------|-----------------------------------|
- * | `method`        | `req.method`                      |
- * | `path`          | `req.path`                        |
- * | `statusCode`    | `res.statusCode`                  |
- * | `durationMs`    | `process.hrtime.bigint()` delta   |
- * | `requestId`     | `req.requestId` (if present)      |
- * | `userAgent`     | `User-Agent` header               |
- * | `contentLength` | `Content-Length` response header   |
- *
- * @param req - Express request object (should have `requestId` from upstream middleware)
+ * @param req - Express request object
  * @param res - Express response object
  * @param next - Express next function
+ */
+export function requestIdMiddleware(
+  req: Request,
+  res: Response,
+  next: NextFunction,
+): void {
+  const existing = req.headers['x-request-id'];
+  const requestId =
+    typeof existing === 'string' && existing.length > 0
+      ? existing
+      : randomUUID();
+  req.requestId = requestId;
+  res.setHeader('X-Request-ID', requestId);
+  next();
+}
+
+/**
+ * Express middleware that logs each request on response finish.
  *
- * @example
- * ```typescript
- * import { requestIdMiddleware } from './middleware/request-id.js';
- * import { requestLogger } from './middleware/logging.js';
+ * On response finish:
+ * - Logs method, path, url, statusCode, durationMs, requestId (if present),
+ *   userAgent, contentLength.
  *
- * app.use(requestIdMiddleware);
- * app.use(requestLogger);
- * ```
+ * @param req - Express request object
+ * @param res - Express response object
+ * @param next - Express next function
  */
 export function requestLogger(
   req: Request,
   res: Response,
   next: NextFunction,
 ): void {
-  const startNs = process.hrtime.bigint();
+  const startMs = Date.now();
 
   res.on('finish', () => {
-    const durationNs = process.hrtime.bigint() - startNs;
-    const durationMs = Number(durationNs) / 1_000_000;
+    const durationMs = Date.now() - startMs;
 
-    logger.info(
-      {
-        method: req.method,
-        path: req.path,
-        statusCode: res.statusCode,
-        durationMs: Math.round(durationMs * 100) / 100,
-        ...(req.requestId && { requestId: req.requestId }),
-        userAgent: req.headers['user-agent'],
-        contentLength: res.getHeader('content-length'),
-      },
-      'request completed',
-    );
+    const logData: Record<string, unknown> = {
+      method: req.method,
+      path: req.path,
+      url: req.url,
+      statusCode: res.statusCode,
+      durationMs,
+      userAgent: req.headers['user-agent'],
+      contentLength: res.getHeader('content-length'),
+    };
+
+    if (req.requestId !== undefined) {
+      logData.requestId = req.requestId;
+    }
+
+    logger.info(logData, 'request completed');
   });
 
   next();

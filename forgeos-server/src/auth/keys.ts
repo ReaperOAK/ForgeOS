@@ -73,7 +73,7 @@ export function hashApiKey(plaintextKey: string): string {
  * @example
  * ```ts
  * const result = await generateApiKey('uuid-of-backend-agent');
- * console.log(result.plaintextKey); // 'fos_<64 hex chars>'
+ * logger.info(result.plaintextKey); // 'fos_<64 hex chars>'
  * // Store result.plaintextKey securely — it cannot be recovered.
  * ```
  */
@@ -127,7 +127,7 @@ export async function generateApiKey(agentId: string): Promise<GenerateKeyResult
  * ```ts
  * const identity = await validateApiKey('fos_abc123...');
  * if (identity) {
- *   console.log(identity.name, identity.role);
+ *   logger.info(identity.name, identity.role);
  * }
  * ```
  */
