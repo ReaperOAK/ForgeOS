@@ -4,7 +4,7 @@
   "description": "Implement authenticated operator action controls following the UIDesigner mockup (FORGEOS-UID004). Add action buttons for Claim, Release, Advance, and Force-Release operations. Each action calls the corresponding REST endpoint (FORGEOS-BE036 for claim, FORGEOS-BE037 for advance/rework). Destructive actions (force-release, force-advance) show a confirmation modal requiring explicit reason input. All actions require authentication via the auth system (FORGEOS-BE055 role-based restrictions).",
   "type": "frontend",
   "priority": "high",
-  "stage": "FRONTEND",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -40,10 +40,10 @@
     "All action buttons disabled when user is not authenticated"
   ],
   "rework_count": 0,
-  "claimed_by": "QA Engineer",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-12T10:38:16Z",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -66,6 +66,15 @@
       "agent": "UIDesigner",
       "machine_id": "pop-os",
       "details": "UIDESIGNER stage complete. Mockup approved. Moving to FRONTEND."
+    },
+    {
+      "timestamp": "2026-03-12T10:11:31.957848+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "QA",
+      "machine_id": "system",
+      "from_stage": "QA",
+      "to_stage": "SECURITY",
+      "details": "Advanced from QA to SECURITY"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
@@ -79,5 +88,11 @@
     "advance",
     "phase4",
     "BLK-10-03"
-  ]
+  ],
+  "status": "in_progress",
+  "current_stage": "QA",
+  "completed_stages": [
+    "FRONTEND"
+  ],
+  "updated_at": "2026-03-12T10:06:52.262789+00:00"
 }
