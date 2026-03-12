@@ -24,7 +24,18 @@ import pytest
 
 from forgeos_sdk.client import ForgeOSClient
 from forgeos_sdk.exceptions import ToolCallError
-from forgeos_sdk.models import Evidence, OperationResult, Ticket
+from forgeos_sdk.models import (
+    DelegationPayload,
+    Evidence,
+    ListResponse,
+    OperationResult,
+    Ticket,
+    BlastRadiusResult,
+    SymbolSearchResult,
+    ImportChainResult,
+    IndexResult,
+    OrientationResult,
+)
 from forgeos_sdk.operations import TicketOperations
 
 # ---------------------------------------------------------------------------
@@ -523,6 +534,256 @@ class TestGetTicket:
 
 
 # ---------------------------------------------------------------------------
+# AC-NEW-1: tickets_get(ticket_id) calls tickets.get and returns Ticket
+# ---------------------------------------------------------------------------
+
+
+class TestTicketsGet:
+    """tickets_get calls tickets.get MCP tool and returns Ticket."""
+
+    async def test_returns_ticket_model(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {
+                "ticket": {
+                    "ticket_id": "FORGEOS-BE003",
+                    "title": "Connection Pool",
+                    "type": "backend",
+                    "priority": "high",
+                    "status": "CLAIMED",
+                    "stage": "BACKEND",
+                    "file_paths": ["src/db/pool.ts"],
+                    "acceptance_criteria": ["AC1: Pool init"],
+                }
+            }
+        )
+
+        ticket = await ops.tickets_get("FORGEOS-BE003")
+
+        assert isinstance(ticket, Ticket)
+        assert ticket.ticket_id == "FORGEOS-BE003"
+        assert ticket.title == "Connection Pool"
+        assert ticket.file_paths == ["src/db/pool.ts"]
+
+    async def test_calls_tickets_get_tool(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"ticket": {"ticket_id": "T-1"}}
+        )
+
+        await ops.tickets_get("T-1")
+
+        mock_session.call_tool.assert_called_once_with(
+            "tickets.get", {"ticket_id": "T-1"}
+        )
+
+    async def test_flat_response_parsed(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"ticket_id": "T-2", "title": "Flat", "stage": "QA"}
+        )
+
+        ticket = await ops.tickets_get("T-2")
+        assert ticket.ticket_id == "T-2"
+
+    async def test_error_response_raises(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"error": "TICKET_NOT_FOUND"}, is_error=True
+        )
+
+        with pytest.raises(ToolCallError):
+            await ops.tickets_get("NONEXISTENT")
+
+    async def test_is_coroutine(self) -> None:
+        assert inspect.iscoroutinefunction(TicketOperations.tickets_get)
+
+
+# ---------------------------------------------------------------------------
+# AC-NEW-2: tickets_list calls tickets.list and returns ListResponse
+# ---------------------------------------------------------------------------
+
+
+class TestTicketsList:
+    """tickets_list calls tickets.list MCP tool and returns ListResponse."""
+
+    async def test_returns_list_response(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {
+                "tickets": [
+                    {"ticket_id": "T-1", "stage": "BACKEND"},
+                    {"ticket_id": "T-2", "stage": "BACKEND"},
+                ],
+                "total": 12,
+                "limit": 10,
+                "offset": 0,
+            }
+        )
+
+        result = await ops.tickets_list(stage="BACKEND", limit=10)
+
+        assert isinstance(result, ListResponse)
+        assert len(result.tickets) == 2
+        assert result.total == 12
+        assert result.limit == 10
+
+    async def test_calls_tickets_list_with_all_filters(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"tickets": [], "total": 0, "limit": 50, "offset": 0}
+        )
+
+        await ops.tickets_list(
+            stage="QA",
+            status="READY",
+            type="backend",
+            priority="critical",
+            limit=25,
+            offset=10,
+        )
+
+        args = mock_session.call_tool.call_args[0]
+        assert args[0] == "tickets.list"
+        assert args[1]["stage"] == "QA"
+        assert args[1]["status"] == "READY"
+        assert args[1]["type"] == "backend"
+        assert args[1]["priority"] == "critical"
+        assert args[1]["limit"] == 25
+        assert args[1]["offset"] == 10
+
+    async def test_omits_none_filters(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"tickets": [], "total": 0, "limit": 50, "offset": 0}
+        )
+
+        await ops.tickets_list(stage="BACKEND")
+
+        args = mock_session.call_tool.call_args[0][1]
+        assert "stage" in args
+        assert "status" not in args
+        assert "type" not in args
+        assert "priority" not in args
+        assert args["limit"] == 50
+        assert args["offset"] == 0
+
+    async def test_default_pagination(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"tickets": [], "total": 0, "limit": 50, "offset": 0}
+        )
+
+        await ops.tickets_list()
+
+        args = mock_session.call_tool.call_args[0][1]
+        assert args["limit"] == 50
+        assert args["offset"] == 0
+
+    async def test_error_response_raises(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"error": "DB unavailable"}, is_error=True
+        )
+
+        with pytest.raises(ToolCallError):
+            await ops.tickets_list()
+
+    async def test_is_coroutine(self) -> None:
+        assert inspect.iscoroutinefunction(TicketOperations.tickets_list)
+
+
+# ---------------------------------------------------------------------------
+# AC-NEW-3: tickets_payload calls tickets.payload and returns DelegationPayload
+# ---------------------------------------------------------------------------
+
+
+class TestTicketsPayload:
+    """tickets_payload calls tickets.payload and returns DelegationPayload."""
+
+    async def test_returns_delegation_payload(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {
+                "ticket": {
+                    "ticket_id": "FORGEOS-BE003",
+                    "title": "Connection Pool",
+                    "stage": "BACKEND",
+                    "status": "CLAIMED",
+                },
+                "upstream_summary": "## Architect\nDesign approved.",
+                "memory_entries": [
+                    {"key": "pool", "value": "pgBouncer recommended"},
+                ],
+                "file_scope": ["src/db/pool.ts", "tests/db/pool.test.ts"],
+            }
+        )
+
+        payload = await ops.tickets_payload("FORGEOS-BE003", "BACKEND")
+
+        assert isinstance(payload, DelegationPayload)
+        assert payload.ticket.ticket_id == "FORGEOS-BE003"
+        assert "Architect" in payload.upstream_summary
+        assert len(payload.memory_entries) == 1
+        assert len(payload.file_scope) == 2
+
+    async def test_calls_tickets_payload_tool(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {
+                "ticket": {"ticket_id": "T-1"},
+                "upstream_summary": "",
+                "memory_entries": [],
+                "file_scope": [],
+            }
+        )
+
+        await ops.tickets_payload("T-1", "QA")
+
+        mock_session.call_tool.assert_called_once_with(
+            "tickets.payload",
+            {"ticket_id": "T-1", "agent_role": "QA"},
+        )
+
+    async def test_minimal_payload_defaults(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"ticket": {"ticket_id": "T-1"}}
+        )
+
+        payload = await ops.tickets_payload("T-1", "BACKEND")
+
+        assert payload.upstream_summary == ""
+        assert payload.memory_entries == []
+        assert payload.file_scope == []
+
+    async def test_error_response_raises(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"error": "TICKET_NOT_FOUND"}, is_error=True
+        )
+
+        with pytest.raises(ToolCallError):
+            await ops.tickets_payload("NONEXISTENT", "BACKEND")
+
+    async def test_is_coroutine(self) -> None:
+        assert inspect.iscoroutinefunction(TicketOperations.tickets_payload)
+
+
+# ---------------------------------------------------------------------------
 # AC7: All methods are async (async def)
 # ---------------------------------------------------------------------------
 
@@ -547,6 +808,15 @@ class TestAsyncMethods:
 
     def test_get_ticket_is_coroutine(self) -> None:
         assert inspect.iscoroutinefunction(TicketOperations.get_ticket)
+
+    def test_tickets_get_is_coroutine(self) -> None:
+        assert inspect.iscoroutinefunction(TicketOperations.tickets_get)
+
+    def test_tickets_list_is_coroutine(self) -> None:
+        assert inspect.iscoroutinefunction(TicketOperations.tickets_list)
+
+    def test_tickets_payload_is_coroutine(self) -> None:
+        assert inspect.iscoroutinefunction(TicketOperations.tickets_payload)
 
 
 # ---------------------------------------------------------------------------
@@ -601,3 +871,534 @@ class TestEdgeCases:
 
         with pytest.raises(ToolCallError, match="Unknown error"):
             await ops._call_tool("tickets.test", {})
+
+
+# ---------------------------------------------------------------------------
+# Code Graph: code_blast_radius
+# ---------------------------------------------------------------------------
+
+
+class TestCodeBlastRadius:
+    """code_blast_radius calls code.blast_radius and returns BlastRadiusResult."""
+
+    async def test_returns_blast_radius_result(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {
+                "file_path": "src/db/pool.ts",
+                "affected_files": ["src/db/pool.ts", "src/api/routes.ts"],
+                "affected_symbols": [
+                    {
+                        "name": "createPool",
+                        "kind": "function",
+                        "file_path": "src/db/pool.ts",
+                        "line": 12,
+                        "depth": 0,
+                    },
+                    {
+                        "name": "handleRequest",
+                        "kind": "function",
+                        "file_path": "src/api/routes.ts",
+                        "line": 45,
+                        "depth": 1,
+                    },
+                ],
+                "total_affected": 2,
+            }
+        )
+
+        result = await ops.code_blast_radius("src/db/pool.ts")
+
+        assert isinstance(result, BlastRadiusResult)
+        assert result.file_path == "src/db/pool.ts"
+        assert len(result.affected_files) == 2
+        assert len(result.affected_symbols) == 2
+        assert result.affected_symbols[0].name == "createPool"
+        assert result.affected_symbols[1].depth == 1
+        assert result.total_affected == 2
+
+    async def test_calls_code_blast_radius_tool(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {
+                "file_path": "src/main.ts",
+                "affected_files": [],
+                "affected_symbols": [],
+                "total_affected": 0,
+            }
+        )
+
+        await ops.code_blast_radius("src/main.ts")
+
+        mock_session.call_tool.assert_called_once_with(
+            "code.blast_radius", {"file_path": "src/main.ts"}
+        )
+
+    async def test_passes_max_depth(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {
+                "file_path": "src/main.ts",
+                "affected_files": [],
+                "affected_symbols": [],
+                "total_affected": 0,
+            }
+        )
+
+        await ops.code_blast_radius("src/main.ts", max_depth=3)
+
+        args = mock_session.call_tool.call_args[0][1]
+        assert args["max_depth"] == 3
+
+    async def test_omits_max_depth_when_none(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {
+                "file_path": "src/main.ts",
+                "affected_files": [],
+                "affected_symbols": [],
+                "total_affected": 0,
+            }
+        )
+
+        await ops.code_blast_radius("src/main.ts")
+
+        args = mock_session.call_tool.call_args[0][1]
+        assert "max_depth" not in args
+
+    async def test_error_response_raises(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"error": "FILE_NOT_FOUND"}, is_error=True
+        )
+
+        with pytest.raises(ToolCallError):
+            await ops.code_blast_radius("nonexistent.ts")
+
+    async def test_is_coroutine(self) -> None:
+        assert inspect.iscoroutinefunction(TicketOperations.code_blast_radius)
+
+
+# ---------------------------------------------------------------------------
+# Code Graph: code_search_symbols
+# ---------------------------------------------------------------------------
+
+
+class TestCodeSearchSymbols:
+    """code_search_symbols calls code.search_symbols and returns SymbolSearchResult."""
+
+    async def test_returns_symbol_search_result(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {
+                "pattern": "create*",
+                "matches": [
+                    {
+                        "name": "createPool",
+                        "kind": "function",
+                        "file_path": "src/db/pool.ts",
+                        "line": 12,
+                        "signature": "(config: PoolConfig) => Pool",
+                    },
+                    {
+                        "name": "createServer",
+                        "kind": "function",
+                        "file_path": "src/server.ts",
+                        "line": 5,
+                        "signature": "(port: number) => Server",
+                    },
+                ],
+                "total": 2,
+            }
+        )
+
+        result = await ops.code_search_symbols("create*")
+
+        assert isinstance(result, SymbolSearchResult)
+        assert result.pattern == "create*"
+        assert len(result.matches) == 2
+        assert result.matches[0].name == "createPool"
+        assert result.matches[0].signature == "(config: PoolConfig) => Pool"
+        assert result.total == 2
+
+    async def test_calls_code_search_symbols_tool(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"pattern": "handle*", "matches": [], "total": 0}
+        )
+
+        await ops.code_search_symbols("handle*")
+
+        mock_session.call_tool.assert_called_once_with(
+            "code.search_symbols", {"name_pattern": "handle*"}
+        )
+
+    async def test_passes_kind_filter(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"pattern": "Pool", "matches": [], "total": 0}
+        )
+
+        await ops.code_search_symbols("Pool", kind="class")
+
+        args = mock_session.call_tool.call_args[0][1]
+        assert args["kind"] == "class"
+
+    async def test_passes_file_path_filter(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"pattern": "init", "matches": [], "total": 0}
+        )
+
+        await ops.code_search_symbols("init", file_path="src/db/")
+
+        args = mock_session.call_tool.call_args[0][1]
+        assert args["file_path"] == "src/db/"
+
+    async def test_omits_none_filters(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"pattern": "foo", "matches": [], "total": 0}
+        )
+
+        await ops.code_search_symbols("foo")
+
+        args = mock_session.call_tool.call_args[0][1]
+        assert "kind" not in args
+        assert "file_path" not in args
+
+    async def test_error_response_raises(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"error": "INVALID_PATTERN"}, is_error=True
+        )
+
+        with pytest.raises(ToolCallError):
+            await ops.code_search_symbols("[invalid")
+
+    async def test_is_coroutine(self) -> None:
+        assert inspect.iscoroutinefunction(TicketOperations.code_search_symbols)
+
+
+# ---------------------------------------------------------------------------
+# Code Graph: code_get_imports
+# ---------------------------------------------------------------------------
+
+
+class TestCodeGetImports:
+    """code_get_imports calls code.get_imports and returns ImportChainResult."""
+
+    async def test_returns_import_chain_result(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {
+                "file_path": "src/db/pool.ts",
+                "imports": [
+                    {
+                        "source": "src/db/pool.ts",
+                        "target": "src/config.ts",
+                        "symbols": ["DatabaseConfig"],
+                        "depth": 1,
+                    },
+                    {
+                        "source": "src/config.ts",
+                        "target": "src/env.ts",
+                        "symbols": ["getEnv"],
+                        "depth": 2,
+                    },
+                ],
+                "total": 2,
+            }
+        )
+
+        result = await ops.code_get_imports("src/db/pool.ts")
+
+        assert isinstance(result, ImportChainResult)
+        assert result.file_path == "src/db/pool.ts"
+        assert len(result.imports) == 2
+        assert result.imports[0].source == "src/db/pool.ts"
+        assert result.imports[0].target == "src/config.ts"
+        assert result.imports[0].symbols == ["DatabaseConfig"]
+        assert result.imports[1].depth == 2
+        assert result.total == 2
+
+    async def test_calls_code_get_imports_tool(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"file_path": "src/main.ts", "imports": [], "total": 0}
+        )
+
+        await ops.code_get_imports("src/main.ts")
+
+        mock_session.call_tool.assert_called_once_with(
+            "code.get_imports", {"file_path": "src/main.ts"}
+        )
+
+    async def test_passes_max_depth(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"file_path": "src/main.ts", "imports": [], "total": 0}
+        )
+
+        await ops.code_get_imports("src/main.ts", max_depth=5)
+
+        args = mock_session.call_tool.call_args[0][1]
+        assert args["max_depth"] == 5
+
+    async def test_omits_max_depth_when_none(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"file_path": "src/main.ts", "imports": [], "total": 0}
+        )
+
+        await ops.code_get_imports("src/main.ts")
+
+        args = mock_session.call_tool.call_args[0][1]
+        assert "max_depth" not in args
+
+    async def test_error_response_raises(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"error": "FILE_NOT_FOUND"}, is_error=True
+        )
+
+        with pytest.raises(ToolCallError):
+            await ops.code_get_imports("nonexistent.ts")
+
+    async def test_is_coroutine(self) -> None:
+        assert inspect.iscoroutinefunction(TicketOperations.code_get_imports)
+
+
+# ---------------------------------------------------------------------------
+# Init Tools: init_index
+# ---------------------------------------------------------------------------
+
+
+class TestInitIndex:
+    """init_index calls init.index and returns IndexResult."""
+
+    async def test_returns_index_result(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {
+                "total_files": 150,
+                "indexed": 142,
+                "skipped": 8,
+                "symbols_found": 1230,
+                "imports_found": 456,
+            }
+        )
+
+        result = await ops.init_index("src/")
+
+        assert isinstance(result, IndexResult)
+        assert result.total_files == 150
+        assert result.indexed == 142
+        assert result.skipped == 8
+        assert result.symbols_found == 1230
+        assert result.imports_found == 456
+
+    async def test_calls_init_index_tool(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {
+                "total_files": 0,
+                "indexed": 0,
+                "skipped": 0,
+                "symbols_found": 0,
+                "imports_found": 0,
+            }
+        )
+
+        await ops.init_index("src/")
+
+        mock_session.call_tool.assert_called_once_with(
+            "init.index", {"root_path": "src/"}
+        )
+
+    async def test_passes_force_when_true(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {
+                "total_files": 10,
+                "indexed": 10,
+                "skipped": 0,
+                "symbols_found": 50,
+                "imports_found": 20,
+            }
+        )
+
+        await ops.init_index("src/", force=True)
+
+        args = mock_session.call_tool.call_args[0][1]
+        assert args["force"] is True
+
+    async def test_omits_force_when_false(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {
+                "total_files": 10,
+                "indexed": 10,
+                "skipped": 0,
+                "symbols_found": 50,
+                "imports_found": 20,
+            }
+        )
+
+        await ops.init_index("src/")
+
+        args = mock_session.call_tool.call_args[0][1]
+        assert "force" not in args
+
+    async def test_error_response_raises(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"error": "PATH_NOT_FOUND"}, is_error=True
+        )
+
+        with pytest.raises(ToolCallError):
+            await ops.init_index("nonexistent/")
+
+    async def test_is_coroutine(self) -> None:
+        assert inspect.iscoroutinefunction(TicketOperations.init_index)
+
+    async def test_default_values(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result({})
+
+        result = await ops.init_index(".")
+
+        assert isinstance(result, IndexResult)
+        assert result.total_files == 0
+        assert result.indexed == 0
+        assert result.skipped == 0
+        assert result.symbols_found == 0
+        assert result.imports_found == 0
+
+
+# ---------------------------------------------------------------------------
+# Init Tools: init_orient
+# ---------------------------------------------------------------------------
+
+
+class TestInitOrient:
+    """init_orient calls init.orient and returns OrientationResult."""
+
+    async def test_returns_orientation_result(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {
+                "project_name": "forgeos-server",
+                "package_manager": "npm",
+                "frameworks": ["express", "vitest"],
+                "languages": ["typescript"],
+                "entry_points": ["src/server.ts"],
+                "test_framework": "vitest",
+                "build_system": "tsc",
+            }
+        )
+
+        result = await ops.init_orient("forgeos-server/")
+
+        assert isinstance(result, OrientationResult)
+        assert result.project_name == "forgeos-server"
+        assert result.package_manager == "npm"
+        assert result.frameworks == ["express", "vitest"]
+        assert result.languages == ["typescript"]
+        assert result.entry_points == ["src/server.ts"]
+        assert result.test_framework == "vitest"
+        assert result.build_system == "tsc"
+
+    async def test_calls_init_orient_tool(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {
+                "project_name": "my-app",
+                "package_manager": "pip",
+                "frameworks": [],
+                "languages": ["python"],
+                "entry_points": [],
+                "test_framework": "pytest",
+                "build_system": "",
+            }
+        )
+
+        await ops.init_orient(".")
+
+        mock_session.call_tool.assert_called_once_with(
+            "init.orient", {"root_path": "."}
+        )
+
+    async def test_error_response_raises(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {"error": "PATH_NOT_FOUND"}, is_error=True
+        )
+
+        with pytest.raises(ToolCallError):
+            await ops.init_orient("nonexistent/")
+
+    async def test_is_coroutine(self) -> None:
+        assert inspect.iscoroutinefunction(TicketOperations.init_orient)
+
+    async def test_default_values(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result({})
+
+        result = await ops.init_orient(".")
+
+        assert isinstance(result, OrientationResult)
+        assert result.project_name == ""
+        assert result.package_manager == ""
+        assert result.frameworks == []
+        assert result.languages == []
+        assert result.entry_points == []
+        assert result.test_framework == ""
+        assert result.build_system == ""
+
+    async def test_multiple_frameworks_and_languages(
+        self, ops: TicketOperations, mock_session: AsyncMock
+    ) -> None:
+        mock_session.call_tool.return_value = _call_result(
+            {
+                "project_name": "fullstack-app",
+                "package_manager": "npm",
+                "frameworks": ["next", "prisma", "tailwindcss"],
+                "languages": ["typescript", "python", "sql"],
+                "entry_points": ["src/index.ts", "api/main.py"],
+                "test_framework": "jest",
+                "build_system": "webpack",
+            }
+        )
+
+        result = await ops.init_orient(".")
+
+        assert len(result.frameworks) == 3
+        assert len(result.languages) == 3
+        assert len(result.entry_points) == 2

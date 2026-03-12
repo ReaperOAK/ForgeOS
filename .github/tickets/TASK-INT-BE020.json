@@ -1,0 +1,67 @@
+{
+  "ticket_id": "TASK-INT-BE020",
+  "title": "Code Graph Stored Functions",
+  "description": "Implement PostgreSQL stored functions for code graph queries: blast_radius (recursive CTE traversal of code_dependencies), search_symbols (filtered symbol lookup), get_import_chain (transitive import resolution). These are called by MCP tools.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-12T15:43:05.049876+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-BE019"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/db/migrations/002-code-graph.sql"
+  ],
+  "acceptance_criteria": [
+    "blast_radius(file_path, max_depth) returns affected files via recursive CTE on code_dependencies",
+    "blast_radius results include: file_path, language, depth, affected_symbol_count",
+    "blast_radius handles circular dependencies (visited set prevents infinite recursion)",
+    "search_symbols(query, kind_filter, language_filter, limit, offset) returns matching symbols",
+    "search_symbols supports exact match, prefix match, and substring match with ordering",
+    "get_import_chain(file_path, max_depth) returns transitive imports with depth",
+    "All functions have SECURITY DEFINER with restricted search_path",
+    "Unit tests with seeded graph data verify all functions"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-12T15:43:05.049878+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase2-schema-indexer.md"
+    },
+    {
+      "timestamp": "2026-03-12T16:16:11.118499+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase2-schema-indexer.md",
+  "tags": [
+    "intelligence",
+    "codegraph",
+    "phase2",
+    "database",
+    "BLK-INT-06"
+  ]
+}

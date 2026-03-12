@@ -1,0 +1,67 @@
+{
+  "ticket_id": "TASK-INT-BE026",
+  "title": "Implement code.get_imports MCP Tool",
+  "description": "Implement the code.get_imports MCP tool. Given a file path, return the import/dependency chain showing what the file imports (direct and transitive up to max_depth). Include import names, source paths, and whether imports are resolved to internal files or external packages.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-12T15:43:05.050585+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-BE020",
+    "TASK-INT-BE021"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/tools/code-get-imports.ts"
+  ],
+  "acceptance_criteria": [
+    "MCP tool code.get_imports accepts file_path and optional max_depth (default 2)",
+    "Returns direct_imports array with source_path, imported_names, is_resolved, resolved_file_path",
+    "Returns transitive_imports array with depth annotations (if max_depth greater than 1)",
+    "Distinguishes internal imports (resolved to code_files) from external packages",
+    "Returns empty result for files with no imports (not an error)",
+    "Zod schemas validate input parameters",
+    "Unit test: fixture with 3-level import chain verifies depth annotations"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-12T15:43:05.050587+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase2-tools-testing.md"
+    },
+    {
+      "timestamp": "2026-03-12T16:26:40.081400+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase2-tools-testing.md",
+  "tags": [
+    "intelligence",
+    "codegraph",
+    "phase2",
+    "mcp-tool",
+    "BLK-INT-08"
+  ]
+}

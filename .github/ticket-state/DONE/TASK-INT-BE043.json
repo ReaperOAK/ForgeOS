@@ -1,0 +1,68 @@
+{
+  "ticket_id": "TASK-INT-BE043",
+  "title": "Implement init.orient MCP Tool",
+  "description": "Implement the init.orient MCP tool. Auto-discovers project framework, build system, and key entry points. Generates an orientation summary that agents use for first-contact with a new codebase. Detects: package managers (npm/pnpm/yarn/pip), frameworks (Next.js/React/Express/Django/FastAPI), test frameworks, and configuration files.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "DONE",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-12T15:43:05.052888+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-BE042"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/tools/init-orient.ts"
+  ],
+  "acceptance_criteria": [
+    "MCP tool init.orient accepts project_root (string)",
+    "Detects package manager from lockfiles (package-lock.json, pnpm-lock.yaml, yarn.lock, Pipfile.lock, poetry.lock)",
+    "Detects frameworks from package.json dependencies or Python imports",
+    "Identifies entry points (src/index.ts, main.py, app.py, manage.py)",
+    "Identifies test directory and test framework",
+    "Identifies build configuration (tsconfig.json, webpack.config, vite.config)",
+    "Returns orientation object with detected_stack, entry_points, build_config, test_config",
+    "Reports progress via SSE",
+    "Handles monorepo structures (scans top-level subpackages)"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-12T15:43:05.052890+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase4-init-docs.md"
+    },
+    {
+      "timestamp": "2026-03-12T16:34:06.243927+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase4-init-docs.md",
+  "tags": [
+    "intelligence",
+    "init",
+    "phase4",
+    "mcp-tool",
+    "BLK-INT-14"
+  ]
+}

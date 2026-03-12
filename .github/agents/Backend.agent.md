@@ -57,20 +57,25 @@ Before ANY work, execute in order — no skips:
 
 1. Read `.github/guardian/STOP_ALL` — if contains `STOP`: halt immediately, zero edits.
 2. Read all `.github/instructions/*.instructions.md` (core, sdlc, ticket-system, git-protocol, agent-behavior, terminal-management).
-3. Read upstream summary from `.github/agent-output/{PreviousAgent}/{ticket-id}.md` (if exists).
+3. Call `tickets.payload(ticket_id)` — receive the full delegation context from ForgeOS MCP server:
+   - Ticket JSON (acceptance criteria, file paths, dependencies)
+   - Upstream summary from previous stage agent (e.g., Architect)
+   - Memory entries relevant to the ticket
+   - File scope (authorized read/write paths)
 4. Read all chunk files in `.github/vibecoding/chunks/Backend.agent/`.
 5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks.
-6. Read ticket JSON from `.github/ticket-state/` or `.github/tickets/`.
+
+RULE: The `tickets.payload` response is the canonical source for ticket context.
+PROHIBITED: Reading `.github/ticket-state/` or `.github/tickets/` directly for workflow state — use MCP.
 
 ## 4. Pre-Claimed Ticket (Dispatcher-Claim Protocol)
 
-RULE: The ticket is already claimed by Ticketer before this agent is launched.
-RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
+RULE: The ticket is already claimed by the ForgeOS orchestrator before this agent is launched.
+RULE: Subagents NEVER call `tickets.claim` — the ForgeOS orchestrator handles claiming.
 
-1. Read ticket JSON from `.github/ticket-state/BACKEND/{ticket-id}.json`.
-2. Verify claim metadata exists: `claimed_by`, `machine_id`, `operator`, `lease_expiry`.
-3. If claim metadata is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing claim`.
-4. Proceed directly to execution workflow — no `git pull --rebase` for claiming.
+1. Verify `tickets.payload` response contains valid claim metadata: `claimed_by`, `machine_id`, `operator`, `lease_expiry`.
+2. If claim metadata is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing claim`.
+3. Proceed directly to execution workflow.
 
 ## 5. Execution Workflow
 
@@ -101,32 +106,42 @@ RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
 - **No hardcoded secrets** — use environment variables or secret management.
 - **Value objects** — wrap domain primitives (Email, UserId, Money) in typed wrappers.
 
-## 6. Work Commit (Commit 2 — Deliverables)
+## 6. Work Commit (Deliverables)
 
 After implementation is complete:
 
 1. Write summary to `.github/agent-output/Backend/{ticket-id}.md` including:
    - Files created/modified, tests created, TDD evidence, coverage metrics.
 2. Delete previous stage summary after reading it.
-3. Update ticket JSON with completion metadata (`status`, `completed_at`, `artifacts`).
-4. Move ticket to next stage: `.github/ticket-state/QA/{ticket-id}.json`.
-5. Append memory entry to `.github/memory-bank/activeContext.md`:
+3. Call `tickets.complete` with structured evidence to advance the ticket:
+   ```jsonc
+   {
+     "ticket_id": "{ticket-id}",
+     "evidence": {
+       "artifacts": ["src/path/to/file.ts", "tests/path/to/test.ts"],
+       "test_results": "N tests passed, 0 failed",
+       "confidence": "HIGH"
+     }
+   }
+   ```
+4. Append memory entry to `.github/memory-bank/activeContext.md`:
    ```markdown
    ### [{ticket-id}] — Summary
    - **Artifacts:** file1.ts, file2.ts
    - **Decisions:** Chose X over Y because Z
    - **Timestamp:** {ISO8601}
    ```
-6. Stage ONLY modified files explicitly — one `git add <file>` per file:
+5. Stage ONLY modified files explicitly — one `git add <file>` per file:
    ```bash
    git add src/path/to/file.ts tests/path/to/test.ts
    git add .github/agent-output/Backend/{ticket-id}.md
-   git add .github/ticket-state/QA/{ticket-id}.json .github/tickets/{ticket-id}.json
    git add .github/memory-bank/activeContext.md
    ```
    **NEVER:** `git add .` / `git add -A` / `git add --all`
-7. Commit: `git commit -m "[{ticket-id}] BACKEND complete by Backend on {machine}"`.
-8. `git push`.
+6. Commit: `git commit -m "[{ticket-id}] BACKEND complete by Backend on {machine}"`.
+7. `git push`.
+
+RULE: Ticket state transitions happen via MCP `tickets.complete` — not by moving JSON files between directories.
 
 ## 7. Scope
 
@@ -144,6 +159,9 @@ After implementation is complete:
 - Business logic in controllers — controllers are thin delegation layers.
 - Silent error swallowing — never `catch (e) {}` or catch-and-ignore.
 - Cross-ticket references — one worker, one ticket, one stage.
+- Reading `.github/ticket-state/` or `.github/tickets/` directly for workflow state — use MCP `tickets.payload`.
+- Moving ticket JSON files between directories — use MCP `tickets.complete` or `tickets.reject`.
+- Calling `tickets.claim` — the ForgeOS orchestrator handles claiming before dispatch.
 - Using or browsing tools outside the Assigned Tool Loadout section — strict boundary enforced.
 - Hallucinating tool names or capabilities not explicitly listed in the loadout.
 

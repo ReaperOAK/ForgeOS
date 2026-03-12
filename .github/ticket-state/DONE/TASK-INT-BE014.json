@@ -1,0 +1,66 @@
+{
+  "ticket_id": "TASK-INT-BE014",
+  "title": "PostgreSQL Stored Functions for Cutover Operations",
+  "description": "Create stored functions for atomic ticket operations: claim_ticket (atomic claim with lease), advance_ticket (stage transition with validation), reject_ticket (rework with evidence). These replace the filesystem-based state machine with database-enforced atomicity.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "DONE",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-12T15:43:05.049302+00:00",
+  "created_by": "TODO",
+  "dependencies": [],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/db/migrations/002-cutover-functions.sql"
+  ],
+  "acceptance_criteria": [
+    "claim_ticket(ticket_id, agent, machine, operator, lease_minutes) function created",
+    "claim_ticket enforces lease expiry check (expired claims are reclaimable)",
+    "claim_ticket is atomic (SELECT FOR UPDATE prevents race conditions)",
+    "advance_ticket(ticket_id, agent) validates current stage and moves to next",
+    "advance_ticket enforces SDLC flow order (cannot skip stages)",
+    "reject_ticket(ticket_id, agent, reason) increments rework_count, records rejection",
+    "reject_ticket enforces max 3 reworks (raises exception beyond limit)",
+    "All functions include audit trail entries in ticket history",
+    "Unit tests for each function with concurrent access scenarios"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-12T15:43:05.049304+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase1-tools.md"
+    },
+    {
+      "timestamp": "2026-03-12T15:43:05.114869+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase1-tools.md",
+  "tags": [
+    "intelligence",
+    "cutover",
+    "phase1",
+    "database",
+    "BLK-INT-03"
+  ]
+}

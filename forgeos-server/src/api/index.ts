@@ -21,6 +21,7 @@ import { ticketsRouter } from './routes/tickets.js';
 import { stagesRouter } from './routes/stages.js';
 import { authMiddleware } from '../middleware/auth.js';
 import { adminRouter } from './routes/admin.js';
+import { orientationProgressRouter } from './routes/orientation-progress.js';
 
 /**
  * Create and return the top-level API router.
@@ -43,6 +44,9 @@ export function createApiRouter(): Router {
 
   // Admin endpoints — require authentication
   router.use('/admin', authMiddleware, adminRouter);
+
+  // Orientation progress — SSE optionally authenticated, status requires auth
+  router.use('/orientation', orientationProgressRouter);
 
   return router;
 }

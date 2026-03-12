@@ -57,18 +57,18 @@ Execute in order before any work. No skips.
 2. Read all `.github/instructions/*.instructions.md` (core, sdlc, ticket-system, git-protocol, agent-behavior, terminal-management)
 3. Read upstream summary from `.github/agent-output/{PreviousAgent}/{ticket-id}.md`
 4. Read all files in `.github/vibecoding/chunks/QA.agent/`
-5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks
-6. Read ticket JSON from `.github/ticket-state/QA/{ticket-id}.json`
+5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks.
+6. Call `tickets.payload(ticket_id)` via the ForgeOS MCP server to receive full delegation context (ticket JSON, upstream summary, memory entries, file scope).
 
 ## 4. Pre-Claimed Ticket (Dispatcher-Claim Protocol)
 
 RULE: The ticket is already claimed by Ticketer before this agent is launched.
 RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
 
-1. Read ticket JSON from `.github/ticket-state/QA/{ticket-id}.json`.
-2. Verify claim metadata exists: `claimed_by`, `machine_id`, `operator`, `lease_expiry`.
-3. If claim metadata is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing claim`.
-4. Proceed directly to execution workflow — no `git pull --rebase` for claiming.
+1. Call `tickets.payload(ticket_id)` to receive the full delegation context from the ForgeOS MCP server.
+2. Verify the payload includes ticket JSON with claim metadata (`claimed_by`, `machine_id`, `operator`, `lease_expiry`).
+3. If claim metadata is missing or the MCP server rejects the request, HALT and report `PROTOCOL_VIOLATION: missing claim`.
+4. Proceed directly to execution workflow.
 
 ## 5. Execution Workflow
 
@@ -117,24 +117,42 @@ RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
 
 **PASS** — All quality gates satisfied:
 - All tests pass, coverage ≥80%, mutation score meets targets, no critical defects
-- Advance ticket: `python3 .github/tickets.py --advance {ticket-id} QA`
+- Call `tickets.complete` via the ForgeOS MCP server with structured evidence:
+  ```jsonc
+  {
+    "ticket_id": "{ticket-id}",
+    "evidence": {
+      "artifacts": ["tests/...", ".github/agent-output/QA/{ticket-id}.md"],
+      "test_results": "{pass/fail counts, coverage %, mutation score}",
+      "confidence": "HIGH",
+      "notes": "QA PASS — all quality gates satisfied"
+    }
+  }
+  ```
 
 **FAIL** — Any gate fails:
 - Document specific failures: file, line, test name, expected vs actual
-- Send for rework: `python3 .github/tickets.py --rework {ticket-id} QA "{reason}"`
+- Call `tickets.reject` via the ForgeOS MCP server with rejection reason and evidence:
+  ```jsonc
+  {
+    "ticket_id": "{ticket-id}",
+    "reason": "{specific failure description with actionable fix guidance}",
+    "evidence": { "failures": ["..."], "coverage": "N%" }
+  }
+  ```
+- The MCP server automatically routes the ticket back to its implementation stage for rework
 - Rework reason must include actionable fix guidance
 
 ## 7. Work Commit (Commit 2)
 
-1. Write QA report to `.github/agent-output/QA/{ticket-id}.md` (include verdict, evidence, metrics)
-2. Delete previous stage summary from `.github/agent-output/{PreviousAgent}/{ticket-id}.md`
-3. If PASS: move ticket to `.github/ticket-state/SECURITY/{ticket-id}.json`
-4. If FAIL: ticket stays in rework state (handled by tickets.py)
-5. Update master copy at `.github/tickets/{ticket-id}.json`
-6. Append memory entry to `.github/memory-bank/activeContext.md` with ticket-id, artifacts, verdict, mutation score, coverage, and ISO8601 timestamp
-7. Stage ONLY modified files explicitly — NEVER `git add .` or `git add -A`
-8. `git commit -m "[{ticket-id}] QA complete by QA on {machine}"`
-9. `git push`
+1. Write QA report to `.github/agent-output/QA/{ticket-id}.md` (include verdict, evidence, metrics).
+2. Delete previous stage summary from `.github/agent-output/{PreviousAgent}/{ticket-id}.md`.
+3. If PASS: call `tickets.complete` with evidence payload (MCP server advances the ticket to SECURITY).
+4. If FAIL: call `tickets.reject` with reason and evidence (MCP server routes ticket back for rework).
+5. Append memory entry to `.github/memory-bank/activeContext.md` with ticket-id, artifacts, verdict, mutation score, coverage, and ISO8601 timestamp.
+6. Stage ONLY modified files explicitly — NEVER `git add .` or `git add -A`.
+7. `git commit -m "[{ticket-id}] QA complete by QA on {machine}"`.
+8. `git push`.
 
 ## 8. Scope
 

@@ -1,0 +1,69 @@
+{
+  "ticket_id": "TASK-INT-BE021",
+  "title": "Core Indexer Service with File Walker",
+  "description": "Implement the core indexer service. File walker traverses the repository, respects .gitignore, computes SHA-256 hashes. Indexer compares hashes for incremental indexing (only re-parse changed files). Orchestrates parser dispatch based on file extension. Manages database writes for code_files rows.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-12T15:43:05.049978+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-DO001",
+    "TASK-INT-BE019"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/services/indexer/indexer-service.ts",
+    "forgeos-server/src/services/indexer/file-walker.ts"
+  ],
+  "acceptance_criteria": [
+    "File walker traverses directory tree respecting .gitignore patterns",
+    "SHA-256 content hash computed for each file",
+    "Incremental indexing: files with unchanged hash are skipped",
+    "New files are inserted into code_files table",
+    "Modified files trigger re-parse (old symbols deleted, new symbols inserted)",
+    "Deleted files are removed from code_files with cascade to symbols/imports",
+    "Batch database operations (configurable batch size, default 100)",
+    "Unit test: mock filesystem then verify walker output"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-12T15:43:05.049980+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase2-schema-indexer.md"
+    },
+    {
+      "timestamp": "2026-03-12T16:16:11.158988+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase2-schema-indexer.md",
+  "tags": [
+    "intelligence",
+    "codegraph",
+    "phase2",
+    "service",
+    "BLK-INT-07"
+  ]
+}

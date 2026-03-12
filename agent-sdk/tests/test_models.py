@@ -15,7 +15,14 @@ from datetime import datetime, timezone
 import pytest
 from pydantic import ValidationError
 
-from forgeos_sdk.models import Claim, Evidence, OperationResult, Ticket
+from forgeos_sdk.models import (
+    Claim,
+    DelegationPayload,
+    Evidence,
+    ListResponse,
+    OperationResult,
+    Ticket,
+)
 
 
 class TestTicketModel:
@@ -195,3 +202,109 @@ class TestOperationResultModel:
     def test_failure_result(self) -> None:
         result = OperationResult(success=False, message="Not found")
         assert result.success is False
+
+
+class TestListResponseModel:
+    """ListResponse model construction and validation."""
+
+    def test_minimal_list_response(self) -> None:
+        lr = ListResponse()
+        assert lr.tickets == []
+        assert lr.total == 0
+        assert lr.limit == 50
+        assert lr.offset == 0
+
+    def test_list_response_with_tickets(self) -> None:
+        lr = ListResponse(
+            tickets=[
+                Ticket(ticket_id="T-001", stage="BACKEND"),
+                Ticket(ticket_id="T-002", stage="QA"),
+            ],
+            total=42,
+            limit=10,
+            offset=20,
+        )
+        assert len(lr.tickets) == 2
+        assert lr.tickets[0].ticket_id == "T-001"
+        assert lr.total == 42
+        assert lr.limit == 10
+        assert lr.offset == 20
+
+    def test_list_response_from_dict(self) -> None:
+        data = {
+            "tickets": [
+                {"ticket_id": "T-003", "status": "READY"},
+                {"ticket_id": "T-004", "status": "CLAIMED"},
+            ],
+            "total": 2,
+            "limit": 50,
+            "offset": 0,
+        }
+        lr = ListResponse.model_validate(data)
+        assert len(lr.tickets) == 2
+        assert lr.tickets[1].status == "CLAIMED"
+
+    def test_list_response_allows_extra_fields(self) -> None:
+        lr = ListResponse(total=5, extra_field="value")
+        assert lr.model_extra is not None
+        assert lr.model_extra.get("extra_field") == "value"
+
+
+class TestDelegationPayloadModel:
+    """DelegationPayload model construction and validation."""
+
+    def test_minimal_payload(self) -> None:
+        ticket = Ticket(ticket_id="T-001", stage="BACKEND")
+        payload = DelegationPayload(ticket=ticket)
+        assert payload.ticket.ticket_id == "T-001"
+        assert payload.upstream_summary == ""
+        assert payload.memory_entries == []
+        assert payload.file_scope == []
+
+    def test_full_payload(self) -> None:
+        ticket = Ticket(
+            ticket_id="FORGEOS-BE003",
+            title="Connection Pool",
+            type="backend",
+            priority="high",
+            status="CLAIMED",
+            stage="BACKEND",
+        )
+        payload = DelegationPayload(
+            ticket=ticket,
+            upstream_summary="## Architect summary\nDesign approved.",
+            memory_entries=[
+                {"key": "pool-pattern", "value": "Use pgBouncer"},
+            ],
+            file_scope=["src/db/pool.ts", "tests/db/pool.test.ts"],
+        )
+        assert payload.ticket.title == "Connection Pool"
+        assert "Architect summary" in payload.upstream_summary
+        assert len(payload.memory_entries) == 1
+        assert len(payload.file_scope) == 2
+
+    def test_payload_from_dict(self) -> None:
+        data = {
+            "ticket": {
+                "ticket_id": "T-005",
+                "title": "Test",
+                "stage": "QA",
+            },
+            "upstream_summary": "All good",
+            "memory_entries": [],
+            "file_scope": ["src/main.py"],
+        }
+        payload = DelegationPayload.model_validate(data)
+        assert payload.ticket.ticket_id == "T-005"
+        assert payload.upstream_summary == "All good"
+        assert payload.file_scope == ["src/main.py"]
+
+    def test_payload_requires_ticket(self) -> None:
+        with pytest.raises(ValidationError):
+            DelegationPayload()  # type: ignore[call-arg]
+
+    def test_payload_allows_extra_fields(self) -> None:
+        ticket = Ticket(ticket_id="T-001")
+        payload = DelegationPayload(ticket=ticket, agent_hints="use TDD")
+        assert payload.model_extra is not None
+        assert payload.model_extra.get("agent_hints") == "use TDD"

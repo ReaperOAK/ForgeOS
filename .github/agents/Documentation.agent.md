@@ -60,17 +60,17 @@ Execute in order. No skips.
 3. Read upstream summary: `.github/agent-output/CIReviewer/{ticket-id}.md`.
 4. Read all files in `.github/vibecoding/chunks/Documentation.agent/`.
 5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks.
-6. Read ticket JSON from `.github/ticket-state/DOCS/{ticket-id}.json`.
+6. Call `tickets.payload(ticket_id)` via the ForgeOS MCP server to receive full delegation context (ticket JSON, upstream summary, memory entries, file scope).
 
 ## 4. Pre-Claimed Ticket (Dispatcher-Claim Protocol)
 
 RULE: The ticket is already claimed by Ticketer before this agent is launched.
 RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
 
-1. Read ticket JSON from `.github/ticket-state/DOCS/{ticket-id}.json`.
-2. Verify claim metadata exists: `claimed_by`, `machine_id`, `operator`, `lease_expiry`.
-3. If claim metadata is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing claim`.
-4. Proceed directly to execution workflow — no `git pull --rebase` for claiming.
+1. Call `tickets.payload(ticket_id)` to receive the full delegation context from the ForgeOS MCP server.
+2. Verify the payload includes ticket JSON with claim metadata (`claimed_by`, `machine_id`, `operator`, `lease_expiry`).
+3. If claim metadata is missing or the MCP server rejects the request, HALT and report `PROTOCOL_VIOLATION: missing claim`.
+4. Proceed directly to execution workflow.
 
 ## 5. Execution Workflow
 
@@ -95,8 +95,19 @@ After verifying claim, execute docs work:
 
 1. Write summary to `.github/agent-output/Documentation/{ticket-id}.md`.
 2. Delete upstream summary: `.github/agent-output/CIReviewer/{ticket-id}.md`.
-3. Move ticket JSON to `.github/ticket-state/VALIDATION/{ticket-id}.json`
-   (remove from `DOCS/`). Update ticket metadata with completion info.
+3. Call `tickets.complete` via the ForgeOS MCP server with structured evidence:
+   ```jsonc
+   {
+     "ticket_id": "{ticket-id}",
+     "evidence": {
+       "artifacts": [".github/agent-output/Documentation/{ticket-id}.md", "{updated doc files}"],
+       "test_results": "Readability FK grade ≤ 10, 0 broken links, freshness updated",
+       "confidence": "HIGH",
+       "notes": "DOCS complete — all documentation updated"
+     }
+   }
+   ```
+   The MCP server advances the ticket to VALIDATION.
 4. Append memory entry to `.github/memory-bank/activeContext.md`:
    ```markdown
    ### [{ticket-id}] — Documentation Summary

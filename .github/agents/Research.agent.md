@@ -59,17 +59,17 @@ Execute in order before any work. No skips.
 3. Read upstream summary from `.github/agent-output/{PreviousAgent}/{ticket-id}.md` (if exists)
 4. Read all files in `.github/vibecoding/chunks/Research.agent/`
 5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks
-6. Read ticket JSON from `.github/ticket-state/RESEARCH/{ticket-id}.json`
+6. Call `tickets.payload(ticket_id)` to receive delegation context (ticket JSON, upstream summary, memory entries, file scope)
 
 ## 4. Pre-Claimed Ticket (Dispatcher-Claim Protocol)
 
-RULE: The ticket is already claimed by Ticketer before this agent is launched.
-RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
+RULE: The ticket is already claimed by ForgeOS orchestrator before this agent is launched.
+RULE: Subagents NEVER perform claim commits — the dispatcher handles claiming via MCP.
 
-1. Read ticket JSON from `.github/ticket-state/RESEARCH/{ticket-id}.json`.
-2. Verify claim metadata exists: `claimed_by`, `machine_id`, `operator`, `lease_expiry`.
-3. If claim metadata is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing claim`.
-4. Proceed directly to execution workflow — no `git pull --rebase` for claiming.
+1. Call `tickets.payload(ticket_id)` to receive full delegation context from the ForgeOS MCP server.
+2. Verify delegation context contains: ticket JSON, upstream summary, memory entries, file scope.
+3. If delegation context is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing delegation context`.
+4. Proceed directly to execution workflow.
 
 ## 5. Execution Workflow
 
@@ -146,6 +146,7 @@ RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
 - Modifying `systemPatterns.md` or `decisionLog.md`
 - Deploying to any environment or force pushing
 - Skipping license compatibility analysis for library recommendations
+- Reading `.github/ticket-state/` or `.github/tickets/` directly for ticket context — use `tickets.payload` via MCP
 - Using or browsing tools outside the Assigned Tool Loadout section — strict boundary enforced.
 - Hallucinating tool names or capabilities not explicitly listed in the loadout.
 

@@ -1,0 +1,69 @@
+{
+  "ticket_id": "TASK-INT-BE042",
+  "title": "Implement init.index MCP Tool",
+  "description": "Implement the init.index MCP tool. Triggers a full codebase indexing. Walks the project directory tree, identifies source files by extension, parses each file with the appropriate tree-sitter parser, and stores symbols in the code graph. Reports progress via SSE.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-12T15:43:05.052780+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-BE021",
+    "TASK-INT-BE019"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/tools/init-index.ts"
+  ],
+  "acceptance_criteria": [
+    "MCP tool init.index accepts project_root (string), optional file_patterns (array of globs, default common extensions)",
+    "Uses the file walker from TASK-INT-BE021 to discover source files",
+    "Parses each file with matching tree-sitter parser (TS/JS or Python)",
+    "Stores file records in code_files, symbols in code_symbols",
+    "Extracts and stores imports in code_imports",
+    "Reports progress via SSE: files_found, files_processed, symbols_extracted",
+    "Returns summary with total_files, total_symbols, total_imports, duration_ms",
+    "Skips node_modules, __pycache__, .git, dist directories by default",
+    "Handles parse errors gracefully (logs warning then continues to next file)"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-12T15:43:05.052782+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase4-init-docs.md"
+    },
+    {
+      "timestamp": "2026-03-12T16:26:40.074123+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase4-init-docs.md",
+  "tags": [
+    "intelligence",
+    "init",
+    "phase4",
+    "mcp-tool",
+    "BLK-INT-14"
+  ]
+}

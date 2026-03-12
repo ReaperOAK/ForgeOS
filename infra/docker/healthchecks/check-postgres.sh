@@ -63,13 +63,13 @@ fi
 # MCP server runs migrations.
 # ---------------------------------------------------------------------------
 EXTENSIONS=$(psql -U "$PGUSER" -d "$PGDATABASE" -h "$PGHOST" -p "$PGPORT" \
-    -c "SELECT extname FROM pg_extension WHERE extname IN ('uuid-ossp','pgcrypto');" \
+    -c "SELECT extname FROM pg_extension WHERE extname IN ('uuid-ossp','pgcrypto','vector');" \
     -t -A 2>/dev/null | wc -l)
 
-if [ "$EXTENSIONS" -lt 2 ]; then
+if [ "$EXTENSIONS" -lt 3 ]; then
     echo "HEALTHY: PostgreSQL accepting connections (extensions not yet loaded — awaiting migrations)"
     exit 0
 fi
 
-echo "HEALTHY: PostgreSQL is accepting connections, queries succeed, extensions loaded"
+echo "HEALTHY: PostgreSQL is accepting connections, queries succeed, extensions loaded (incl. pgvector)"
 exit 0

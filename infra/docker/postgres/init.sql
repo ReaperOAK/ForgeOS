@@ -13,12 +13,12 @@
 -- The forgeos database itself is created by the POSTGRES_DB env var in
 -- docker-compose.yml. This script handles everything beyond that.
 --
--- Prerequisites: PostgreSQL 14+ (for uuid-ossp, pgcrypto)
+-- Prerequisites: PostgreSQL 14+ (for uuid-ossp, pgcrypto), pgvector 0.7+
 -- Idempotency:   Safe to re-run (uses IF NOT EXISTS / IF EXISTS guards)
 --
--- Ticket:  FORGEOS-DO002
+-- Ticket:  FORGEOS-DO002, TASK-INT-DO002
 -- Author:  DevOps Engineer
--- Date:    2026-03-07
+-- Date:    2026-03-07 (updated 2026-03-12)
 -- =============================================================================
 
 -- Switch to the forgeos database (should already be selected via POSTGRES_DB)
@@ -33,6 +33,7 @@
 
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 CREATE EXTENSION IF NOT EXISTS "pgcrypto";
+CREATE EXTENSION IF NOT EXISTS "vector";
 
 -- =============================================================================
 -- 2. APPLICATION ROLE — forgeos_user
@@ -121,12 +122,12 @@ BEGIN
     -- Verify extensions
     SELECT COUNT(*) INTO ext_count
     FROM pg_extension
-    WHERE extname IN ('uuid-ossp', 'pgcrypto');
+    WHERE extname IN ('uuid-ossp', 'pgcrypto', 'vector');
 
-    IF ext_count = 2 THEN
-        RAISE NOTICE 'ForgeOS init: All required extensions installed (uuid-ossp, pgcrypto)';
+    IF ext_count = 3 THEN
+        RAISE NOTICE 'ForgeOS init: All required extensions installed (uuid-ossp, pgcrypto, vector)';
     ELSE
-        RAISE WARNING 'ForgeOS init: Expected 2 extensions, found %', ext_count;
+        RAISE WARNING 'ForgeOS init: Expected 3 extensions, found %', ext_count;
     END IF;
 
     -- Verify role

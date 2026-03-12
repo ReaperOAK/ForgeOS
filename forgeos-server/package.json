@@ -14,6 +14,7 @@
     "seed:demo": "tsx src/db/seed-demo.ts",
     "test": "vitest run",
     "test:watch": "vitest",
+    "grammars:setup": "bash scripts/download-grammars.sh",
     "prepare": "husky"
   },
   "dependencies": {
@@ -23,6 +24,8 @@
     "pg": "^8.13.1",
     "pino": "^9.6.0",
     "pino-pretty": "^13.0.0",
+    "tree-sitter-wasms": "^0.1.13",
+    "web-tree-sitter": "^0.24.7",
     "zod": "^3.24.2"
   },
   "devDependencies": {

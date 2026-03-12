@@ -62,12 +62,12 @@ Execute in order before any work:
 3. Read upstream context from `.github/agent-output/{PreviousAgent}/{ticket-id}.md`
 4. Read `.github/vibecoding/chunks/ProductManager.agent/` (all chunks)
 5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks
-6. Read assignment / delegation packet
+6. Call `tickets.payload(ticket_id)` to receive delegation context (ticket JSON, upstream summary, memory entries, file scope)
 
 ## 4. Ticket Handling
 
 ProductManager does NOT follow the standard dispatcher-claim SDLC protocol:
-- Receives requirements from human operators or Ticketer
+- Receives requirements from human operators or ForgeOS orchestrator
 - Produces PRDs, user stories, acceptance criteria, and task specs
 - Outputs feed into **TODO agent** for L1→L2→L3 ticket decomposition
 - Does NOT claim SDLC tickets — does NOT move tickets through stages
@@ -150,6 +150,7 @@ CI/CD configuration (→ DevOps), infrastructure (→ DevOps).
 - Assuming user needs without evidence
 - Modifying `systemPatterns.md` or `decisionLog.md`
 - Force pushing or deleting branches
+- Reading `.github/ticket-state/` or `.github/tickets/` directly for ticket context — use `tickets.payload` via MCP
 - Using or browsing tools outside the Assigned Tool Loadout section — strict boundary enforced.
 - Hallucinating tool names or capabilities not explicitly listed in the loadout.
 

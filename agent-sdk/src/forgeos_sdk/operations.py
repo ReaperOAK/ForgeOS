@@ -15,7 +15,23 @@ from typing import Any
 from forgeos_sdk.client import ForgeOSClient
 from forgeos_sdk.exceptions import ToolCallError
 from forgeos_sdk.heartbeat import LeaseHeartbeat
-from forgeos_sdk.models import Evidence, OperationResult, Ticket
+from forgeos_sdk.models import (
+    BlastRadiusResult,
+    ContextResponse,
+    DelegationPayload,
+    Evidence,
+    ImportChainResult,
+    IndexResult,
+    Lesson,
+    ListResponse,
+    MemoryAddLessonInput,
+    MemoryGetContextInput,
+    MemorySearchLessonsInput,
+    OperationResult,
+    OrientationResult,
+    SymbolSearchResult,
+    Ticket,
+)
 
 logger = logging.getLogger("forgeos_sdk")
 
@@ -294,6 +310,354 @@ class TicketOperations:
         """
         data = await self._call_tool("tickets.status", {"ticket_id": ticket_id})
         return self._parse_ticket(data)
+
+    # ------------------------------------------------------------------
+    # Cutover MCP tools (tickets.get, tickets.list, tickets.payload)
+    # ------------------------------------------------------------------
+
+    async def tickets_get(
+        self,
+        ticket_id: str,
+    ) -> Ticket:
+        """Get full ticket detail by ID.
+
+        Calls the ``tickets.get`` MCP tool.
+
+        Parameters:
+            ticket_id: The ticket ID to retrieve (e.g. ``"FORGEOS-BE003"``).
+
+        Returns:
+            The ticket with full detail.
+
+        Raises:
+            ToolCallError: If the query fails or the ticket is not found.
+        """
+        data = await self._call_tool("tickets.get", {"ticket_id": ticket_id})
+        return self._parse_ticket(data)
+
+    async def tickets_list(
+        self,
+        *,
+        stage: str | None = None,
+        status: str | None = None,
+        type: str | None = None,
+        priority: str | None = None,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> ListResponse:
+        """List tickets with optional filtering and pagination.
+
+        Calls the ``tickets.list`` MCP tool.
+
+        Parameters:
+            stage: Filter by SDLC stage (e.g. ``"BACKEND"``).
+            status: Filter by status (e.g. ``"READY"``, ``"CLAIMED"``).
+            type: Filter by ticket type (e.g. ``"backend"``, ``"frontend"``).
+            priority: Filter by priority (e.g. ``"critical"``, ``"high"``).
+            limit: Maximum tickets per page (default 50).
+            offset: Zero-based offset into the result set.
+
+        Returns:
+            A :class:`ListResponse` containing matched tickets and pagination info.
+
+        Raises:
+            ToolCallError: If the query fails.
+        """
+        arguments: dict[str, Any] = {
+            "limit": limit,
+            "offset": offset,
+        }
+        if stage is not None:
+            arguments["stage"] = stage
+        if status is not None:
+            arguments["status"] = status
+        if type is not None:
+            arguments["type"] = type
+        if priority is not None:
+            arguments["priority"] = priority
+
+        data = await self._call_tool("tickets.list", arguments)
+        return ListResponse.model_validate(data)
+
+    async def tickets_payload(
+        self,
+        ticket_id: str,
+        agent_role: str,
+    ) -> DelegationPayload:
+        """Get the delegation payload for a ticket and agent role.
+
+        Calls the ``tickets.payload`` MCP tool. Returns the full ticket,
+        upstream summary from the previous stage agent, relevant memory
+        entries, and authorized file scope.
+
+        Parameters:
+            ticket_id: The ticket ID to retrieve context for.
+            agent_role: The SDLC stage or agent role (e.g. ``"BACKEND"``).
+
+        Returns:
+            A :class:`DelegationPayload` with full delegation context.
+
+        Raises:
+            ToolCallError: If the query fails or the ticket is not found.
+        """
+        data = await self._call_tool(
+            "tickets.payload",
+            {"ticket_id": ticket_id, "agent_role": agent_role},
+        )
+        return DelegationPayload.model_validate(data)
+
+    # ------------------------------------------------------------------
+    # Code graph tools (code.blast_radius, code.search_symbols,
+    #                    code.get_imports)
+    # ------------------------------------------------------------------
+
+    async def code_blast_radius(
+        self,
+        file_path: str,
+        *,
+        max_depth: int | None = None,
+    ) -> BlastRadiusResult:
+        """Analyse the blast radius of a file change.
+
+        Calls the ``code.blast_radius`` MCP tool to find all symbols
+        and files transitively affected by changes to *file_path*.
+
+        Parameters:
+            file_path: Workspace-relative path to analyse.
+            max_depth: Maximum traversal depth (optional).
+
+        Returns:
+            A :class:`BlastRadiusResult` with affected files and symbols.
+
+        Raises:
+            ToolCallError: If the analysis fails.
+        """
+        arguments: dict[str, Any] = {"file_path": file_path}
+        if max_depth is not None:
+            arguments["max_depth"] = max_depth
+
+        data = await self._call_tool("code.blast_radius", arguments)
+        return BlastRadiusResult.model_validate(data)
+
+    async def code_search_symbols(
+        self,
+        name_pattern: str,
+        *,
+        kind: str | None = None,
+        file_path: str | None = None,
+    ) -> SymbolSearchResult:
+        """Search for code symbols by name pattern.
+
+        Calls the ``code.search_symbols`` MCP tool.
+
+        Parameters:
+            name_pattern: Glob or regex pattern to match symbol names.
+            kind: Optional filter by symbol kind (e.g. ``"function"``,
+                ``"class"``).
+            file_path: Optional workspace-relative path to restrict
+                the search scope.
+
+        Returns:
+            A :class:`SymbolSearchResult` with matching symbols.
+
+        Raises:
+            ToolCallError: If the search fails.
+        """
+        arguments: dict[str, Any] = {"name_pattern": name_pattern}
+        if kind is not None:
+            arguments["kind"] = kind
+        if file_path is not None:
+            arguments["file_path"] = file_path
+
+        data = await self._call_tool("code.search_symbols", arguments)
+        return SymbolSearchResult.model_validate(data)
+
+    async def code_get_imports(
+        self,
+        file_path: str,
+        *,
+        max_depth: int | None = None,
+    ) -> ImportChainResult:
+        """Get the import chain for a file.
+
+        Calls the ``code.get_imports`` MCP tool to traverse the import
+        graph starting from *file_path*.
+
+        Parameters:
+            file_path: Workspace-relative path to analyse.
+            max_depth: Maximum traversal depth (optional).
+
+        Returns:
+            An :class:`ImportChainResult` with import edges.
+
+        Raises:
+            ToolCallError: If the analysis fails.
+        """
+        arguments: dict[str, Any] = {"file_path": file_path}
+        if max_depth is not None:
+            arguments["max_depth"] = max_depth
+
+        data = await self._call_tool("code.get_imports", arguments)
+        return ImportChainResult.model_validate(data)
+
+    # ------------------------------------------------------------------
+    # Init tools (init.index, init.orient)
+    # ------------------------------------------------------------------
+
+    async def init_index(
+        self,
+        root_path: str,
+        *,
+        force: bool = False,
+    ) -> IndexResult:
+        """Index a codebase directory for symbols and imports.
+
+        Calls the ``init.index`` MCP tool to scan and index all source
+        files under *root_path*.
+
+        Parameters:
+            root_path: Workspace-relative path to the directory to index.
+            force: If ``True``, re-index even if a cached index exists.
+
+        Returns:
+            An :class:`IndexResult` with indexing statistics.
+
+        Raises:
+            ToolCallError: If the indexing fails.
+        """
+        arguments: dict[str, Any] = {"root_path": root_path}
+        if force:
+            arguments["force"] = force
+
+        data = await self._call_tool("init.index", arguments)
+        return IndexResult.model_validate(data)
+
+    async def init_orient(
+        self,
+        root_path: str,
+    ) -> OrientationResult:
+        """Scan a project directory and detect its technology stack.
+
+        Calls the ``init.orient`` MCP tool to identify the project name,
+        package manager, frameworks, languages, entry points, test
+        framework, and build system.
+
+        Parameters:
+            root_path: Workspace-relative path to the project root.
+
+        Returns:
+            An :class:`OrientationResult` with detected project metadata.
+
+        Raises:
+            ToolCallError: If the orientation scan fails.
+        """
+        data = await self._call_tool("init.orient", {"root_path": root_path})
+        return OrientationResult.model_validate(data)
+
+    # ------------------------------------------------------------------
+    # Memory tools (memory.search_lessons, memory.add_lesson,
+    #               memory.get_context)
+    # ------------------------------------------------------------------
+
+    async def memory_search_lessons(
+        self,
+        query: str,
+        *,
+        category: str | None = None,
+        max_results: int | None = None,
+    ) -> list[Lesson]:
+        """Search lessons in the memory system.
+
+        Calls the ``memory.search_lessons`` MCP tool.
+
+        Parameters:
+            query: Free-text search query.
+            category: Optional category filter (e.g. ``"bug_fix"``,
+                ``"pattern"``).
+            max_results: Maximum number of lessons to return.
+
+        Returns:
+            A list of :class:`Lesson` objects matching the query.
+
+        Raises:
+            ToolCallError: If the search fails.
+        """
+        params = MemorySearchLessonsInput(
+            query=query, category=category, max_results=max_results,
+        )
+        arguments = params.model_dump(exclude_none=True)
+        data = await self._call_tool("memory.search_lessons", arguments)
+        raw_lessons = data.get("lessons", [])
+        return [Lesson.model_validate(item) for item in raw_lessons]
+
+    async def memory_add_lesson(
+        self,
+        ticket_id: str,
+        title: str,
+        content: str,
+        category: str,
+    ) -> OperationResult:
+        """Add a lesson to the memory system.
+
+        Calls the ``memory.add_lesson`` MCP tool.
+
+        Parameters:
+            ticket_id: The ticket that produced this lesson.
+            title: Short title for the lesson.
+            content: Full lesson content.
+            category: Lesson category (e.g. ``"bug_fix"``, ``"pattern"``).
+
+        Returns:
+            An :class:`OperationResult` confirming the lesson was added.
+
+        Raises:
+            ToolCallError: If the operation fails.
+        """
+        params = MemoryAddLessonInput(
+            ticket_id=ticket_id,
+            title=title,
+            content=content,
+            category=category,
+        )
+        arguments = params.model_dump()
+        data = await self._call_tool("memory.add_lesson", arguments)
+        return OperationResult(
+            success=True,
+            message=data.get("message", "Lesson added successfully"),
+            data=data,
+        )
+
+    async def memory_get_context(
+        self,
+        *,
+        file_path: str | None = None,
+        ticket_id: str | None = None,
+        max_lessons: int | None = None,
+    ) -> ContextResponse:
+        """Get contextual information from the memory system.
+
+        Calls the ``memory.get_context`` MCP tool to retrieve blast
+        radius information and relevant lessons for a file or ticket.
+
+        Parameters:
+            file_path: Optional workspace-relative file path.
+            ticket_id: Optional ticket ID to scope context.
+            max_lessons: Maximum number of relevant lessons to include.
+
+        Returns:
+            A :class:`ContextResponse` with blast radius and lessons.
+
+        Raises:
+            ToolCallError: If the query fails.
+        """
+        params = MemoryGetContextInput(
+            file_path=file_path,
+            ticket_id=ticket_id,
+            max_lessons=max_lessons,
+        )
+        arguments = params.model_dump(exclude_none=True)
+        data = await self._call_tool("memory.get_context", arguments)
+        return ContextResponse.model_validate(data)
 
     # ------------------------------------------------------------------
     # Heartbeat management

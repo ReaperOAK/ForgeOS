@@ -1,0 +1,64 @@
+{
+  "ticket_id": "TASK-INT-BE003",
+  "title": "Rewrite sdlc.instructions.md Stage Transitions for MCP",
+  "description": "Update sdlc.instructions.md to describe stage transitions via MCP tools instead of filesystem moves. Replace directory-based stage descriptions with MCP advance/reject tool calls. Update rework rules to reference MCP reject tool. Preserve Definition of Done items unchanged.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "DONE",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-12T15:43:05.047966+00:00",
+  "created_by": "TODO",
+  "dependencies": [],
+  "blocked_by": [],
+  "file_paths": [
+    ".github/instructions/sdlc.instructions.md"
+  ],
+  "acceptance_criteria": [
+    "Stage transitions described as MCP advance tool calls (not directory moves)",
+    "Rework described as MCP reject tool call with rejection evidence",
+    "Stage ownership table preserved unchanged",
+    "Definition of Done (11 items) preserved unchanged",
+    "Post-implementation chain order preserved (QA, Security, CI, Docs, Validator)",
+    "TODO agent decomposition rules preserved unchanged",
+    "Document passes markdown lint with zero errors"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-12T15:43:05.047968+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase1-rewrites.md"
+    },
+    {
+      "timestamp": "2026-03-12T15:43:05.074189+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase1-rewrites.md",
+  "tags": [
+    "intelligence",
+    "cutover",
+    "phase1",
+    "instructions",
+    "BLK-INT-01"
+  ]
+}

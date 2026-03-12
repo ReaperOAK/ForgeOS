@@ -8,11 +8,10 @@ description: System identity, rule precedence, boot sequence, halt gate, human a
 
 ## 1. System Identity
 
-RULE: This is a multi-agent ticket-driven system.
-RULE: Ticketer is a stateless dispatcher. It dispatches subagents and performs claim commits. It absolutely does nothing else.
-RULE: All agents are autonomous workers. They derive context from the filesystem.
-RULE: Git enforces distributed locking via dispatcher-claim protocol.
-RULE: tickets.py enforces dependency resolution and stage transitions.
+RULE: This is a multi-agent ticket-driven system orchestrated by the ForgeOS MCP server.
+RULE: ForgeOS is the orchestrator. It manages ticket lifecycle, dispatches agents, and enforces stage transitions via MCP tools.
+RULE: All agents are autonomous workers. They derive context from the ForgeOS MCP server.
+RULE: The ForgeOS MCP server enforces distributed locking, dependency resolution, and stage transitions.
 
 ## 2. Rule Precedence
 
@@ -30,14 +29,19 @@ RULE: If file contains `STOP` => zero edits, zero execution, report blocked.
 
 ## 4. Boot Sequence (All Agents)
 
-REQUIRED: Before any work, read in order:
-1. `.github/guardian/STOP_ALL`
-2. `.github/instructions/` (all 6 files)
-3. `.github/vibecoding/chunks/{YourAgent}.agent/` (all files)
-4. `.github/vibecoding/catalog.yml` (load task-relevant chunks)
-5. Upstream summary from `.github/agent-output/{PreviousAgent}/{ticket-id}.md`
-6. Ticket JSON from `.github/ticket-state/` or `.github/tickets/`
+REQUIRED: Before any work, execute in order:
+1. `.github/guardian/STOP_ALL` — read and check for halt signal.
+2. `.github/instructions/` — read all instruction files.
+3. Call `tickets.payload` — receive the full delegation context from ForgeOS MCP server:
+   - Ticket JSON (acceptance criteria, file paths, dependencies)
+   - Upstream summary from previous stage agent
+   - Memory entries relevant to the ticket
+   - File scope (authorized read/write paths)
+4. `.github/vibecoding/chunks/{YourAgent}.agent/` — read all chunk files.
+5. `.github/vibecoding/catalog.yml` — load task-relevant chunks.
 
+RULE: The `tickets.payload` response is the canonical source for ticket context.
+RULE: Agents MUST NOT read ticket JSON directly from `.github/ticket-state/` or `.github/tickets/` — use MCP.
 PROHIBITED: Starting work without completing boot sequence.
 
 ## 5. Human Approval Gates
@@ -54,14 +58,16 @@ PROHIBITED: Implicit approval. Silent execution of destructive operations.
 
 ## 6. Memory Gate (INV-4)
 
-REQUIRED: Before DONE, ticket must have entry in `.github/memory-bank/activeContext.md`:
+REQUIRED: Before DONE, ticket must have a memory entry persisted via `tickets.update`:
 ```markdown
 ### [TICKET-ID] — Summary
 - **Artifacts:** file1.ts, file2.ts
 - **Decisions:** Chose X over Y because Z
 - **Timestamp:** {ISO8601}
 ```
-RULE: Missing entry => ticket cannot reach DONE.
+RULE: Memory entries are persisted to the ForgeOS MCP server via `tickets.update`.
+RULE: The git-tracked `.github/memory-bank/activeContext.md` serves as a secondary append-only store.
+RULE: Missing MCP-persisted entry => ticket cannot reach DONE.
 
 ## 7. Memory Bank Rules
 
@@ -72,10 +78,10 @@ RULE: Every entry requires ISO8601 timestamp and agent attribution.
 |------|-------------|
 | `activeContext.md` | All agents (append) |
 | `progress.md` | All agents (append) |
-| `systemPatterns.md` | Ticketer & Documentation only |
-| `productContext.md` | Ticketer, Documentation & Product Manager only |
-| `decisionLog.md` | Ticketer & Documentation only |
-| `riskRegister.md` | Ticketer + Security |
+| `systemPatterns.md` | ForgeOS & Documentation only |
+| `productContext.md` | ForgeOS, Documentation & Product Manager only |
+| `decisionLog.md` | ForgeOS & Documentation only |
+| `riskRegister.md` | ForgeOS + Security |
 
 ## 8. Anti-Loop Rule
 

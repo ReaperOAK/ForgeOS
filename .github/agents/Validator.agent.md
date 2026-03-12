@@ -45,7 +45,7 @@ Independent SDLC compliance reviewer — verifies Definition of Done, runs quali
 ---
 
 ## 2. Stage
-`VALIDATION` — processes tickets after Documentation stage. Tickets arrive from `.github/ticket-state/VALIDATION/`.
+`VALIDATION` — processes tickets after Documentation stage. Receives pre-claimed tickets via the ForgeOS MCP server.
 
 ## 3. Boot Sequence (run in order, no skips)
 1. Read `.github/guardian/STOP_ALL` — if `STOP`: halt, zero edits.
@@ -53,17 +53,17 @@ Independent SDLC compliance reviewer — verifies Definition of Done, runs quali
 3. Read upstream summary from `.github/agent-output/Documentation/{ticket-id}.md`.
 4. Read `.github/vibecoding/chunks/Validator.agent/` (all chunk files).
 5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks.
-6. Read ticket JSON from `.github/ticket-state/VALIDATION/{ticket-id}.json`.
+6. Call `tickets.payload(ticket_id)` via the ForgeOS MCP server to receive full delegation context (ticket JSON, upstream summary, memory entries, file scope).
 
 ## 4. Pre-Claimed Ticket (Dispatcher-Claim Protocol)
 
 RULE: The ticket is already claimed by Ticketer before this agent is launched.
 RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
 
-1. Read ticket JSON from `.github/ticket-state/VALIDATION/{ticket-id}.json`.
-2. Verify claim metadata exists: `claimed_by`, `machine_id`, `operator`, `lease_expiry`.
-3. If claim metadata is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing claim`.
-4. Proceed directly to execution workflow — no `git pull --rebase` for claiming.
+1. Call `tickets.payload(ticket_id)` to receive the full delegation context from the ForgeOS MCP server.
+2. Verify the payload includes ticket JSON with claim metadata (`claimed_by`, `machine_id`, `operator`, `lease_expiry`).
+3. If claim metadata is missing or the MCP server rejects the request, HALT and report `PROTOCOL_VIOLATION: missing claim`.
+4. Proceed directly to execution workflow.
 
 ## 5. Execution Workflow — Definition of Done (ALL 10 must pass)
 
@@ -100,16 +100,35 @@ ELSE → verdict = REJECTED (list all failures with evidence)
 ```
 
 ## 6. Verdict Actions
-- **APPROVE:** `python3 .github/tickets.py --advance {ticket-id} Validator` → move to DONE.
-- **REJECT:** `python3 .github/tickets.py --rework {ticket-id} Validator "{reason}"` → back to implementation stage with evidence.
+- **APPROVE:** Call `tickets.complete` via the ForgeOS MCP server with APPROVED evidence:
+  ```jsonc
+  {
+    "ticket_id": "{ticket-id}",
+    "evidence": {
+      "artifacts": [".github/agent-output/Validator/{ticket-id}.md"],
+      "test_results": "DoD {N}/10 pass, all upstream verdicts verified",
+      "confidence": "HIGH",
+      "notes": "VALIDATION APPROVED — all Definition of Done items satisfied"
+    }
+  }
+  ```
+  The MCP server advances the ticket to DONE and resolves downstream dependencies.
+- **REJECT:** Call `tickets.reject` via the ForgeOS MCP server with rejection evidence:
+  ```jsonc
+  {
+    "ticket_id": "{ticket-id}",
+    "reason": "{specific DoD failures with remediation guidance}",
+    "evidence": { "dod_failures": ["..."], "upstream_issues": ["..."] }
+  }
+  ```
+  The MCP server automatically routes the ticket back to its implementation stage for rework.
 
 ## 7. Work Commit (Commit 2)
 1. Write validation report to `.github/agent-output/Validator/{ticket-id}.md`.
 2. Delete previous stage summary (Documentation's `{ticket-id}.md`).
-3. If APPROVED: move ticket JSON to `.github/ticket-state/DONE/{ticket-id}.json`.
-4. If REJECTED: ticket goes back for rework (tickets.py handles state).
-5. Run `python3 .github/tickets.py --sync` to unblock freed downstream tasks.
-6. Write memory entry to `.github/memory-bank/activeContext.md`:
+3. If APPROVED: call `tickets.complete` with evidence payload (MCP server moves ticket to DONE and resolves downstream dependencies).
+4. If REJECTED: call `tickets.reject` with reason and evidence (MCP server routes ticket back for rework).
+5. Write memory entry to `.github/memory-bank/activeContext.md`:
    ```
    ### [TICKET-ID] — Validation Summary
    - **Artifacts:** validation report path

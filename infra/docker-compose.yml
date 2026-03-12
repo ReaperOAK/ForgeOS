@@ -29,7 +29,10 @@ services:
   # See ADR-001 for decision rationale.
   # ---------------------------------------------------------------------------
   postgres:
-    image: postgres:17-alpine
+    build:
+      context: ./docker/postgres
+      dockerfile: Dockerfile
+    image: forgeos-postgres:17
     container_name: forgeos-postgres
     hostname: postgres
     environment:
@@ -134,7 +137,7 @@ services:
     container_name: forgeos-pgadmin
     hostname: pgadmin
     environment:
-      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_EMAIL:-admin@forgeos.local}"
+      PGADMIN_DEFAULT_EMAIL: "${PGADMIN_EMAIL:-admin@forgeos.dev}"
       PGADMIN_DEFAULT_PASSWORD: "${PGADMIN_PASSWORD:-admin}"
       PGADMIN_LISTEN_PORT: "5050"
       PGADMIN_CONFIG_SERVER_MODE: "True"

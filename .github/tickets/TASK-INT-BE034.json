@@ -1,0 +1,69 @@
+{
+  "ticket_id": "TASK-INT-BE034",
+  "title": "Reflection Protocol Service",
+  "description": "Implement the Reflection Protocol service. Auto-triggers on rework-to-DONE ticket transitions. Extracts lessons from QA rejection cycles: what failed, what fixed it, and the pattern learned. Generates embeddings and stores as lessons.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-12T15:43:05.051603+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-BE033",
+    "TASK-INT-BE032"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/services/reflection-service.ts"
+  ],
+  "acceptance_criteria": [
+    "ReflectionService.processCompletion(ticketId) triggers automatically on rework-to-DONE transition",
+    "Extracts rejection reason from QA/Security/Validator agent output",
+    "Extracts fix description from rework agent output",
+    "Categorizes lesson as pattern, anti-pattern, convention, or decision",
+    "Generates embedding via EmbeddingService",
+    "Stores lesson and embedding in lessons/lesson_embeddings tables",
+    "Assigns confidence: 1.0 for repeated patterns, 0.5 for first occurrence",
+    "Skips tickets with no rework history (no-op, not error)",
+    "Unit tests: mock rework history then verify lesson extraction and storage"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-12T15:43:05.051606+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase3-schema-tools.md"
+    },
+    {
+      "timestamp": "2026-03-12T16:39:39.322487+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase3-schema-tools.md",
+  "tags": [
+    "intelligence",
+    "memory",
+    "phase3",
+    "service",
+    "BLK-INT-11"
+  ]
+}

@@ -56,17 +56,17 @@ Context mapping BEFORE any design — architecture without codebase understandin
 3. Read upstream summary from `.github/agent-output/{PreviousAgent}/{ticket-id}.md`
 4. Read `.github/vibecoding/chunks/Architect.agent/` (all chunk files)
 5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks
-6. Read ticket JSON from `.github/ticket-state/` or `.github/tickets/`
+6. Call `tickets.payload(ticket_id)` to receive delegation context (ticket JSON, upstream summary, memory entries, file scope)
 
 ## 4. Pre-Claimed Ticket (Dispatcher-Claim Protocol)
 
-RULE: The ticket is already claimed by Ticketer before this agent is launched.
-RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
+RULE: The ticket is already claimed by ForgeOS orchestrator before this agent is launched.
+RULE: Subagents NEVER perform claim commits — the dispatcher handles claiming via MCP.
 
-1. Read ticket JSON from `.github/ticket-state/ARCHITECT/{ticket-id}.json`.
-2. Verify claim metadata exists: `claimed_by`, `machine_id`, `operator`, `lease_expiry`.
-3. If claim metadata is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing claim`.
-4. Proceed directly to execution workflow — no `git pull --rebase` for claiming.
+1. Call `tickets.payload(ticket_id)` to receive full delegation context from the ForgeOS MCP server.
+2. Verify delegation context contains: ticket JSON, upstream summary, memory entries, file scope.
+3. If delegation context is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing delegation context`.
+4. Proceed directly to execution workflow.
 
 ## 5. Execution Workflow
 Step-by-step architecture process:
@@ -122,6 +122,7 @@ Flag and remediate: Big Ball of Mud, Golden Hammer, Distributed Monolith, God Se
 - NEVER make cross-ticket references or modify files outside ticket scope
 - NEVER force push or delete branches
 - NEVER propose microservices where a monolith suffices without ADR justification
+- Reading `.github/ticket-state/` or `.github/tickets/` directly for ticket context — use `tickets.payload` via MCP
 - Using or browsing tools outside the Assigned Tool Loadout section — strict boundary enforced.
 - Hallucinating tool names or capabilities not explicitly listed in the loadout.
 

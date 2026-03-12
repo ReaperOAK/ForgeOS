@@ -6,6 +6,9 @@ const DEFAULT_CONFIG: ApiClientConfig = {
   timeout: 10_000,
   headers: {
     'Content-Type': 'application/json',
+    ...(process.env.NEXT_PUBLIC_API_KEY
+      ? { Authorization: `Bearer ${process.env.NEXT_PUBLIC_API_KEY}` }
+      : {}),
   },
 };
 

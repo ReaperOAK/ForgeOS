@@ -1,0 +1,70 @@
+{
+  "ticket_id": "TASK-INT-BE015",
+  "title": "Implement ForgeOS Orchestrator Loop",
+  "description": "Implement the ForgeOS orchestrator loop as a persistent server-side process. Replaces the stateless Ticketer dispatcher. Polls for READY tickets on a configurable interval (default 10s). For each READY ticket, determines the correct agent, creates a claim via stored function, and emits dispatch event. Monitors lease expiry and reclaims abandoned tickets.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-12T15:43:05.049406+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-BE011",
+    "TASK-INT-BE012",
+    "TASK-INT-BE014"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/services/orchestrator.ts"
+  ],
+  "acceptance_criteria": [
+    "Orchestrator runs as persistent process within the MCP server",
+    "Polls tickets.list for READY tickets every 10 seconds (configurable via env)",
+    "Determines correct agent from ticket type and SDLC flow",
+    "Claims ticket via claim_ticket stored function (atomic)",
+    "Emits SSE dispatch event with ticket_id, agent, and claim details",
+    "Monitors lease expiry and releases abandoned claims",
+    "Graceful shutdown on SIGTERM (completes current dispatch cycle)",
+    "Unit test: mock READY tickets then verify dispatch events emitted",
+    "Integration test: concurrent claims verify only one succeeds"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-12T15:43:05.049408+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase1-tools.md"
+    },
+    {
+      "timestamp": "2026-03-12T16:01:38.470006+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase1-tools.md",
+  "tags": [
+    "intelligence",
+    "cutover",
+    "phase1",
+    "orchestrator",
+    "BLK-INT-04"
+  ]
+}
