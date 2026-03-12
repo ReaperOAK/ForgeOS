@@ -3,38 +3,57 @@ import type { ApiError } from './types';
 
 // ── Request types ────────────────────────────────────────────────────────────
 
+/** Parameters for claiming a ticket. */
 export interface ClaimRequest {
+  /** The ticket to claim. */
   ticketId: string;
+  /** Agent identifier (e.g., `'operator'`). */
   agent: string;
+  /** Machine hostname or identifier. */
   machine: string;
+  /** Human operator performing the claim. */
   operator: string;
 }
 
+/** Parameters for releasing a ticket claim. */
 export interface ReleaseRequest {
+  /** The ticket whose claim should be released. */
   ticketId: string;
 }
 
+/** Parameters for advancing a ticket to the next stage. */
 export interface AdvanceRequest {
+  /** The ticket to advance. */
   ticketId: string;
+  /** Evidence or rationale supporting the stage advancement. */
   evidence: string;
 }
 
+/** Parameters for force-releasing another operator's claim. */
 export interface ForceReleaseRequest {
+  /** The ticket to force-release. */
   ticketId: string;
+  /** Mandatory reason explaining why the force release is needed. */
   reason: string;
 }
 
 // ── Response types ───────────────────────────────────────────────────────────
 
+/** Standard response returned from all ticket operation endpoints. */
 export interface OperationResponse {
+  /** Whether the operation succeeded. */
   success: boolean;
+  /** Human-readable result message. */
   message: string;
+  /** ID of the affected ticket. */
   ticketId: string;
+  /** ISO-8601 server timestamp of the operation. */
   timestamp: string;
 }
 
 // ── Operator action type ─────────────────────────────────────────────────────
 
+/** Union of supported operator action identifiers. */
 export type OperatorAction = 'claim' | 'release' | 'advance' | 'force-release';
 
 // ── HTTP helper ──────────────────────────────────────────────────────────────

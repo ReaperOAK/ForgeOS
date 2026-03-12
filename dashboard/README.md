@@ -74,15 +74,19 @@ dashboard/
     │   │   ├── HealthPanel.tsx      # Panel container with status + badge
     │   │   ├── MetricCard.tsx       # Metric value with trend and severity
     │   │   └── StatusIndicator.tsx  # Green/yellow/red status dot
-    │   └── machines/          # Machine status view components
-    │       ├── MachineCard.tsx      # Individual machine card with status + agents
-    │       └── AgentList.tsx        # Agent list with clickable links to claims
+    │   ├── machines/          # Machine status view components
+    │   │   ├── MachineCard.tsx      # Individual machine card with status + agents
+    │   │   └── AgentList.tsx        # Agent list with clickable links to claims
+    │   └── operator/          # Operator workbench components
+    │       ├── OperatorActions.tsx   # Action toolbar (Claim, Release, Advance, Force Release)
+    │       └── ConfirmationModal.tsx # Confirmation dialog for destructive actions
     ├── lib/                   # Shared utilities
     │   ├── api/               # REST API client library
     │   │   ├── index.ts       # Barrel re-exports (types + functions)
     │   │   ├── types.ts       # TypeScript interfaces and type aliases
     │   │   ├── client.ts      # ForgeApiClient class (fetch wrapper)
     │   │   ├── tickets.ts     # Ticket endpoint functions
+    │   │   ├── operations.ts  # Ticket lifecycle action functions (claim, release, advance, force-release)
     │   │   └── websocket.ts   # WebSocket client with reconnection
     │   ├── hooks/             # Custom React hooks
     │   │   ├── useTicketStream.ts  # WebSocket lifecycle hook
@@ -583,6 +587,112 @@ props on `LeaseCountdown`.
 | `ClaimsTableProps` | Props for the `ClaimsTable` component |
 | `LeaseCountdownProps` | Props for the `LeaseCountdown` component |
 | `CountdownState` | Internal urgency state: normal, warning, critical, expired |
+
+---
+
+## Operator Workbench Actions
+
+<!-- last_reviewed: 2026-03-12T20:00:00Z -->
+
+Action toolbar for executing ticket lifecycle operations from the
+dashboard. Operators can claim, release, advance, and force-release
+tickets. Destructive actions require explicit confirmation with a
+reason or evidence input.
+
+### Components
+
+| Component | File | Purpose |
+|-----------|------|---------|
+| `OperatorActions` | `components/operator/OperatorActions.tsx` | 2×2 grid of action buttons with state-aware enable/disable logic |
+| `ConfirmationModal` | `components/operator/ConfirmationModal.tsx` | Accessible modal dialog with text input for destructive action confirmation |
+
+### API Client
+
+The operations API module (`src/lib/api/operations.ts`) provides typed
+functions that POST to the ForgeOS REST API:
+
+| Function | Endpoint | Description |
+|----------|----------|-------------|
+| `claimTicket(req)` | `POST /api/tickets/:id/claim` | Acquire a 30-minute lease on an unclaimed ticket |
+| `releaseTicket(req)` | `POST /api/tickets/:id/release` | Release the caller’s active claim |
+| `advanceTicket(req)` | `POST /api/tickets/:id/advance` | Move a ticket to the next SDLC stage |
+| `forceReleaseTicket(req)` | `POST /api/tickets/:id/force-release` | Force-release another operator’s claim (requires reason) |
+
+All functions return an `OperationResponse` with `success`, `message`,
+`ticketId`, and `timestamp` fields. On failure they throw an `ApiError`
+(use `isApiError()` to narrow).
+
+### Action Enable/Disable Rules
+
+| Action | Enabled when |
+|--------|-------------|
+| Claim | User is authenticated, ticket is selected, and ticket is **not** claimed |
+| Release | User is authenticated and **holds** the active claim |
+| Advance | User is authenticated and **holds** the active claim |
+| Force Release | User is authenticated, ticket **is** claimed, and user **does not** hold the claim |
+
+When the user is not authenticated, a translucent overlay with a lock
+icon covers the entire toolbar.
+
+### Confirmation Modal
+
+The `ConfirmationModal` is shown for **Advance** (warning variant) and
+**Force Release** (danger variant) actions:
+
+- **Advance** — multiline textarea for evidence; no minimum length.
+- **Force Release** — single-line input for a reason; minimum 10 characters.
+
+Behavior:
+- Focus traps inside the modal while open.
+- Escape closes the modal (disabled during loading).
+- Ctrl/Cmd+Enter submits the form.
+- Focus returns to the previously focused element on close.
+
+### Accessibility
+
+- Toolbar uses `role="toolbar"` with `aria-label`.
+- Each button has a descriptive `aria-label` (e.g., "Claim Ticket:
+  Acquire lease on an unclaimed ticket").
+- Loading buttons set `aria-busy="true"` and update their label.
+- A screen-reader-only `aria-live="polite"` region announces action
+  outcomes.
+- Disabled buttons include a `title` tooltip explaining why.
+- The confirmation modal uses `role="dialog"`, `aria-modal`,
+  `aria-labelledby`, and `aria-describedby`.
+- Invalid input shows inline error text with `aria-invalid` and
+  `aria-describedby` linking to the error message.
+
+### Key Interfaces
+
+```typescript
+interface OperatorActionsProps {
+  ticketId: string | null;
+  ticketStage: string | null;
+  isClaimHolder: boolean;
+  isClaimed: boolean;
+  isAuthenticated: boolean;
+  onActionComplete?: (action: OperatorAction, result: ActionResult) => void;
+  onActionError?: (action: OperatorAction, error: Error) => void;
+}
+
+interface ConfirmationModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: (inputText: string) => void;
+  variant: 'danger' | 'warning';
+  title: string;
+  description: string;
+  warningText: string;
+  inputLabel: string;
+  inputPlaceholder: string;
+  confirmLabel: string;
+  minInputLength?: number;  // default: 0
+  isLoading?: boolean;      // default: false
+  multiline?: boolean;      // default: false
+}
+
+type OperatorAction = 'claim' | 'release' | 'advance' | 'force-release';
+```
 
 ---
 

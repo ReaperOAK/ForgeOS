@@ -14,20 +14,44 @@ import { isApiError } from '@/lib/api/client';
 
 // ── Types ────────────────────────────────────────────────────────────────────
 
+/**
+ * Result returned after a successful operator action.
+ *
+ * @remarks Passed to the {@link OperatorActionsProps.onActionComplete} callback.
+ */
 export interface ActionResult {
+  /** ID of the ticket the action was performed on. */
   ticketId: string;
+  /** The action that was executed. */
   action: OperatorAction;
+  /** ISO-8601 timestamp from the server response. */
   timestamp: string;
+  /** Human-readable success message from the server. */
   message: string;
 }
 
+/**
+ * Props for the {@link OperatorActions} component.
+ *
+ * @remarks
+ * Pass ticket state from the parent page and optional callbacks to
+ * handle success / error outcomes. When `isAuthenticated` is `false`,
+ * all action buttons are disabled and a sign-in overlay is shown.
+ */
 export interface OperatorActionsProps {
+  /** Currently selected ticket ID, or `null` when no ticket is selected. */
   ticketId: string | null;
+  /** Current SDLC stage of the selected ticket (used in the advance modal description). */
   ticketStage: string | null;
+  /** Whether the current user holds the active claim on this ticket. */
   isClaimHolder: boolean;
+  /** Whether any operator currently holds a claim on this ticket. */
   isClaimed: boolean;
+  /** Whether the current user is authenticated. */
   isAuthenticated: boolean;
+  /** Fires after a successful action with the action type and server result. */
   onActionComplete?: (action: OperatorAction, result: ActionResult) => void;
+  /** Fires when an action fails with the action type and error details. */
   onActionError?: (action: OperatorAction, error: Error) => void;
 }
 
@@ -76,6 +100,34 @@ const ACTIONS: ActionConfig[] = [
 
 // ── Component ────────────────────────────────────────────────────────────────
 
+/**
+ * Operator action toolbar for managing ticket lifecycle.
+ *
+ * Renders four action buttons — Claim, Release, Advance, and Force Release —
+ * in a responsive 2-column grid. Button availability depends on ticket state
+ * and authentication status. Destructive actions (advance, force-release)
+ * open a {@link ConfirmationModal} requiring user input before execution.
+ *
+ * @remarks
+ * - Uses an ARIA `role="toolbar"` with a live region for screen reader
+ *   announcements of action outcomes.
+ * - When `isAuthenticated` is `false`, a translucent overlay with a lock
+ *   icon covers the toolbar.
+ * - Loading state is per-action: only the triggered button shows a spinner.
+ *
+ * @example
+ * ```tsx
+ * <OperatorActions
+ *   ticketId="FORGEOS-FE009"
+ *   ticketStage="QA"
+ *   isClaimHolder={true}
+ *   isClaimed={true}
+ *   isAuthenticated={true}
+ *   onActionComplete={(action, result) => toast.success(result.message)}
+ *   onActionError={(action, error) => toast.error(error.message)}
+ * />
+ * ```
+ */
 export function OperatorActions({
   ticketId,
   ticketStage,
