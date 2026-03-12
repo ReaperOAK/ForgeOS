@@ -62,17 +62,17 @@ Execute in order before any work. Abort if any step fails.
 3. Read upstream QA summary from `.github/agent-output/QA/{ticket-id}.md`.
 4. Read all chunks in `.github/vibecoding/chunks/Security.agent/`.
 5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks.
-6. Read ticket JSON from `.github/ticket-state/SECURITY/{ticket-id}.json`.
+6. Call `tickets.payload(ticket_id)` via the ForgeOS MCP server to receive full delegation context (ticket JSON, upstream summary, memory entries, file scope).
 
 ## 4. Pre-Claimed Ticket (Dispatcher-Claim Protocol)
 
 RULE: The ticket is already claimed by Ticketer before this agent is launched.
 RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
 
-1. Read ticket JSON from `.github/ticket-state/SECURITY/{ticket-id}.json`.
-2. Verify claim metadata exists: `claimed_by`, `machine_id`, `operator`, `lease_expiry`.
-3. If claim metadata is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing claim`.
-4. Proceed directly to execution workflow — no `git pull --rebase` for claiming.
+1. Call `tickets.payload(ticket_id)` to receive the full delegation context from the ForgeOS MCP server.
+2. Verify the payload includes ticket JSON with claim metadata (`claimed_by`, `machine_id`, `operator`, `lease_expiry`).
+3. If claim metadata is missing or the MCP server rejects the request, HALT and report `PROTOCOL_VIOLATION: missing claim`.
+4. Proceed directly to execution workflow.
 
 ## 5. Execution Workflow
 
@@ -118,18 +118,37 @@ For every ticket, perform ALL of the following analyses on modified files:
 ## 6. Verdict
 
 **PASS** — Zero critical/high findings. Medium/low findings documented with risk acceptance.
-→ Advance ticket to CI stage.
+→ Call `tickets.complete` via the ForgeOS MCP server with structured evidence:
+  ```jsonc
+  {
+    "ticket_id": "{ticket-id}",
+    "evidence": {
+      "artifacts": [".github/agent-output/Security/{ticket-id}.md", "{SARIF file}"],
+      "test_results": "STRIDE complete, OWASP 10/10 checked, 0 critical/high findings",
+      "confidence": "HIGH",
+      "notes": "Security PASS — zero critical/high findings"
+    }
+  }
+  ```
 
 **FAIL** — Any critical or high finding present.
-→ Reject ticket. Execute: `python3 .github/tickets.py --rework {ticket-id} Security "{finding summary}"`
+→ Call `tickets.reject` via the ForgeOS MCP server with rejection evidence:
+  ```jsonc
+  {
+    "ticket_id": "{ticket-id}",
+    "reason": "{finding summary with CWE references and remediation guidance}",
+    "evidence": { "critical_count": "N", "high_count": "N", "sarif": "..." }
+  }
+  ```
+→ The MCP server automatically routes the ticket back to its implementation stage for rework.
 → Append entry to `.github/memory-bank/riskRegister.md` with threat details, severity, and recommended fix.
 
 ## 7. Work Commit (Commit 2)
 
 1. Write security report to `.github/agent-output/Security/{ticket-id}.md` including: STRIDE model, OWASP checklist, SARIF findings, SBOM summary, verdict.
 2. Delete previous stage summary: `.github/agent-output/QA/{ticket-id}.md`.
-3. If PASS: move ticket to `.github/ticket-state/CI/{ticket-id}.json`.
-4. If FAIL: rework via `tickets.py` (ticket stays in SECURITY or returns to its implementation stage).
+3. If PASS: call `tickets.complete` with evidence payload (MCP server advances the ticket to CI).
+4. If FAIL: call `tickets.reject` with reason and evidence (MCP server routes ticket back for rework).
 5. Append memory entry to `.github/memory-bank/activeContext.md`:
    ```
    ### [{ticket-id}] — Security Review

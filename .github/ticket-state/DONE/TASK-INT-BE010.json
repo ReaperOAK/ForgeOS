@@ -1,0 +1,68 @@
+{
+  "ticket_id": "TASK-INT-BE010",
+  "title": "Update Root agents.md for MCP-Only Architecture",
+  "description": "Update root agents.md to reflect MCP-only architecture. Update boot sequence to include tickets.payload call. Update identity invariants (Ticketer as orchestrator invoker, not stateless dispatcher). Update execution SOP to reference MCP tools. Update tool loadout reference table.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "DONE",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-12T15:43:05.048815+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-BE007",
+    "TASK-INT-BE008",
+    "TASK-INT-BE009"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "agents.md"
+  ],
+  "acceptance_criteria": [
+    "Boot sequence updated with tickets.payload step",
+    "Identity invariants updated for MCP-only model",
+    "Ticketer description updated from stateless dispatcher to orchestrator invoker",
+    "Execution SOP uses MCP tools for state reads",
+    "Tool loadout table updated to include new MCP tools",
+    "Scoped git rules preserved (no git add .)",
+    "Document passes markdown lint with zero errors"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-12T15:43:05.048818+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase1-rewrites.md"
+    },
+    {
+      "timestamp": "2026-03-12T16:16:11.119093+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase1-rewrites.md",
+  "tags": [
+    "intelligence",
+    "cutover",
+    "phase1",
+    "agents",
+    "BLK-INT-02"
+  ]
+}

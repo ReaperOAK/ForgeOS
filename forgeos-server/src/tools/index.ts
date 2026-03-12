@@ -19,7 +19,17 @@ import { ticketsUpdateSchema, ticketsUpdateHandler } from './tickets-update.js';
 import { ticketsReleaseSchema, ticketsReleaseHandler } from './tickets-release.js';
 import { ticketsStatsSchema, ticketsStatsHandler } from './tickets-stats.js';
 import { ticketsGraphSchema, ticketsGraphHandler } from './tickets-graph.js';
-
+import { ticketsListSchema, ticketsListHandler } from './tickets-list.js';
+import { ticketsGetSchema, ticketsGetHandler } from './tickets-get.js';
+import { ticketsPayloadSchema, ticketsPayloadHandler } from './tickets-payload.js';
+import { initIndexSchema, initIndexHandler } from './init-index.js';
+import { codeSearchSymbolsSchema, codeSearchSymbolsHandler } from './code-search-symbols.js';
+import { codeBlastRadiusSchema, codeBlastRadiusHandler } from './code-blast-radius.js';
+import { codeGetImportsSchema, codeGetImportsHandler } from './code-get-imports.js';
+import { initOrientSchema, initOrientHandler } from './init-orient.js';
+import { memorySearchLessonsSchema, memorySearchLessonsHandler } from './memory-search-lessons.js';
+import { memoryAddLessonSchema, memoryAddLessonHandler } from './memory-add-lesson.js';
+import { memoryGetContextBaseSchema, memoryGetContextSchema, memoryGetContextHandler } from './memory-get-context.js';
 /**
  * Register all MCP tools on the server.
  *
@@ -105,5 +115,93 @@ export function registerTools(server: McpServer): void {
     'Return the ticket dependency graph showing parent-child and depends_on relationships.',
     ticketsGraphSchema.shape,
     async (params) => ticketsGraphHandler(params),
+  );
+
+  // ── tickets.list ─────────────────────────────────────────────────────────
+  server.tool(
+    'tickets.list',
+    'List tickets with optional filters (stage, status, type, priority, tags), pagination (limit, offset), and sorting (sort_by, sort_order). Returns ticket summaries and total_count.',
+    ticketsListSchema.shape,
+    async (params) => ticketsListHandler(params),
+  );
+
+  // ── tickets.get ──────────────────────────────────────────────────────────
+  server.tool(
+    'tickets.get',
+    'Retrieve full ticket details by ticket_id, including current claim info, stage, dependencies, acceptance criteria, and event history.',
+    ticketsGetSchema.shape,
+    async (params) => ticketsGetHandler(params),
+  );
+
+  // ── tickets.payload ──────────────────────────────────────────────────────
+  server.tool(
+    'tickets.payload',
+    'Return the full delegation context for an agent: ticket JSON, upstream stage summary, file scope, and memory entries.',
+    ticketsPayloadSchema.shape,
+    async (params) => ticketsPayloadHandler(params),
+  );
+
+  // ── code.search_symbols ────────────────────────────────────────────────
+  server.tool(
+    'code.search_symbols',
+    'Search for code symbols (functions, classes, methods, interfaces) by name pattern, optionally filtered by kind and file path. Uses ILIKE pattern matching.',
+    codeSearchSymbolsSchema.shape,
+    async (params) => codeSearchSymbolsHandler(params),
+  );
+
+  // ── code.blast_radius ────────────────────────────────────────────────────
+  server.tool(
+    'code.blast_radius',
+    'Compute blast radius for a file — all transitively affected symbols and files via recursive graph traversal',
+    codeBlastRadiusSchema.shape,
+    async (params) => codeBlastRadiusHandler(params),
+  );
+
+  // ── code.get_imports ─────────────────────────────────────────────────────
+  server.tool(
+    'code.get_imports',
+    'Get the import chain for a file — direct and transitive dependencies with depth info',
+    codeGetImportsSchema.shape,
+    async (params) => codeGetImportsHandler(params),
+  );
+
+  // ── init.index ───────────────────────────────────────────────────────────
+  server.tool(
+    'init.index',
+    'Index the codebase — walk directory tree, parse source files with tree-sitter, populate code graph (code_files, code_symbols, code_imports, code_edges)',
+    initIndexSchema.shape,
+    async (params) => initIndexHandler(params),
+  );
+
+  // ── init.orient ──────────────────────────────────────────────────────────
+  server.tool(
+    'init.orient',
+    'Auto-discover project framework, build system, package manager, test framework, languages, entry points, and key directories. Returns a structured orientation summary for first-contact with a new codebase.',
+    initOrientSchema.shape,
+    async (params) => initOrientHandler(params),
+  );
+
+  // ── memory.add_lesson ────────────────────────────────────────────────────
+  server.tool(
+    'memory.add_lesson',
+    'Record a lesson learned during agent work. Generates embedding and stores for semantic search.',
+    memoryAddLessonSchema.shape,
+    async (params) => memoryAddLessonHandler(params),
+  );
+
+  // ── memory.search_lessons ────────────────────────────────────────────────
+  server.tool(
+    'memory.search_lessons',
+    'Search for relevant past lessons by natural language query. Embeds the query, then uses cosine similarity to find matching lessons.',
+    memorySearchLessonsSchema.shape,
+    async (params) => memorySearchLessonsHandler(params),
+  );
+
+  // ── memory.get_context ───────────────────────────────────────────────────
+  server.tool(
+    'memory.get_context',
+    'Get combined code graph + memory context for a file or ticket. Returns blast radius, relevant lessons, and context confidence score.',
+    memoryGetContextBaseSchema.shape,
+    async (params) => memoryGetContextHandler(memoryGetContextSchema.parse(params)),
   );
 }

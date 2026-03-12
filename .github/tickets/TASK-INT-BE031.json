@@ -1,0 +1,66 @@
+{
+  "ticket_id": "TASK-INT-BE031",
+  "title": "Memory Engine Schema Migration",
+  "description": "Create database migration 003 for the memory engine. Tables: lessons (extracted wisdom from rework cycles), lesson_embeddings (vector representations for semantic search). Include HNSW index on embeddings column. Match DDL from architecture doc migration 003.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-12T15:43:05.051322+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-DO002"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/db/migrations/003-memory-engine.sql"
+  ],
+  "acceptance_criteria": [
+    "lessons table created with id, ticket_id (FK), category (ENUM: pattern, anti-pattern, convention, decision), title, content, confidence (0.0-1.0), context JSONB, created_at",
+    "lesson_embeddings table created with id, lesson_id (FK), model_name, embedding vector(1536), created_at",
+    "HNSW index created on lesson_embeddings with m=16, ef_construction=200, vector_cosine_ops",
+    "GIN index on lessons.context JSONB column",
+    "Index on lessons.category",
+    "Migration is idempotent (IF NOT EXISTS guards)",
+    "Rollback drops tables and indexes cleanly"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-12T15:43:05.051325+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase3-schema-tools.md"
+    },
+    {
+      "timestamp": "2026-03-12T16:26:40.101028+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase3-schema-tools.md",
+  "tags": [
+    "intelligence",
+    "memory",
+    "phase3",
+    "database",
+    "BLK-INT-10"
+  ]
+}

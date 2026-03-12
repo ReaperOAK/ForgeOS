@@ -1,0 +1,69 @@
+{
+  "ticket_id": "TASK-INT-BE023",
+  "title": "Python and SQL AST Parsers",
+  "description": "Implement Python and SQL AST parsers using web-tree-sitter. Python parser extracts functions, classes, methods, imports (import/from). SQL parser extracts CREATE TABLE, CREATE FUNCTION, CREATE INDEX statements as symbols.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-12T15:43:05.050188+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-DO001",
+    "TASK-INT-BE019"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/services/parsers/python-parser.ts",
+    "forgeos-server/src/services/parsers/sql-parser.ts"
+  ],
+  "acceptance_criteria": [
+    "Python parser extracts function definitions with name, start_line, end_line",
+    "Python parser extracts class definitions with methods as child symbols",
+    "Python parser extracts import and from-import statements",
+    "Python parser handles decorators without errors",
+    "SQL parser extracts CREATE TABLE statements as symbols (kind: table)",
+    "SQL parser extracts CREATE FUNCTION statements as symbols (kind: function)",
+    "SQL parser extracts CREATE INDEX statements as symbols (kind: index)",
+    "Unit tests: parse Python and SQL fixtures then verify all symbols extracted"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-12T15:43:05.050190+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase2-schema-indexer.md"
+    },
+    {
+      "timestamp": "2026-03-12T16:16:11.133188+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase2-schema-indexer.md",
+  "tags": [
+    "intelligence",
+    "codegraph",
+    "phase2",
+    "parser",
+    "BLK-INT-07"
+  ]
+}

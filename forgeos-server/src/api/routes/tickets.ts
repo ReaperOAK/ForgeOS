@@ -37,7 +37,7 @@ const listQuerySchema = z.object({
   status: z.enum(TICKET_STATUSES as [TicketStatus, ...TicketStatus[]]).optional(),
   claimed_by: z.string().optional(),
   priority: z.enum(TICKET_PRIORITIES as [TicketPriority, ...TicketPriority[]]).optional(),
-  limit: z.coerce.number().int().min(1).max(100).default(20),
+  limit: z.coerce.number().int().min(1).max(500).default(20),
   offset: z.coerce.number().int().min(0).default(0),
 });
 

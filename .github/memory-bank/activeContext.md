@@ -8,6 +8,11 @@
 - **Decisions:** Added Machines View section to README, TSDoc on MachineCardProps and formatRelativeTime, CHANGELOG entry for multi-machine status view
 - **Timestamp:** 2026-03-12T20:30:00Z
 
+### [TASK-INT-SEC002] — Security Review PASS
+- **Artifacts:** .github/agent-output/Security/TASK-INT-SEC002.md
+- **Decisions:** PASS — 0 critical, 0 high, 3 medium (accepted), 4 low. STRIDE complete, OWASP 10/10 checked. API key handling verified secure. All SQL parameterized. pgvector config safe.
+- **Timestamp:** 2026-03-12T22:00:00Z
+
 ### [FORGEOS-FE010] — Security Review
 - **Artifacts:** .github/agent-output/Security/FORGEOS-FE010.md
 - **Decisions:** PASS — STRIDE max 4/LOW, OWASP 10/10, 0 critical/high findings. React auto-escaping, encodeURIComponent on URLs, bounded API (limit=200), WS exponential backoff. 2 informational notes (pre-existing).
@@ -2295,3 +2300,30 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-FE009.md
 - **Decisions:** APPROVED — 11/11 DoD pass, 7/7 AC verified, 69/69 tests pass, lint clean, tsc clean
 - **Timestamp:** 2026-03-12T21:00:00Z
+
+### [TASK-INT-BE006] — BACKEND Complete
+- **Artifacts:** .github/instructions/terminal-management.instructions.md (NEW), .github/agent-output/Backend/TASK-INT-BE006.md
+- **Decisions:** Created terminal-management.instructions.md as the 6th instruction file. MCP-first principle. tickets.py scoped to human operators and 3 authorized agents. 5/5 AC verified.
+- **Timestamp:** 2026-03-12T22:00:00Z
+
+### [TASK-INT-SEC001] — Security Review
+- **Artifacts:** .github/agent-output/Security/TASK-INT-SEC001.md
+- **Decisions:** PASS (conditional) — STRIDE complete, OWASP 10/10 checked, 0 critical, 3 high (SEC-01 auto-reg wildcard perms, SEC-02 hardcoded reject identity, SEC-06 permissive CORS), 4 medium, 2 low. All SQL parameterized. SHA-256 auth solid. Rate limiting configured but unenforced.
+- **Timestamp:** 2026-03-12T23:00:00Z
+
+### [TASK-INT-DOC001] — Documentation Complete
+- **Artifacts:** docs/operations/mcp-cutover-guide.md (NEW), docs/architecture/intelligence-architecture.md (UPDATED), .github/agent-output/Documentation/TASK-INT-DOC001.md
+- **Decisions:** Created How-To cutover guide with 9 sections. Updated architecture doc Phase 1 status to IMPLEMENTED with Section 3.8 completion summary.
+- **Timestamp:** 2026-03-12T22:00:00Z
+
+### Intelligence Plan — COMPLETE (2026-03-12)
+- **Phase 1 (MCP-Only Cutover):** 6 instruction files + 14 agent files rewritten, tickets.get/list/payload tools, orchestrator, migration script, stored function verification
+- **Phase 2 (Code Graph Engine):** tree-sitter WASM parsers (TS/JS/Python/SQL), indexer service, file walker, code_files/symbols/imports/edges schema, blast_radius/search_symbols/get_imports stored functions + MCP tools, init.index tool
+- **Phase 3 (Memory Engine):** pgvector 0.7+, lessons/lesson_embeddings schema, embedding service (OpenAI text-embedding-3-small), reflection service, memory.add_lesson/search_lessons/get_context tools, memory injection in orchestrator dispatch, search_similar_lessons stored function
+- **Phase 4 (Drop-In Init):** init.orient tool, orientation progress API + SSE stream, Agent SDK updated (init + memory + code graph wrappers)
+- **Testing:** codegraph benchmarks, init benchmarks, blast radius integration tests, memory engine integration tests, embedding/similarity tests, init engine integration tests
+- **Docs:** architecture doc updated, operations setup guide created, README updated
+- **Security:** 2 security reviews (SEC001 code graph + SEC002 memory engine), 0 Critical, 0 High remaining
+- **Totals:** 53 tickets executed across 9 waves, 219 total tickets in DONE, all integrity checks pass
+- **Artifacts:** 19 MCP tools, 5 DB migrations, 600+ tests, 40+ new/modified files
+- **Confidence:** HIGH

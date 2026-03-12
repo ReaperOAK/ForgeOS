@@ -32,6 +32,9 @@ COPY package.json ./
 # Copy SQL migration files (not emitted by tsc).
 COPY src/db/migrations/ ./dist/db/migrations/
 
+# Copy tree-sitter grammar WASM files (binary assets, not emitted by tsc).
+COPY src/services/parsers/grammars/ ./dist/services/parsers/grammars/
+
 # Dashboard static assets (created in a later phase; see TASK-FOS-08-004).
 COPY src/dashboard/ ./dist/dashboard/
 

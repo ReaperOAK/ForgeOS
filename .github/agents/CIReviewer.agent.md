@@ -58,17 +58,17 @@ Execute in order before any work. Halt immediately if step 1 triggers.
 3. Read upstream summary from `.github/agent-output/Security/{ticket-id}.md`.
 4. Read all files in `.github/vibecoding/chunks/CIReviewer.agent/`.
 5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks.
-6. Read ticket JSON from `.github/ticket-state/CI/{ticket-id}.json`.
+6. Call `tickets.payload(ticket_id)` via the ForgeOS MCP server to receive full delegation context (ticket JSON, upstream summary, memory entries, file scope).
 
 ## 4. Pre-Claimed Ticket (Dispatcher-Claim Protocol)
 
 RULE: The ticket is already claimed by Ticketer before this agent is launched.
 RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
 
-1. Read ticket JSON from `.github/ticket-state/CI/{ticket-id}.json`.
-2. Verify claim metadata exists: `claimed_by`, `machine_id`, `operator`, `lease_expiry`.
-3. If claim metadata is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing claim`.
-4. Proceed directly to execution workflow — no `git pull --rebase` for claiming.
+1. Call `tickets.payload(ticket_id)` to receive the full delegation context from the ForgeOS MCP server.
+2. Verify the payload includes ticket JSON with claim metadata (`claimed_by`, `machine_id`, `operator`, `lease_expiry`).
+3. If claim metadata is missing or the MCP server rejects the request, HALT and report `PROTOCOL_VIOLATION: missing claim`.
+4. Proceed directly to execution workflow.
 
 ## 5. Execution Workflow
 
@@ -103,19 +103,35 @@ After verifying claim, execute these checks against all files in the ticket's `f
 | **PASS** | 0 Critical, ≤ 3 Warnings, coverage ≥ 80%, score ≥ 75 |
 | **FAIL** | ≥ 1 Critical, OR > 5 Warnings, OR coverage < 60%, OR score < 60 |
 
-- **PASS** → advance ticket to DOCS stage.
-- **FAIL** → reject with SARIF evidence:
-  ```bash
-  python3 .github/tickets.py --rework {ticket-id} CIReviewer "{reason with finding summary}"
+- **PASS** → call `tickets.complete` via the ForgeOS MCP server with evidence:
+  ```jsonc
+  {
+    "ticket_id": "{ticket-id}",
+    "evidence": {
+      "artifacts": [".github/agent-output/CIReviewer/{ticket-id}.md", ".github/agent-output/CIReviewer/{ticket-id}.sarif"],
+      "test_results": "Score {N}/100, {N} critical, {N} warnings, coverage {N}%",
+      "confidence": "HIGH",
+      "notes": "CI PASS — all quality gates satisfied"
+    }
+  }
   ```
+- **FAIL** → call `tickets.reject` via the ForgeOS MCP server with SARIF evidence:
+  ```jsonc
+  {
+    "ticket_id": "{ticket-id}",
+    "reason": "{reason with finding summary}",
+    "evidence": { "quality_score": "N", "critical_count": "N", "sarif": "..." }
+  }
+  ```
+  The MCP server automatically routes the ticket back to its implementation stage for rework.
 
 ## 7. Work Commit (Commit 2)
 
 1. Write CI report to `.github/agent-output/CIReviewer/{ticket-id}.md` containing:
    verdict, quality score, SARIF findings summary, metrics per file.
-2. Delete upstream summary: `rm .github/agent-output/Security/{ticket-id}.md`.
-3. If PASS: move ticket JSON to `.github/ticket-state/DOCS/{ticket-id}.json`.
-   If FAIL: ticket stays for rework processing (tickets.py handles move).
+2. Delete upstream summary: `.github/agent-output/Security/{ticket-id}.md`.
+3. If PASS: call `tickets.complete` with evidence payload (MCP server advances the ticket to DOCS).
+   If FAIL: call `tickets.reject` with reason and evidence (MCP server routes ticket back for rework).
 4. Append memory entry to `.github/memory-bank/activeContext.md`:
    ```markdown
    ### [{ticket-id}] — CI Review
@@ -126,8 +142,7 @@ After verifying claim, execute these checks against all files in the ticket's `f
 5. Stage ONLY modified files explicitly — **NEVER `git add .`**:
    ```bash
    git add .github/agent-output/CIReviewer/{ticket-id}.md
-   git add .github/ticket-state/DOCS/{ticket-id}.json   # or CI/ if rework
-   git add .github/tickets/{ticket-id}.json
+   git add .github/agent-output/CIReviewer/{ticket-id}.sarif
    git add .github/memory-bank/activeContext.md
    git commit -m "[{ticket-id}] CI complete by CIReviewer on $(hostname)"
    git push

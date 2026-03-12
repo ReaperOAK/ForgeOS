@@ -43,7 +43,27 @@ from forgeos_sdk.exceptions import (
 )
 from forgeos_sdk.fallback import FilesystemFallback
 from forgeos_sdk.heartbeat import LeaseHeartbeat
-from forgeos_sdk.models import Claim, Evidence, OperationResult, Ticket
+from forgeos_sdk.models import (
+    AffectedSymbol,
+    BlastRadiusResult,
+    Claim,
+    ContextResponse,
+    DelegationPayload,
+    Evidence,
+    ImportChainResult,
+    ImportEntry,
+    IndexResult,
+    Lesson,
+    ListResponse,
+    MemoryAddLessonInput,
+    MemoryGetContextInput,
+    MemorySearchLessonsInput,
+    OperationResult,
+    OrientationResult,
+    SymbolMatch,
+    SymbolSearchResult,
+    Ticket,
+)
 from forgeos_sdk.operations import TicketOperations
 from forgeos_sdk.runner_hooks import HookConfig, HookResult, RunnerHooks
 from forgeos_sdk.summary import (
@@ -57,18 +77,33 @@ __version__ = "0.1.0"
 __app_name__ = "forgeos-agent-sdk"
 
 __all__ = [
+    "AffectedSymbol",
+    "BlastRadiusResult",
     "Claim",
     "ConnectionState",
+    "ContextResponse",
+    "DelegationPayload",
     "Evidence",
     "FilesystemFallback",
     "ForgeOSClient",
     "HookConfig",
     "HookResult",
+    "ImportChainResult",
+    "ImportEntry",
+    "IndexResult",
     "LeaseHeartbeat",
+    "Lesson",
+    "ListResponse",
+    "MemoryAddLessonInput",
+    "MemoryGetContextInput",
+    "MemorySearchLessonsInput",
     "OperationMode",
     "OperationResult",
+    "OrientationResult",
     "RunnerHooks",
     "SDKConfig",
+    "SymbolMatch",
+    "SymbolSearchResult",
     "Ticket",
     "TicketOperations",
     "TransportType",

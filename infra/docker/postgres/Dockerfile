@@ -1,10 +1,10 @@
 # =============================================================================
-# ForgeOS — PostgreSQL 17 Alpine Container
+# ForgeOS — PostgreSQL 17 + pgvector Container
 # =============================================================================
 # Custom PostgreSQL image for the ForgeOS distributed orchestration platform.
 #
 # Features:
-#   - PostgreSQL 17 on Alpine (minimal footprint)
+#   - PostgreSQL 17 with pgvector 0.7+ (vector similarity search)
 #   - Init script creates the forgeos database, user, and required extensions
 #   - Health check script via pg_isready
 #   - Development-tuned configuration (shared_buffers, work_mem, connections)
@@ -14,17 +14,19 @@
 # Build:
 #   docker build -t forgeos-postgres:17 .
 #
-# Ticket:  FORGEOS-DO002
+# Ticket:  FORGEOS-DO002, TASK-INT-DO002
 # Author:  DevOps Engineer
-# Date:    2026-03-07
+# Date:    2026-03-07 (updated 2026-03-12)
 # =============================================================================
 
-FROM postgres:17-alpine
+# pgvector/pgvector:pg17 ships pgvector 0.8.0 pre-installed on Debian-based PG17.
+# This eliminates the need to compile from source or install packages manually.
+FROM pgvector/pgvector:pg17
 
 LABEL maintainer="ForgeOS DevOps <devops@forgeos.local>"
 LABEL org.opencontainers.image.title="ForgeOS PostgreSQL"
-LABEL org.opencontainers.image.description="PostgreSQL 17 Alpine with ForgeOS init scripts"
-LABEL org.opencontainers.image.version="17.0"
+LABEL org.opencontainers.image.description="PostgreSQL 17 with pgvector for ForgeOS"
+LABEL org.opencontainers.image.version="17.1"
 LABEL org.opencontainers.image.source="https://github.com/Ticketer/ForgeOS"
 
 # ---------------------------------------------------------------------------

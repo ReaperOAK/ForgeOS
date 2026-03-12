@@ -52,7 +52,8 @@ export async function fetchPipelineOverview(): Promise<PipelineOverview> {
 export async function fetchTicketHistory(
   ticketId: string,
 ): Promise<EventHistory[]> {
-  return apiClient.get<EventHistory[]>(
+  const res = await apiClient.get<{ ticket_id: string; events: EventHistory[]; count: number }>(
     `/api/tickets/${encodeURIComponent(ticketId)}/history`,
   );
+  return res.events;
 }

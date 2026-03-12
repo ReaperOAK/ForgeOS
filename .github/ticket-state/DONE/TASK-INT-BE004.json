@@ -1,0 +1,64 @@
+{
+  "ticket_id": "TASK-INT-BE004",
+  "title": "Rewrite git-protocol.instructions.md for Simplified Commits",
+  "description": "Update git-protocol.instructions.md to remove two-commit protocol (CLAIM+WORK). Replace with single WORK commit model since MCP server handles locking via database. Preserve scoped git rules (no git add .). Update summary handoff to reference MCP-based context delivery instead of filesystem summaries.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "DONE",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-12T15:43:05.048076+00:00",
+  "created_by": "TODO",
+  "dependencies": [],
+  "blocked_by": [],
+  "file_paths": [
+    ".github/instructions/git-protocol.instructions.md"
+  ],
+  "acceptance_criteria": [
+    "Two-commit protocol replaced with single WORK commit (MCP server handles claims)",
+    "Claim commit section removed (MCP server creates claims atomically)",
+    "Scoped git rules preserved (explicit file staging only)",
+    "Commit message format preserved with ticket ID prefix",
+    "Summary handoff updated to reference MCP payload delivery",
+    "Lease mechanism described as server-managed (not filesystem-based)",
+    "Document passes markdown lint with zero errors"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-12T15:43:05.048079+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase1-rewrites.md"
+    },
+    {
+      "timestamp": "2026-03-12T15:43:05.130950+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase1-rewrites.md",
+  "tags": [
+    "intelligence",
+    "cutover",
+    "phase1",
+    "instructions",
+    "BLK-INT-01"
+  ]
+}

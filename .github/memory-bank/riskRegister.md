@@ -435,3 +435,33 @@ Known sources list disclosed in `UnknownSourceError` details. Risk accepted — 
 | SEC-002 | Stage name fallback passes raw DB value to mkdir/path construction | CWE-22 | MEDIUM | Accepted | DB uses enum constraint on stage column; recommend removing fallback |
 | SEC-003 | TOCTOU race in file exist check → move | CWE-367 | LOW | Accepted | Git-based claim protocol ensures single-writer per ticket |
 | SEC-004 | Unbounded JSON file read in _read_fs_tickets | CWE-400 | LOW | Accepted | Operator-managed directory; files typically <5KB |
+
+---
+
+### 2026-03-12T23:00:00Z — TASK-INT-SEC001 MCP Tools Security Review
+
+**Agent:** Security Engineer
+
+| ID | Threat | CWE | Severity | Status | Mitigation |
+|----|--------|-----|----------|--------|------------|
+| SEC-MCP-01 | Auto-registration grants wildcard `["*"]` permissions in tickets-claim.ts and tickets-reject.ts | CWE-269 | HIGH | OPEN | Change auto-reg permissions to minimal set or require pre-provisioning |
+| SEC-MCP-02 | tickets.reject hardcodes `agentName = 'system'`, bypassing caller identity | CWE-287 | HIGH | OPEN | Pass authenticated agent identity from request context |
+| SEC-MCP-03 | Path traversal via crafted ticket_id in tickets-payload.ts filesystem read | CWE-22 | MEDIUM | OPEN | Add regex validation: `/^[A-Za-z0-9_-]+$/` on ticket_id |
+| SEC-MCP-04 | Error messages may leak PostgreSQL internals (table/column/constraint names) | CWE-209 | LOW | OPEN | Replace raw err.message with generic descriptions in production |
+| SEC-MCP-05 | Rate limiting configured but no middleware enforced in Express chain | CWE-770 | MEDIUM | OPEN | Install and apply express-rate-limit middleware |
+| SEC-MCP-06 | CORS reflects any Origin with credentials, enabling cross-origin attacks | CWE-942 | HIGH | OPEN | Restrict to known origins allowlist |
+| SEC-MCP-07 | `/events` SSE and `/dashboard` served without authentication | CWE-200 | LOW | OPEN | Require auth on /events; restrict /dashboard via network policy |
+
+### 2026-03-12T22:00:00Z — TASK-INT-SEC002 Memory Engine Security Review
+
+**Agent:** Security Engineer
+
+| ID | Threat | CWE | Severity | Status | Mitigation |
+|----|--------|-----|----------|--------|------------|
+| SEC-002-M01 | Lesson text stored without HTML/script sanitization (stored XSS risk) | CWE-79 | MEDIUM | ACCEPTED | No web rendering path exists; add sanitization if dashboard ever displays lessons |
+| SEC-002-M02 | No per-caller rate limiting on embedding API calls (cost/availability risk) | CWE-770 | MEDIUM | ACCEPTED | Mitigated by OpenAI 429 handling + single-agent-per-ticket model |
+| SEC-002-M03 | No max length on lesson_text input (uncontrolled resource consumption) | CWE-400 | MEDIUM | ACCEPTED | Add `.max(10000)` to Zod schema; agents are trusted internal actors |
+| SEC-002-L01 | OpenAI error body included verbatim in thrown errors (info disclosure) | CWE-209 | LOW | ACCEPTED | Truncate/sanitize OpenAI error body in production |
+| SEC-002-L02 | EmbeddingService instantiated per-request bypasses global concurrency limit | CWE-404 | LOW | ACCEPTED | Use singleton pattern for shared concurrency limiter |
+| SEC-002-L03 | claimed_by used as agent_role in reflection service | CWE-345 | LOW | ACCEPTED | Resolve role from canonical mapping |
+| SEC-002-L04 | Non-transactional lesson + embedding INSERT in add_lesson | CWE-367 | LOW | ACCEPTED | Wrap in BEGIN/COMMIT transaction |

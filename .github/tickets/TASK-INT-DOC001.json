@@ -1,0 +1,65 @@
+{
+  "ticket_id": "TASK-INT-DOC001",
+  "title": "MCP-Only Cutover Documentation",
+  "description": "Document the MCP-only cutover: migration procedure, new MCP tools, orchestrator configuration, agent SDK updates. Update the architecture document with Phase 1 implementation details. Create operations guide for running the migration.",
+  "type": "docs",
+  "priority": "medium",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-12T15:43:05.047542+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-BE015",
+    "TASK-INT-BE016",
+    "TASK-INT-BE017"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "docs/operations/mcp-cutover-guide.md",
+    "docs/architecture/intelligence-architecture.md"
+  ],
+  "acceptance_criteria": [
+    "Cutover operations guide: step-by-step migration from filesystem to MCP",
+    "Migration guide: how to run migrate-filesystem.ts, rollback procedures",
+    "MCP tool reference: tickets.get, tickets.list, tickets.payload specifications",
+    "Orchestrator configuration: env vars, polling interval, lease duration",
+    "Agent SDK migration guide: old API to new API mapping",
+    "Architecture doc updated with Phase 1 implementation reality",
+    "All code examples verified and tested"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-12T15:43:05.047545+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase1-migration.md"
+    },
+    {
+      "timestamp": "2026-03-12T16:26:40.100522+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase1-migration.md",
+  "tags": [
+    "intelligence",
+    "cutover",
+    "phase1",
+    "documentation",
+    "BLK-INT-05"
+  ]
+}

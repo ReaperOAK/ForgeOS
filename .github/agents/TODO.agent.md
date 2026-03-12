@@ -15,8 +15,8 @@ Progressive refinement decomposition engine with 3 operating modes:
 - **Planning** (L1→L2): Capabilities to execution blocks (epics)
 - **Execution Planning** (L2→L3): Blocks to granular, delegatable tickets
 
-Decomposes project visions into trackable tasks. Only invoked by Ticketer.
-Each invocation operates in exactly ONE mode, selected via delegation packet.
+Decomposes project visions into trackable tasks. Only invoked by ForgeOS orchestrator.
+Each invocation operates in exactly ONE mode, selected via delegation context.
 TODO does NOT implement code — it decomposes only.
 
 ---
@@ -63,11 +63,11 @@ Execute in order before any work:
 3. Read upstream summary from `.github/agent-output/TODO/{ticket-id}.md` (if exists)
 4. Read `.github/vibecoding/chunks/TODO.agent/` (all chunk files)
 5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks
-6. Read delegation packet / assignment from Ticketer
+6. Call `tickets.payload(ticket_id)` to receive delegation context from the ForgeOS MCP server
 
 ## 4. Invocation Rules
 
-- Only Ticketer may invoke TODO agent
+- Only ForgeOS orchestrator may invoke TODO agent
 - TODO does NOT claim SDLC tickets via dispatcher-claim protocol
 - TODO outputs ticket JSON files via `python3 .github/tickets.py --parse TODO/`
 - Decomposition MUST follow L0→L1→L2→L3 strictly (no jumping L0→L3)
@@ -143,6 +143,7 @@ runInTerminal restricted to: python .github/tickets.py commands ONLY.
 - Self-initiating strategic decisions without delegation
 - Running any terminal command other than `python3 .github/tickets.py`
 - Modifying files outside `TODO/`, `.github/tickets/`, `.github/ticket-state/`, `.github/agent-output/TODO/`
+- Reading `.github/ticket-state/` or `.github/tickets/` directly for ticket context — use `tickets.payload` via MCP
 - Using or browsing tools outside the Assigned Tool Loadout section — strict boundary enforced.
 - Hallucinating tool names or capabilities not explicitly listed in the loadout.
 

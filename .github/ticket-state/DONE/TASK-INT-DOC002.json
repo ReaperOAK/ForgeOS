@@ -1,0 +1,65 @@
+{
+  "ticket_id": "TASK-INT-DOC002",
+  "title": "Intelligence Evolution Documentation",
+  "description": "Update all documentation for the intelligence evolution features. Update the architecture doc with final schema, API contracts, and configuration. Create an operations guide for setting up pgvector, configuring the OpenAI API key, and running init.index. Update README with intelligence feature summary.",
+  "type": "docs",
+  "priority": "medium",
+  "stage": "DONE",
+  "sdlc_flow": [
+    "READY",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-12T15:43:05.053464+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-BE035",
+    "TASK-INT-BE041",
+    "TASK-INT-BE047"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "docs/architecture/intelligence-architecture.md",
+    "docs/operations/intelligence-setup.md",
+    "README.md"
+  ],
+  "acceptance_criteria": [
+    "docs/architecture/intelligence-architecture.md updated with final schema DDL",
+    "docs/architecture/intelligence-architecture.md updated with all MCP tool contracts",
+    "docs/operations/intelligence-setup.md created with setup instructions for pgvector, OpenAI API key, and initial indexing",
+    "README.md updated with intelligence features section",
+    "All code examples in documentation are accurate and tested",
+    "JSDoc and TSDoc updated for all new public APIs",
+    "No TODO comments remaining in documentation"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-12T15:43:05.053467+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase4-init-docs.md"
+    },
+    {
+      "timestamp": "2026-03-12T17:06:38.970637+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase4-init-docs.md",
+  "tags": [
+    "intelligence",
+    "docs",
+    "phase4",
+    "BLK-INT-15"
+  ]
+}

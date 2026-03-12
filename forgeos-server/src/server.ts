@@ -45,6 +45,22 @@ const sseClients = new Set<Response>();
 export function createApp(_config: AppConfig): express.Express {
   const app = express();
 
+  // ── CORS ───────────────────────────────────────────
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin) {
+      res.setHeader('Access-Control-Allow-Origin', origin);
+      res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
+      res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Request-ID');
+      res.setHeader('Access-Control-Allow-Credentials', 'true');
+    }
+    if (req.method === 'OPTIONS') {
+      res.status(204).end();
+      return;
+    }
+    next();
+  });
+
   // ── Middleware (order matters) ──────────────────────
   // Skip express.json() for /mcp — the MCP SDK transport reads the raw body stream itself
   app.use((req, res, next) => {

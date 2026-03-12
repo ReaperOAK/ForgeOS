@@ -54,8 +54,8 @@ barriers. Strategic discovery and execution run simultaneously.
 The runtime infrastructure consists of:
 
 - **ForgeOS MCP Server** (`forgeos-server/`) — TypeScript/Express service
-  exposing 11 ticket-lifecycle tools over the Model Context Protocol (MCP)
-  via Streamable HTTP transport.
+  exposing 19 tools (11 ticket-lifecycle + 3 code graph + 3 memory + 2 init)
+  over the Model Context Protocol (MCP) via Streamable HTTP transport.
 - **PostgreSQL 17** — Primary data store with Row-Level Security, stored
   functions for atomic ticket operations, event-sourcing audit trail, and
   `LISTEN/NOTIFY` for real-time Server-Sent Events.
@@ -379,16 +379,69 @@ workers consume directly.
 
 ---
 
+## Intelligence Features
+
+Beyond ticket orchestration, ForgeOS includes a cognitive intelligence layer
+that makes agents context-aware and self-improving.
+
+### Code Graph Engine (Phase 2)
+
+AST-based code understanding powered by tree-sitter WASM parsers. The MCP
+Server parses source files into a dependency graph stored in PostgreSQL.
+
+| Tool | Purpose |
+|------|---------|
+| `code.blast_radius` | Compute which files and symbols are affected by a change |
+| `code.search_symbols` | Search functions, classes, and methods by name pattern |
+| `code.get_imports` | Trace the transitive import chain of a file |
+
+Supported languages: TypeScript, JavaScript, Python, SQL (regex fallback for
+others).
+
+### Memory Engine (Phase 3)
+
+Vector-based lesson storage using pgvector and OpenAI embeddings. Agents
+record lessons from rework cycles, and future agents retrieve relevant
+past lessons via semantic search.
+
+| Tool | Purpose |
+|------|---------|
+| `memory.add_lesson` | Record a lesson with automatic embedding |
+| `memory.search_lessons` | Semantic similarity search over past lessons |
+| `memory.get_context` | Unified context for ticket dispatch (blast radius + lessons) |
+
+### Drop-In Initialization (Phase 4)
+
+Zero-config project onboarding. Index a new codebase and auto-detect its
+tech stack in two tool calls.
+
+| Tool | Purpose |
+|------|---------|
+| `init.index` | Parse and index all source files into the code graph |
+| `init.orient` | Auto-discover frameworks, languages, entry points |
+
+For setup instructions, see the
+[Intelligence Setup Guide](docs/operations/intelligence-setup.md).
+For architecture details, see the
+[Intelligence Architecture](docs/architecture/intelligence-architecture.md).
+
+---
+
 ## Required MCP and Tooling
 
 Vibecoding is built on the Model Context Protocol (MCP) ecosystem. While
 core orchestration logic operates with minimal tooling, maximum value is
 achieved when connected to the full stack.
 
-The ForgeOS MCP Server exposes 11 ticket lifecycle tools via the MCP protocol.
+The ForgeOS MCP Server exposes 19 tools via the MCP protocol: 11 ticket
+lifecycle tools, 3 code graph tools, 3 memory engine tools, and 2
+initialization tools.
+
 For complete input/output schemas, error codes, and usage examples, see the
 [MCP Tool Definition Schemas](docs/architecture/api/mcp-tool-definitions.md)
-reference document.
+reference document and the
+[Intelligence Architecture](docs/architecture/intelligence-architecture.md)
+for Phase 2–4 tool specifications.
 
 The **Agent Registration API** (`/api/admin/*`) enables programmatic agent
 lifecycle management — registration with one-time API key generation, key

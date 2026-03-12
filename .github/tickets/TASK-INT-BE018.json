@@ -1,0 +1,70 @@
+{
+  "ticket_id": "TASK-INT-BE018",
+  "title": "Integration Tests for MCP-Only Workflow",
+  "description": "Write end-to-end integration tests for the MCP-only ticket workflow. Test the full lifecycle: create ticket, claim via orchestrator, retrieve payload, advance through stages, handle rework, complete to DONE. Verify all MCP tools work together correctly.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-12T15:43:05.047234+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-BE011",
+    "TASK-INT-BE012",
+    "TASK-INT-BE013",
+    "TASK-INT-BE015"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/__tests__/integration/mcp-workflow.test.ts"
+  ],
+  "acceptance_criteria": [
+    "Test full lifecycle: READY then BACKEND then QA then SECURITY then CI then DOCS then VALIDATION then DONE",
+    "Test tickets.get returns correct ticket data at each stage",
+    "Test tickets.list filters correctly by stage and type",
+    "Test tickets.payload includes upstream summary from previous stage",
+    "Test orchestrator dispatches READY tickets to correct agents",
+    "Test reject_ticket sends ticket to rework with evidence preserved",
+    "Test concurrent claims on same ticket (only one succeeds)",
+    "All tests use isolated test database with cleanup"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-12T15:43:05.047239+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase1-migration.md"
+    },
+    {
+      "timestamp": "2026-03-12T16:16:11.155591+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase1-migration.md",
+  "tags": [
+    "intelligence",
+    "cutover",
+    "phase1",
+    "testing",
+    "BLK-INT-05"
+  ]
+}

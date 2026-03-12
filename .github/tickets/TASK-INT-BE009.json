@@ -1,0 +1,75 @@
+{
+  "ticket_id": "TASK-INT-BE009",
+  "title": "Rewrite Review Agent Files for MCP Operations",
+  "description": "Rewrite 6 review and dispatch agent files (QA, Security, CIReviewer, Documentation, Validator, Ticketer) for MCP operations. Ticketer becomes the orchestrator loop caller. QA/Security/Validator use MCP reject tool for rework. All agents receive context via tickets.payload.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-12T15:43:05.048706+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-BE001",
+    "TASK-INT-BE002",
+    "TASK-INT-BE003",
+    "TASK-INT-BE004",
+    "TASK-INT-BE005"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    ".github/agents/QA.agent.md",
+    ".github/agents/Security.agent.md",
+    ".github/agents/CIReviewer.agent.md",
+    ".github/agents/Documentation.agent.md",
+    ".github/agents/Validator.agent.md",
+    ".github/agents/Ticketer.agent.md"
+  ],
+  "acceptance_criteria": [
+    "All 6 agent files updated: QA, Security, CIReviewer, Documentation, Validator, Ticketer",
+    "Ticketer rewritten as orchestrator loop invoker (not stateless dispatcher)",
+    "QA, Security, Validator use MCP reject tool for rework (not filesystem moves)",
+    "Context delivery via tickets.payload for all agents",
+    "Tool loadouts preserved per agent",
+    "Forbidden actions preserved per agent",
+    "All 6 files pass markdown lint with zero errors"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-12T15:43:05.048709+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase1-rewrites.md"
+    },
+    {
+      "timestamp": "2026-03-12T16:01:38.453368+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase1-rewrites.md",
+  "tags": [
+    "intelligence",
+    "cutover",
+    "phase1",
+    "agents",
+    "BLK-INT-02"
+  ]
+}
