@@ -4,7 +4,7 @@
   "description": "Implement the multi-machine status view following the UIDesigner mockup (FORGEOS-UID004). Display a grid of machine cards showing hostname, online/offline status indicator, last heartbeat timestamp, and list of currently running agents. Each machine card expands to show the agent-to-ticket mapping. Data sourced from the pipeline overview and claims data, updated in real-time via WebSocket.",
   "type": "frontend",
   "priority": "medium",
-  "stage": "VALIDATION",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -38,10 +38,10 @@
     "Empty state message when no machines are currently active"
   ],
   "rework_count": 0,
-  "claimed_by": "Validator",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-12T10:05:10Z",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -110,6 +110,15 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "Advanced from DOCS to VALIDATION"
+    },
+    {
+      "timestamp": "2026-03-12T09:41:25.567694+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
