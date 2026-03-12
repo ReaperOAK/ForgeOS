@@ -32,10 +32,23 @@ from mcp_server.migration.phases.phase_b import (
     SDKClaimAdapter,
     TransitionReport,
 )
+from mcp_server.migration.phases.phase_c import (
+    ExportAdapter,
+    ExportRecord,
+    FilesystemWriteDetector,
+    PhaseC,
+    PhaseCConfig,
+    PhaseCStatus,
+    SDKOperationAdapter,
+    TransitionReport as PhaseCTransitionReport,
+)
 
 __all__ = [
     "Discrepancy",
+    "ExportAdapter",
+    "ExportRecord",
     "FilesystemClaimAdapter",
+    "FilesystemWriteDetector",
     "OperationBackend",
     "OperationRecord",
     "PhaseA",
@@ -44,7 +57,12 @@ __all__ = [
     "PhaseB",
     "PhaseBConfig",
     "PhaseBStatus",
+    "PhaseC",
+    "PhaseCConfig",
+    "PhaseCStatus",
+    "PhaseCTransitionReport",
     "SDKClaimAdapter",
+    "SDKOperationAdapter",
     "TransitionReport",
     "ValidationReport",
 ]
