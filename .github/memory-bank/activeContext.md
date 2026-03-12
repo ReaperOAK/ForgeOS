@@ -2195,3 +2195,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** dashboard/src/components/claims/__tests__/LeaseCountdown.test.tsx, dashboard/src/components/claims/__tests__/ClaimsTable.test.tsx, dashboard/src/app/claims/__tests__/page.test.tsx, .github/agent-output/QA/FORGEOS-FE008.md
 - **Decisions:** QA PASS — 68/68 tests pass, coverage ≥80% all files (ClaimsTable 91%, LeaseCountdown 100%, page 90%), 7/7 AC verified, 0 defects
 - **Timestamp:** 2026-03-12T08:30:00Z
+
+### [FORGEOS-FE010] — QA PASS
+- **Artifacts:** dashboard/src/components/machines/__tests__/AgentList.test.tsx, dashboard/src/components/machines/__tests__/MachineCard.test.tsx, dashboard/src/app/machines/__tests__/page.test.tsx, .github/agent-output/QA/FORGEOS-FE010.md
+- **Decisions:** QA PASS — 46/46 tests pass, coverage 94% stmt / 84% branch / 93% func / 97% line, 7/7 AC verified, 0 defects
+- **Timestamp:** 2026-03-12T09:10:00Z

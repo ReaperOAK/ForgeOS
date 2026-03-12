@@ -4,7 +4,7 @@
   "description": "Implement the multi-machine status view following the UIDesigner mockup (FORGEOS-UID004). Display a grid of machine cards showing hostname, online/offline status indicator, last heartbeat timestamp, and list of currently running agents. Each machine card expands to show the agent-to-ticket mapping. Data sourced from the pipeline overview and claims data, updated in real-time via WebSocket.",
   "type": "frontend",
   "priority": "medium",
-  "stage": "QA",
+  "stage": "SECURITY",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -71,6 +71,13 @@
       "agent": "Frontend",
       "machine_id": "reaperoak-dev",
       "details": "FRONTEND complete. 3 components created, Sidebar updated. Moving to QA."
+    },
+    {
+      "timestamp": "2026-03-12T09:10:00Z",
+      "event": "STAGE_COMPLETE",
+      "agent": "QA Engineer",
+      "machine_id": "pop-os",
+      "details": "QA PASS. 46 tests, 94% stmt coverage, 84% branch, 93% func, 97% line. All 7 AC verified. Moving to SECURITY."
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
@@ -84,5 +91,5 @@
     "phase4",
     "BLK-10-03"
   ],
-  "current_stage": "QA"
+  "current_stage": "SECURITY"
 }
