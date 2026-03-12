@@ -35,10 +35,10 @@
     "Phase D entry logged with final migration statistics (total operations, error rates, duration)"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Security Engineer",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-12T10:05:10Z",
   "lease_duration_minutes": 30,
   "history": [
     {
