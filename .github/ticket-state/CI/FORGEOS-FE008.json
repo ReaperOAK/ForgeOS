@@ -38,10 +38,10 @@
     "Real-time updates via WebSocket connection from FORGEOS-FE006"
   ],
   "rework_count": 0,
-  "claimed_by": "Security Engineer",
+  "claimed_by": "CI Reviewer",
   "machine_id": "pop-os",
   "operator": "reaperoak",
-  "lease_expiry": "2026-03-12T09:07:35Z",
+  "lease_expiry": "2026-03-12T09:29:04Z",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -88,7 +88,7 @@
       "machine_id": "pop-os",
       "from_stage": "SECURITY",
       "to_stage": "CI",
-      "details": "SECURITY PASS — 0 critical/high findings, 2 informational notes. Advanced to CI."
+      "details": "SECURITY PASS \u2014 0 critical/high findings, 2 informational notes. Advanced to CI."
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
