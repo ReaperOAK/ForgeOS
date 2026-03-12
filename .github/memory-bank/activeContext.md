@@ -2180,3 +2180,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** mcp-server/README.md (Phase C section ~210 lines), mcp-server/src/mcp_server/migration/phases/__init__.py (docstring updated)
 - **Decisions:** Added Phase C reference section matching Phase A/B pattern; all inline docstrings already complete from Backend stage; no CHANGELOG needed (internal module)
 - **Timestamp:** 2026-03-12T16:00:00Z
+
+### [FORGEOS-BE078] — Documentation
+- **Artifacts:** mcp-server/README.md (Automated Rollback Triggers section, ~190 lines), .github/agent-output/Documentation/FORGEOS-BE078.md
+- **Decisions:** All 23 public API symbols already had docstrings; added README reference section with health monitor + rollback manager subsections, quick start examples, API tables; no CHANGELOG needed (internal migration infrastructure)
+- **Timestamp:** 2026-03-12T14:00:00Z

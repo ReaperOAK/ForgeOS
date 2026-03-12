@@ -5327,6 +5327,233 @@ class TicketOperationAdapter(Protocol):
   and string coercion for cross-path comparison.
 
 
+## Automated Rollback Triggers
+
+<!-- last_reviewed: 2026-03-12T00:00:00Z -->
+<!-- audience: developers -->
+<!-- diataxis: reference -->
+
+The `mcp_server.migration.health_monitor` and `mcp_server.migration.rollback`
+modules provide automated rollback when the MCP server becomes unhealthy
+during a migration phase transition. The health monitor tracks availability
+and error rates; the rollback manager reverts feature flags, exports data,
+and emits alerts.
+
+### Health Monitor
+
+`HealthMonitor` tracks two signals:
+
+1. **Availability** — periodic health probes detect when the MCP server is
+   unreachable for longer than a configurable threshold (default 5 minutes).
+2. **Error rate** — operation outcomes are recorded into a rolling window
+   (default 15 minutes). If failures exceed the threshold (default 10%),
+   rollback is triggered.
+
+#### Quick Start
+
+```python
+from mcp_server.migration.health_monitor import (
+    HealthMonitor,
+    HealthMonitorConfig,
+    OperationOutcome,
+)
+
+config = HealthMonitorConfig(
+    probe_interval_seconds=30.0,       # check every 30s
+    unreachable_threshold_seconds=300.0,  # 5 min before UNREACHABLE
+    error_rate_threshold=10.0,         # 10% error rate triggers rollback
+    rolling_window_seconds=900.0,      # 15-minute rolling window
+)
+
+monitor = HealthMonitor(config, probe=my_health_probe)
+
+# Execute a probe
+status = await monitor.check_health()
+
+# Record operation outcomes
+monitor.record_operation(OperationOutcome.SUCCESS)
+monitor.record_operation(OperationOutcome.FAILURE)
+
+# Check rollback conditions
+if monitor.needs_rollback():
+    reason = monitor.get_rollback_reason()
+```
+
+#### HealthMonitorConfig
+
+| Parameter | Default | Description |
+|---|---|---|
+| `probe_interval_seconds` | `30.0` | Seconds between health probes |
+| `unreachable_threshold_seconds` | `300.0` | Seconds of continuous failure before UNREACHABLE status |
+| `error_rate_threshold` | `10.0` | Error rate percentage that triggers rollback |
+| `rolling_window_seconds` | `900.0` | Rolling window duration for error rate calculation |
+
+#### HealthMonitor Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `check_health()` | `HealthStatus` | Execute a health probe and update status |
+| `record_operation(outcome)` | `None` | Record an operation outcome into the rolling window |
+| `get_rolling_stats()` | `dict` | Get rolling window statistics (total, successes, failures, error_rate) |
+| `exceeds_error_threshold()` | `bool` | Whether current error rate exceeds the configured threshold |
+| `needs_rollback()` | `bool` | Whether an automated rollback should be triggered |
+| `get_rollback_reason()` | `RollbackReason \| None` | Reason for triggering rollback, or `None` if healthy |
+
+#### HealthMonitor Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `status` | `HealthStatus` | Current health status (`HEALTHY`, `DEGRADED`, `UNREACHABLE`) |
+| `probe_interval` | `float` | Configured probe interval in seconds |
+
+#### Enums
+
+| Enum | Values | Description |
+|---|---|---|
+| `HealthStatus` | `HEALTHY`, `DEGRADED`, `UNREACHABLE` | Current MCP server health |
+| `OperationOutcome` | `SUCCESS`, `FAILURE` | Outcome of a single MCP operation |
+| `RollbackReason` | `MCP_UNREACHABLE`, `ERROR_RATE_EXCEEDED` | Why rollback was triggered |
+
+#### HealthProbe Protocol
+
+Any object implementing the `HealthProbe` protocol can serve as a probe:
+
+```python
+class HealthProbe(Protocol):
+    async def check(self) -> bool: ...
+```
+
+### Rollback Manager
+
+`RollbackManager` orchestrates the three-step rollback sequence:
+
+1. **Revert feature flags** — sets the migration phase back to the previous phase.
+2. **Export data** — triggers database-to-filesystem export (best-effort).
+3. **Emit alert** — sends a structured alert for human operator awareness.
+
+Rollback is **idempotent**: calling `execute_rollback()` after a successful
+rollback returns immediately with `already_rolled_back=True`.
+
+#### Quick Start
+
+```python
+from mcp_server.migration.rollback import (
+    RollbackManager,
+    RollbackManagerConfig,
+)
+
+config = RollbackManagerConfig(
+    current_phase="phase_3_mcp_primary",
+    previous_phase="phase_2_shadow_mode",
+)
+
+manager = RollbackManager(
+    config=config,
+    flag_setter=my_flag_setter,     # implements FeatureFlagSetter
+    exporter=my_exporter,           # implements RollbackExporter
+    alert_emitter=my_alert_emitter, # implements AlertEmitter
+)
+
+# Trigger rollback
+event = await manager.execute_rollback(RollbackReason.MCP_UNREACHABLE)
+print(event.new_phase)           # "phase_2_shadow_mode"
+print(event.export_success)      # True
+print(manager.state)             # RollbackState.ROLLED_BACK
+
+# Idempotent — second call is a no-op
+event2 = await manager.execute_rollback(RollbackReason.ERROR_RATE_EXCEEDED)
+print(event2.already_rolled_back)  # True
+```
+
+#### RollbackManagerConfig
+
+| Parameter | Type | Description |
+|---|---|---|
+| `current_phase` | `str` | The active migration phase |
+| `previous_phase` | `str` | The phase to revert to on rollback |
+
+#### RollbackManager Methods
+
+| Method | Returns | Description |
+|---|---|---|
+| `execute_rollback(reason)` | `RollbackEvent` | Execute the rollback sequence (idempotent) |
+| `reset()` | `None` | Reset state to IDLE after manual recovery |
+
+#### RollbackManager Properties
+
+| Property | Type | Description |
+|---|---|---|
+| `state` | `RollbackState` | Current state (`IDLE`, `ROLLING_BACK`, `ROLLED_BACK`) |
+| `event_history` | `list[RollbackEvent]` | Copy of all rollback events |
+
+#### RollbackEvent
+
+Frozen dataclass recording a rollback execution:
+
+| Field | Type | Description |
+|---|---|---|
+| `reason` | `RollbackReason` | Why the rollback was triggered |
+| `previous_phase` | `str` | The phase that was active before rollback |
+| `new_phase` | `str` | The phase reverted to |
+| `timestamp` | `str` | ISO-8601 timestamp of the rollback |
+| `already_rolled_back` | `bool` | `True` if this was a no-op (idempotent repeat) |
+| `export_success` | `bool` | Whether the data export succeeded |
+
+#### Dependency Protocols
+
+The rollback manager accepts three collaborators via constructor injection,
+each defined as a `runtime_checkable` Protocol:
+
+| Protocol | Method | Description |
+|---|---|---|
+| `FeatureFlagSetter` | `set_phase(phase) -> None` | Set the migration phase via feature flags |
+| `RollbackExporter` | `export() -> dict` | Execute data export during rollback |
+| `AlertEmitter` | `emit(event) -> None` | Emit a structured rollback alert |
+
+#### Enums
+
+| Enum | Values | Description |
+|---|---|---|
+| `RollbackState` | `IDLE`, `ROLLING_BACK`, `ROLLED_BACK` | Rollback manager state machine |
+
+### Error Handling
+
+| Scenario | Behavior |
+|---|---|
+| Export fails during rollback | Rollback continues (best-effort); `export_success=False` logged |
+| Rollback called when already rolled back | Returns immediately with `already_rolled_back=True` |
+| `reset()` called | Returns state to `IDLE` for manual recovery workflows |
+
+### Design Constraints
+
+- **Idempotent** — repeated rollback calls are safe no-ops after the first.
+- **Best-effort export** — export failure does not block flag reversion or alerting.
+- **Protocol-based collaborators** — `FeatureFlagSetter`, `RollbackExporter`,
+  and `AlertEmitter` use structural subtyping for testability.
+- **Structured logging** — all operations emit structured log events with
+  `reason`, `from_phase`, `to_phase`, and `timestamp` correlation context.
+- **Frozen config** — `RollbackManagerConfig` and `HealthMonitorConfig` are
+  immutable dataclasses preventing accidental mutation.
+
+### API Reference
+
+| Symbol | Kind | Description |
+|---|---|---|
+| `HealthMonitor` | class | Monitors MCP server health and determines rollback need |
+| `HealthMonitorConfig` | frozen dataclass | Health monitoring configuration |
+| `HealthProbe` | protocol | Async health check interface |
+| `HealthStatus` | enum | `HEALTHY`, `DEGRADED`, `UNREACHABLE` |
+| `OperationOutcome` | enum | `SUCCESS`, `FAILURE` |
+| `RollbackManager` | class | Orchestrates idempotent rollback sequence |
+| `RollbackManagerConfig` | frozen dataclass | Rollback phase configuration |
+| `RollbackEvent` | frozen dataclass | Record of a rollback execution |
+| `RollbackReason` | enum | `MCP_UNREACHABLE`, `ERROR_RATE_EXCEEDED` |
+| `RollbackState` | enum | `IDLE`, `ROLLING_BACK`, `ROLLED_BACK` |
+| `FeatureFlagSetter` | protocol | Set migration phase via feature flags |
+| `RollbackExporter` | protocol | Execute data export during rollback |
+| `AlertEmitter` | protocol | Emit structured rollback alerts |
+
+
 ## Database-to-Filesystem Export
 
 <!-- last_reviewed: 2026-03-11T23:59:00Z -->
