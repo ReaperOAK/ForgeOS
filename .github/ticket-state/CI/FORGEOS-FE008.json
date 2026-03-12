@@ -4,7 +4,7 @@
   "description": "Implement the active claims monitor view following the UIDesigner mockup (FORGEOS-UID004). Display a table of all currently claimed tickets with columns for ticket ID, agent, machine, operator, stage, and a real-time lease countdown timer. The countdown timer shows remaining lease time, turns yellow at <5 minutes, and red at <1 minute. Data updates in real-time via WebSocket. Support sorting by lease remaining and filtering by agent/machine.",
   "type": "frontend",
   "priority": "high",
-  "stage": "SECURITY",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "UIDESIGNER",
@@ -80,6 +80,15 @@
       "from_stage": "QA",
       "to_stage": "SECURITY",
       "details": "Advanced from QA to SECURITY"
+    },
+    {
+      "timestamp": "2026-03-12T09:10:00.000000+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "pop-os",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "SECURITY PASS — 0 critical/high findings, 2 informational notes. Advanced to CI."
     }
   ],
   "source_task_file": "TODO/tasks/phase4-dashboard.md",
@@ -93,5 +102,5 @@
     "phase4",
     "BLK-10-03"
   ],
-  "current_stage": "QA"
+  "current_stage": "SECURITY"
 }
