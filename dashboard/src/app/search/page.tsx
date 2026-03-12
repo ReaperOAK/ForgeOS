@@ -36,11 +36,10 @@ function FilterChip({
         <button
             type="button"
             onClick={onClick}
-            className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
-                active
+            className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${active
                     ? 'bg-primary text-inverse border-primary'
                     : 'bg-surface-alt text-muted border-border hover:border-primary/50'
-            }`}
+                }`}
         >
             {label}
         </button>

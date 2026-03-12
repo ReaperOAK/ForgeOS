@@ -76,7 +76,7 @@ describe('PipelinePage', () => {
     });
 
     it('shows loading state initially', () => {
-        mockFetchTickets.mockReturnValue(new Promise(() => {})); // never resolves
+        mockFetchTickets.mockReturnValue(new Promise(() => { })); // never resolves
         render(<PipelinePage />);
         const board = screen.getByTestId('pipeline-board');
         expect(board).toHaveAttribute('data-loading', 'true');

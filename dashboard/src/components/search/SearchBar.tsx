@@ -173,11 +173,10 @@ function FilterChip({
         <button
             type="button"
             onClick={onClick}
-            className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${
-                active
+            className={`px-2.5 py-1 rounded-full text-xs font-medium border transition-colors ${active
                     ? 'bg-primary text-inverse border-primary'
                     : 'bg-surface-alt text-muted border-border hover:border-primary/50'
-            }`}
+                }`}
         >
             {label}
         </button>
@@ -455,11 +454,10 @@ export function SearchBar() {
                     <button
                         type="button"
                         onClick={() => setShowFilters((p) => !p)}
-                        className={`px-1.5 py-0.5 rounded text-xs font-mono border ${
-                            showFilters
+                        className={`px-1.5 py-0.5 rounded text-xs font-mono border ${showFilters
                                 ? 'border-primary text-primary'
                                 : 'border-border text-muted'
-                        }`}
+                            }`}
                         aria-label="Toggle search filters"
                     >
                         Filters
@@ -554,11 +552,10 @@ export function SearchBar() {
                                     role="option"
                                     aria-selected={idx === highlightedIdx}
                                     type="button"
-                                    className={`w-full text-left px-3 py-2.5 border-b border-border/50 last:border-0 transition-colors ${
-                                        idx === highlightedIdx
+                                    className={`w-full text-left px-3 py-2.5 border-b border-border/50 last:border-0 transition-colors ${idx === highlightedIdx
                                             ? 'bg-primary/10'
                                             : 'hover:bg-surface-alt'
-                                    }`}
+                                        }`}
                                     onClick={() => handleSelect(result.ticketId)}
                                     onMouseEnter={() => setHighlightedIdx(idx)}
                                 >

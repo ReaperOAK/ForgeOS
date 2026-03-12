@@ -146,8 +146,8 @@ export default function TicketDetailPage() {
                             aria-controls={`panel-${tab.key}`}
                             onClick={() => setActiveTab(tab.key)}
                             className={`px-4 py-3 text-sm font-medium transition-colors border-b-2 ${activeTab === tab.key
-                                    ? 'border-primary text-primary'
-                                    : 'border-transparent text-muted hover:text-foreground'
+                                ? 'border-primary text-primary'
+                                : 'border-transparent text-muted hover:text-foreground'
                                 }`}
                         >
                             {tab.label}
