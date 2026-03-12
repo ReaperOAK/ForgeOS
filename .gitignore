@@ -33,3 +33,4 @@ forgeos-server/coverage
 node_modules
 .venv
 dashboard/coverage
+.playwright-mcp
