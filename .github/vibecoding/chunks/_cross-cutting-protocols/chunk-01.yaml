@@ -13,7 +13,7 @@ user-invokable: false
 
 > **Applies to:** ALL subagents in this swarm.
 > Every agent MUST follow these protocols in addition to their domain-specific
-> instructions. ReaperOAK enforces compliance.
+> instructions. Ticketer enforces compliance.
 
 ---
 
@@ -34,9 +34,9 @@ STEP 3 — GENERATE: Only NOW produce output.
 ```
 
 **Violation detection:** If output references patterns not found in loaded
-context, the agent is hallucinating. ReaperOAK rejects and re-delegates.
+context, the agent is hallucinating. Ticketer rejects and re-delegates.
 
-**Orchestrator RUG Rule (ReaperOAK):** The orchestrator NEVER performs
+**Orchestrator RUG Rule (Ticketer):** The orchestrator NEVER performs
 implementation work directly. All implementation is delegated via `runSubagent`
 and tracked via `manage_todo_list`. The orchestrator's RUG cycle outputs
 delegation packets — never source code.
@@ -59,7 +59,7 @@ own deliverable on a 1-10 scale across five dimensions:
 **Quality Gate:**
 - ALL dimensions must score ≥ 7 to submit.
 - If any score < 7, the agent MUST self-iterate (max 3 iterations).
-- After 3 iterations without passing, escalate to ReaperOAK with honest
+- After 3 iterations without passing, escalate to Ticketer with honest
   scores and specific blockers.
 
 **Output format:**
@@ -84,7 +84,7 @@ Every deliverable includes a confidence declaration:
 |-----------|-------|--------|
 | **High** | 90-100% | Proceed to next phase |
 | **Medium** | 70-89% | Proceed with flagged risks |
-| **Low** | 50-69% | Pause — request review from ReaperOAK |
+| **Low** | 50-69% | Pause — request review from Ticketer |
 | **Insufficient** | < 50% | Block — escalate with unknowns listed |
 
 **Format:**
@@ -127,7 +127,7 @@ Agents must provide **evidence** for every claim in their `<thought>` blocks:
 
 ### Anti-Laziness for Orchestrator
 
-ReaperOAK must also prove diligence in delegation:
+Ticketer must also prove diligence in delegation:
 
 | Claim | Required Evidence |
 |-------|-----------------|
@@ -222,14 +222,14 @@ When the agent's context feels stale or contradictory:
 1. Re-read the delegation packet
 2. Re-read systemPatterns.md
 3. Re-read the specific file being modified
-4. If still uncertain, request fresh delegation from ReaperOAK
+4. If still uncertain, request fresh delegation from Ticketer
 
 ---
 
 ## 6. Structured Autonomy Levels
 
 Each agent operates at one of three autonomy levels, set per-task by
-ReaperOAK in the delegation packet:
+Ticketer in the delegation packet:
 
 | Level | Name | Agent Can Do | Agent Must Ask |
 |-------|------|-------------|---------------|
@@ -240,7 +240,7 @@ ReaperOAK in the delegation packet:
 **Default:** L2 (Guided) unless explicitly elevated or restricted.
 
 **Autonomy escalation:** If an agent needs higher autonomy mid-task, they
-must request it from ReaperOAK with justification:
+must request it from Ticketer with justification:
 
 ```yaml
 autonomyRequest:
@@ -269,7 +269,7 @@ audit:
 ```
 
 These entries are appended to `activeContext.md` as a running log.
-ReaperOAK aggregates them for task-level and system-level quality dashboards.
+Ticketer aggregates them for task-level and system-level quality dashboards.
 
 ---
 
@@ -301,7 +301,7 @@ handoff:
 
 ### Sub-Agent Orchestration Patterns
 
-ReaperOAK follows these delegation rules:
+Ticketer follows these delegation rules:
 
 ```
 RULE 1: One file = One subagent
@@ -341,7 +341,7 @@ When an agent encounters a failure:
 Attempt 1: Retry with same approach, fresh context
 Attempt 2: Retry with alternative approach
 Attempt 3: Minimal viable output + detailed failure report
-After 3 failures: STOP. Report to ReaperOAK with:
+After 3 failures: STOP. Report to Ticketer with:
   - What was attempted (3 approaches)
   - What failed and why
   - Root cause hypothesis
@@ -423,7 +423,7 @@ Skills are discovered via **progressive loading**:
 
 ## 12. Specification Adherence Protocol
 
-Every task delegated by ReaperOAK includes acceptance criteria. Agents must
+Every task delegated by Ticketer includes acceptance criteria. Agents must
 demonstrate compliance with EVERY criterion — not just the ones they remember.
 
 ### Adherence Checklist
@@ -441,7 +441,7 @@ Before marking a task complete:
 
 ### Validation Subagent Pattern
 
-For critical tasks, ReaperOAK invokes a validation subagent:
+For critical tasks, Ticketer invokes a validation subagent:
 
 ```
 CONTEXT: {agent-name} has completed {task-id}

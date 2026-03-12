@@ -152,7 +152,7 @@ Clarity: ?/10 | Impact: ?/10 | TOTAL: ?/50
 
 ## 16. Delegation Input/Output Contract
 
-### Input (from ReaperOAK)
+### Input (from Ticketer)
 
 ```yaml
 taskId: string
@@ -169,7 +169,7 @@ dagNodeId: string
 dependencies: string[]
 ```
 
-### Output (to ReaperOAK)
+### Output (to Ticketer)
 
 ```yaml
 taskId: string
@@ -224,14 +224,14 @@ blockers: string[]
 
 ## 17. Escalation Triggers
 
-- Research question too broad → Request refinement from ReaperOAK
+- Research question too broad → Request refinement from Ticketer
 - Conflicting evidence cannot be resolved → Escalate with contradiction report
 - License incompatibility found → Escalate to Security + Architect
 - PoC reveals fundamental limitation → Escalate to Architect with data
 - Evidence insufficient for recommendation → Report "insufficient data" verdict
 - Security vulnerability in recommended library → Escalate to Security
 - Repo health score < 4 for recommended library → Escalate with risk assessment
-- Migration risk assessed as HIGH → Escalate to Architect + ReaperOAK
+- Migration risk assessed as HIGH → Escalate to Architect + Ticketer
 
 ## 18. Memory Bank Access
 

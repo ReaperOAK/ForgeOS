@@ -1,5 +1,5 @@
 ---
-source: "./.github/agents/ReaperOAK.agent.md"
+source: "./.github/agents/Ticketer.agent.md"
 chunk_index: 4
 token_estimate: 1450
 hash: "pending-rehash"
@@ -10,7 +10,7 @@ summary: "Parallel Execution Safety — file conflict detection algorithm, depen
 
 ## Task Conflict Detection Algorithm
 
-Before selecting N tasks for parallel execution in a cycle, ReaperOAK MUST
+Before selecting N tasks for parallel execution in a cycle, Ticketer MUST
 check for file conflicts:
 
 ```

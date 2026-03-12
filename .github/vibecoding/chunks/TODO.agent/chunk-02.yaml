@@ -24,13 +24,13 @@ REWORK → IMPLEMENTING (rework_count ≤ 3) | READY (rework_count > 3)
 | State | Meaning | Owner |
 |-------|---------|-------|
 | `READY` | All dependencies DONE, eligible for assignment | System (auto via dep check) |
-| `LOCKED` | Worker assigned from pool, lock acquired | ReaperOAK |
+| `LOCKED` | Worker assigned from pool, lock acquired | Ticketer |
 | `IMPLEMENTING` | Delegated to worker, work in progress | Assigned Worker |
 | `QA_REVIEW` | Implementation done, QA + Validator reviewing | QA Engineer + Validator |
 | `VALIDATION` | QA and Validator both passed | Validator (confirmation) |
 | `DOCUMENTATION` | Docs being updated by Documentation Specialist | Documentation Specialist |
 | `CI_REVIEW` | Documentation done, CI Reviewer checking lint/types/complexity | CI Reviewer |
-| `COMMIT` | CI passed, atomic commit being created | ReaperOAK |
+| `COMMIT` | CI passed, atomic commit being created | Ticketer |
 | `DONE` | Full lifecycle complete, worker released | System (final) |
 
 `REWORK` is a side state (failure path), not in the main progression.
@@ -81,7 +81,7 @@ finishes, this chain runs for EVERY ticket. No exceptions, no shortcuts.
 3. Validator → DoD enforcement (10 items verified) → APPROVED/REJECTED
 4. Documentation Specialist → artifact updates → confirms
 5. CI Reviewer → CI checks (lint, types, complexity) → PASS/REJECT
-6. ReaperOAK → commit enforcement → `git commit -m "[TICKET-ID] desc"`
+6. Ticketer → commit enforcement → `git commit -m "[TICKET-ID] desc"`
 7. TODO Agent → marks ticket DONE after all chain steps pass
 ```
 
@@ -109,13 +109,13 @@ A ticket reaches `DONE` ONLY when ALL of these are true:
 
 ### 4.1 Max-Task-Per-Cycle
 
-One ticket in IMPLEMENTING per agent per cycle (ticket locking via ReaperOAK).
+One ticket in IMPLEMENTING per agent per cycle (ticket locking via Ticketer).
 
 | Check Point | Enforcer | Action on Violation |
 |-------------|----------|-------------------|
 | DECOMPOSE output | TODO Agent | Split tasks further if any agent has > 1 |
-| Pre-delegation | ReaperOAK | Refuse delegation with > 1 task/agent |
-| Runtime | ReaperOAK | Track delegations per agent per cycle, hard-stop at 1 |
+| Pre-delegation | Ticketer | Refuse delegation with > 1 task/agent |
+| Runtime | Ticketer | Track delegations per agent per cycle, hard-stop at 1 |
 
 ### 4.2 Stall Detection
 
@@ -186,7 +186,7 @@ Default behavior: **STOP at L3. L4 is opt-in, not automatic.**
 | # | Trigger | Condition | Action |
 |---|---------|-----------|--------|
 | 1 | **High complexity** | Multi-file changes, cross-module deps, new patterns | Generate L4 for affected L3 tasks |
-| 2 | **Junior executor** | Explicitly stated by user or ReaperOAK | Generate L4 for all L3 tasks in scope |
+| 2 | **Junior executor** | Explicitly stated by user or Ticketer | Generate L4 for all L3 tasks in scope |
 | 3 | **Validator rejection** | Task rejected for insufficient clarity | Generate L4 for rejected task only |
 | 4 | **High bug risk** | Security-critical, data-handling, financial logic | Generate L4 for high-risk L3 tasks |
 
@@ -215,14 +215,14 @@ signals trigger `yes`:
 
 **Enforcement:** Frontend tasks with `UI Touching: yes` MUST have a
 UIDesigner task in their `depends_on` chain. If missing, the UI/UX Gate
-(run by ReaperOAK between DECOMPOSE and SPEC) will block the pipeline.
+(run by Ticketer between DECOMPOSE and SPEC) will block the pipeline.
 
 ## 8. Input/Output Contract
 
-**Input (from ReaperOAK):**
+**Input (from Ticketer):**
 
 ```yaml
-taskId: string             # ReaperOAK's delegation packet ID
+taskId: string             # Ticketer's delegation packet ID
 mode: string               # "strategic" | "planning" | "execution_planning"
 objective: string          # "Decompose feature X into granular tasks"
 featureDescription: string # Full feature description from user
@@ -232,7 +232,7 @@ maxTasksPerAgent: int      # Default: 3 (execution_planning mode only)
 targetAgents: string[]     # Agents that should receive tasks (optional)
 ```
 
-**Output (to ReaperOAK) — mode-specific:**
+**Output (to Ticketer) — mode-specific:**
 
 | Field | Strategic | Planning | Execution Planning |
 |-------|-----------|----------|-------------------|
@@ -266,7 +266,7 @@ After writing a TODO file, the TODO Agent must:
 3. Confirm no circular dependencies exist
 4. Confirm no agent has > 1 task per delegation cycle
 5. Confirm per-agent effort ≤ 90 min
-6. Return task summary + DAG to ReaperOAK
+6. Return task summary + DAG to Ticketer
 ```
 
 If `todo_visual.py` reports parsing errors, fix the task file before

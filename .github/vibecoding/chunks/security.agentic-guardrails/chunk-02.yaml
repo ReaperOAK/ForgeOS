@@ -132,7 +132,7 @@ securityPolicy:
 
 1. Security Agent loads policy at session start
 2. Policy is distributed to all agents via cross-cutting protocols
-3. ReaperOAK enforces policy during delegation and merge
+3. Ticketer enforces policy during delegation and merge
 4. Governance hooks validate policy compliance in real-time
 
 ### 12.3 Policy Override Protocol

@@ -254,7 +254,7 @@ Clarity: ?/10 | Impact: ?/10 | TOTAL: ?/50
 
 ## 16. Delegation Input/Output Contract
 
-### Input (from ReaperOAK)
+### Input (from Ticketer)
 
 ```yaml
 taskId: string
@@ -269,7 +269,7 @@ dagNodeId: string
 dependencies: string[]
 ```
 
-### Output (to ReaperOAK)
+### Output (to Ticketer)
 
 ```yaml
 taskId: string
@@ -330,7 +330,7 @@ blockers: string[]
 - Secret exposure in logs/code → P1 escalation to Security agent
 - Terraform plan shows destructive changes → Block + review
 - Container vulnerability (critical CVE) → Escalate to Security agent
-- Cost anomaly (> 2x expected) → Escalate to ReaperOAK
+- Cost anomaly (> 2x expected) → Escalate to Ticketer
 - Dependency service outage → Follow escalation matrix, notify affected teams
 - Chaos experiment reveals undocumented failure mode → Document + escalate
 

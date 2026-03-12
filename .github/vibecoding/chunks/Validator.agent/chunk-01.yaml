@@ -68,7 +68,7 @@ correctly. No state may be skipped; guard conditions must be satisfied.
 | State | What to Verify | Evidence Source |
 |-------|---------------|----------------|
 | READY | All dependencies DONE, eligible for assignment | Dependency check on TODO files |
-| LOCKED | Lock acquired by ReaperOAK, worker assigned | `workflow-state.json` lock fields |
+| LOCKED | Lock acquired by Ticketer, worker assigned | `workflow-state.json` lock fields |
 | IMPLEMENTING | Worker produced deliverables per acceptance criteria; no syntax errors | `git diff` output, file existence check |
 | QA_REVIEW | This is YOUR state — you are running validation now. QA has reviewed test coverage. | Current validation session, QA report |
 | VALIDATION | All DoD items pass; Validator verdict = APPROVED | DoD report at `docs/reviews/dod/` |
@@ -180,5 +180,5 @@ When evaluating evidence provided by agents, apply these rules:
 |-----------|---------|-----------------|
 | **HIGH** (90-100%) | All 10 items pass with strong evidence; no pattern deviations | Issue APPROVED |
 | **MEDIUM** (70-89%) | All items pass but some evidence is moderate; minor deviations | Issue APPROVED with advisory notes |
-| **LOW** (50-69%) | Some items have weak evidence; significant deviations | Re-run all checks; escalate ambiguity to ReaperOAK |
+| **LOW** (50-69%) | Some items have weak evidence; significant deviations | Re-run all checks; escalate ambiguity to Ticketer |
 | **INSUFFICIENT** (<50%) | Multiple items fail or evidence is missing | Issue REJECTED |

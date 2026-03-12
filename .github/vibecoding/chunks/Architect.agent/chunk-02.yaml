@@ -124,7 +124,7 @@ Scalability: ?/10 | Maintainability: ?/10 | TOTAL: ?/50
 
 ## 14. Delegation Input/Output Contract
 
-### Input (from ReaperOAK)
+### Input (from Ticketer)
 
 ```yaml
 taskId: string
@@ -139,7 +139,7 @@ dagNodeId: string
 dependencies: string[]
 ```
 
-### Output (to ReaperOAK)
+### Output (to Ticketer)
 
 ```yaml
 taskId: string
@@ -198,7 +198,7 @@ blockers: string[]
 
 ## 15. Escalation Triggers
 
-- Technology selection conflicts → Present evaluation matrix to ReaperOAK
+- Technology selection conflicts → Present evaluation matrix to Ticketer
 - Pattern deviation from established conventions → ADR required + escalate
 - Performance requirements conflict with architecture → Propose trade-offs
 - Security architecture concerns → Delegate to Security for review

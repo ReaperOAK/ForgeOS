@@ -237,7 +237,7 @@ exist at `docs/uiux/mockups/{feature-name}/`:
 3. **Blocking Gate:** UIDesigner task status may NOT advance past IMPLEMENTING
    until all 5 artifact types exist on disk
 4. **Frontend Dependency:** Frontend tasks with `UI Touching: yes` are BLOCKED
-   until all artifacts exist at the expected path — verified by ReaperOAK
+   until all artifacts exist at the expected path — verified by Ticketer
    before Frontend delegation
 5. **Versioning:** If designs are iterated, suffix with `-v2`, `-v3` etc.
    Keep previous versions (append-only)

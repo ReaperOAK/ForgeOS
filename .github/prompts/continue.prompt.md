@@ -45,7 +45,10 @@ python3 .github/tickets.py --sync
 python3 .github/tickets.py --status --json
 ```
 
-**1d.** Detect anomalies — scan `.github/ticket-state/*` for:
+**1d.** Verify boot sequence compliance — ensure agents follow the 11-step boot from `agents.md`:
+- STOP_ALL check → instructions → agent file (with Tool Loadout) → upstream summary → chunks → catalog → sequentialthinking plan
+
+**1e.** Detect anomalies — scan `.github/ticket-state/*` for:
 
 - Tickets stuck in: BACKEND, FRONTEND, QA, SECURITY, CI, DOCS, VALIDATION
   (need SDLC chain completion in Step 2)
@@ -55,7 +58,7 @@ python3 .github/tickets.py --status --json
   - Validator entry in `feedback-log.md` → needs Validator pass
   - Documentation entry → needs Documentation pass
 
-**1e.** Archive consumed resume artifacts:
+**1f.** Archive consumed resume artifacts:
 
 ```bash
 mkdir -p .github/memory-bank/archive
@@ -145,8 +148,8 @@ python3 .github/tickets.py --status --json
 
 **3c.** Dispatch workers — one `runSubagent` per READY ticket:
 
-ReaperOAK does NOT compute file conflicts or safe parallel groups.
-ReaperOAK performs the CLAIM commit before dispatching each subagent. Subagents only produce WORK commits.
+Ticketer does NOT compute file conflicts or safe parallel groups.
+Ticketer performs the CLAIM commit before dispatching each subagent. Subagents only produce WORK commits.
 Git push conflicts on the claim commit are the safety mechanism.
 
 ```
@@ -191,7 +194,7 @@ runSubagent("Frontend Engineer", prompt="
 | Task Decomposition | `"TODO"` |
 
 Launch all READY tickets. One ticket → one dispatcher CLAIM → one worker → one WORK commit.
-For N READY tickets, ReaperOAK claims each sequentially, then dispatches N workers in parallel (using N `runSubagent` calls). No grouping or batching logic. No dependency reasoning.
+For N READY tickets, Ticketer claims each sequentially, then dispatches N workers in parallel (using N `runSubagent` calls). No grouping or batching logic. No dependency reasoning.
 
 ---
 
@@ -281,9 +284,12 @@ This will produce `RESUME_POINT.md`, `SESSION_SUMMARY.md`, and
 - Do not rewrite stable components
 - Do not generate new roadmap unless explicitly requested
 - Maintain velocity and governance
-- ReaperOAK does NOT reason about file conflicts — git push conflicts enforce safety
-- ReaperOAK does NOT implement code — only dispatches and advances
+- Ticketer does NOT reason about file conflicts — git push conflicts enforce safety
+- Ticketer does NOT implement code — only dispatches and advances. Its toolset is restricted to `memory/*`, `execute/*`, `github/*`, and `sequentialthinking/*`
 - All agents read their own chunks from `.github/vibecoding/chunks/{Agent}.agent/`
-- All agents derive context from filesystem — ReaperOAK does NOT inject context
-- Dispatcher-claim protocol enforced: ReaperOAK performs CLAIM commit (ticket JSON) → subagent performs WORK commit (deliverables)
+- All agents derive context from filesystem — Ticketer does NOT inject context
+- All agents follow their Assigned Tool Loadout defined in `.github/agents/{Agent}.agent.md` — no tool browsing or hallucination outside assigned loadout
+- Dispatcher-claim protocol enforced: Ticketer performs CLAIM commit (ticket JSON) → subagent performs WORK commit (deliverables)
 - Scoped git only — no `git add .` / `git add -A` / `git add --all`
+- Each agent must invoke `sequentialthinking` to plan execution before touching any files
+- Agents use `oraios/serena/*` for code navigation and atomic edits — never generic `read_file` for large files

@@ -98,8 +98,8 @@ The Validator has the following enforcement powers:
 | Power | Description | Scope |
 |-------|-------------|-------|
 | **REJECT** | Reject any task that fails ANY blocking CHK item | All CHK-01 through CHK-10 |
-| **REQUEST REWORK** | Send task back to IMPLEMENTING with specific findings and CHK IDs | Via ReaperOAK routing |
-| **FORCE REVERT STATUS** | If post-completion audit finds violations, request ReaperOAK to revert task from DONE to REWORK | Requires evidence |
+| **REQUEST REWORK** | Send task back to IMPLEMENTING with specific findings and CHK IDs | Via Ticketer routing |
+| **FORCE REVERT STATUS** | If post-completion audit finds violations, request Ticketer to revert task from DONE to REWORK | Requires evidence |
 | **ESCALATE** | After 3 consecutive rejections of the same task, escalate to user | Automatic trigger |
 
 ### Guardrails on Authority
@@ -160,15 +160,15 @@ Post-DONE Audit:
   IF violations found in completed task
         │
         └── FORCE REVERT STATUS ──► DONE → REWORK
-                (requires written justification + ReaperOAK acknowledgment)
+                (requires written justification + Ticketer acknowledgment)
 ```
 
 ### Force Revert Protocol
 
 When a post-completion audit reveals violations:
 1. Validator writes a detailed audit report documenting findings.
-2. Validator requests ReaperOAK to revert the task status from DONE to REWORK.
-3. ReaperOAK acknowledges and processes the revert.
+2. Validator requests Ticketer to revert the task status from DONE to REWORK.
+3. Ticketer acknowledges and processes the revert.
 4. The task re-enters the SDLC inner loop at the appropriate stage.
 5. Standard rejection/rework rules apply from that point.
 

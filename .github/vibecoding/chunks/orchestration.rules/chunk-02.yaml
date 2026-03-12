@@ -17,7 +17,7 @@ summary: "- [ ] No forbidden actions were taken - [ ] Memory bank entries are pr
 
 ### Agent-to-Orchestrator Communication
 
-Subagents communicate with ReaperOAK ONLY through:
+Subagents communicate with Ticketer ONLY through:
 
 1. **Delegation output:** Structured YAML response matching the contract
 2. **Memory bank append:** Timestamped entries in `activeContext.md` or
@@ -28,7 +28,7 @@ Subagents communicate with ReaperOAK ONLY through:
 ### Inter-Agent Communication
 
 Agents do NOT communicate directly with each other. All coordination flows
-through ReaperOAK. This ensures:
+through Ticketer. This ensures:
 
 - Single source of truth for task state
 - No circular dependencies between agents

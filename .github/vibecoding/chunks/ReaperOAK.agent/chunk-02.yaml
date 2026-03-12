@@ -1,5 +1,5 @@
 ---
-source: "./.github/agents/ReaperOAK.agent.md"
+source: "./.github/agents/Ticketer.agent.md"
 chunk_index: 2
 token_estimate: 3937
 hash: "27f9c5210b649edc90e1217fb9d29c90bcd999d2be1200c96ba95b7118e72f35"
@@ -19,7 +19,7 @@ parallelExecution:
     agent: "Frontend"
     ownedFiles: ["src/components/**", "src/pages/**"]
     sharedReads: ["src/types/**"]
-  conflictStrategy: "ReaperOAK resolves at integration checkpoint"
+  conflictStrategy: "Ticketer resolves at integration checkpoint"
   mergeOrder: "taskA first (types may affect frontend)"
 ```
 
@@ -57,7 +57,7 @@ delegation:
 ```
 
 **Execution Cycle Lock Requirement:** Before sending any delegation packet,
-ReaperOAK must acquire a task lock for the target task. Each agent receives
+Ticketer must acquire a task lock for the target task. Each agent receives
 exactly 1 task per execution cycle. If the agent already holds a lock in
 the current cycle, the delegation is REJECTED and the task waits for the
 next cycle. See `.github/locks/task-lock-schema.json` for lock record format.
@@ -97,7 +97,7 @@ When subagent outputs conflict, apply this resolution protocol:
 
 | Conflict Type | Example | Resolution Strategy |
 |---------------|---------|-------------------|
-| **File conflict** | Two agents modified same file | ReaperOAK merges manually |
+| **File conflict** | Two agents modified same file | Ticketer merges manually |
 | **Design conflict** | Backend wants REST, Frontend wants GraphQL | Architect arbitrates |
 | **Priority conflict** | Security blocks feature, PM wants ship | Risk-based decision (§12) |
 | **Evidence conflict** | Research says X, Backend says Y | Evidence quality wins |
@@ -164,15 +164,15 @@ Memory bank files live in `.github/memory-bank/`:
 
 | File | Owner | Write Access | Purpose |
 |------|-------|-------------|---------|
-| `productContext.md` | ReaperOAK | ReaperOAK, PM | Project vision |
-| `systemPatterns.md` | ReaperOAK | ReaperOAK ONLY | Architecture decisions |
+| `productContext.md` | Ticketer | Ticketer, PM | Project vision |
+| `systemPatterns.md` | Ticketer | Ticketer ONLY | Architecture decisions |
 | `activeContext.md` | Shared | All (append) | Current focus |
 | `progress.md` | Shared | All (append) | Milestones |
-| `decisionLog.md` | ReaperOAK | ReaperOAK ONLY | Trade-off records |
-| `riskRegister.md` | Security | Security, ReaperOAK | Identified risks |
+| `decisionLog.md` | Ticketer | Ticketer ONLY | Trade-off records |
+| `riskRegister.md` | Security | Security, Ticketer | Identified risks |
 
 Immutability: `systemPatterns.md` and `decisionLog.md` are append-only by
-ReaperOAK. No subagent may delete or overwrite entries.
+Ticketer. No subagent may delete or overwrite entries.
 
 ### Decision Log Entry Template
 
@@ -190,7 +190,7 @@ decisionEntry:
   consequences: "What becomes easier/harder"
   confidence: 85
   revisitTrigger: "When should this decision be reconsidered"
-  decidedBy: "ReaperOAK"
+  decidedBy: "Ticketer"
 ```
 
 ## 3.3 Handoff Contract

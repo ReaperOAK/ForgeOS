@@ -192,11 +192,11 @@ Validator approval (DOD-07 verdict) is required before VALIDATION state.
 2. Agent self-assesses DOD-01 through DOD-06, DOD-08 through DOD-10
 3. Agent sets DOD-07 = false (cannot self-verify)
 4. Agent writes DoD report to docs/reviews/dod/{TASK_ID}-dod.yaml
-5. ReaperOAK delegates to Validator at VALIDATION stage
+5. Ticketer delegates to Validator at VALIDATION stage
 6. Validator independently verifies ALL 10 items
 7. Validator sets verdict = APPROVED or REJECTED
 8. If REJECTED → Validator lists failing items in rejection_reasons[]
-9. ReaperOAK reads verdict and routes accordingly (rework or proceed)
+9. Ticketer reads verdict and routes accordingly (rework or proceed)
 ```
 
 ## `dod_checklist` Field Mapping (delegation-packet-schema.json)

@@ -24,8 +24,8 @@
     },
     "issued_by": {
       "type": "string",
-      "const": "ReaperOAK",
-      "description": "Only ReaperOAK may issue delegation packets"
+      "const": "Ticketer",
+      "description": "Only Ticketer may issue delegation packets"
     },
     "issued_at": {
       "type": "string",
@@ -52,7 +52,11 @@
     },
     "autonomy_level": {
       "type": "string",
-      "enum": ["L1", "L2", "L3"],
+      "enum": [
+        "L1",
+        "L2",
+        "L3"
+      ],
       "description": "L1=Supervised, L2=Guided, L3=Autonomous"
     },
     "objective": {
@@ -62,23 +66,31 @@
     },
     "success_criteria": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "minItems": 1,
       "description": "List of verifiable success criteria"
     },
     "allowed_write_paths": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "description": "Glob patterns for writable paths"
     },
     "forbidden_paths": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "description": "Glob patterns for forbidden paths"
     },
     "input_artifacts": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "description": "File references the agent should read"
     },
     "max_token_budget": {
@@ -88,7 +100,10 @@
       "description": "Maximum token consumption allowed"
     },
     "deadline_ts": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "format": "date-time",
       "description": "ISO8601 deadline or null for no deadline"
     },
@@ -128,10 +143,14 @@
     "context_budget": {
       "type": "object",
       "properties": {
-        "total_tokens": { "type": "integer" },
+        "total_tokens": {
+          "type": "integer"
+        },
         "priority_files": {
           "type": "array",
-          "items": { "type": "string" }
+          "items": {
+            "type": "string"
+          }
         }
       }
     },
@@ -143,104 +162,218 @@
     },
     "phase": {
       "type": "string",
-      "enum": ["DECOMPOSE", "SPEC", "BUILD", "VALIDATE", "GATE", "DOCUMENT", "RETROSPECTIVE"],
+      "enum": [
+        "DECOMPOSE",
+        "SPEC",
+        "BUILD",
+        "VALIDATE",
+        "GATE",
+        "DOCUMENT",
+        "RETROSPECTIVE"
+      ],
       "description": "Current SDLC phase this delegation belongs to"
     },
     "upstream_artifacts": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "description": "File paths from prior phases that agent MUST read before starting"
     },
     "todo_task_id": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^[A-Z][A-Z0-9-]*\\d{3,4}$",
       "description": "Specific TODO task ID this delegation executes. Null for DECOMPOSE-phase delegations."
     },
     "todo_acceptance_criteria": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "description": "Verifiable acceptance criteria copied from the TODO task"
     },
     "mcp_grants": {
       "type": "array",
-      "items": { "type": "string" },
+      "items": {
+        "type": "string"
+      },
       "description": "MCP server prefixes granted for this task (e.g., 'stitch/', 'playwright/')"
     },
     "fix_loop_context": {
       "type": "object",
       "properties": {
-        "iteration": { "type": "integer", "minimum": 1, "maximum": 3 },
-        "review_report": { "type": "string", "description": "Path to the review report with findings to fix" },
-        "specific_findings": { "type": "array", "items": { "type": "string" } }
+        "iteration": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3
+        },
+        "review_report": {
+          "type": "string",
+          "description": "Path to the review report with findings to fix"
+        },
+        "specific_findings": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
       },
       "description": "Present only in fix-loop re-delegations (BUILD phase after VALIDATE failure)"
     },
     "output_contract": {
       "type": "object",
       "properties": {
-        "deliverables_dir": { "type": "string" },
-        "required_files": { "type": "array", "items": { "type": "string" } },
-        "quality_threshold": { "type": "number", "minimum": 0, "maximum": 10 }
+        "deliverables_dir": {
+          "type": "string"
+        },
+        "required_files": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "quality_threshold": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 10
+        }
       },
       "description": "Structured output expectations for the agent"
     },
     "sdlc_stage": {
-      "type": ["string", "null"],
-      "enum": ["READY", "LOCKED", "IMPLEMENTING", "QA_REVIEW", "VALIDATION", "DOCUMENTATION", "CI_REVIEW", "COMMIT", "DONE", "REWORK", null],
+      "type": [
+        "string",
+        "null"
+      ],
+      "enum": [
+        "READY",
+        "LOCKED",
+        "IMPLEMENTING",
+        "QA_REVIEW",
+        "VALIDATION",
+        "DOCUMENTATION",
+        "CI_REVIEW",
+        "COMMIT",
+        "DONE",
+        "REWORK",
+        null
+      ],
       "description": "Current ticket state in the 9-state machine. Null if not yet assigned."
     },
     "dod_checklist": {
-      "type": ["object", "null"],
+      "type": [
+        "object",
+        "null"
+      ],
       "properties": {
-        "code_implemented": { "type": "boolean" },
-        "tests_written": { "type": "boolean" },
-        "lint_passes": { "type": "boolean" },
-        "type_checks_pass": { "type": "boolean" },
-        "ci_passes": { "type": "boolean" },
-        "docs_updated": { "type": "boolean" },
-        "validator_reviewed": { "type": "boolean" },
-        "no_console_errors": { "type": "boolean" },
-        "no_unhandled_promises": { "type": "boolean" },
-        "no_todo_comments": { "type": "boolean" }
+        "code_implemented": {
+          "type": "boolean"
+        },
+        "tests_written": {
+          "type": "boolean"
+        },
+        "lint_passes": {
+          "type": "boolean"
+        },
+        "type_checks_pass": {
+          "type": "boolean"
+        },
+        "ci_passes": {
+          "type": "boolean"
+        },
+        "docs_updated": {
+          "type": "boolean"
+        },
+        "validator_reviewed": {
+          "type": "boolean"
+        },
+        "no_console_errors": {
+          "type": "boolean"
+        },
+        "no_unhandled_promises": {
+          "type": "boolean"
+        },
+        "no_todo_comments": {
+          "type": "boolean"
+        }
       },
       "additionalProperties": false,
       "description": "Definition of Done checklist status. Null until QA_REVIEW state."
     },
     "initialization_checklist": {
-      "type": ["object", "null"],
+      "type": [
+        "object",
+        "null"
+      ],
       "properties": {
-        "directory_structure": { "type": "boolean" },
-        "linter_formatter": { "type": "boolean" },
-        "tsconfig": { "type": "boolean" },
-        "test_framework": { "type": "boolean" },
-        "env_documented": { "type": "boolean" },
-        "health_check": { "type": "boolean" },
-        "logging": { "type": "boolean" },
-        "error_boundaries": { "type": "boolean" },
-        "error_tracking": { "type": "boolean" }
+        "directory_structure": {
+          "type": "boolean"
+        },
+        "linter_formatter": {
+          "type": "boolean"
+        },
+        "tsconfig": {
+          "type": "boolean"
+        },
+        "test_framework": {
+          "type": "boolean"
+        },
+        "env_documented": {
+          "type": "boolean"
+        },
+        "health_check": {
+          "type": "boolean"
+        },
+        "logging": {
+          "type": "boolean"
+        },
+        "error_boundaries": {
+          "type": "boolean"
+        },
+        "error_tracking": {
+          "type": "boolean"
+        }
       },
       "additionalProperties": false,
       "description": "Project initialization checklist. Null for non-initialization tasks."
     },
     "ticket_id": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "pattern": "^TICKET-\\d{4}$",
       "description": "Ticket ID from the distributed ticket state machine. Null for non-ticket delegations."
     },
     "operator": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "description": "Human operator name (e.g., 'Owais', 'Sujal') running this machine."
     },
     "machine_id": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "description": "Machine hostname or identifier for distributed execution tracking."
     },
     "upstream_summary_path": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "description": "Path to the upstream agent summary file in .github/agent-output/{Agent}/{ticket-id}.md"
     },
     "expected_summary_output": {
-      "type": ["string", "null"],
+      "type": [
+        "string",
+        "null"
+      ],
       "description": "Expected path for this agent's summary output in .github/agent-output/{Agent}/{ticket-id}.md"
     },
     "lease_duration_minutes": {

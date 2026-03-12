@@ -54,7 +54,7 @@ Fairness: ?/10 | Actionability: ?/10 | TOTAL: ?/50
 
 ## 12. Delegation Input/Output Contract
 
-### Input (from ReaperOAK)
+### Input (from Ticketer)
 
 ```yaml
 taskId: string
@@ -75,7 +75,7 @@ dagNodeId: string
 dependencies: string[]
 ```
 
-### Output (to ReaperOAK)
+### Output (to Ticketer)
 
 ```yaml
 taskId: string

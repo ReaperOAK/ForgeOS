@@ -29,20 +29,20 @@ RULE: Agents derive context ONLY from:
 4. Instruction files (`.github/instructions/`)
 5. Agent chunk files (`.github/vibecoding/chunks/{Agent}.agent/`)
 
-PROHIBITED: Expecting context injection from ReaperOAK.
+PROHIBITED: Expecting context injection from Ticketer.
 Allowed: Reading other agents' summaries outside the chain.
 RULE: Context is filesystem-derived. Period.
 
-## 3. ReaperOAK Dispatcher Contract
+## 3. Ticketer Dispatcher Contract
 
-RULE: ReaperOAK is a stateless dispatcher.
+RULE: Ticketer is a stateless dispatcher.
 
-REQUIRED: ReaperOAK behavior:
+REQUIRED: Ticketer behavior:
 1. Scan `.github/ticket-state/READY/`
 2. For each ticket, call the correct subagent
 3. Stop when no READY tickets exist
 
-PROHIBITED for ReaperOAK:
+PROHIBITED for Ticketer:
 - Analyzing code
 - Computing file overlap
 - Computing safe parallel sets
@@ -53,9 +53,9 @@ PROHIBITED for ReaperOAK:
 - Reading/modifying files 
 - Running build/test commands
 
-RULE: ReaperOAK calls one subagent per READY ticket.
+RULE: Ticketer calls one subagent per READY ticket.
 RULE: No grouping logic. No dependency reasoning. No conflict analysis.
-RULE: Git + tickets.py enforce safety. Not ReaperOAK.
+RULE: Git + tickets.py enforce safety. Not Ticketer.
 
 ## 4. Stage Ownership
 
@@ -84,8 +84,8 @@ PROHIBITED: Modifying files outside ticket scope.
 PROHIBITED: `git add .` / `git add -A` / `git add --all`
 PROHIBITED: Force pushing or deleting branches.
 PROHIBITED: Deploying to any environment. (allowed for DevOps agent)
-PROHIBITED: Modifying `systemPatterns.md` (except ReaperOAK and Documentation agent).
-PROHIBITED: Modifying `decisionLog.md` (except ReaperOAK and Documentation agent).
+PROHIBITED: Modifying `systemPatterns.md` (except Ticketer and Documentation agent).
+PROHIBITED: Modifying `decisionLog.md` (except Ticketer and Documentation agent).
 PROHIBITED: Processing unclaimed tickets.
 PROHIBITED: Holding claims on multiple tickets per agent instance.
 

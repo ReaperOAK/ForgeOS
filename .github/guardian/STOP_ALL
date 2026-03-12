@@ -3,7 +3,7 @@
 # When this file contains the line "STOP" below, ALL agents MUST:
 # 1. Immediately cease heavy operations (writes, deploys, tests)
 # 2. Save current state to claim files
-# 3. Report status to ReaperOAK
+# 3. Report status to Ticketer
 # 4. Wait for human clearance before resuming
 #
 # To activate: Add "STOP" on a line by itself below the delimiter

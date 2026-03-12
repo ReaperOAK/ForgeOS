@@ -1,7 +1,7 @@
 ---
 id: summarization-spec
 version: "1.0"
-locked_by: ReaperOAK
+locked_by: Ticketer
 ---
 
 # Summarization & Token Economy
@@ -56,7 +56,7 @@ dense summaries without losing critical decision chains.
 ### activeContext.md Compaction
 - Entries older than 50 items archived to `activeContext.archive.md`
 - Archived entries replaced with summary_128 reference
-- Only ReaperOAK may perform compaction
+- Only Ticketer may perform compaction
 - Archive format: timestamped markdown with original entries verbatim
 
 ### decisionLog.md Compaction
@@ -87,5 +87,5 @@ dense summaries without losing critical decision chains.
 ### Cost Tracking
 - Every agent logs token_input and token_output per tool call
 - Cumulative tracked in claim file
-- ReaperOAK monitors session-wide aggregate
+- Ticketer monitors session-wide aggregate
 - Reports generated at session end with per-agent breakdown
