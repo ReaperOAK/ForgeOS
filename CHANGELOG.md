@@ -8,6 +8,19 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Migration Phase D — Filesystem Deprecated** (FORGEOS-BE076) — `PhaseD`
+  at `mcp-server/src/mcp_server/migration/phases/phase_d.py` implements the
+  final migration phase. The filesystem ticket state is fully deprecated and
+  the database becomes the sole source of truth. Sync engine, dual-mode
+  wrapper, and SDK filesystem fallback are deactivated. Feature flags collapse
+  to `migration_complete=true`. `FilesystemDeprecationInterceptor` logs
+  warnings when filesystem ticket operations are attempted. `MigrationReport`
+  dataclass captures total operations, error rate, and migration duration.
+  `MigrationCleanup` at `mcp-server/src/mcp_server/migration/cleanup.py`
+  archives `.github/ticket-state/` and `.github/tickets/` to a timestamped
+  directory with verification support. Non-destructive: files are moved, not
+  deleted. 51 tests, 98% coverage, CI quality score 95/100.
+
 - **Active Claims Monitor** (FORGEOS-FE008) — `/claims` page at
   `dashboard/src/app/claims/page.tsx` showing all currently claimed tickets
   in a sortable table with real-time lease countdown timers.

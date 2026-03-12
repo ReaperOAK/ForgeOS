@@ -100,10 +100,8 @@ class MigrationCleanup:
     Moves ``.github/ticket-state/`` and ``.github/tickets/`` into a
     timestamped subdirectory of ``archive_dir``.
 
-    Parameters
-    ----------
-    config:
-        Cleanup configuration with source and destination paths.
+    Args:
+        config: Cleanup configuration with source and destination paths.
     """
 
     def __init__(self, config: CleanupConfig) -> None:
@@ -230,13 +228,13 @@ class MigrationCleanup:
     async def verify_archive(self, archive_path: str) -> dict[str, Any]:
         """Verify an archive exists and contains expected content.
 
-        Parameters
-        ----------
-        archive_path:
-            Path to the archive directory to verify.
+        Args:
+            archive_path: Path to the archive directory to verify.
 
         Returns:
-            Dict with verification results.
+            Dict with verification results including ``valid``,
+            ``archive_path``, ``ticket_state_archived``,
+            ``tickets_archived``, and ``total_files``.
         """
         path = Path(archive_path)
         if not path.exists():

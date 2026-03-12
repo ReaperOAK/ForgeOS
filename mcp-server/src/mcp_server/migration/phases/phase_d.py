@@ -155,12 +155,10 @@ class FilesystemDeprecationInterceptor:
     def intercept(self, operation: str, ticket_id: str = "") -> None:
         """Log a deprecation warning for a filesystem operation attempt.
 
-        Parameters
-        ----------
-        operation:
-            The operation that was attempted (e.g. ``"claim"``, ``"sync"``).
-        ticket_id:
-            The ticket involved, if applicable.
+        Args:
+            operation: The operation that was attempted
+                (e.g. ``"claim"``, ``"sync"``).
+            ticket_id: The ticket involved, if applicable.
         """
         self._warning_count += 1
         logger.warning(
@@ -181,13 +179,11 @@ class FilesystemDeprecationInterceptor:
 class PhaseD:
     """Migration Phase D — filesystem fully deprecated, database only.
 
-    Parameters
-    ----------
-    config:
-        Phase D configuration.
-    deprecation_interceptor:
-        Optional interceptor for filesystem deprecation warnings.
-        If ``None``, a default instance is created.
+    Args:
+        config: Phase D configuration.
+        deprecation_interceptor: Optional interceptor for filesystem
+            deprecation warnings.  If ``None``, a default instance
+            is created.
     """
 
     def __init__(
@@ -330,17 +326,12 @@ class PhaseD:
     ) -> None:
         """Emit a deprecation warning for a filesystem ticket operation.
 
-        Parameters
-        ----------
-        operation:
-            The operation that was attempted.
-        ticket_id:
-            The ticket involved, if applicable.
+        Args:
+            operation: The operation that was attempted.
+            ticket_id: The ticket involved, if applicable.
 
-        Raises
-        ------
-        RuntimeError
-            If Phase D is not active.
+        Raises:
+            RuntimeError: If Phase D is not active.
         """
         if self._status != PhaseDStatus.ACTIVE:
             raise RuntimeError(
