@@ -1,7 +1,7 @@
-### [FORGEOS-FE008] — Documentation Complete
-- **Artifacts:** CHANGELOG.md, dashboard/README.md, dashboard/src/app/claims/page.tsx, dashboard/src/components/claims/ClaimsTable.tsx, .github/agent-output/Documentation/FORGEOS-FE008.md
-- **Decisions:** Added Active Claims Monitor section to dashboard README with component table, behavior, LeaseCountdown states, accessibility, and data types. JSDoc/TSDoc on all public exports. CHANGELOG entry added.
-- **Timestamp:** 2026-03-12T12:00:00Z
+### [FORGEOS-FE008] — Validation APPROVED
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-FE008.md
+- **Decisions:** APPROVED — 11/11 DoD pass, 7/7 AC verified, 68/68 tests pass, lint clean, tsc clean
+- **Timestamp:** 2026-03-12T15:30:00Z
 
 ### [FORGEOS-FE010] — Documentation Complete
 - **Artifacts:** CHANGELOG.md, dashboard/README.md, dashboard/src/components/machines/MachineCard.tsx, .github/agent-output/Documentation/FORGEOS-FE010.md
@@ -2240,3 +2240,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Security/FORGEOS-BE076.md
 - **Decisions:** PASS — 0 critical, 0 high, 2 info findings (TOCTOU race mitigated, read-only path accepted). STRIDE max score 6/25. OWASP 10/10 checked. Confidence HIGH.
 - **Timestamp:** 2026-03-12T18:00:00Z
+
+### [FORGEOS-FE010] — Validation APPROVED
+- **Artifacts:** .github/agent-output/Validator/FORGEOS-FE010.md
+- **Decisions:** APPROVED — 11/11 DoD pass, 7/7 AC verified, 46/46 tests pass, lint clean, tsc clean, all upstream PASS
+- **Timestamp:** 2026-03-12T21:00:00Z
