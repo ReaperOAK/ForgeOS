@@ -2125,3 +2125,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-FE012.md
 - **Decisions:** APPROVED — 11/11 DoD pass, 7/7 AC verified, 49/49 tests pass, lint clean (2 systemic eslint config warnings noted), tsc clean
 - **Timestamp:** 2026-03-11T22:30:00Z
+
+### [FORGEOS-BE078] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE078.md
+- **Decisions:** PASS — 0 critical/high findings, 1 LOW (SEC-001 CWE-532 exception message logging, mitigated by SensitiveDataFilter)
+- **Timestamp:** 2026-03-12T14:10:00Z
+
+### [FORGEOS-BE079] — Security Review
+- **Artifacts:** .github/agent-output/Security/FORGEOS-BE079.md
+- **Decisions:** PASS — 0 critical/high findings, 2 LOW (SEC-BE079-001 CWE-778 print() logging, SEC-BE079-002 CWE-209 exception detail logging)
+- **Timestamp:** 2026-03-12T14:10:00Z

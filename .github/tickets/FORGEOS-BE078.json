@@ -4,7 +4,7 @@
   "description": "Implement automated rollback triggers that revert the migration to a previous phase when health checks fail. Monitor MCP server health, database connectivity, and operation success rates. If the MCP server is unreachable for >5 minutes, or if operation error rate exceeds 10% over a rolling 15-minute window, automatically trigger a rollback: switch feature flags to the previous phase's configuration and activate the database-to-filesystem export (FORGEOS-BE072). Emit alerts for human operator awareness.",
   "type": "backend",
   "priority": "high",
-  "stage": "QA",
+  "stage": "CI",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -36,10 +36,10 @@
     "Rollback event logged with trigger reason, previous phase, new phase, and timestamp"
   ],
   "rework_count": 0,
-  "claimed_by": "Security",
-  "machine_id": "pop-os",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-12T13:50:27.971674",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -82,6 +82,15 @@
       "from_stage": "BACKEND",
       "to_stage": "QA",
       "details": "Advanced from BACKEND to QA"
+    },
+    {
+      "timestamp": "2026-03-12T07:54:19.623742+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "reaperoak-dev",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "SECURITY PASS \u2014 0 critical/high, 1 LOW (SEC-001 CWE-532). Advanced to CI."
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",
@@ -95,5 +104,5 @@
     "phase4",
     "BLK-11-02"
   ],
-  "current_stage": "SECURITY"
+  "current_stage": "CI"
 }
