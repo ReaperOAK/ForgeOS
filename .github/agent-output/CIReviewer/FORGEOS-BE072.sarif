@@ -1,0 +1,40 @@
+{
+  "$schema": "https://schemastore.azurewebsites.net/schemas/json/sarif-2.1.0-rtm.5.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CIReviewer",
+          "version": "2026.03.11",
+          "informationUri": "https://github.com/ForgeOS/ci-reviewer",
+          "rules": [
+            {
+              "id": "TC003",
+              "name": "Type-checking import grouping",
+              "shortDescription": {"text": "Standard library imports should be grouped in type-checking blocks if only used for type hints."},
+              "fullDescription": {"text": "Move standard library import 'pathlib.Path' into a type-checking block if only used for type hints."},
+              "helpUri": "https://docs.astral.sh/ruff/rules/TC003/",
+              "properties": {"category": "lint"}
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "TC003",
+          "level": "warning",
+          "message": {"text": "Move standard library import 'pathlib.Path' into a type-checking block."},
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {"uri": "mcp-server/src/mcp_server/migration/exporter.py"},
+                "region": {"startLine": 20, "startColumn": 1}
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
