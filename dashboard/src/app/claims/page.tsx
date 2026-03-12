@@ -51,71 +51,71 @@ export default function ClaimsPage() {
                 // Silently handle — WebSocket will populate data
             } finally {
                 if (!cancelled) setIsLoading(false);
-      }
-    }
+            }
+        }
 
-    loadClaims();
-    return () => { cancelled = true; };
-  }, []);
+        loadClaims();
+        return () => { cancelled = true; };
+    }, []);
 
-  // Handle real-time WebSocket updates
-  const handleTicketUpdate = useCallback((ticket: Ticket) => {
-    setClaims((prev) => {
-      const next = new Map(prev);
-      const row = ticketToClaimRow(ticket);
+    // Handle real-time WebSocket updates
+    const handleTicketUpdate = useCallback((ticket: Ticket) => {
+        setClaims((prev) => {
+            const next = new Map(prev);
+            const row = ticketToClaimRow(ticket);
 
-      if (row) {
-        next.set(row.ticketId, row);
-      } else {
-        // Ticket is no longer claimed — remove from table
-        next.delete(ticket.ticket_id);
-      }
+            if (row) {
+                next.set(row.ticketId, row);
+            } else {
+                // Ticket is no longer claimed — remove from table
+                next.delete(ticket.ticket_id);
+            }
 
-      return next;
+            return next;
+        });
+    }, []);
+
+    const { status: wsStatus } = useTicketStream({
+        onTicketUpdate: handleTicketUpdate,
     });
-  }, []);
 
-  const { status: wsStatus } = useTicketStream({
-    onTicketUpdate: handleTicketUpdate,
-  });
+    const handleSort = useCallback((field: SortField) => {
+        setSortField((prev) => {
+            if (prev === field) {
+                setSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'));
+                return prev;
+            }
+            setSortDirection('asc');
+            return field;
+        });
+    }, []);
 
-  const handleSort = useCallback((field: SortField) => {
-    setSortField((prev) => {
-      if (prev === field) {
-        setSortDirection((d) => (d === 'asc' ? 'desc' : 'asc'));
-        return prev;
-      }
-      setSortDirection('asc');
-      return field;
-    });
-  }, []);
+    const claimRows = Array.from(claims.values());
 
-  const claimRows = Array.from(claims.values());
-
-  return (
-    <div>
-      <div className="flex items-center justify-between mb-6">
+    return (
         <div>
-          <h1 className="text-2xl font-bold flex items-center gap-2">
-            <Clock size={24} aria-hidden="true" />
-            Active Claims
-          </h1>
-          <p className="text-sm text-muted mt-1">
-            {isLoading
-              ? 'Loading claims…'
-              : `${claimRows.length} active claim${claimRows.length !== 1 ? 's' : ''}`}
-          </p>
-        </div>
-        <ConnectionStatusIndicator status={wsStatus} />
-      </div>
+            <div className="flex items-center justify-between mb-6">
+                <div>
+                    <h1 className="text-2xl font-bold flex items-center gap-2">
+                        <Clock size={24} aria-hidden="true" />
+                        Active Claims
+                    </h1>
+                    <p className="text-sm text-muted mt-1">
+                        {isLoading
+                            ? 'Loading claims…'
+                            : `${claimRows.length} active claim${claimRows.length !== 1 ? 's' : ''}`}
+                    </p>
+                </div>
+                <ConnectionStatusIndicator status={wsStatus} />
+            </div>
 
-      <ClaimsTable
-        claims={claimRows}
-        sortField={sortField}
-        sortDirection={sortDirection}
-        onSort={handleSort}
-        isLoading={isLoading}
-      />
-    </div>
-  );
+            <ClaimsTable
+                claims={claimRows}
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={handleSort}
+                isLoading={isLoading}
+            />
+        </div>
+    );
 }
