@@ -2160,3 +2160,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** dashboard/src/app/machines/page.tsx, dashboard/src/components/machines/MachineCard.tsx, dashboard/src/components/machines/AgentList.tsx, dashboard/src/components/Sidebar.tsx
 - **Decisions:** Derived machine data from claimed tickets aggregated by machine_id. Used existing TicketWebSocketClient for real-time. 10-min heartbeat threshold. Added "Machines" nav to Sidebar with Monitor icon.
 - **Timestamp:** 2026-03-12T01:00:00Z
+
+### [FORGEOS-BE079] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE079.md, .github/agent-output/CIReviewer/FORGEOS-BE079.sarif
+- **Decisions:** PASS — Score 78/100, 0 critical, 4 warnings (F541 lint, mypy arg-type, complexity in main/execute_work_commit). runner_adapter.py pristine. 17/17 tests, 94% coverage.
+- **Timestamp:** 2026-03-12T15:30:00Z
+
+### [FORGEOS-BE075] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/FORGEOS-BE075.md
+- **Decisions:** PASS — Score 92/100, 0 critical, 1 warning (OC-007 class size). 29/29 tests, 100% coverage, lint clean, mypy clean.
+- **Timestamp:** 2026-03-12T15:30:00Z
