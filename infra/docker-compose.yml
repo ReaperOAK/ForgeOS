@@ -39,14 +39,13 @@ services:
       # Performance tuning for development workloads
       POSTGRES_INITDB_ARGS: "--encoding=UTF8 --locale=C"
     healthcheck:
-      test: ["CMD", "sh", "/usr/local/bin/check-postgres.sh"]
+      test: [ "CMD", "sh", "/usr/local/bin/check-postgres.sh" ]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 30s
     volumes:
       - pgdata:/var/lib/postgresql/data
-      - ../forgeos-server/src/db/migrations:/docker-entrypoint-initdb.d:ro
       - ./docker/healthchecks/check-postgres.sh:/usr/local/bin/check-postgres.sh:ro
     secrets:
       - db_password
@@ -83,16 +82,17 @@ services:
     container_name: forgeos-mcp
     hostname: mcp-server
     environment:
-      DATABASE_URL: "postgresql://forgeos@postgres:5432/forgeos"
+      DATABASE_URL: "postgresql://forgeos:${DB_PASSWORD:-forgeos_dev}@postgres:5432/forgeos"
       PORT: "3000"
-      NODE_ENV: production
+      NODE_ENV: "${NODE_ENV:-development}"
       LOG_LEVEL: info
       ADMIN_API_KEY: "${ADMIN_API_KEY:-forgeos_admin_CHANGE_ME}"
+      WEBHOOK_SECRET: "${WEBHOOK_SECRET:-dev_webhook_secret}"
       DEFAULT_LEASE_MINUTES: "30"
       MAX_LEASE_MINUTES: "120"
       RECONCILIATION_INTERVAL: "300"
     healthcheck:
-      test: ["CMD", "sh", "/app/check-mcp.sh"]
+      test: [ "CMD", "sh", "/app/check-mcp.sh" ]
       interval: 15s
       timeout: 5s
       retries: 3
@@ -139,7 +139,7 @@ services:
       PGADMIN_LISTEN_PORT: "5050"
       PGADMIN_CONFIG_SERVER_MODE: "True"
     healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5050/misc/ping"]
+      test: [ "CMD", "wget", "--spider", "-q", "http://localhost:5050/misc/ping" ]
       interval: 30s
       timeout: 10s
       retries: 3

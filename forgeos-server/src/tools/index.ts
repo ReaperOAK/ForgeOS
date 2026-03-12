@@ -16,6 +16,8 @@ import { ticketsSpawnSchema, ticketsSpawnHandler } from './tickets-spawn.js';
 import { ticketsCompleteSchema, ticketsCompleteHandler } from './tickets-complete.js';
 import { ticketsExtendSchema, ticketsExtendHandler } from './tickets-extend.js';
 import { ticketsUpdateSchema, ticketsUpdateHandler } from './tickets-update.js';
+import { ticketsReleaseSchema, ticketsReleaseHandler } from './tickets-release.js';
+import { ticketsStatsSchema, ticketsStatsHandler } from './tickets-stats.js';
 
 /**
  * Register all MCP tools on the server.
@@ -78,5 +80,21 @@ export function registerTools(server: McpServer): void {
     'Update metadata on a claimed ticket. Only the current claim owner can update. Merges metadata using jsonb || operator.',
     ticketsUpdateSchema.shape,
     async (params) => ticketsUpdateHandler(params),
+  );
+
+  // ── tickets.release ──────────────────────────────────────────────────────
+  server.tool(
+    'tickets.release',
+    'Release a claim on a ticket. Normal release requires claim ownership. Force release (admin) can release any claim.',
+    ticketsReleaseSchema.shape,
+    async (params) => ticketsReleaseHandler(params),
+  );
+
+  // ── tickets.stats ────────────────────────────────────────────────────────
+  server.tool(
+    'tickets.stats',
+    'Get aggregate system statistics: per-stage counts, per-status counts, claim health, average time-in-stage, rework distribution.',
+    ticketsStatsSchema.shape,
+    async (params) => ticketsStatsHandler(params),
   );
 }

@@ -59,8 +59,6 @@ The runtime infrastructure consists of:
 - **PostgreSQL 17** — Primary data store with Row-Level Security, stored
   functions for atomic ticket operations, event-sourcing audit trail, and
   `LISTEN/NOTIFY` for real-time Server-Sent Events.
-- **Python MCP Server** (`mcp-server/`) — Alternative MCP server built on
-  the official Python SDK with FastMCP, asyncpg, and Pydantic.
 - **Real-Time Dashboard** — Live Kanban board at
   **http://localhost:3000/dashboard** with SSE-driven updates, stage
   filtering, and ticket detail views.
@@ -492,11 +490,6 @@ forgeos-server/            TypeScript MCP Server (Express + PostgreSQL 17)
   docker-compose.yml       PostgreSQL + PgBouncer + MCP Server
   Dockerfile               Multi-stage Docker build
 
-mcp-server/                Python MCP Server (FastMCP + asyncpg + Pydantic)
-  src/mcp_server/          Server, tools, config, error hierarchy
-  alembic/                 PostgreSQL schema migrations
-  tests/                   Pytest test suite
-
 dashboard/                 Next.js 14+ dashboard (App Router + Tailwind CSS)
   src/app/                 App Router pages (overview, health check)
   src/components/          React components (sidebar, metric cards, etc.)
@@ -807,22 +800,20 @@ representative tickets across 6 types (`architecture`, `backend`, `docs`,
 
 The MCP Server CI workflow (`.github/workflows/mcp-server-ci.yml`) runs
 automatically on every push to `main` and on pull requests. It validates
-both the TypeScript `forgeos-server` and the Python `mcp-server` in parallel.
+the TypeScript `forgeos-server`.
 
 | Job | What it checks | Timeout |
 |-----|----------------|---------|  
 | TS Lint & Type Check | ESLint + TypeScript compiler (Node.js 22) | 5 min |
 | TS Tests | Vitest with coverage, PostgreSQL 17 service container | 8 min |
-| Python Lint & Type Check | ruff + pyright (Python 3.12) | 5 min |
-| Python Tests | pytest with coverage, PostgreSQL 17 service container | 8 min |
 | Docker Build | Multi-stage image build verification (no push) | 8 min |
 | CI Gate | Aggregation — fails if any upstream job fails | 1 min |
 
-Path filters restrict the workflow to changes in `forgeos-server/`,
-`mcp-server/`, or the workflow file itself. Concurrency control cancels
+Path filters restrict the workflow to changes in `forgeos-server/`
+or the workflow file itself. Concurrency control cancels
 in-progress runs when a newer commit is pushed to the same branch.
 
-Coverage artifacts (TypeScript and Python) are uploaded with 7-day retention.
+Coverage artifacts are uploaded with 7-day retention.
 
 ### Starting the Engine
 

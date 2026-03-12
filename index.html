@@ -1,0 +1,798 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Distributed Ticket Board</title>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,-apple-system,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+header{background:#1e293b;border-bottom:1px solid #334155;padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;flex-wrap:wrap;gap:10px}
+header h1{font-size:1.4rem;color:#38bdf8;white-space:nowrap}
+.stats-bar{display:flex;gap:20px;align-items:center;flex-wrap:wrap}
+.stat{text-align:center;min-width:48px}
+.stat-value{font-size:1.4rem;font-weight:bold}
+.stat-label{font-size:.7rem;color:#94a3b8;text-transform:uppercase;letter-spacing:.5px}
+.controls{display:flex;gap:6px}
+.controls button{background:#334155;color:#e2e8f0;border:1px solid #475569;border-radius:6px;padding:5px 11px;cursor:pointer;font-size:1rem;transition:background .15s}
+.controls button:hover{background:#475569}
+.stage-pipeline{display:flex;gap:4px;padding:10px 24px;background:#1e293b;border-bottom:1px solid #334155;overflow-x:auto;flex-wrap:nowrap}
+.stage-chip{display:flex;align-items:center;gap:4px;padding:6px 12px;border-radius:8px;background:#334155;border:1px solid #475569;font-size:.8rem;white-space:nowrap;cursor:pointer;transition:all .15s}
+.stage-chip:hover{border-color:#38bdf8;background:#1e3a5f}
+.stage-chip .stage-emoji{font-size:1rem}
+.stage-chip .stage-name{color:#94a3b8;font-weight:500}
+.stage-chip .stage-count{background:#475569;color:#e2e8f0;padding:1px 7px;border-radius:10px;font-weight:bold;font-size:.75rem}
+.tabs{display:flex;border-bottom:1px solid #334155;background:#1e293b}
+.tab{padding:11px 22px;cursor:pointer;border-bottom:2px solid transparent;color:#94a3b8;font-size:.9rem;user-select:none;transition:color .15s}
+.tab.active{color:#38bdf8;border-bottom-color:#38bdf8}
+.tab:hover{color:#e2e8f0}
+#graph-container{overflow:hidden;height:calc(100vh - 200px);position:relative;cursor:grab;display:block}
+#graph-container:active{cursor:grabbing}
+#graph-inner{transform-origin:0 0;padding:40px;display:inline-block;min-width:100%}
+#task-table-container{display:none;padding:0}
+#filter-bar{padding:10px 16px;background:#1e293b;display:flex;gap:8px;flex-wrap:wrap;border-bottom:1px solid #334155;align-items:center}
+.filter-btn{background:#334155;color:#e2e8f0;border:1px solid #475569;border-radius:20px;padding:4px 14px;cursor:pointer;font-size:.8rem;transition:all .15s}
+.filter-btn.active{background:#38bdf8;color:#0f172a;border-color:#38bdf8}
+.filter-btn:hover{border-color:#38bdf8}
+.table-scroll{overflow-x:auto;max-height:calc(100vh - 260px);overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:.83rem}
+th{background:#1e293b;padding:9px 12px;text-align:left;position:sticky;top:0;border-bottom:2px solid #38bdf8;color:#38bdf8;z-index:2;cursor:pointer}
+th:hover{color:#22d3ee}
+td{padding:7px 12px;border-bottom:1px solid #1e293b}
+tr:hover td{background:rgba(56,189,248,.06)}
+.badge{padding:2px 8px;border-radius:4px;font-size:.73rem;font-weight:600;white-space:nowrap;display:inline-block;margin:1px 2px}
+.badge.done{background:#166534;color:#dcfce7}
+.badge.ready{background:#059669;color:#d1fae5}
+.badge.active{background:#d97706;color:#fef3c7}
+.badge.expired{background:#9d174d;color:#fce7f3}
+.badge.blocked-tag{background:#991b1b;color:#fee2e2}
+.deps{color:#64748b;font-size:.73rem;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+.prio-critical{color:#ef4444;font-weight:bold}
+.prio-high{color:#eab308}
+.prio-medium{color:#94a3b8}
+.prio-low{color:#64748b}
+.progress-bar{width:180px;height:7px;background:#334155;border-radius:4px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,#38bdf8,#22d3ee);border-radius:4px}
+.search-box{background:#334155;border:1px solid #475569;border-radius:6px;padding:5px 12px;color:#e2e8f0;font-size:.85rem;width:220px;outline:none;transition:border-color .15s}
+.search-box:focus{border-color:#38bdf8}
+.search-box::placeholder{color:#64748b}
+footer{background:#1e293b;border-top:1px solid #334155;padding:8px 24px;text-align:center;font-size:.7rem;color:#64748b}
+@media(max-width:768px){header{flex-direction:column;gap:8px}.stats-bar{gap:10px}.search-box{width:100%}.stage-pipeline{flex-wrap:wrap}}
+</style>
+</head>
+<body>
+<header>
+  <h1>Distributed Ticket Board</h1>
+  <div class="stats-bar">
+    <div class="stat"><div class="stat-value" style="color:#22c55e">159</div><div class="stat-label">Done</div></div>
+    <div class="stat"><div class="stat-value" style="color:#eab308">5</div><div class="stat-label">Active</div></div>
+    <div class="stat"><div class="stat-value" style="color:#22c55e">0</div><div class="stat-label">Ready</div></div>
+    <div class="stat"><div class="stat-value" style="color:#ef4444">4</div><div class="stat-label">Blocked</div></div>
+    <div class="stat"><div class="stat-value" style="color:#3b82f6">4</div><div class="stat-label">Claimed</div></div>
+    <div class="stat"><div class="stat-value" style="color:#ec4899">0</div><div class="stat-label">Expired</div></div>
+    <div class="stat">
+      <div class="stat-value">95.8%</div>
+      <div class="progress-bar"><div class="progress-fill" style="width:95.8%;max-width:100%"></div></div>
+    </div>
+  </div>
+  <div class="controls">
+    <button onclick="zoomIn()" title="Zoom In">+</button>
+    <button onclick="zoomOut()" title="Zoom Out">-</button>
+    <button onclick="resetView()" title="Reset View">R</button>
+    <button onclick="fitView()" title="Fit to Screen">F</button>
+  </div>
+</header>
+<div class="stage-pipeline">
+    <div class="stage-chip" data-stage="READY"><span class="stage-emoji">🟢</span><span class="stage-name">READY</span><span class="stage-count">0</span></div>
+    <div class="stage-chip" data-stage="RESEARCH"><span class="stage-emoji">🔍</span><span class="stage-name">RESEARCH</span><span class="stage-count">0</span></div>
+    <div class="stage-chip" data-stage="PM"><span class="stage-emoji">📋</span><span class="stage-name">PM</span><span class="stage-count">0</span></div>
+    <div class="stage-chip" data-stage="ARCHITECT"><span class="stage-emoji">📐</span><span class="stage-name">ARCHITECT</span><span class="stage-count">0</span></div>
+    <div class="stage-chip" data-stage="DEVOPS"><span class="stage-emoji">🛠️</span><span class="stage-name">DEVOPS</span><span class="stage-count">0</span></div>
+    <div class="stage-chip" data-stage="BACKEND"><span class="stage-emoji">⚙️</span><span class="stage-name">BACKEND</span><span class="stage-count">0</span></div>
+    <div class="stage-chip" data-stage="UIDESIGNER"><span class="stage-emoji">🎨</span><span class="stage-name">UIDESIGNER</span><span class="stage-count">0</span></div>
+    <div class="stage-chip" data-stage="FRONTEND"><span class="stage-emoji">🖥️</span><span class="stage-name">FRONTEND</span><span class="stage-count">0</span></div>
+    <div class="stage-chip" data-stage="QA"><span class="stage-emoji">🧪</span><span class="stage-name">QA</span><span class="stage-count">2</span></div>
+    <div class="stage-chip" data-stage="SECURITY"><span class="stage-emoji">🔒</span><span class="stage-name">SECURITY</span><span class="stage-count">0</span></div>
+    <div class="stage-chip" data-stage="CI"><span class="stage-emoji">🔄</span><span class="stage-name">CI</span><span class="stage-count">0</span></div>
+    <div class="stage-chip" data-stage="DOCS"><span class="stage-emoji">📝</span><span class="stage-name">DOCS</span><span class="stage-count">1</span></div>
+    <div class="stage-chip" data-stage="VALIDATION"><span class="stage-emoji">✅</span><span class="stage-name">VALIDATION</span><span class="stage-count">2</span></div>
+    <div class="stage-chip" data-stage="DONE"><span class="stage-emoji">🏁</span><span class="stage-name">DONE</span><span class="stage-count">159</span></div>
+</div>
+<div class="tabs">
+  <div class="tab active" onclick="showView('graph')">Dependency Graph</div>
+  <div class="tab" onclick="showView('table')">Ticket List (166)</div>
+</div>
+<div id="graph-container">
+  <div id="graph-inner">
+    <pre class="mermaid">
+graph TD
+    subgraph QA["🧪 QA (2)"]
+        FORGEOS_FE008["P1 FORGEOS-FE008<br/>Implement Active Claims Monitor<br/>@reaperoak"]:::claimed
+        FORGEOS_FE010["P2 FORGEOS-FE010<br/>Implement Multi-Machine Status View<br/>@reaperoak"]:::claimed
+    end
+    subgraph DOCS["📝 DOCS (1)"]
+        FORGEOS_BE079["P1 FORGEOS-BE079<br/>Implement agent-runner.py Migration Evolution<br/>@reaperoak"]:::claimed
+    end
+    subgraph VALIDATION["✅ VALIDATION (2)"]
+        FORGEOS_BE075["P1 FORGEOS-BE075<br/>Implement Migration Phase C — Full MCP<br/>@reaperoak"]:::claimed
+        FORGEOS_BE078["P1 FORGEOS-BE078<br/>Implement Automated Rollback Triggers"]:::active
+    end
+    subgraph DONE["🏁 DONE (159)"]
+        FORGEOS_ARCH001["P0 FORGEOS-ARCH001<br/>Design System Component Architecture"]:::done
+        FORGEOS_ARCH002["P1 FORGEOS-ARCH002<br/>ADR — PostgreSQL as Primary State Store"]:::done
+        FORGEOS_ARCH003["P1 FORGEOS-ARCH003<br/>ADR — MCP as Agent Communication Protocol"]:::done
+        FORGEOS_ARCH004["P1 FORGEOS-ARCH004<br/>ADR — Dual-Mode Migration Strategy"]:::done
+        FORGEOS_ARCH005["P0 FORGEOS-ARCH005<br/>Design Core Database Schema"]:::done
+        FORGEOS_ARCH006["P2 FORGEOS-ARCH006<br/>Design Database Index and Performance Strategy"]:::done
+        FORGEOS_ARCH007["P2 FORGEOS-ARCH007<br/>Design Event Sourcing Audit Trail Schema"]:::done
+        FORGEOS_ARCH008["P1 FORGEOS-ARCH008<br/>Design REST API OpenAPI Specification"]:::done
+        FORGEOS_ARCH009["P1 FORGEOS-ARCH009<br/>Design MCP Tool Definition Schemas"]:::done
+        FORGEOS_ARCH010["P2 FORGEOS-ARCH010<br/>Design Error Catalog and API Standards"]:::done
+        FORGEOS_ARCH011["P2 FORGEOS-ARCH011<br/>Define Quality Attributes and Performance Targets"]:::done
+        FORGEOS_ARCH012["P2 FORGEOS-ARCH012<br/>Design Fitness Functions and Verification Plan"]:::done
+        FORGEOS_BE001["P0 FORGEOS-BE001<br/>Initialize Alembic Migration Framework"]:::done
+        FORGEOS_BE002["P0 FORGEOS-BE002<br/>Create Core Tables Migration"]:::done
+        FORGEOS_BE003["P0 FORGEOS-BE003<br/>Create Event History and Audit Tables Migration"]:::done
+        FORGEOS_BE004["P1 FORGEOS-BE004<br/>Create Database Indexes and Constraints<br/>@reaperoak"]:::done
+        FORGEOS_BE005["P1 FORGEOS-BE005<br/>Create Database Seed Script for JSON Import"]:::done
+        FORGEOS_BE006["P0 FORGEOS-BE006<br/>Implement Ticket Claim Queue with SKIP LOCKED"]:::done
+        FORGEOS_BE007["P1 FORGEOS-BE007<br/>Implement File-Level Advisory Lock Mutex"]:::done
+        FORGEOS_BE008["P1 FORGEOS-BE008<br/>Implement Lease Heartbeat Mechanism"]:::done
+        FORGEOS_BE009["P1 FORGEOS-BE009<br/>Implement Expired Lease Detection and Release"]:::done
+        FORGEOS_BE010["P1 FORGEOS-BE010<br/>Configure Transaction Isolation per Operation"]:::done
+        FORGEOS_BE011["P0 FORGEOS-BE011<br/>Implement asyncpg Connection Pool"]:::done
+        FORGEOS_BE012["P1 FORGEOS-BE012<br/>Implement Event Sourcing Subsystem"]:::done
+        FORGEOS_BE013["P0 FORGEOS-BE013<br/>Implement Repository Pattern Data Access Layer"]:::done
+        FORGEOS_BE014["P2 FORGEOS-BE014<br/>Implement Connection Pool Health Monitoring"]:::done
+        FORGEOS_BE015["P0 FORGEOS-BE015<br/>Initialize MCP Server with Python SDK"]:::done
+        FORGEOS_BE016["P0 FORGEOS-BE016<br/>Implement stdio Transport for Local Agents"]:::done
+        FORGEOS_BE017["P1 FORGEOS-BE017<br/>Implement SSE/HTTP Transport for Remote Agents"]:::done
+        FORGEOS_BE018["P0 FORGEOS-BE018<br/>Wire MCP Server to Database Layer"]:::done
+        FORGEOS_BE019["P1 FORGEOS-BE019<br/>Implement Request Lifecycle with Correlation IDs"]:::done
+        FORGEOS_BE020["P0 FORGEOS-BE020<br/>Implement Dynamic Tool Registration System"]:::done
+        FORGEOS_BE021["P1 FORGEOS-BE021<br/>Implement Tool Input JSON Schema Validation"]:::done
+        FORGEOS_BE022["P0 FORGEOS-BE022<br/>Implement Agent Session Lifecycle Management"]:::done
+        FORGEOS_BE023["P1 FORGEOS-BE023<br/>Implement Concurrent Session Handling"]:::done
+        FORGEOS_BE024["P0 FORGEOS-BE024<br/>Implement Structured JSON Logging"]:::done
+        FORGEOS_BE025["P1 FORGEOS-BE025<br/>Implement Health Check and Readiness Probes"]:::done
+        FORGEOS_BE026["P1 FORGEOS-BE026<br/>Implement Graceful Shutdown with Request Draining"]:::done
+        FORGEOS_BE027["P2 FORGEOS-BE027<br/>Implement Metrics Collection Points"]:::done
+        FORGEOS_BE028["P0 FORGEOS-BE028<br/>Implement tickets.next MCP Tool"]:::done
+        FORGEOS_BE029["P0 FORGEOS-BE029<br/>Implement tickets.claim MCP Tool"]:::done
+        FORGEOS_BE030["P0 FORGEOS-BE030<br/>Implement tickets.advance MCP Tool"]:::done
+        FORGEOS_BE031["P1 FORGEOS-BE031<br/>Implement tickets.rework MCP Tool"]:::done
+        FORGEOS_BE032["P1 FORGEOS-BE032<br/>Implement tickets.release and tickets.status Tools"]:::done
+        FORGEOS_BE033["P1 FORGEOS-BE033<br/>Implement tickets.sync and tickets.validate Tools"]:::done
+        FORGEOS_BE034["P1 FORGEOS-BE034<br/>Implement Ticket List REST Endpoint"]:::done
+        FORGEOS_BE035["P1 FORGEOS-BE035<br/>Implement Ticket Detail and History Endpoints"]:::done
+        FORGEOS_BE036["P1 FORGEOS-BE036<br/>Implement Ticket Claim REST Endpoint"]:::done
+        FORGEOS_BE037["P1 FORGEOS-BE037<br/>Implement Ticket Advance and Rework REST Endpoints"]:::done
+        FORGEOS_BE038["P2 FORGEOS-BE038<br/>Implement Pipeline Overview and Health Endpoints"]:::done
+        FORGEOS_BE039["P1 FORGEOS-BE039<br/>Implement WebSocket Ticket State Streaming"]:::done
+        FORGEOS_BE040["P2 FORGEOS-BE040<br/>Implement Filtered WebSocket Subscriptions"]:::done
+        FORGEOS_BE041["P1 FORGEOS-BE041<br/>Implement Idempotency Keys for Operations"]:::done
+        FORGEOS_BE042["P2 FORGEOS-BE042<br/>Implement Per-Agent Rate Limiting"]:::done
+        FORGEOS_BE043["P0 FORGEOS-BE043<br/>Create forgeos-agent-sdk Package Structure"]:::done
+        FORGEOS_BE044["P0 FORGEOS-BE044<br/>Implement MCP Client Connection Manager"]:::done
+        FORGEOS_BE045["P0 FORGEOS-BE045<br/>Implement High-Level Ticket Operations API"]:::done
+        FORGEOS_BE046["P1 FORGEOS-BE046<br/>Implement SDK Error Handling and Configuration"]:::done
+        FORGEOS_BE047["P1 FORGEOS-BE047<br/>Implement Background Lease Heartbeat in SDK"]:::done
+        FORGEOS_BE048["P2 FORGEOS-BE048<br/>Implement Summary Handoff Helpers"]:::done
+        FORGEOS_BE049["P2 FORGEOS-BE049<br/>Implement Filesystem Fallback Mode"]:::done
+        FORGEOS_BE050["P2 FORGEOS-BE050<br/>Implement agent-runner.py Integration Hooks"]:::done
+        FORGEOS_BE051["P0 FORGEOS-BE051<br/>Implement Agent API Key Authentication"]:::done
+        FORGEOS_BE052["P1 FORGEOS-BE052<br/>Implement Machine Registration and Verification"]:::done
+        FORGEOS_BE053["P1 FORGEOS-BE053<br/>Implement Operator Token Authentication"]:::done
+        FORGEOS_BE054["P0 FORGEOS-BE054<br/>Implement Auth Middleware for MCP and REST"]:::done
+        FORGEOS_BE055["P0 FORGEOS-BE055<br/>Implement Role-Based Claim Restrictions"]:::done
+        FORGEOS_BE056["P1 FORGEOS-BE056<br/>Implement Operator Machine-Scoped Permissions"]:::done
+        FORGEOS_BE057["P2 FORGEOS-BE057<br/>Implement Admin Force Operations"]:::done
+        FORGEOS_BE058["P1 FORGEOS-BE058<br/>Implement Comprehensive Audit Logging"]:::done
+        FORGEOS_BE059["P1 FORGEOS-BE059<br/>Implement Webhook HTTP Receiver Endpoint"]:::done
+        FORGEOS_BE060["P1 FORGEOS-BE060<br/>Implement GitHub Webhook Signature Verification"]:::done
+        FORGEOS_BE061["P1 FORGEOS-BE061<br/>Implement Push Event Handler for Sync"]:::done
+        FORGEOS_BE062["P1 FORGEOS-BE062<br/>Implement CI Status Event Handler"]:::done
+        FORGEOS_BE063["P2 FORGEOS-BE063<br/>Implement PR Event Handler"]:::done
+        FORGEOS_BE064["P1 FORGEOS-BE064<br/>Implement Notification Event Queue"]:::done
+        FORGEOS_BE065["P1 FORGEOS-BE065<br/>Implement State Change Notification Emitter"]:::done
+        FORGEOS_BE066["P2 FORGEOS-BE066<br/>Implement Notification Channel Configuration"]:::done
+        FORGEOS_BE067["P2 FORGEOS-BE067<br/>Implement Retry Logic and Dead-Letter Handling"]:::done
+        FORGEOS_BE068["P0 FORGEOS-BE068<br/>Implement Dual-Mode Wrapper for tickets.py"]:::done
+        FORGEOS_BE069["P0 FORGEOS-BE069<br/>Implement Feature Flag System for Migration"]:::done
+        FORGEOS_BE070["P0 FORGEOS-BE070<br/>Implement Filesystem-to-Database Data Import"]:::done
+        FORGEOS_BE071["P1 FORGEOS-BE071<br/>Implement Bidirectional Sync Engine"]:::done
+        FORGEOS_BE072["P1 FORGEOS-BE072<br/>Implement Database-to-Filesystem Export"]:::done
+        FORGEOS_BE073["P0 FORGEOS-BE073<br/>Implement Migration Phase A — Background Sync"]:::done
+        FORGEOS_BE074["P0 FORGEOS-BE074<br/>Implement Migration Phase B — SDK with Fallback"]:::done
+        FORGEOS_BE077["P1 FORGEOS-BE077<br/>Implement Shadow Mode Validation Engine"]:::done
+        FORGEOS_DO001["P0 FORGEOS-DO001<br/>Create Docker Compose for Local Development"]:::done
+        FORGEOS_DO002["P0 FORGEOS-DO002<br/>Configure PostgreSQL Container with Init Scripts"]:::done
+        FORGEOS_DO003["P1 FORGEOS-DO003<br/>Create Development Tooling and Makefile"]:::done
+        FORGEOS_DO004["P1 FORGEOS-DO004<br/>Create Environment Configuration Profiles"]:::done
+        FORGEOS_DO005["P1 FORGEOS-DO005<br/>Create GitHub Actions CI Workflow for MCP Server"]:::done
+        FORGEOS_DO006["P1 FORGEOS-DO006<br/>Create Database Migration CI Step"]:::done
+        FORGEOS_DO007["P2 FORGEOS-DO007<br/>Create PostgreSQL Backup and Restore Scripts"]:::done
+        FORGEOS_DO008["P2 FORGEOS-DO008<br/>Define Container Health Checks and Monitoring"]:::done
+        FORGEOS_FE001["P0 FORGEOS-FE001<br/>Scaffold Dashboard Web Application"]:::done
+        FORGEOS_FE002["P0 FORGEOS-FE002<br/>Implement API Client and Data Models"]:::done
+        FORGEOS_FE003["P0 FORGEOS-FE003<br/>Implement Stage Pipeline Kanban View"]:::done
+        FORGEOS_FE004["P0 FORGEOS-FE004<br/>Implement Ticket Detail View"]:::done
+        FORGEOS_FE005["P1 FORGEOS-FE005<br/>Implement Interactive Dependency Graph"]:::done
+        FORGEOS_FE006["P1 FORGEOS-FE006<br/>Implement WebSocket Real-Time Updates"]:::done
+        FORGEOS_FE007["P2 FORGEOS-FE007<br/>Implement Global Search"]:::done
+        FORGEOS_FE011["P2 FORGEOS-FE011<br/>Implement System Health Dashboard"]:::done
+        FORGEOS_FE012["P2 FORGEOS-FE012<br/>Implement Dashboard Filtering and Sorting"]:::done
+        FORGEOS_PM001["P0 FORGEOS-PM001<br/>Define User Personas for Orchestration Platform"]:::done
+        FORGEOS_PM002["P1 FORGEOS-PM002<br/>Capture User Stories Across All Capabilities"]:::done
+        FORGEOS_PM003["P1 FORGEOS-PM003<br/>Define Non-Functional and Migration Requirements"]:::done
+        FORGEOS_PM004["P2 FORGEOS-PM004<br/>Define Dashboard UX Requirements and Priority Matr"]:::done
+        FORGEOS_RES001["P0 FORGEOS-RES001<br/>Research MCP Protocol Core Specification"]:::done
+        FORGEOS_RES002["P1 FORGEOS-RES002<br/>Evaluate MCP Transport Layer Options"]:::done
+        FORGEOS_RES003["P1 FORGEOS-RES003<br/>Evaluate MCP Python SDK Maturity"]:::done
+        FORGEOS_RES004["P2 FORGEOS-RES004<br/>MCP Protocol Adoption Risk Assessment"]:::done
+        FORGEOS_RES005["P0 FORGEOS-RES005<br/>Research PostgreSQL Distributed Locking Patterns"]:::done
+        FORGEOS_RES006["P1 FORGEOS-RES006<br/>Research PostgreSQL Connection Pooling Strategies"]:::done
+        FORGEOS_RES007["P1 FORGEOS-RES007<br/>Research PostgreSQL Transaction Isolation Levels"]:::done
+        FORGEOS_RES008["P1 FORGEOS-RES008<br/>Assess Event Sourcing Feasibility in PostgreSQL"]:::done
+        FORGEOS_RES009["P0 FORGEOS-RES009<br/>Current System Gap Analysis"]:::done
+        FORGEOS_RES010["P1 FORGEOS-RES010<br/>MCP vs gRPC vs REST Protocol Comparison"]:::done
+        FORGEOS_RES011["P2 FORGEOS-RES011<br/>Web Framework and ORM Evaluation"]:::done
+        FORGEOS_RES012["P2 FORGEOS-RES012<br/>Database Migration Tooling Evaluation"]:::done
+        FORGEOS_UID001["P1 FORGEOS-UID001<br/>Design Dashboard Layout and Design Tokens"]:::done
+        FORGEOS_UID002["P1 FORGEOS-UID002<br/>Design Pipeline and Ticket Detail Views"]:::done
+        FORGEOS_UID003["P2 FORGEOS-UID003<br/>Design Dependency Graph and Search Interface"]:::done
+        FORGEOS_UID004["P2 FORGEOS-UID004<br/>Design Operator Workbench and Claims Monitor"]:::done
+        FORGEOS_UID005["P3 FORGEOS-UID005<br/>Design System Health Dashboard"]:::done
+        TASK_FOS_01_001["P0 TASK-FOS-01-001<br/>PostgreSQL Schema — Initial Migration"]:::done
+        TASK_FOS_01_002["P0 TASK-FOS-01-002<br/>Database Connection Pool and Migration Runner"]:::done
+        TASK_FOS_01_003["P2 TASK-FOS-01-003<br/>Seed Data and Filesystem Import Tool"]:::done
+        TASK_FOS_02_001["P0 TASK-FOS-02-001<br/>MCP Server Scaffold and Project Setup"]:::done
+        TASK_FOS_02_002["P0 TASK-FOS-02-002<br/>TypeScript Type Definitions"]:::done
+        TASK_FOS_02_003["P1 TASK-FOS-02-003<br/>Middleware Stack — Logging, Error Handling, Valida"]:::done
+        TASK_FOS_03_001["P0 TASK-FOS-03-001<br/>tickets.next — Find Next Available Ticket"]:::done
+        TASK_FOS_03_002["P0 TASK-FOS-03-002<br/>tickets.claim — Atomic Ticket Claiming"]:::done
+        TASK_FOS_03_003["P1 TASK-FOS-03-003<br/>tickets.update — Update Ticket Metadata"]:::done
+        TASK_FOS_03_004["P0 TASK-FOS-03-004<br/>tickets.complete — Complete Stage and Advance"]:::done
+        TASK_FOS_03_005["P1 TASK-FOS-03-005<br/>tickets.reject — Reject and Trigger Rework"]:::done
+        TASK_FOS_03_006["P1 TASK-FOS-03-006<br/>tickets.spawn — Create Child Ticket"]:::done
+        TASK_FOS_03_007["P1 TASK-FOS-03-007<br/>tickets.graph — Dependency Graph"]:::done
+        TASK_FOS_03_008["P1 TASK-FOS-03-008<br/>tickets.release — Release Claim"]:::done
+        TASK_FOS_03_009["P1 TASK-FOS-03-009<br/>tickets.extend — Extend Lease Duration"]:::done
+        TASK_FOS_03_010["P2 TASK-FOS-03-010<br/>tickets.stats — Dashboard Statistics"]:::done
+        TASK_FOS_04_001["P1 TASK-FOS-04-001<br/>API Key Authentication Middleware"]:::done
+        TASK_FOS_04_002["P1 TASK-FOS-04-002<br/>Agent Registration and Identity Management"]:::done
+        TASK_FOS_04_003["P1 TASK-FOS-04-003<br/>File-Level Mutex Implementation"]:::done
+        TASK_FOS_05_001["P1 TASK-FOS-05-001<br/>Dashboard HTML/CSS Layout with Pipeline Visualizat"]:::done
+        TASK_FOS_05_002["P1 TASK-FOS-05-002<br/>SSE Endpoint for Real-Time Updates"]:::done
+        TASK_FOS_05_003["P2 TASK-FOS-05-003<br/>Dependency Graph D3.js Visualization"]:::done
+        TASK_FOS_05_004["P1 TASK-FOS-05-004<br/>Dashboard JavaScript Logic"]:::done
+        TASK_FOS_06_001["P2 TASK-FOS-06-001<br/>Husky Commit-Msg Hook"]:::done
+        TASK_FOS_06_002["P2 TASK-FOS-06-002<br/>Husky Pre-Commit Hook — Blast Radius Validation"]:::done
+        TASK_FOS_06_003["P2 TASK-FOS-06-003<br/>Agent-Runner Wrapper for Safe Git Operations"]:::done
+        TASK_FOS_06_004["P1 TASK-FOS-06-004<br/>Webhook State Recovery Endpoint"]:::done
+        TASK_FOS_07_001["P2 TASK-FOS-07-001<br/>Update Agent Files with MCP Tool References"]:::done
+        TASK_FOS_07_002["P2 TASK-FOS-07-002<br/>Update Instruction Files for New Architecture<br/>@reaperoak"]:::done
+        TASK_FOS_07_003["P2 TASK-FOS-07-003<br/>Update Root Documentation Files"]:::done
+        TASK_FOS_07_004["P2 TASK-FOS-07-004<br/>Update tickets.py for Backward Compatibility Bridg"]:::done
+        TASK_FOS_08_001["P0 TASK-FOS-08-001<br/>Dockerfile for ForgeOS Server"]:::done
+        TASK_FOS_08_002["P0 TASK-FOS-08-002<br/>Docker Compose with PostgreSQL and Server"]:::done
+        TASK_FOS_08_003["P1 TASK-FOS-08-003<br/>Environment Configuration"]:::done
+    end
+
+    FORGEOS_BE074 --> FORGEOS_BE079
+    FORGEOS_BE050 --> FORGEOS_BE079
+    FORGEOS_RES001 --> FORGEOS_ARCH001
+    FORGEOS_RES005 --> FORGEOS_ARCH001
+    FORGEOS_RES009 --> FORGEOS_ARCH001
+    FORGEOS_RES005 --> FORGEOS_ARCH002
+    FORGEOS_RES006 --> FORGEOS_ARCH002
+    FORGEOS_RES007 --> FORGEOS_ARCH002
+    FORGEOS_RES001 --> FORGEOS_ARCH003
+    FORGEOS_RES002 --> FORGEOS_ARCH003
+    FORGEOS_RES010 --> FORGEOS_ARCH003
+    FORGEOS_RES009 --> FORGEOS_ARCH004
+    FORGEOS_RES012 --> FORGEOS_ARCH004
+    FORGEOS_ARCH001 --> FORGEOS_ARCH005
+    FORGEOS_ARCH002 --> FORGEOS_ARCH005
+    FORGEOS_ARCH005 --> FORGEOS_ARCH006
+    FORGEOS_ARCH005 --> FORGEOS_ARCH007
+    FORGEOS_RES008 --> FORGEOS_ARCH007
+    FORGEOS_ARCH001 --> FORGEOS_ARCH008
+    FORGEOS_ARCH001 --> FORGEOS_ARCH009
+    FORGEOS_RES001 --> FORGEOS_ARCH009
+    FORGEOS_RES003 --> FORGEOS_ARCH009
+    FORGEOS_ARCH008 --> FORGEOS_ARCH010
+    FORGEOS_ARCH001 --> FORGEOS_ARCH011
+    FORGEOS_ARCH011 --> FORGEOS_ARCH012
+    FORGEOS_ARCH005 --> FORGEOS_BE001
+    FORGEOS_DO002 --> FORGEOS_BE001
+    FORGEOS_BE001 --> FORGEOS_BE002
+    FORGEOS_ARCH005 --> FORGEOS_BE002
+    FORGEOS_BE001 --> FORGEOS_BE003
+    FORGEOS_ARCH007 --> FORGEOS_BE003
+    FORGEOS_BE002 --> FORGEOS_BE004
+    FORGEOS_BE003 --> FORGEOS_BE004
+    FORGEOS_ARCH006 --> FORGEOS_BE004
+    FORGEOS_BE002 --> FORGEOS_BE005
+    FORGEOS_BE002 --> FORGEOS_BE006
+    FORGEOS_BE011 --> FORGEOS_BE006
+    FORGEOS_BE002 --> FORGEOS_BE007
+    FORGEOS_BE011 --> FORGEOS_BE007
+    FORGEOS_BE006 --> FORGEOS_BE008
+    FORGEOS_BE008 --> FORGEOS_BE009
+    FORGEOS_BE006 --> FORGEOS_BE010
+    FORGEOS_BE002 --> FORGEOS_BE011
+    FORGEOS_DO002 --> FORGEOS_BE011
+    FORGEOS_BE003 --> FORGEOS_BE012
+    FORGEOS_ARCH007 --> FORGEOS_BE012
+    FORGEOS_BE011 --> FORGEOS_BE013
+    FORGEOS_BE011 --> FORGEOS_BE014
+    FORGEOS_ARCH009 --> FORGEOS_BE015
+    FORGEOS_ARCH003 --> FORGEOS_BE015
+    FORGEOS_BE015 --> FORGEOS_BE016
+    FORGEOS_BE015 --> FORGEOS_BE017
+    FORGEOS_BE015 --> FORGEOS_BE018
+    FORGEOS_BE013 --> FORGEOS_BE018
+    FORGEOS_BE015 --> FORGEOS_BE019
+    FORGEOS_BE015 --> FORGEOS_BE020
+    FORGEOS_ARCH009 --> FORGEOS_BE020
+    FORGEOS_BE020 --> FORGEOS_BE021
+    FORGEOS_BE015 --> FORGEOS_BE022
+    FORGEOS_BE011 --> FORGEOS_BE022
+    FORGEOS_BE022 --> FORGEOS_BE023
+    FORGEOS_BE015 --> FORGEOS_BE024
+    FORGEOS_BE015 --> FORGEOS_BE025
+    FORGEOS_BE011 --> FORGEOS_BE025
+    FORGEOS_BE015 --> FORGEOS_BE026
+    FORGEOS_BE024 --> FORGEOS_BE027
+    FORGEOS_BE020 --> FORGEOS_BE028
+    FORGEOS_BE021 --> FORGEOS_BE028
+    FORGEOS_BE006 --> FORGEOS_BE028
+    FORGEOS_BE028 --> FORGEOS_BE029
+    FORGEOS_BE028 --> FORGEOS_BE030
+    FORGEOS_BE010 --> FORGEOS_BE030
+    FORGEOS_BE012 --> FORGEOS_BE030
+    FORGEOS_BE030 --> FORGEOS_BE031
+    FORGEOS_BE028 --> FORGEOS_BE032
+    FORGEOS_BE028 --> FORGEOS_BE033
+    FORGEOS_BE013 --> FORGEOS_BE033
+    FORGEOS_BE009 --> FORGEOS_BE033
+    FORGEOS_BE028 --> FORGEOS_BE034
+    FORGEOS_BE017 --> FORGEOS_BE034
+    FORGEOS_BE034 --> FORGEOS_BE035
+    FORGEOS_BE012 --> FORGEOS_BE035
+    FORGEOS_BE029 --> FORGEOS_BE036
+    FORGEOS_BE034 --> FORGEOS_BE036
+    FORGEOS_BE030 --> FORGEOS_BE037
+    FORGEOS_BE031 --> FORGEOS_BE037
+    FORGEOS_BE034 --> FORGEOS_BE037
+    FORGEOS_BE034 --> FORGEOS_BE038
+    FORGEOS_BE034 --> FORGEOS_BE039
+    FORGEOS_BE012 --> FORGEOS_BE039
+    FORGEOS_BE039 --> FORGEOS_BE040
+    FORGEOS_BE028 --> FORGEOS_BE041
+    FORGEOS_BE030 --> FORGEOS_BE041
+    FORGEOS_BE028 --> FORGEOS_BE042
+    FORGEOS_BE022 --> FORGEOS_BE042
+    FORGEOS_BE015 --> FORGEOS_BE043
+    FORGEOS_BE017 --> FORGEOS_BE043
+    FORGEOS_BE043 --> FORGEOS_BE044
+    FORGEOS_BE022 --> FORGEOS_BE044
+    FORGEOS_BE044 --> FORGEOS_BE045
+    FORGEOS_BE028 --> FORGEOS_BE045
+    FORGEOS_BE044 --> FORGEOS_BE046
+    FORGEOS_BE045 --> FORGEOS_BE047
+    FORGEOS_BE008 --> FORGEOS_BE047
+    FORGEOS_BE045 --> FORGEOS_BE048
+    FORGEOS_BE045 --> FORGEOS_BE049
+    FORGEOS_BE049 --> FORGEOS_BE050
+    FORGEOS_BE047 --> FORGEOS_BE050
+    FORGEOS_BE015 --> FORGEOS_BE051
+    FORGEOS_BE002 --> FORGEOS_BE051
+    FORGEOS_BE051 --> FORGEOS_BE052
+    FORGEOS_BE051 --> FORGEOS_BE053
+    FORGEOS_BE051 --> FORGEOS_BE054
+    FORGEOS_BE017 --> FORGEOS_BE054
+    FORGEOS_BE054 --> FORGEOS_BE055
+    FORGEOS_BE028 --> FORGEOS_BE055
+    FORGEOS_BE054 --> FORGEOS_BE056
+    FORGEOS_BE052 --> FORGEOS_BE056
+    FORGEOS_BE055 --> FORGEOS_BE057
+    FORGEOS_BE054 --> FORGEOS_BE058
+    FORGEOS_BE012 --> FORGEOS_BE058
+    FORGEOS_BE017 --> FORGEOS_BE059
+    FORGEOS_BE054 --> FORGEOS_BE059
+    FORGEOS_BE059 --> FORGEOS_BE060
+    FORGEOS_BE060 --> FORGEOS_BE061
+    FORGEOS_BE033 --> FORGEOS_BE061
+    FORGEOS_BE060 --> FORGEOS_BE062
+    FORGEOS_BE030 --> FORGEOS_BE062
+    FORGEOS_BE060 --> FORGEOS_BE063
+    FORGEOS_BE012 --> FORGEOS_BE064
+    FORGEOS_BE003 --> FORGEOS_BE064
+    FORGEOS_BE064 --> FORGEOS_BE065
+    FORGEOS_BE030 --> FORGEOS_BE065
+    FORGEOS_BE064 --> FORGEOS_BE066
+    FORGEOS_BE064 --> FORGEOS_BE067
+    FORGEOS_BE066 --> FORGEOS_BE067
+    FORGEOS_BE006 --> FORGEOS_BE068
+    FORGEOS_BE028 --> FORGEOS_BE068
+    FORGEOS_BE045 --> FORGEOS_BE068
+    FORGEOS_BE068 --> FORGEOS_BE069
+    FORGEOS_BE068 --> FORGEOS_BE070
+    FORGEOS_BE002 --> FORGEOS_BE070
+    FORGEOS_BE070 --> FORGEOS_BE071
+    FORGEOS_BE070 --> FORGEOS_BE072
+    FORGEOS_BE071 --> FORGEOS_BE073
+    FORGEOS_BE049 --> FORGEOS_BE073
+    FORGEOS_BE073 --> FORGEOS_BE074
+    FORGEOS_BE050 --> FORGEOS_BE074
+    FORGEOS_BE073 --> FORGEOS_BE077
+    FORGEOS_ARCH001 --> FORGEOS_DO001
+    FORGEOS_ARCH002 --> FORGEOS_DO001
+    FORGEOS_DO001 --> FORGEOS_DO002
+    FORGEOS_DO001 --> FORGEOS_DO003
+    FORGEOS_DO002 --> FORGEOS_DO003
+    FORGEOS_DO001 --> FORGEOS_DO004
+    FORGEOS_DO001 --> FORGEOS_DO005
+    FORGEOS_DO002 --> FORGEOS_DO005
+    FORGEOS_DO005 --> FORGEOS_DO006
+    FORGEOS_DO002 --> FORGEOS_DO007
+    FORGEOS_DO001 --> FORGEOS_DO008
+    FORGEOS_DO002 --> FORGEOS_DO008
+    FORGEOS_UID001 --> FORGEOS_FE001
+    FORGEOS_BE038 --> FORGEOS_FE001
+    FORGEOS_FE001 --> FORGEOS_FE002
+    FORGEOS_BE034 --> FORGEOS_FE002
+    FORGEOS_FE002 --> FORGEOS_FE003
+    FORGEOS_UID002 --> FORGEOS_FE003
+    FORGEOS_FE002 --> FORGEOS_FE004
+    FORGEOS_UID002 --> FORGEOS_FE004
+    FORGEOS_FE002 --> FORGEOS_FE005
+    FORGEOS_UID003 --> FORGEOS_FE005
+    FORGEOS_FE003 --> FORGEOS_FE006
+    FORGEOS_BE039 --> FORGEOS_FE006
+    FORGEOS_FE002 --> FORGEOS_FE007
+    FORGEOS_UID003 --> FORGEOS_FE007
+    FORGEOS_FE001 --> FORGEOS_FE011
+    FORGEOS_BE038 --> FORGEOS_FE011
+    FORGEOS_UID005 --> FORGEOS_FE011
+    FORGEOS_FE003 --> FORGEOS_FE012
+    FORGEOS_FE004 --> FORGEOS_FE012
+    FORGEOS_RES009 --> FORGEOS_PM001
+    FORGEOS_PM001 --> FORGEOS_PM002
+    FORGEOS_RES009 --> FORGEOS_PM003
+    FORGEOS_RES010 --> FORGEOS_PM003
+    FORGEOS_PM001 --> FORGEOS_PM004
+    FORGEOS_PM002 --> FORGEOS_PM004
+    FORGEOS_RES001 --> FORGEOS_RES004
+    FORGEOS_RES002 --> FORGEOS_RES004
+    FORGEOS_RES003 --> FORGEOS_RES004
+    FORGEOS_PM004 --> FORGEOS_UID001
+    FORGEOS_UID001 --> FORGEOS_UID002
+    FORGEOS_UID001 --> FORGEOS_UID003
+    FORGEOS_UID001 --> FORGEOS_UID004
+    FORGEOS_UID001 --> FORGEOS_UID005
+    TASK_FOS_01_001 --> TASK_FOS_01_002
+    TASK_FOS_02_001 --> TASK_FOS_01_002
+    TASK_FOS_01_001 --> TASK_FOS_01_003
+    TASK_FOS_01_002 --> TASK_FOS_01_003
+    TASK_FOS_02_001 --> TASK_FOS_02_003
+    TASK_FOS_02_002 --> TASK_FOS_02_003
+    TASK_FOS_02_001 --> TASK_FOS_03_001
+    TASK_FOS_01_002 --> TASK_FOS_03_001
+    TASK_FOS_02_002 --> TASK_FOS_03_001
+    TASK_FOS_03_001 --> TASK_FOS_03_002
+    TASK_FOS_04_003 --> TASK_FOS_03_002
+    TASK_FOS_03_002 --> TASK_FOS_03_003
+    TASK_FOS_03_002 --> TASK_FOS_03_004
+    TASK_FOS_03_002 --> TASK_FOS_03_005
+    TASK_FOS_03_002 --> TASK_FOS_03_006
+    TASK_FOS_03_001 --> TASK_FOS_03_007
+    TASK_FOS_03_002 --> TASK_FOS_03_008
+    TASK_FOS_03_002 --> TASK_FOS_03_009
+    TASK_FOS_03_001 --> TASK_FOS_03_010
+    TASK_FOS_02_001 --> TASK_FOS_04_001
+    TASK_FOS_01_002 --> TASK_FOS_04_001
+    TASK_FOS_02_002 --> TASK_FOS_04_001
+    TASK_FOS_04_001 --> TASK_FOS_04_002
+    TASK_FOS_01_002 --> TASK_FOS_04_003
+    TASK_FOS_02_002 --> TASK_FOS_04_003
+    TASK_FOS_05_002 --> TASK_FOS_05_001
+    TASK_FOS_03_010 --> TASK_FOS_05_001
+    TASK_FOS_02_001 --> TASK_FOS_05_002
+    TASK_FOS_01_002 --> TASK_FOS_05_002
+    TASK_FOS_05_001 --> TASK_FOS_05_003
+    TASK_FOS_03_007 --> TASK_FOS_05_003
+    TASK_FOS_05_001 --> TASK_FOS_05_004
+    TASK_FOS_05_002 --> TASK_FOS_05_004
+    TASK_FOS_06_001 --> TASK_FOS_06_002
+    TASK_FOS_03_002 --> TASK_FOS_06_003
+    TASK_FOS_03_004 --> TASK_FOS_06_003
+    TASK_FOS_02_001 --> TASK_FOS_06_004
+    TASK_FOS_01_002 --> TASK_FOS_06_004
+    TASK_FOS_02_003 --> TASK_FOS_06_004
+    TASK_FOS_02_001 --> TASK_FOS_07_001
+    TASK_FOS_03_002 --> TASK_FOS_07_001
+    TASK_FOS_07_001 --> TASK_FOS_07_002
+    TASK_FOS_07_001 --> TASK_FOS_07_003
+    TASK_FOS_03_002 --> TASK_FOS_07_004
+    TASK_FOS_03_004 --> TASK_FOS_07_004
+    TASK_FOS_02_001 --> TASK_FOS_08_001
+    TASK_FOS_08_001 --> TASK_FOS_08_002
+    TASK_FOS_01_001 --> TASK_FOS_08_002
+    FORGEOS_FE006 --> FORGEOS_FE008
+    FORGEOS_UID004 --> FORGEOS_FE008
+    FORGEOS_FE006 --> FORGEOS_FE010
+    FORGEOS_UID004 --> FORGEOS_FE010
+    FORGEOS_BE074 --> FORGEOS_BE075
+    FORGEOS_BE072 --> FORGEOS_BE078
+    FORGEOS_BE077 --> FORGEOS_BE078
+    FORGEOS_BE075 --> FORGEOS_BE076
+    FORGEOS_FE008 --> FORGEOS_FE009
+    FORGEOS_BE036 --> FORGEOS_FE009
+    FORGEOS_BE037 --> FORGEOS_FE009
+    FORGEOS_BE055 --> FORGEOS_FE009
+
+    classDef done fill:#dcfce7,stroke:#166534,stroke-width:2px,color:#14532d
+    classDef ready fill:#d1fae5,stroke:#059669,stroke-width:2px,color:#065f46
+    classDef active fill:#fef3c7,stroke:#d97706,stroke-width:2px,color:#92400e
+    classDef claimed fill:#dbeafe,stroke:#1e40af,stroke-width:2px,color:#1e3a8a
+    classDef blocked fill:#fee2e2,stroke:#991b1b,stroke-width:2px,color:#7f1d1d
+    classDef expired fill:#fce7f3,stroke:#9d174d,stroke-width:2px,color:#831843
+    classDef missing fill:#f3f4f6,stroke:#6b7280,stroke-width:1px,stroke-dasharray:5,color:#374151
+    </pre>
+  </div>
+</div>
+<div id="task-table-container">
+  <div id="filter-bar">
+    <input class="search-box" type="text" placeholder="Search tickets..." oninput="filterTable()">
+    <button class="filter-btn active" data-filter="all" onclick="setFilter(this)">All (166)</button>
+    <button class="filter-btn" data-filter="READY" onclick="setFilter(this)">Ready (0)</button>
+    <button class="filter-btn" data-filter="critical" onclick="setFilter(this)">Critical (0)</button>
+    <button class="filter-btn" data-filter="high" onclick="setFilter(this)">High (5)</button>
+    <button class="filter-btn" data-filter="blocked" onclick="setFilter(this)">Blocked (4)</button>
+    <button class="filter-btn" data-filter="DONE" onclick="setFilter(this)">Done (159)</button>
+  </div>
+  <div class="table-scroll">
+    <table>
+      <thead><tr>
+        <th onclick="sortTable(0)">Ticket ID</th>
+        <th onclick="sortTable(1)">Title</th>
+        <th onclick="sortTable(2)">Priority</th>
+        <th onclick="sortTable(3)">Stage</th>
+        <th onclick="sortTable(4)">Type</th>
+        <th onclick="sortTable(5)">Operator</th>
+        <th onclick="sortTable(6)">Agent</th>
+        <th>Deps</th>
+      </tr></thead>
+      <tbody>
+            <tr data-priority='critical' data-stage='DONE' data-type='architecture'><td><b>FORGEOS-ARCH001</b></td><td>Design System Component Architecture</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>architecture</td><td>---</td><td>---</td><td class='deps'>FORGEOS-RES001, FORGEOS-RES005, FORGEOS-RES009</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='architecture'><td><b>FORGEOS-ARCH005</b></td><td>Design Core Database Schema</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>architecture</td><td>---</td><td>---</td><td class='deps'>FORGEOS-ARCH001, FORGEOS-ARCH002</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE001</b></td><td>Initialize Alembic Migration Framework</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-ARCH005, FORGEOS-DO002</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE002</b></td><td>Create Core Tables Migration</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE001, FORGEOS-ARCH005</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE003</b></td><td>Create Event History and Audit Tables Migration</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE001, FORGEOS-ARCH007</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE006</b></td><td>Implement Ticket Claim Queue with SKIP LOCKED</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE002, FORGEOS-BE011</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE011</b></td><td>Implement asyncpg Connection Pool</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE002, FORGEOS-DO002</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE013</b></td><td>Implement Repository Pattern Data Access Layer</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE011</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE015</b></td><td>Initialize MCP Server with Python SDK</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-ARCH009, FORGEOS-ARCH003</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE016</b></td><td>Implement stdio Transport for Local Agents</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE015</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE018</b></td><td>Wire MCP Server to Database Layer</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE015, FORGEOS-BE013</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE020</b></td><td>Implement Dynamic Tool Registration System</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE015, FORGEOS-ARCH009</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE022</b></td><td>Implement Agent Session Lifecycle Management</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE015, FORGEOS-BE011</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE024</b></td><td>Implement Structured JSON Logging</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE015</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE028</b></td><td>Implement tickets.next MCP Tool</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE020, FORGEOS-BE021, FORGEOS-BE006</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE029</b></td><td>Implement tickets.claim MCP Tool</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE028</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE030</b></td><td>Implement tickets.advance MCP Tool</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE028, FORGEOS-BE010, FORGEOS-BE012</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE043</b></td><td>Create forgeos-agent-sdk Package Structure</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE015, FORGEOS-BE017</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE044</b></td><td>Implement MCP Client Connection Manager</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE043, FORGEOS-BE022</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE045</b></td><td>Implement High-Level Ticket Operations API</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE044, FORGEOS-BE028</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE051</b></td><td>Implement Agent API Key Authentication</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE015, FORGEOS-BE002</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE054</b></td><td>Implement Auth Middleware for MCP and REST</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE051, FORGEOS-BE017</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE055</b></td><td>Implement Role-Based Claim Restrictions</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE054, FORGEOS-BE028</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE068</b></td><td>Implement Dual-Mode Wrapper for tickets.py</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE006, FORGEOS-BE028, FORGEOS-BE045</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE069</b></td><td>Implement Feature Flag System for Migration</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE068</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE070</b></td><td>Implement Filesystem-to-Database Data Import</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE068, FORGEOS-BE002</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE073</b></td><td>Implement Migration Phase A — Background Sync</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE071, FORGEOS-BE049</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE074</b></td><td>Implement Migration Phase B — SDK with Fallback</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE073, FORGEOS-BE050</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='infra'><td><b>FORGEOS-DO001</b></td><td>Create Docker Compose for Local Development</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>infra</td><td>---</td><td>---</td><td class='deps'>FORGEOS-ARCH001, FORGEOS-ARCH002</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='infra'><td><b>FORGEOS-DO002</b></td><td>Configure PostgreSQL Container with Init Scripts</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>infra</td><td>---</td><td>---</td><td class='deps'>FORGEOS-DO001</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='frontend'><td><b>FORGEOS-FE001</b></td><td>Scaffold Dashboard Web Application</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>frontend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-UID001, FORGEOS-BE038</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='frontend'><td><b>FORGEOS-FE002</b></td><td>Implement API Client and Data Models</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>frontend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-FE001, FORGEOS-BE034</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='frontend'><td><b>FORGEOS-FE003</b></td><td>Implement Stage Pipeline Kanban View</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>frontend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-FE002, FORGEOS-UID002</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='frontend'><td><b>FORGEOS-FE004</b></td><td>Implement Ticket Detail View</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>frontend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-FE002, FORGEOS-UID002</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='docs'><td><b>FORGEOS-PM001</b></td><td>Define User Personas for Orchestration Platform</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>docs</td><td>---</td><td>---</td><td class='deps'>FORGEOS-RES009</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='research'><td><b>FORGEOS-RES001</b></td><td>Research MCP Protocol Core Specification</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>research</td><td>---</td><td>---</td><td class='deps'>---</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='research'><td><b>FORGEOS-RES005</b></td><td>Research PostgreSQL Distributed Locking Patterns</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>research</td><td>---</td><td>---</td><td class='deps'>---</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='research'><td><b>FORGEOS-RES009</b></td><td>Current System Gap Analysis</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>research</td><td>---</td><td>---</td><td class='deps'>---</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-01-001</b></td><td>PostgreSQL Schema — Initial Migration</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>---</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-01-002</b></td><td>Database Connection Pool and Migration Runner</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-01-001, TASK-FOS-02-001</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-02-001</b></td><td>MCP Server Scaffold and Project Setup</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>---</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-02-002</b></td><td>TypeScript Type Definitions</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>---</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-03-001</b></td><td>tickets.next — Find Next Available Ticket</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-02-001, TASK-FOS-01-002, TASK-FOS-02-002</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-03-002</b></td><td>tickets.claim — Atomic Ticket Claiming</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-03-001, TASK-FOS-04-003</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-03-004</b></td><td>tickets.complete — Complete Stage and Advance</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-03-002</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='infra'><td><b>TASK-FOS-08-001</b></td><td>Dockerfile for ForgeOS Server</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>infra</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-02-001</td></tr>
+            <tr data-priority='critical' data-stage='DONE' data-type='infra'><td><b>TASK-FOS-08-002</b></td><td>Docker Compose with PostgreSQL and Server</td><td class='prio-critical'>critical</td><td><span class="badge done">Done</span></td><td>infra</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-08-001, TASK-FOS-01-001</td></tr>
+            <tr data-priority='high' data-stage='QA' data-type='frontend'><td><b>FORGEOS-FE008</b></td><td>Implement Active Claims Monitor</td><td class='prio-high'>high</td><td><span class="badge active">🧪 QA</span></td><td>frontend</td><td>reaperoak</td><td>QA Engineer</td><td class='deps'>FORGEOS-FE006, FORGEOS-UID004</td></tr>
+            <tr data-priority='high' data-stage='DOCS' data-type='backend'><td><b>FORGEOS-BE079</b></td><td>Implement agent-runner.py Migration Evolution</td><td class='prio-high'>high</td><td><span class="badge active">📝 DOCS</span></td><td>backend</td><td>reaperoak</td><td>Documentation Specialist</td><td class='deps'>FORGEOS-BE074, FORGEOS-BE050</td></tr>
+            <tr data-priority='high' data-stage='VALIDATION' data-type='backend'><td><b>FORGEOS-BE075</b></td><td>Implement Migration Phase C — Full MCP</td><td class='prio-high'>high</td><td><span class="badge active">✅ VALIDATION</span></td><td>backend</td><td>reaperoak</td><td>Documentation Specialist</td><td class='deps'>FORGEOS-BE074</td></tr>
+            <tr data-priority='high' data-stage='VALIDATION' data-type='backend'><td><b>FORGEOS-BE078</b></td><td>Implement Automated Rollback Triggers</td><td class='prio-high'>high</td><td><span class="badge active">✅ VALIDATION</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE072, FORGEOS-BE077</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='architecture'><td><b>FORGEOS-ARCH002</b></td><td>ADR — PostgreSQL as Primary State Store</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>architecture</td><td>---</td><td>---</td><td class='deps'>FORGEOS-RES005, FORGEOS-RES006, FORGEOS-RES007</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='architecture'><td><b>FORGEOS-ARCH003</b></td><td>ADR — MCP as Agent Communication Protocol</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>architecture</td><td>---</td><td>---</td><td class='deps'>FORGEOS-RES001, FORGEOS-RES002, FORGEOS-RES010</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='architecture'><td><b>FORGEOS-ARCH004</b></td><td>ADR — Dual-Mode Migration Strategy</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>architecture</td><td>---</td><td>---</td><td class='deps'>FORGEOS-RES009, FORGEOS-RES012</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='architecture'><td><b>FORGEOS-ARCH008</b></td><td>Design REST API OpenAPI Specification</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>architecture</td><td>---</td><td>---</td><td class='deps'>FORGEOS-ARCH001</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='architecture'><td><b>FORGEOS-ARCH009</b></td><td>Design MCP Tool Definition Schemas</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>architecture</td><td>---</td><td>---</td><td class='deps'>FORGEOS-ARCH001, FORGEOS-RES001, FORGEOS-RES003</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE004</b></td><td>Create Database Indexes and Constraints</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>reaperoak</td><td>---</td><td class='deps'>FORGEOS-BE002, FORGEOS-BE003, FORGEOS-ARCH006</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE005</b></td><td>Create Database Seed Script for JSON Import</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE002</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE007</b></td><td>Implement File-Level Advisory Lock Mutex</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE002, FORGEOS-BE011</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE008</b></td><td>Implement Lease Heartbeat Mechanism</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE006</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE009</b></td><td>Implement Expired Lease Detection and Release</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE008</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE010</b></td><td>Configure Transaction Isolation per Operation</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE006</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE012</b></td><td>Implement Event Sourcing Subsystem</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE003, FORGEOS-ARCH007</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE017</b></td><td>Implement SSE/HTTP Transport for Remote Agents</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE015</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE019</b></td><td>Implement Request Lifecycle with Correlation IDs</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE015</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE021</b></td><td>Implement Tool Input JSON Schema Validation</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE020</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE023</b></td><td>Implement Concurrent Session Handling</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE022</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE025</b></td><td>Implement Health Check and Readiness Probes</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE015, FORGEOS-BE011</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE026</b></td><td>Implement Graceful Shutdown with Request Draining</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE015</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE031</b></td><td>Implement tickets.rework MCP Tool</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE030</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE032</b></td><td>Implement tickets.release and tickets.status Tools</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE028</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE033</b></td><td>Implement tickets.sync and tickets.validate Tools</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE028, FORGEOS-BE013, FORGEOS-BE009</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE034</b></td><td>Implement Ticket List REST Endpoint</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE028, FORGEOS-BE017</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE035</b></td><td>Implement Ticket Detail and History Endpoints</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE034, FORGEOS-BE012</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE036</b></td><td>Implement Ticket Claim REST Endpoint</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE029, FORGEOS-BE034</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE037</b></td><td>Implement Ticket Advance and Rework REST Endpoints</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE030, FORGEOS-BE031, FORGEOS-BE034</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE039</b></td><td>Implement WebSocket Ticket State Streaming</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE034, FORGEOS-BE012</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE041</b></td><td>Implement Idempotency Keys for Operations</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE028, FORGEOS-BE030</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE046</b></td><td>Implement SDK Error Handling and Configuration</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE044</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE047</b></td><td>Implement Background Lease Heartbeat in SDK</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE045, FORGEOS-BE008</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE052</b></td><td>Implement Machine Registration and Verification</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE051</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE053</b></td><td>Implement Operator Token Authentication</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE051</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE056</b></td><td>Implement Operator Machine-Scoped Permissions</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE054, FORGEOS-BE052</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE058</b></td><td>Implement Comprehensive Audit Logging</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE054, FORGEOS-BE012</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE059</b></td><td>Implement Webhook HTTP Receiver Endpoint</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE017, FORGEOS-BE054</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE060</b></td><td>Implement GitHub Webhook Signature Verification</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE059</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE061</b></td><td>Implement Push Event Handler for Sync</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE060, FORGEOS-BE033</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE062</b></td><td>Implement CI Status Event Handler</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE060, FORGEOS-BE030</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE064</b></td><td>Implement Notification Event Queue</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE012, FORGEOS-BE003</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE065</b></td><td>Implement State Change Notification Emitter</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE064, FORGEOS-BE030</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE071</b></td><td>Implement Bidirectional Sync Engine</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE070</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE072</b></td><td>Implement Database-to-Filesystem Export</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE070</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE077</b></td><td>Implement Shadow Mode Validation Engine</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE073</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='infra'><td><b>FORGEOS-DO003</b></td><td>Create Development Tooling and Makefile</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>infra</td><td>---</td><td>---</td><td class='deps'>FORGEOS-DO001, FORGEOS-DO002</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='infra'><td><b>FORGEOS-DO004</b></td><td>Create Environment Configuration Profiles</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>infra</td><td>---</td><td>---</td><td class='deps'>FORGEOS-DO001</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='infra'><td><b>FORGEOS-DO005</b></td><td>Create GitHub Actions CI Workflow for MCP Server</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>infra</td><td>---</td><td>---</td><td class='deps'>FORGEOS-DO001, FORGEOS-DO002</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='infra'><td><b>FORGEOS-DO006</b></td><td>Create Database Migration CI Step</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>infra</td><td>---</td><td>---</td><td class='deps'>FORGEOS-DO005</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='frontend'><td><b>FORGEOS-FE005</b></td><td>Implement Interactive Dependency Graph</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>frontend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-FE002, FORGEOS-UID003</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='frontend'><td><b>FORGEOS-FE006</b></td><td>Implement WebSocket Real-Time Updates</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>frontend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-FE003, FORGEOS-BE039</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='docs'><td><b>FORGEOS-PM002</b></td><td>Capture User Stories Across All Capabilities</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>docs</td><td>---</td><td>---</td><td class='deps'>FORGEOS-PM001</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='docs'><td><b>FORGEOS-PM003</b></td><td>Define Non-Functional and Migration Requirements</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>docs</td><td>---</td><td>---</td><td class='deps'>FORGEOS-RES009, FORGEOS-RES010</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='research'><td><b>FORGEOS-RES002</b></td><td>Evaluate MCP Transport Layer Options</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>research</td><td>---</td><td>---</td><td class='deps'>---</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='research'><td><b>FORGEOS-RES003</b></td><td>Evaluate MCP Python SDK Maturity</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>research</td><td>---</td><td>---</td><td class='deps'>---</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='research'><td><b>FORGEOS-RES006</b></td><td>Research PostgreSQL Connection Pooling Strategies</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>research</td><td>---</td><td>---</td><td class='deps'>---</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='research'><td><b>FORGEOS-RES007</b></td><td>Research PostgreSQL Transaction Isolation Levels</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>research</td><td>---</td><td>---</td><td class='deps'>---</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='research'><td><b>FORGEOS-RES008</b></td><td>Assess Event Sourcing Feasibility in PostgreSQL</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>research</td><td>---</td><td>---</td><td class='deps'>---</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='research'><td><b>FORGEOS-RES010</b></td><td>MCP vs gRPC vs REST Protocol Comparison</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>research</td><td>---</td><td>---</td><td class='deps'>---</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='frontend'><td><b>FORGEOS-UID001</b></td><td>Design Dashboard Layout and Design Tokens</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>frontend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-PM004</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='frontend'><td><b>FORGEOS-UID002</b></td><td>Design Pipeline and Ticket Detail Views</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>frontend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-UID001</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-02-003</b></td><td>Middleware Stack — Logging, Error Handling, Validation</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-02-001, TASK-FOS-02-002</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-03-003</b></td><td>tickets.update — Update Ticket Metadata</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-03-002</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-03-005</b></td><td>tickets.reject — Reject and Trigger Rework</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-03-002</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-03-006</b></td><td>tickets.spawn — Create Child Ticket</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-03-002</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-03-007</b></td><td>tickets.graph — Dependency Graph</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-03-001</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-03-008</b></td><td>tickets.release — Release Claim</td><td class='prio-high'>high</td><td><span class="badge done">Done</span> <span class="badge blocked-tag">BLOCKED</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-03-002</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-03-009</b></td><td>tickets.extend — Extend Lease Duration</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-03-002</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-04-001</b></td><td>API Key Authentication Middleware</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-02-001, TASK-FOS-01-002, TASK-FOS-02-002</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-04-002</b></td><td>Agent Registration and Identity Management</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-04-001</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-04-003</b></td><td>File-Level Mutex Implementation</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-01-002, TASK-FOS-02-002</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='frontend'><td><b>TASK-FOS-05-001</b></td><td>Dashboard HTML/CSS Layout with Pipeline Visualization</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>frontend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-05-002, TASK-FOS-03-010</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-05-002</b></td><td>SSE Endpoint for Real-Time Updates</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-02-001, TASK-FOS-01-002</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='frontend'><td><b>TASK-FOS-05-004</b></td><td>Dashboard JavaScript Logic</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>frontend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-05-001, TASK-FOS-05-002</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-06-004</b></td><td>Webhook State Recovery Endpoint</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-02-001, TASK-FOS-01-002, TASK-FOS-02-003</td></tr>
+            <tr data-priority='high' data-stage='DONE' data-type='infra'><td><b>TASK-FOS-08-003</b></td><td>Environment Configuration</td><td class='prio-high'>high</td><td><span class="badge done">Done</span></td><td>infra</td><td>---</td><td>---</td><td class='deps'>---</td></tr>
+            <tr data-priority='high' data-stage='BLOCKED' data-type='frontend'><td><b>FORGEOS-FE009</b></td><td>Implement Operator Workbench Actions</td><td class='prio-high'>high</td><td><span class="badge">BLOCKED</span> <span class="badge blocked-tag">BLOCKED</span></td><td>frontend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-FE008, FORGEOS-BE036, FORGEOS-BE037, FORGEOS-BE055</td></tr>
+            <tr data-priority='medium' data-stage='QA' data-type='frontend'><td><b>FORGEOS-FE010</b></td><td>Implement Multi-Machine Status View</td><td class='prio-medium'>medium</td><td><span class="badge active">🧪 QA</span></td><td>frontend</td><td>reaperoak</td><td>QA Engineer</td><td class='deps'>FORGEOS-FE006, FORGEOS-UID004</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='architecture'><td><b>FORGEOS-ARCH006</b></td><td>Design Database Index and Performance Strategy</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>architecture</td><td>---</td><td>---</td><td class='deps'>FORGEOS-ARCH005</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='architecture'><td><b>FORGEOS-ARCH007</b></td><td>Design Event Sourcing Audit Trail Schema</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>architecture</td><td>---</td><td>---</td><td class='deps'>FORGEOS-ARCH005, FORGEOS-RES008</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='architecture'><td><b>FORGEOS-ARCH010</b></td><td>Design Error Catalog and API Standards</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>architecture</td><td>---</td><td>---</td><td class='deps'>FORGEOS-ARCH008</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='architecture'><td><b>FORGEOS-ARCH011</b></td><td>Define Quality Attributes and Performance Targets</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>architecture</td><td>---</td><td>---</td><td class='deps'>FORGEOS-ARCH001</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='architecture'><td><b>FORGEOS-ARCH012</b></td><td>Design Fitness Functions and Verification Plan</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>architecture</td><td>---</td><td>---</td><td class='deps'>FORGEOS-ARCH011</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE014</b></td><td>Implement Connection Pool Health Monitoring</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE011</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE027</b></td><td>Implement Metrics Collection Points</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE024</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE038</b></td><td>Implement Pipeline Overview and Health Endpoints</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE034</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE040</b></td><td>Implement Filtered WebSocket Subscriptions</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE039</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE042</b></td><td>Implement Per-Agent Rate Limiting</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE028, FORGEOS-BE022</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE048</b></td><td>Implement Summary Handoff Helpers</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE045</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE049</b></td><td>Implement Filesystem Fallback Mode</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE045</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE050</b></td><td>Implement agent-runner.py Integration Hooks</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE049, FORGEOS-BE047</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE057</b></td><td>Implement Admin Force Operations</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE055</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE063</b></td><td>Implement PR Event Handler</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE060</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE066</b></td><td>Implement Notification Channel Configuration</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE064</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='backend'><td><b>FORGEOS-BE067</b></td><td>Implement Retry Logic and Dead-Letter Handling</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE064, FORGEOS-BE066</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='infra'><td><b>FORGEOS-DO007</b></td><td>Create PostgreSQL Backup and Restore Scripts</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>infra</td><td>---</td><td>---</td><td class='deps'>FORGEOS-DO002</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='infra'><td><b>FORGEOS-DO008</b></td><td>Define Container Health Checks and Monitoring</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>infra</td><td>---</td><td>---</td><td class='deps'>FORGEOS-DO001, FORGEOS-DO002</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='frontend'><td><b>FORGEOS-FE007</b></td><td>Implement Global Search</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>frontend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-FE002, FORGEOS-UID003</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='frontend'><td><b>FORGEOS-FE011</b></td><td>Implement System Health Dashboard</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>frontend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-FE001, FORGEOS-BE038, FORGEOS-UID005</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='frontend'><td><b>FORGEOS-FE012</b></td><td>Implement Dashboard Filtering and Sorting</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>frontend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-FE003, FORGEOS-FE004</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='docs'><td><b>FORGEOS-PM004</b></td><td>Define Dashboard UX Requirements and Priority Matrix</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>docs</td><td>---</td><td>---</td><td class='deps'>FORGEOS-PM001, FORGEOS-PM002</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='research'><td><b>FORGEOS-RES004</b></td><td>MCP Protocol Adoption Risk Assessment</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>research</td><td>---</td><td>---</td><td class='deps'>FORGEOS-RES001, FORGEOS-RES002, FORGEOS-RES003</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='research'><td><b>FORGEOS-RES011</b></td><td>Web Framework and ORM Evaluation</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>research</td><td>---</td><td>---</td><td class='deps'>---</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='research'><td><b>FORGEOS-RES012</b></td><td>Database Migration Tooling Evaluation</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>research</td><td>---</td><td>---</td><td class='deps'>---</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='frontend'><td><b>FORGEOS-UID003</b></td><td>Design Dependency Graph and Search Interface</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>frontend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-UID001</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='frontend'><td><b>FORGEOS-UID004</b></td><td>Design Operator Workbench and Claims Monitor</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>frontend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-UID001</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-01-003</b></td><td>Seed Data and Filesystem Import Tool</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-01-001, TASK-FOS-01-002</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-03-010</b></td><td>tickets.stats — Dashboard Statistics</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-03-001</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='frontend'><td><b>TASK-FOS-05-003</b></td><td>Dependency Graph D3.js Visualization</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>frontend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-05-001, TASK-FOS-03-007</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='infra'><td><b>TASK-FOS-06-001</b></td><td>Husky Commit-Msg Hook</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>infra</td><td>---</td><td>---</td><td class='deps'>---</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='infra'><td><b>TASK-FOS-06-002</b></td><td>Husky Pre-Commit Hook — Blast Radius Validation</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>infra</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-06-001</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-06-003</b></td><td>Agent-Runner Wrapper for Safe Git Operations</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-03-002, TASK-FOS-03-004</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='docs'><td><b>TASK-FOS-07-001</b></td><td>Update Agent Files with MCP Tool References</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>docs</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-02-001, TASK-FOS-03-002</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='docs'><td><b>TASK-FOS-07-002</b></td><td>Update Instruction Files for New Architecture</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>docs</td><td>reaperoak</td><td>---</td><td class='deps'>TASK-FOS-07-001</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='docs'><td><b>TASK-FOS-07-003</b></td><td>Update Root Documentation Files</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span> <span class="badge blocked-tag">BLOCKED</span></td><td>docs</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-07-001</td></tr>
+            <tr data-priority='medium' data-stage='DONE' data-type='backend'><td><b>TASK-FOS-07-004</b></td><td>Update tickets.py for Backward Compatibility Bridge</td><td class='prio-medium'>medium</td><td><span class="badge done">Done</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>TASK-FOS-03-002, TASK-FOS-03-004</td></tr>
+            <tr data-priority='medium' data-stage='BLOCKED' data-type='backend'><td><b>FORGEOS-BE076</b></td><td>Implement Migration Phase D — Filesystem Deprecated</td><td class='prio-medium'>medium</td><td><span class="badge">BLOCKED</span> <span class="badge blocked-tag">BLOCKED</span></td><td>backend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-BE075</td></tr>
+            <tr data-priority='low' data-stage='DONE' data-type='frontend'><td><b>FORGEOS-UID005</b></td><td>Design System Health Dashboard</td><td class='prio-low'>low</td><td><span class="badge done">Done</span></td><td>frontend</td><td>---</td><td>---</td><td class='deps'>FORGEOS-UID001</td></tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+<footer>Distributed Ticket Board -- Read-only snapshot from .github/ticket-state/ -- Ticket files untouched</footer>
+<script>
+mermaid.initialize({startOnLoad:true,theme:'dark',flowchart:{useMaxWidth:false,htmlLabels:true,curve:'basis',padding:15},securityLevel:'loose',maxTextSize:500000});
+function showView(v){
+  var g=document.getElementById('graph-container'),t=document.getElementById('task-table-container'),tabs=document.querySelectorAll('.tab');
+  if(v==='graph'){g.style.display='block';t.style.display='none';tabs[0].classList.add('active');tabs[1].classList.remove('active')}
+  else{g.style.display='none';t.style.display='block';tabs[0].classList.remove('active');tabs[1].classList.add('active')}
+}
+var container=document.getElementById('graph-container'),inner=document.getElementById('graph-inner');
+var scale=1,tx=0,ty=0,drag=false,sx,sy;
+function upd(){inner.style.transform='translate('+tx+'px,'+ty+'px) scale('+scale+')'}
+function zoomIn(){scale=Math.min(scale*1.25,6);upd()}
+function zoomOut(){scale=Math.max(scale/1.25,.05);upd()}
+function resetView(){scale=1;tx=0;ty=0;upd()}
+function fitView(){var svg=inner.querySelector('svg');if(!svg)return;var r=svg.getBoundingClientRect();scale=Math.min(container.clientWidth/(r.width||1),container.clientHeight/(r.height||1),.95);tx=10;ty=10;upd()}
+container.addEventListener('wheel',function(e){e.preventDefault();scale=Math.max(.05,Math.min(6,scale*(e.deltaY>0?.88:1.12)));upd()},{passive:false});
+container.addEventListener('mousedown',function(e){drag=true;sx=e.clientX-tx;sy=e.clientY-ty});
+container.addEventListener('mousemove',function(e){if(!drag)return;tx=e.clientX-sx;ty=e.clientY-sy;upd()});
+container.addEventListener('mouseup',function(){drag=false});
+container.addEventListener('mouseleave',function(){drag=false});
+document.addEventListener('keydown',function(e){if(e.target.tagName==='INPUT')return;if(e.key==='+'||e.key==='=')zoomIn();if(e.key==='-')zoomOut();if(e.key==='0')resetView()});
+setTimeout(fitView,1500);
+var activeFilter='all';
+function setFilter(btn){
+  document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active')});
+  btn.classList.add('active');activeFilter=btn.dataset.filter;filterTable();
+}
+function filterTable(){
+  var q=(document.querySelector('.search-box')||{}).value||'';q=q.toLowerCase();
+  document.querySelectorAll('tbody tr').forEach(function(tr){
+    var mf=true;
+    if(activeFilter!=='all'){
+      if(activeFilter==='blocked'){mf=tr.innerHTML.indexOf('BLOCKED')!==-1}
+      else if(activeFilter==='critical'||activeFilter==='high'){mf=tr.dataset.priority===activeFilter}
+      else{mf=tr.dataset.stage===activeFilter}
+    }
+    var ms=!q||tr.textContent.toLowerCase().indexOf(q)!==-1;
+    tr.style.display=(mf&&ms)?'':'none';
+  });
+}
+var sortDir={};
+function sortTable(col){
+  var tbody=document.querySelector('tbody'),rows=Array.from(tbody.querySelectorAll('tr'));
+  sortDir[col]=!sortDir[col];var dir=sortDir[col]?1:-1;
+  rows.sort(function(a,b){var av=a.children[col].textContent.trim(),bv=b.children[col].textContent.trim();return av<bv?-dir:av>bv?dir:0});
+  rows.forEach(function(r){tbody.appendChild(r)});
+}
+document.querySelectorAll('.stage-chip').forEach(function(chip){
+  chip.addEventListener('click',function(){
+    var stage=chip.dataset.stage;
+    showView('table');
+    document.querySelectorAll('.filter-btn').forEach(function(b){b.classList.remove('active')});
+    activeFilter=stage;filterTable();
+  });
+});
+</script>
+</body>
+</html>

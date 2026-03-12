@@ -57,13 +57,18 @@ fi
 # ---------------------------------------------------------------------------
 # Check 3: Required extensions — Are uuid-ossp and pgcrypto loaded?
 # ---------------------------------------------------------------------------
+# Note: Extensions are created by the MCP server's migration runner.
+# During initial startup, extensions won't exist yet. We check for them
+# but treat 0 extensions as healthy so Postgres can start before the
+# MCP server runs migrations.
+# ---------------------------------------------------------------------------
 EXTENSIONS=$(psql -U "$PGUSER" -d "$PGDATABASE" -h "$PGHOST" -p "$PGPORT" \
     -c "SELECT extname FROM pg_extension WHERE extname IN ('uuid-ossp','pgcrypto');" \
     -t -A 2>/dev/null | wc -l)
 
 if [ "$EXTENSIONS" -lt 2 ]; then
-    echo "UNHEALTHY: Required extensions missing (expected uuid-ossp + pgcrypto, found ${EXTENSIONS})"
-    exit 1
+    echo "HEALTHY: PostgreSQL accepting connections (extensions not yet loaded — awaiting migrations)"
+    exit 0
 fi
 
 echo "HEALTHY: PostgreSQL is accepting connections, queries succeed, extensions loaded"

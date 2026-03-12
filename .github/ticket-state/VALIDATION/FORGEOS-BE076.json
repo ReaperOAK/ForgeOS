@@ -4,7 +4,7 @@
   "description": "Implement Migration Phase D: the filesystem ticket state is fully deprecated. The database is the sole source of truth. Remove filesystem sync, remove fallback code paths, remove dual-mode wrapper. The `.github/ticket-state/` directories and `.github/tickets/*.json` files are archived but no longer maintained by the system. WORK commits remain git-based for code changes only. This phase produces the cleanup script and deprecation configuration.",
   "type": "backend",
   "priority": "medium",
-  "stage": "DONE",
+  "stage": "VALIDATION",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -35,10 +35,10 @@
     "Phase D entry logged with final migration statistics (total operations, error rates, duration)"
   ],
   "rework_count": 0,
-  "claimed_by": null,
-  "machine_id": null,
-  "operator": null,
-  "lease_expiry": null,
+  "claimed_by": "Validator",
+  "machine_id": "pop-os",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-03-12T10:38:16Z",
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -106,15 +106,6 @@
       "from_stage": "DOCS",
       "to_stage": "VALIDATION",
       "details": "Advanced from DOCS to VALIDATION"
-    },
-    {
-      "timestamp": "2026-03-12T10:11:35.295606+00:00",
-      "event": "STAGE_COMPLETED",
-      "agent": "Validator",
-      "machine_id": "system",
-      "from_stage": "VALIDATION",
-      "to_stage": "DONE",
-      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tasks/phase4-migration.md",
