@@ -213,6 +213,11 @@
 - **Decisions:** Documented lifecycle guardrail regression intent directly in the test file and README. Added changelog entry for the guardrail suite. QA handoff file was missing; used CI + ticket AC + implementation fallback as reference.
 - **Timestamp:** 2026-03-14T15:43:29Z
 
+### [TASK-PC-BE-003] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/TASK-PC-BE-003.md
+- **Decisions:** REJECTED — DoD failures on lint max-depth gate (`src/services/context-hash.ts:125`), independent coverage artifact below threshold, and no independent green CI confirmation in sampled runs.
+- **Timestamp:** 2026-03-14T16:07:05Z
+
 ### [TASK-PC-BE-003] — Security Review
 - **Artifacts:** .github/agent-output/Security/TASK-PC-BE-003.md, .github/agent-output/Security/TASK-PC-BE-003.sarif
 - **Decisions:** PASS — STRIDE complete (all LOW), OWASP A03/SQL injection checks passed, test `vi.mock` isolation safe (test-only), hardcoded secret scan clean on changed files, npm audit high/critical = 0 (1 moderate `hono` advisory).

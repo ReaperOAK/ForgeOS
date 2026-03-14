@@ -4,7 +4,7 @@
   "description": "Implement canonical `context_hash` computation over required context inputs (`repo_commit`, `graph_version`, `memory_snapshot`, `packet_schema`, `template_version`) with deterministic serialization and SHA-256 output.",
   "type": "backend",
   "priority": "critical",
-  "stage": "SECURITY",
+  "stage": "BACKEND",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,7 +34,7 @@
     "Given unit tests, when executed, then deterministic and sensitivity assertions pass.",
     "Given implementation review, when auditing for scope, then no filesystem discovery logic is required by hash computation."
   ],
-  "rework_count": 1,
+  "rework_count": 2,
   "claimed_by": null,
   "machine_id": null,
   "operator": null,
@@ -117,6 +117,42 @@
       "from_stage": "QA",
       "to_stage": "SECURITY",
       "details": "Advanced from QA to SECURITY"
+    },
+    {
+      "timestamp": "2026-03-14T15:49:55.316376+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Security",
+      "machine_id": "system",
+      "from_stage": "SECURITY",
+      "to_stage": "CI",
+      "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-14T15:54:54.071463+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "system",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "Advanced from CI to DOCS"
+    },
+    {
+      "timestamp": "2026-03-14T16:00:19.981495+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
+    },
+    {
+      "timestamp": "2026-03-14T16:07:15.406307+00:00",
+      "event": "REWORK",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "BACKEND",
+      "details": "Rework #2: Validation failed: lint max-depth warning in forgeos-server/src/services/context-hash.ts:125; coverage artifact not meeting >=80% evidence for new code; no independent green CI run confirmation."
     }
   ],
   "source_task_file": "TODO/tickets/prompt-compiler-l3.md",
