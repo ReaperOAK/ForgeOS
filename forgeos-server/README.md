@@ -50,6 +50,26 @@ The server starts on `http://localhost:3011` by default.
 | `test:watch`    | `vitest`             | Run tests in watch mode                |
 | `prepare`       | `husky`              | Install Git hooks (runs on `npm install`) |
 
+### Lifecycle Guardrail Regression Tests
+
+The lifecycle prompt pipeline includes a static regression suite at
+`src/__tests__/prompt-lifecycle-guardrails.test.ts`.
+
+Test pattern and purpose:
+
+- Reads lifecycle modules as source text (`compiler.ts`, `tickets-claim.ts`,
+  `reconciliation.ts`) and asserts forbidden path patterns are absent.
+- Prevents regressions that re-introduce direct filesystem ticket-state
+  coupling (for example, `.github/ticket-state` and `.github/tickets`).
+- Verifies lifecycle hooks use queue-based prompt compilation triggers instead
+  of mutating lifecycle state directly.
+
+Run only this suite:
+
+```bash
+npx vitest run src/__tests__/prompt-lifecycle-guardrails.test.ts
+```
+
 ## Database
 
 ### Connection Pool

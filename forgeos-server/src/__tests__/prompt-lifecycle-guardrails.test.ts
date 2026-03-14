@@ -2,10 +2,24 @@ import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 
+/**
+ * Regression guardrails for prompt lifecycle modules.
+ *
+ * These tests enforce a hard boundary: lifecycle code may trigger prompt
+ * compilation, but it must not couple ticket state transitions to filesystem
+ * state directories or direct fs mutations.
+ */
+
 const compilerPath = resolve(process.cwd(), 'src/services/compiler.ts');
 const claimPath = resolve(process.cwd(), 'src/tools/tickets-claim.ts');
 const reconciliationPath = resolve(process.cwd(), 'src/webhooks/reconciliation.ts');
 
+/**
+ * Reads a module as UTF-8 text for static pattern assertions.
+ *
+ * The guardrail suite intentionally inspects source text instead of importing
+ * runtime modules, so checks remain focused on architectural contracts.
+ */
 function readModule(path: string): string {
     return readFileSync(path, 'utf8');
 }

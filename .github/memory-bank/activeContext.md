@@ -208,6 +208,11 @@
 - **Decisions:** Added full Reference-quadrant section for advance/rework endpoints in README, matching existing endpoint doc pattern (request/response examples, error tables, schema tables, route mounting, design decisions). Updated schemas module meta to include BE037.
 - **Timestamp:** 2026-03-11T08:30:00Z
 
+### [TASK-PC-BE-002] — Documentation Summary
+- **Artifacts:** forgeos-server/src/__tests__/prompt-lifecycle-guardrails.test.ts, forgeos-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/TASK-PC-BE-002.md
+- **Decisions:** Documented lifecycle guardrail regression intent directly in the test file and README. Added changelog entry for the guardrail suite. QA handoff file was missing; used CI + ticket AC + implementation fallback as reference.
+- **Timestamp:** 2026-03-14T15:43:29Z
+
 ### [FORGEOS-FE001] — QA Summary
 - **Artifacts:** .github/agent-output/QA/FORGEOS-FE001.md, dashboard/jest.config.ts, dashboard/jest.setup.ts, dashboard/src/components/__tests__/*.test.tsx (8 suites), dashboard/src/lib/__tests__/*.test.ts(x) (3 suites)
 - **Decisions:** QA PASS (HIGH confidence) — 89 tests pass, 83.1% statement / 84.21% line coverage. All 7 ACs verified. Build clean, lint clean. 0 defects. Design tokens verified against FORGEOS-UID001. Test infrastructure (Jest + RTL) added.
