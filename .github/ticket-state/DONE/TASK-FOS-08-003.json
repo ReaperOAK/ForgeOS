@@ -29,7 +29,7 @@
     ".env.example includes: ADMIN_API_KEY, WEBHOOK_SECRET, WORKSPACE_PATH, RATE_LIMIT_PER_MINUTE",
     ".env.example includes: DEFAULT_LEASE_MINUTES, MAX_LEASE_MINUTES",
     "config/index.ts exports typed Config interface with all configuration fields",
-    "Config loader reads from process.env with sensible defaults (PORT=3000, LOG_LEVEL=info, DEFAULT_LEASE_MINUTES=30)",
+    "Config loader reads from process.env with sensible defaults (PORT=3011, LOG_LEVEL=info, DEFAULT_LEASE_MINUTES=30)",
     "Config loader validates required variables in production: DB_PASSWORD, WEBHOOK_SECRET",
     "Config loader throws descriptive error on missing required variables listing all missing vars",
     "Config object is frozen (Object.freeze) after initialization to prevent mutation"

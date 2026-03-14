@@ -118,7 +118,7 @@ describe('ForgeApiClient', () => {
 
   describe('getBaseUrl', () => {
     it('returns the configured base URL', () => {
-      // default is process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'
+      // default is process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3011'
       expect(apiClient.getBaseUrl()).toBeTruthy();
     });
   });

@@ -43,7 +43,7 @@ applies migrations, and the MCP server connects once PostgreSQL reports healthy.
 
 | Service     | URL / Port             | Purpose                     |
 |-------------|------------------------|-----------------------------|
-| MCP Server  | http://localhost:3000   | MCP Streamable HTTP endpoint |
+| MCP Server  | http://localhost:3011   | MCP Streamable HTTP endpoint |
 | PostgreSQL  | localhost:5432          | Direct database access       |
 | pgAdmin     | http://localhost:5050   | Database administration UI   |
 
@@ -55,7 +55,7 @@ applies migrations, and the MCP server connects once PostgreSQL reports healthy.
 ```
 ┌──────────────┐     ┌──────────────┐     ┌──────────────┐
 │   pgAdmin    │     │  MCP Server  │     │  Agent Client │
-│  :5050       │     │  :3000       │     │  (VS Code)    │
+│  :5050       │     │  :3011       │     │  (VS Code)    │
 └──────┬───────┘     └──────┬───────┘     └──────┬────────┘
        │                    │                     │
        │     depends_on     │                     │
@@ -97,7 +97,7 @@ into `/docker-entrypoint-initdb.d/` and applied automatically on first start.
 |-----------------|---------------------------------------------|
 | Image           | Built from `forgeos-server/Dockerfile`      |
 | Container name  | `forgeos-mcp`                               |
-| Port            | 3000 (mapped to host)                       |
+| Port            | 3011 (mapped to host)                       |
 | Node.js         | 22 (Alpine)                                 |
 | Environment     | `NODE_ENV=production`, `LOG_LEVEL=info`     |
 | Depends on      | `postgres` (healthy)                        |
@@ -278,8 +278,8 @@ receives the start signal.
 the compose port mapping.
 
 ```bash
-# Check ports 3000, 5432, 5050
-lsof -i :3000 -i :5432 -i :5050
+# Check ports 3011, 5432, 5050
+lsof -i :3011 -i :5432 -i :5050
 ```
 
 ### pgAdmin Cannot Connect to PostgreSQL
@@ -442,7 +442,7 @@ healthcheck:
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `MCP_HOST` | `localhost` | MCP server hostname |
-| `MCP_PORT` | `3000` | MCP server port |
+| `MCP_PORT` | `3011` | MCP server port |
 | `TIMEOUT` | `5` | Request timeout in seconds |
 
 ### Writing a Custom Health Check
@@ -503,7 +503,7 @@ Prometheus scrapes two targets:
 | Job | Target | Interval | Description |
 |-----|--------|----------|-------------|
 | `prometheus` | `localhost:9090` | 15 s | Self-monitoring |
-| `forgeos-mcp-server` | `mcp-server:3000/health` | 10 s | MCP health probe |
+| `forgeos-mcp-server` | `mcp-server:3011/health` | 10 s | MCP health probe |
 | `forgeos-postgres` | `postgres:5432` | 15 s | TCP availability check |
 
 Data retains for 7 days (`--storage.tsdb.retention.time=7d`).
@@ -554,7 +554,7 @@ Grafana depends on Prometheus being healthy before starting.
 |                                                      |
 |  +---------+    scrape     +------------+            |
 |  |  MCP    +---------------+ Prometheus |            |
-|  | Server  |  /health:3000 |  :9090     |            |
+|  | Server  |  /health:3011 |  :9090     |            |
 |  +---------+               +------+-----+            |
 |                                   |                  |
 |  +----------+   TCP probe         |  datasource      |

@@ -272,7 +272,7 @@ The middleware chain is: `requestIdMiddleware → requestLogger → authMiddlewa
 - **Mitigating Factor:** ForgeOS is primarily a server-to-server system (LLM agents → MCP server), not browser-based. Browser-based exploitation requires the API key to be accessible to browser JavaScript.
 - **Remediation:** Restrict CORS to known origins:
   ```typescript
-  const ALLOWED_ORIGINS = ['http://localhost:3000', 'http://localhost:3100'];
+  const ALLOWED_ORIGINS = ['http://localhost:3011', 'http://localhost:3100'];
   if (origin && ALLOWED_ORIGINS.includes(origin)) {
     res.setHeader('Access-Control-Allow-Origin', origin);
   }

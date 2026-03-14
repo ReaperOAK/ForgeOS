@@ -602,7 +602,7 @@ describe('Code Graph Performance Benchmarks', () => {
         timestamp: new Date().toISOString(),
         results: benchmarkResults,
         nfrTargets: {
-          full_index_1k_files: '< 30000ms',
+          full_index_1k_files: '< 30110ms',
           blast_radius_query: '< 500ms',
         },
       };

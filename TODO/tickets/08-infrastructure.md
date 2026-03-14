@@ -8,15 +8,15 @@
 **Files:** forgeos-server/Dockerfile, forgeos-server/.dockerignore
 
 ### Description
-Create a multi-stage Dockerfile for the ForgeOS MCP server as specified in Architecture §8.2. Stage 1 (builder): Node.js 22 Alpine base, install dependencies with npm ci, copy source and compile TypeScript with npm run build. Stage 2 (runtime): Node.js 22 Alpine base, copy compiled dist/ and node_modules/ from builder, copy dashboard static files, set NODE_ENV=production, run as non-root user (node), expose port 3000, add HEALTHCHECK instruction that curls /health endpoint, CMD to run the compiled entry point. Include a .dockerignore file that excludes node_modules, .git, dist, *.md, .env, and other non-essential files.
+Create a multi-stage Dockerfile for the ForgeOS MCP server as specified in Architecture §8.2. Stage 1 (builder): Node.js 22 Alpine base, install dependencies with npm ci, copy source and compile TypeScript with npm run build. Stage 2 (runtime): Node.js 22 Alpine base, copy compiled dist/ and node_modules/ from builder, copy dashboard static files, set NODE_ENV=production, run as non-root user (node), expose port 3011, add HEALTHCHECK instruction that curls /health endpoint, CMD to run the compiled entry point. Include a .dockerignore file that excludes node_modules, .git, dist, *.md, .env, and other non-essential files.
 
 ### Acceptance Criteria
 - [ ] Multi-stage build: builder stage uses node:22-alpine, compiles TypeScript
 - [ ] Builder stage installs dependencies with npm ci (not npm install) for reproducible builds
 - [ ] Runtime stage uses node:22-alpine, copies only dist/, node_modules/, and dashboard static files
 - [ ] Runtime stage sets NODE_ENV=production and USER node (non-root)
-- [ ] EXPOSE 3000 directive present
-- [ ] HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD curl -f http://localhost:3000/health
+- [ ] EXPOSE 3011 directive present
+- [ ] HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD curl -f http://localhost:3011/health
 - [ ] CMD ["node", "dist/index.js"] as the entry point
 - [ ] .dockerignore excludes: node_modules, .git, dist, *.md (except README), .env, .env.*, secrets/
 - [ ] Built image size under 200MB
@@ -65,7 +65,7 @@ Create the environment configuration template and config loader module. The .env
 - [ ] .env.example includes: ADMIN_API_KEY, WEBHOOK_SECRET, WORKSPACE_PATH, RATE_LIMIT_PER_MINUTE
 - [ ] .env.example includes: DEFAULT_LEASE_MINUTES, MAX_LEASE_MINUTES
 - [ ] config/index.ts exports typed Config interface with all configuration fields
-- [ ] Config loader reads from process.env with sensible defaults (PORT=3000, LOG_LEVEL=info, DEFAULT_LEASE_MINUTES=30)
+- [ ] Config loader reads from process.env with sensible defaults (PORT=3011, LOG_LEVEL=info, DEFAULT_LEASE_MINUTES=30)
 - [ ] Config loader validates required variables in production: DB_PASSWORD, WEBHOOK_SECRET
 - [ ] Config loader throws descriptive error on missing required variables listing all missing vars
 - [ ] Config object is frozen (Object.freeze) after initialization to prevent mutation

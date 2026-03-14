@@ -49,7 +49,7 @@ summary: "- **`ENTRYPOINT`:** Defines the executable that will always run. Makes
 ```dockerfile
 # Set default values
 ENV NODE_ENV=production
-ENV PORT=3000
+ENV PORT=3011
 ENV LOG_LEVEL=info
 
 # Use ARG for build-time variables

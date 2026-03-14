@@ -413,7 +413,7 @@ The MCP protocol as used by ForgeOS follows this pattern:
       "ticket_id": "FORGEOS-ARCH001",
       "agent_name": "Architect",
       "machine_id": "pop-os",
-      "operator": "Ticketer"
+      "operator": "ForgeOS dispatcher"
     }
   }
 }
@@ -551,7 +551,7 @@ graph TB
     subgraph "Single Machine (pop-os)"
         subgraph "Docker Compose"
             PG["PostgreSQL 17<br>Container: forgeos-postgres<br>Port: 5432<br>Volume: pgdata"]
-            SERVER["ForgeOS MCP Server<br>Container: forgeos-mcp<br>Port: 3000"]
+            SERVER["ForgeOS MCP Server<br>Container: forgeos-mcp<br>Port: 3011"]
         end
 
         subgraph "Local Agents"
@@ -562,11 +562,11 @@ graph TB
         BROWSER["Browser<br>(Dashboard)"]
     end
 
-    VSCODE -->|"localhost:3000/mcp"| SERVER
-    CLI -->|"localhost:3000/mcp"| SERVER
+    VSCODE -->|"localhost:3011/mcp"| SERVER
+    CLI -->|"localhost:3011/mcp"| SERVER
     SERVER -->|"postgres:5432"| PG
-    BROWSER -->|"localhost:3000/dashboard"| SERVER
-    BROWSER -->|"localhost:3000/events"| SERVER
+    BROWSER -->|"localhost:3011/dashboard"| SERVER
+    BROWSER -->|"localhost:3011/events"| SERVER
 
     style PG fill:#336791,color:#fff
     style SERVER fill:#4CAF50,color:#fff
@@ -587,7 +587,7 @@ graph TB
     subgraph "Server Machine (Central)"
         subgraph "Docker Compose"
             PG["PostgreSQL 17<br>Port: 5432"]
-            SERVER["ForgeOS MCP Server<br>Port: 3000"]
+            SERVER["ForgeOS MCP Server<br>Port: 3011"]
         end
     end
 

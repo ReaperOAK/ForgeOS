@@ -835,7 +835,7 @@ NC='\033[0m'
 
 PASS=0
 FAIL=0
-BASE_URL="http://localhost:3000"
+BASE_URL="http://localhost:3011"
 
 pass() { echo -e "${GREEN}✓ $1${NC}"; ((PASS++)); }
 fail() { echo -e "${RED}✗ $1${NC}"; ((FAIL++)); }
@@ -1093,7 +1093,7 @@ Estimated total: 6-8 engineering hours across all fixes.
 **Decision:** The TypeScript MCP server (`forgeos-server/`) is the canonical server. The Python MCP server (`mcp-server/`) should not be deployed or maintained as a server.  
 **Consequences:**
 - All tool development happens in TypeScript
-- Agent SDK targets TypeScript server on port 3000
+- Agent SDK targets TypeScript server on port 3011
 - Python `mcp-server/` code can be archived or repurposed as reference
 - Schema migration ownership belongs to `forgeos-server/src/db/migrations/`
 

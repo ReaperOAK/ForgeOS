@@ -19,7 +19,7 @@ make up      # starts PostgreSQL, MCP Server, and pgAdmin
 make migrate && make seed  # apply schema and load sample data
 ```
 
-Open the live Kanban dashboard at **http://localhost:3000/dashboard**.
+Open the live Kanban dashboard at **http://localhost:3011/dashboard**.
 
 ---
 
@@ -60,11 +60,11 @@ The runtime infrastructure consists of:
   functions for atomic ticket operations, event-sourcing audit trail, and
   `LISTEN/NOTIFY` for real-time Server-Sent Events.
 - **Real-Time Dashboard** — Live Kanban board at
-  **http://localhost:3000/dashboard** with SSE-driven updates, stage
+  **http://localhost:3011/dashboard** with SSE-driven updates, stage
   filtering, and ticket detail views.
 
 ```
-Ticketer (CTO / Elastic Multi-Worker Parallel Orchestrator)
+ForgeOS Dispatcher (CTO / Elastic Multi-Worker Parallel Orchestrator)
 |
 +--- Strategic Layer ----------------------------------------
 |    Research Analyst      Evidence research, PoC, tech radar
@@ -86,10 +86,10 @@ Ticketer (CTO / Elastic Multi-Worker Parallel Orchestrator)
      CI Reviewer           Complexity, lint, SARIF findings
 ```
 
-**Ticketer** is the singular orchestrator. It never writes code. It selects
+**ForgeOS dispatcher** is the singular orchestrator. It never writes code. It selects
 tickets, assigns workers from elastic pools, drives each ticket through its
 lifecycle, reacts to events, and enforces commits. All inter-agent
-communication routes through Ticketer — there is no direct agent-to-agent
+communication routes through the dispatcher — there is no direct agent-to-agent
 messaging.
 
 ### Key Properties
@@ -157,7 +157,7 @@ controlled pivots without halting unaffected work.
 
 ### Event Queue
 
-An ordered log of all system events. Ticketer consumes events and routes
+An ordered log of all system events. The ForgeOS dispatcher consumes events and routes
 them to the appropriate handler. Event types include TASK_STARTED,
 TASK_COMPLETED, TASK_FAILED, WORKER_SPAWNED, WORKER_TERMINATED,
 POOL_SCALED_UP, POOL_SCALED_DOWN, SDR_PROPOSED, SDR_APPROVED,
@@ -317,7 +317,7 @@ through the SDR (Strategic Decision Record) protocol.
 
 1. A strategic-layer agent (Research, Architect, Product Manager) identifies
    a necessary direction change and proposes an SDR.
-2. Ticketer evaluates the SDR. Scope expansions require operator approval.
+2. The ForgeOS dispatcher evaluates the SDR. Scope expansions require operator approval.
    Priority reshuffling can be auto-approved.
 3. On approval, affected tickets are re-prioritized, new tickets are generated
    by the TODO Agent, and obsolete tickets are cancelled.
@@ -493,7 +493,7 @@ autonomous delivery.
   agents/                  14 agent definitions (*.agent.md) with YAML frontmatter
                            Includes role, tools, permissions, forbidden actions
   tickets/                 Ticket JSON files + schema (`ticket-schema.json`)
-  ticket-state/            File-based state machine directories (READY..DONE)
+  ticket-state/            Legacy compatibility snapshots (not runtime state)
   agent-output/            Stage handoff summaries (`{Agent}/{ticket-id}.md`)
   memory-bank/             Persistent shared state (9 files + schema)
                            activeContext, progress, decisionLog, riskRegister,
@@ -568,7 +568,7 @@ TODO/                      Task decomposition artifacts
 ## Example Execution Flow
 
 **Scenario:** 5 conflict-free READY tickets trigger elastic pool spawning.
-Ticketer launches 5 workers in parallel. One triggers a strategic review.
+The ForgeOS dispatcher launches 5 workers in parallel. One triggers a strategic review.
 Only that ticket pauses. The others continue to completion.
 
 ```
@@ -600,7 +600,7 @@ T+20:00  BE-011 completes -> enters post-execution chain
          BE-011 -> DONE. Worker terminated.
 
 T+22:00  BE-010 triggers NEEDS_INPUT_FROM (Architect).
-         BE-010 pauses at BACKEND. Ticketer routes question.
+         BE-010 pauses at BACKEND. Dispatcher routes question.
          All other tickets continue unaffected.
 
 T+25:00  FE-001 completes -> full chain -> DONE
@@ -743,19 +743,19 @@ make up
 make migrate && make seed
 ```
 
-The live Kanban dashboard is available at **http://localhost:3000/dashboard**.
+The live Kanban dashboard is available at **http://localhost:3011/dashboard**.
 
 ### Configuration
 
 1. **MCP Connections.** Configure required MCP servers in your VS Code
    settings. At minimum: file system, terminal, and Git access.
 
-2. **Worker Pool Sizes.** Pool bounds are defined in the Ticketer agent
-   definition at `.github/agents/Ticketer.agent.md` (Section 7). Adjust
+2. **Worker Pool Sizes.** Pool bounds are defined in the dispatcher agent
+  definition at `.github/agents/Ticketer.agent.md` (Section 7). Adjust
    `minSize` and `maxSize` per role based on your workload profile.
 
 3. **Git Provider.** Ensure Git is configured for the target repository.
-  Ticketer enforces two-commit protocol per stage with explicit scoped staging.
+  The dispatcher enforces two-commit protocol per stage with explicit scoped staging.
 
 4. **Optional Integrations.** Connect Stitch MCP for UI design, Playwright
    for E2E testing, Sentry for monitoring, MongoDB for data operations,
@@ -803,7 +803,7 @@ make help
 
 | Service    | URL                    |
 |------------|------------------------|
-| MCP Server | http://localhost:3000   |
+| MCP Server | http://localhost:3011   |
 | PostgreSQL | localhost:5432          |
 | pgAdmin    | http://localhost:5050   |
 
@@ -870,11 +870,11 @@ Coverage artifacts are uploaded with 7-day retention.
 
 ### Starting the Engine
 
-Invoke Ticketer in GitHub Copilot Agent Mode. The boot protocol
+Invoke the ForgeOS dispatcher in GitHub Copilot Agent Mode. The boot protocol
 (`agents.md`) loads automatically, reads memory bank state, checks the
 guardian circuit breaker, and initializes the scheduling loop.
 
-From there, provide a project vision or feature request. Ticketer will:
+From there, provide a project vision or feature request. The dispatcher will:
 
 1. Invoke the TODO Agent to decompose work into tickets
 2. Evaluate ticket dependencies and build the execution DAG

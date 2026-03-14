@@ -8,14 +8,14 @@
 **Files:** forgeos-server/package.json, forgeos-server/tsconfig.json, forgeos-server/src/index.ts, forgeos-server/src/server.ts
 
 ### Description
-Initialize the ForgeOS MCP server project. Create package.json with all required dependencies: @modelcontextprotocol/server, @modelcontextprotocol/node, pg, zod (v4), express, @types/express, @types/pg, typescript, tsx, @octokit/webhooks, d3 (CDN — no npm install needed for dashboard). Create tsconfig.json with TypeScript strict mode enabled (strict: true, all strict flags). Create the entry point (index.ts) that boots Express, creates the MCP server via factory function, sets up Streamable HTTP transport with session management, registers the health endpoint, and starts listening on configurable PORT (default 3000). Create server.ts as the MCP server factory function that will later register all tools. Implement graceful shutdown that drains in-flight requests on SIGTERM/SIGINT.
+Initialize the ForgeOS MCP server project. Create package.json with all required dependencies: @modelcontextprotocol/server, @modelcontextprotocol/node, pg, zod (v4), express, @types/express, @types/pg, typescript, tsx, @octokit/webhooks, d3 (CDN — no npm install needed for dashboard). Create tsconfig.json with TypeScript strict mode enabled (strict: true, all strict flags). Create the entry point (index.ts) that boots Express, creates the MCP server via factory function, sets up Streamable HTTP transport with session management, registers the health endpoint, and starts listening on configurable PORT (default 3011). Create server.ts as the MCP server factory function that will later register all tools. Implement graceful shutdown that drains in-flight requests on SIGTERM/SIGINT.
 
 ### Acceptance Criteria
 - [ ] package.json includes @modelcontextprotocol/server, @modelcontextprotocol/node, pg, zod, express as production dependencies
 - [ ] package.json includes typescript, @types/express, @types/pg, tsx as dev dependencies
 - [ ] package.json has scripts: build (tsc), dev (tsx watch), start (node dist/index.js), migrate, seed, import
 - [ ] tsconfig.json has strict: true, target ES2022, module NodeNext, outDir dist, rootDir src
-- [ ] index.ts boots Express app, creates MCP server from factory, and listens on PORT env var (default 3000)
+- [ ] index.ts boots Express app, creates MCP server from factory, and listens on PORT env var (default 3011)
 - [ ] Streamable HTTP transport configured with session ID generator and session map for stateful sessions
 - [ ] GET /health endpoint returns {status: "ok", uptime: N, timestamp: ISO8601} (DB check added later)
 - [ ] Graceful shutdown handler on SIGTERM/SIGINT closes server and pool connections

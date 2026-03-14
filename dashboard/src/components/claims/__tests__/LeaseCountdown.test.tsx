@@ -116,7 +116,7 @@ describe('LeaseCountdown', () => {
 
         // Advance past 300s boundary
         act(() => {
-            jest.advanceTimersByTime(3000);
+            jest.advanceTimersByTime(3011);
         });
         expect(timer.innerHTML).toContain('text-warning');
     });
@@ -127,7 +127,7 @@ describe('LeaseCountdown', () => {
         expect(timer.innerHTML).toContain('text-warning');
 
         act(() => {
-            jest.advanceTimersByTime(3000);
+            jest.advanceTimersByTime(3011);
         });
         expect(timer.innerHTML).toContain('text-error');
     });
@@ -139,7 +139,7 @@ describe('LeaseCountdown', () => {
         expect(onExpire).not.toHaveBeenCalled();
 
         act(() => {
-            jest.advanceTimersByTime(3000);
+            jest.advanceTimersByTime(3011);
         });
         expect(onExpire).toHaveBeenCalledTimes(1);
     });

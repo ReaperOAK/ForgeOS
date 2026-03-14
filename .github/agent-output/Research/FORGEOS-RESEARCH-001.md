@@ -150,7 +150,7 @@ app.get('/mcp', async (req, res) => {
   await transports[sessionId].handleRequest(req, res);
 });
 
-app.listen(3000, '127.0.0.1');
+app.listen(3011, '127.0.0.1');
 ```
 
 **Sources:** Official SDK server.md docs (weight: 1.0), SDK examples (weight: 0.9)
@@ -725,14 +725,14 @@ services:
     environment:
       DATABASE_URL: postgres://forgeos:password@pgbouncer:6432/forgeos
       NODE_ENV: production
-      PORT: 3000
+      PORT: 3011
     depends_on:
       pgbouncer:
         condition: service_started
       postgres:
         condition: service_healthy
     ports:
-      - "3000:3000"
+      - "3011:3011"
     volumes:
       - git-repos:/app/repos  # Git repo mount point
       - ./config:/app/config:ro  # Read-only config

@@ -172,7 +172,7 @@
         {
           "ruleId": "SEC-INFO-002",
           "level": "note",
-          "message": {"text": "Default MCP URL uses HTTP (http://localhost:3000/mcp). Acceptable for localhost development. Production deployments should configure HTTPS via env var."},
+          "message": {"text": "Default MCP URL uses HTTP (http://localhost:3011/mcp). Acceptable for localhost development. Production deployments should configure HTTPS via env var."},
           "locations": [{"physicalLocation": {"artifactLocation": {"uri": ".github/tickets.py"}, "region": {"startLine": 84}}}]
         }
       ]

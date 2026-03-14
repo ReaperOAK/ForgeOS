@@ -32,11 +32,11 @@ export type WebSocketEvent =
 export type ConnectionStatus = 'connected' | 'connecting' | 'disconnected';
 
 export interface WebSocketClientOptions {
-  /** Base URL for the WebSocket endpoint. Defaults to env or localhost:3000. */
+  /** Base URL for the WebSocket endpoint. Defaults to env or localhost:3011. */
   url?: string;
   /** Initial reconnection delay in ms. Default: 1000. */
   initialDelay?: number;
-  /** Maximum reconnection delay in ms. Default: 30000. */
+  /** Maximum reconnection delay in ms. Default: 30110. */
   maxDelay?: number;
   /** Called on every incoming event. */
   onEvent?: (event: WebSocketEvent) => void;
@@ -45,7 +45,7 @@ export interface WebSocketClientOptions {
 }
 
 const DEFAULT_WS_URL =
-  (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000')
+  (process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3011')
     .replace(/^http/, 'ws') + '/ws/tickets';
 
 /**

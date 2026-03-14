@@ -479,7 +479,7 @@ The scaffold includes a typed API client module:
 
 | Setting | Source | Default | Description |
 |---------|--------|---------|-------------|
-| `NEXT_PUBLIC_API_URL` | Environment variable | `http://localhost:3000` | ForgeOS API base URL |
+| `NEXT_PUBLIC_API_URL` | Environment variable | `http://localhost:3011` | ForgeOS API base URL |
 
 ### Client Module Structure
 
@@ -509,7 +509,7 @@ dashboard/
 ├── next.config.js             # Next.js configuration
 ├── tailwind.config.ts         # Tailwind with design token colors
 ├── postcss.config.js          # PostCSS for Tailwind
-├── .env.local                 # NEXT_PUBLIC_API_URL=http://localhost:3000
+├── .env.local                 # NEXT_PUBLIC_API_URL=http://localhost:3011
 ├── src/
 │   ├── app/
 │   │   ├── layout.tsx         # Root layout with theme provider, sidebar, top bar

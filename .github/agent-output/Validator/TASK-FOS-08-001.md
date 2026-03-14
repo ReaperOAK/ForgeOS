@@ -17,7 +17,7 @@ cross-verified: QA PASS, Security PASS, CI PASS (93/100), Documentation PASS.
 | 2 | Builder uses npm ci (not npm install) | PASS | Dockerfile L11: `RUN npm ci` |
 | 3 | Runtime copies only dist/, node_modules/, dashboard static | PASS | Dockerfile L28-30: `COPY --from=builder /app/dist/`, `node_modules/`, `package.json`; L33: `COPY src/dashboard/` |
 | 4 | Runtime sets NODE_ENV=production and USER node (non-root) | PASS | Dockerfile L35: `ENV NODE_ENV=production`, L38: `USER node` |
-| 5 | EXPOSE 3000 directive present | PASS | Dockerfile L40: `EXPOSE 3000` |
+| 5 | EXPOSE 3011 directive present | PASS | Dockerfile L40: `EXPOSE 3011` |
 | 6 | HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD curl | PASS | Dockerfile L44-45: exact match with `|| exit 1` (standard) |
 | 7 | CMD ["node", "dist/index.js"] as entry point | PASS | Dockerfile L47: `CMD ["node", "dist/index.js"]` |
 | 8 | .dockerignore excludes required patterns | PASS | All present: node_modules, .git, dist, *.md, !README.md, .env, .env.*, secrets/ |

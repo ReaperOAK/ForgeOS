@@ -34,6 +34,7 @@ interface TicketRow {
   ticket_id: string;
   current_stage: string;
   claimed_by: string | null;
+  claimed_by_name: string | null;
   rework_count: number;
 }
 
@@ -78,7 +79,13 @@ export class ReflectionService {
   async reflectOnTicket(ticketId: string): Promise<ReflectionLesson | null> {
     // 1. Load ticket — bail early if missing or never reworked
     const ticketResult = await this.pool.query<TicketRow>(
-      'SELECT ticket_id, current_stage, claimed_by, rework_count FROM tickets WHERE ticket_id = $1',
+      `SELECT ticket_id,
+              stage AS current_stage,
+              claimed_by,
+              claimed_by_name,
+              rework_count
+         FROM tickets
+        WHERE ticket_id = $1`,
       [ticketId],
     );
     const ticket = ticketResult.rows[0];
@@ -121,7 +128,7 @@ export class ReflectionService {
     const embedding = await this.embeddingService.embedText(lessonText);
 
     // 6. Store lesson + embedding in a single transaction
-    const agentRole = ticket.claimed_by ?? 'unknown';
+    const agentRole = ticket.claimed_by_name ?? ticket.claimed_by ?? 'unknown';
     const client = await this.pool.connect();
     try {
       await client.query('BEGIN');

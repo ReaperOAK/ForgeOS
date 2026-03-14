@@ -6,7 +6,7 @@
 # Dashboard JavaScript Architecture
 
 Reference documentation for the ForgeOS real-time dashboard client-side
-JavaScript. The dashboard is served at `http://localhost:3000/dashboard` and
+JavaScript. The dashboard is served at `http://localhost:3011/dashboard` and
 renders a live Kanban board backed by Server-Sent Events.
 
 ## Module Overview
@@ -91,7 +91,7 @@ The `init()` function in `app.js` publishes the following surface on
 2. On `open`, sets state to `connected`, resets retry counter.
 3. Registers listeners for 13 named event types (see table below).
 4. On `error`, closes the source and schedules a reconnect with
-   exponential backoff: `delay = min(1000 * 2^(retryCount-1), 30000)`.
+   exponential backoff: `delay = min(1000 * 2^(retryCount-1), 30110)`.
 5. If elapsed time since last message exceeds 30 s and retryCount > 1,
    state changes to `disconnected` and a banner with a Retry button
    appears.

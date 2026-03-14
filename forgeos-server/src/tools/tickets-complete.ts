@@ -22,6 +22,8 @@
 import { z } from 'zod';
 import { pool } from '../db/pool.js';
 import { logger } from '../middleware/logging.js';
+import { EmbeddingService } from '../services/embedding-service.js';
+import { ReflectionService } from '../services/reflection-service.js';
 import type { Ticket, TicketsCompleteOutput } from '../types/index.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
@@ -182,6 +184,29 @@ export async function ticketsCompleteHandler(
 
     const advancedTicket = result.rows[0]!;
     const newStage = advancedTicket.stage;
+
+    // ── Step 4b: Auto-reflection on rework completion ─────────────────────
+    if (newStage === 'DONE' && advancedTicket.rework_count > 0) {
+      try {
+        const reflectionService = new ReflectionService(pool, new EmbeddingService());
+        const lesson = await reflectionService.reflectOnTicket(ticket_id);
+        if (lesson) {
+          logger.info(
+            { ticket_id, rework_count: lesson.reworkCount, stage: lesson.stage },
+            'tickets.complete: reflection lesson captured',
+          );
+        }
+      } catch (reflectionErr: unknown) {
+        // Reflection should never block ticket progression.
+        logger.warn(
+          {
+            ticket_id,
+            error: reflectionErr instanceof Error ? reflectionErr.message : String(reflectionErr),
+          },
+          'tickets.complete: reflection capture failed (non-fatal)',
+        );
+      }
+    }
 
     // ── Step 5: Query unblocked dependencies ─────────────────────────────
     let dependenciesUnblocked: string[] = [];

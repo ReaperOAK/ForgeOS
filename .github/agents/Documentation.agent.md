@@ -64,7 +64,7 @@ Execute in order. No skips.
 
 ## 4. Pre-Claimed Ticket (Dispatcher-Claim Protocol)
 
-RULE: The ticket is already claimed by Ticketer before this agent is launched.
+RULE: The ticket is already claimed by ForgeOS dispatcher before this agent is launched.
 RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
 
 1. Call `tickets.payload(ticket_id)` to receive the full delegation context from the ForgeOS MCP server.

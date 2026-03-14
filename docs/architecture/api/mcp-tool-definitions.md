@@ -993,7 +993,7 @@ reason in the event payload.
 *Force-release by an admin:*
 ```json
 // Request
-{ "ticket_id": "TASK-002", "agent_name": "Ticketer", "force": true, "reason": "Lease expired, agent unresponsive" }
+{ "ticket_id": "TASK-002", "agent_name": "ForgeOS dispatcher", "force": true, "reason": "Lease expired, agent unresponsive" }
 
 // Response — same shape; released_file_locks may be empty if no locks were held
 {

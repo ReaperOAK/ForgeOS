@@ -2,7 +2,7 @@
 
 This repository implements a **multi-agent vibecoding system** — a ticket-driven
 AI development infrastructure where specialized agents collaborate under
-Ticketer (stateless dispatcher).
+the ForgeOS dispatcher (MCP-native orchestrator).
 
 ## Repository Structure
 
@@ -16,9 +16,8 @@ Ticketer (stateless dispatcher).
     git-protocol.instructions.md    # Two-commit protocol, scoped git, lease, summary handoff
     agent-behavior.instructions.md  # Worker model, scope, context derivation, stage ownership
   memory-bank/         # Persistent shared state (append-only)
-  tickets/             # Ticket JSON files + schema
-  ticket-state/        # File-based state machine (11 stage directories)
-    READY/ ARCHITECT/ RESEARCH/ BACKEND/ FRONTEND/ QA/ SECURITY/ CI/ DOCS/ VALIDATION/ DONE/
+  tickets/             # Legacy ticket JSON artifacts (migration/compat only)
+  ticket-state/        # Legacy state snapshots (not runtime source of truth)
   agent-output/        # Summary handoff chain ({AgentName}/{ticket-id}.md)
   vibecoding/          # Context chunks, catalog, index
   guardian/            # Circuit breaker (STOP_ALL)
@@ -48,13 +47,13 @@ docs/uiux/            # UI/UX design artifacts
 
 ## Architecture
 
-- **Ticketer**: Stateless dispatcher. Scans READY tickets, dispatches workers, advances lifecycle.
+- **ForgeOS dispatcher**: MCP-native orchestrator. Finds READY work via `tickets.next`, claims via `tickets.claim`, and dispatches stage agents.
 - **ForgeOS MCP Server** (`forgeos-server/`): TypeScript/Express server exposing 11 ticket lifecycle tools over Model Context Protocol (MCP) via Streamable HTTP transport. Backed by PostgreSQL 17 with Row-Level Security, stored functions for atomic ticket operations, and LISTEN/NOTIFY for real-time SSE.
 - **PostgreSQL 17**: Primary data store with event-sourcing audit trail, file-level mutex for concurrent access, and dependency resolution.
-- **Real-Time Dashboard**: Live Kanban board at http://localhost:3000/dashboard with SSE-driven updates, stage filtering, and ticket detail views.
+- **Real-Time Dashboard**: Live Kanban board at http://localhost:3011/dashboard with SSE-driven updates, stage filtering, and ticket detail views.
 - **Distributed execution**: Multiple operators on multiple machines via Git-native locking.
 - **Two-commit protocol**: CLAIM commit (distributed lock via push) + WORK commit (deliverables).
-- **File-based state machine**: Ticket state = directory location under .github/ticket-state/.
+- **PostgreSQL state machine**: Ticket state lives in DB `tickets.stage` and advances via MCP tools.
 - **14 agents**: Architect, Backend, Frontend, QA, Security, DevOps, Documentation, Research, ProductManager, CIReviewer, UIDesigner, TODO, Validator.
 - **Summary handoff**: Context flows via .github/agent-output/{Agent}/{ticket-id}.md files.
 - **Memory bank**: Git-tracked markdown files for cross-session persistence.

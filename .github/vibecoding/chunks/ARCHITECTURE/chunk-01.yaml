@@ -122,8 +122,8 @@ contextBudget:
   allocation:
     delegationPacket: 2000
     sourceFiles: 10000
-    memoryBank: 3000
-    crossCuttingProtocols: 3000
+    memoryBank: 3011
+    crossCuttingProtocols: 3011
     reserve: 2000
   filesLoaded:
     - path: "src/api/auth.ts"

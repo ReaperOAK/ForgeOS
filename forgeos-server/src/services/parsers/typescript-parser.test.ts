@@ -142,7 +142,7 @@ describe('parseTypeScript', () => {
     it('extracts class properties', async () => {
       const source = `class Config {
   readonly host: string = 'localhost';
-  port: number = 3000;
+  port: number = 3011;
 }`;
       const result = await parseTypeScript(source, 'test.ts');
 

@@ -152,7 +152,7 @@
     };
 
     // Remove all status classes
-    Object.keys(classMap).forEach(function(key) {
+    Object.keys(classMap).forEach(function (key) {
       dotEl.classList.remove(classMap[key]);
     });
     dotEl.classList.add(classMap[status] || classMap.unknown);
@@ -231,14 +231,14 @@
     var max = Math.max.apply(null, data);
     var range = max - min || 1;
 
-    var points = data.map(function(val, i) {
+    var points = data.map(function (val, i) {
       var x = padding + (i / (data.length - 1)) * w;
       var y = padding + h - ((val - min) / range) * h;
       return { x: x, y: y };
     });
 
     // Build path
-    var lineD = 'M ' + points.map(function(p) { return p.x.toFixed(1) + ' ' + p.y.toFixed(1); }).join(' L ');
+    var lineD = 'M ' + points.map(function (p) { return p.x.toFixed(1) + ' ' + p.y.toFixed(1); }).join(' L ');
 
     // Area path
     var areaD = lineD + ' L ' + points[points.length - 1].x.toFixed(1) + ' ' + (viewH - padding) + ' L ' + points[0].x.toFixed(1) + ' ' + (viewH - padding) + ' Z';
@@ -309,14 +309,14 @@
   }
 
   function dismissAlert(alertId) {
-    state.alerts = state.alerts.filter(function(a) { return a.id !== alertId; });
+    state.alerts = state.alerts.filter(function (a) { return a.id !== alertId; });
     renderAlerts();
   }
 
   function renderAlerts() {
     // Remove expired alerts
     var now = Date.now();
-    state.alerts = state.alerts.filter(function(a) {
+    state.alerts = state.alerts.filter(function (a) {
       return (now - new Date(a.timestamp).getTime()) < ALERT_AUTO_EXPIRE_MS;
     });
 
@@ -352,7 +352,7 @@
     }
 
     // Render each alert
-    state.alerts.forEach(function(alert) {
+    state.alerts.forEach(function (alert) {
       var li = document.createElement('li');
       li.className = 'alert-item';
       li.setAttribute('role', 'alert');
@@ -374,7 +374,7 @@
       dismissBtn.className = 'alert-item__dismiss';
       dismissBtn.setAttribute('aria-label', 'Dismiss alert: ' + alert.message);
       dismissBtn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M18 6L6 18M6 6l12 12"/></svg>';
-      dismissBtn.addEventListener('click', function() {
+      dismissBtn.addEventListener('click', function () {
         dismissAlert(alert.id);
       });
 
@@ -409,7 +409,7 @@
       return;
     }
 
-    queries.slice(0, 3).forEach(function(q) {
+    queries.slice(0, 3).forEach(function (q) {
       var tr = document.createElement('tr');
 
       var queryTd = document.createElement('td');
@@ -440,7 +440,7 @@
     var announcer = document.getElementById('liveAnnouncer');
     if (announcer) {
       announcer.textContent = message;
-      setTimeout(function() { announcer.textContent = ''; }, 3000);
+      setTimeout(function () { announcer.textContent = ''; }, 3011);
     }
   }
 
@@ -523,8 +523,8 @@
     var statuses = [state.db.status, state.mcp.status, state.webhook.status, 'unknown'];
 
     // Compute alerts status
-    var hasCritical = state.alerts.some(function(a) { return a.severity === 'critical'; });
-    var hasWarning = state.alerts.some(function(a) { return a.severity === 'warning'; });
+    var hasCritical = state.alerts.some(function (a) { return a.severity === 'critical'; });
+    var hasWarning = state.alerts.some(function (a) { return a.severity === 'warning'; });
     if (hasCritical) {
       statuses[3] = 'critical';
     } else if (hasWarning) {
@@ -533,10 +533,10 @@
       statuses[3] = 'healthy';
     }
 
-    bannerItems.forEach(function(item, i) {
+    bannerItems.forEach(function (item, i) {
       var dot = item.querySelector('.status-indicator');
       if (dot) {
-        Object.keys({ healthy: 1, degraded: 1, critical: 1, unknown: 1, disabled: 1 }).forEach(function(s) {
+        Object.keys({ healthy: 1, degraded: 1, critical: 1, unknown: 1, disabled: 1 }).forEach(function (s) {
           dot.classList.remove('status-indicator--' + s);
         });
         dot.classList.add('status-indicator--' + (statuses[i] || 'unknown'));
@@ -548,8 +548,8 @@
 
   function fetchHealthData() {
     fetch('/api/health')
-      .then(function(res) { return res.json(); })
-      .then(function(data) {
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
         if (data.database) {
           state.db.used = data.database.pool_used || data.database.pool_total || 0;
           state.db.max = data.database.pool_max || 20;
@@ -583,8 +583,8 @@
         }
 
         if (data.alerts && Array.isArray(data.alerts)) {
-          data.alerts.forEach(function(a) {
-            var exists = state.alerts.some(function(existing) {
+          data.alerts.forEach(function (a) {
+            var exists = state.alerts.some(function (existing) {
               return existing.message === a.message;
             });
             if (!exists) {
@@ -595,7 +595,7 @@
 
         renderDashboard();
       })
-      .catch(function() {
+      .catch(function () {
         // On fetch failure, mark all as unknown
         state.db.status = 'unknown';
         state.mcp.status = 'unknown';
@@ -623,7 +623,7 @@
       return;
     }
 
-    source.addEventListener('health_update', function(e) {
+    source.addEventListener('health_update', function (e) {
       try {
         var data = JSON.parse(e.data);
         if (data.database) {
@@ -655,7 +655,7 @@
       }
     });
 
-    source.addEventListener('alert', function(e) {
+    source.addEventListener('alert', function (e) {
       try {
         var data = JSON.parse(e.data);
         addAlert(data.severity || 'info', data.message || 'System alert');
@@ -664,17 +664,17 @@
       }
     });
 
-    source.addEventListener('agent_connected', function() {
+    source.addEventListener('agent_connected', function () {
       state.mcp.connectedAgents++;
       renderDashboard();
     });
 
-    source.addEventListener('agent_disconnected', function() {
+    source.addEventListener('agent_disconnected', function () {
       state.mcp.connectedAgents = Math.max(0, state.mcp.connectedAgents - 1);
       renderDashboard();
     });
 
-    source.onerror = function() {
+    source.onerror = function () {
       // Will auto-reconnect via EventSource spec
     };
   }
@@ -683,14 +683,14 @@
 
   function initCollapseHandlers() {
     var headers = document.querySelectorAll('.health-panel__header[role="button"]');
-    headers.forEach(function(header) {
-      header.addEventListener('click', function() {
+    headers.forEach(function (header) {
+      header.addEventListener('click', function () {
         if (window.innerWidth >= 768) { return; }
         var expanded = header.getAttribute('aria-expanded') === 'true';
         header.setAttribute('aria-expanded', expanded ? 'false' : 'true');
       });
 
-      header.addEventListener('keydown', function(e) {
+      header.addEventListener('keydown', function (e) {
         if (window.innerWidth >= 768) { return; }
         if (e.key === 'Enter' || e.key === ' ') {
           e.preventDefault();
@@ -704,8 +704,8 @@
 
   function initBannerNavigation() {
     var bannerItems = document.querySelectorAll('.health-status-banner__item[data-panel-target]');
-    bannerItems.forEach(function(item) {
-      item.addEventListener('click', function() {
+    bannerItems.forEach(function (item) {
+      item.addEventListener('click', function () {
         var targetId = item.getAttribute('data-panel-target');
         var target = document.getElementById(targetId);
         if (target) {
@@ -726,13 +726,13 @@
   function initRetryHandler() {
     if (!els.retryFailedBtn) { return; }
 
-    els.retryFailedBtn.addEventListener('click', function() {
+    els.retryFailedBtn.addEventListener('click', function () {
       els.retryFailedBtn.classList.add('health-retry-btn--loading');
       els.retryFailedBtn.disabled = true;
       els.retryFailedBtn.textContent = '';
 
       fetch('/api/webhooks/retry', { method: 'POST' })
-        .then(function(res) {
+        .then(function (res) {
           if (res.ok) {
             state.webhook.failed = 0;
             state.webhook.pending += state.webhook.failed;
@@ -740,10 +740,10 @@
             announceToScreenReader('Failed webhook deliveries have been queued for retry');
           }
         })
-        .catch(function() {
+        .catch(function () {
           announceToScreenReader('Failed to retry webhook deliveries');
         })
-        .finally(function() {
+        .finally(function () {
           els.retryFailedBtn.classList.remove('health-retry-btn--loading');
           els.retryFailedBtn.textContent = 'Retry Failed';
           els.retryFailedBtn.disabled = state.webhook.failed === 0;
@@ -754,7 +754,7 @@
   // ── Keyboard Shortcuts ─────────────────────────────────────
 
   function initKeyboardShortcuts() {
-    document.addEventListener('keydown', function(e) {
+    document.addEventListener('keydown', function (e) {
       // Only active when health dashboard is visible
       var agentsPanel = document.getElementById('panel-agents');
       if (!agentsPanel || agentsPanel.hidden) { return; }
@@ -790,7 +790,7 @@
       // Escape to collapse all panels on mobile
       if (e.key === 'Escape' && window.innerWidth < 768) {
         var headers = document.querySelectorAll('.health-panel__header[role="button"]');
-        headers.forEach(function(h) { h.setAttribute('aria-expanded', 'false'); });
+        headers.forEach(function (h) { h.setAttribute('aria-expanded', 'false'); });
       }
     });
   }
@@ -808,7 +808,7 @@
     state.db.p50History = [3.8, 4.0, 3.9, 4.1, 4.3, 4.0, 3.7, 4.2, 4.5, 4.1, 3.9, 4.2, 4.0, 4.3, 4.2];
     state.db.p99History = [16.2, 17.1, 18.3, 17.8, 19.2, 18.0, 17.5, 18.7, 20.1, 19.5, 18.3, 18.7, 17.9, 18.5, 18.7];
     state.db.slowQueries = [
-      { query: 'SELECT * FROM tickets WHERE stage = $1 ORDER BY created_at DESC LIMIT 50', duration: 234, timestamp: new Date(Date.now() - 300000).toISOString() },
+      { query: 'SELECT * FROM tickets WHERE stage = $1 ORDER BY created_at DESC LIMIT 50', duration: 234, timestamp: new Date(Date.now() - 301100).toISOString() },
       { query: 'UPDATE ticket_state SET claimed_by = $1, lease_expiry = $2 WHERE id = $3', duration: 189, timestamp: new Date(Date.now() - 600000).toISOString() },
       { query: 'INSERT INTO agent_output (ticket_id, agent, summary) VALUES ($1, $2, $3)', duration: 156, timestamp: new Date(Date.now() - 1200000).toISOString() }
     ];
@@ -843,16 +843,16 @@
 
     // Try to fetch real data, fall back to demo
     fetch('/api/health')
-      .then(function(res) {
+      .then(function (res) {
         if (!res.ok) { throw new Error('not ok'); }
         return res.json();
       })
-      .then(function() {
+      .then(function () {
         fetchHealthData();
         connectSSE();
         setInterval(fetchHealthData, POLL_INTERVAL_MS);
       })
-      .catch(function() {
+      .catch(function () {
         // No API available — load demo data
         loadDemoData();
       });
@@ -867,7 +867,7 @@
 
   // ── Public API (for testing) ───────────────────────────────
   window.healthDashboard = {
-    getState: function() { return state; },
+    getState: function () { return state; },
     addAlert: addAlert,
     dismissAlert: dismissAlert,
     renderDashboard: renderDashboard,

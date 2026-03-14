@@ -12,6 +12,7 @@
 
 import { z } from 'zod';
 import { readFile } from 'node:fs/promises';
+import path from 'node:path';
 import { pool } from '../db/pool.js';
 import { IndexerService } from '../services/indexer/indexer-service.js';
 import { parseTypeScript } from '../services/parsers/typescript-parser.js';
@@ -76,6 +77,54 @@ interface NormalisedImport {
   target_path: string;
   import_names: string[];
   is_default_import: boolean;
+}
+
+const MODULE_SYMBOL_NAME = '__module__';
+
+/**
+ * Resolve an import target path to a known indexed file path.
+ *
+ * Supports relative imports (./, ../) with extension remapping between
+ * JS runtime specifiers and TS source files.
+ */
+function resolveImportTargetPath(
+  sourceFilePath: string,
+  targetPath: string,
+): string[] {
+  const isRelative = targetPath.startsWith('./') || targetPath.startsWith('../');
+  if (!isRelative) {
+    // Non-relative specifiers are treated as external packages for now.
+    return [];
+  }
+
+  const sourceDir = path.posix.dirname(sourceFilePath);
+  const base = path.posix.normalize(path.posix.join(sourceDir, targetPath));
+
+  const candidates = new Set<string>([
+    base,
+    `${base}.ts`,
+    `${base}.tsx`,
+    `${base}.js`,
+    `${base}.jsx`,
+    `${base}.py`,
+    `${base}.sql`,
+    path.posix.join(base, 'index.ts'),
+    path.posix.join(base, 'index.tsx'),
+    path.posix.join(base, 'index.js'),
+    path.posix.join(base, 'index.jsx'),
+  ]);
+
+  // Map runtime JS import specifiers to TypeScript source paths when possible.
+  if (base.endsWith('.js')) {
+    candidates.add(base.slice(0, -3) + '.ts');
+    candidates.add(base.slice(0, -3) + '.tsx');
+  }
+  if (base.endsWith('.jsx')) {
+    candidates.add(base.slice(0, -4) + '.tsx');
+    candidates.add(base.slice(0, -4) + '.ts');
+  }
+
+  return Array.from(candidates);
 }
 
 /**
@@ -264,35 +313,51 @@ async function computeEdges(client: PoolClient): Promise<number> {
 
     // Get exported symbols in the target file matching import names
     let targetSymbols: Array<{ id: string }>;
-    if (imp.import_names.length > 0) {
-      const result = await client.query<{ id: string }>(
-        `SELECT id FROM code_symbols
-         WHERE file_id = $1 AND exported = TRUE AND name = ANY($2)`,
-        [imp.target_file_id, imp.import_names],
-      );
-      targetSymbols = result.rows;
-    } else if (imp.is_default_import) {
-      // Default import: link to all exported symbols in target
+    if (imp.import_names.includes('*') || imp.is_default_import) {
+      // Namespace (`*`) and default imports are file-level dependencies.
+      // Link to all exported symbols to preserve transitive blast-radius paths.
       const result = await client.query<{ id: string }>(
         'SELECT id FROM code_symbols WHERE file_id = $1 AND exported = TRUE',
         [imp.target_file_id],
+      );
+      targetSymbols = result.rows;
+    } else if (imp.import_names.length > 0) {
+      const result = await client.query<{ id: string }>(
+        `SELECT id FROM code_symbols
+         WHERE file_id = $1
+           AND exported = TRUE
+           AND (
+             name = ANY($2)
+             OR qualified_name = ANY($2)
+           )`,
+        [imp.target_file_id, imp.import_names],
       );
       targetSymbols = result.rows;
     } else {
       continue;
     }
 
-    // Create edges: first source symbol → each matched target symbol
+    // Side-effect imports (e.g. `import './polyfill'`) still create file dependencies.
+    if (targetSymbols.length === 0 && imp.import_names.length === 0) {
+      const fallbackResult = await client.query<{ id: string }>(
+        'SELECT id FROM code_symbols WHERE file_id = $1 AND exported = TRUE',
+        [imp.target_file_id],
+      );
+      targetSymbols = fallbackResult.rows;
+    }
+
+    // Create edges: all source symbols in the file → each matched target symbol.
     if (sourceSymbols.rows.length > 0 && targetSymbols.length > 0) {
-      const sourceId = sourceSymbols.rows[0]!.id;
-      for (const target of targetSymbols) {
-        await client.query(
-          `INSERT INTO code_edges (source_symbol_id, target_symbol_id, edge_type)
-           VALUES ($1, $2, $3)
-           ON CONFLICT (source_symbol_id, target_symbol_id, edge_type) DO NOTHING`,
-          [sourceId, target.id, 'imports'],
-        );
-        edgeCount++;
+      for (const source of sourceSymbols.rows) {
+        for (const target of targetSymbols) {
+          await client.query(
+            `INSERT INTO code_edges (source_symbol_id, target_symbol_id, edge_type)
+             VALUES ($1, $2, $3)
+             ON CONFLICT (source_symbol_id, target_symbol_id, edge_type) DO NOTHING`,
+            [source.id, target.id, 'imports'],
+          );
+          edgeCount++;
+        }
       }
     }
   }
@@ -333,16 +398,16 @@ export async function initIndexHandler(
     // When force=true, treat ALL files as changed
     const filesToProcess = force
       ? await (async () => {
-          const allResult = await pool.query<{ file_path: string; language: string }>(
-            'SELECT file_path, language FROM code_files',
-          );
-          return allResult.rows.map((r) => ({
-            path: r.file_path,
-            language: r.language,
-            hash: '',
-            lineCount: 0,
-          })) as FileEntry[];
-        })()
+        const allResult = await pool.query<{ file_path: string; language: string }>(
+          'SELECT file_path, language FROM code_files',
+        );
+        return allResult.rows.map((r) => ({
+          path: r.file_path,
+          language: r.language,
+          hash: '',
+          lineCount: 0,
+        })) as FileEntry[];
+      })()
       : indexResult.changedFiles;
 
     let symbolsCount = 0;
@@ -350,6 +415,8 @@ export async function initIndexHandler(
     let edgesComputed = 0;
 
     if (filesToProcess.length > 0) {
+      const filePathToId = new Map<string, string>();
+
       const client: PoolClient = await pool.connect();
       try {
         await client.query('BEGIN');
@@ -368,6 +435,7 @@ export async function initIndexHandler(
           }
 
           const fileId = fileRow.rows[0]!.id;
+          filePathToId.set(file.path, fileId);
 
           // Clear stale data for this file
           await client.query(
@@ -413,14 +481,53 @@ export async function initIndexHandler(
             symbolsCount++;
           }
 
+          // Ensure each file has at least one symbol node so import-only modules
+          // still participate in transitive dependency traversal.
+          if (parseResult.symbols.length === 0) {
+            await client.query(
+              `INSERT INTO code_symbols
+                 (file_id, name, qualified_name, kind, start_line, end_line, signature, exported)
+               VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
+              [
+                fileId,
+                MODULE_SYMBOL_NAME,
+                `${file.path}::${MODULE_SYMBOL_NAME}`,
+                'variable',
+                1,
+                1,
+                'module',
+                false,
+              ],
+            );
+            symbolsCount++;
+          }
+
           // Insert imports with target_file_id resolution
           for (const imp of parseResult.imports) {
-            // Attempt to resolve target_file_id
-            const targetRow = await client.query<{ id: string }>(
-              'SELECT id FROM code_files WHERE file_path = $1',
-              [imp.target_path],
-            );
-            const targetFileId = targetRow.rows[0]?.id ?? null;
+            const resolutionCandidates = resolveImportTargetPath(file.path, imp.target_path);
+            let resolvedPath: string | null = null;
+            let targetFileId: string | null = null;
+
+            for (const candidatePath of resolutionCandidates) {
+              const cachedId = filePathToId.get(candidatePath);
+              if (cachedId) {
+                resolvedPath = candidatePath;
+                targetFileId = cachedId;
+                break;
+              }
+
+              const targetFileResult = await client.query<{ id: string }>(
+                'SELECT id FROM code_files WHERE file_path = $1',
+                [candidatePath],
+              );
+              if (targetFileResult.rows.length > 0) {
+                const foundId = targetFileResult.rows[0]!.id;
+                filePathToId.set(candidatePath, foundId);
+                resolvedPath = candidatePath;
+                targetFileId = foundId;
+                break;
+              }
+            }
 
             await client.query(
               `INSERT INTO code_imports
@@ -428,7 +535,7 @@ export async function initIndexHandler(
                VALUES ($1, $2, $3, $4, $5)`,
               [
                 fileId,
-                imp.target_path,
+                resolvedPath ?? imp.target_path,
                 targetFileId,
                 imp.import_names,
                 imp.is_default_import,

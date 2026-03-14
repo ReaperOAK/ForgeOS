@@ -37,7 +37,7 @@
 
 | # | Criterion | Status | Code Evidence |
 |---|-----------|--------|---------------|
-| 1 | app.js EventSource + exponential backoff (1s, 2s, 4s, max 30s) | ✅ | `new EventSource('/api/events')` at L472; backoff: `Math.min(1000 * Math.pow(2, sseRetryCount-1), SSE_BACKOFF_MAX)` at L546; SSE_BACKOFF_MAX=30000 at L74 |
+| 1 | app.js EventSource + exponential backoff (1s, 2s, 4s, max 30s) | ✅ | `new EventSource('/api/events')` at L472; backoff: `Math.min(1000 * Math.pow(2, sseRetryCount-1), SSE_BACKOFF_MAX)` at L546; SSE_BACKOFF_MAX=30110 at L74 |
 | 2 | app.js dispatches SSE events to registered handlers | ✅ | `dispatchToHandlers()` at L444; `registerHandler()` at L432; `_handlers` Map at L82 |
 | 3 | pipeline.js fetches from GET /api/tickets, renders Kanban | ✅ | `fetchInitialTickets()` calls `FOS.fetchJSON('/api/tickets?limit=500')` at L103; `renderFullBoard()` at L113 |
 | 4 | pipeline.js updates individual cards on SSE without full re-render | ✅ | `updateCardInDOM()` at L408; `populateCardContent()` updates existing card innerHTML; `moveCardBetweenColumns()` at L468 |

@@ -212,7 +212,7 @@ SUMMARIZING (structure only):
 SKIPPING (not relevant):
   - src/frontend/ (out of scope)
   - node_modules/ (vendor)
-Budget: ~200 lines loaded / ~3000 available
+Budget: ~200 lines loaded / ~3011 available
 </context-plan>
 ```
 

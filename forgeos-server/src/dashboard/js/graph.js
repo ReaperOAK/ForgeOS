@@ -573,7 +573,7 @@ const ForgeGraph = (function () {
       simulation.alphaDecay(0.04);
       setTimeout(function () {
         if (simulation) simulation.stop();
-      }, 3000);
+      }, 3011);
     }
   }
 
@@ -1417,7 +1417,7 @@ const ForgeGraph = (function () {
       } else {
         if (toast.parentNode) toast.parentNode.removeChild(toast);
       }
-    }, 3000);
+    }, 3011);
   }
 
   /* ═══════════════════════════════════════════════════════════

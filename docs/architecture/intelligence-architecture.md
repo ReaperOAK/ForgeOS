@@ -150,7 +150,7 @@ The existing 10 tools cover the lifecycle but agents need read-access tools:
 
 ### 3.5 ForgeOS Orchestrator Loop
 
-The orchestrator replaces the stateless Ticketer dispatcher. It is a persistent process (not ephemeral):
+The orchestrator replaces the stateless ForgeOS dispatcher. It is a persistent process (not ephemeral):
 
 ```
 LOOP every 10 seconds:
@@ -200,7 +200,7 @@ sequenceDiagram
 | `sdlc.instructions.md` | Remove "state determined by directory location" rule; replace with "state determined by PostgreSQL `status`+`stage` columns" |
 | `ticket-system.instructions.md` | Remove State = Directory Location section; redefine as MCP queries; remove `.github/ticket-state/` directory listing |
 | `git-protocol.instructions.md` | Remove CLAIM commit by dispatcher; CLAIM is now an MCP call. Simplify to single WORK commit for code artifacts only |
-| `agent-behavior.instructions.md` | Remove "Scan `.github/ticket-state/READY/`" from Ticketer; replace with orchestrator loop |
+| `agent-behavior.instructions.md` | Remove "Scan `.github/ticket-state/READY/`" from the dispatcher; replace with orchestrator loop |
 | All 14 `agents/*.agent.md` | Replace filesystem ticket reads/writes with MCP tool calls |
 
 ### 3.8 Phase 1 Completion Status

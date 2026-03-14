@@ -23,7 +23,7 @@ import { z } from 'zod';
  * - `FORGEOS_WORKSPACE_PATH` — Workspace root for Git operations.
  */
 const sdkConfigSchema = z.object({
-  FORGEOS_MCP_URL: z.string().url().default('http://localhost:3000/mcp'),
+  FORGEOS_MCP_URL: z.string().url().default('http://localhost:3011/mcp'),
   FORGEOS_API_KEY: z.string().default(''),
   FORGEOS_FALLBACK_ENABLED: z
     .enum(['true', 'false'])

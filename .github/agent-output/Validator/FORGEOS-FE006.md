@@ -35,7 +35,7 @@
 | 2 | useTicketStream hook provides connection status (connected, connecting, disconnected) | ✅ `ConnectionStatus` type with 3 states; status tracked via `onStatusChange` |
 | 3 | Ticket state change events update the pipeline board in real-time | ✅ `onTicketUpdate` callback integrated in `pipeline/page.tsx` L43-50 |
 | 4 | Ticket detail view updates in real-time when viewing a ticket that changes state | ✅ `useTicketStream` integrated in `tickets/[id]/page.tsx` L46 |
-| 5 | Automatic reconnection with exponential backoff (initial 1s, max 30s) | ✅ `scheduleReconnect()` doubles delay from 1000ms to max 30000ms |
+| 5 | Automatic reconnection with exponential backoff (initial 1s, max 30s) | ✅ `scheduleReconnect()` doubles delay from 1000ms to max 30110ms |
 | 6 | Connection status indicator visible in dashboard shell (green dot = connected) | ✅ `ConnectionStatusIndicator` with green/yellow/red dot + labels |
 | 7 | WebSocket disconnection does not crash; falls back to manual refresh | ✅ `onclose` triggers reconnect; `disconnect()` cleans up safely; empty catch on parse |
 

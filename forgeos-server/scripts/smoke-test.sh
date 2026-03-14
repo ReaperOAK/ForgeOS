@@ -19,7 +19,7 @@ NC='\033[0m'
 
 PASS=0
 FAIL=0
-BASE_URL="http://localhost:3000"
+BASE_URL="http://localhost:3011"
 
 pass() { echo -e "${GREEN}✓ $1${NC}"; ((PASS++)); }
 fail() { echo -e "${RED}✗ $1${NC}"; ((FAIL++)); }

@@ -233,7 +233,7 @@ _PROFILE_DEFAULTS: dict[Environment, dict[str, Any]] = {
         "rate_limit_per_minute": 1000,
         "otel_traces_sampler_arg": 1.0,
         "otel_enabled": False,
-        "cors_allowed_origins": "http://localhost:3000",
+        "cors_allowed_origins": "http://localhost:3011",
         "feature_dashboard": True,
         "feature_chaos": False,
         "reconciliation_interval": 60,
@@ -429,7 +429,7 @@ def get_settings(
         log_level = LogLevel.INFO
 
     # Port
-    port = _env_int("PORT", 3000)
+    port = _env_int("PORT", 3011)
     if not 1 <= port <= 65535:
         errors.append(
             f"PORT must be between 1 and 65535,"

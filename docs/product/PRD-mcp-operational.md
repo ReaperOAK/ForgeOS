@@ -78,14 +78,14 @@ Make the ForgeOS MCP server start, accept MCP connections, and execute the core 
 | SC-1 | `npm run build` compiles with zero errors | Run `cd forgeos-server && npm run build` — exit code 0, `dist/` directory produced |
 | SC-2 | `docker compose up` starts all services | Run `docker compose -f infra/docker-compose.yml up -d` — postgres, mcp-server containers healthy within 60s |
 | SC-3 | PostgreSQL accepts connections with migrations applied | `psql` into the container; verify `tickets`, `agents`, `events`, `file_locks` tables exist |
-| SC-4 | MCP endpoint responds to `initialize` | Send MCP `initialize` request to `POST http://localhost:3000/mcp` — receive valid MCP response with `serverInfo` and tool list |
+| SC-4 | MCP endpoint responds to `initialize` | Send MCP `initialize` request to `POST http://localhost:3011/mcp` — receive valid MCP response with `serverInfo` and tool list |
 | SC-5 | All 9 tools are listed | MCP `tools/list` response includes: `tickets.next`, `tickets.claim`, `tickets.complete`, `tickets.reject`, `tickets.extend`, `tickets.update`, `tickets.spawn`, `tickets.release`, `tickets.stats` |
 | SC-6 | An agent can register and authenticate | POST to a bootstrap/registration endpoint returns an API key; subsequent MCP requests with that key succeed |
 | SC-7 | Core lifecycle executes end-to-end | Seed a ticket → agent claims it via `tickets.claim` → agent completes via `tickets.complete` → ticket moves to next stage |
-| SC-8 | `/health` returns accurate status | `GET http://localhost:3000/health` returns `200` with `{ "status": "ok", "database": "connected" }` |
-| SC-9 | REST API is accessible | `GET http://localhost:3000/api/tickets` returns ticket list; `GET http://localhost:3000/api/stages` returns stage pipeline |
-| SC-10 | Agent SDK connects successfully | Python script using `forgeos_sdk` connects to `http://localhost:3000/mcp`, lists tools, claims a ticket |
-| SC-11 | Dashboard loads and shows data | `GET http://localhost:3000/dashboard` returns HTML; ticket board renders with seeded data |
+| SC-8 | `/health` returns accurate status | `GET http://localhost:3011/health` returns `200` with `{ "status": "ok", "database": "connected" }` |
+| SC-9 | REST API is accessible | `GET http://localhost:3011/api/tickets` returns ticket list; `GET http://localhost:3011/api/stages` returns stage pipeline |
+| SC-10 | Agent SDK connects successfully | Python script using `forgeos_sdk` connects to `http://localhost:3011/mcp`, lists tools, claims a ticket |
+| SC-11 | Dashboard loads and shows data | `GET http://localhost:3011/dashboard` returns HTML; ticket board renders with seeded data |
 | SC-12 | SSE events stream updates | Client subscribes to SSE endpoint; performing a `tickets.claim` action produces a real-time event |
 
 ---
@@ -107,7 +107,7 @@ Make the ForgeOS MCP server start, accept MCP connections, and execute the core 
 
 | Attribute | Detail |
 |-----------|--------|
-| **Who** | Software engineer or team lead running the Ticketer dispatcher |
+| **Who** | Software engineer or team lead running the ForgeOS dispatcher dispatcher |
 | **Interface** | CLI (`tickets.py`), web dashboard, REST API |
 | **Goal** | Monitor agent progress, intervene on stuck tickets, verify pipeline health |
 | **Key needs** | Real-time visibility into ticket states, agent activity, error logs |
@@ -174,7 +174,7 @@ These are hard blockers. Without every P0, no user can interact with the system.
 **As an** AI agent, **I want** to send MCP `initialize` requests to `/mcp`, **so that** I can discover available tools.
 
 **Acceptance Criteria:**
-- Given the server is running, when I `POST` a valid MCP `initialize` request to `http://localhost:3000/mcp`, then I receive a valid MCP response with `serverInfo`
+- Given the server is running, when I `POST` a valid MCP `initialize` request to `http://localhost:3011/mcp`, then I receive a valid MCP response with `serverInfo`
 - Given a connected MCP session, when I send `tools/list`, then I receive a list of 9 tools
 - Given concurrent MCP requests from 2 agents, then both receive correct responses without interference
 
@@ -242,7 +242,7 @@ Agents can complete full workflows with proper error handling and monitoring.
 **As an** AI agent developer, **I want** the Python Agent SDK to connect to the TypeScript MCP server, **so that** I have a typed client.
 
 **Acceptance Criteria:**
-- Given `FORGEOS_SERVER_URL=http://localhost:3000/mcp`, when SDK calls `client.connect()`, then the session is established
+- Given `FORGEOS_SERVER_URL=http://localhost:3011/mcp`, when SDK calls `client.connect()`, then the session is established
 - Given a connected SDK session, when calling `ops.claim_next(stage="BACKEND")`, then a ticket is claimed
 
 #### P1-6: Dashboard Shows Real-Time State
@@ -250,7 +250,7 @@ Agents can complete full workflows with proper error handling and monitoring.
 **As a** human operator, **I want** the dashboard to load and display ticket data, **so that** I can monitor pipeline progress.
 
 **Acceptance Criteria:**
-- Given the server is running with seeded data, when I open `http://localhost:3000/dashboard`, then I see a Kanban board with ticket cards
+- Given the server is running with seeded data, when I open `http://localhost:3011/dashboard`, then I see a Kanban board with ticket cards
 - Given an agent claims a ticket, then the dashboard updates within 5 seconds via SSE
 
 ---
@@ -334,7 +334,7 @@ Step 4: Database Schema
   ASSERT: tables include tickets, agents, events, file_locks, schema_migrations
 
 Step 5: Health Check
-  curl http://localhost:3000/health
+  curl http://localhost:3011/health
   ASSERT: 200 { "status": "ok" }
 
 Step 6: Agent Bootstrap
@@ -342,7 +342,7 @@ Step 6: Agent Bootstrap
   ASSERT: API key returned
 
 Step 7: MCP Initialize
-  POST http://localhost:3000/mcp (MCP initialize request with API key)
+  POST http://localhost:3011/mcp (MCP initialize request with API key)
   ASSERT: valid MCP response with serverInfo
 
 Step 8: Tools List
@@ -357,11 +357,11 @@ Step 9: End-to-End Lifecycle
   ASSERT: ticket now in next stage
 
 Step 10: REST API
-  curl http://localhost:3000/api/tickets
+  curl http://localhost:3011/api/tickets
   ASSERT: 200, JSON array
 
 Step 11: Dashboard
-  curl http://localhost:3000/dashboard
+  curl http://localhost:3011/dashboard
   ASSERT: 200, HTML content
 
 Step 12: SSE Events

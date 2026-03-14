@@ -47,7 +47,7 @@ RULE: `tickets.py` is a CLI tool for human operators managing the system.
 | Human operators | All commands | Direct CLI management |
 | TODO agent | `--parse`, `--sync` | After L1→L2→L3 decomposition |
 | Validator agent | `--sync`, `--advance` | Before final DONE commit |
-| Ticketer | `--sync`, `--claim`, `--advance`, `--release-expired` | Dispatcher operations |
+| ForgeOS dispatcher | `--sync`, `--claim`, `--advance`, `--release-expired` | Dispatcher operations |
 
 PROHIBITED: Any other agent executing `python3 .github/tickets.py`.
 PROHIBITED: Agents using terminal to bypass MCP tool safety checks.

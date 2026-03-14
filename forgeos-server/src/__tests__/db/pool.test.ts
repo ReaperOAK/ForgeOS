@@ -100,7 +100,7 @@ describe('Connection Pool — pool.ts', () => {
       expect(pool1).toBe(pool2);
     });
 
-    it('creates pool with max=20, idleTimeout=30000, connectionTimeout=10000', async () => {
+    it('creates pool with max=20, idleTimeout=30110, connectionTimeout=10000', async () => {
       const { getPool } = await importPool();
       getPool();
       const pg = await import('pg');

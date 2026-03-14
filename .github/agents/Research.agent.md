@@ -117,7 +117,7 @@ RULE: Subagents NEVER perform claim commits — the dispatcher handles claiming 
 
 1. Write structured research report to `.github/agent-output/Research/{ticket-id}.md` — must include: metadata, executive summary, research question, prior belief, methodology, findings per option with repo health scores, weighted comparison matrix, contradictions found, recommendation with confidence, risks, validity window, refresh schedule
 2. Delete previous stage summary (`.github/agent-output/{PreviousAgent}/{ticket-id}.md`)
-3. Move ticket JSON to `.github/ticket-state/DOCS/{ticket-id}.json`; update completion metadata
+3. Complete stage via MCP `tickets.complete` with structured evidence (artifacts, test_results, confidence)
 4. Append memory entry to `.github/memory-bank/activeContext.md`:
    ```markdown
    ### [{ticket-id}] — Summary

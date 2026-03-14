@@ -8,7 +8,7 @@ describe('ApiClient', () => {
     });
 
     it('getBaseUrl returns configured base URL', () => {
-        expect(apiClient.getBaseUrl()).toBe('http://localhost:3000');
+        expect(apiClient.getBaseUrl()).toBe('http://localhost:3011');
     });
 
     it('get() returns parsed data on success', async () => {
@@ -45,7 +45,7 @@ describe('ApiClient', () => {
 
         await apiClient.get('/test');
         expect(global.fetch).toHaveBeenCalledWith(
-            'http://localhost:3000/test',
+            'http://localhost:3011/test',
             expect.objectContaining({
                 method: 'GET',
                 headers: { 'Content-Type': 'application/json' },

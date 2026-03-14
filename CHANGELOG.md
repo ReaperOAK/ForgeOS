@@ -1073,7 +1073,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   section (`git clone`, `make setup`, `make up`, dashboard link), describes
   the distributed MCP server + PostgreSQL 17 architecture, lists
   `forgeos-server/`, `mcp-server/`, and `infra/` in the repository structure,
-  and links to the live Kanban dashboard at http://localhost:3000/dashboard.
+  and links to the live Kanban dashboard at http://localhost:3011/dashboard.
   agents.md Required Boot Sequence includes MCP server connectivity check
   (step 8). agents.md Required Lifecycle section documents 8 MCP tools
   (`tickets.next`, `tickets.claim`, `tickets.advance`, `tickets.release`,
@@ -1497,7 +1497,7 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
   image while allowing `README.md` and `.env.example` through.
 - **Environment configuration** — Zod-validated config loader (`src/config.ts`)
   with typed `AppConfig` export, `Object.freeze()` immutability, sensible
-  defaults (PORT=3000, LOG_LEVEL=info, DEFAULT_LEASE_MINUTES=30), production
+  defaults (PORT=3011, LOG_LEVEL=info, DEFAULT_LEASE_MINUTES=30), production
   validation for security-critical variables (`WEBHOOK_SECRET`, `ADMIN_API_KEY`),
   and a comprehensive `.env.example` template documenting all 12 environment
   variables.

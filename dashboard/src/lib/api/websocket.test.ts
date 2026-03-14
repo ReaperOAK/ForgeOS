@@ -136,7 +136,7 @@ describe('TicketWebSocketClient', () => {
     const client = new TicketWebSocketClient({
       url: 'ws://test/ws/tickets',
       initialDelay: 1000,
-      maxDelay: 30000,
+      maxDelay: 30110,
       onStatusChange: (s) => statuses.push(s),
     });
 
