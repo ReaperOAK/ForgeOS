@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-14T00:00:00Z -->
+<!-- last_reviewed: 2026-03-14T22:30:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -178,6 +178,24 @@ Runtime persistence path:
 - `src/services/compiler.ts` stores prompt text plus metadata (`context_hash`,
   packet/schema/template versions, freshness fields, canonical context inputs)
   in both dedicated columns and `tickets.metadata.compiled_prompt`.
+
+### Freshness Gate API (Cache Invalidation)
+
+The compiler service exposes two cache-control helpers in
+`src/services/compiler.ts`.
+
+| Function | When to call | Behavior |
+|----------|--------------|----------|
+| `compileIfStale(ticketId)` | Normal lifecycle compile paths (`claim`, `advance`, reconciliation) where deterministic context may or may not have changed. | Computes current context hash and compares it to stored hash. Returns cached prompt (`provider: cached`) when hash is unchanged. Recompiles and persists when hash is missing or stale. |
+| `invalidatePromptCache(ticketId)` | After manual prompt/template-affecting edits or operational override when you must force a fresh compile on next access. | Clears stored `compiled_prompt_context_hash`, marks freshness `missing`, and ensures the next `compileIfStale` triggers full recompilation. |
+
+Operational guidance:
+
+- Prefer `compileIfStale` for automated workflows. It prevents unnecessary
+  recompilation and preserves deterministic behavior.
+- Use `invalidatePromptCache` sparingly as an explicit override.
+- If unsure, call `compileIfStale` first. It is safe in both fresh and stale
+  states.
 
 ## Configuration
 

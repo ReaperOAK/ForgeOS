@@ -2430,3 +2430,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/TASK-PC-BE-002.md
 - **Decisions:** APPROVED — DoD 10/10 pass. Independent vitest/typecheck/eslint gates passed. Lifecycle guardrails verified in scoped modules. Stage evidence confirmed via CI/Docs summaries plus ticket history and memory entries.
 - **Timestamp:** 2026-03-14T15:49:58Z
+
+### [TASK-PC-BE-003] — Documentation Summary
+- **Artifacts:** forgeos-server/src/services/compiler.ts, forgeos-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/TASK-PC-BE-003.md
+- **Decisions:** Added explicit JSDoc (`@param`, `@returns`) for `compileIfStale()` and `invalidatePromptCache()`; documented freshness/cache-invalidation API usage in server README; appended changelog feature entry for deterministic context-hash freshness gate.
+- **Timestamp:** 2026-03-14T22:30:00Z

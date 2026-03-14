@@ -8,6 +8,17 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Deterministic Context Hash Freshness Gate** (TASK-PC-BE-003) — Added
+  cache-freshness gate controls to prompt compilation in
+  `forgeos-server/src/services/compiler.ts`. `compileIfStale(ticketId)` now
+  compares current canonical context hash with stored
+  `compiled_prompt_context_hash` and skips recompilation when unchanged,
+  returning cached prompt metadata (`provider: cached`).
+  `invalidatePromptCache(ticketId)` clears hash freshness metadata to force
+  recompilation on the next compile pass. Regression coverage in
+  `forgeos-server/src/__tests__/context-hash.test.ts` verifies skip,
+  recompile, missing-hash, and explicit invalidation flows.
+
 - **Prompt lifecycle guardrail regression suite** (TASK-PC-BE-002) — Added
   `forgeos-server/src/__tests__/prompt-lifecycle-guardrails.test.ts` static
   regression checks to enforce MCP/DB lifecycle boundaries. The suite blocks
