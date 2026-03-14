@@ -8,6 +8,18 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Atomic Hash + Validation Compile Pipeline Integration** (TASK-PC-BE-005) -
+  Wired `orchestrateCompilePipeline(ticketId)` in
+  `forgeos-server/src/services/compile-orchestrator.ts` to enforce both
+  freshness-aware compilation and strict packet schema validation before
+  returning results. Added internal helper documentation in
+  `forgeos-server/src/services/compiler.ts` for
+  `persistCompiledPromptAtomic` (single-statement atomic persistence of prompt
+  text plus hash/schema/template/freshness metadata) and
+  `maybeRecordPacketValidationError` (records only public-safe validation
+  errors). This integration ensures invalid packets are rejected before use and
+  valid packets are stored with deterministic metadata in one atomic update.
+
 - **11-Section Packet Validation** (TASK-PC-BE-004) — Every compiled prompt
   packet is now validated against a strict 11-section schema before it is
   stored. `validatePacketSections(text)` in
