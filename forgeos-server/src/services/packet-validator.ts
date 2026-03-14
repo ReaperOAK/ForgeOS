@@ -65,29 +65,139 @@ function findSectionMatches(
         new RegExp(`^#{1,6}\\s+${escaped}\\s*$`, 'gmi'),
     ];
 
-    const matches: Array<{ index: number; length: number }> = [];
-    for (const pattern of patterns) {
-        for (const match of text.matchAll(pattern)) {
-            if (match.index !== undefined) {
-                matches.push({ index: match.index, length: match[0].length });
-            }
-        }
-    }
-
-    return matches.sort((a, b) => a.index - b.index);
+    return patterns
+        .flatMap((pattern) => Array.from(text.matchAll(pattern)))
+        .filter((match) => match.index !== undefined)
+        .map((match) => ({
+            index: match.index as number,
+            length: match[0].length,
+        }))
+        .sort((a, b) => a.index - b.index);
 }
 
 /** Returns true when the section body contains any canonical section header marker. */
 function containsCanonicalHeader(body: string): boolean {
-    for (const section of REQUIRED_SECTIONS) {
+    return REQUIRED_SECTIONS.some((section) => {
         const escaped = section.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const patterns = [new RegExp(`\\*\\*${escaped}\\*\\*`, 'i'), new RegExp(`^#{1,6}\\s+${escaped}\\s*$`, 'mi')];
-        if (patterns.some((pattern) => pattern.test(body))) {
-            return true;
-        }
+        return patterns.some((pattern) => pattern.test(body));
+    });
+}
+
+/**
+ * Parse canonical section headers from prompt text and capture each section body.
+ * Duplicate headers are marked using internal `__duplicate:<SECTION>` keys.
+ */
+export function extractSections(prompt: string): Map<string, string> {
+    if (!prompt || prompt.trim().length === 0) {
+        return new Map<string, string>();
     }
 
-    return false;
+    const sections = new Map<string, string>();
+    const foundHeaders = REQUIRED_SECTIONS.flatMap((section) => {
+        const matches = findSectionMatches(prompt, section);
+        if (matches.length > 1) {
+            sections.set(`__duplicate:${section}`, section);
+            return [];
+        }
+
+        if (matches.length === 0) {
+            return [];
+        }
+
+        const match = matches[0] as { index: number; length: number };
+        return [{ section, index: match.index, length: match.length }];
+    }).sort((a, b) => a.index - b.index);
+
+    foundHeaders.forEach((current, index) => {
+        const nextHeaderIndex = foundHeaders[index + 1]?.index ?? prompt.length;
+        const bodyStart = current.index + current.length;
+        const body = prompt.slice(bodyStart, nextHeaderIndex).trim();
+        sections.set(current.section, body);
+    });
+
+    return sections;
+}
+
+/** Validate canonical section presence and order. */
+export function validateSectionOrder(sections: Map<string, string>): ValidationResult {
+    const duplicateSections = REQUIRED_SECTIONS.filter((section) =>
+        sections.has(`__duplicate:${section}`),
+    );
+    if (duplicateSections.length > 0) {
+        return {
+            valid: false,
+            missingSections: [],
+            misordered: [],
+            structuredReason: `Duplicate section headers detected: ${duplicateSections.join(', ')}`,
+        };
+    }
+
+    const missingSections = REQUIRED_SECTIONS.filter((section) => !sections.has(section));
+    if (missingSections.length > 0) {
+        return {
+            valid: false,
+            missingSections,
+            misordered: [],
+            structuredReason: `Missing sections: ${missingSections.join(', ')}`,
+        };
+    }
+
+    const actualOrder = [...sections.keys()].filter((section): section is RequiredSection =>
+        REQUIRED_SECTIONS.includes(section as RequiredSection),
+    );
+    const misordered = actualOrder.filter((section, index) => section !== REQUIRED_SECTIONS[index]);
+    if (misordered.length > 0) {
+        return {
+            valid: false,
+            missingSections: [],
+            misordered,
+            structuredReason: `Sections are misordered. Expected: ${REQUIRED_SECTIONS.join(' → ')}. Actual: ${actualOrder.join(' → ')}.`,
+        };
+    }
+
+    return {
+        valid: true,
+        missingSections: [],
+        misordered: [],
+        structuredReason: 'Section order is valid.',
+    };
+}
+
+/** Validate semantic section body requirements (non-empty and no nested headers). */
+export function validateSectionBodies(sections: Map<string, string>): ValidationResult {
+    const emptyBodySection = REQUIRED_SECTIONS.find((section) => (sections.get(section)?.trim().length ?? 0) === 0);
+    if (emptyBodySection !== undefined) {
+        return {
+            valid: false,
+            missingSections: [],
+            misordered: [],
+            structuredReason: `Section body is empty for: ${emptyBodySection}`,
+        };
+    }
+
+    const nestedHeaderSection = REQUIRED_SECTIONS.find((section) => {
+        const body = sections.get(section);
+        if (body === undefined) {
+            return false;
+        }
+        return containsCanonicalHeader(body);
+    });
+    if (nestedHeaderSection !== undefined) {
+        return {
+            valid: false,
+            missingSections: [],
+            misordered: [],
+            structuredReason: `Section body contains nested canonical header marker for: ${nestedHeaderSection}`,
+        };
+    }
+
+    return {
+        valid: true,
+        missingSections: [],
+        misordered: [],
+        structuredReason: 'Section bodies are valid.',
+    };
 }
 
 /**
@@ -107,94 +217,15 @@ export function validatePacketSections(text: string): ValidationResult {
         };
     }
 
-    const headers = new Map<string, { index: number; length: number }>();
-    const missingSections: string[] = [];
-    const duplicateSections: string[] = [];
-
-    for (const section of REQUIRED_SECTIONS) {
-        const matches = findSectionMatches(text, section);
-        if (matches.length === 0) {
-            missingSections.push(section);
-        } else if (matches.length > 1) {
-            duplicateSections.push(section);
-        } else {
-            headers.set(section, matches[0] as { index: number; length: number });
-        }
+    const sections = extractSections(text);
+    const orderResult = validateSectionOrder(sections);
+    if (!orderResult.valid) {
+        return orderResult;
     }
 
-    if (missingSections.length > 0) {
-        return {
-            valid: false,
-            missingSections,
-            misordered: [],
-            structuredReason: `Missing sections: ${missingSections.join(', ')}`,
-        };
-    }
-
-    if (duplicateSections.length > 0) {
-        return {
-            valid: false,
-            missingSections: [],
-            misordered: [],
-            structuredReason: `Duplicate section headers detected: ${duplicateSections.join(', ')}`,
-        };
-    }
-
-    // All sections present — verify canonical ordering
-    const presentSections = REQUIRED_SECTIONS.filter((s) => headers.has(s));
-    const actualOrder = [...presentSections].sort(
-        (a, b) => (headers.get(a)?.index ?? 0) - (headers.get(b)?.index ?? 0),
-    );
-
-    const misordered: string[] = [];
-    for (let i = 0; i < presentSections.length; i++) {
-        const actual = actualOrder[i];
-        if (actual !== undefined && actual !== presentSections[i]) {
-            misordered.push(actual);
-        }
-    }
-
-    if (misordered.length > 0) {
-        return {
-            valid: false,
-            missingSections: [],
-            misordered,
-            structuredReason: `Sections are misordered. Expected: ${presentSections.join(' → ')}. Actual: ${actualOrder.join(' → ')}.`,
-        };
-    }
-
-    // Enforce section-body semantics for anti-evasion: non-empty body and no nested canonical headers.
-    for (let i = 0; i < REQUIRED_SECTIONS.length; i++) {
-        const section = REQUIRED_SECTIONS[i] as string;
-        const current = headers.get(section);
-        if (!current) {
-            continue;
-        }
-
-        const nextSection = REQUIRED_SECTIONS[i + 1] as string | undefined;
-        const nextHeaderIndex =
-            nextSection !== undefined
-                ? (headers.get(nextSection)?.index ?? text.length)
-                : text.length;
-
-        const body = text.slice(current.index + current.length, nextHeaderIndex).trim();
-        if (body.length === 0) {
-            return {
-                valid: false,
-                missingSections: [],
-                misordered: [],
-                structuredReason: `Section body is empty for: ${section}`,
-            };
-        }
-
-        if (containsCanonicalHeader(body)) {
-            return {
-                valid: false,
-                missingSections: [],
-                misordered: [],
-                structuredReason: `Section body contains nested canonical header marker for: ${section}`,
-            };
-        }
+    const bodyResult = validateSectionBodies(sections);
+    if (!bodyResult.valid) {
+        return bodyResult;
     }
 
     return {
