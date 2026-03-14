@@ -8,6 +8,12 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **Prompt lifecycle guardrail regression suite** (TASK-PC-BE-002) — Added
+  `forgeos-server/src/__tests__/prompt-lifecycle-guardrails.test.ts` static
+  regression checks to enforce MCP/DB lifecycle boundaries. The suite blocks
+  reintroduction of forbidden filesystem ticket-state paths and verifies
+  queue-based prompt compilation hooks remain the lifecycle trigger mechanism.
+
 - **Operator Workbench Actions** (FORGEOS-FE009) — `OperatorActions` component
   at `dashboard/src/components/operator/OperatorActions.tsx` renders a 2×2
   action toolbar for ticket lifecycle operations: Claim, Release, Advance, and
