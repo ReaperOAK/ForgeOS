@@ -1,0 +1,60 @@
+{
+  "ticket_id": "TASK-PC-CIR-016",
+  "title": "CI Gate for Prompt Compiler Quality Thresholds",
+  "description": "Add CI checks for prompt compiler determinism/freshness/queue suites and enforce zero-lint, zero-type-error, and required test pass thresholds before merge.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-14T13:14:03.440735+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-PC-SEC-015"
+  ],
+  "blocked_by": [
+    "TASK-PC-SEC-015"
+  ],
+  "file_paths": [
+    "forgeos-server/vitest.config.ts",
+    "forgeos-server/package.json",
+    ".github/workflows",
+    "forgeos-server/src/__tests__"
+  ],
+  "acceptance_criteria": [
+    "Given CI run on prompt compiler changes, when checks execute, then deterministic and freshness suites are required and blocking.",
+    "Given lint and type checks, when run in CI, then prompt compiler surfaces have zero errors.",
+    "Given flaky retry tests, when CI runs, then test strategy provides deterministic pass/fail outcomes.",
+    "Given CI report, when pipeline completes, then prompt compiler gate status is explicit and auditable."
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-14T13:14:03.440737+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/prompt-compiler-l3.md"
+    }
+  ],
+  "source_task_file": "TODO/tickets/prompt-compiler-l3.md",
+  "tags": [
+    "prompt-compiler",
+    "ci",
+    "quality-gate",
+    "p1"
+  ]
+}

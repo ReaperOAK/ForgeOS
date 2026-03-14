@@ -39,6 +39,8 @@ const configSchema = z.object({
   EMBEDDING_MODEL: z.string().min(1).default('mxbai-embed-large'),
   OLLAMA_BASE_URL: z.string().url().default('http://127.0.0.1:11434/api/embed'),
   OPENAI_API_KEY: z.string().optional(),
+  GEMINI_API_KEY: z.string().optional(),
+  GEMINI_MODEL: z.string().min(1).default('gemini-1.5-flash'),
   RATE_LIMIT_PER_MINUTE: z.coerce.number().int().min(1).default(100),
   DEFAULT_LEASE_MINUTES: z.coerce.number().int().min(5).max(120).default(30),
   MAX_LEASE_MINUTES: z.coerce.number().int().min(10).max(480).default(120),

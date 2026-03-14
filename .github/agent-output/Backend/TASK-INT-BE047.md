@@ -1,6 +1,6 @@
 # TASK-INT-BE047 — Update Agent SDK with Init Tool Schemas
 
-## Stage: BACKEND | Agent: Backend | Machine: reaperoak
+## Stage: BACKEND | Agent: Backend | Machine: Ticketer
 
 ## Summary
 

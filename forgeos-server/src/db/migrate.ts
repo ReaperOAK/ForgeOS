@@ -34,6 +34,12 @@ interface AppliedMigration {
   checksum: string;
 }
 
+/** Rollback SQL extraction result for a migration file. */
+interface MigrationSections {
+  upSql: string;
+  downSql: string | null;
+}
+
 // ── Internal Functions ───────────────────────────────────────────────────────
 
 /**
@@ -82,6 +88,71 @@ function getMigrationFiles(): string[] {
     .readdirSync(MIGRATIONS_DIR)
     .filter((f) => f.endsWith('.sql'))
     .sort();
+}
+
+/**
+ * Extract executable up/down SQL sections from a migration file.
+ *
+ * Convention:
+ * - The full file is treated as "up" SQL.
+ * - An optional rollback block can be declared as commented SQL after a line
+ *   containing "Down migration".
+ *
+ * Example:
+ * -- Down migration:
+ * -- ALTER TABLE foo DROP COLUMN bar;
+ */
+function parseMigrationSections(content: string): MigrationSections {
+  const lines = content.split(/\r?\n/);
+  const downStart = lines.findIndex((line) => /--\s*down migration/i.test(line));
+
+  if (downStart < 0) {
+    return { upSql: content, downSql: null };
+  }
+
+  const rollbackLines: string[] = [];
+  for (let i = downStart + 1; i < lines.length; i += 1) {
+    const line = lines[i] ?? '';
+    const trimmed = line.trim();
+
+    if (trimmed.length === 0) {
+      rollbackLines.push('');
+      continue;
+    }
+
+    if (!trimmed.startsWith('--')) {
+      break;
+    }
+
+    rollbackLines.push(trimmed.replace(/^--\s?/, ''));
+  }
+
+  const downSql = rollbackLines.join('\n').trim();
+  return {
+    upSql: content,
+    downSql: downSql.length > 0 ? downSql : null,
+  };
+}
+
+/**
+ * Resolve a rollback migration filename safely within the migrations directory.
+ */
+function resolveMigrationPath(migrationName: string): string {
+  if (path.basename(migrationName) !== migrationName) {
+    throw new Error(`Invalid migration name: ${migrationName}`);
+  }
+
+  if (!migrationName.endsWith('.sql')) {
+    throw new Error(`Invalid migration name: ${migrationName}`);
+  }
+
+  const resolved = path.resolve(MIGRATIONS_DIR, migrationName);
+  const migrationsRoot = `${path.resolve(MIGRATIONS_DIR)}${path.sep}`;
+  if (!resolved.startsWith(migrationsRoot)) {
+    throw new Error(`Invalid migration name: ${migrationName}`);
+  }
+
+  return resolved;
 }
 
 // ── Public API ───────────────────────────────────────────────────────────────
@@ -160,6 +231,7 @@ export async function runMigrations(): Promise<number> {
   for (const file of pending) {
     const filePath = path.join(MIGRATIONS_DIR, file);
     const sql = fs.readFileSync(filePath, 'utf-8');
+    const sections = parseMigrationSections(sql);
     const checksum = computeChecksum(sql);
 
     // Migrations with .notx. in the filename run without a transaction.
@@ -169,7 +241,7 @@ export async function runMigrations(): Promise<number> {
     const client = await pool.connect();
     try {
       if (!noTx) await client.query('BEGIN');
-      await client.query(sql);
+      await client.query(sections.upSql);
       await client.query(
         'INSERT INTO schema_migrations (name, checksum) VALUES ($1, $2)',
         [file, checksum],
@@ -196,6 +268,52 @@ export async function runMigrations(): Promise<number> {
   }
 
   return pending.length;
+}
+
+/**
+ * Execute a migration's rollback SQL and remove its schema_migrations record.
+ *
+ * Intended for test/manual verification environments where rollback execution
+ * is explicitly required by acceptance criteria.
+ */
+export async function runMigrationRollback(migrationName: string): Promise<void> {
+  const migrationPath = resolveMigrationPath(migrationName);
+
+  if (!fs.existsSync(migrationPath)) {
+    throw new Error(`Migration file not found: ${migrationName}`);
+  }
+
+  const content = fs.readFileSync(migrationPath, 'utf-8');
+  const { downSql } = parseMigrationSections(content);
+  if (!downSql) {
+    throw new Error(`No rollback SQL found for migration: ${migrationName}`);
+  }
+
+  await ensureMigrationsTable();
+
+  const pool = getPool();
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    await client.query(downSql);
+    await client.query('DELETE FROM schema_migrations WHERE name = $1', [migrationName]);
+    await client.query('COMMIT');
+    logger.info(
+      { event: 'migration_rollback_applied', migration: migrationName },
+      'Migration rollback applied',
+    );
+  } catch (err) {
+    await client.query('ROLLBACK').catch(() => {
+      /* ignore rollback errors on already-failed connection */
+    });
+    logger.error(
+      { event: 'migration_rollback_failed', migration: migrationName, err },
+      'Migration rollback failed',
+    );
+    throw err;
+  } finally {
+    client.release();
+  }
 }
 
 // ── CLI Entry Point ──────────────────────────────────────────────────────────

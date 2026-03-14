@@ -1,0 +1,61 @@
+{
+  "ticket_id": "TASK-PC-BE-010",
+  "title": "Integrate Compile Queue Triggers and Metrics",
+  "description": "Integrate queue triggering on executable-state transitions and stale/missing claim detection. Emit queue depth, age, success/failure, and freshness metrics required by architecture and PRD.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-14T13:14:03.440129+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-PC-BE-009"
+  ],
+  "blocked_by": [
+    "TASK-PC-BE-009"
+  ],
+  "file_paths": [
+    "forgeos-server/src/webhooks/reconciliation.ts",
+    "forgeos-server/src/tools/tickets-claim.ts",
+    "forgeos-server/src/services/prompt-compile-queue.ts",
+    "forgeos-server/src/monitoring/metrics.ts",
+    "forgeos-server/src/__tests__/prompt-compile-triggering.test.ts"
+  ],
+  "acceptance_criteria": [
+    "Given ticket enters executable state, when transition hook fires, then compile job is enqueued with idempotency key.",
+    "Given stale or missing claim result, when claim path completes, then recompile enqueue is triggered once per effective context target.",
+    "Given metrics export, when observed, then queue and freshness counters are emitted with defined labels.",
+    "Given load test harness, when burst enqueue occurs, then queue instrumentation reflects backlog and recovery progression."
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-14T13:14:03.440131+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/prompt-compiler-l3.md"
+    }
+  ],
+  "source_task_file": "TODO/tickets/prompt-compiler-l3.md",
+  "tags": [
+    "prompt-compiler",
+    "queue",
+    "observability",
+    "p0"
+  ]
+}

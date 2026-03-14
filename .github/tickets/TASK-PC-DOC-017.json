@@ -1,0 +1,57 @@
+{
+  "ticket_id": "TASK-PC-DOC-017",
+  "title": "Update Prompt Compiler Architecture and Operations Docs",
+  "description": "Document final prompt compiler contract, freshness policy behavior, queue operations, and operator runbooks. Include migration notes for clients moving from `system_directive` to packet metadata contract.",
+  "type": "docs",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-14T13:14:03.440815+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-PC-CIR-016"
+  ],
+  "blocked_by": [
+    "TASK-PC-CIR-016"
+  ],
+  "file_paths": [
+    "docs/architecture/prompt-compiler-architecture.md",
+    "docs/product/PRD-prompt-compiler.md",
+    "docs/operations/intelligence-setup.md",
+    "README.md",
+    ".github/agent-output/Documentation/TASK-PC-DOC-017.md"
+  ],
+  "acceptance_criteria": [
+    "Given docs review, when comparing against implementation, then claim and packet contracts are accurate and complete.",
+    "Given operations runbook, when operator follows stale/missing remediation steps, then queue and freshness issues are diagnosable.",
+    "Given README update, when new contributors onboard, then prompt compiler architecture and constraints are discoverable.",
+    "Given governance review, when docs are approved, then lifecycle guardrail forbidding direct state modifications is explicitly documented."
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-14T13:14:03.440817+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/prompt-compiler-l3.md"
+    }
+  ],
+  "source_task_file": "TODO/tickets/prompt-compiler-l3.md",
+  "tags": [
+    "prompt-compiler",
+    "docs",
+    "runbook",
+    "p1"
+  ]
+}

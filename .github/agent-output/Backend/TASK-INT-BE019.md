@@ -1,6 +1,6 @@
 # TASK-INT-BE019 — Code Graph PostgreSQL Schema Migration
 
-## Stage: BACKEND | Agent: Backend | Machine: reaperoak
+## Stage: BACKEND | Agent: Backend | Machine: Ticketer
 
 ## Summary
 

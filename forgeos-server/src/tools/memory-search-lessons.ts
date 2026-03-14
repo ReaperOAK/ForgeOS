@@ -27,18 +27,18 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
  * - `limit` (optional) — Maximum results to return (1–100, default 10).
  */
 export const memorySearchLessonsSchema = z.object({
-    query: z.string().min(1).describe(
-        'Natural language search query for finding relevant past lessons',
-    ),
-    category: z.string().optional().describe(
-        'Optional category filter to narrow lesson results',
-    ),
-    threshold: z.number().min(0).max(1).optional().default(0.7).describe(
-        'Minimum similarity score (0–1). Defaults to 0.7',
-    ),
-    limit: z.number().int().min(1).max(100).optional().default(10).describe(
-        'Maximum number of results to return (1–100). Defaults to 10',
-    ),
+  query: z.string().min(1).describe(
+    'Natural language search query for finding relevant past lessons',
+  ),
+  category: z.string().optional().describe(
+    'Optional category filter to narrow lesson results',
+  ),
+  threshold: z.number().min(0).max(1).optional().default(0.7).describe(
+    'Minimum similarity score (0–1). Defaults to 0.7',
+  ),
+  limit: z.number().int().min(1).max(100).optional().default(10).describe(
+    'Maximum number of results to return (1–100). Defaults to 10',
+  ),
 });
 
 /** Validated input type derived from the Zod schema. */
@@ -48,10 +48,10 @@ export type MemorySearchLessonsInput = z.infer<typeof memorySearchLessonsSchema>
 
 /** A single lesson match returned by the stored function. */
 interface LessonMatch {
-    id: string;
-    ticket_id: string;
-    stage: string;
-    agent_role: string;
+  id: string;
+  ticket_id: string;
+  stage: string;
+  agent_role: string;
   rework_count: number;
   lesson_text: string;
   category: string;
@@ -101,22 +101,58 @@ export async function memorySearchLessonsHandler(
   try {
     const startMs = Date.now();
 
-    // 1. Embed the query text
-    const embeddingService = new EmbeddingService();
-    const queryEmbedding = await embeddingService.embedText(query);
+    let lessons: LessonMatch[] = [];
 
-    // 2. Call stored function with the embedding
-    const queryResult = await pool.query<{ search_similar_lessons: LessonMatch[] }>(
-      'SELECT search_similar_lessons($1::vector, $2, $3, $4)',
-      [
-        JSON.stringify(queryEmbedding),
-        category ?? null,
-        threshold,
-        limit,
-      ],
-    );
+    try {
+      // 1. Embed the query text
+      const embeddingService = new EmbeddingService();
+      const queryEmbedding = await embeddingService.embedText(query);
 
-    const lessons: LessonMatch[] = queryResult.rows[0]?.search_similar_lessons ?? [];
+      // 2. Call stored function with the embedding
+      const queryResult = await pool.query<{ search_similar_lessons: LessonMatch[] }>(
+        'SELECT search_similar_lessons($1::vector, $2, $3, $4)',
+        [
+          JSON.stringify(queryEmbedding),
+          category ?? null,
+          threshold,
+          limit,
+        ],
+      );
+
+      lessons = queryResult.rows[0]?.search_similar_lessons ?? [];
+    } catch (embedErr: unknown) {
+      // Fallback: lexical search on lesson_text when embedding infra is unavailable.
+      logger.warn(
+        {
+          query,
+          category,
+          error: embedErr instanceof Error ? embedErr.message : String(embedErr),
+        },
+        'memory.search_lessons embedding failed, using lexical fallback',
+      );
+
+      const lexical = await pool.query<LessonMatch>(
+        `SELECT
+          id,
+          ticket_id,
+          stage,
+          agent_role,
+          rework_count,
+          lesson_text,
+          category,
+          tags,
+          0.5::float AS similarity,
+          created_at
+         FROM lessons
+         WHERE ($1::text IS NULL OR category = $1)
+           AND lesson_text ILIKE $2
+         ORDER BY created_at DESC
+         LIMIT $3`,
+        [category ?? null, `%${query}%`, limit],
+      );
+
+      lessons = lexical.rows;
+    }
 
     const durationMs = Date.now() - startMs;
 

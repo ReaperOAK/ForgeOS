@@ -1,0 +1,60 @@
+{
+  "ticket_id": "TASK-PC-BE-009",
+  "title": "Implement Queue Worker Retry and Idempotency Engine",
+  "description": "Implement durable queue worker with row locking, idempotent job claiming, exponential backoff retry, dead-letter terminal state, and structured error taxonomy.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-14T13:14:03.440045+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-PC-BE-008"
+  ],
+  "blocked_by": [
+    "TASK-PC-BE-008"
+  ],
+  "file_paths": [
+    "forgeos-server/src/services/prompt-compile-queue.ts",
+    "forgeos-server/src/services/compiler.ts",
+    "forgeos-server/src/__tests__/prompt-compile-queue.test.ts"
+  ],
+  "acceptance_criteria": [
+    "Given pending jobs, when worker polls, then jobs are claimed with safe concurrency semantics.",
+    "Given transient compile errors, when retry budget remains, then job is retried with exponential backoff and jitter.",
+    "Given non-retryable validation error, when worker handles failure, then job transitions to terminal non-retryable state.",
+    "Given duplicate enqueue burst, when worker processes jobs, then only one compile outcome is committed for shared idempotency key.",
+    "Given service restart, when worker resumes, then pending jobs remain durable and recoverable."
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-14T13:14:03.440047+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/prompt-compiler-l3.md"
+    }
+  ],
+  "source_task_file": "TODO/tickets/prompt-compiler-l3.md",
+  "tags": [
+    "prompt-compiler",
+    "queue-worker",
+    "retry",
+    "p0"
+  ]
+}

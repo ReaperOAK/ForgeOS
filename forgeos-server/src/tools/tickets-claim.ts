@@ -22,6 +22,12 @@ import { z } from 'zod';
 import { pool } from '../db/pool.js';
 import { logger } from '../middleware/logging.js';
 import type { Ticket, TicketsClaimOutput } from '../types/index.js';
+import { queueCompileTicketPrompt } from '../services/compiler.js';
+import {
+  buildContextHashInputsFromEnv,
+  computeContextHash,
+  evaluatePromptFreshness,
+} from '../services/context-hash.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
 /**
@@ -127,7 +133,37 @@ export async function ticketsClaimHandler(
       ticket,
       lease_expiry: ticket.lease_expiry ?? '',
       file_locks: locksResult.rows.map((r) => r.file_path),
+      compiled_prompt: ticket.compiled_prompt,
+      system_directive: ticket.compiled_prompt
+        ?? ((ticket.metadata?.agent_prompt as { prompt?: string } | undefined)?.prompt ?? null),
     };
+
+    const packetVersion = ticket.compiled_prompt_packet_version ?? 'v1';
+    const templateVersion = ticket.compiled_prompt_template_version ?? 'prompt-architect-v1';
+    const currentContextHash = computeContextHash(
+      buildContextHashInputsFromEnv(process.env, packetVersion, templateVersion),
+    );
+
+    const freshness = evaluatePromptFreshness({
+      compiledPrompt: ticket.compiled_prompt,
+      storedContextHash: ticket.compiled_prompt_context_hash,
+      currentContextHash,
+    });
+
+    output.prompt_packet = {
+      version: packetVersion,
+      compiled_at: ticket.compiled_prompt_compiled_at ?? null,
+      context_hash: ticket.compiled_prompt_context_hash ?? null,
+      freshness_status: freshness.freshnessStatus,
+      stale_reason: freshness.staleReason,
+    };
+
+    if (freshness.shouldInvalidateCache) {
+      const trigger = freshness.freshnessStatus === 'stale'
+        ? 'claim-stale-compiled-prompt'
+        : 'claim-missing-compiled-prompt';
+      queueCompileTicketPrompt(ticket_id, trigger);
+    }
 
     return { content: [{ type: 'text', text: JSON.stringify(output) }] };
   } catch (err) {

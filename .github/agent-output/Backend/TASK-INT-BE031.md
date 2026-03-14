@@ -1,6 +1,6 @@
 # TASK-INT-BE031 — Memory Engine Schema Migration
 
-## Stage: BACKEND | Agent: Backend | Machine: reaperoak
+## Stage: BACKEND | Agent: Backend | Machine: Ticketer
 
 ## Summary
 

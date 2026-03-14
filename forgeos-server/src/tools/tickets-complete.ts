@@ -24,6 +24,7 @@ import { pool } from '../db/pool.js';
 import { logger } from '../middleware/logging.js';
 import { EmbeddingService } from '../services/embedding-service.js';
 import { ReflectionService } from '../services/reflection-service.js';
+import { handleTicketTransition } from '../webhooks/reconciliation.js';
 import type { Ticket, TicketsCompleteOutput } from '../types/index.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
@@ -235,6 +236,10 @@ export async function ticketsCompleteHandler(
       new_stage: newStage,
       dependencies_unblocked: dependenciesUnblocked,
     };
+
+    if (advancedTicket.status === 'READY') {
+      handleTicketTransition(advancedTicket.ticket_id, advancedTicket.stage, advancedTicket.status);
+    }
 
     logger.info(
       {
