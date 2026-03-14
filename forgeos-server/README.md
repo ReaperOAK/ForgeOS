@@ -197,6 +197,43 @@ Operational guidance:
 - If unsure, call `compileIfStale` first. It is safe in both fresh and stale
   states.
 
+### Packet Validation (11-Section Schema)
+
+Every compiled prompt packet must conform to a strict 11-section schema before
+it is stored or dispatched. The sections must appear in this exact order:
+
+| # | Section name |
+|---|---|
+| 1 | `ROLE` |
+| 2 | `TICKET` |
+| 3 | `SYSTEM CONSTRAINTS` |
+| 4 | `HISTORY` |
+| 5 | `LEARNINGS` |
+| 6 | `BEST PRACTICES` |
+| 7 | `CONTEXT LOCATIONS` |
+| 8 | `YOUR EXACT TASK` |
+| 9 | `EXECUTION PLAN` |
+| 10 | `EDGE CASES` |
+| 11 | `POST-COMPLETION` |
+
+Section headers are recognized in two formats: `**SECTION NAME**` (bold
+Markdown) and `## SECTION NAME` (Markdown heading, any level 1–6).
+
+Validation logic lives in `src/services/packet-validator.ts` and is called
+automatically inside `compileTicketPrompt` and its fallback path.
+
+**What happens when validation fails:**
+
+- `validatePacketSections(text)` returns a `ValidationResult` with
+  `valid: false`, a `missingSections` array, a `misordered` array, and a
+  `structuredReason` string describing the first detected failure.
+- The compiler throws `PacketValidationError(result)`, which carries the full
+  `ValidationResult` on its `.result` property for structured logging.
+- At API or transport boundaries, call `error.toPublicMessage()` to get a
+  fixed, non-leaking error string safe to forward to clients.
+- The failed compilation is **not** persisted — no partial packet reaches the
+  database.
+
 ## Configuration
 
 All settings are loaded from environment variables (`.env` supported via
