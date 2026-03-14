@@ -186,6 +186,36 @@ export interface Ticket {
   max_reworks: number;
   /** Arbitrary JSONB metadata (e.g., evidence, agent notes). */
   metadata: Record<string, unknown>;
+  /** Precompiled stateless execution directive for downstream IDE agents. */
+  compiled_prompt: string | null;
+  /** ISO 8601 timestamp when compiled_prompt was generated. */
+  compiled_prompt_generated_at: string | null;
+  /** Model provider that generated compiled_prompt (gemini/ollama/openai). */
+  compiled_prompt_provider: string | null;
+  /** Model identifier that generated compiled_prompt. */
+  compiled_prompt_model: string | null;
+  /** Normalized packet compilation timestamp (ISO 8601). */
+  compiled_prompt_compiled_at?: string | null;
+  /** Canonical deterministic context hash (sha256-hex) for freshness checks. */
+  compiled_prompt_context_hash?: string | null;
+  /** Packet schema version for evolution-safe contract changes. */
+  compiled_prompt_packet_schema_version?: number | null;
+  /** Packet contract version label (for example, `v1`). */
+  compiled_prompt_packet_version?: string | null;
+  /** Prompt synthesis template version used to compile the packet. */
+  compiled_prompt_template_version?: string | null;
+  /** Freshness status computed for the stored packet (`fresh|stale|missing`). */
+  compiled_prompt_freshness_status?: 'fresh' | 'stale' | 'missing' | null;
+  /** Optional stale reason hint (for example, `hash_mismatch` or `not_compiled`). */
+  compiled_prompt_stale_reason?: string | null;
+  /** Timestamp when freshness status was last evaluated (ISO 8601). */
+  compiled_prompt_freshness_checked_at?: string | null;
+  /** Canonical hash input: repository commit used during compile. */
+  compiled_prompt_context_repo_commit?: string | null;
+  /** Canonical hash input: cognition graph version used during compile. */
+  compiled_prompt_context_graph_version?: string | null;
+  /** Canonical hash input: memory snapshot version used during compile. */
+  compiled_prompt_context_memory_snapshot?: string | null;
   /** `ticket_id` of the parent ticket if this is a spawned subtask. */
   parent_id: string | null;
   /** Path to the TODO task file that generated this ticket. */
@@ -408,6 +438,23 @@ export interface TicketsClaimOutput {
   lease_expiry: string;
   /** Array of file paths that were locked for this ticket. */
   file_locks: string[];
+  /** Optional precompiled prompt directive for stateless agent execution. */
+  compiled_prompt?: string | null;
+  /** Alias for compiled_prompt used by thin IDE clients. */
+  system_directive?: string | null;
+  /** Freshness and version metadata for the compiled prompt packet. */
+  prompt_packet?: {
+    /** Packet contract version (for example, `v1`). */
+    version: string;
+    /** Compilation timestamp if available. */
+    compiled_at: string | null;
+    /** Stored deterministic context hash if available. */
+    context_hash: string | null;
+    /** Freshness status derived at claim time. */
+    freshness_status: 'fresh' | 'stale' | 'missing';
+    /** Optional stale reason hint. */
+    stale_reason: 'hash_mismatch' | 'not_compiled' | null;
+  };
 }
 
 /**
@@ -781,16 +828,16 @@ export interface ErrorResponse {
  * ```
  */
 export const SDLC_FLOWS: Record<TicketType, TicketStage[]> = {
-  backend:      ['READY', 'BACKEND', 'QA', 'SECURITY', 'CI', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
-  frontend:     ['READY', 'UI_DESIGN', 'FRONTEND', 'QA', 'SECURITY', 'CI', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
-  fullstack:    ['READY', 'UI_DESIGN', 'BACKEND', 'FRONTEND', 'QA', 'SECURITY', 'CI', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
-  infra:        ['READY', 'BACKEND', 'QA', 'SECURITY', 'CI', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
-  security:     ['READY', 'SECURITY', 'QA', 'CI', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
-  docs:         ['READY', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
-  research:     ['READY', 'RESEARCH', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
+  backend: ['READY', 'BACKEND', 'QA', 'SECURITY', 'CI', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
+  frontend: ['READY', 'UI_DESIGN', 'FRONTEND', 'QA', 'SECURITY', 'CI', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
+  fullstack: ['READY', 'UI_DESIGN', 'BACKEND', 'FRONTEND', 'QA', 'SECURITY', 'CI', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
+  infra: ['READY', 'BACKEND', 'QA', 'SECURITY', 'CI', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
+  security: ['READY', 'SECURITY', 'QA', 'CI', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
+  docs: ['READY', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
+  research: ['READY', 'RESEARCH', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
   architecture: ['READY', 'ARCHITECT', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
-  product:      ['READY', 'PRODUCT_MANAGER', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
-  design:       ['READY', 'UI_DESIGN', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
+  product: ['READY', 'PRODUCT_MANAGER', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
+  design: ['READY', 'UI_DESIGN', 'DOCUMENTATION', 'VALIDATOR', 'DONE'],
 };
 
 /**

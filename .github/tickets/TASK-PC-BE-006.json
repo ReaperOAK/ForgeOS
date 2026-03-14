@@ -1,0 +1,59 @@
+{
+  "ticket_id": "TASK-PC-BE-006",
+  "title": "Add Freshness Gate to Claim Path",
+  "description": "Implement claim-time freshness verification comparing stored `context_hash` to current context hash and returning explicit freshness status (`fresh`, `stale`, `missing`) with stale reason.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-14T13:14:03.439794+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-PC-BE-005"
+  ],
+  "blocked_by": [
+    "TASK-PC-BE-005"
+  ],
+  "file_paths": [
+    "forgeos-server/src/tools/tickets-claim.ts",
+    "forgeos-server/src/services/context-hash.ts",
+    "forgeos-server/src/__tests__/tickets-claim-freshness.test.ts"
+  ],
+  "acceptance_criteria": [
+    "Given claim with matching hash, when response is returned, then freshness status is `fresh`.",
+    "Given claim with missing compiled prompt, when response is returned, then freshness status is `missing` and compile trigger path is invoked.",
+    "Given claim with hash mismatch, when response is returned, then freshness status is `stale` with `hash_mismatch` reason and recompile trigger path is invoked.",
+    "Given strict/permissive policy configuration, when stale prompt is encountered, then behavior follows configured mode."
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-14T13:14:03.439796+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/prompt-compiler-l3.md"
+    }
+  ],
+  "source_task_file": "TODO/tickets/prompt-compiler-l3.md",
+  "tags": [
+    "prompt-compiler",
+    "freshness-gate",
+    "claim",
+    "p0"
+  ]
+}

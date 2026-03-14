@@ -435,4 +435,61 @@ describe('Migration Runner — migrate.ts', () => {
       );
     });
   });
+
+  // ── 8. Rollback execution ─────────────────────────────────────────────
+
+  describe('rollback execution', () => {
+    it('executes commented down migration SQL and clears schema_migrations row', async () => {
+      const { runMigrationRollback } = await importMigrate();
+
+      const migration = [
+        '-- up',
+        'ALTER TABLE tickets ADD COLUMN foo TEXT;',
+        '-- Down migration:',
+        '-- ALTER TABLE tickets',
+        '--   DROP COLUMN IF EXISTS foo;',
+      ].join('\n');
+
+      mockQuery.mockResolvedValueOnce({ rows: [] }); // ensureMigrationsTable
+      mockExistsSync.mockReturnValue(true);
+      mockReadFileSync.mockReturnValue(migration);
+      mockClient.query.mockResolvedValue({ rows: [] });
+
+      await runMigrationRollback('008-prompt-compiler-foundation.sql');
+
+      const calls = mockClient.query.mock.calls.map((c: unknown[]) => c[0]);
+      expect(calls[0]).toBe('BEGIN');
+      expect(calls[1]).toBe('ALTER TABLE tickets\n  DROP COLUMN IF EXISTS foo;');
+      expect(calls[2]).toBe('DELETE FROM schema_migrations WHERE name = $1');
+      expect(calls[3]).toBe('COMMIT');
+      expect(mockClient.release).toHaveBeenCalled();
+    });
+
+    it('throws if rollback block is missing', async () => {
+      const { runMigrationRollback } = await importMigrate();
+
+      mockExistsSync.mockReturnValue(true);
+      mockReadFileSync.mockReturnValue('ALTER TABLE tickets ADD COLUMN foo TEXT;');
+
+      await expect(runMigrationRollback('008-prompt-compiler-foundation.sql')).rejects.toThrow(
+        'No rollback SQL found',
+      );
+    });
+
+    it('rejects rollback migration names with path traversal', async () => {
+      const { runMigrationRollback } = await importMigrate();
+
+      await expect(runMigrationRollback('../008-prompt-compiler-foundation.sql')).rejects.toThrow(
+        'Invalid migration name',
+      );
+    });
+
+    it('rejects rollback migration names that are not .sql files', async () => {
+      const { runMigrationRollback } = await importMigrate();
+
+      await expect(runMigrationRollback('008-prompt-compiler-foundation.txt')).rejects.toThrow(
+        'Invalid migration name',
+      );
+    });
+  });
 });

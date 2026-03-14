@@ -41,8 +41,8 @@ const sampleArgs = {
   'code.search_symbols': { name_pattern: '%ticket%' },
   'code.blast_radius': { file_path: 'forgeos-server/src/server.ts', max_depth: 5 },
   'code.get_imports': { file_path: 'forgeos-server/src/server.ts', max_depth: 5 },
-  'init.index': { root_path: '/home/reaperoak/Documents/ForgeOS', force: false },
-  'init.orient': { root_path: '/home/reaperoak/Documents/ForgeOS/forgeos-server' },
+  'init.index': { root_path: '/home/Ticketer/Documents/ForgeOS', force: false },
+  'init.orient': { root_path: '/home/Ticketer/Documents/ForgeOS/forgeos-server' },
   'memory.add_lesson': {
     ticket_id: 'MCP-SMOKE-TEST',
     stage: 'VALIDATION',
@@ -84,5 +84,5 @@ try {
   const failed = rows.length - passed;
   console.log(JSON.stringify({ summary: { total: rows.length, passed, failed }, rows }, null, 2));
 } finally {
-  try { await client.close(); } catch {}
+  try { await client.close(); } catch { }
 }

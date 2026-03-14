@@ -13,7 +13,7 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 
 // ── Hoisted mocks (vi.mock factories run before module scope) ────────────────
 
-const { mockQuery, mockLogger } = vi.hoisted(() => {
+const { mockQuery, mockQueueCompileTicketPrompt, mockLogger } = vi.hoisted(() => {
   const mLogger = {
     info: vi.fn(),
     warn: vi.fn(),
@@ -25,6 +25,7 @@ const { mockQuery, mockLogger } = vi.hoisted(() => {
   };
   return {
     mockQuery: vi.fn(),
+    mockQueueCompileTicketPrompt: vi.fn(),
     mockLogger: mLogger,
   };
 });
@@ -45,6 +46,10 @@ vi.mock('../../config.js', () => ({
 
 vi.mock('../../middleware/logging.js', () => ({
   logger: mockLogger,
+}));
+
+vi.mock('../../services/compiler.js', () => ({
+  queueCompileTicketPrompt: (...args: unknown[]) => mockQueueCompileTicketPrompt(...args),
 }));
 
 // ── Import AFTER mocks ──────────────────────────────────────────────────────
@@ -85,6 +90,11 @@ function makeTicketRow(overrides: Record<string, unknown> = {}) {
     rework_count: 0,
     max_reworks: 3,
     metadata: {},
+    compiled_prompt: 'compiled prompt',
+    compiled_prompt_compiled_at: '2026-03-07T09:50:00.000Z',
+    compiled_prompt_context_hash: 'unused-hash',
+    compiled_prompt_packet_version: 'v1',
+    compiled_prompt_template_version: 'prompt-architect-v1',
     parent_id: null,
     source_task_file: null,
     created_at: '2026-03-01T00:00:00Z',
@@ -318,10 +328,16 @@ describe('ticketsClaimHandler — AC2: Agent resolution and SQL function call', 
 describe('ticketsClaimHandler — AC5: Success response with ticket, lease_expiry, and file_locks', () => {
   beforeEach(() => {
     vi.clearAllMocks();
+    process.env.FORGEOS_REPO_COMMIT = 'repo-main';
+    process.env.FORGEOS_GRAPH_VERSION = 'graph-v1';
+    process.env.FORGEOS_MEMORY_SNAPSHOT_VERSION = 'memory-v1';
   });
 
   it('returns {ticket, lease_expiry, file_locks} on success', async () => {
-    const ticket = makeTicketRow({ lease_expiry: '2026-03-07T10:30:00.000Z' });
+    const ticket = makeTicketRow({
+      lease_expiry: '2026-03-07T10:30:00.000Z',
+      compiled_prompt_context_hash: '117f49edbc9a1e0efa6bc420b092a8e3897a5e29763f2250055c85f8a70804f9',
+    });
     mockQuery.mockResolvedValueOnce({ rows: [{ id: 'agent-uuid-001' }] });
     mockQuery.mockResolvedValueOnce({ rows: [ticket] });
     mockQuery.mockResolvedValueOnce({
@@ -346,6 +362,14 @@ describe('ticketsClaimHandler — AC5: Success response with ticket, lease_expir
     expect(parsed.ticket.ticket_id).toBe('TASK-TEST-001');
     expect(parsed.lease_expiry).toBe('2026-03-07T10:30:00.000Z');
     expect(parsed.file_locks).toEqual(['src/test.ts', 'src/other.ts']);
+    expect(parsed.prompt_packet).toEqual({
+      version: 'v1',
+      compiled_at: '2026-03-07T09:50:00.000Z',
+      context_hash: '117f49edbc9a1e0efa6bc420b092a8e3897a5e29763f2250055c85f8a70804f9',
+      freshness_status: 'fresh',
+      stale_reason: null,
+    });
+    expect(mockQueueCompileTicketPrompt).not.toHaveBeenCalled();
   });
 
   it('returns empty file_locks array when no files locked', async () => {
@@ -363,6 +387,55 @@ describe('ticketsClaimHandler — AC5: Success response with ticket, lease_expir
 
     const parsed = JSON.parse(textOf(result));
     expect(parsed.file_locks).toEqual([]);
+  });
+
+  it('marks stale prompts and triggers background recompile', async () => {
+    const ticket = makeTicketRow({
+      compiled_prompt_context_hash: 'stale-hash',
+    });
+    mockQuery.mockResolvedValueOnce({ rows: [{ id: 'agent-uuid-001' }] });
+    mockQuery.mockResolvedValueOnce({ rows: [ticket] });
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+
+    const result = await ticketsClaimHandler({
+      ticket_id: 'TASK-TEST-001',
+      agent_name: 'Backend Engineer',
+      machine_id: 'dev-machine',
+      lease_minutes: 30,
+    });
+
+    const parsed = JSON.parse(textOf(result));
+    expect(parsed.prompt_packet.freshness_status).toBe('stale');
+    expect(parsed.prompt_packet.stale_reason).toBe('hash_mismatch');
+    expect(mockQueueCompileTicketPrompt).toHaveBeenCalledWith(
+      'TASK-TEST-001',
+      'claim-stale-compiled-prompt',
+    );
+  });
+
+  it('marks missing prompts and triggers background recompile', async () => {
+    const ticket = makeTicketRow({
+      compiled_prompt: null,
+      compiled_prompt_context_hash: null,
+    });
+    mockQuery.mockResolvedValueOnce({ rows: [{ id: 'agent-uuid-001' }] });
+    mockQuery.mockResolvedValueOnce({ rows: [ticket] });
+    mockQuery.mockResolvedValueOnce({ rows: [] });
+
+    const result = await ticketsClaimHandler({
+      ticket_id: 'TASK-TEST-001',
+      agent_name: 'Backend Engineer',
+      machine_id: 'dev-machine',
+      lease_minutes: 30,
+    });
+
+    const parsed = JSON.parse(textOf(result));
+    expect(parsed.prompt_packet.freshness_status).toBe('missing');
+    expect(parsed.prompt_packet.stale_reason).toBe('not_compiled');
+    expect(mockQueueCompileTicketPrompt).toHaveBeenCalledWith(
+      'TASK-TEST-001',
+      'claim-missing-compiled-prompt',
+    );
   });
 
   it('returns correct MCP response format (content array with text type)', async () => {

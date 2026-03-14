@@ -4,7 +4,7 @@
   "description": "Review and update terminal-management.instructions.md for compatibility with MCP-only operations. Ensure terminal usage rules do not conflict with MCP tool usage patterns. Update any references to tickets.py CLI that should now use MCP tools.",
   "type": "backend",
   "priority": "high",
-  "stage": "DONE",
+  "stage": "QA",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -30,10 +30,10 @@
     "Document passes markdown lint with zero errors"
   ],
   "rework_count": 0,
-  "claimed_by": "Backend",
-  "machine_id": "reaperoak-workstation",
-  "operator": "reaperoak",
-  "lease_expiry": "2026-03-12T22:30:00+00:00",
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
   "lease_duration_minutes": 30,
   "history": [
     {
@@ -54,8 +54,15 @@
       "timestamp": "2026-03-12T22:00:00.000000+00:00",
       "event": "BACKEND_COMPLETE",
       "agent": "Backend",
-      "machine_id": "reaperoak-workstation",
+      "machine_id": "Ticketer-workstation",
       "details": "Created terminal-management.instructions.md. MCP-first principle established, tickets.py scoped to human operators and authorized agents only. 5/5 AC verified."
+    },
+    {
+      "timestamp": "2026-03-14T13:14:03.668960+00:00",
+      "event": "CLAIM_RELEASED",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Released claim from Backend: Lease expired at 2026-03-12T22:30:00+00:00"
     }
   ],
   "source_task_file": "TODO/tasks/int-phase1-rewrites.md",

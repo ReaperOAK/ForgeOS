@@ -23,6 +23,7 @@
 import { z } from 'zod';
 import { pool } from '../db/pool.js';
 import { logger } from '../middleware/logging.js';
+import { handleTicketTransition } from '../webhooks/reconciliation.js';
 import type { Ticket, TicketsRejectOutput } from '../types/index.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
@@ -143,6 +144,10 @@ export async function ticketsRejectHandler(
       escalated: isEscalated,
       returned_to_stage: ticket.stage,
     };
+
+    if (ticket.status === 'READY') {
+      handleTicketTransition(ticket.ticket_id, ticket.stage, ticket.status);
+    }
 
     return { content: [{ type: 'text', text: JSON.stringify(output) }] };
   } catch (err) {

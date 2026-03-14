@@ -1,6 +1,6 @@
 # TASK-INT-BE034 — Reflection Protocol Service
 
-## Stage: BACKEND | Agent: Backend | Machine: reaperoak
+## Stage: BACKEND | Agent: Backend | Machine: Ticketer
 
 ## Summary
 

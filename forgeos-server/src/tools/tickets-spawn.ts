@@ -23,6 +23,7 @@
 import { z } from 'zod';
 import { pool } from '../db/pool.js';
 import { logger } from '../middleware/logging.js';
+import { handleTicketTransition } from '../webhooks/reconciliation.js';
 import {
   SDLC_FLOWS,
   TICKET_TYPES,
@@ -304,6 +305,10 @@ export async function ticketsSpawnHandler(
       ticket: childTicket,
       parent_ticket_id: parent_id,
     };
+
+    if (childTicket.status === 'READY') {
+      handleTicketTransition(childTicket.ticket_id, childTicket.stage, childTicket.status);
+    }
 
     return {
       content: [{ type: 'text', text: JSON.stringify(output) }],

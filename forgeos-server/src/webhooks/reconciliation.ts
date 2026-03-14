@@ -18,6 +18,7 @@
  */
 
 import type { ClaimCommitOp, WorkCommitOp, TicketCommitOp } from './parser.js';
+import { queueCompileTicketPrompt } from '../services/compiler.js';
 
 // ── Dependency Interfaces ────────────────────────────────────────────────────
 
@@ -605,4 +606,19 @@ export async function runPeriodicReconciliation(
     ambiguousStates: 0,
     events,
   };
+}
+
+/**
+ * Trigger prompt precompilation when a ticket transitions into READY state.
+ *
+ * Fire-and-forget by design to avoid blocking ticket lifecycle operations.
+ */
+export function handleTicketTransition(
+  ticketId: string,
+  newStage: string,
+  newStatus: string,
+): void {
+  if (newStatus === 'READY') {
+    queueCompileTicketPrompt(ticketId, `transition:${newStage}:${newStatus}`);
+  }
 }

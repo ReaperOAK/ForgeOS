@@ -37,7 +37,7 @@ vi.mock('../middleware/logging.js', () => ({
 
 /** Extract text from the first MCP content block (narrows discriminated union). */
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function parseContent(result: { content: Array<{ type: string; [k: string]: unknown }> }): Record<string, any> {
+function parseContent(result: { content: Array<{ type: string;[k: string]: unknown }> }): Record<string, any> {
   const item = result.content[0] as { type: 'text'; text: string };
   return JSON.parse(item.text);
 }
@@ -59,7 +59,7 @@ function makeTicketRow(overrides: Record<string, unknown> = {}): Record<string, 
     claimed_by: 'agent-uuid-001',
     claimed_by_name: 'Backend',
     machine_id: 'build-01',
-    operator: 'reaperoak',
+    operator: 'Ticketer',
     lease_expiry: '2026-03-12T16:00:00Z',
     lease_duration_minutes: 30,
     depends_on: ['TASK-TEST-000'],

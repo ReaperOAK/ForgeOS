@@ -7,42 +7,42 @@ const claimPath = resolve(process.cwd(), 'src/tools/tickets-claim.ts');
 const reconciliationPath = resolve(process.cwd(), 'src/webhooks/reconciliation.ts');
 
 function readModule(path: string): string {
-  return readFileSync(path, 'utf8');
+    return readFileSync(path, 'utf8');
 }
 
 describe('prompt lifecycle guardrails', () => {
-  it('does not reference forbidden filesystem ticket state paths', () => {
-    const modules = [
-      readModule(compilerPath),
-      readModule(claimPath),
-      readModule(reconciliationPath),
-    ];
+    it('does not reference forbidden filesystem ticket state paths', () => {
+        const modules = [
+            readModule(compilerPath),
+            readModule(claimPath),
+            readModule(reconciliationPath),
+        ];
 
-    for (const code of modules) {
-      expect(code).not.toContain('.github/ticket-state');
-      expect(code).not.toContain('.github/tickets');
-    }
-  });
+        for (const code of modules) {
+            expect(code).not.toContain('.github/ticket-state');
+            expect(code).not.toContain('.github/tickets');
+        }
+    });
 
-  it('keeps compile triggers independent from direct filesystem state operations', () => {
-    const compiler = readModule(compilerPath);
-    const claim = readModule(claimPath);
-    const reconciliation = readModule(reconciliationPath);
+    it('keeps compile triggers independent from direct filesystem state operations', () => {
+        const compiler = readModule(compilerPath);
+        const claim = readModule(claimPath);
+        const reconciliation = readModule(reconciliationPath);
 
-    for (const code of [compiler, claim, reconciliation]) {
-      expect(code).not.toMatch(/from\s+['"]node:fs['"]/);
-      expect(code).not.toMatch(/from\s+['"]fs['"]/);
-      expect(code).not.toMatch(/writeFileSync|appendFileSync|mkdirSync|rmSync/);
-    }
-  });
+        for (const code of [compiler, claim, reconciliation]) {
+            expect(code).not.toMatch(/from\s+['"]node:fs['"]/);
+            expect(code).not.toMatch(/from\s+['"]fs['"]/);
+            expect(code).not.toMatch(/writeFileSync|appendFileSync|mkdirSync|rmSync/);
+        }
+    });
 
-  it('uses queue-based prompt compilation hooks in lifecycle entry points', () => {
-    const claim = readModule(claimPath);
-    const reconciliation = readModule(reconciliationPath);
+    it('uses queue-based prompt compilation hooks in lifecycle entry points', () => {
+        const claim = readModule(claimPath);
+        const reconciliation = readModule(reconciliationPath);
 
-    expect(claim).toContain('queueCompileTicketPrompt(ticket_id, trigger)');
-    expect(claim).toContain("'claim-stale-compiled-prompt'");
-    expect(claim).toContain("'claim-missing-compiled-prompt'");
-    expect(reconciliation).toContain('queueCompileTicketPrompt(ticketId, `transition:${newStage}:${newStatus}`)');
-  });
+        expect(claim).toContain('queueCompileTicketPrompt(ticket_id, trigger)');
+        expect(claim).toContain("'claim-stale-compiled-prompt'");
+        expect(claim).toContain("'claim-missing-compiled-prompt'");
+        expect(reconciliation).toContain('queueCompileTicketPrompt(ticketId, `transition:${newStage}:${newStatus}`)');
+    });
 });

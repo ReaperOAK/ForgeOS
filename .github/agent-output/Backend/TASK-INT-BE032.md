@@ -1,6 +1,6 @@
 # TASK-INT-BE032 — search_similar_lessons Stored Function
 
-## Stage: BACKEND | Agent: Backend | Machine: reaperoak
+## Stage: BACKEND | Agent: Backend | Machine: Ticketer
 
 ## Summary
 

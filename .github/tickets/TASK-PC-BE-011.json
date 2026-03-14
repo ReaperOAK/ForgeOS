@@ -1,0 +1,63 @@
+{
+  "ticket_id": "TASK-PC-BE-011",
+  "title": "Version Claim Delivery Contract for Prompt Packets",
+  "description": "Deliver additive versioned claim contract exposing canonical `raw_payload` and `prompt_packet` metadata while keeping backward-compatible `system_directive` alias to `compiled_prompt` during migration.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-14T13:14:03.440211+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-PC-BE-006",
+    "TASK-PC-BE-010"
+  ],
+  "blocked_by": [
+    "TASK-PC-BE-006",
+    "TASK-PC-BE-010"
+  ],
+  "file_paths": [
+    "forgeos-server/src/tools/tickets-claim.ts",
+    "forgeos-server/src/types/index.ts",
+    "agent-sdk/src/forgeos_sdk/client.py",
+    "agent-sdk/tests/test_transport.py",
+    "agent-sdk/tests/test_models.py"
+  ],
+  "acceptance_criteria": [
+    "Given successful claim, when response is serialized, then it includes `ticket_id`, `compiled_prompt`, canonical `raw_payload`, and `prompt_packet` metadata.",
+    "Given legacy client behavior, when reading `system_directive`, then field remains available as alias to `compiled_prompt`.",
+    "Given SDK parsing, when claim response includes new fields, then SDK models deserialize without regression.",
+    "Given compatibility tests, when executed, then both legacy and new contract consumers pass."
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-14T13:14:03.440213+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/prompt-compiler-l3.md"
+    }
+  ],
+  "source_task_file": "TODO/tickets/prompt-compiler-l3.md",
+  "tags": [
+    "prompt-compiler",
+    "claim-contract",
+    "sdk",
+    "p0"
+  ]
+}
