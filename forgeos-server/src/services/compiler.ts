@@ -22,6 +22,10 @@ import {
     evaluatePromptFreshness,
 } from './context-hash.js';
 import {
+    validatePacketSections,
+    PacketValidationError,
+} from './packet-validator.js';
+import {
     PromptArchitectService,
     type PromptGenerationContext,
     type PromptHistoryEntry,
@@ -74,10 +78,14 @@ You synthesize the definitive execution prompt for the downstream executor.
 Output markdown in this exact section order:
 **ROLE**
 **TICKET**
-**HISTORY & LEARNINGS**
+**SYSTEM CONSTRAINTS**
+**HISTORY**
+**LEARNINGS**
 **BEST PRACTICES**
 **CONTEXT LOCATIONS**
 **YOUR EXACT TASK**
+**EXECUTION PLAN**
+**EDGE CASES**
 **POST-COMPLETION**
 
 Rules:
@@ -85,6 +93,7 @@ Rules:
 - Use exact file paths when available.
 - If context is missing, write: NOT FOUND — agent must investigate
 - Do not include any commentary before or after the final prompt.
+- Every section must appear in the order listed above.
 `;
 
 const PACKET_SCHEMA_VERSION = 1;
@@ -146,6 +155,10 @@ export async function compileTicketPrompt(ticketId: string): Promise<CompiledPro
 
     const geminiResult = await tryGenerateGeminiPrompt(ticketId, investigation);
     if (geminiResult !== null) {
+        const geminiValidation = validatePacketSections(geminiResult.prompt);
+        if (!geminiValidation.valid) {
+            throw new PacketValidationError(geminiValidation);
+        }
         const packetEnvelope = createInstructionPacketEnvelope(geminiResult.prompt, packetMetadata);
         return {
             prompt: geminiResult.prompt,
@@ -160,6 +173,10 @@ export async function compileTicketPrompt(ticketId: string): Promise<CompiledPro
     const fallbackService = new PromptArchitectService();
     const fallbackContext = mapInvestigationToFallbackContext(investigation);
     const fallback = await fallbackService.generatePrompt(fallbackContext);
+    const fallbackValidation = validatePacketSections(fallback.prompt);
+    if (!fallbackValidation.valid) {
+        throw new PacketValidationError(fallbackValidation);
+    }
     const packetEnvelope = createInstructionPacketEnvelope(fallback.prompt, packetMetadata);
 
     return {
