@@ -1,61 +1,41 @@
 {
-  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
   "version": "2.1.0",
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
   "runs": [
     {
       "tool": {
         "driver": {
-          "name": "CI-Reviewer",
-          "version": "3.0.0",
-          "informationUri": "https://github.com/microsoft/sarif-tutorials",
-          "rules": [
-            {
-              "id": "CI-PASS-000",
-              "name": "AllRequestedCIGatesPassed",
-              "shortDescription": {
-                "text": "All required CI checks passed for ticket scope"
-              },
-              "fullDescription": {
-                "text": "Typecheck, scoped lint, complexity/max-depth lint, targeted coverage, context-hash coverage threshold, and circular dependency checks all passed."
-              },
-              "defaultConfiguration": {
-                "level": "note"
-              },
-              "properties": {
-                "category": "ci-gates",
-                "priority": "NOTE"
-              }
-            }
-          ]
+          "name": "CIReviewer",
+          "version": "1.0.0",
+          "informationUri": "https://github.com/forgeos/forgeos",
+          "rules": []
         }
       },
       "results": [],
-      "invocations": [
-        {
-          "executionSuccessful": true,
-          "properties": {
-            "ticketId": "TASK-PC-BE-003",
-            "verdict": "PASS",
-            "totalFindings": 0,
-            "critical": 0,
-            "warning": 0,
-            "suggestion": 0,
-            "qualityScore": 100,
-            "filesReviewed": 2,
-            "coverage": {
-              "contextHashLinesPct": 97.67,
-              "contextHashBranchesPct": 81.48
-            },
-            "checks": [
-              "npm run typecheck",
-              "npx eslint src/services/compiler.ts src/__tests__/context-hash.test.ts --max-warnings=0",
-              "npx eslint src/services/compiler.ts --rule 'complexity:[\"warn\",10]' --rule 'max-depth:[\"warn\",1]' --max-warnings=0",
-              "npx vitest run src/__tests__/context-hash.test.ts --coverage --coverage.reporter=json-summary",
-              "npx madge --circular src/services/compiler.ts"
-            ]
+      "properties": {
+        "ticket": "TASK-PC-BE-003",
+        "verdict": "PASS",
+        "qualityScore": 100,
+        "criticalCount": 0,
+        "warningCount": 0,
+        "suggestionCount": 0,
+        "coverage": {
+          "context-hash.ts": {
+            "lines": "97.67%",
+            "branches": "82.14%",
+            "functions": "100%",
+            "statements": "97.67%"
           }
-        }
-      ]
+        },
+        "checks": {
+          "typecheck": "PASS",
+          "eslint": "PASS",
+          "complexity": "PASS",
+          "vitest": "PASS",
+          "circularDeps": "PASS"
+        },
+        "timestamp": "2026-03-14T23:10:00Z"
+      }
     }
   ]
 }
