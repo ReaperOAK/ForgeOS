@@ -2365,3 +2365,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/QA/TASK-PC-BE-004.md
 - **Decisions:** REJECT — 0/4 AC met. packet-validator.ts absent. Backend implemented queue/idempotency (wrong scope). 3 critical AC unaddressed (AC1/AC2/AC4). Sent back to BACKEND.
 - **Timestamp:** 2026-03-14T20:46:00Z
+
+### [TASK-PC-BE-003] — Backend Complete
+- **Artifacts:** forgeos-server/src/services/compiler.ts, forgeos-server/src/__tests__/context-hash.test.ts
+- **Decisions:** Added compileIfStale (freshness gate: SELECT hash → evaluatePromptFreshness → skip or compileAndStore) and invalidatePromptCache (clears hash → forces recompile). Extended provider union with 'cached'. 20/20 tests pass, 83%+ branch coverage.
+- **Timestamp:** 2026-03-14T20:51:00Z
