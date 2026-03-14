@@ -62,115 +62,22 @@
           ]
         }
       },
-      "results": [
-        {
-          "ruleId": "AF-005",
-          "level": "error",
-          "message": {
-            "text": "Changed file coverage is below threshold: src/services/compiler.ts has 0% lines covered (required >=80%)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "forgeos-server/src/services/compiler.ts"
-                },
-                "region": {
-                  "startLine": 1
-                }
-              }
-            }
-          ],
-          "properties": {
-            "priority": "🔴",
-            "reviewComment": "Add targeted tests for compileTicketPrompt/compileAndStoreTicketPrompt/gatherInvestigation and rerun coverage gate."
-          }
-        },
-        {
-          "ruleId": "CC-001",
-          "level": "warning",
-          "message": {
-            "text": "Function gatherInvestigation has cyclomatic complexity 19 (max 10)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "forgeos-server/src/services/compiler.ts"
-                },
-                "region": {
-                  "startLine": 347
-                }
-              }
-            }
-          ],
-          "properties": {
-            "priority": "🟡",
-            "reviewComment": "Extract lesson lookup, blast-radius pass, and symbol search logic into smaller helpers."
-          }
-        },
-        {
-          "ruleId": "CC-001",
-          "level": "warning",
-          "message": {
-            "text": "Function mapInvestigationToFallbackContext has cyclomatic complexity 13 (max 10)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "forgeos-server/src/services/compiler.ts"
-                },
-                "region": {
-                  "startLine": 444
-                }
-              }
-            }
-          ],
-          "properties": {
-            "priority": "🟡",
-            "reviewComment": "Decompose data shaping into dedicated mapping helpers with guard clauses."
-          }
-        },
-        {
-          "ruleId": "OC-001",
-          "level": "warning",
-          "message": {
-            "text": "Nesting depth exceeds one level in compiler flow (max-depth violations)."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": {
-                  "uri": "forgeos-server/src/services/compiler.ts"
-                },
-                "region": {
-                  "startLine": 117
-                }
-              }
-            }
-          ],
-          "properties": {
-            "priority": "🟡",
-            "reviewComment": "Flatten nested try/if blocks using early returns and helper extraction."
-          }
-        }
-      ],
+      "results": [],
       "invocations": [
         {
           "executionSuccessful": true,
           "properties": {
-            "verdict": "REQUEST_CHANGES",
-            "totalFindings": 4,
-            "critical": 1,
-            "warning": 3,
+            "verdict": "APPROVE",
+            "totalFindings": 0,
+            "critical": 0,
+            "warning": 0,
             "suggestion": 0,
-            "qualityScore": 60,
+            "qualityScore": 100,
             "filesReviewed": 3,
-            "testsSummary": "1 test file passed, 16 tests passed",
+            "testsSummary": "2 test files passed, 22 tests passed",
             "typecheckSummary": "tsc --noEmit passed",
-            "lintSummary": "scoped lint passed for compiler.ts/types/index.ts; repo lint has unrelated warnings",
-            "coverageSummary": "src/services/compiler.ts lines 0% in this run (threshold >=80%)"
+            "lintSummary": "scoped lint passed with 0 errors and 0 warnings for compiler.ts/compiler.test.ts/types/index.ts",
+            "coverageSummary": "src/services/compiler.ts lines 88.59% in this run (threshold >=80%)"
           }
         }
       ]
