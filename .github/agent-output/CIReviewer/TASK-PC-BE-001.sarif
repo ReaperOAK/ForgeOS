@@ -1,0 +1,179 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CI-Reviewer",
+          "version": "3.0.0",
+          "rules": [
+            {
+              "id": "AF-005",
+              "name": "Architecture/CoverageChangedFiles",
+              "shortDescription": {
+                "text": "Changed files must have at least 80% coverage"
+              },
+              "fullDescription": {
+                "text": "Changed implementation files must meet minimum coverage threshold to pass CI gate."
+              },
+              "defaultConfiguration": {
+                "level": "error"
+              },
+              "properties": {
+                "tags": ["ci", "coverage", "architecture-fitness"],
+                "priority": "critical"
+              }
+            },
+            {
+              "id": "CC-001",
+              "name": "Complexity/CyclomaticThreshold",
+              "shortDescription": {
+                "text": "Function cyclomatic complexity exceeds threshold"
+              },
+              "fullDescription": {
+                "text": "Cyclomatic complexity should remain <= 10 per function for maintainability and reviewability."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": ["ci", "complexity", "maintainability"],
+                "priority": "warning"
+              }
+            },
+            {
+              "id": "OC-001",
+              "name": "ObjectCalisthenics/OneIndentLevel",
+              "shortDescription": {
+                "text": "Nesting depth exceeds one level"
+              },
+              "fullDescription": {
+                "text": "Object Calisthenics rule recommends one indentation level per method to reduce cognitive load."
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "tags": ["ci", "object-calisthenics", "maintainability"],
+                "priority": "warning"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "AF-005",
+          "level": "error",
+          "message": {
+            "text": "Changed file coverage is below threshold: src/services/compiler.ts has 0% lines covered (required >=80%)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "forgeos-server/src/services/compiler.ts"
+                },
+                "region": {
+                  "startLine": 1
+                }
+              }
+            }
+          ],
+          "properties": {
+            "priority": "🔴",
+            "reviewComment": "Add targeted tests for compileTicketPrompt/compileAndStoreTicketPrompt/gatherInvestigation and rerun coverage gate."
+          }
+        },
+        {
+          "ruleId": "CC-001",
+          "level": "warning",
+          "message": {
+            "text": "Function gatherInvestigation has cyclomatic complexity 19 (max 10)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "forgeos-server/src/services/compiler.ts"
+                },
+                "region": {
+                  "startLine": 347
+                }
+              }
+            }
+          ],
+          "properties": {
+            "priority": "🟡",
+            "reviewComment": "Extract lesson lookup, blast-radius pass, and symbol search logic into smaller helpers."
+          }
+        },
+        {
+          "ruleId": "CC-001",
+          "level": "warning",
+          "message": {
+            "text": "Function mapInvestigationToFallbackContext has cyclomatic complexity 13 (max 10)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "forgeos-server/src/services/compiler.ts"
+                },
+                "region": {
+                  "startLine": 444
+                }
+              }
+            }
+          ],
+          "properties": {
+            "priority": "🟡",
+            "reviewComment": "Decompose data shaping into dedicated mapping helpers with guard clauses."
+          }
+        },
+        {
+          "ruleId": "OC-001",
+          "level": "warning",
+          "message": {
+            "text": "Nesting depth exceeds one level in compiler flow (max-depth violations)."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "forgeos-server/src/services/compiler.ts"
+                },
+                "region": {
+                  "startLine": 117
+                }
+              }
+            }
+          ],
+          "properties": {
+            "priority": "🟡",
+            "reviewComment": "Flatten nested try/if blocks using early returns and helper extraction."
+          }
+        }
+      ],
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "properties": {
+            "verdict": "REQUEST_CHANGES",
+            "totalFindings": 4,
+            "critical": 1,
+            "warning": 3,
+            "suggestion": 0,
+            "qualityScore": 60,
+            "filesReviewed": 3,
+            "testsSummary": "1 test file passed, 16 tests passed",
+            "typecheckSummary": "tsc --noEmit passed",
+            "lintSummary": "scoped lint passed for compiler.ts/types/index.ts; repo lint has unrelated warnings",
+            "coverageSummary": "src/services/compiler.ts lines 0% in this run (threshold >=80%)"
+          }
+        }
+      ]
+    }
+  ]
+}
