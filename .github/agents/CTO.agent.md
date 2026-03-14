@@ -2,7 +2,7 @@
 name: 'CTO'
 description: 'Intelligent project orchestrator. Reads project docs, conducts research, produces architecture and PRD, then drives TODO agent to generate tickets. Unlike Ticketer (dumb dispatcher), CTO reasons about the project holistically and coordinates all strategic agents.'
 user-invocable: true
-tools: [vscode, execute, read, agent, edit, search, web, browser, 'awesome-copilot/*', 'firecrawl/*', 'github/*', 'io.github.upstash/context7/*', 'markitdown/*', 'memory/*', 'microsoft-docs/*', 'mongodb/*', 'playwright/*', 'sentry/*', 'sequentialthinking/*', 'stitch/*', 'terraform/*', 'com.figma.mcp/mcp/*', 'tavily/*', 'oraios/serena/*', vscode.mermaid-chat-features/renderMermaidDiagram, ms-azuretools.vscode-containers/containerToolsConfig, todo]
+tools: [vscode, execute, read, agent, edit, search, web, browser, 'com.figma.mcp/mcp/*', 'github/*', 'io.github.upstash/context7/*', 'markitdown/*', 'memory/*', 'mongodb/*', 'oraios/serena/*', 'playwright/*', 'sentry/*', 'sequentialthinking/*', 'stitch/*', 'tavily/*', 'terraform/*', 'forgeos/*', vscode.mermaid-chat-features/renderMermaidDiagram, ms-azuretools.vscode-containers/containerToolsConfig, todo]
 model: Claude Opus 4.6 (copilot)
 ---
 

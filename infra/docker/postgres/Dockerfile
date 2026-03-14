@@ -52,18 +52,20 @@ RUN chmod 444 /docker-entrypoint-initdb.d/00_init.sql
 # Values are conservative defaults suitable for development workloads.
 # Production deployments should use a dedicated postgresql.conf or ConfigMap.
 # ---------------------------------------------------------------------------
-RUN echo "" >> /usr/local/share/postgresql/postgresql.conf.sample && \
-    echo "# --- ForgeOS Development Defaults ---" >> /usr/local/share/postgresql/postgresql.conf.sample && \
-    echo "shared_buffers = 128MB" >> /usr/local/share/postgresql/postgresql.conf.sample && \
-    echo "work_mem = 8MB" >> /usr/local/share/postgresql/postgresql.conf.sample && \
-    echo "maintenance_work_mem = 64MB" >> /usr/local/share/postgresql/postgresql.conf.sample && \
-    echo "effective_cache_size = 256MB" >> /usr/local/share/postgresql/postgresql.conf.sample && \
-    echo "max_connections = 50" >> /usr/local/share/postgresql/postgresql.conf.sample && \
-    echo "wal_level = replica" >> /usr/local/share/postgresql/postgresql.conf.sample && \
-    echo "log_timezone = 'UTC'" >> /usr/local/share/postgresql/postgresql.conf.sample && \
-    echo "timezone = 'UTC'" >> /usr/local/share/postgresql/postgresql.conf.sample && \
-    echo "log_min_duration_statement = 500" >> /usr/local/share/postgresql/postgresql.conf.sample && \
-    echo "log_line_prefix = '%m [%p] %q%u@%d '" >> /usr/local/share/postgresql/postgresql.conf.sample
+RUN CONF_SAMPLE="$(find /usr/share/postgresql -name postgresql.conf.sample | head -n 1)" && \
+    test -n "$CONF_SAMPLE" && \
+    echo "" >> "$CONF_SAMPLE" && \
+    echo "# --- ForgeOS Development Defaults ---" >> "$CONF_SAMPLE" && \
+    echo "shared_buffers = 128MB" >> "$CONF_SAMPLE" && \
+    echo "work_mem = 8MB" >> "$CONF_SAMPLE" && \
+    echo "maintenance_work_mem = 64MB" >> "$CONF_SAMPLE" && \
+    echo "effective_cache_size = 256MB" >> "$CONF_SAMPLE" && \
+    echo "max_connections = 50" >> "$CONF_SAMPLE" && \
+    echo "wal_level = replica" >> "$CONF_SAMPLE" && \
+    echo "log_timezone = 'UTC'" >> "$CONF_SAMPLE" && \
+    echo "timezone = 'UTC'" >> "$CONF_SAMPLE" && \
+    echo "log_min_duration_statement = 500" >> "$CONF_SAMPLE" && \
+    echo "log_line_prefix = '%m [%p] %q%u@%d '" >> "$CONF_SAMPLE"
 
 # ---------------------------------------------------------------------------
 # Health check
@@ -84,7 +86,3 @@ EXPOSE 5432
 # ---------------------------------------------------------------------------
 VOLUME ["/var/lib/postgresql/data"]
 
-# ---------------------------------------------------------------------------
-# Default user: postgres (inherited from base image, non-root)
-# ---------------------------------------------------------------------------
-USER postgres

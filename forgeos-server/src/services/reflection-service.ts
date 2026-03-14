@@ -65,7 +65,7 @@ export class ReflectionService {
   constructor(
     private readonly pool: Pool,
     private readonly embeddingService: EmbeddingService,
-  ) {}
+  ) { }
 
   /**
    * Reflect on a ticket's rework history and extract a lesson.
@@ -150,7 +150,11 @@ export class ReflectionService {
       await client.query(
         `INSERT INTO lesson_embeddings (lesson_id, embedding, model_name)
          VALUES ($1, $2, $3)`,
-        [lessonId, JSON.stringify(embedding), 'text-embedding-3-small'],
+        [
+          lessonId,
+          JSON.stringify(embedding),
+          process.env.EMBEDDING_MODEL ?? 'mxbai-embed-large',
+        ],
       );
 
       await client.query('COMMIT');

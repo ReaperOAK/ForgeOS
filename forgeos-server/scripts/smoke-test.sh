@@ -58,11 +58,13 @@ fi
 echo "Step 4: Using admin API key..."
 ADMIN_KEY="${ADMIN_API_KEY:-forgeos_admin_CHANGE_ME}"
 AUTH_HEADER="Authorization: Bearer $ADMIN_KEY"
+ACCEPT_HEADER="Accept: application/json, text/event-stream"
 
 # ── Step 5: MCP Initialize ───────────────────────────────────────
 echo "Step 5: Testing MCP initialize..."
 MCP_INIT=$(curl -sf -X POST "$BASE_URL/mcp" \
   -H "Content-Type: application/json" \
+  -H "$ACCEPT_HEADER" \
   -H "$AUTH_HEADER" \
   -d '{
     "jsonrpc": "2.0",
@@ -75,7 +77,7 @@ MCP_INIT=$(curl -sf -X POST "$BASE_URL/mcp" \
     }
   }')
 
-if echo "$MCP_INIT" | jq -e '.result.serverInfo.name == "forgeos"' > /dev/null 2>&1; then
+if echo "$MCP_INIT" | grep '^data:' | sed 's/^data: //' | jq -e '.result.serverInfo.name == "forgeos"' > /dev/null 2>&1; then
   pass "MCP initialize succeeded"
 else
   fail "MCP initialize failed: $MCP_INIT"
@@ -85,6 +87,7 @@ fi
 echo "Step 6: Listing MCP tools..."
 MCP_TOOLS=$(curl -sf -X POST "$BASE_URL/mcp" \
   -H "Content-Type: application/json" \
+  -H "$ACCEPT_HEADER" \
   -H "$AUTH_HEADER" \
   -d '{
     "jsonrpc": "2.0",
@@ -92,13 +95,12 @@ MCP_TOOLS=$(curl -sf -X POST "$BASE_URL/mcp" \
     "method": "tools/list",
     "params": {}
   }')
-
-TOOL_COUNT=$(echo "$MCP_TOOLS" | jq '.result.tools | length')
-if [ "$TOOL_COUNT" -eq 9 ]; then
-  pass "All 9 tools registered"
+TOOL_COUNT=$(echo "$MCP_TOOLS" | grep '^data:' | sed 's/^data: //' | jq '.result.tools | length')
+if [ "$TOOL_COUNT" -eq 21 ]; then
+  pass "All 21 tools registered"
 else
-  fail "Expected 9 tools, got $TOOL_COUNT"
-  echo "$MCP_TOOLS" | jq '.result.tools[].name'
+  fail "Expected 21 tools, got $TOOL_COUNT"
+  echo "$MCP_TOOLS" | grep '^data:' | sed 's/^data: //' | jq '.result.tools[].name'
 fi
 
 # ── Step 7: Seed demo data ─────────────────────────────────────
@@ -116,6 +118,7 @@ pass "Demo ticket seeded"
 echo "Step 8: Testing tickets.next..."
 MCP_NEXT=$(curl -sf -X POST "$BASE_URL/mcp" \
   -H "Content-Type: application/json" \
+  -H "$ACCEPT_HEADER" \
   -H "$AUTH_HEADER" \
   -d '{
     "jsonrpc": "2.0",
@@ -127,7 +130,7 @@ MCP_NEXT=$(curl -sf -X POST "$BASE_URL/mcp" \
     }
   }')
 
-if echo "$MCP_NEXT" | jq -e '.result.content[0].text' | grep -q "SMOKE-001" 2>/dev/null; then
+if echo "$MCP_NEXT" | grep '^data:' | sed 's/^data: //' | jq -e -r '.result.content[0].text' | grep -q "SMOKE-001" 2>/dev/null; then
   pass "tickets.next found SMOKE-001"
 else
   fail "tickets.next did not find SMOKE-001: $MCP_NEXT"
@@ -136,8 +139,8 @@ fi
 # ── Step 9: REST API ─────────────────────────────────────────────
 echo "Step 9: Testing REST API..."
 API_TICKETS=$(curl -sf "$BASE_URL/api/tickets" -H "$AUTH_HEADER")
-if echo "$API_TICKETS" | jq -e 'type == "array"' > /dev/null 2>&1; then
-  pass "REST /api/tickets returns array"
+if echo "$API_TICKETS" | jq -e '.data | type == "array"' > /dev/null 2>&1; then
+  pass "REST /api/tickets returns paginated data"
 else
   fail "REST /api/tickets failed: $API_TICKETS"
 fi

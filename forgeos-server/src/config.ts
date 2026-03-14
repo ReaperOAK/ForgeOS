@@ -16,7 +16,9 @@
 import { z } from 'zod';
 import dotenv from 'dotenv';
 
-dotenv.config();
+if (!process.env.VITEST && process.env.NODE_ENV !== 'test') {
+  dotenv.config();
+}
 
 /**
  * Zod schema defining all supported environment variables, their types,
@@ -33,6 +35,10 @@ const configSchema = z.object({
   ADMIN_API_KEY: z.string().min(8).default('forgeos_admin_CHANGE_ME'),
   WEBHOOK_SECRET: z.string().optional(),
   WORKSPACE_PATH: z.string().optional(),
+  EMBEDDING_PROVIDER: z.enum(['ollama', 'openai']).default('ollama'),
+  EMBEDDING_MODEL: z.string().min(1).default('mxbai-embed-large'),
+  OLLAMA_BASE_URL: z.string().url().default('http://127.0.0.1:11434/api/embed'),
+  OPENAI_API_KEY: z.string().optional(),
   RATE_LIMIT_PER_MINUTE: z.coerce.number().int().min(1).default(100),
   DEFAULT_LEASE_MINUTES: z.coerce.number().int().min(5).max(120).default(30),
   MAX_LEASE_MINUTES: z.coerce.number().int().min(10).max(480).default(120),

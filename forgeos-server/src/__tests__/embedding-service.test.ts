@@ -65,21 +65,29 @@ const FAST_OPTIONS: EmbeddingServiceOptions = {
 
 // ── Setup / Teardown ─────────────────────────────────────────────────────────
 
-let originalEnv: string | undefined;
+let originalApiKeyEnv: string | undefined;
+let originalProviderEnv: string | undefined;
 let fetchMock: ReturnType<typeof vi.fn>;
 
 beforeEach(() => {
-  originalEnv = process.env.OPENAI_API_KEY;
+  originalApiKeyEnv = process.env.OPENAI_API_KEY;
+  originalProviderEnv = process.env.EMBEDDING_PROVIDER;
+  process.env.EMBEDDING_PROVIDER = 'openai';
   process.env.OPENAI_API_KEY = 'test-key-edge-cases';
   fetchMock = vi.fn();
   vi.stubGlobal('fetch', fetchMock);
 });
 
 afterEach(() => {
-  if (originalEnv !== undefined) {
-    process.env.OPENAI_API_KEY = originalEnv;
+  if (originalApiKeyEnv !== undefined) {
+    process.env.OPENAI_API_KEY = originalApiKeyEnv;
   } else {
     delete process.env.OPENAI_API_KEY;
+  }
+  if (originalProviderEnv !== undefined) {
+    process.env.EMBEDDING_PROVIDER = originalProviderEnv;
+  } else {
+    delete process.env.EMBEDDING_PROVIDER;
   }
   vi.restoreAllMocks();
   vi.unstubAllGlobals();

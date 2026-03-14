@@ -1,5 +1,5 @@
 /**
- * Embedding Service — OpenAI text-embedding API integration.
+ * Embedding Service — pluggable embedding provider integration.
  *
  * Provides {@link EmbeddingService.embedText} for single-text embedding
  * and {@link EmbeddingService.embedBatch} for batch processing with
@@ -8,8 +8,9 @@
  * Features:
  * - Retry with exponential backoff (configurable attempts).
  * - Configurable max concurrent requests for rate limiting.
- * - API key read exclusively from `OPENAI_API_KEY` env var.
- * - API key is NEVER logged — masked as `***MASKED***` in error context.
+ * - Supports `ollama` (default) and `openai` providers.
+ * - OpenAI API key is read from `OPENAI_API_KEY` only when provider=openai.
+ * - API keys are NEVER logged — masked as `***MASKED***` in error context.
  *
  * @module services/embedding-service
  * @ticket TASK-INT-BE033
@@ -21,31 +22,39 @@ import { logger } from '../middleware/logging.js';
 
 /** Configuration options for {@link EmbeddingService}. */
 export interface EmbeddingServiceOptions {
-    /** OpenAI model name. Defaults to env `EMBEDDING_MODEL` or `text-embedding-3-small`. */
-    model?: string;
-    /** Maximum retry attempts on transient failures. Defaults to `3`. */
-    maxRetries?: number;
-    /** Number of texts per API call in batch mode. Defaults to `100`. */
-    batchSize?: number;
-    /** Maximum concurrent API requests for rate limiting. Defaults to `5`. */
-    maxConcurrent?: number;
-    /** Base delay in ms for exponential backoff. Defaults to `1000`. */
-    baseDelayMs?: number;
-    /** Override the API base URL (useful for testing). */
-    baseUrl?: string;
+  /** Embedding model name. Defaults to provider-specific defaults. */
+  model?: string;
+  /** Provider name. Defaults to env `EMBEDDING_PROVIDER` or `ollama`. */
+  provider?: 'openai' | 'ollama';
+  /** Maximum retry attempts on transient failures. Defaults to `3`. */
+  maxRetries?: number;
+  /** Number of texts per API call in batch mode. Defaults to `100`. */
+  batchSize?: number;
+  /** Maximum concurrent API requests for rate limiting. Defaults to `5`. */
+  maxConcurrent?: number;
+  /** Base delay in ms for exponential backoff. Defaults to `1000`. */
+  baseDelayMs?: number;
+  /** Override the provider API base URL (useful for testing). */
+  baseUrl?: string;
 }
 
 /** Shape of a single embedding object in the OpenAI response. */
 interface EmbeddingResponseItem {
-    embedding: number[];
-    index: number;
+  embedding: number[];
+  index: number;
 }
 
 /** Shape of the OpenAI embeddings API response body. */
 interface EmbeddingApiResponse {
-    data: EmbeddingResponseItem[];
-    model: string;
-    usage: { prompt_tokens: number; total_tokens: number };
+  data: EmbeddingResponseItem[];
+  model: string;
+  usage: { prompt_tokens: number; total_tokens: number };
+}
+
+/** Shape of the Ollama /api/embed response body. */
+interface OllamaEmbedResponse {
+  embeddings?: number[][];
+  embedding?: number[];
 }
 
 // ── Errors ───────────────────────────────────────────────────────────────────
@@ -71,7 +80,7 @@ class ConcurrencyLimiter {
   private active = 0;
   private readonly waiting: Array<() => void> = [];
 
-  constructor(private readonly maxConcurrent: number) {}
+  constructor(private readonly maxConcurrent: number) { }
 
   async acquire(): Promise<void> {
     if (this.active < this.maxConcurrent) {
@@ -105,6 +114,7 @@ class ConcurrencyLimiter {
  */
 export class EmbeddingService {
   private readonly apiKey: string;
+  private readonly provider: 'openai' | 'ollama';
   private readonly model: string;
   private readonly baseUrl: string;
   private readonly maxRetries: number;
@@ -113,21 +123,35 @@ export class EmbeddingService {
   private readonly limiter: ConcurrencyLimiter;
 
   constructor(options?: EmbeddingServiceOptions) {
+    const provider = options?.provider ??
+      (process.env.EMBEDDING_PROVIDER === 'openai' ? 'openai' : 'ollama');
+    this.provider = provider;
+
     const apiKey = process.env.OPENAI_API_KEY ?? '';
-    if (!apiKey) {
-      throw new Error('OPENAI_API_KEY environment variable is required');
+    if (provider === 'openai' && !apiKey) {
+      throw new Error('OPENAI_API_KEY environment variable is required when EMBEDDING_PROVIDER=openai');
     }
     this.apiKey = apiKey;
-    this.model =
-      options?.model ?? process.env.EMBEDDING_MODEL ?? 'text-embedding-3-small';
-    this.baseUrl = options?.baseUrl ?? 'https://api.openai.com/v1/embeddings';
+
+    const defaultModel = provider === 'openai' ? 'text-embedding-3-small' : 'mxbai-embed-large';
+    this.model = options?.model ?? process.env.EMBEDDING_MODEL ?? defaultModel;
+    this.baseUrl = options?.baseUrl ?? (
+      provider === 'openai'
+        ? 'https://api.openai.com/v1/embeddings'
+        : (process.env.OLLAMA_BASE_URL ?? 'http://127.0.0.1:11434/api/embed')
+    );
     this.maxRetries = options?.maxRetries ?? 3;
     this.batchSize = options?.batchSize ?? 100;
     this.baseDelayMs = options?.baseDelayMs ?? 1000;
     this.limiter = new ConcurrencyLimiter(options?.maxConcurrent ?? 5);
 
     logger.info(
-      { model: this.model, maxRetries: this.maxRetries, batchSize: this.batchSize },
+      {
+        provider: this.provider,
+        model: this.model,
+        maxRetries: this.maxRetries,
+        batchSize: this.batchSize,
+      },
       'embedding-service: initialised',
     );
   }
@@ -143,7 +167,11 @@ export class EmbeddingService {
       throw new Error('embedText requires a non-empty string');
     }
     const response = await this.callApi([text]);
-    return response[0];
+    const embedding = response[0];
+    if (!embedding) {
+      throw new Error('Embedding API returned no embedding for requested text');
+    }
+    return embedding;
   }
 
   /**
@@ -189,14 +217,7 @@ export class EmbeddingService {
     for (let attempt = 0; attempt <= this.maxRetries; attempt++) {
       await this.limiter.acquire();
       try {
-        const response = await fetch(this.baseUrl, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${this.apiKey}`,
-          },
-          body: JSON.stringify({ input, model: this.model }),
-        });
+        const response = await this.fetchProvider(input);
 
         if (!response.ok) {
           const statusCode = response.status;
@@ -216,8 +237,7 @@ export class EmbeddingService {
           );
         }
 
-        const data = (await response.json()) as EmbeddingApiResponse;
-        return data.data.map((d) => d.embedding);
+        return await this.parseProviderResponse(response);
       } catch (err) {
         lastError = err as Error;
 
@@ -244,5 +264,44 @@ export class EmbeddingService {
       'embedding-service: all retries exhausted',
     );
     throw lastError;
+  }
+
+  private async fetchProvider(input: string[]): Promise<Response> {
+    if (this.provider === 'openai') {
+      return fetch(this.baseUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${this.apiKey}`,
+        },
+        body: JSON.stringify({ input, model: this.model }),
+      });
+    }
+
+    // Ollama endpoint accepts either a single string or an array in `input`.
+    const ollamaInput = input.length === 1 ? input[0] : input;
+    return fetch(this.baseUrl, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ model: this.model, input: ollamaInput }),
+    });
+  }
+
+  private async parseProviderResponse(response: Response): Promise<number[][]> {
+    if (this.provider === 'openai') {
+      const data = (await response.json()) as EmbeddingApiResponse;
+      return data.data.map((d) => d.embedding);
+    }
+
+    const data = (await response.json()) as OllamaEmbedResponse;
+    if (Array.isArray(data.embeddings)) {
+      return data.embeddings;
+    }
+    if (Array.isArray(data.embedding)) {
+      return [data.embedding];
+    }
+    throw new Error('Ollama embedding API returned no embeddings');
   }
 }

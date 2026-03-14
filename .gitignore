@@ -34,3 +34,4 @@ node_modules
 .venv
 dashboard/coverage
 .playwright-mcp
+forgeos-server/dist
