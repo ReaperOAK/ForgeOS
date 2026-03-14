@@ -258,6 +258,11 @@
 - **Decisions:** APPROVED (HIGH confidence) — 10/10 DoD items pass. 21 tests, 100% coverage on emitter.py. Lint clean. All upstream verdicts verified (QA PASS, Security PASS, CI PASS, Docs PASS). All 6 ACs met after rework #2.
 - **Timestamp:** 2026-03-11T05:00:00Z
 
+### [TASK-PC-BE-004] — Backend Rework #2
+- **Artifacts:** forgeos-server/src/services/packet-validator.ts, forgeos-server/src/services/packet-validator.test.ts, .github/agent-output/Backend/TASK-PC-BE-004.md
+- **Decisions:** Added section-body semantic validation (non-empty body + canonical-header marker rejection), duplicate-header rejection, and `PacketValidationError.toPublicMessage()` sanitization. Validation checks pass: 39/39 tests, packet-validator lines 92.46%, typecheck clean, eslint clean.
+- **Timestamp:** 2026-03-14T21:20:00Z
+
 ### [FORGEOS-BE041] — Validation Summary
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-BE041.md
 - **Decisions:** APPROVED (HIGH confidence) — 10/10 DoD items pass. 38 tests, 95% coverage. Lint clean. All upstream verdicts verified (QA, Security, CI, Docs). AC4 partial (in-memory store, abstract interface for PostgreSQL extensibility).
@@ -2410,3 +2415,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/TASK-PC-BE-003.md
 - **Decisions:** FAIL — Score 50/100, 1 critical (3 failing tests), 5 warnings (max-depth). Rework required.
 - **Timestamp:** 2026-03-14T21:12:00Z
+
+### [TASK-PC-BE-002] — Validation Summary
+- **Artifacts:** .github/agent-output/Validator/TASK-PC-BE-002.md
+- **Decisions:** APPROVED — DoD 10/10 pass. Independent vitest/typecheck/eslint gates passed. Lifecycle guardrails verified in scoped modules. Stage evidence confirmed via CI/Docs summaries plus ticket history and memory entries.
+- **Timestamp:** 2026-03-14T15:49:58Z

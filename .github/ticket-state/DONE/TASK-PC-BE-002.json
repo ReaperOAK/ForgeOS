@@ -4,7 +4,7 @@
   "description": "Add explicit guardrails ensuring prompt compiler and claim delivery code uses only MCP/DB lifecycle state and never mutates ticket lifecycle through direct filesystem state edits. Include regression tests that fail if forbidden state paths are introduced in prompt lifecycle modules.",
   "type": "backend",
   "priority": "critical",
-  "stage": "DOCS",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -98,6 +98,24 @@
       "from_stage": "CI",
       "to_stage": "DOCS",
       "details": "Advanced from CI to DOCS"
+    },
+    {
+      "timestamp": "2026-03-14T15:46:47.605996+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Documentation",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
+    },
+    {
+      "timestamp": "2026-03-14T15:50:40.978918+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tickets/prompt-compiler-l3.md",
