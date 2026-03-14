@@ -452,12 +452,16 @@ async function loadStoredPromptSnapshot(ticketId: string): Promise<StoredPromptS
 }
 
 /**
- * Freshness-gated compile:  skip recompilation when the stored context hash
- * matches the current one; only call compileAndStoreTicketPrompt when the
- * hash is stale or missing.
+ * Compiles a ticket prompt only when freshness checks mark the cache stale.
  *
- * Returns the cached result (freshnessStatus='fresh') when skipping,
- * or the newly compiled result when a recompile was performed.
+ * This function computes the current deterministic context hash, compares it
+ * with the hash stored on the ticket row, and decides whether to reuse the
+ * cached prompt or run a full compile-and-store cycle.
+ *
+ * @param ticketId - Ticket identifier whose compiled prompt cache is checked.
+ * @returns A `CompiledPromptResult` from cache (`provider: 'cached'`) when the
+ * stored hash matches, or a newly compiled/stored result when the cache is
+ * missing or stale.
  */
 export async function compileIfStale(ticketId: string): Promise<CompiledPromptResult> {
     const hashInputs = buildContextHashInputsFromEnv(process.env, PACKET_VERSION, TEMPLATE_VERSION);
@@ -513,9 +517,13 @@ export async function compileIfStale(ticketId: string): Promise<CompiledPromptRe
 }
 
 /**
- * Force-invalidate the compiled prompt cache for a ticket by clearing the stored
- * context hash.  The next call to compileIfStale will find the ticket missing/stale
- * and trigger a full recompile.
+ * Invalidates compiled prompt freshness metadata for a ticket.
+ *
+ * This clears the stored context hash and marks freshness as `missing`, so the
+ * next `compileIfStale` call must recompile and persist a fresh packet.
+ *
+ * @param ticketId - Ticket identifier whose compiled prompt cache is invalidated.
+ * @returns Resolves when invalidation metadata has been persisted.
  */
 export async function invalidatePromptCache(ticketId: string): Promise<void> {
     logger.info({ ticketId }, 'compiler: invalidating prompt cache');
