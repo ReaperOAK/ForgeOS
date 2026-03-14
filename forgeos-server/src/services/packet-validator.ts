@@ -41,25 +41,53 @@ export class PacketValidationError extends Error {
         this.name = 'PacketValidationError';
         this.result = result;
     }
+
+    /**
+     * Returns a sanitized, transport-safe message for external boundaries.
+     * Internal validation details remain available on `result` for logging/debugging.
+     */
+    public toPublicMessage(): string {
+        return 'Packet validation failed. Packet structure is invalid.';
+    }
 }
 
 /**
- * Locate the character index of a section header within the rendered packet text.
+ * Locate all occurrences of a section header within the rendered packet text.
  * Matches **SECTION NAME** (bold markdown) and ## SECTION NAME (markdown headings).
  */
-function findSectionIndex(text: string, sectionName: string): number {
+function findSectionMatches(
+    text: string,
+    sectionName: string,
+): Array<{ index: number; length: number }> {
     const escaped = sectionName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
     const patterns = [
-        new RegExp(`\\*\\*${escaped}\\*\\*`, 'i'),
-        new RegExp(`^#{1,6}\\s+${escaped}\\s*$`, 'mi'),
+        new RegExp(`\\*\\*${escaped}\\*\\*`, 'gi'),
+        new RegExp(`^#{1,6}\\s+${escaped}\\s*$`, 'gmi'),
     ];
+
+    const matches: Array<{ index: number; length: number }> = [];
     for (const pattern of patterns) {
-        const match = pattern.exec(text);
-        if (match !== null) {
-            return match.index;
+        for (const match of text.matchAll(pattern)) {
+            if (match.index !== undefined) {
+                matches.push({ index: match.index, length: match[0].length });
+            }
         }
     }
-    return -1;
+
+    return matches.sort((a, b) => a.index - b.index);
+}
+
+/** Returns true when the section body contains any canonical section header marker. */
+function containsCanonicalHeader(body: string): boolean {
+    for (const section of REQUIRED_SECTIONS) {
+        const escaped = section.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const patterns = [new RegExp(`\\*\\*${escaped}\\*\\*`, 'i'), new RegExp(`^#{1,6}\\s+${escaped}\\s*$`, 'mi')];
+        if (patterns.some((pattern) => pattern.test(body))) {
+            return true;
+        }
+    }
+
+    return false;
 }
 
 /**
@@ -79,15 +107,18 @@ export function validatePacketSections(text: string): ValidationResult {
         };
     }
 
-    const positions = new Map<string, number>();
+    const headers = new Map<string, { index: number; length: number }>();
     const missingSections: string[] = [];
+    const duplicateSections: string[] = [];
 
     for (const section of REQUIRED_SECTIONS) {
-        const idx = findSectionIndex(text, section);
-        if (idx === -1) {
+        const matches = findSectionMatches(text, section);
+        if (matches.length === 0) {
             missingSections.push(section);
+        } else if (matches.length > 1) {
+            duplicateSections.push(section);
         } else {
-            positions.set(section, idx);
+            headers.set(section, matches[0] as { index: number; length: number });
         }
     }
 
@@ -100,10 +131,19 @@ export function validatePacketSections(text: string): ValidationResult {
         };
     }
 
+    if (duplicateSections.length > 0) {
+        return {
+            valid: false,
+            missingSections: [],
+            misordered: [],
+            structuredReason: `Duplicate section headers detected: ${duplicateSections.join(', ')}`,
+        };
+    }
+
     // All sections present — verify canonical ordering
-    const presentSections = REQUIRED_SECTIONS.filter((s) => positions.has(s));
+    const presentSections = REQUIRED_SECTIONS.filter((s) => headers.has(s));
     const actualOrder = [...presentSections].sort(
-        (a, b) => (positions.get(a) ?? 0) - (positions.get(b) ?? 0),
+        (a, b) => (headers.get(a)?.index ?? 0) - (headers.get(b)?.index ?? 0),
     );
 
     const misordered: string[] = [];
@@ -121,6 +161,40 @@ export function validatePacketSections(text: string): ValidationResult {
             misordered,
             structuredReason: `Sections are misordered. Expected: ${presentSections.join(' → ')}. Actual: ${actualOrder.join(' → ')}.`,
         };
+    }
+
+    // Enforce section-body semantics for anti-evasion: non-empty body and no nested canonical headers.
+    for (let i = 0; i < REQUIRED_SECTIONS.length; i++) {
+        const section = REQUIRED_SECTIONS[i] as string;
+        const current = headers.get(section);
+        if (!current) {
+            continue;
+        }
+
+        const nextSection = REQUIRED_SECTIONS[i + 1] as string | undefined;
+        const nextHeaderIndex =
+            nextSection !== undefined
+                ? (headers.get(nextSection)?.index ?? text.length)
+                : text.length;
+
+        const body = text.slice(current.index + current.length, nextHeaderIndex).trim();
+        if (body.length === 0) {
+            return {
+                valid: false,
+                missingSections: [],
+                misordered: [],
+                structuredReason: `Section body is empty for: ${section}`,
+            };
+        }
+
+        if (containsCanonicalHeader(body)) {
+            return {
+                valid: false,
+                missingSections: [],
+                misordered: [],
+                structuredReason: `Section body contains nested canonical header marker for: ${section}`,
+            };
+        }
     }
 
     return {

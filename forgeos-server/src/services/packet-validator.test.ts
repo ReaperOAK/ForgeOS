@@ -200,6 +200,39 @@ describe('validatePacketSections — misordered sections', () => {
 });
 
 // ---------------------------------------------------------------------------
+// validatePacketSections — section-body semantics / anti-evasion
+// ---------------------------------------------------------------------------
+describe('validatePacketSections — section-body semantics', () => {
+    it('returns valid=false when a required section body is empty', () => {
+        const packet = REQUIRED_SECTIONS.map((section, idx) => {
+            if (idx === 3) {
+                return `**${section}**\n\n`;
+            }
+            return `**${section}**\n\nContent for ${section}.\n`;
+        }).join('\n');
+
+        const result = validatePacketSections(packet);
+        expect(result.valid).toBe(false);
+        expect(result.structuredReason).toContain('Section body is empty for: HISTORY');
+    });
+
+    it('returns valid=false when a section body contains a canonical header marker', () => {
+        const packet = REQUIRED_SECTIONS.map((section, idx) => {
+            if (idx === 2) {
+                return `**${section}**\n\nNormal text.\n**EXECUTION PLAN** hidden marker.\n`;
+            }
+            return `**${section}**\n\nContent for ${section}.\n`;
+        }).join('\n');
+
+        const result = validatePacketSections(packet);
+        expect(result.valid).toBe(false);
+        expect(result.structuredReason).toMatch(
+            /Duplicate section headers detected|Section body contains nested canonical header marker/i,
+        );
+    });
+});
+
+// ---------------------------------------------------------------------------
 // PacketValidationError class
 // ---------------------------------------------------------------------------
 describe('PacketValidationError', () => {
@@ -245,5 +278,20 @@ describe('PacketValidationError', () => {
         const err = new PacketValidationError(mockResult);
         expect(err.result).toBe(mockResult);
         expect(err.result.missingSections).toContain('EXECUTION PLAN');
+    });
+
+    it('provides a sanitized public message without internal validation details', () => {
+        const err = new PacketValidationError({
+            valid: false,
+            missingSections: ['ROLE'],
+            misordered: [],
+            structuredReason: 'Missing sections: ROLE',
+        });
+
+        expect(err.toPublicMessage()).toBe(
+            'Packet validation failed. Packet structure is invalid.',
+        );
+        expect(err.toPublicMessage()).not.toContain('ROLE');
+        expect(err.toPublicMessage()).not.toContain('Missing sections');
     });
 });
