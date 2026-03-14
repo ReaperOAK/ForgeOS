@@ -224,8 +224,25 @@ function validateCompiledPromptOrThrow(prompt: string): void {
  * Precompute and persist compiled prompt onto ticket row.
  */
 export async function compileAndStoreTicketPrompt(ticketId: string): Promise<CompiledPromptResult> {
-    const compiled = await compileTicketPrompt(ticketId);
+    try {
+        const compiled = await compileTicketPrompt(ticketId);
+        await persistCompiledPromptAtomic(ticketId, compiled);
+        return compiled;
+    } catch (err) {
+        await maybeRecordPacketValidationError(ticketId, err);
+        throw err;
+    }
+}
 
+async function maybeRecordPacketValidationError(ticketId: string, err: unknown): Promise<void> {
+    if (!(err instanceof PacketValidationError)) {
+        return;
+    }
+
+    await recordCompileError(ticketId, err.toPublicMessage());
+}
+
+async function persistCompiledPromptAtomic(ticketId: string, compiled: CompiledPromptResult): Promise<void> {
     await pool.query(
         `UPDATE tickets
      SET compiled_prompt = $1,
@@ -243,6 +260,7 @@ export async function compileAndStoreTicketPrompt(ticketId: string): Promise<Com
          compiled_prompt_context_repo_commit = $11,
          compiled_prompt_context_graph_version = $12,
          compiled_prompt_context_memory_snapshot = $13,
+         last_error = NULL,
          metadata = COALESCE(metadata, '{}'::jsonb) || $14::jsonb
      WHERE ticket_id = $15`,
         [
@@ -283,8 +301,15 @@ export async function compileAndStoreTicketPrompt(ticketId: string): Promise<Com
             ticketId,
         ],
     );
+}
 
-    return compiled;
+async function recordCompileError(ticketId: string, message: string): Promise<void> {
+    await pool.query(
+        `UPDATE tickets
+         SET last_error = $1
+         WHERE ticket_id = $2`,
+        [message, ticketId],
+    );
 }
 
 function createInstructionPacketEnvelope(
