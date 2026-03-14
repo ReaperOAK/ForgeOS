@@ -9,7 +9,6 @@
  */
 
 import { GoogleGenAI } from '@google/genai';
-import { createHash } from 'node:crypto';
 import { pool } from '../db/pool.js';
 import { logger } from '../middleware/logging.js';
 import { ticketsGetHandler } from '../tools/tickets-get.js';
@@ -17,6 +16,10 @@ import { ticketsPayloadHandler } from '../tools/tickets-payload.js';
 import { memorySearchLessonsHandler } from '../tools/memory-search-lessons.js';
 import { codeBlastRadiusHandler } from '../tools/code-blast-radius.js';
 import { codeSearchSymbolsHandler } from '../tools/code-search-symbols.js';
+import {
+    buildContextHashInputsFromEnv,
+    computeContextHash,
+} from './context-hash.js';
 import {
     PromptArchitectService,
     type PromptGenerationContext,
@@ -30,6 +33,7 @@ export interface CompiledPromptResult {
     provider: 'gemini' | 'ollama' | 'openai';
     model: string;
     usedFallback: boolean;
+    packetEnvelope: InstructionPacketEnvelope;
     compiledAt: string;
     contextHash: string;
     packetSchemaVersion: number;
@@ -101,6 +105,35 @@ interface PromptPacketMetadata {
     };
 }
 
+export interface InstructionPacketEnvelope {
+    envelopeVersion: 'v1';
+    packetVersion: string;
+    packetSchemaVersion: number;
+    templateVersion: string;
+    compiledAt: string;
+    contextHash: string;
+    canonicalContext: {
+        repoCommit: string;
+        graphVersion: string;
+        memorySnapshot: string;
+    };
+    compiledPrompt: string;
+}
+
+interface QueuedCompileJob {
+    ticketId: string;
+    trigger: string;
+    idempotencyKey: string;
+}
+
+interface QueueCompileOptions {
+    idempotencyKey?: string;
+}
+
+const compileQueue = new Map<string, QueuedCompileJob>();
+let compileWorkerRunning = false;
+let compileWorkerScheduled = false;
+
 /**
  * Compile a ticket prompt using Gemini when available, otherwise fallback.
  */
@@ -112,11 +145,13 @@ export async function compileTicketPrompt(ticketId: string): Promise<CompiledPro
 
     const geminiResult = await tryGenerateGeminiPrompt(ticketId, investigation);
     if (geminiResult !== null) {
+        const packetEnvelope = createInstructionPacketEnvelope(geminiResult.prompt, packetMetadata);
         return {
             prompt: geminiResult.prompt,
             provider: 'gemini',
             model: geminiResult.model,
             usedFallback: false,
+            packetEnvelope,
             ...packetMetadata,
         };
     }
@@ -124,12 +159,14 @@ export async function compileTicketPrompt(ticketId: string): Promise<CompiledPro
     const fallbackService = new PromptArchitectService();
     const fallbackContext = mapInvestigationToFallbackContext(investigation);
     const fallback = await fallbackService.generatePrompt(fallbackContext);
+    const packetEnvelope = createInstructionPacketEnvelope(fallback.prompt, packetMetadata);
 
     return {
         prompt: fallback.prompt,
         provider: fallback.provider,
         model: fallback.model,
         usedFallback: true,
+        packetEnvelope,
         ...packetMetadata,
     };
 }
@@ -218,6 +255,7 @@ export async function compileAndStoreTicketPrompt(ticketId: string): Promise<Com
                         graph_version: compiled.canonicalContext.graphVersion,
                         memory_snapshot: compiled.canonicalContext.memorySnapshot,
                     },
+                    packet_envelope: compiled.packetEnvelope,
                 },
             }),
             ticketId,
@@ -227,35 +265,123 @@ export async function compileAndStoreTicketPrompt(ticketId: string): Promise<Com
     return compiled;
 }
 
+function createInstructionPacketEnvelope(
+    compiledPrompt: string,
+    metadata: PromptPacketMetadata,
+): InstructionPacketEnvelope {
+    return {
+        envelopeVersion: 'v1',
+        packetVersion: metadata.packetVersion,
+        packetSchemaVersion: metadata.packetSchemaVersion,
+        templateVersion: metadata.templateVersion,
+        compiledAt: metadata.compiledAt,
+        contextHash: metadata.contextHash,
+        canonicalContext: metadata.canonicalContext,
+        compiledPrompt,
+    };
+}
+
 /**
  * Fire-and-forget helper to precompute prompt in background.
+ *
+ * Idempotency foundation: duplicate enqueue calls with the same key collapse
+ * into one queued compile job.
  */
-export function queueCompileTicketPrompt(ticketId: string, trigger: string): void {
-    void compileAndStoreTicketPrompt(ticketId)
-        .then((result) => {
-            logger.info(
-                {
-                    ticketId,
-                    trigger,
-                    provider: result.provider,
-                    model: result.model,
-                    usedFallback: result.usedFallback,
-                    contextHash: result.contextHash,
-                    freshnessStatus: result.freshnessStatus,
-                },
-                'compiler: compiled prompt stored',
-            );
-        })
-        .catch((err) => {
-            logger.error(
-                {
-                    ticketId,
-                    trigger,
-                    error: err instanceof Error ? err.message : String(err),
-                },
-                'compiler: failed to compile/store prompt',
-            );
-        });
+export function queueCompileTicketPrompt(ticketId: string, trigger: string, options?: QueueCompileOptions): void {
+    const idempotencyKey = options?.idempotencyKey ?? `${ticketId}:${trigger}`;
+    if (compileQueue.has(idempotencyKey)) {
+        logger.info(
+            {
+                ticketId,
+                trigger,
+                idempotencyKey,
+            },
+            'compiler: compile job already queued (idempotent replay)',
+        );
+        return;
+    }
+
+    compileQueue.set(idempotencyKey, {
+        ticketId,
+        trigger,
+        idempotencyKey,
+    });
+    scheduleCompileWorker();
+}
+
+async function runCompileWorker(): Promise<void> {
+    if (compileWorkerRunning) {
+        return;
+    }
+
+    compileWorkerRunning = true;
+    try {
+        while (compileQueue.size > 0) {
+            const next = compileQueue.entries().next().value as [string, QueuedCompileJob] | undefined;
+            if (!next) {
+                break;
+            }
+            const [queueKey, job] = next;
+            compileQueue.delete(queueKey);
+
+            await compileAndStoreTicketPrompt(job.ticketId)
+                .then((result) => {
+                    logger.info(
+                        {
+                            ticketId: job.ticketId,
+                            trigger: job.trigger,
+                            idempotencyKey: job.idempotencyKey,
+                            provider: result.provider,
+                            model: result.model,
+                            usedFallback: result.usedFallback,
+                            contextHash: result.contextHash,
+                            freshnessStatus: result.freshnessStatus,
+                        },
+                        'compiler: compiled prompt stored',
+                    );
+                })
+                .catch((err) => {
+                    logger.error(
+                        {
+                            ticketId: job.ticketId,
+                            trigger: job.trigger,
+                            idempotencyKey: job.idempotencyKey,
+                            error: err instanceof Error ? err.message : String(err),
+                        },
+                        'compiler: failed to compile/store prompt',
+                    );
+                });
+        }
+    } finally {
+        compileWorkerRunning = false;
+        if (compileQueue.size > 0) {
+            scheduleCompileWorker();
+        }
+    }
+}
+
+function scheduleCompileWorker(): void {
+    if (compileWorkerScheduled) {
+        return;
+    }
+
+    compileWorkerScheduled = true;
+    queueMicrotask(() => {
+        compileWorkerScheduled = false;
+        void runCompileWorker();
+    });
+}
+
+/**
+ * Test helper: wait until in-process compile queue is empty and worker is idle.
+ */
+export async function waitForCompileQueueToDrain(maxPasses = 20): Promise<void> {
+    for (let pass = 0; pass < maxPasses; pass += 1) {
+        if (!compileWorkerRunning && !compileWorkerScheduled && compileQueue.size === 0) {
+            return;
+        }
+        await new Promise<void>((resolve) => setTimeout(resolve, 0));
+    }
 }
 
 async function generateWithGemini(
@@ -314,45 +440,22 @@ function getFirstCandidateParts(response: Record<string, unknown>): unknown[] | 
 }
 
 function createPacketMetadata(now: Date = new Date()): PromptPacketMetadata {
-    const repoCommit = normalizeCanonicalToken(
-        process.env.FORGEOS_REPO_COMMIT
-        ?? process.env.GIT_COMMIT_SHA
-        ?? process.env.SOURCE_COMMIT
-        ?? 'unknown',
-    );
-    const graphVersion = normalizeCanonicalToken(
-        process.env.FORGEOS_GRAPH_VERSION ?? 'unknown',
-    );
-    const memorySnapshot = normalizeCanonicalToken(
-        process.env.FORGEOS_MEMORY_SNAPSHOT_VERSION ?? 'unknown',
-    );
-
-    const canonicalMaterial = [
-        `repo_commit=${repoCommit}`,
-        `graph_version=${graphVersion}`,
-        `memory_snapshot=${memorySnapshot}`,
-        `packet_schema=${PACKET_VERSION}`,
-        `template_version=${TEMPLATE_VERSION}`,
-    ].join('|');
+    const hashInputs = buildContextHashInputsFromEnv(process.env, PACKET_VERSION, TEMPLATE_VERSION);
 
     return {
         compiledAt: now.toISOString(),
-        contextHash: createHash('sha256').update(canonicalMaterial, 'utf8').digest('hex'),
+        contextHash: computeContextHash(hashInputs),
         packetSchemaVersion: PACKET_SCHEMA_VERSION,
         packetVersion: PACKET_VERSION,
         templateVersion: TEMPLATE_VERSION,
         freshnessStatus: 'fresh',
         staleReason: null,
         canonicalContext: {
-            repoCommit,
-            graphVersion,
-            memorySnapshot,
+            repoCommit: hashInputs.repoCommit,
+            graphVersion: hashInputs.graphVersion,
+            memorySnapshot: hashInputs.memorySnapshot,
         },
     };
-}
-
-function normalizeCanonicalToken(value: string): string {
-    return value.trim().replace(/[|\n\r\t]/g, '_');
 }
 
 async function gatherInvestigation(ticketId: string): Promise<Record<string, unknown>> {
