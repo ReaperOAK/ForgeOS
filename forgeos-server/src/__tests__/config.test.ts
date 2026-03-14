@@ -721,8 +721,8 @@ describe('docker-compose.yml service orchestration', () => {
     expect(composeContent).toContain('postgres:');
   });
 
-  it('uses postgres:17-alpine image', () => {
-    expect(composeContent).toContain('postgres:17-alpine');
+  it('uses the custom postgres 17 image build', () => {
+    expect(composeContent).toContain('image: forgeos-postgres:17');
   });
 
   it('defines forgeos-server service', () => {

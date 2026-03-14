@@ -109,7 +109,8 @@ function makeSampleLesson(overrides: Partial<SimilarLesson> = {}): SimilarLesson
 
 // ── Mock Setup ───────────────────────────────────────────────────────────────
 
-let originalEnv: string | undefined;
+let originalApiKeyEnv: string | undefined;
+let originalProviderEnv: string | undefined;
 let fetchMock: ReturnType<typeof vi.fn>;
 let dbQueryMock: ReturnType<typeof vi.fn>;
 let embeddingService: EmbeddingService;
@@ -132,7 +133,9 @@ function mockEmbeddingApiResponse(embedding: number[]): object {
 }
 
 beforeEach(() => {
-  originalEnv = process.env.OPENAI_API_KEY;
+  originalApiKeyEnv = process.env.OPENAI_API_KEY;
+  originalProviderEnv = process.env.EMBEDDING_PROVIDER;
+  process.env.EMBEDDING_PROVIDER = 'openai';
   process.env.OPENAI_API_KEY = 'test-key-similarity';
   fetchMock = vi.fn();
   vi.stubGlobal('fetch', fetchMock);
@@ -146,10 +149,15 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  if (originalEnv !== undefined) {
-    process.env.OPENAI_API_KEY = originalEnv;
+  if (originalApiKeyEnv !== undefined) {
+    process.env.OPENAI_API_KEY = originalApiKeyEnv;
   } else {
     delete process.env.OPENAI_API_KEY;
+  }
+  if (originalProviderEnv !== undefined) {
+    process.env.EMBEDDING_PROVIDER = originalProviderEnv;
+  } else {
+    delete process.env.EMBEDDING_PROVIDER;
   }
   vi.restoreAllMocks();
   vi.unstubAllGlobals();

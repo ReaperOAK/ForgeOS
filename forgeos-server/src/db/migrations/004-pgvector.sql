@@ -17,9 +17,7 @@
 --                           (higher = better recall at build-time cost)
 --
 -- Embedding Dimension:
---   1536 — Default for OpenAI text-embedding-3-small. Change if using a
---          different model (e.g., 768 for text-embedding-3-small with
---          dimensions parameter, 3072 for text-embedding-3-large).
+--   1024 — Default for Ollama mxbai-embed-large.
 --
 -- Idempotency: Safe to re-run. Uses IF NOT EXISTS guards.
 -- =============================================================================
@@ -43,8 +41,8 @@ CREATE TABLE IF NOT EXISTS code_embeddings (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   symbol_id   UUID REFERENCES code_symbols(id) ON DELETE CASCADE,
   file_id     UUID REFERENCES code_files(id) ON DELETE CASCADE,
-  embedding   vector(1536) NOT NULL,
-  model_name  TEXT NOT NULL DEFAULT 'text-embedding-3-small',
+  embedding   vector(1024) NOT NULL,
+  model_name  TEXT NOT NULL DEFAULT 'mxbai-embed-large',
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
   -- At least one of symbol_id or file_id must be set

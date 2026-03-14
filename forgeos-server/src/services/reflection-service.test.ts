@@ -354,7 +354,7 @@ describe('ReflectionService', () => {
       const params = embedCall![1] as unknown[];
       expect(params[0]).toBe(FAKE_LESSON_ID);
       expect(params[1]).toBe(JSON.stringify(FAKE_EMBEDDING));
-      expect(params[2]).toBe('text-embedding-3-small');
+      expect(params[2]).toBe('mxbai-embed-large');
     });
 
     it('releases client after successful transaction', async () => {

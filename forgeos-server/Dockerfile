@@ -12,6 +12,7 @@ RUN npm ci
 
 # Copy source and compile TypeScript (output goes to dist/).
 COPY src/ ./src/
+COPY scripts/ ./scripts/
 RUN npm run build
 
 # ---- Stage 2: Runtime ----

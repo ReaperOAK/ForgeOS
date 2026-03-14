@@ -22,7 +22,7 @@
 --   ef_construction = 200 — Size of dynamic candidate list during build
 --
 -- Embedding Dimension:
---   1536 — Default for OpenAI text-embedding-3-small.
+--   1024 — Default for Ollama mxbai-embed-large.
 --
 -- Idempotency: Safe to re-run. Uses IF NOT EXISTS guards.
 -- =============================================================================
@@ -60,8 +60,8 @@ CREATE TABLE IF NOT EXISTS lessons (
 CREATE TABLE IF NOT EXISTS lesson_embeddings (
   id          UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   lesson_id   UUID NOT NULL REFERENCES lessons(id) ON DELETE CASCADE,
-  embedding   vector(1536) NOT NULL,
-  model_name  TEXT NOT NULL DEFAULT 'text-embedding-3-small',
+  embedding   vector(1024) NOT NULL,
+  model_name  TEXT NOT NULL DEFAULT 'mxbai-embed-large',
   created_at  TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
@@ -135,7 +135,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON lesson_embeddings TO forgeos_user;
 --           optional category filtering and configurable threshold.
 --
 -- Parameters:
---   query_embedding — 1536-dim vector to search against
+--   query_embedding — 1024-dim vector to search against
 --   p_category      — optional category filter (NULL = no filter)
 --   p_threshold     — minimum similarity score (default 0.7)
 --   p_limit         — max results to return (default 10)
@@ -144,7 +144,7 @@ GRANT SELECT, INSERT, UPDATE, DELETE ON lesson_embeddings TO forgeos_user;
 -- =============================================================================
 
 CREATE OR REPLACE FUNCTION search_similar_lessons(
-  query_embedding vector(1536),
+  query_embedding vector(1024),
   p_category TEXT DEFAULT NULL,
   p_threshold FLOAT DEFAULT 0.7,
   p_limit INTEGER DEFAULT 10

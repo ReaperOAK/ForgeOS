@@ -964,18 +964,29 @@ describe('tools/index.ts source analysis', () => {
     expect(toolsSrc).toContain('McpServer');
   });
 
-  describe('registers all 10 MCP tools', () => {
+  describe('registers all 21 MCP tools', () => {
     const expectedTools = [
       'tickets.next',
       'tickets.claim',
-      'tickets.update',
-      'tickets.complete',
       'tickets.reject',
       'tickets.spawn',
-      'tickets.graph',
-      'tickets.release',
+      'tickets.complete',
       'tickets.extend',
+      'tickets.update',
+      'tickets.release',
       'tickets.stats',
+      'tickets.graph',
+      'tickets.list',
+      'tickets.get',
+      'tickets.payload',
+      'code.search_symbols',
+      'code.blast_radius',
+      'code.get_imports',
+      'init.index',
+      'init.orient',
+      'memory.add_lesson',
+      'memory.search_lessons',
+      'memory.get_context',
     ];
 
     for (const tool of expectedTools) {
@@ -984,9 +995,9 @@ describe('tools/index.ts source analysis', () => {
       });
     }
 
-    it('calls server.tool() exactly 10 times', () => {
+    it('calls server.tool() exactly 21 times', () => {
       const matches = toolsSrc.match(/server\.tool\s*\(/g);
-      expect(matches).toHaveLength(10);
+      expect(matches).toHaveLength(21);
     });
   });
 
@@ -994,14 +1005,25 @@ describe('tools/index.ts source analysis', () => {
     const expectedImports = [
       'tickets-next',
       'tickets-claim',
-      'tickets-update',
-      'tickets-complete',
       'tickets-reject',
       'tickets-spawn',
-      'tickets-graph',
-      'tickets-release',
+      'tickets-complete',
       'tickets-extend',
+      'tickets-update',
+      'tickets-release',
       'tickets-stats',
+      'tickets-graph',
+      'tickets-list',
+      'tickets-get',
+      'tickets-payload',
+      'code-search-symbols',
+      'code-blast-radius',
+      'code-get-imports',
+      'init-index',
+      'init-orient',
+      'memory-add-lesson',
+      'memory-search-lessons',
+      'memory-get-context',
     ];
 
     for (const mod of expectedImports) {
@@ -1013,9 +1035,12 @@ describe('tools/index.ts source analysis', () => {
 
   describe('each tool has schema and handler', () => {
     const tools = [
-      'ticketsNext', 'ticketsClaim', 'ticketsUpdate', 'ticketsComplete',
-      'ticketsReject', 'ticketsSpawn', 'ticketsGraph', 'ticketsRelease',
-      'ticketsExtend', 'ticketsStats',
+      'ticketsNext', 'ticketsClaim', 'ticketsReject', 'ticketsSpawn',
+      'ticketsComplete', 'ticketsExtend', 'ticketsUpdate', 'ticketsRelease',
+      'ticketsStats', 'ticketsGraph', 'ticketsList', 'ticketsGet',
+      'ticketsPayload', 'codeSearchSymbols', 'codeBlastRadius',
+      'codeGetImports', 'initIndex', 'initOrient', 'memoryAddLesson',
+      'memorySearchLessons', 'memoryGetContext',
     ];
 
     for (const tool of tools) {
@@ -1031,7 +1056,7 @@ describe('tools/index.ts source analysis', () => {
 
   it('passes schema.shape to server.tool for Zod integration', () => {
     const shapeMatches = toolsSrc.match(/Schema\.shape/g);
-    expect(shapeMatches).toHaveLength(10);
+    expect(shapeMatches).toHaveLength(21);
   });
 });
 
@@ -1534,7 +1559,7 @@ describe('Security checks', () => {
       const fullPath = path.join(dir, entry.name);
       if (entry.isDirectory() && entry.name !== '__tests__' && entry.name !== 'dashboard') {
         content += readAllTsFiles(fullPath);
-      } else if (entry.isFile() && entry.name.endsWith('.ts')) {
+      } else if (entry.isFile() && entry.name.endsWith('.ts') && !entry.name.endsWith('.test.ts')) {
         content += fs.readFileSync(fullPath, 'utf-8') + '\n';
       }
     }

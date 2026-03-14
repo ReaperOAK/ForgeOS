@@ -9,70 +9,78 @@
 
 import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import {
-    EmbeddingService,
-    EmbeddingApiError,
-    type EmbeddingServiceOptions,
+  EmbeddingService,
+  EmbeddingApiError,
+  type EmbeddingServiceOptions,
 } from './embedding-service.js';
 
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 /** Build a mock OpenAI-style response body for the given inputs. */
 function mockEmbeddingResponse(inputs: string[]): object {
-    return {
-        data: inputs.map((_, i) => ({
-            embedding: [0.1 * (i + 1), 0.2 * (i + 1), 0.3 * (i + 1)],
-            index: i,
-        })),
-        model: 'text-embedding-3-small',
-        usage: { prompt_tokens: inputs.length * 5, total_tokens: inputs.length * 5 },
-    };
+  return {
+    data: inputs.map((_, i) => ({
+      embedding: [0.1 * (i + 1), 0.2 * (i + 1), 0.3 * (i + 1)],
+      index: i,
+    })),
+    model: 'text-embedding-3-small',
+    usage: { prompt_tokens: inputs.length * 5, total_tokens: inputs.length * 5 },
+  };
 }
 
 /** Creates a successful Response mock. */
 function okResponse(body: object): Response {
-    return {
-        ok: true,
-        status: 200,
-        json: vi.fn().mockResolvedValue(body),
-        text: vi.fn().mockResolvedValue(JSON.stringify(body)),
-    } as unknown as Response;
+  return {
+    ok: true,
+    status: 200,
+    json: vi.fn().mockResolvedValue(body),
+    text: vi.fn().mockResolvedValue(JSON.stringify(body)),
+  } as unknown as Response;
 }
 
 /** Creates a failing Response mock. */
 function errorResponse(status: number, body = ''): Response {
-    return {
-        ok: false,
-        status,
-        json: vi.fn().mockResolvedValue({}),
-        text: vi.fn().mockResolvedValue(body),
-    } as unknown as Response;
+  return {
+    ok: false,
+    status,
+    json: vi.fn().mockResolvedValue({}),
+    text: vi.fn().mockResolvedValue(body),
+  } as unknown as Response;
 }
 
 /** Default options with zero delays for fast tests. */
 const FAST_OPTIONS: EmbeddingServiceOptions = {
-    maxRetries: 3,
-    batchSize: 2,
+  maxRetries: 3,
+  batchSize: 2,
   maxConcurrent: 2,
   baseDelayMs: 0, // no backoff delay in tests
 };
 
 // ── Test Setup ───────────────────────────────────────────────────────────────
 
-let originalEnv: string | undefined;
+let originalApiKeyEnv: string | undefined;
+let originalProviderEnv: string | undefined;
 let fetchMock: ReturnType<typeof vi.fn>;
 
 beforeEach(() => {
-  originalEnv = process.env.OPENAI_API_KEY;
+  originalApiKeyEnv = process.env.OPENAI_API_KEY;
+  originalProviderEnv = process.env.EMBEDDING_PROVIDER;
+  process.env.EMBEDDING_PROVIDER = 'openai';
   process.env.OPENAI_API_KEY = 'test-key-abc123';
   fetchMock = vi.fn();
   vi.stubGlobal('fetch', fetchMock);
 });
 
 afterEach(() => {
-  if (originalEnv !== undefined) {
-    process.env.OPENAI_API_KEY = originalEnv;
+  if (originalApiKeyEnv !== undefined) {
+    process.env.OPENAI_API_KEY = originalApiKeyEnv;
   } else {
     delete process.env.OPENAI_API_KEY;
+  }
+  if (originalProviderEnv !== undefined) {
+    process.env.EMBEDDING_PROVIDER = originalProviderEnv;
+  } else {
+    delete process.env.EMBEDDING_PROVIDER;
   }
   vi.restoreAllMocks();
   vi.unstubAllGlobals();
@@ -84,14 +92,14 @@ describe('EmbeddingService — constructor', () => {
   it('throws if OPENAI_API_KEY is not set', () => {
     delete process.env.OPENAI_API_KEY;
     expect(() => new EmbeddingService(FAST_OPTIONS)).toThrow(
-      'OPENAI_API_KEY environment variable is required',
+      'OPENAI_API_KEY environment variable is required when EMBEDDING_PROVIDER=openai',
     );
   });
 
   it('throws if OPENAI_API_KEY is empty', () => {
     process.env.OPENAI_API_KEY = '';
     expect(() => new EmbeddingService(FAST_OPTIONS)).toThrow(
-      'OPENAI_API_KEY environment variable is required',
+      'OPENAI_API_KEY environment variable is required when EMBEDDING_PROVIDER=openai',
     );
   });
 
