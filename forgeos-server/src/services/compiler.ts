@@ -234,6 +234,16 @@ export async function compileAndStoreTicketPrompt(ticketId: string): Promise<Com
     }
 }
 
+/**
+ * Persists a public-safe compile error only for packet schema failures.
+ *
+ * This keeps non-validation failures untouched while recording a structured,
+ * non-leaking message for validation errors on the ticket row.
+ *
+ * @internal
+ * @param ticketId - Ticket identifier associated with the compile attempt.
+ * @param err - Thrown error from the compile pipeline.
+ */
 async function maybeRecordPacketValidationError(ticketId: string, err: unknown): Promise<void> {
     if (!(err instanceof PacketValidationError)) {
         return;
@@ -242,6 +252,17 @@ async function maybeRecordPacketValidationError(ticketId: string, err: unknown):
     await recordCompileError(ticketId, err.toPublicMessage());
 }
 
+/**
+ * Atomically writes compiled prompt content and deterministic packet metadata.
+ *
+ * Updates prompt text, provider/model, context hash, packet versions,
+ * freshness fields, canonical context inputs, and metadata envelope in a
+ * single SQL `UPDATE` so readers never observe a partially persisted packet.
+ *
+ * @internal
+ * @param ticketId - Ticket identifier to update.
+ * @param compiled - Fully validated compile output to persist.
+ */
 async function persistCompiledPromptAtomic(ticketId: string, compiled: CompiledPromptResult): Promise<void> {
     await pool.query(
         `UPDATE tickets

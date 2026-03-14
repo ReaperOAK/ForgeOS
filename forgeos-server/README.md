@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-14T22:30:00Z -->
+<!-- last_reviewed: 2026-03-14T23:59:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -178,6 +178,18 @@ Runtime persistence path:
 - `src/services/compiler.ts` stores prompt text plus metadata (`context_hash`,
   packet/schema/template versions, freshness fields, canonical context inputs)
   in both dedicated columns and `tickets.metadata.compiled_prompt`.
+
+Compile pipeline overview:
+
+- `src/services/compile-orchestrator.ts` runs `orchestrateCompilePipeline(ticketId)`,
+  which calls `compileIfStale` (hash-based freshness gate) and then enforces
+  `validatePacketSections` before returning a result. When packets are invalid,
+  it throws `PacketValidationError` and rejects the pipeline output.
+- `src/services/compiler.ts` persists compiled packets through
+  `persistCompiledPromptAtomic`, which writes prompt content, hash/version
+  metadata, freshness fields, and packet envelope in one SQL update. Validation
+  failures are captured by `maybeRecordPacketValidationError` using a
+  public-safe error message.
 
 ### Freshness Gate API (Cache Invalidation)
 
