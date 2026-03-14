@@ -2440,3 +2440,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/services/compiler.ts, forgeos-server/README.md, CHANGELOG.md, .github/agent-output/Documentation/TASK-PC-BE-003.md
 - **Decisions:** Added explicit JSDoc (`@param`, `@returns`) for `compileIfStale()` and `invalidatePromptCache()`; documented freshness/cache-invalidation API usage in server README; appended changelog feature entry for deterministic context-hash freshness gate.
 - **Timestamp:** 2026-03-14T22:30:00Z
+
+### [TASK-PC-BE-003] — QA PASS (Rework #2 — Final)
+- **Artifacts:** .github/agent-output/QA/TASK-PC-BE-003.md
+- **Decisions:** PASS — 11/11 tests pass, context-hash.ts 97.67% lines / 82.14% branches (both ≥80%). Rework #2 fixed max-depth violation in `canonicalize()`. Ticket advanced QA→SECURITY. compiler.ts file-wide coverage low (v8/resetModules artifact — not a gate failure).
+- **Timestamp:** 2026-03-14T17:13:45Z
+
+### [TASK-PC-BE-004] — CI Review
+- **Artifacts:** .github/agent-output/CIReviewer/TASK-PC-BE-004.md, .github/agent-output/CIReviewer/TASK-PC-BE-004.sarif
+- **Decisions:** PASS — Score 100/100, 0 critical, 0 warnings. rework_count=3 (FINAL). Refactored validatePacketSections() helpers resolved all complexity/depth violations. 27/27 tests, lines 93.56%, branches 91.83%, functions 100%.
+- **Timestamp:** 2026-03-14T17:15:06Z
