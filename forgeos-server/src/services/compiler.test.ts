@@ -126,11 +126,20 @@ describe('compiler service', () => {
         expect(result.freshnessStatus).toBe('fresh');
         expect(result.staleReason).toBeNull();
         expect(result.contextHash).toHaveLength(64);
+        expect(result.packetEnvelope).toMatchObject({
+            envelopeVersion: 'v1',
+            packetVersion: 'v1',
+            packetSchemaVersion: 1,
+            templateVersion: 'prompt-architect-v1',
+            compiledPrompt: 'compiled by gemini',
+        });
         expect(result.canonicalContext).toEqual({
             repoCommit: 'repo-main',
             graphVersion: 'graph-v1',
             memorySnapshot: 'memory-v1',
         });
+        expect(result.packetEnvelope.canonicalContext).toEqual(result.canonicalContext);
+        expect(result.packetEnvelope.contextHash).toBe(result.contextHash);
 
         expect(mockGeneratePrompt).not.toHaveBeenCalled();
         expect(mockCodeBlastRadiusHandler).toHaveBeenCalledTimes(2);
@@ -237,6 +246,21 @@ describe('compiler service', () => {
 
         const metadataJson = params[13] as string;
         expect(metadataJson).toContain('compiled_prompt');
+        expect(metadataJson).toContain('packet_envelope');
+    });
+
+    it('produces stable context hash across repeated compile runs with identical context', async () => {
+        process.env.GEMINI_API_KEY = 'test-gemini-key';
+        mockGenerateContent.mockResolvedValue({ text: 'compiled deterministically' });
+
+        const { compileTicketPrompt } = await import('./compiler.js');
+        const runA = await compileTicketPrompt('TASK-PC-BE-001');
+        const runB = await compileTicketPrompt('TASK-PC-BE-001');
+
+        expect(runA.contextHash).toBe(runB.contextHash);
+        expect(runA.packetEnvelope.contextHash).toBe(runB.packetEnvelope.contextHash);
+        expect(runA.packetEnvelope.packetVersion).toBe('v1');
+        expect(runB.packetEnvelope.packetVersion).toBe('v1');
     });
 
     it('falls back when tool responses are malformed JSON', async () => {
@@ -259,5 +283,35 @@ describe('compiler service', () => {
         expect(context.contextFiles).toEqual([
             { path: 'NOT FOUND — agent must investigate', reason: 'No file scope returned.' },
         ]);
+    });
+
+    it('deduplicates queued compile jobs for the same idempotency key', async () => {
+        process.env.GEMINI_API_KEY = 'test-gemini-key';
+        mockGenerateContent.mockResolvedValue({ text: 'queued prompt' });
+        mockPoolQuery.mockResolvedValue({ rowCount: 1 });
+
+        const { queueCompileTicketPrompt, waitForCompileQueueToDrain } = await import('./compiler.js');
+
+        queueCompileTicketPrompt('TASK-PC-BE-001', 'claim-missing-compiled-prompt');
+        queueCompileTicketPrompt('TASK-PC-BE-001', 'claim-missing-compiled-prompt');
+
+        await waitForCompileQueueToDrain();
+
+        expect(mockPoolQuery).toHaveBeenCalledTimes(1);
+    });
+
+    it('allows distinct idempotency keys to enqueue separate jobs', async () => {
+        process.env.GEMINI_API_KEY = 'test-gemini-key';
+        mockGenerateContent.mockResolvedValue({ text: 'queued prompt' });
+        mockPoolQuery.mockResolvedValue({ rowCount: 1 });
+
+        const { queueCompileTicketPrompt, waitForCompileQueueToDrain } = await import('./compiler.js');
+
+        queueCompileTicketPrompt('TASK-PC-BE-001', 'claim-missing-compiled-prompt', { idempotencyKey: 'job-1' });
+        queueCompileTicketPrompt('TASK-PC-BE-001', 'claim-missing-compiled-prompt', { idempotencyKey: 'job-2' });
+
+        await waitForCompileQueueToDrain();
+
+        expect(mockPoolQuery).toHaveBeenCalledTimes(2);
     });
 });
