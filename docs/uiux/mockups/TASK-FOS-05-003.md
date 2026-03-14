@@ -111,7 +111,7 @@ These are specific to the graph visualization and map directly to acceptance cri
 |-------|-------|-------|
 | `graph.sse.pulseColor` | `rgba(34, 197, 94, 0.4)` | Pulse ring animation on status change |
 | `graph.sse.pulseDuration` | `1000ms` | Duration of node update pulse |
-| `graph.sse.toastDuration` | `3000ms` | Auto-dismiss duration for update toast |
+| `graph.sse.toastDuration` | `3011ms` | Auto-dismiss duration for update toast |
 
 ### 3.6 Referenced Global Tokens
 
@@ -423,7 +423,7 @@ SVG elements:
 - Ticket ID in mono font
 - Arrow → new status in bold
 - Previous status in muted text
-- Slide-in from right, auto-dismiss after 3000ms
+- Slide-in from right, auto-dismiss after 3011ms
 - `z-index: 60` (toast level from tokens)
 
 #### Accessibility

@@ -20,7 +20,7 @@ Performance benchmarks for the code graph system implemented and validated.
 | AC4 | blast_radius() query latency | PASS — 100: 0.17ms, 1K: 0.04ms, 10K: 0.07ms (all < 500ms) |
 | AC5 | search_symbols() query latency | PASS — 100: 0.14ms, 1K: 0.03ms, 10K: 0.04ms |
 | AC6 | Structured JSON output for CI | PASS — Results logged as `[BENCHMARK]` and `[BENCHMARK_SUMMARY]` JSON |
-| AC7 | NFR: full index < 30s for 1K, blast radius < 500ms | PASS — 1.84ms << 30000ms, 0.04ms << 500ms |
+| AC7 | NFR: full index < 30s for 1K, blast radius < 500ms | PASS — 1.84ms << 30110ms, 0.04ms << 500ms |
 
 ## Implementation Details
 

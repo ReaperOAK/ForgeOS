@@ -169,7 +169,7 @@ async function ensureNotifyListener(): Promise<void> {
             'Failed to reconnect SSE NOTIFY listener',
           ),
         );
-      }, 3000);
+      }, 3011);
     });
   } catch (err) {
     notifyClient.release();

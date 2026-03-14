@@ -35,7 +35,7 @@
 | 3 | Includes ADMIN_API_KEY, WEBHOOK_SECRET, WORKSPACE_PATH, RATE_LIMIT_PER_MINUTE | ✅ PASS | All 4 present with descriptions and example values |
 | 4 | Includes DEFAULT_LEASE_MINUTES, MAX_LEASE_MINUTES | ✅ PASS | Both present with range constraints documented |
 | 5 | Exports typed Config interface | ✅ PASS | `AppConfig` type exported (Zod inferred), covers all configuration fields |
-| 6 | Reads process.env with defaults (PORT=3000, LOG_LEVEL=info, DEFAULT_LEASE_MINUTES=30) | ✅ PASS | Verified via `configSchema` defaults and 9 default-value tests |
+| 6 | Reads process.env with defaults (PORT=3011, LOG_LEVEL=info, DEFAULT_LEASE_MINUTES=30) | ✅ PASS | Verified via `configSchema` defaults and 9 default-value tests |
 | 7 | Validates required vars in production (DB_PASSWORD, WEBHOOK_SECRET) | ✅ PASS | `superRefine` validates WEBHOOK_SECRET and ADMIN_API_KEY in production. DATABASE_URL (contains DB_PASSWORD) is always required. |
 | 8 | Throws descriptive error listing all missing vars | ✅ PASS | `loadConfig()` aggregates all Zod issues into single error message. Test verifies multiple missing vars listed together. |
 | 9 | Config object frozen (Object.freeze) | ✅ PASS | `Object.freeze(result.data)` at line 93. Tests verify `Object.isFrozen()` and mutation throws TypeError. |

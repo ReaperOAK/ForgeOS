@@ -185,9 +185,9 @@ class TestForgeOSClientFromEnv:
     def test_from_env_override_server_url(self) -> None:
         with patch.dict(os.environ, {}, clear=True):
             client = ForgeOSClient.from_env(
-                overrides={"server_url": "http://custom:3000/mcp"}
+                overrides={"server_url": "http://custom:3011/mcp"}
             )
-        assert client.server_url == "http://custom:3000/mcp"
+        assert client.server_url == "http://custom:3011/mcp"
 
     def test_from_env_override_transport(self) -> None:
         with patch.dict(os.environ, {}, clear=True):

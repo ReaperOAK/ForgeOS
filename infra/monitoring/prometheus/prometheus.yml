@@ -4,7 +4,7 @@
 # Scrapes health and metric endpoints from ForgeOS services.
 #
 # Scrape targets:
-#   - MCP Server:  /health on port 3000
+#   - MCP Server:  /health on port 3011
 #   - PostgreSQL:  pg_exporter (if added) or blackbox probe
 #   - Prometheus:  self-monitoring on /metrics
 #
@@ -54,7 +54,7 @@ scrape_configs:
     scrape_interval: 10s
     scrape_timeout: 5s
     static_configs:
-      - targets: ["mcp-server:3000"]
+      - targets: ["mcp-server:3011"]
         labels:
           service: "mcp-server"
           component: "api"

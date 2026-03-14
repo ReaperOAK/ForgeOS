@@ -86,7 +86,7 @@ services:
     hostname: mcp-server
     environment:
       DATABASE_URL: "postgresql://forgeos:${DB_PASSWORD:-forgeos_dev}@postgres:5432/forgeos"
-      PORT: "3000"
+      PORT: "3011"
       NODE_ENV: "${NODE_ENV:-development}"
       LOG_LEVEL: info
       ADMIN_API_KEY: "${ADMIN_API_KEY:-forgeos_admin_CHANGE_ME}"
@@ -108,7 +108,7 @@ services:
     networks:
       - forgeos-net
     ports:
-      - "3000:3000"
+      - "3011:3011"
     restart: unless-stopped
     logging:
       driver: json-file

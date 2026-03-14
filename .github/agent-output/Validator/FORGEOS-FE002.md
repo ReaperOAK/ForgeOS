@@ -43,7 +43,7 @@ confidence: HIGH
 | 4 | fetchPipelineOverview() → PipelineOverview | ✅ tickets.ts:42 — calls GET /api/stages |
 | 5 | fetchTicketHistory(id) → EventHistory[] | ✅ tickets.ts:50 — encodeURIComponent on path param, calls GET /api/tickets/:id/history |
 | 6 | Error responses parsed into typed error objects | ✅ client.ts:parseErrorResponse parses JSON body (message/error/code/details), falls back to statusText. AbortError and generic errors wrapped as ApiError with code=NETWORK_ERROR |
-| 7 | Base URL configurable via NEXT_PUBLIC_API_URL | ✅ client.ts:5 — `process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'` |
+| 7 | Base URL configurable via NEXT_PUBLIC_API_URL | ✅ client.ts:5 — `process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3011'` |
 
 ## Upstream Verdict Cross-Check
 

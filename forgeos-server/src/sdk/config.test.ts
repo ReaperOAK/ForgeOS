@@ -25,7 +25,7 @@ describe('loadSdkConfig', () => {
 
     const config = loadSdkConfig();
 
-    expect(config.FORGEOS_MCP_URL).toBe('http://localhost:3000/mcp');
+    expect(config.FORGEOS_MCP_URL).toBe('http://localhost:3011/mcp');
     expect(config.FORGEOS_API_KEY).toBe('');
     expect(config.FORGEOS_FALLBACK_ENABLED).toBe(true);
     expect(config.FORGEOS_TICKETS_PY_PATH).toBe('.github/tickets.py');

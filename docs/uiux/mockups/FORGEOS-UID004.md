@@ -90,7 +90,7 @@ interface ClaimRow {
   ticketTitle: string;    // e.g. "Implement backup strategy"
   agent: string;          // e.g. "Backend"
   machine: string;        // e.g. "pop-os"
-  operator: string;       // e.g. "Ticketer"
+  operator: string;       // e.g. "ForgeOS dispatcher"
   leaseExpiry: string;    // ISO 8601 timestamp
   stage: string;          // Current SDLC stage
   claimedAt: string;      // ISO 8601 claim timestamp

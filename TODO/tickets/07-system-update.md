@@ -61,7 +61,7 @@ Update the root-level documentation files to reflect the new ForgeOS architectur
 - [ ] copilot-instructions.md Architecture section describes MCP server + PostgreSQL + dashboard
 - [ ] README.md includes quick start: git clone, docker compose up, open dashboard
 - [ ] README.md architecture section describes the distributed MCP-based system
-- [ ] README.md links to dashboard URL (http://localhost:3000/dashboard)
+- [ ] README.md links to dashboard URL (http://localhost:3011/dashboard)
 
 ---
 

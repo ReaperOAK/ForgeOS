@@ -1853,7 +1853,7 @@ services:
     environment:
       DATABASE_URL: postgres://forgeos:${DB_PASSWORD}@pgbouncer:6432/forgeos
       NODE_ENV: ${NODE_ENV:-production}
-      PORT: ${MCP_PORT:-3000}
+      PORT: ${MCP_PORT:-3011}
       WEBHOOK_SECRET: ${WEBHOOK_SECRET}
       ADMIN_API_KEY: ${ADMIN_API_KEY}
       LOG_LEVEL: ${LOG_LEVEL:-info}
@@ -1863,11 +1863,11 @@ services:
       pgbouncer:
         condition: service_started
     ports:
-      - "${MCP_PORT:-3000}:3000"
+      - "${MCP_PORT:-3011}:3011"
     volumes:
       - ${WORKSPACE_PATH:-.}:/app/workspace:ro
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      test: ["CMD", "curl", "-f", "http://localhost:3011/health"]
       interval: 30s
       retries: 3
       start_period: 10s
@@ -1907,10 +1907,10 @@ COPY src/dashboard/ ./dist/dashboard/
 ENV NODE_ENV=production
 USER node
 
-EXPOSE 3000
+EXPOSE 3011
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:3000/health || exit 1
+    CMD curl -f http://localhost:3011/health || exit 1
 
 CMD ["node", "dist/index.js"]
 ```
@@ -1928,7 +1928,7 @@ DB_PASSWORD=changeme_use_secrets_in_production
 PGBOUNCER_PORT=6432
 
 # ── MCP Server ──
-MCP_PORT=3000
+MCP_PORT=3011
 NODE_ENV=development
 LOG_LEVEL=debug
 

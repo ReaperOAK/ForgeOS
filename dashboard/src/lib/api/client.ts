@@ -1,8 +1,8 @@
 import type { ApiClientConfig, ApiError } from './types';
 
-/** Default client configuration. Uses `NEXT_PUBLIC_API_URL` or localhost:3000. */
+/** Default client configuration. Uses `NEXT_PUBLIC_API_URL` or localhost:3011. */
 const DEFAULT_CONFIG: ApiClientConfig = {
-  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3011',
   timeout: 10_000,
   headers: {
     'Content-Type': 'application/json',

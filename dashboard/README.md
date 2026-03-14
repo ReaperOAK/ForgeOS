@@ -13,7 +13,7 @@ strict mode, and Tailwind CSS.
 
 - **Node.js** 18.17 or later
 - **npm** 9+ (or pnpm / yarn)
-- **ForgeOS API** running at `http://localhost:3000` (or set
+- **ForgeOS API** running at `http://localhost:3011` (or set
   `NEXT_PUBLIC_API_URL`)
 
 ## Quick Start
@@ -258,7 +258,7 @@ import {
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `NEXT_PUBLIC_API_URL` | `http://localhost:3000` | ForgeOS API base URL |
+| `NEXT_PUBLIC_API_URL` | `http://localhost:3011` | ForgeOS API base URL |
 
 The client reads the environment variable at construction time and applies
 a 10-second request timeout via `AbortController`.
@@ -304,7 +304,7 @@ WebSocket lifecycle:
 |--------|------|---------|-------------|
 | `url` | `string` | Derived from `NEXT_PUBLIC_API_URL` | WebSocket endpoint URL |
 | `initialDelay` | `number` | `1000` | Initial reconnection delay (ms) |
-| `maxDelay` | `number` | `30000` | Maximum reconnection delay (ms) |
+| `maxDelay` | `number` | `30110` | Maximum reconnection delay (ms) |
 | `onEvent` | `(event: WebSocketEvent) => void` | no-op | Called for every parsed event |
 | `onStatusChange` | `(status: ConnectionStatus) => void` | no-op | Called on status transitions |
 

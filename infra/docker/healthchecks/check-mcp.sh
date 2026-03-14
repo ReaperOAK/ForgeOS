@@ -14,7 +14,7 @@
 #
 # Environment variables (overridable):
 #   MCP_HOST    — Hostname or IP (default: localhost)
-#   MCP_PORT    — Port (default: 3000)
+#   MCP_PORT    — Port (default: 3011)
 #   TIMEOUT     — Request timeout in seconds (default: 5)
 #
 # Ticket:  FORGEOS-DO008
@@ -28,7 +28,7 @@ set -e
 # Configuration
 # ---------------------------------------------------------------------------
 MCP_HOST="${MCP_HOST:-localhost}"
-MCP_PORT="${MCP_PORT:-3000}"
+MCP_PORT="${MCP_PORT:-3011}"
 TIMEOUT="${TIMEOUT:-5}"
 
 HEALTH_URL="http://${MCP_HOST}:${MCP_PORT}/health"

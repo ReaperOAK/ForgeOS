@@ -103,11 +103,8 @@ Execute in order before any work:
 
 ## 6. Ticket Generation
 
-L3 tasks are written as markdown in `TODO/` then parsed into ticket JSON:
-```bash
-python3 .github/tickets.py --parse TODO/
-```
-This creates JSON files in `.github/tickets/` and places them in `.github/ticket-state/READY/`.
+L3 tasks are written as markdown in `TODO/` and then created as MCP tickets via `tickets.spawn`.
+Ticket lifecycle state is managed in PostgreSQL by the ForgeOS MCP server (not filesystem directories).
 
 Task ID convention must match regex: `^(#{2,4})\s+([A-Z][A-Z0-9-]*\d{3,4}):\s*(.+)$`
 
@@ -120,18 +117,18 @@ CIR (CI Reviewer), UID (UIDesigner), SYS (System/cross-cutting).
 | Artifact | Location |
 |----------|----------|
 | L1/L2/L3 decomposition files | `TODO/` |
-| Ticket JSON files | `.github/tickets/` |
-| State copies | `.github/ticket-state/READY/` |
+| Ticket records | PostgreSQL via MCP `tickets.spawn` |
+| Ticket state | PostgreSQL `tickets.stage` / `tickets.status` |
 | Agent summary | `.github/agent-output/TODO/{ticket-id}.md` |
 | Memory entry | `.github/memory-bank/activeContext.md` (append-only) |
 
 ## 8. Scope
 
-- **Included:** `TODO/` directory, ticket creation, decomposition artifacts, `tickets.py` commands
+- **Included:** `TODO/` directory, ticket creation, decomposition artifacts, MCP ticket operations
 - **Excluded:** Implementation code, test execution, architecture decisions, SDLC stage processing
 
 ## Constraint
-runInTerminal restricted to: python .github/tickets.py commands ONLY.
+runInTerminal restricted to MCP-safe ticket generation support commands approved for TODO workflow.
 
 ## 9. Forbidden Actions
 
@@ -141,8 +138,8 @@ runInTerminal restricted to: python .github/tickets.py commands ONLY.
 - Processing SDLC tickets (TODO creates tickets, not processes them)
 - Cross-ticket references in worker output
 - Self-initiating strategic decisions without delegation
-- Running any terminal command other than `python3 .github/tickets.py`
-- Modifying files outside `TODO/`, `.github/tickets/`, `.github/ticket-state/`, `.github/agent-output/TODO/`
+- Running terminal commands that bypass MCP ticket lifecycle controls
+- Modifying files outside `TODO/` and `.github/agent-output/TODO/`
 - Reading `.github/ticket-state/` or `.github/tickets/` directly for ticket context — use `tickets.payload` via MCP
 - Using or browsing tools outside the Assigned Tool Loadout section — strict boundary enforced.
 - Hallucinating tool names or capabilities not explicitly listed in the loadout.

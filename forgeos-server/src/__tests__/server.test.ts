@@ -306,8 +306,8 @@ describe('config.ts source analysis', () => {
     expect(configSrc).toMatch(/startsWith\s*\(\s*['"]postgresql:\/\//);
   });
 
-  it('defines PORT with default 3000', () => {
-    expect(configSrc).toMatch(/PORT.*default\(3000\)/);
+  it('defines PORT with default 3011', () => {
+    expect(configSrc).toMatch(/PORT.*default\(3011\)/);
   });
 
   it('defines NODE_ENV with enum validation', () => {
@@ -547,7 +547,7 @@ describe('server.ts source analysis', () => {
 
     it('uses setTimeout for reconnection delay', () => {
       expect(serverSrc).toContain('setTimeout');
-      expect(serverSrc).toContain('3000');
+      expect(serverSrc).toContain('3011');
     });
 
     it('does NOT release the LISTEN client (stays connected)', () => {
@@ -1539,8 +1539,8 @@ describe('Docker infrastructure', () => {
       expect(compose).toMatch(/server|forgeos/i);
     });
 
-    it('maps port 3000', () => {
-      expect(compose).toContain('3000');
+    it('maps port 3011', () => {
+      expect(compose).toContain('3011');
     });
   });
 });

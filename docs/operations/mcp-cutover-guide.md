@@ -50,7 +50,7 @@ Ensure the following environment variables are set in `forgeos-server/.env`:
 
 ```env
 DATABASE_URL=postgresql://forgeos:password@localhost:5432/forgeos
-PORT=3000
+PORT=3011
 NODE_ENV=development
 ADMIN_API_KEY=<your-admin-key>
 DEFAULT_LEASE_MINUTES=30
@@ -67,7 +67,7 @@ Ensure no agents are running and no tickets are in-flight.
 
 ```bash
 # Check for active claims
-curl -s http://localhost:3000/api/tickets?status=CLAIMED \
+curl -s http://localhost:3011/api/tickets?status=CLAIMED \
   -H "Authorization: Bearer $ADMIN_API_KEY" | jq '.total_count'
 ```
 
@@ -75,7 +75,7 @@ If the count is not zero, wait for active work to complete or release
 stale claims:
 
 ```bash
-curl -X POST http://localhost:3000/api/admin/release-expired \
+curl -X POST http://localhost:3011/api/admin/release-expired \
   -H "Authorization: Bearer $ADMIN_API_KEY"
 ```
 
@@ -131,7 +131,7 @@ Migration complete:
 psql -c "SELECT stage, COUNT(*) FROM tickets GROUP BY stage ORDER BY stage;"
 
 # Verify a specific ticket
-curl -s http://localhost:3000/mcp \
+curl -s http://localhost:3011/mcp \
   -H "Content-Type: application/json" \
   -d '{"method":"tickets.get","params":{"ticket_id":"TASK-INT-BE011"}}' \
   | jq '.result.ticket.title'
@@ -153,7 +153,7 @@ Launch a test agent to verify MCP connectivity:
 ```python
 from forgeos_sdk import ForgeOSClient, TicketOperations
 
-async with ForgeOSClient("http://localhost:3000/mcp") as client:
+async with ForgeOSClient("http://localhost:3011/mcp") as client:
     ops = TicketOperations(client)
     tickets = await ops.tickets_list(stage="READY", limit=5)
     print(f"Found {tickets.total} READY tickets")
@@ -297,7 +297,7 @@ The handler:
 ## 5. Orchestrator Configuration
 
 The ForgeOS orchestrator is a persistent polling loop that replaces the
-stateless Ticketer dispatcher.
+stateless ForgeOS dispatcher.
 
 **Source:** `forgeos-server/src/services/orchestrator.ts`
 
@@ -306,7 +306,7 @@ stateless Ticketer dispatcher.
 | Variable | Type | Default | Description |
 |----------|------|---------|-------------|
 | `DATABASE_URL` | `string` | — | PostgreSQL connection string (required) |
-| `PORT` | `number` | `3000` | HTTP server port |
+| `PORT` | `number` | `3011` | HTTP server port |
 | `NODE_ENV` | `string` | `development` | Environment (`development`, `production`, `test`) |
 | `LOG_LEVEL` | `string` | `info` | Log level (`trace`, `debug`, `info`, `warn`, `error`) |
 | `ADMIN_API_KEY` | `string` | — | Admin API key (min 8 characters; change default in production) |
@@ -395,7 +395,7 @@ Calls `tickets.get` MCP tool. Returns a `Ticket` with full detail.
 ```python
 from forgeos_sdk import ForgeOSClient, TicketOperations
 
-async with ForgeOSClient("http://localhost:3000/mcp") as client:
+async with ForgeOSClient("http://localhost:3011/mcp") as client:
     ops = TicketOperations(client)
     ticket = await ops.tickets_get("TASK-INT-BE011")
     print(ticket.title, ticket.stage, ticket.status)
@@ -466,7 +466,7 @@ Run through this list after migration to confirm successful cutover.
 | 1 | Ticket count matches | `psql -c "SELECT COUNT(*) FROM tickets;"` vs `.github/tickets/*.json` count |
 | 2 | Stage distribution matches | `psql -c "SELECT stage, COUNT(*) FROM tickets GROUP BY stage;"` |
 | 3 | Event history present | `psql -c "SELECT COUNT(*) FROM events;"` (should be > 0) |
-| 4 | MCP server responds | `curl http://localhost:3000/health` |
+| 4 | MCP server responds | `curl http://localhost:3011/health` |
 | 5 | tickets.get works | Call via MCP and verify ticket data |
 | 6 | tickets.list works | Call with `stage=READY` filter |
 | 7 | tickets.payload works | Call with a known ticket ID |
@@ -543,7 +543,7 @@ pg_isready -h localhost -p 5432
 Check the server is running and accessible:
 
 ```bash
-curl -s http://localhost:3000/health | jq .
+curl -s http://localhost:3011/health | jq .
 ```
 
 Verify the agent's MCP URL configuration matches the server address.
@@ -559,7 +559,7 @@ psql -c "SELECT status, COUNT(*) FROM tickets GROUP BY status;"
 If tickets show `CLAIMED` with expired leases, release them:
 
 ```bash
-curl -X POST http://localhost:3000/api/admin/release-expired \
+curl -X POST http://localhost:3011/api/admin/release-expired \
   -H "Authorization: Bearer $ADMIN_API_KEY"
 ```
 

@@ -3,7 +3,7 @@
  *
  * Validates:
  * - Zod schema covers all .env.example variables
- * - Default values match acceptance criteria (PORT=3000, LOG_LEVEL=info, etc.)
+ * - Default values match acceptance criteria (PORT=3011, LOG_LEVEL=info, etc.)
  * - Validation rejects invalid values (bad URLs, out-of-range ports, bad enums)
  * - loadConfig() returns a typed AppConfig on valid input
  * - loadConfig() throws descriptive errors on invalid input
@@ -74,7 +74,7 @@ describe('Config module — Zod schema', () => {
 
     expect(config).toBeDefined();
     expect(config.DATABASE_URL).toBe('postgresql://user:pass@localhost:5432/db');
-    expect(config.PORT).toBe(3000);
+    expect(config.PORT).toBe(3011);
     // vitest sets NODE_ENV=test, so default 'development' won't appear here
     expect(['development', 'test', 'production']).toContain(config.NODE_ENV);
     expect(config.LOG_LEVEL).toBe('info');
@@ -92,10 +92,10 @@ describe('Config module — Zod schema', () => {
       process.env['DATABASE_URL'] = 'postgresql://u:p@localhost:5432/db';
     });
 
-    it('PORT defaults to 3000', async () => {
+    it('PORT defaults to 3011', async () => {
       delete process.env['PORT'];
       const loadConfig = await importLoadConfig();
-      expect(loadConfig().PORT).toBe(3000);
+      expect(loadConfig().PORT).toBe(3011);
     });
 
     it('NODE_ENV defaults to development', async () => {
@@ -684,8 +684,8 @@ describe('Dockerfile best practices', () => {
     expect(dockerContent).toContain('/health');
   });
 
-  it('exposes port 3000', () => {
-    expect(dockerContent).toMatch(/EXPOSE\s+3000/);
+  it('exposes port 3011', () => {
+    expect(dockerContent).toMatch(/EXPOSE\s+3011/);
   });
 
   it('uses node (not npm) as CMD entrypoint for signal handling', () => {
@@ -739,7 +739,7 @@ describe('docker-compose.yml service orchestration', () => {
   });
 
   it('server has healthcheck hitting /health', () => {
-    expect(composeContent).toContain('http://localhost:3000/health');
+    expect(composeContent).toContain('http://localhost:3011/health');
   });
 
   it('exposes postgres port with env var override', () => {
@@ -747,7 +747,7 @@ describe('docker-compose.yml service orchestration', () => {
   });
 
   it('exposes server port with env var override', () => {
-    expect(composeContent).toMatch(/PORT.*3000/);
+    expect(composeContent).toMatch(/PORT.*3011/);
   });
 
   it('defines persistent pgdata volume', () => {

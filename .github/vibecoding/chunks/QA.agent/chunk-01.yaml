@@ -369,7 +369,7 @@ const config: PlaywrightTestConfig = {
     ['junit', { outputFile: 'test-results/junit.xml' }],
   ],
   use: {
-    baseURL: process.env.BASE_URL || 'http://localhost:3000',
+    baseURL: process.env.BASE_URL || 'http://localhost:3011',
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -383,7 +383,7 @@ const config: PlaywrightTestConfig = {
   ],
   webServer: {
     command: 'npm run start',
-    port: 3000,
+    port: 3011,
     reuseExistingServer: !process.env.CI,
   },
 };

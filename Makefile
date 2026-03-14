@@ -63,7 +63,7 @@ help: ## Show this help text
 up: ## Start all services in development mode (detached)
 	@printf "$(GREEN)▶ Starting ForgeOS services …$(RESET)\n"
 	$(COMPOSE) up -d --build
-	@printf "$(GREEN)✔ Services running. MCP server → http://localhost:3000  pgAdmin → http://localhost:5050$(RESET)\n"
+	@printf "$(GREEN)✔ Services running. MCP server → http://localhost:3011  pgAdmin → http://localhost:5050$(RESET)\n"
 
 .PHONY: down
 down: ## Stop and remove containers (preserves volumes)

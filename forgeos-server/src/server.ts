@@ -180,7 +180,7 @@ export async function startNotifyListener(): Promise<void> {
         startNotifyListener().catch((e) =>
           logger.error({ err: e }, 'Failed to restart NOTIFY listener'),
         );
-      }, 3000);
+      }, 3011);
     });
   } catch (err) {
     client.release();

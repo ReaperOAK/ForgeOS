@@ -48,12 +48,12 @@ services:
       dockerfile: Dockerfile
     environment:
       DATABASE_URL: postgresql://forgeos:forgeos_dev@postgres:5432/forgeos
-      PORT: ${PORT:-3000}
+      PORT: ${PORT:-3011}
       NODE_ENV: development
       ADMIN_API_KEY: ${ADMIN_API_KEY:-forgeos-dev-key}
       POSTGRES_PORT: ${POSTGRES_PORT:-5432}
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:3000/health" ]
+      test: [ "CMD", "curl", "-f", "http://localhost:3011/health" ]
       interval: 15s
       retries: 3
       start_period: 10s
@@ -63,7 +63,7 @@ services:
       pgbouncer:
         condition: service_started
     ports:
-      - "${PORT:-3000}:3000"
+      - "${PORT:-3011}:3011"
     volumes:
       - ../:/workspace:ro
     restart: unless-stopped

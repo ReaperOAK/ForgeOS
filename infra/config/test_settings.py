@@ -130,17 +130,17 @@ class TestEnvRequired:
 class TestEnvInt:
     def test_reads_int(self):
         with mock.patch.dict(os.environ, {"PORT": "8080"}):
-            assert _env_int("PORT", 3000) == 8080
+            assert _env_int("PORT", 3011) == 8080
 
     def test_default(self):
-        assert _env_int("PORT", 3000) == 3000
+        assert _env_int("PORT", 3011) == 3011
 
     def test_invalid_raises(self):
         with mock.patch.dict(os.environ, {"PORT": "abc"}):
             with pytest.raises(
                 ConfigValidationError, match="integer",
             ):
-                _env_int("PORT", 3000)
+                _env_int("PORT", 3011)
 
 
 class TestEnvFloat:

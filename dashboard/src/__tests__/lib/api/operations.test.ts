@@ -19,7 +19,7 @@ global.fetch = mockFetch;
 
 // Mock apiClient.getBaseUrl()
 jest.mock('@/lib/api/client', () => ({
-    apiClient: { getBaseUrl: () => 'http://localhost:3000' },
+    apiClient: { getBaseUrl: () => 'http://localhost:3011' },
     isApiError: (e: unknown) =>
         typeof e === 'object' &&
         e !== null &&
@@ -71,7 +71,7 @@ describe('claimTicket', () => {
         const result = await claimTicket(req);
 
         expect(mockFetch).toHaveBeenCalledWith(
-            'http://localhost:3000/api/tickets/FORGEOS-TEST-1/claim',
+            'http://localhost:3011/api/tickets/FORGEOS-TEST-1/claim',
             expect.objectContaining({
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -102,7 +102,7 @@ describe('claimTicket', () => {
         await claimTicket({ ...req, ticketId: 'TEST/SPECIAL' });
 
         expect(mockFetch).toHaveBeenCalledWith(
-            'http://localhost:3000/api/tickets/TEST%2FSPECIAL/claim',
+            'http://localhost:3011/api/tickets/TEST%2FSPECIAL/claim',
             expect.anything(),
         );
     });
@@ -118,7 +118,7 @@ describe('releaseTicket', () => {
         const result = await releaseTicket(req);
 
         expect(mockFetch).toHaveBeenCalledWith(
-            'http://localhost:3000/api/tickets/FORGEOS-TEST-1/release',
+            'http://localhost:3011/api/tickets/FORGEOS-TEST-1/release',
             expect.objectContaining({
                 method: 'POST',
                 body: JSON.stringify({}),
@@ -145,7 +145,7 @@ describe('advanceTicket', () => {
         const result = await advanceTicket(req);
 
         expect(mockFetch).toHaveBeenCalledWith(
-            'http://localhost:3000/api/tickets/FORGEOS-TEST-1/advance',
+            'http://localhost:3011/api/tickets/FORGEOS-TEST-1/advance',
             expect.objectContaining({
                 method: 'POST',
                 body: JSON.stringify({ evidence: 'All tests pass' }),
@@ -175,7 +175,7 @@ describe('forceReleaseTicket', () => {
         const result = await forceReleaseTicket(req);
 
         expect(mockFetch).toHaveBeenCalledWith(
-            'http://localhost:3000/api/tickets/FORGEOS-TEST-1/force-release',
+            'http://localhost:3011/api/tickets/FORGEOS-TEST-1/force-release',
             expect.objectContaining({
                 method: 'POST',
                 body: JSON.stringify({ reason: 'Operator unresponsive for 2 hours' }),

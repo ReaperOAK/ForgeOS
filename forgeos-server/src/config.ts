@@ -29,7 +29,7 @@ if (!process.env.VITEST && process.env.NODE_ENV !== 'test') {
  */
 const configSchema = z.object({
   DATABASE_URL: z.string().url().startsWith('postgresql://'),
-  PORT: z.coerce.number().int().min(1).max(65535).default(3000),
+  PORT: z.coerce.number().int().min(1).max(65535).default(3011),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
   LOG_LEVEL: z.enum(['trace', 'debug', 'info', 'warn', 'error', 'fatal']).default('info'),
   ADMIN_API_KEY: z.string().min(8).default('forgeos_admin_CHANGE_ME'),
@@ -84,7 +84,7 @@ export type AppConfig = z.infer<typeof configSchema>;
  * import { loadConfig, AppConfig } from './config';
  *
  * const cfg: AppConfig = loadConfig();
- * logger.info(cfg.PORT);       // 3000 (default)
+ * logger.info(cfg.PORT);       // 3011 (default)
  * logger.info(cfg.NODE_ENV);    // 'development' (default)
  * ```
  */

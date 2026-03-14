@@ -1335,7 +1335,7 @@ jobs:
         working-directory: forgeos-server
         run: |
           k6 run load-tests/k6-claim-latency.js \
-            --env MCP_URL=http://localhost:3000 \
+            --env MCP_URL=http://localhost:3011 \
             --env API_KEY=${{ secrets.TEST_API_KEY || 'forgeos_admin_CHANGE_ME' }} \
             --out json=latency-results.json
         continue-on-error: true  # Non-blocking
@@ -1376,7 +1376,7 @@ jobs:
       - name: Wait for healthy
         run: |
           for i in $(seq 1 30); do
-            curl -sf http://localhost:3000/health && break || sleep 2
+            curl -sf http://localhost:3011/health && break || sleep 2
           done
 
       - name: Install k6
@@ -1386,7 +1386,7 @@ jobs:
         working-directory: forgeos-server
         run: |
           k6 run load-tests/k6-mixed-workload.js \
-            --env MCP_URL=http://localhost:3000 \
+            --env MCP_URL=http://localhost:3011 \
             --env API_KEY=forgeos_admin_CHANGE_ME \
             --out json=nightly-results.json
 
@@ -1427,7 +1427,7 @@ jobs:
 
       - name: FF-11 — Zero-downtime migration soak
         working-directory: forgeos-server
-        run: k6 run load-tests/k6-migration-soak.js --env MCP_URL=http://localhost:3000
+        run: k6 run load-tests/k6-migration-soak.js --env MCP_URL=http://localhost:3011
 
       - name: FF-16 — Memory stability check
         run: |

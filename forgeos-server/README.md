@@ -33,7 +33,7 @@ npm run migrate
 npm run dev
 ```
 
-The server starts on `http://localhost:3000` by default.
+The server starts on `http://localhost:3011` by default.
 
 ## npm Scripts
 
@@ -133,7 +133,7 @@ invalid configuration.
 | Variable                 | Required | Default               | Description                                  |
 |--------------------------|----------|-----------------------|----------------------------------------------|
 | `DATABASE_URL`           | Yes      | —                     | PostgreSQL connection string (`postgresql://…`) |
-| `PORT`                   | No       | `3000`                | HTTP listen port                             |
+| `PORT`                   | No       | `3011`                | HTTP listen port                             |
 | `NODE_ENV`               | No       | `development`         | `development`, `production`, or `test`       |
 | `LOG_LEVEL`              | No       | `info`                | Pino log level (`trace`–`fatal`)             |
 | `ADMIN_API_KEY`          | No       | `forgeos_admin_CHANGE_ME` | Admin API key (change in production)     |
@@ -1251,7 +1251,7 @@ All values are read from environment variables and validated with Zod on first u
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `FORGEOS_MCP_URL` | `http://localhost:3000/mcp` | MCP server endpoint |
+| `FORGEOS_MCP_URL` | `http://localhost:3011/mcp` | MCP server endpoint |
 | `FORGEOS_API_KEY` | *(required)* | Bearer token for MCP auth |
 | `FORGEOS_FALLBACK_ENABLED` | `true` | Enable `tickets.py` CLI fallback |
 | `FORGEOS_TICKETS_PY_PATH` | `.github/tickets.py` | Path to CLI script |
@@ -1338,7 +1338,7 @@ changes to files outside the ticket boundary.
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `FORGEOS_TICKET_ID` | — | Override ticket ID (skips commit-message parsing) |
-| `FORGEOS_MCP_URL` | `http://localhost:3000` | MCP server base URL for scope lookup |
+| `FORGEOS_MCP_URL` | `http://localhost:3011` | MCP server base URL for scope lookup |
 | `FORGEOS_CURL_TIMEOUT` | `5` | Seconds before the API request times out |
 
 #### Bypass
@@ -1562,14 +1562,14 @@ docker build -t forgeos-server .
 ```bash
 docker run -d \
   --name forgeos \
-  -p 3000:3000 \
+  -p 3011:3011 \
   -e DATABASE_URL="postgresql://user:pass@host:5432/forgeos" \
   -e ADMIN_API_KEY="<your-admin-key>" \
   -e WEBHOOK_SECRET="<your-webhook-secret>" \
   forgeos-server
 ```
 
-The container exposes port **3000** and includes a built-in health check that
+The container exposes port **3011** and includes a built-in health check that
 probes `/health` every 30 seconds (`HEALTHCHECK` instruction). Orchestrators
 such as Docker Compose, Kubernetes, or ECS use this signal to detect and
 restart unhealthy containers automatically.
@@ -1581,7 +1581,7 @@ restart unhealthy containers automatically.
 | Base image | `node:22-alpine` (builder and runtime) |
 | Build tool | `npm ci` for reproducible installs |
 | Runtime user | `node` (non-root) |
-| Health check | `curl -f http://localhost:3000/health` every 30 s |
+| Health check | `curl -f http://localhost:3011/health` every 30 s |
 | Entry point | `node dist/index.js` |
 | Expected size | < 200 MB |
 
@@ -1630,7 +1630,7 @@ docker compose down -v
 |---------|-------|------|-------------|
 | `postgres` | `postgres:17-alpine` | 5432 (internal) | Primary database with healthcheck and persistent storage |
 | `pgbouncer` | `edoburu/pgbouncer` | 6432 (host-mapped) | Connection pooler in transaction mode |
-| `mcp-server` | Built from local `Dockerfile` | 3000 (internal) | ForgeOS MCP server |
+| `mcp-server` | Built from local `Dockerfile` | 3011 (internal) | ForgeOS MCP server |
 
 #### Service details
 
@@ -1692,7 +1692,7 @@ default placeholder value must be changed in production.
 | `pgbouncer` | `DEFAULT_POOL_SIZE` | `50` |
 | `pgbouncer` | `MAX_CLIENT_CONN` | `200` |
 | `mcp-server` | `DATABASE_URL` | `postgresql://forgeos:…@pgbouncer:6432/forgeos` |
-| `mcp-server` | `PORT` | `3000` |
+| `mcp-server` | `PORT` | `3011` |
 | `mcp-server` | `NODE_ENV` | `production` |
 
 ## TypeScript Configuration

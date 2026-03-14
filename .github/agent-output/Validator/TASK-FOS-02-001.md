@@ -34,7 +34,7 @@
 | AC2 | Dev deps: typescript, @types/express, @types/pg, tsx | ✅ | All present in devDependencies. |
 | AC3 | Scripts: build, dev, start, migrate, seed, import | ⚠️ | build, dev, start, migrate present. `seed` and `import` missing — deferred to database ticket scope. |
 | AC4 | tsconfig: strict, ES2022, NodeNext, outDir dist, rootDir src | ✅ | All verified in tsconfig.json. Plus noUncheckedIndexedAccess, noImplicitReturns, noFallthroughCasesInSwitch, noUnusedLocals, noUnusedParameters. |
-| AC5 | index.ts boots Express, creates MCP from factory, PORT default 3000 | ✅ | `createApp(config)` + `app.listen(config.PORT)`, PORT defaults to 3000 via Zod schema. |
+| AC5 | index.ts boots Express, creates MCP from factory, PORT default 3011 | ✅ | `createApp(config)` + `app.listen(config.PORT)`, PORT defaults to 3011 via Zod schema. |
 | AC6 | Streamable HTTP transport with session management | ⚠️ | Uses `sessionIdGenerator: undefined` (stateless). Security review endorsed this as deliberate: "avoids session management complexity." |
 | AC7 | GET /health returns {status, uptime, timestamp} | ⚠️ | Returns `{status, timestamp}` — missing `uptime` field. Includes DB health check (AC said "added later"). |
 | AC8 | Graceful shutdown on SIGTERM/SIGINT | ✅ | Both signal handlers present. Drains HTTP server, closes DB pool, 10s force-exit timeout. |

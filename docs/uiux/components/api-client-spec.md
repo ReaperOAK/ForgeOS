@@ -373,7 +373,7 @@ export interface ApiClientConfig {
 
 ```typescript
 const DEFAULT_CONFIG: ApiClientConfig = {
-  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000',
+  baseUrl: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3011',
   timeout: 10_000,
   headers: {
     'Content-Type': 'application/json',

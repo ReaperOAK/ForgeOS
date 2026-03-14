@@ -44,11 +44,11 @@ ENV NODE_ENV=production
 # Drop privileges — run the server as the built-in non-root "node" user.
 USER node
 
-EXPOSE 3000
+EXPOSE 3011
 
 # Probe the /health endpoint every 30 s. The container is marked unhealthy
 # after 3 consecutive failures, giving orchestrators a signal to restart it.
 HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 \
-    CMD curl -f http://localhost:3000/health || exit 1
+    CMD curl -f http://localhost:3011/health || exit 1
 
 CMD ["node", "dist/index.js"]

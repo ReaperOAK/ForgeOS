@@ -865,7 +865,7 @@ Then the commit is accepted
 | **Description** | Initialize the ForgeOS MCP server using `@modelcontextprotocol/server` with Streamable HTTP transport via Express. Register health endpoint, configure session management, and set up structured logging. |
 | **Type** | backend |
 | **Priority** | critical |
-| **Acceptance Criteria** | 1. MCP server starts and accepts connections on port 3000. 2. Health endpoint returns `{status: "ok"}`. 3. Session management with `mcp-session-id` header works. 4. Structured JSON logging with correlation IDs. 5. Graceful shutdown drains in-flight requests. |
+| **Acceptance Criteria** | 1. MCP server starts and accepts connections on port 3011. 2. Health endpoint returns `{status: "ok"}`. 3. Session management with `mcp-session-id` header works. 4. Structured JSON logging with correlation IDs. 5. Graceful shutdown drains in-flight requests. |
 | **File Paths** | `src/mcp/server.ts`, `src/mcp/transport.ts`, `src/mcp/health.ts`, `src/logging/logger.ts`, `src/index.ts` |
 | **Dependencies** | TASK-03 (Database must be available for health check) |
 

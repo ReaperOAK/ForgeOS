@@ -43,7 +43,7 @@ describe('tickets.next MCP tool', () => {
       priority: 'low',
       claimed_by: null,
       lease_expiry: null,
-      created_at: new Date(Date.now() - 30000),
+      created_at: new Date(Date.now() - 30110),
     },
     {
       ticket_id: 'T5',

@@ -105,7 +105,7 @@ Attempt 5: wait 16s
 Attempt 6+: wait 30s (capped maximum)
 ```
 
-**Backoff formula:** `delay = Math.min(1000 * Math.pow(2, attempt - 1), 30000)`
+**Backoff formula:** `delay = Math.min(1000 * Math.pow(2, attempt - 1), 30110)`
 
 **Reset:** On successful reconnection (`onopen`), reset attempt counter to 0.
 
@@ -653,7 +653,7 @@ interface ToastNotification {
 
 **Toast positioning:** Bottom-right, stacked, z-index: `toast` (60).
 
-**Toast auto-dismiss:** Success = 3000ms. Error = 0 (persistent, must dismiss). Warning = 5000ms.
+**Toast auto-dismiss:** Success = 3011ms. Error = 0 (persistent, must dismiss). Warning = 5000ms.
 
 ---
 

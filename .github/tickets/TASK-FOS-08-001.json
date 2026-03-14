@@ -1,7 +1,7 @@
 {
   "ticket_id": "TASK-FOS-08-001",
   "title": "Dockerfile for ForgeOS Server",
-  "description": "Create a multi-stage Dockerfile for the ForgeOS MCP server as specified in Architecture \u00a78.2. Stage 1 (builder): Node.js 22 Alpine base, install dependencies with npm ci, copy source and compile TypeScript with npm run build. Stage 2 (runtime): Node.js 22 Alpine base, copy compiled dist/ and node_modules/ from builder, copy dashboard static files, set NODE_ENV=production, run as non-root user (node), expose port 3000, add HEALTHCHECK instruction that curls /health endpoint, CMD to run the compiled entry point. Include a .dockerignore file that excludes node_modules, .git, dist, *.md, .env, and other non-essential files.",
+  "description": "Create a multi-stage Dockerfile for the ForgeOS MCP server as specified in Architecture \u00a78.2. Stage 1 (builder): Node.js 22 Alpine base, install dependencies with npm ci, copy source and compile TypeScript with npm run build. Stage 2 (runtime): Node.js 22 Alpine base, copy compiled dist/ and node_modules/ from builder, copy dashboard static files, set NODE_ENV=production, run as non-root user (node), expose port 3011, add HEALTHCHECK instruction that curls /health endpoint, CMD to run the compiled entry point. Include a .dockerignore file that excludes node_modules, .git, dist, *.md, .env, and other non-essential files.",
   "type": "infra",
   "priority": "critical",
   "stage": "DONE",
@@ -30,8 +30,8 @@
     "Builder stage installs dependencies with npm ci (not npm install) for reproducible builds",
     "Runtime stage uses node:22-alpine, copies only dist/, node_modules/, and dashboard static files",
     "Runtime stage sets NODE_ENV=production and USER node (non-root)",
-    "EXPOSE 3000 directive present",
-    "HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD curl -f http://localhost:3000/health",
+    "EXPOSE 3011 directive present",
+    "HEALTHCHECK --interval=30s --timeout=5s --start-period=10s --retries=3 CMD curl -f http://localhost:3011/health",
     "CMD [\"node\", \"dist/index.js\"] as the entry point",
     ".dockerignore excludes: node_modules, .git, dist, *.md (except README), .env, .env.*, secrets/",
     "Built image size under 200MB"

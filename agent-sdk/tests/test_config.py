@@ -104,7 +104,7 @@ class TestSDKConfigFromEnv:
 
     def test_all_env_vars_together(self) -> None:
         env = {
-            "FORGEOS_SERVER_URL": "http://custom:3000/mcp",
+            "FORGEOS_SERVER_URL": "http://custom:3011/mcp",
             "FORGEOS_AGENT_ID": "QA",
             "FORGEOS_TRANSPORT": "streamable-http",
             "FORGEOS_API_KEY": "my-api-key",
@@ -113,7 +113,7 @@ class TestSDKConfigFromEnv:
             config = SDKConfig(
                 _env_file=None,  # type: ignore[call-arg]
             )
-        assert config.server_url == "http://custom:3000/mcp"
+        assert config.server_url == "http://custom:3011/mcp"
         assert config.agent_id == "QA"
         assert config.transport == TransportType.STREAMABLE_HTTP
         assert config.api_key == "my-api-key"

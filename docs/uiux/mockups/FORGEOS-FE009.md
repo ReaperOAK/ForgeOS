@@ -83,7 +83,7 @@ All tokens from [`docs/uiux/design-tokens.json`](../design-tokens.json). No new 
 | Input label | Inter | `sm` (0.875rem) | 500 | "Reason", "Evidence" labels |
 | Input text | Inter | `sm` (0.875rem) | 400 | User input |
 | Validation error | Inter | `xs` (0.75rem) | 500 | Inline error messages |
-| Auth status | Inter | `sm` (0.875rem) | 500 | "Ticketer", "Authenticated as operator" |
+| Auth status | Inter | `sm` (0.875rem) | 500 | "ForgeOS dispatcher", "Authenticated as operator" |
 | Danger badge | Inter | `xs` (0.75rem) | 600 | "DANGER" badge on Force Release |
 
 ---
@@ -150,7 +150,7 @@ interface ActionResult {
 │  │ [BLUE left accent]       │ [RED left accent]         │     │
 │  └──────────────────────────┴──────────────────────────┘     │
 │                                                               │
-│  🟢 Ticketer ✓  Authenticated as operator                   │
+│  🟢 ForgeOS dispatcher ✓  Authenticated as operator                   │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -169,7 +169,7 @@ Grid container: `grid grid-cols-1 md:grid-cols-2 gap-3`
 
 ```
 ┌────────────────────────────────┐
-│ 🟢 Ticketer ✓                 │
+│ 🟢 ForgeOS dispatcher ✓                 │
 │ Authenticated as operator      │
 ├────────────────────────────────┤
 │ ✋ Claim Ticket                 │
@@ -533,7 +533,7 @@ Position: `fixed top-4 right-4 z-toast` (z-index: 60). Auto-dismiss after 5s.
 │  │ SDLC stage              │ operator's claim          │     │
 │  └──────────────────────────┴──────────────────────────┘     │
 │                                                              │
-│  🟢 Ticketer ✓  Authenticated as operator                   │
+│  🟢 ForgeOS dispatcher ✓  Authenticated as operator                   │
 │                                                              │
 └──────────────────────────────────────────────────────────────┘
 ```
@@ -544,7 +544,7 @@ Position: `fixed top-4 right-4 z-toast` (z-index: 60). Auto-dismiss after 5s.
 ┌────────────────────────────────┐
 │ ☰  ForgeOS Dashboard    🟢    │
 ├────────────────────────────────┤
-│ 🟢 Ticketer ✓ Authenticated  │
+│ 🟢 ForgeOS dispatcher ✓ Authenticated  │
 ├────────────────────────────────┤
 │ ✋ Claim Ticket                │
 │ Acquire lease on unclaimed... │

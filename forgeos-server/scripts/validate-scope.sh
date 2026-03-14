@@ -19,7 +19,7 @@
 #   - Empty file_paths       → WARNING, allow commit
 #
 # Environment variables:
-#   FORGEOS_MCP_URL        — MCP server base URL (default: http://localhost:3000)
+#   FORGEOS_MCP_URL        — MCP server base URL (default: http://localhost:3011)
 #   FORGEOS_TICKET_ID      — Explicit ticket ID override
 #   FORGEOS_CURL_TIMEOUT   — API request timeout in seconds (default: 5)
 #
@@ -33,7 +33,7 @@ set -euo pipefail
 # ─── Configuration ────────────────────────────────────
 
 # MCP server base URL (override via env)
-MCP_URL="${FORGEOS_MCP_URL:-http://localhost:3000}"
+MCP_URL="${FORGEOS_MCP_URL:-http://localhost:3011}"
 
 # Timeout for API requests (seconds)
 CURL_TIMEOUT="${FORGEOS_CURL_TIMEOUT:-5}"

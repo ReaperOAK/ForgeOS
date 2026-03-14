@@ -142,12 +142,12 @@ The system has never been run end-to-end. The code quality is generally good —
 
 | Component | Port | Source |
 |-----------|------|--------|
-| TypeScript MCP Server | 3000 | `forgeos-server/.env.example`: `PORT=3000` |
+| TypeScript MCP Server | 3011 | `forgeos-server/.env.example`: `PORT=3011` |
 | Python MCP Server | 8080 | `mcp-server/src/mcp_server/server.py`: `port: int = 8080` |
 | Agent SDK default | 8080 | `agent-sdk/src/forgeos_sdk/config.py`: `server_url="http://localhost:8080/mcp"` |
-| Docker infra | 3000 | `infra/docker-compose.yml`: `"3000:3000"` |
+| Docker infra | 3011 | `infra/docker-compose.yml`: `"3011:3011"` |
 
-- **Issue:** The Agent SDK defaults to port 8080 (Python server), but the Docker infrastructure deploys the TypeScript server on port 3000. If an agent connects without explicit configuration, it connects to the wrong server (or nothing at all).
+- **Issue:** The Agent SDK defaults to port 8080 (Python server), but the Docker infrastructure deploys the TypeScript server on port 3011. If an agent connects without explicit configuration, it connects to the wrong server (or nothing at all).
 - **Impact:** MEDIUM — Agents must set `FORGEOS_SERVER_URL` explicitly.
 
 ### 4.2 Two Servers, Different Tool Sets
@@ -294,7 +294,7 @@ The system has never been run end-to-end. The code quality is generally good —
 ### 8.1 Default Server URL Points to Python Server
 
 - **File:** [agent-sdk/src/forgeos_sdk/config.py](agent-sdk/src/forgeos_sdk/config.py): `server_url: str = "http://localhost:8080/mcp"`
-- **Issue:** Defaults to Python server port (8080), but Docker infrastructure deploys TypeScript server on port 3000.
+- **Issue:** Defaults to Python server port (8080), but Docker infrastructure deploys TypeScript server on port 3011.
 - **Fix:** Either align the ports or document that `FORGEOS_SERVER_URL` must be explicitly set.
 
 ### 8.2 Tool Name Mismatch with Servers

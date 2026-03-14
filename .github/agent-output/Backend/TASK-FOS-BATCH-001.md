@@ -94,8 +94,8 @@ docker compose up -d postgres    # Start PostgreSQL
 cp .env.example .env             # Configure environment
 npm run migrate                  # Apply DDL
 npm run dev                      # Start dev server
-# Open http://localhost:3000/health
-# Open http://localhost:3000/dashboard
+# Open http://localhost:3011/health
+# Open http://localhost:3011/dashboard
 ```
 
 ## Acceptance Criteria Coverage

@@ -232,7 +232,7 @@ _None_
 | SEC-001 | Medium | `withErrorHandling()` in error-handler.ts returns raw `err.message` to MCP clients regardless of NODE_ENV. PG errors could leak schema/table/constraint names via MCP transport (CWE-209). | Risk Accepted | MCP is a machine-to-machine protocol used by authenticated AI agents. Auth enforcement (TASK-FOS-04) will restrict MCP access. Recommend applying `isProduction` guard in future hardening pass. |
 | SEC-002 | Low | No length/format validation on `X-Request-ID` header. Accepts any non-empty string (CWE-20). | Risk Accepted | Node.js HTTP parser limits total headers to ~16KB. ID used for log correlation only, never for authorization. Industry standard practice. |
 | SEC-003 | Low | Validation middleware does not log validation failures server-side (CWE-778). | Risk Accepted | 400 status code is captured by request-level logging middleware. Validation failures are expected in normal operation. |
-| SEC-DO001-006 | Low | All service ports (5432, 3000, 5050) bind to 0.0.0.0 — accessible from LAN (CWE-668) | Risk Accepted | Standard local dev pattern; production should bind to 127.0.0.1 or use reverse proxy |
+| SEC-DO001-006 | Low | All service ports (5432, 3011, 5050) bind to 0.0.0.0 — accessible from LAN (CWE-668) | Risk Accepted | Standard local dev pattern; production should bind to 127.0.0.1 or use reverse proxy |
 
 ### [FORGEOS-DO002] — PostgreSQL Container Init Script Security Risks (2026-03-07T16:10:00Z)
 
@@ -420,7 +420,7 @@ Known sources list disclosed in `UnknownSourceError` details. Risk accepted — 
 | SEC-FE001-001 | MEDIUM | `next.config.js` does not configure security headers (CSP, X-Frame-Options, X-Content-Type-Options, HSTS, Referrer-Policy, Permissions-Policy). CWE-693, OWASP A05. STRIDE: Information Disclosure (Impact=2 × Likelihood=2 = 4). | Risk Accepted | Development scaffold. Security headers will be added in a dedicated hardening ticket before production deployment. |
 | SEC-FE001-002 | MEDIUM (downgraded from HIGH) | `npm audit` reports 4 HIGH findings: glob CLI command injection (devDependency only, unexploitable), next DoS via Image Optimizer (remotePatterns not configured), next HTTP deserialization DoS (RSC patterns not used). CWE-1395, OWASP A06. | Risk Accepted | None exploitable in current scaffold configuration. No non-breaking fix available (requires Next.js 16.x). Track for upgrade when adopted project-wide. |
 | SEC-FE001-003 | LOW | `dangerouslySetInnerHTML` in `layout.tsx` for anti-flash theme script. Hardcoded IIFE reads localStorage, calls `setAttribute('data-theme', value)`. CWE-79, OWASP A03. | Risk Accepted | Standard anti-flash pattern. Content is hardcoded string literal. `setAttribute` is not an XSS vector. `theme.tsx` validates runtime values. |
-| SEC-FE001-004 | LOW | `.env` file tracked in git. Contains `NEXT_PUBLIC_API_URL=http://localhost:3000` — public client-side variable. CWE-540. | Risk Accepted | Content is non-sensitive default dev config. `.env.local` is gitignored for actual overrides/secrets. |
+| SEC-FE001-004 | LOW | `.env` file tracked in git. Contains `NEXT_PUBLIC_API_URL=http://localhost:3011` — public client-side variable. CWE-540. | Risk Accepted | Content is non-sensitive default dev config. `.env.local` is gitignored for actual overrides/secrets. |
 
 - **Agent:** Security Engineer
 - **Timestamp:** 2026-03-11T10:10:00Z

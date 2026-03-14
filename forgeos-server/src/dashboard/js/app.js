@@ -71,9 +71,9 @@ const EVENT_DOT_COLORS = {
 };
 
 /** SSE backoff cap in ms */
-const SSE_BACKOFF_MAX = 30000;
+const SSE_BACKOFF_MAX = 30110;
 /** Threshold (ms since last successful message) before declaring disconnected */
-const SSE_DISCONNECT_THRESHOLD = 30000;
+const SSE_DISCONNECT_THRESHOLD = 30110;
 
 /* ═══════════════════════════════════════════════════════════
    HANDLER REGISTRY
@@ -339,7 +339,7 @@ function getClaimStatus(ticket) {
   const now = Date.now();
   const remaining = expiry - now;
   if (remaining <= 0) return 'expired';
-  if (remaining <= 300000) return 'expiring';
+  if (remaining <= 301100) return 'expiring';
   return 'claimed';
 }
 
@@ -2361,7 +2361,7 @@ const machinesDataDemo = [
   { hostname: 'pop-os', status: 'connected', agents: ['Backend', 'Frontend', 'Documentation'], claims: 3, maxClaims: 10, throughput: 7, maxThroughput: 20, lastHeartbeat: new Date(Date.now() - 5000) },
   { hostname: 'dev-server', status: 'connected', agents: ['Backend'], claims: 1, maxClaims: 10, throughput: 3, maxThroughput: 20, lastHeartbeat: new Date(Date.now() - 12000) },
   { hostname: 'ci-runner-01', status: 'reconnecting', agents: ['QA'], claims: 1, maxClaims: 10, throughput: 12, maxThroughput: 20, lastHeartbeat: new Date(Date.now() - 45000) },
-  { hostname: 'sec-box', status: 'disconnected', agents: [], claims: 0, maxClaims: 10, throughput: 0, maxThroughput: 20, lastHeartbeat: new Date(Date.now() - 300000) },
+  { hostname: 'sec-box', status: 'disconnected', agents: [], claims: 0, maxClaims: 10, throughput: 0, maxThroughput: 20, lastHeartbeat: new Date(Date.now() - 301100) },
 ];
 
 function initMachines() { renderMachines(machinesDataDemo); }

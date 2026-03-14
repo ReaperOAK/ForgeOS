@@ -11,7 +11,7 @@ description: Stage-based lifecycle, per-type flows, post-execution chain, rework
 RULE: Ticket state is stored in PostgreSQL and managed by the ForgeOS MCP Server.
 RULE: There are 11 possible stages. Each ticket type traverses a defined subset.
 RULE: Stage transitions are atomic database operations executed via MCP tools (`tickets.claim`, `tickets.complete`, `tickets.reject`).
-RULE: Ticketer dispatches subagents after claiming tickets via `tickets.claim`. Subagents advance or reject via `tickets.complete` / `tickets.reject`.
+RULE: ForgeOS dispatcher dispatches subagents after claiming tickets via `tickets.claim`. Subagents advance or reject via `tickets.complete` / `tickets.reject`.
 
 ### Available Stages
 
@@ -86,7 +86,7 @@ REQUIRED: Rejection payload for `tickets.reject`:
 
 ### Claiming a Ticket (`tickets.claim`)
 
-RULE: Ticketer (dispatcher) claims tickets via `tickets.claim` before launching subagents.
+RULE: ForgeOS dispatcher (dispatcher) claims tickets via `tickets.claim` before launching subagents.
 RULE: The MCP Server atomically acquires a database-level lock, validates the ticket is in READY state, sets claim metadata (`claimed_by`, `machine_id`, `lease_expiry`), and acquires file-level locks.
 RULE: Subagents NEVER call `tickets.claim` — they receive pre-claimed tickets.
 

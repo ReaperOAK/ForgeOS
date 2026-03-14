@@ -115,7 +115,7 @@ Deliver four phases of intelligence capabilities that make ForgeOS a self-aware,
 
 ### 4.1 P0: Phase 1 — MCP-Only Cutover (Burn the Boats)
 
-**Summary:** Permanently sever all agent dependencies on the filesystem for ticket state. Agents interact exclusively with the MCP server for ticket lifecycle operations. The ForgeOS orchestrator replaces the stateless Ticketer dispatcher.
+**Summary:** Permanently sever all agent dependencies on the filesystem for ticket state. Agents interact exclusively with the MCP server for ticket lifecycle operations. The ForgeOS orchestrator replaces the stateless ForgeOS dispatcher.
 
 | Feature ID | Feature | Description |
 |-----------|---------|-------------|
@@ -442,7 +442,7 @@ Phase 4 (Drop-In Init) ─────┴──► Requires Phase 2 (indexing) +
 | Filesystem ticket references | 73+ across 22 files | **0** | `grep -r "ticket-state" .github/agents/ .github/instructions/ agents.md \| wc -l` |
 | Agent boot reliability | Variable (stale JSON, race conditions) | **100%** (all agents boot via MCP) | MCP server logs: successful `tickets.get` calls / total dispatch |
 | Ticket state consistency | Dual (filesystem + DB can diverge) | **Single** (PostgreSQL only) | Architectural audit: zero filesystem state paths |
-| Orchestrator dispatch latency | N/A (manual Ticketer) | **< 10s** from READY to dispatched | Timer from `resolve_dependencies()` to agent launch |
+| Orchestrator dispatch latency | N/A (manual dispatcher) | **< 10s** from READY to dispatched | Timer from `resolve_dependencies()` to agent launch |
 
 ### 10.2 Phase 2 — Code Graph KPIs
 
@@ -516,7 +516,7 @@ Phase 4 (Drop-In Init) ─────┴──► Requires Phase 2 (indexing) +
 | **Incremental indexing** | Re-indexing only files whose content hash has changed since the last index run |
 | **Lesson** | A distilled first-principle insight extracted from a QA rejection→fix cycle, stored as text + vector embedding |
 | **MCP** | Model Context Protocol — the JSON-RPC protocol used for agent↔server communication |
-| **Orchestrator** | The ForgeOS orchestration loop that polls for READY tickets and dispatches agents (replaces the stateless Ticketer) |
+| **Orchestrator** | The ForgeOS orchestration loop that polls for READY tickets and dispatches agents (replaces the stateless dispatcher) |
 | **pgvector** | PostgreSQL extension for vector similarity search using HNSW and IVFFlat indexes |
 | **Reflection Protocol** | The automatic pipeline that fires when a reworked ticket reaches DONE, extracting and embedding a lesson |
 | **tree-sitter** | An incremental parsing system that builds concrete syntax trees for source files |

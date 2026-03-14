@@ -18,7 +18,7 @@ import type { SdkConfig } from './config.js';
 
 function makeConfig(overrides?: Partial<SdkConfig>): SdkConfig {
   return {
-    FORGEOS_MCP_URL: 'http://localhost:3000/mcp',
+    FORGEOS_MCP_URL: 'http://localhost:3011/mcp',
     FORGEOS_API_KEY: 'test-key',
     FORGEOS_FALLBACK_ENABLED: true,
     FORGEOS_TICKETS_PY_PATH: '.github/tickets.py',

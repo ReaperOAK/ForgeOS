@@ -49,13 +49,13 @@ Full specification in [mockup document](../mockups/FORGEOS-UID004.md#32-leasecou
 ```
 ┌─────────────────────────────────────────────────────────────────────────────┐
 │ NORMAL ROW                                                                  │
-│ FORGEOS-BE015  │ Backend  │ pop-os    │ Ticketer │ 🟢 24:15 │ [👁] [🔓]  │
+│ FORGEOS-BE015  │ Backend  │ pop-os    │ ForgeOS dispatcher │ 🟢 24:15 │ [👁] [🔓]  │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ WARNING ROW (yellow left border, warning bg tint)                           │
 │ FORGEOS-UID003 │ Frontend │ dev-serv  │ john_doe  │ 🟡 04:32 │ [👁] [🔓]  │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ CRITICAL ROW (red left border, critical bg tint)                            │
-│ TASK-FOS-002   │ QA       │ staging   │ Ticketer │ 🔴 00:45 │ [👁] [🔓]  │
+│ TASK-FOS-002   │ QA       │ staging   │ ForgeOS dispatcher │ 🔴 00:45 │ [👁] [🔓]  │
 ├─────────────────────────────────────────────────────────────────────────────┤
 │ EXPIRED ROW (red left border, dimmed opacity 0.8)                           │
 │ FORGEOS-RES003 │ Research │ pop-os    │ alice     │ ❌ EXPIRED│ [👁] [⚠🔓] │

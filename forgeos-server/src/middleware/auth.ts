@@ -41,6 +41,18 @@ import type { AgentIdentity } from '../types/index.js';
 /** Path prefixes exempt from authentication. */
 const publicPaths: readonly string[] = ['/health', '/dashboard', '/events'];
 
+/** Read-only dashboard API endpoints that are safe to expose without auth. */
+const dashboardPublicApiPaths: readonly string[] = [
+  '/api/health',
+  '/api/stages',
+  '/api/tickets',
+  '/api/events',
+  '/health',
+  '/stages',
+  '/tickets',
+  '/events',
+];
+
 /**
  * Check whether a request path is exempt from authentication.
  *
@@ -49,6 +61,19 @@ const publicPaths: readonly string[] = ['/health', '/dashboard', '/events'];
  */
 function isPublicPath(requestPath: string): boolean {
   return publicPaths.some(
+    (prefix) => requestPath === prefix || requestPath.startsWith(`${prefix}/`),
+  );
+}
+
+/**
+ * Check whether a request is a read-only dashboard API request.
+ */
+function isDashboardPublicApi(requestPath: string, method: string): boolean {
+  if (method !== 'GET') {
+    return false;
+  }
+
+  return dashboardPublicApiPaths.some(
     (prefix) => requestPath === prefix || requestPath.startsWith(`${prefix}/`),
   );
 }
@@ -135,8 +160,10 @@ export async function authMiddleware(
   res: Response,
   next: NextFunction,
 ): Promise<void> {
+  const requestPath = (req.originalUrl ?? req.path).split('?')[0] ?? req.path;
+
   // Public paths bypass authentication
-  if (isPublicPath(req.path)) {
+  if (isPublicPath(requestPath) || isDashboardPublicApi(requestPath, req.method)) {
     next();
     return;
   }

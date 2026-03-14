@@ -123,7 +123,7 @@ Is this reversible? What is the blast radius? What is the rollback plan?
 
 1. Write summary to `.github/agent-output/DevOps/{ticket-id}.md`
 2. Delete previous stage summary (`.github/agent-output/{PreviousAgent}/{ticket-id}.md`)
-3. Move ticket JSON to next stage: `.github/ticket-state/QA/{ticket-id}.json`
+3. Complete stage via MCP `tickets.complete` with structured evidence (artifacts, test_results, confidence)
 4. Update `.github/memory-bank/activeContext.md` with entry:
    `### [{ticket-id}] — Artifacts, Decisions, Timestamp (ISO8601)`
 5. Stage ONLY modified files explicitly — **NEVER `git add .`**

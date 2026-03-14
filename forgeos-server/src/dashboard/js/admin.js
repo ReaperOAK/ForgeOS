@@ -36,8 +36,8 @@
   var POLL_INTERVAL = 15000;
 
   /** Machine staleness thresholds (ms). */
-  var STALE_THRESHOLD = 30000;
-  var OFFLINE_THRESHOLD = 300000;
+  var STALE_THRESHOLD = 30110;
+  var OFFLINE_THRESHOLD = 301100;
 
   /** DB pool gauge color thresholds (percentage). */
   var DB_GAUGE_OK = 0.7;
@@ -82,72 +82,72 @@
     panel.innerHTML =
       '<div class="admin-grid">' +
 
-        /* Force-Release Section */
-        '<section class="admin-section admin-section--force-release" aria-labelledby="admin-force-title">' +
-          '<h2 class="section-heading" id="admin-force-title">' +
-            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">' +
-            '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>' +
-            ' Force Release' +
-          '</h2>' +
-          '<div class="admin-force-release">' +
-            '<label for="admin-force-ticket" class="admin-force-release__label">Ticket ID</label>' +
-            '<div class="admin-force-release__row">' +
-              '<input type="text" id="admin-force-ticket" class="input admin-force-release__input" ' +
-                'placeholder="e.g. TASK-FOS-05-001" autocomplete="off" ' +
-                'aria-describedby="admin-force-hint" />' +
-              '<button class="btn btn--danger admin-force-release__btn" id="admin-force-btn" ' +
-                'aria-label="Force release ticket claim">Release</button>' +
-            '</div>' +
-            '<p class="admin-force-release__hint" id="admin-force-hint">' +
-              'Forcefully releases another operator\'s claim. Requires confirmation.</p>' +
-            '<div class="admin-force-release__result" id="admin-force-result" ' +
-              'role="status" aria-live="polite" hidden></div>' +
-          '</div>' +
-        '</section>' +
+      /* Force-Release Section */
+      '<section class="admin-section admin-section--force-release" aria-labelledby="admin-force-title">' +
+      '<h2 class="section-heading" id="admin-force-title">' +
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">' +
+      '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>' +
+      ' Force Release' +
+      '</h2>' +
+      '<div class="admin-force-release">' +
+      '<label for="admin-force-ticket" class="admin-force-release__label">Ticket ID</label>' +
+      '<div class="admin-force-release__row">' +
+      '<input type="text" id="admin-force-ticket" class="input admin-force-release__input" ' +
+      'placeholder="e.g. TASK-FOS-05-001" autocomplete="off" ' +
+      'aria-describedby="admin-force-hint" />' +
+      '<button class="btn btn--danger admin-force-release__btn" id="admin-force-btn" ' +
+      'aria-label="Force release ticket claim">Release</button>' +
+      '</div>' +
+      '<p class="admin-force-release__hint" id="admin-force-hint">' +
+      'Forcefully releases another operator\'s claim. Requires confirmation.</p>' +
+      '<div class="admin-force-release__result" id="admin-force-result" ' +
+      'role="status" aria-live="polite" hidden></div>' +
+      '</div>' +
+      '</section>' +
 
-        /* Machine Status Section */
-        '<section class="admin-section admin-section--machines" aria-labelledby="admin-machines-title">' +
-          '<h2 class="section-heading" id="admin-machines-title">' +
-            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">' +
-            '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>' +
-            ' Machine Status' +
-          '</h2>' +
-          '<div class="admin-machines" id="admin-machines-grid" role="list" ' +
-            'aria-label="Connected machines"></div>' +
-          '<p class="admin-machines__empty" id="admin-machines-empty" role="status">' +
-            'No machines reporting.</p>' +
-        '</section>' +
+      /* Machine Status Section */
+      '<section class="admin-section admin-section--machines" aria-labelledby="admin-machines-title">' +
+      '<h2 class="section-heading" id="admin-machines-title">' +
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">' +
+      '<rect x="2" y="3" width="20" height="14" rx="2" ry="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>' +
+      ' Machine Status' +
+      '</h2>' +
+      '<div class="admin-machines" id="admin-machines-grid" role="list" ' +
+      'aria-label="Connected machines"></div>' +
+      '<p class="admin-machines__empty" id="admin-machines-empty" role="status">' +
+      'No machines reporting.</p>' +
+      '</section>' +
 
-        /* System Health Section */
-        '<section class="admin-section admin-section--health" aria-labelledby="admin-health-title">' +
-          '<h2 class="section-heading" id="admin-health-title">' +
-            '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">' +
-            '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>' +
-            ' System Health' +
-          '</h2>' +
-          '<div class="admin-health">' +
-            '<div class="admin-health__card" aria-label="Database pool usage">' +
-              '<span class="admin-health__label">DB Pool</span>' +
-              '<div class="admin-health__gauge" id="admin-db-gauge" role="meter" ' +
-                'aria-valuenow="0" aria-valuemin="0" aria-valuemax="20" ' +
-                'aria-label="Database connections: 0 of 20 active">' +
-                '<div class="admin-health__gauge-track">' +
-                  '<div class="admin-health__gauge-fill" id="admin-db-gauge-fill"></div>' +
-                '</div>' +
-                '<span class="admin-health__gauge-text" id="admin-db-gauge-text">0 / 20</span>' +
-              '</div>' +
-            '</div>' +
-            '<div class="admin-health__card" aria-label="Server uptime">' +
-              '<span class="admin-health__label">Uptime</span>' +
-              '<span class="admin-health__value" id="admin-uptime">--</span>' +
-            '</div>' +
-            '<div class="admin-health__card" aria-label="Expired lease count">' +
-              '<span class="admin-health__label">Expired Leases</span>' +
-              '<span class="admin-health__value admin-health__value--count" ' +
-                'id="admin-expired-count">0</span>' +
-            '</div>' +
-          '</div>' +
-        '</section>' +
+      /* System Health Section */
+      '<section class="admin-section admin-section--health" aria-labelledby="admin-health-title">' +
+      '<h2 class="section-heading" id="admin-health-title">' +
+      '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">' +
+      '<path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>' +
+      ' System Health' +
+      '</h2>' +
+      '<div class="admin-health">' +
+      '<div class="admin-health__card" aria-label="Database pool usage">' +
+      '<span class="admin-health__label">DB Pool</span>' +
+      '<div class="admin-health__gauge" id="admin-db-gauge" role="meter" ' +
+      'aria-valuenow="0" aria-valuemin="0" aria-valuemax="20" ' +
+      'aria-label="Database connections: 0 of 20 active">' +
+      '<div class="admin-health__gauge-track">' +
+      '<div class="admin-health__gauge-fill" id="admin-db-gauge-fill"></div>' +
+      '</div>' +
+      '<span class="admin-health__gauge-text" id="admin-db-gauge-text">0 / 20</span>' +
+      '</div>' +
+      '</div>' +
+      '<div class="admin-health__card" aria-label="Server uptime">' +
+      '<span class="admin-health__label">Uptime</span>' +
+      '<span class="admin-health__value" id="admin-uptime">--</span>' +
+      '</div>' +
+      '<div class="admin-health__card" aria-label="Expired lease count">' +
+      '<span class="admin-health__label">Expired Leases</span>' +
+      '<span class="admin-health__value admin-health__value--count" ' +
+      'id="admin-expired-count">0</span>' +
+      '</div>' +
+      '</div>' +
+      '</section>' +
 
       '</div>';
 
@@ -296,24 +296,24 @@
         'role="listitem" aria-label="' + FOS.escapeHtml(m.machine_id || m.id || 'Unknown') +
         ': ' + statusLabel + '">' +
         '<div class="admin-machine-card__header">' +
-          '<span class="admin-machine-card__dot admin-machine-card__dot--' + statusClass + '" ' +
-            'aria-hidden="true"></span>' +
-          '<span class="admin-machine-card__name" style="color:' + machineColor + '">' +
-            FOS.escapeHtml(m.machine_id || m.id || 'Unknown') + '</span>' +
-          '<span class="admin-machine-card__status badge badge--' + statusClass + '">' +
-            statusLabel + '</span>' +
+        '<span class="admin-machine-card__dot admin-machine-card__dot--' + statusClass + '" ' +
+        'aria-hidden="true"></span>' +
+        '<span class="admin-machine-card__name" style="color:' + machineColor + '">' +
+        FOS.escapeHtml(m.machine_id || m.id || 'Unknown') + '</span>' +
+        '<span class="admin-machine-card__status badge badge--' + statusClass + '">' +
+        statusLabel + '</span>' +
         '</div>' +
         '<div class="admin-machine-card__meta">' +
-          '<span class="admin-machine-card__detail">Agent: ' +
-            FOS.escapeHtml(m.agent || m.claimed_by || '—') + '</span>' +
-          '<span class="admin-machine-card__detail">Operator: ' +
-            FOS.escapeHtml(m.operator || '—') + '</span>' +
-          '<span class="admin-machine-card__detail">Last seen: ' +
-            FOS.escapeHtml(relTime) + '</span>' +
-          (m.active_tickets != null ?
-            '<span class="admin-machine-card__detail">Tickets: ' + m.active_tickets + '</span>' : '') +
+        '<span class="admin-machine-card__detail">Agent: ' +
+        FOS.escapeHtml(m.agent || m.claimed_by || '—') + '</span>' +
+        '<span class="admin-machine-card__detail">Operator: ' +
+        FOS.escapeHtml(m.operator || '—') + '</span>' +
+        '<span class="admin-machine-card__detail">Last seen: ' +
+        FOS.escapeHtml(relTime) + '</span>' +
+        (m.active_tickets != null ?
+          '<span class="admin-machine-card__detail">Tickets: ' + m.active_tickets + '</span>' : '') +
         '</div>' +
-      '</div>';
+        '</div>';
     }).join('');
   }
 

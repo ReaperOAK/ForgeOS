@@ -143,13 +143,13 @@ Replace in all 14 agent files:
 - `sdlc.instructions.md`: Redefine state as PostgreSQL columns
 - `ticket-system.instructions.md`: Remove directory listing, add MCP tool reference
 - `git-protocol.instructions.md`: Simplify to single WORK commit (code only)
-- `agent-behavior.instructions.md`: Replace Ticketer scan with orchestrator loop
+- `agent-behavior.instructions.md`: Replace dispatcher scan with orchestrator loop
 
 ### Step 6: Build ForgeOS Orchestrator Loop
 New module: `forgeos-server/src/orchestrator/loop.ts`
 - Polls PostgreSQL for READY tickets every 10 seconds
 - Dispatches agents via subprocess with MCP connection URL
-- Replaces the stateless Ticketer dispatcher
+- Replaces the stateless ForgeOS dispatcher
 
 ### Step 7: Deprecation
 - Mark `.github/ticket-state/` as deprecated (keep read-only for 30 days)
