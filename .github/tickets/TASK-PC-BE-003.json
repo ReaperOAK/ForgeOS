@@ -4,7 +4,7 @@
   "description": "Implement canonical `context_hash` computation over required context inputs (`repo_commit`, `graph_version`, `memory_snapshot`, `packet_schema`, `template_version`) with deterministic serialization and SHA-256 output.",
   "type": "backend",
   "priority": "critical",
-  "stage": "CI",
+  "stage": "BACKEND",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -34,7 +34,7 @@
     "Given unit tests, when executed, then deterministic and sensitivity assertions pass.",
     "Given implementation review, when auditing for scope, then no filesystem discovery logic is required by hash computation."
   ],
-  "rework_count": 0,
+  "rework_count": 1,
   "claimed_by": null,
   "machine_id": null,
   "operator": null,
@@ -90,6 +90,15 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-14T15:41:05.507574+00:00",
+      "event": "REWORK",
+      "agent": "CIReviewer",
+      "machine_id": "system",
+      "from_stage": "CI",
+      "to_stage": "BACKEND",
+      "details": "Rework #1: CI FAIL: 3 failing freshness-gate tests (PacketValidationError) and 5 max-depth warnings in compiler.ts; quality score 50/100"
     }
   ],
   "source_task_file": "TODO/tickets/prompt-compiler-l3.md",
