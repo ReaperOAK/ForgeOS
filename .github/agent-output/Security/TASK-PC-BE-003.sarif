@@ -1,0 +1,48 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "SecurityEngineer-Agent",
+          "version": "2.0.0",
+          "rules": [
+            {
+              "id": "SEC-DEP-001",
+              "name": "ModerateDependencyVulnerability",
+              "shortDescription": {
+                "text": "Moderate dependency vulnerability detected with no high/critical findings"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "owasp": "A06:2021",
+                "cwe": "CWE-1104"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "SEC-DEP-001",
+          "level": "warning",
+          "message": {
+            "text": "npm audit reported 1 moderate vulnerability (hono, GHSA-v8w9-8mx6-g223); high=0, critical=0."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "forgeos-server/package-lock.json"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
