@@ -2390,3 +2390,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Security/TASK-PC-BE-003.md
 - **Decisions:** PASS — STRIDE 0/0 critical/high, OWASP 10/10 checked, SQL parameterized (confirmed), SHA-256 correct, no hardcoded secrets, npm audit 0 high/critical. 3 informational findings (future ownership check, test placeholder key, pre-existing Hono CVE).
 - **Timestamp:** 2026-03-14T22:00:00Z
+
+### [TASK-PC-BE-004] — QA PASS (Rework #1)
+- **Artifacts:** .github/agent-output/QA/TASK-PC-BE-004.md
+- **Decisions:** PASS — 36/36 tests pass (24 packet-validator + 12 compiler), packet-validator.ts 100%/91.66% coverage, compiler.ts 81.93%/83.72%, typecheck 0 errors, all 4 rework items verified, 4/4 ACs met. Minor: test co-located at src/services/ vs src/__tests__/ (ticket file_paths). Branch gap line 106 is equivalent mutant. Queue worker catch logs err.message (includes structuredReason).
+- **Timestamp:** 2026-03-14T21:15:00Z
