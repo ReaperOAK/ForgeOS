@@ -113,21 +113,21 @@ export function evaluatePromptFreshness(input: FreshnessEvaluationInput): Prompt
 }
 
 function canonicalize(value: unknown): unknown {
+    if (!value || typeof value !== 'object') {
+        return value;
+    }
+
     if (Array.isArray(value)) {
         return value.map((item) => canonicalize(item));
     }
 
-    if (value && typeof value === 'object') {
-        const input = value as Record<string, unknown>;
-        const keys = Object.keys(input).sort((a, b) => a.localeCompare(b));
-        const output: Record<string, unknown> = {};
+    const input = value as Record<string, unknown>;
+    const keys = Object.keys(input).sort((a, b) => a.localeCompare(b));
+    const output: Record<string, unknown> = {};
 
-        for (const key of keys) {
-            output[key] = canonicalize(input[key]);
-        }
-
-        return output;
+    for (const key of keys) {
+        output[key] = canonicalize(input[key]);
     }
 
-    return value;
+    return output;
 }
