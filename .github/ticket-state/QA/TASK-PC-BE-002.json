@@ -1,0 +1,83 @@
+{
+  "ticket_id": "TASK-PC-BE-002",
+  "title": "Enforce Lifecycle Guardrails in Prompt Paths",
+  "description": "Add explicit guardrails ensuring prompt compiler and claim delivery code uses only MCP/DB lifecycle state and never mutates ticket lifecycle through direct filesystem state edits. Include regression tests that fail if forbidden state paths are introduced in prompt lifecycle modules.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "QA",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-14T13:14:03.439395+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-PC-BE-001"
+  ],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/services/compiler.ts",
+    "forgeos-server/src/tools/tickets-claim.ts",
+    "forgeos-server/src/webhooks/reconciliation.ts",
+    "forgeos-server/src/__tests__/prompt-lifecycle-guardrails.test.ts"
+  ],
+  "acceptance_criteria": [
+    "Given prompt compile and claim code paths, when static and unit checks run, then no `.github/ticket-state` read/write paths are referenced.",
+    "Given lifecycle operations, when prompt compilation is triggered, then ticket stage/state transitions remain delegated to existing lifecycle interfaces only.",
+    "Given new tests, when run in CI, then a forbidden direct state-path regression fails fast.",
+    "Given review checklist, when validating guardrails, then all prompt lifecycle modifications remain within `forgeos-server` lifecycle contracts."
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-14T13:14:03.439399+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tickets/prompt-compiler-l3.md"
+    },
+    {
+      "timestamp": "2026-03-14T14:56:41.008059+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    },
+    {
+      "timestamp": "2026-03-14T15:01:55.705771+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Backend",
+      "machine_id": "system",
+      "from_stage": "READY",
+      "to_stage": "BACKEND",
+      "details": "Advanced from READY to BACKEND"
+    },
+    {
+      "timestamp": "2026-03-14T15:02:55.018595+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Backend",
+      "machine_id": "system",
+      "from_stage": "BACKEND",
+      "to_stage": "QA",
+      "details": "Advanced from BACKEND to QA"
+    }
+  ],
+  "source_task_file": "TODO/tickets/prompt-compiler-l3.md",
+  "tags": [
+    "prompt-compiler",
+    "lifecycle",
+    "guardrail",
+    "p0"
+  ]
+}
