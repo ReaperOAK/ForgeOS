@@ -155,10 +155,7 @@ export async function compileTicketPrompt(ticketId: string): Promise<CompiledPro
 
     const geminiResult = await tryGenerateGeminiPrompt(ticketId, investigation);
     if (geminiResult !== null) {
-        const geminiValidation = validatePacketSections(geminiResult.prompt);
-        if (!geminiValidation.valid) {
-            throw new PacketValidationError(geminiValidation);
-        }
+        validateCompiledPromptOrThrow(geminiResult.prompt);
         const packetEnvelope = createInstructionPacketEnvelope(geminiResult.prompt, packetMetadata);
         return {
             prompt: geminiResult.prompt,
@@ -213,6 +210,13 @@ async function tryGenerateGeminiPrompt(
             'compiler: gemini generation failed, falling back',
         );
         return null;
+    }
+}
+
+function validateCompiledPromptOrThrow(prompt: string): void {
+    const validation = validatePacketSections(prompt);
+    if (!validation.valid) {
+        throw new PacketValidationError(validation);
     }
 }
 
@@ -334,47 +338,62 @@ async function runCompileWorker(): Promise<void> {
 
     compileWorkerRunning = true;
     try {
-        while (compileQueue.size > 0) {
-            const next = compileQueue.entries().next().value as [string, QueuedCompileJob] | undefined;
-            if (!next) {
-                break;
-            }
-            const [queueKey, job] = next;
-            compileQueue.delete(queueKey);
-
-            await compileAndStoreTicketPrompt(job.ticketId)
-                .then((result) => {
-                    logger.info(
-                        {
-                            ticketId: job.ticketId,
-                            trigger: job.trigger,
-                            idempotencyKey: job.idempotencyKey,
-                            provider: result.provider,
-                            model: result.model,
-                            usedFallback: result.usedFallback,
-                            contextHash: result.contextHash,
-                            freshnessStatus: result.freshnessStatus,
-                        },
-                        'compiler: compiled prompt stored',
-                    );
-                })
-                .catch((err) => {
-                    logger.error(
-                        {
-                            ticketId: job.ticketId,
-                            trigger: job.trigger,
-                            idempotencyKey: job.idempotencyKey,
-                            error: err instanceof Error ? err.message : String(err),
-                        },
-                        'compiler: failed to compile/store prompt',
-                    );
-                });
-        }
+        await processCompileQueue();
     } finally {
         compileWorkerRunning = false;
-        if (compileQueue.size > 0) {
-            scheduleCompileWorker();
-        }
+        scheduleWorkerIfQueuePending();
+    }
+}
+
+function dequeueCompileJob(): QueuedCompileJob | null {
+    const next = compileQueue.entries().next().value as [string, QueuedCompileJob] | undefined;
+    if (!next) {
+        return null;
+    }
+
+    const [queueKey, job] = next;
+    compileQueue.delete(queueKey);
+    return job;
+}
+
+async function processCompileQueue(): Promise<void> {
+    for (let job = dequeueCompileJob(); job !== null; job = dequeueCompileJob()) {
+        await processCompileJob(job);
+    }
+}
+
+async function processCompileJob(job: QueuedCompileJob): Promise<void> {
+    try {
+        const result = await compileAndStoreTicketPrompt(job.ticketId);
+        logger.info(
+            {
+                ticketId: job.ticketId,
+                trigger: job.trigger,
+                idempotencyKey: job.idempotencyKey,
+                provider: result.provider,
+                model: result.model,
+                usedFallback: result.usedFallback,
+                contextHash: result.contextHash,
+                freshnessStatus: result.freshnessStatus,
+            },
+            'compiler: compiled prompt stored',
+        );
+    } catch (err) {
+        logger.error(
+            {
+                ticketId: job.ticketId,
+                trigger: job.trigger,
+                idempotencyKey: job.idempotencyKey,
+                error: err instanceof Error ? err.message : String(err),
+            },
+            'compiler: failed to compile/store prompt',
+        );
+    }
+}
+
+function scheduleWorkerIfQueuePending(): void {
+    if (compileQueue.size > 0) {
+        scheduleCompileWorker();
     }
 }
 
@@ -394,12 +413,13 @@ function scheduleCompileWorker(): void {
  * Test helper: wait until in-process compile queue is empty and worker is idle.
  */
 export async function waitForCompileQueueToDrain(maxPasses = 20): Promise<void> {
-    for (let pass = 0; pass < maxPasses; pass += 1) {
-        if (!compileWorkerRunning && !compileWorkerScheduled && compileQueue.size === 0) {
-            return;
-        }
+    for (let pass = 0; pass < maxPasses && isCompileWorkerBusy(); pass += 1) {
         await new Promise<void>((resolve) => setTimeout(resolve, 0));
     }
+}
+
+function isCompileWorkerBusy(): boolean {
+    return compileWorkerRunning || compileWorkerScheduled || compileQueue.size > 0;
 }
 
 interface StoredPromptSnapshot {

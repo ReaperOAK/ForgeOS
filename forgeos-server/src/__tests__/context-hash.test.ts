@@ -26,6 +26,20 @@ vi.mock('../tools/tickets-payload.js', () => ({ ticketsPayloadHandler: (...a: un
 vi.mock('../tools/memory-search-lessons.js', () => ({ memorySearchLessonsHandler: (...a: unknown[]) => mockMemorySearchLessonsHandler(...a) }));
 vi.mock('../tools/code-blast-radius.js', () => ({ codeBlastRadiusHandler: (...a: unknown[]) => mockCodeBlastRadiusHandler(...a) }));
 vi.mock('../tools/code-search-symbols.js', () => ({ codeSearchSymbolsHandler: (...a: unknown[]) => mockCodeSearchSymbolsHandler(...a) }));
+vi.mock('../services/packet-validator.js', () => ({
+    validatePacketSections: vi.fn(() => ({
+        valid: true,
+        missingSections: [],
+        misordered: [],
+        structuredReason: 'mocked valid for freshness-gate unit tests',
+    })),
+    PacketValidationError: class PacketValidationError extends Error {
+        constructor() {
+            super('mocked packet validation error');
+            this.name = 'PacketValidationError';
+        }
+    },
+}));
 vi.mock('./prompt-architect-service.js', () => ({
     PromptArchitectService: class {
         async generatePrompt(...a: unknown[]) { return mockGeneratePrompt(...a); }
