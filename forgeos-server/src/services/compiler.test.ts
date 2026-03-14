@@ -9,6 +9,7 @@ const mockCodeBlastRadiusHandler = vi.fn();
 const mockCodeSearchSymbolsHandler = vi.fn();
 const mockGeneratePrompt = vi.fn();
 const mockGenerateContent = vi.fn();
+const mockValidatePacketSections = vi.fn();
 
 vi.mock('../db/pool.js', () => ({
     pool: {
@@ -60,6 +61,18 @@ vi.mock('@google/genai', () => ({
     },
 }));
 
+vi.mock('./packet-validator.js', () => ({
+    validatePacketSections: (...args: unknown[]) => mockValidatePacketSections(...args),
+    PacketValidationError: class PacketValidationError extends Error {
+        public result: unknown;
+        constructor(result: { structuredReason: string }) {
+            super(`Packet validation failed: ${result.structuredReason}`);
+            this.name = 'PacketValidationError';
+            this.result = result;
+        }
+    },
+}));
+
 function textResult(value: unknown): CallToolResult {
     return {
         content: [{ type: 'text', text: typeof value === 'string' ? value : JSON.stringify(value) }],
@@ -75,6 +88,14 @@ describe('compiler service', () => {
         process.env.FORGEOS_REPO_COMMIT = 'repo-main';
         process.env.FORGEOS_GRAPH_VERSION = 'graph-v1';
         process.env.FORGEOS_MEMORY_SNAPSHOT_VERSION = 'memory-v1';
+
+        // Default: validation passes so existing tests are unaffected
+        mockValidatePacketSections.mockReturnValue({
+            valid: true,
+            missingSections: [],
+            misordered: [],
+            structuredReason: 'All 11 sections present in correct order.',
+        });
 
         mockTicketsGetHandler.mockResolvedValue(
             textResult({
@@ -313,5 +334,56 @@ describe('compiler service', () => {
         await waitForCompileQueueToDrain();
 
         expect(mockPoolQuery).toHaveBeenCalledTimes(2);
+    });
+
+    it('throws PacketValidationError when Gemini generates a malformed packet (missing sections)', async () => {
+        process.env.GEMINI_API_KEY = 'test-gemini-key';
+        mockGenerateContent.mockResolvedValue({ text: 'incomplete prompt without proper sections' });
+        mockValidatePacketSections.mockReturnValue({
+            valid: false,
+            missingSections: ['SYSTEM CONSTRAINTS', 'EXECUTION PLAN', 'EDGE CASES'],
+            misordered: [],
+            structuredReason: 'Missing sections: SYSTEM CONSTRAINTS, EXECUTION PLAN, EDGE CASES',
+        });
+
+        const { compileTicketPrompt } = await import('./compiler.js');
+
+        await expect(compileTicketPrompt('TASK-PC-BE-001')).rejects.toThrow('Packet validation failed');
+        await expect(compileTicketPrompt('TASK-PC-BE-001')).rejects.toMatchObject({
+            name: 'PacketValidationError',
+        });
+    });
+
+    it('throws PacketValidationError when fallback service generates a malformed packet', async () => {
+        // No GEMINI_API_KEY — forces fallback path
+        mockGeneratePrompt.mockResolvedValue({
+            prompt: 'fallback without proper sections',
+            provider: 'ollama',
+            model: 'qwen2.5',
+            usedFallback: false,
+        });
+        mockValidatePacketSections.mockReturnValue({
+            valid: false,
+            missingSections: ['ROLE', 'EXECUTION PLAN'],
+            misordered: [],
+            structuredReason: 'Missing sections: ROLE, EXECUTION PLAN',
+        });
+
+        const { compileTicketPrompt } = await import('./compiler.js');
+
+        await expect(compileTicketPrompt('TASK-PC-BE-001')).rejects.toThrow('Packet validation failed');
+        await expect(compileTicketPrompt('TASK-PC-BE-001')).rejects.toMatchObject({
+            name: 'PacketValidationError',
+        });
+    });
+
+    it('invokes validatePacketSections on the generated prompt text', async () => {
+        process.env.GEMINI_API_KEY = 'test-gemini-key';
+        mockGenerateContent.mockResolvedValue({ text: 'prompt text from gemini' });
+
+        const { compileTicketPrompt } = await import('./compiler.js');
+        await compileTicketPrompt('TASK-PC-BE-001');
+
+        expect(mockValidatePacketSections).toHaveBeenCalledWith('prompt text from gemini');
     });
 });

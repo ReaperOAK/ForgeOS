@@ -2375,3 +2375,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Security/TASK-PC-BE-002.md
 - **Decisions:** PASS — 0 critical/high findings. 2 LOW informational LLM01/LLM02 notes (raw ticket content in Gemini user turn; output propagated as agent context). No hardcoded secrets. 1 pre-existing moderate Hono CVE (not introduced by this PR). All AC verified. Advanced SECURITY → CI.
 - **Timestamp:** 2026-03-14T16:00:00Z
+
+### [TASK-PC-BE-004] — Backend Rework #1 Complete
+- **Artifacts:** forgeos-server/src/services/packet-validator.ts, forgeos-server/src/services/packet-validator.test.ts, forgeos-server/src/services/compiler.ts, forgeos-server/src/services/compiler.test.ts
+- **Decisions:** Created 11-section packet validator per architecture doc §5.1. Threw PacketValidationError on invalid packets in compileTicketPrompt(). Fixed PROMPT_ARCHITECT_SYSTEM from 7→11 sections. 36/36 tests pass; packet-validator.ts: 100% line coverage; compiler.ts: 81.93% line coverage. All ACs met.
+- **Timestamp:** 2026-03-14T21:00:00Z
