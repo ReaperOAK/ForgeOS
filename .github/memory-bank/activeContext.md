@@ -2465,3 +2465,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/CIReviewer/TASK-PC-BE-003.md, .github/agent-output/CIReviewer/TASK-PC-BE-003.sarif
 - **Decisions:** PASS — Score 100/100, 0 critical, 0 warnings. tsc clean, eslint clean, complexity(≤10)/max-depth(≤1) clean on context-hash.ts, 11/11 tests pass, lines 97.67%/branches 82.14% (both ≥80%), 0 circular deps. Advanced to DOCS.
 - **Timestamp:** 2026-03-14T23:10:00Z
+
+### [TASK-PC-BE-003] — CI Review (rework #2)
+- **Artifacts:** .github/agent-output/CIReviewer/TASK-PC-BE-003.md
+- **Decisions:** PASS — Score 100/100, 0 critical, 0 warnings. tsc clean, eslint clean, complexity/max-depth clean, 11/11 tests pass, context-hash.ts lines 97.67% branches 82.14% (both ≥80%), no circular imports.
+- **Timestamp:** 2026-03-14T17:28:32Z
+
+### [TASK-PC-BE-004] — Validation APPROVED
+- **Artifacts:** .github/agent-output/Validator/TASK-PC-BE-004.md
+- **Decisions:** APPROVED — 10/10 DoD pass, 4/4 AC verified, 27/27 tests pass (lines 93.56%, branches 91.83%), lint clean, tsc clean, complexity+depth clean, security bypass fixed (decoy-header CWE-20/CWE-693 via containsCanonicalHeader guard)
+- **Timestamp:** 2026-03-14T23:05:00Z
