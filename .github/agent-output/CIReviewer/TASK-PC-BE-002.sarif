@@ -1,0 +1,156 @@
+{
+  "version": "2.1.0",
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "CIReviewer",
+          "version": "1.0.0",
+          "informationUri": "https://github.com/forgeos/ci-reviewer",
+          "rules": [
+            {
+              "id": "OC001",
+              "name": "OneIndentationLevelPerMethod",
+              "shortDescription": {
+                "text": "Object Calisthenics OC-001: One level of indentation per method"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              }
+            },
+            {
+              "id": "LINT-PASS",
+              "name": "ESLintClean",
+              "shortDescription": {
+                "text": "ESLint passed with zero errors and zero warnings"
+              },
+              "defaultConfiguration": {
+                "level": "none"
+              }
+            },
+            {
+              "id": "TYPE-PASS",
+              "name": "TypeScriptClean",
+              "shortDescription": {
+                "text": "tsc --noEmit passed with zero errors"
+              },
+              "defaultConfiguration": {
+                "level": "none"
+              }
+            },
+            {
+              "id": "TEST-PASS",
+              "name": "AllTestsGreen",
+              "shortDescription": {
+                "text": "All tests passed"
+              },
+              "defaultConfiguration": {
+                "level": "none"
+              }
+            },
+            {
+              "id": "CIRC-PASS",
+              "name": "NoCircularDependencies",
+              "shortDescription": {
+                "text": "No circular dependencies detected"
+              },
+              "defaultConfiguration": {
+                "level": "none"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "OC001",
+          "level": "note",
+          "message": {
+            "text": "for...of loop inside it() callback creates 2 levels of indentation. OC-001 recommends 1 level per method. Standard Vitest idiom — Suggestion only."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "forgeos-server/src/__tests__/prompt-lifecycle-guardrails.test.ts",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 21,
+                  "endLine": 24
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "OC001",
+          "level": "note",
+          "message": {
+            "text": "for...of loop inside it() callback creates 2 levels of indentation. OC-001 recommends 1 level per method. Standard Vitest idiom — Suggestion only."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "forgeos-server/src/__tests__/prompt-lifecycle-guardrails.test.ts",
+                  "uriBaseId": "%SRCROOT%"
+                },
+                "region": {
+                  "startLine": 32,
+                  "endLine": 36
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "artifacts": [
+        {
+          "location": {
+            "uri": "forgeos-server/src/__tests__/prompt-lifecycle-guardrails.test.ts",
+            "uriBaseId": "%SRCROOT%"
+          }
+        }
+      ],
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "toolExecutionNotifications": [
+            {
+              "message": {
+                "text": "tsc --noEmit: EXIT 0 (no type errors)"
+              },
+              "level": "note"
+            },
+            {
+              "message": {
+                "text": "eslint --max-warnings=0: EXIT 0 (0 errors, 0 warnings)"
+              },
+              "level": "note"
+            },
+            {
+              "message": {
+                "text": "eslint complexity+max-depth --max-warnings=0: EXIT 0"
+              },
+              "level": "note"
+            },
+            {
+              "message": {
+                "text": "vitest: 3/3 tests pass, EXIT 0"
+              },
+              "level": "note"
+            },
+            {
+              "message": {
+                "text": "madge --circular: no circular dependencies, EXIT 0"
+              },
+              "level": "note"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
