@@ -56,3 +56,53 @@
 - `forgeos-server/src/__tests__/context-hash.test.ts`
 - `forgeos-server/src/services/compiler.ts`
 - `.github/agent-output/Backend/TASK-PC-BE-003.md`
+
+---
+
+# TASK-PC-BE-003 — Backend Rework #2
+
+- **Agent:** Backend
+- **Stage:** BACKEND
+- **Date:** 2026-03-14
+- **Status:** COMPLETE
+- **Confidence:** HIGH
+
+## Scope
+- `forgeos-server/src/services/context-hash.ts`
+
+## Rejection Reason Addressed
+- Max-depth violation at `forgeos-server/src/services/context-hash.ts:125`.
+
+## Implementation
+- Refactored `canonicalize()` with guard clauses and early return style.
+- Removed object-path `if` nesting and flattened flow to:
+  - `if (!value || typeof value !== 'object') return value;`
+  - `if (Array.isArray(value)) return ...;`
+  - object canonicalization loop at top block depth.
+- Reviewed the entire file for additional max-depth > 1 patterns; none remained after refactor.
+
+## Validation Gates
+
+1. `npx eslint src/services/context-hash.ts --rule 'max-depth:["warn",1]' --max-warnings=0`
+- **Result:** PASS
+
+2. `npx eslint src/services/context-hash.ts --max-warnings=0`
+- **Result:** PASS
+
+3. `npm run typecheck`
+- **Result:** PASS
+
+4. `npx vitest run src/__tests__/context-hash.test.ts`
+- **Result:** PASS
+- **Details:** 11 passed, 0 failed
+
+5. `npx vitest run src/__tests__/context-hash.test.ts --coverage --coverage.reporter=json-summary`
+- **Result:** PASS
+- **Coverage evidence (`coverage/coverage-summary.json`):**
+  - `/home/reaperoak/Documents/ForgeOS/forgeos-server/src/services/context-hash.ts`
+  - lines **97.67%**, functions **100%**, statements **97.67%**, branches **82.14%**
+  - Requirement met: `context-hash.ts` >= 80%
+
+## Artifacts
+- `forgeos-server/src/services/context-hash.ts`
+- `.github/agent-output/Backend/TASK-PC-BE-003.md`
