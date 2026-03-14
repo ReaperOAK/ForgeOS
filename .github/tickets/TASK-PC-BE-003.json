@@ -4,7 +4,7 @@
   "description": "Implement canonical `context_hash` computation over required context inputs (`repo_commit`, `graph_version`, `memory_snapshot`, `packet_schema`, `template_version`) with deterministic serialization and SHA-256 output.",
   "type": "backend",
   "priority": "critical",
-  "stage": "CI",
+  "stage": "DONE",
   "sdlc_flow": [
     "READY",
     "BACKEND",
@@ -180,6 +180,33 @@
       "from_stage": "SECURITY",
       "to_stage": "CI",
       "details": "Advanced from SECURITY to CI"
+    },
+    {
+      "timestamp": "2026-03-14T17:29:25.340242+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "system",
+      "from_stage": "CI",
+      "to_stage": "DOCS",
+      "details": "Advanced from CI to DOCS"
+    },
+    {
+      "timestamp": "2026-03-14T17:31:16.278279+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "CIReviewer",
+      "machine_id": "system",
+      "from_stage": "DOCS",
+      "to_stage": "VALIDATION",
+      "details": "Advanced from DOCS to VALIDATION"
+    },
+    {
+      "timestamp": "2026-03-14T17:38:21.816566+00:00",
+      "event": "STAGE_COMPLETED",
+      "agent": "Validator",
+      "machine_id": "system",
+      "from_stage": "VALIDATION",
+      "to_stage": "DONE",
+      "details": "Advanced from VALIDATION to DONE"
     }
   ],
   "source_task_file": "TODO/tickets/prompt-compiler-l3.md",
