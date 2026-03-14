@@ -2360,3 +2360,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/TASK-PC-BE-001.md
 - **Decisions:** APPROVED — 10/10 DoD pass in ticket scope; AC 5/5 verified; independent checks PASS (`typecheck`, scoped eslint, scoped vitest with coverage). No blocking regressions found.
 - **Timestamp:** 2026-03-14T14:54:47Z
+
+### [TASK-PC-BE-004] — QA REJECT (Rework #1)
+- **Artifacts:** .github/agent-output/QA/TASK-PC-BE-004.md
+- **Decisions:** REJECT — 0/4 AC met. packet-validator.ts absent. Backend implemented queue/idempotency (wrong scope). 3 critical AC unaddressed (AC1/AC2/AC4). Sent back to BACKEND.
+- **Timestamp:** 2026-03-14T20:46:00Z
