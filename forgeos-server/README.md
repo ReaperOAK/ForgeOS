@@ -1,4 +1,4 @@
-<!-- last_reviewed: 2026-03-11T01:00:00Z -->
+<!-- last_reviewed: 2026-03-14T00:00:00Z -->
 <!-- audience: developer -->
 <!-- diataxis: reference -->
 
@@ -43,8 +43,9 @@ The server starts on `http://localhost:3011` by default.
 | `start`         | `node dist/index.js` | Run compiled production build          |
 | `dev`           | `tsx watch src/index.ts` | Development mode with hot-reload   |
 | `migrate`       | `tsx src/db/migrate.ts`  | Run pending database migrations    |
+| `ingest:legacy-context` | `tsx src/db/ingest-legacy-context.ts` | Import legacy filesystem context into lessons/embeddings |
 | `typecheck`     | `tsc --noEmit`       | Type-check without emitting files      |
-| `lint`          | `eslint src/`        | Run ESLint on source files             |
+| `lint`          | `eslint "src/**/*.{ts,tsx}"` | Run ESLint on TypeScript source files |
 | `test`          | `vitest run`         | Run test suite once                    |
 | `test:watch`    | `vitest`             | Run tests in watch mode                |
 | `prepare`       | `husky`              | Install Git hooks (runs on `npm install`) |
@@ -124,6 +125,40 @@ Key behaviors:
 - **Transactional** — each migration runs inside `BEGIN`/`COMMIT`; a
   failure rolls back only the failing migration.
 
+### Prompt Compiler Foundation (Migration 008)
+
+`src/db/migrations/008-prompt-compiler-foundation.sql` adds additive
+metadata for deterministic prompt packets and freshness checks. Existing
+`compiled_prompt` content remains unchanged.
+
+Added columns on `tickets`:
+
+- `compiled_prompt_compiled_at`
+- `compiled_prompt_context_hash`
+- `compiled_prompt_packet_schema_version` (default `1`)
+- `compiled_prompt_packet_version` (default `v1`)
+- `compiled_prompt_template_version`
+- `compiled_prompt_freshness_status` (`fresh | stale | missing`)
+- `compiled_prompt_stale_reason`
+- `compiled_prompt_freshness_checked_at`
+- `compiled_prompt_context_repo_commit`
+- `compiled_prompt_context_graph_version`
+- `compiled_prompt_context_memory_snapshot`
+
+Migration safeguards:
+
+- Backfills new timestamps and packet version defaults for existing rows with
+  non-null `compiled_prompt`.
+- Adds check constraints for valid freshness status and schema version.
+- Adds indexes for `compiled_prompt_context_hash` and
+  `compiled_prompt_freshness_status`.
+
+Runtime persistence path:
+
+- `src/services/compiler.ts` stores prompt text plus metadata (`context_hash`,
+  packet/schema/template versions, freshness fields, canonical context inputs)
+  in both dedicated columns and `tickets.metadata.compiled_prompt`.
+
 ## Configuration
 
 All settings are loaded from environment variables (`.env` supported via
@@ -139,6 +174,8 @@ invalid configuration.
 | `ADMIN_API_KEY`          | No       | `forgeos_admin_CHANGE_ME` | Admin API key (change in production)     |
 | `WEBHOOK_SECRET`         | No       | —                     | GitHub webhook HMAC secret                   |
 | `WORKSPACE_PATH`         | No       | —                     | Path to the Git workspace                    |
+| `GEMINI_API_KEY`         | No       | —                     | Enables Gemini-first prompt compilation      |
+| `GEMINI_MODEL`           | No       | `gemini-1.5-flash`    | Gemini model used by the prompt compiler     |
 | `RATE_LIMIT_PER_MINUTE`  | No       | `100`                 | Max requests per minute per client           |
 | `DEFAULT_LEASE_MINUTES`  | No       | `30`                  | Default ticket claim lease duration          |
 | `MAX_LEASE_MINUTES`      | No       | `120`                 | Maximum lease extension allowed              |
