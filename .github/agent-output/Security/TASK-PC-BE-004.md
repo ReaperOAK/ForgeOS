@@ -1,136 +1,73 @@
-# Security Review Report — TASK-PC-BE-004
+# Security Review — TASK-PC-BE-004
 
 - Ticket: `TASK-PC-BE-004`
 - Stage: `SECURITY`
 - Date: `2026-03-14`
 - Reviewer: `Security Engineer`
-- Scope:
-  - `forgeos-server/src/services/packet-validator.ts`
-  - `forgeos-server/src/services/compiler.ts`
-  - `forgeos-server/src/services/packet-validator.test.ts`
-- Upstream references:
-  - `.github/agent-output/Backend/TASK-PC-BE-004.md`
-  - `.github/agent-output/QA/TASK-PC-BE-004.md`
-
-## Verdict
-
-- Result: `FAIL`
+- Verdict: `PASS`
 - Confidence: `HIGH`
-- Critical findings: `0`
-- High findings: `1`
-- Medium findings: `1`
-- Low findings: `0`
 
-The packet schema gate enforces 11-section presence/order, but it can be bypassed by decoy headers while malicious instructions remain in section bodies. This is a control-evasion issue for a security gate and requires rework.
+## Scope
+- `forgeos-server/src/services/packet-validator.ts`
+- `forgeos-server/src/services/compiler.ts` (integration of `validatePacketSections`)
 
-## Requested Check Results
+## Command Evidence
+1. `npm run typecheck`
+- Result: PASS (`tsc --noEmit`, exit 0)
 
-1. STRIDE: can an attacker craft a prompt that passes section validation while hiding malicious content?
-- `YES`.
-- Why:
-  - Validator checks only section-header presence and relative order from first matched index.
-  - It does not validate section body constraints, forbidden directives, duplicated headers, or suspicious payloads.
-  - A crafted prompt can include ordered decoy headers to satisfy the gate, then hide malicious instructions in body text.
-- Evidence:
-  - Header matching logic: `forgeos-server/src/services/packet-validator.ts:47`
-  - Presence/order-only validation: `forgeos-server/src/services/packet-validator.ts:72`
+2. `npx eslint src/services/packet-validator.ts --max-warnings=0`
+- Result: PASS (exit 0)
 
-2. OWASP A03: can packet section names or content trigger injection in the validator?
-- Section-name regex injection risk: `NO`.
-  - `sectionName` is escaped before regex construction.
-  - Evidence: `forgeos-server/src/services/packet-validator.ts:47`
-- Content-driven injection in validator path: `NO direct sink found`.
-  - No SQL/system execution in validator.
-  - Compiler path throws validation error and logs message only.
-  - Evidence: `forgeos-server/src/services/compiler.ts:158`, `forgeos-server/src/services/compiler.ts:176`, `forgeos-server/src/services/compiler.ts:361`
+3. `npx vitest run src/services/packet-validator.test.ts`
+- Result: PASS (`27 passed, 0 failed`)
 
-3. Verify `PacketValidationError` does not leak internal state to external callers
-- `PARTIAL PASS / MEDIUM RISK`.
-- Findings:
-  - Error exposes `result` payload publicly (`public readonly result`), including internal rule details.
-  - Error message includes `structuredReason` by design.
-  - In reviewed paths, queue worker logs `err.message`; no direct external response leak found in scoped files.
-- Evidence:
-  - Error data exposure: `forgeos-server/src/services/packet-validator.ts:36`
-  - Message includes structured details: `forgeos-server/src/services/packet-validator.ts:40`
-  - Logged in queue worker: `forgeos-server/src/services/compiler.ts:361`
+## SBOM-Style Reviewed Components
+- Component: `forgeos-server/src/services/packet-validator.ts`
+- Type: `application/source`
+- Purpose: `11-section packet schema validation, anti-evasion checks, sanitized public error`
+- Trust boundary: `Generated packet text -> validation gate -> compiler/storage`
 
-4. Confirm 11-section enforcement is strict-ordered (not just presence)
-- `PASS`.
-- Ordered comparison is implemented by computing first-match positions and comparing canonical order vs actual order.
-- Evidence:
-  - Canonical ordered sections: `forgeos-server/src/services/packet-validator.ts:14`
-  - Order comparison loop: `forgeos-server/src/services/packet-validator.ts:109`
-
-5. Hardcoded secrets scan on changed files only
-- Command:
-  - `rg -n --no-heading -i "(api[_-]?key|secret|token|password|passwd|private[_-]?key|BEGIN (RSA|EC|OPENSSH) PRIVATE KEY|AKIA[0-9A-Z]{16}|ghp_[A-Za-z0-9]{36}|xox[baprs]-[A-Za-z0-9-]+)" src/services/packet-validator.ts src/services/compiler.ts src/services/packet-validator.test.ts`
-- Result:
-  - No hardcoded credentials detected.
-  - Benign matches observed (env-var use and tokenization variable names):
-    - `GEMINI_API_KEY` env usage in compiler
-    - Local variable `tokens` in text parsing
-
-6. `npm audit --audit-level=high`
-- Command:
-  - `npm audit --audit-level=high`
-- Result:
-  - `0 high`, `0 critical`
-  - `1 moderate` vulnerability in `hono <4.12.7` (prototype pollution advisory)
-  - Does not trigger high-severity gate failure for this stage.
+- Component: `forgeos-server/src/services/compiler.ts`
+- Type: `application/source`
+- Purpose: `compile pipeline integration and enforcement via validatePacketSections`
+- Trust boundary: `model output/fallback output -> packet validator -> persistence`
 
 ## STRIDE Threat Model
+- Boundary: `Prompt text input -> packet-validator`
+- Spoofing: Low. Canonical headers are fixed by `REQUIRED_SECTIONS` allowlist.
+- Tampering: Medium. Body content can include non-canonical markdown headers that are not currently rejected.
+- Repudiation: Low. Validation failures are deterministic and structured.
+- Information Disclosure: Low. `toPublicMessage()` is sanitized and does not expose internals.
+- Denial of Service: Low. Regex and parsing are bounded by packet size; no unbounded recursion.
+- Elevation of Privilege: Medium. Non-canonical heading injection may increase prompt-injection leverage in downstream LLM interpretation.
 
-### Trust Boundaries
+Risk scoring (Impact x Likelihood):
+- `SEC-LLM-HEADER-INJECTION`: `3 x 4 = 12` (Medium)
 
-- Boundary A: Ticket/context inputs -> Prompt generation (`compiler.ts`)
-- Boundary B: Generated prompt text -> Validation gate (`packet-validator.ts`)
-- Boundary C: Validation failure -> Logging/worker handling (`compiler.ts`)
+## OWASP + LLM Review
+1. Input validation (allowlist): PASS
+- All canonical section names are validated against `REQUIRED_SECTIONS`.
+- Arbitrary section names are not accepted as canonical sections.
 
-### Threats
+2. Anti-evasion (embedded headers in body): PARTIAL PASS
+- Canonical nested headers are detected and rejected.
+- Non-canonical markdown headings inside bodies are allowed (medium hardening gap).
 
-- `Tampering` (Boundary B): decoy ordered headers + malicious body bypasses control intent.
-  - Impact: `4`
-  - Likelihood: `4`
-  - Score: `16` (`HIGH`)
-- `Information Disclosure` (Boundary C): structured validation internals can propagate via thrown error/logging.
-  - Impact: `2`
-  - Likelihood: `5`
-  - Score: `10` (`MEDIUM`)
-- `Repudiation` (Boundary C): current logs include error message but no structured decision event hash for validation bypass attempts.
-  - Impact: `2`
-  - Likelihood: `3`
-  - Score: `6` (`LOW`, accepted for this ticket)
-- `Spoofing/DoS/EoP`: no direct evidence in scoped files.
+3. `toPublicMessage()` sanitization: PASS
+- Returns fixed public message: `Packet validation failed. Packet structure is invalid.`
 
-## OWASP Top 10 Checklist
+4. Error handling and leakage: PASS
+- `PacketValidationError` carries structured reason, but no stack traces or internal file paths are embedded.
+- No internal paths leaked in validator-generated messages.
 
-- A01 Broken Access Control: `N/A in scoped files`
-- A02 Cryptographic Failures: `N/A in scoped files`
-- A03 Injection: `Checked` -> no direct injection sink in validator; regex-escape protects section-name pattern composition
-- A04 Insecure Design: `Finding` -> schema-only gate can be semantically bypassed by malicious body payloads
-- A05 Security Misconfiguration: `No issue found in scope`
-- A06 Vulnerable Components: `1 moderate` dependency finding, no high/critical
-- A07 Identification/Auth Failures: `N/A in scoped files`
-- A08 Software/Data Integrity Failures: `Finding` -> validation control can be gamed by decoy formatting
-- A09 Security Logging/Monitoring Failures: `Partial` -> error logs present, but no explicit validation-abuse marker
-- A10 SSRF: `N/A in scoped files`
+5. Prompt-injection resistance vs order bypass: PASS (for canonical ordering)
+- Duplicate canonical headers and misordering are rejected.
+- No direct bypass found for canonical ordering enforcement.
 
-## LLM Top 10 (Applicable)
-
-- LLM01 Prompt Injection: `FAIL` (high finding)
-  - Validator enforces syntax shape only, not malicious instruction semantics.
-- LLM02 Insecure Output Handling: `PARTIAL`
-  - Output is trusted after schema check; additional policy scanning is absent.
-- LLM06 Sensitive Information Disclosure: `PASS in scoped code`
-- LLM08 Excessive Agency: `N/A in scoped files`
-
-## SARIF Findings
-
+## SARIF Findings (Security)
 ```json
 {
   "version": "2.1.0",
-  "$schema": "https://json.schemastore.org/sarif-2.1.0.json",
   "runs": [
     {
       "tool": {
@@ -138,47 +75,25 @@ The packet schema gate enforces 11-section presence/order, but it can be bypasse
           "name": "ForgeOS Security Review",
           "rules": [
             {
-              "id": "FORGEOS-SEC-001",
-              "name": "PacketValidationBypassViaDecoyHeaders",
-              "shortDescription": { "text": "Schema gate can be bypassed by ordered decoy headers while malicious body content remains" },
-              "properties": { "tags": ["OWASP:A04", "LLM01", "CWE-20", "CWE-693"] }
-            },
-            {
-              "id": "FORGEOS-SEC-002",
-              "name": "ValidationErrorDetailExposure",
-              "shortDescription": { "text": "Validation error exposes structured internals via public result payload and message" },
-              "properties": { "tags": ["OWASP:A09", "CWE-209"] }
+              "id": "SEC-LLM-HEADER-INJECTION",
+              "shortDescription": { "text": "Non-canonical markdown headers allowed inside section bodies" },
+              "properties": { "severity": "medium", "cwe": "CWE-74" }
             }
           ]
         }
       },
       "results": [
         {
-          "ruleId": "FORGEOS-SEC-001",
-          "level": "error",
+          "ruleId": "SEC-LLM-HEADER-INJECTION",
+          "level": "warning",
           "message": {
-            "text": "validatePacketSections enforces only header presence/order from first matches; attacker can satisfy ordering with decoy headers and place malicious instructions in section bodies."
+            "text": "Section body validation blocks canonical nested headers but does not block arbitrary markdown headings, which can amplify prompt-injection attempts."
           },
           "locations": [
             {
               "physicalLocation": {
                 "artifactLocation": { "uri": "forgeos-server/src/services/packet-validator.ts" },
                 "region": { "startLine": 72 }
-              }
-            }
-          ]
-        },
-        {
-          "ruleId": "FORGEOS-SEC-002",
-          "level": "warning",
-          "message": {
-            "text": "PacketValidationError includes structuredReason and exposes raw ValidationResult on .result; ensure external boundaries do not return this object directly."
-          },
-          "locations": [
-            {
-              "physicalLocation": {
-                "artifactLocation": { "uri": "forgeos-server/src/services/packet-validator.ts" },
-                "region": { "startLine": 36 }
               }
             }
           ]
@@ -189,26 +104,5 @@ The packet schema gate enforces 11-section presence/order, but it can be bypasse
 }
 ```
 
-## Required Remediation (Rework)
-
-1. Strengthen validator semantics beyond header presence/order:
-- Reject duplicate canonical headers.
-- Require exactly one instance of each canonical section.
-- Enforce bounded content per section and reject disallowed patterns (for example destructive git commands, secrets directives, or policy-violating instructions).
-- Parse sections structurally (single-pass parser) instead of first-occurrence regex matching.
-
-2. Add anti-evasion checks:
-- Detect and reject decoy headers that appear before the true packet body.
-- Reject packets where canonical headers appear inside fenced code blocks or quoted payload wrappers.
-
-3. Reduce error detail exposure at external boundary:
-- Keep `PacketValidationError.result` internal-only or redact before any external transport.
-- Return normalized public error codes/messages (`VALIDATION_FAILED`) and keep specifics in internal logs.
-
-4. Extend tests:
-- Add adversarial packet cases: duplicate headers, decoy preamble headers, code-fence header spoofing, malicious directives hidden in body.
-
-## Security Decision
-
-- Decision: `REJECT`
-- Rework reason: High-severity validation bypass risk (`FORGEOS-SEC-001`) remains.
+## Final Decision
+PASS. No critical or high findings identified. One medium hardening recommendation is documented (`SEC-LLM-HEADER-INJECTION`) and does not block stage advancement.
