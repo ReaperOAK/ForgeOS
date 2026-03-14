@@ -22,6 +22,7 @@ import { ticketsGraphSchema, ticketsGraphHandler } from './tickets-graph.js';
 import { ticketsListSchema, ticketsListHandler } from './tickets-list.js';
 import { ticketsGetSchema, ticketsGetHandler } from './tickets-get.js';
 import { ticketsPayloadSchema, ticketsPayloadHandler } from './tickets-payload.js';
+import { ticketsAttachPromptsSchema, ticketsAttachPromptsHandler } from './tickets-attach-prompts.js';
 import { initIndexSchema, initIndexHandler } from './init-index.js';
 import { codeSearchSymbolsSchema, codeSearchSymbolsHandler } from './code-search-symbols.js';
 import { codeBlastRadiusSchema, codeBlastRadiusHandler } from './code-blast-radius.js';
@@ -139,6 +140,14 @@ export function registerTools(server: McpServer): void {
     'Return the full delegation context for an agent: ticket JSON, upstream stage summary, file scope, and memory entries.',
     ticketsPayloadSchema.shape,
     async (params) => ticketsPayloadHandler(params),
+  );
+
+  // ── tickets.attach_prompts ───────────────────────────────────────────────
+  server.tool(
+    'tickets.attach_prompts',
+    'Generate and attach a descriptive agent-execution prompt to READY tickets using local-first LLM strategy (Ollama by default).',
+    ticketsAttachPromptsSchema.shape,
+    async (params) => ticketsAttachPromptsHandler(params),
   );
 
   // ── code.search_symbols ────────────────────────────────────────────────
