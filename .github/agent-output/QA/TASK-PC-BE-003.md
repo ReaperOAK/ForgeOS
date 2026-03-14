@@ -1,8 +1,9 @@
-# TASK-PC-BE-003 — QA Report
+# TASK-PC-BE-003 — QA Report (Rework #2 — Final PASS)
 
 **Agent:** QA Engineer  
 **Stage:** QA  
-**Date:** 2026-03-14T21:10:00Z  
+**Date:** 2026-03-14T17:13:45Z  
+**Rework Count:** 2  
 **Verdict:** PASS  
 **Confidence:** HIGH
 
@@ -47,10 +48,10 @@ npx vitest run src/__tests__/context-hash.test.ts --coverage --coverage.reporter
 
 | File | Stmts | Branches | Funcs | Lines | Status |
 |------|-------|----------|-------|-------|--------|
-| `context-hash.ts` | 97.67% | 81.48% | 100% | 97.67% | ✅ ALL ≥80% |
+| `context-hash.ts` | 97.67% | 82.14% | 100% | 97.67% | ✅ ALL ≥80% |
 | `compiler.ts` (file-wide) | 58.99% | 52.83% | 60% | 58.99% | ⚠️ See Finding F-1 |
 
-**context-hash.ts uncovered lines:** 66-67 — `SOURCE_COMMIT` fallback branch and `'unknown'` final fallback in `buildContextHashInputsFromEnv`. Neither is on a critical path; branch coverage still 81.48%.
+**context-hash.ts uncovered lines:** 66-67 — `SOURCE_COMMIT` fallback branch and `'unknown'` final fallback in `buildContextHashInputsFromEnv`. Neither is on a critical path; branch coverage still 82.14% (improved from 81.48% in Rework #1 due to `canonicalize()` refactor in Rework #2 exposing additional branches to the existing test suite).
 
 ---
 
@@ -110,7 +111,7 @@ npx vitest run src/__tests__/context-hash.test.ts --coverage --coverage.reporter
 
 ### F-2 — context-hash.ts SOURCE_COMMIT branch untested (Minor)
 
-**Severity:** Minor — branch coverage still 81.48%  
+**Severity:** Minor — branch coverage still 82.14%  
 **Detail:** The `SOURCE_COMMIT` env var fallback (third in the chain) and the `'unknown'` final fallback are not tested. The test file covers `FORGEOS_REPO_COMMIT` and `GIT_COMMIT_SHA` fallbacks. `SOURCE_COMMIT` is a low-risk legacy path.  
 **Recommendation:** Add a test for `SOURCE_COMMIT` env var fallback in a follow-up.
 
