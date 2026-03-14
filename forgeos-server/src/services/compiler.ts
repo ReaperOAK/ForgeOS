@@ -19,6 +19,7 @@ import { codeSearchSymbolsHandler } from '../tools/code-search-symbols.js';
 import {
     buildContextHashInputsFromEnv,
     computeContextHash,
+    evaluatePromptFreshness,
 } from './context-hash.js';
 import {
     PromptArchitectService,
@@ -30,7 +31,7 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
 export interface CompiledPromptResult {
     prompt: string;
-    provider: 'gemini' | 'ollama' | 'openai';
+    provider: 'gemini' | 'ollama' | 'openai' | 'cached';
     model: string;
     usedFallback: boolean;
     packetEnvelope: InstructionPacketEnvelope;
@@ -382,6 +383,114 @@ export async function waitForCompileQueueToDrain(maxPasses = 20): Promise<void> 
         }
         await new Promise<void>((resolve) => setTimeout(resolve, 0));
     }
+}
+
+interface StoredPromptSnapshot {
+    compiledPrompt: string | null;
+    contextHash: string | null;
+}
+
+/**
+ * Read the stored compiled_prompt and context_hash from the ticket row.
+ * Used by the freshness gate to decide whether a recompile is needed.
+ */
+async function loadStoredPromptSnapshot(ticketId: string): Promise<StoredPromptSnapshot> {
+    const result = await pool.query<{
+        compiled_prompt: string | null;
+        compiled_prompt_context_hash: string | null;
+    }>(
+        'SELECT compiled_prompt, compiled_prompt_context_hash FROM tickets WHERE ticket_id = $1',
+        [ticketId],
+    );
+
+    const row = result.rows[0];
+    if (!row) {
+        return { compiledPrompt: null, contextHash: null };
+    }
+
+    return {
+        compiledPrompt: row.compiled_prompt ?? null,
+        contextHash: row.compiled_prompt_context_hash ?? null,
+    };
+}
+
+/**
+ * Freshness-gated compile:  skip recompilation when the stored context hash
+ * matches the current one; only call compileAndStoreTicketPrompt when the
+ * hash is stale or missing.
+ *
+ * Returns the cached result (freshnessStatus='fresh') when skipping,
+ * or the newly compiled result when a recompile was performed.
+ */
+export async function compileIfStale(ticketId: string): Promise<CompiledPromptResult> {
+    const hashInputs = buildContextHashInputsFromEnv(process.env, PACKET_VERSION, TEMPLATE_VERSION);
+    const currentHash = computeContextHash(hashInputs);
+
+    const { compiledPrompt: storedPrompt, contextHash: storedHash } = await loadStoredPromptSnapshot(ticketId);
+
+    const freshness = evaluatePromptFreshness({
+        compiledPrompt: storedPrompt,
+        storedContextHash: storedHash,
+        currentContextHash: currentHash,
+    });
+
+    if (!freshness.shouldInvalidateCache) {
+        logger.info(
+            { ticketId, contextHash: currentHash },
+            'compiler: freshness gate: skipping recompile (hash unchanged)',
+        );
+
+        const now = new Date().toISOString();
+        const canonicalContext = {
+            repoCommit: hashInputs.repoCommit,
+            graphVersion: hashInputs.graphVersion,
+            memorySnapshot: hashInputs.memorySnapshot,
+        };
+        const cachedMetadata: PromptPacketMetadata = {
+            compiledAt: now,
+            contextHash: currentHash,
+            packetSchemaVersion: PACKET_SCHEMA_VERSION,
+            packetVersion: PACKET_VERSION,
+            templateVersion: TEMPLATE_VERSION,
+            freshnessStatus: 'fresh',
+            staleReason: null,
+            canonicalContext,
+        };
+
+        return {
+            prompt: storedPrompt!,
+            provider: 'cached',
+            model: 'cached',
+            usedFallback: false,
+            packetEnvelope: createInstructionPacketEnvelope(storedPrompt!, cachedMetadata),
+            ...cachedMetadata,
+        };
+    }
+
+    logger.info(
+        { ticketId, freshnessStatus: freshness.freshnessStatus, staleReason: freshness.staleReason },
+        'compiler: freshness gate: recompiling',
+    );
+
+    return compileAndStoreTicketPrompt(ticketId);
+}
+
+/**
+ * Force-invalidate the compiled prompt cache for a ticket by clearing the stored
+ * context hash.  The next call to compileIfStale will find the ticket missing/stale
+ * and trigger a full recompile.
+ */
+export async function invalidatePromptCache(ticketId: string): Promise<void> {
+    logger.info({ ticketId }, 'compiler: invalidating prompt cache');
+    await pool.query(
+        `UPDATE tickets
+         SET compiled_prompt_context_hash = NULL,
+             compiled_prompt_freshness_status = 'missing',
+             compiled_prompt_stale_reason = 'not_compiled',
+             compiled_prompt_freshness_checked_at = NOW()
+         WHERE ticket_id = $1`,
+        [ticketId],
+    );
 }
 
 async function generateWithGemini(
