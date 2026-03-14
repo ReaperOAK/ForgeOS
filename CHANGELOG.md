@@ -8,6 +8,20 @@ Format based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
 ### Added
 
+- **11-Section Packet Validation** (TASK-PC-BE-004) — Every compiled prompt
+  packet is now validated against a strict 11-section schema before it is
+  stored. `validatePacketSections(text)` in
+  `forgeos-server/src/services/packet-validator.ts` checks that all required
+  sections (ROLE, TICKET, SYSTEM CONSTRAINTS, HISTORY, LEARNINGS, BEST
+  PRACTICES, CONTEXT LOCATIONS, YOUR EXACT TASK, EXECUTION PLAN, EDGE CASES,
+  POST-COMPLETION) are present exactly once, in canonical order, with
+  non-empty bodies and no nested canonical headers. On failure,
+  `compileTicketPrompt` throws `PacketValidationError` — which carries a
+  structured `ValidationResult` for logging and exposes `toPublicMessage()` for
+  safe client-facing error strings. Failed compilations are never persisted.
+  27 tests in `packet-validator.test.ts`, 93.56 % line coverage, 91.83 %
+  branch coverage.
+
 - **Deterministic Context Hash Freshness Gate** (TASK-PC-BE-003) — Added
   cache-freshness gate controls to prompt compilation in
   `forgeos-server/src/services/compiler.ts`. `compileIfStale(ticketId)` now

@@ -33,6 +33,23 @@ export interface ValidationResult {
     structuredReason: string;
 }
 
+/**
+ * Thrown by `compileTicketPrompt` (and related helpers) when a compiled prompt
+ * packet fails the 11-section structural validation enforced by
+ * `validatePacketSections`.
+ *
+ * The full machine-readable `ValidationResult` is available on the `result`
+ * property for structured logging and debugging. Use `toPublicMessage()` when
+ * surfacing a failure message at an external or transport boundary.
+ *
+ * @example
+ * ```ts
+ * const result = validatePacketSections(prompt);
+ * if (!result.valid) {
+ *   throw new PacketValidationError(result);
+ * }
+ * ```
+ */
 export class PacketValidationError extends Error {
     public readonly result: ValidationResult;
 
@@ -45,6 +62,8 @@ export class PacketValidationError extends Error {
     /**
      * Returns a sanitized, transport-safe message for external boundaries.
      * Internal validation details remain available on `result` for logging/debugging.
+     *
+     * @returns A fixed, non-leaking error string safe to forward to API clients.
      */
     public toPublicMessage(): string {
         return 'Packet validation failed. Packet structure is invalid.';
@@ -204,8 +223,24 @@ export function validateSectionBodies(sections: Map<string, string>): Validation
  * Validate that a compiled packet contains all 11 required sections in the
  * exact canonical order specified in architecture doc §5.1.
  *
- * Returns a `ValidationResult` with `valid: true` on success or a structured
- * failure describing which sections are missing or misordered.
+ * The 11 required sections are (in order):
+ * ROLE → TICKET → SYSTEM CONSTRAINTS → HISTORY → LEARNINGS → BEST PRACTICES
+ * → CONTEXT LOCATIONS → YOUR EXACT TASK → EXECUTION PLAN → EDGE CASES
+ * → POST-COMPLETION.
+ *
+ * Each section must:
+ * - Appear exactly once (duplicates are rejected).
+ * - Appear in the canonical order defined above.
+ * - Have a non-empty body.
+ * - Not contain a nested canonical section header in its body.
+ *
+ * This function never throws. The caller is responsible for throwing
+ * `PacketValidationError` when `valid` is `false`.
+ *
+ * @param text - The full rendered packet text to validate.
+ * @returns A `ValidationResult` with `valid: true` on success, or
+ *   `valid: false` with `missingSections`, `misordered`, and
+ *   `structuredReason` describing the first detected failure.
  */
 export function validatePacketSections(text: string): ValidationResult {
     if (!text || text.trim().length === 0) {
