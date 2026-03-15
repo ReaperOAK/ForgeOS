@@ -2535,3 +2535,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Security/TASK-PC-BE-013.md
 - **Decisions:** PASS — 0 critical, 0 high. M1: LLM01 ticket content unfiltered in user-turn (risk accepted, insider-only). M2: compileQueue unbounded (risk accepted, internal callers). All SQL parameterized. SHA-256 context hash. SBOM 365 comps, 0 CVEs.
 - **Timestamp:** 2026-03-15T21:30:00Z
+
+### [TASK-PC-BE-012] — BACKEND Rework Complete
+- **Artifacts:** forgeos-server/src/__tests__/memory-snapshot-versioning.test.ts
+- **Decisions:** Added 16 regression tests + mockPoolQuery plumbing. Covered normalizeLessonRows edge cases, sortEntries tiebreakers, loadMemorySnapshotForTicket, safeSearchLessons malformed paths, queueCompileTicketPrompt/drain, invalidatePromptCache, compileIfStale cached+stale paths. compiler.ts: 74.09%→86.44%, memory-provider.ts: 78.52%→88.59%. No implementation files modified.
+- **Timestamp:** 2026-03-15T22:31:00Z
