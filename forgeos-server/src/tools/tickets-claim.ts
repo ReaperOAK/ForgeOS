@@ -44,6 +44,11 @@ export const ticketsClaimSchema = z.object({
   operator: z.string().optional().describe('Human operator name'),
   lease_minutes: z.number().int().min(5).max(120).default(30)
     .describe('Lease duration in minutes'),
+  freshness_policy: z.enum(['strict', 'permissive']).default('permissive')
+    .describe(
+      "Freshness gate mode — 'strict' surfaces a warning in the response when the compiled "
+      + "prompt is stale or missing; 'permissive' (default) triggers a background recompile silently",
+    ),
 });
 
 /**
@@ -76,7 +81,7 @@ export const ticketsClaimSchema = z.object({
 export async function ticketsClaimHandler(
   params: z.infer<typeof ticketsClaimSchema>,
 ): Promise<CallToolResult> {
-  const { ticket_id, agent_name, machine_id, operator, lease_minutes } = params;
+  const { ticket_id, agent_name, machine_id, operator, lease_minutes, freshness_policy } = params;
 
   logger.info({ ticket_id, agent_name, machine_id }, 'tickets.claim called');
 
@@ -163,6 +168,23 @@ export async function ticketsClaimHandler(
         ? 'claim-stale-compiled-prompt'
         : 'claim-missing-compiled-prompt';
       queueCompileTicketPrompt(ticket_id, trigger);
+
+      if (freshness_policy === 'strict') {
+        logger.warn(
+          { ticket_id, freshness_status: freshness.freshnessStatus, stale_reason: freshness.staleReason },
+          'tickets.claim: strict freshness gate — compiled prompt requires recompile before use',
+        );
+        return {
+          content: [{
+            type: 'text',
+            text: JSON.stringify({
+              ...output,
+              freshness_warning: `Compiled prompt is ${freshness.freshnessStatus}`
+                + ` (${freshness.staleReason ?? 'not_compiled'}); recompile has been queued.`,
+            }),
+          }],
+        };
+      }
     }
 
     return { content: [{ type: 'text', text: JSON.stringify(output) }] };
