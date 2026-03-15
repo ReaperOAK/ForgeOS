@@ -22,6 +22,11 @@ import {
     evaluatePromptFreshness,
 } from './context-hash.js';
 import {
+    buildCognitionSnapshot,
+    type CognitionContextLocation,
+    type CognitionPacketWarning,
+} from './cognition-provider.js';
+import {
     validatePacketSections,
     PacketValidationError,
 } from './packet-validator.js';
@@ -113,6 +118,8 @@ interface PromptPacketMetadata {
         graphVersion: string;
         memorySnapshot: string;
     };
+    contextLocations: CognitionContextLocation[];
+    warnings: CognitionPacketWarning[];
 }
 
 export interface InstructionPacketEnvelope {
@@ -127,7 +134,30 @@ export interface InstructionPacketEnvelope {
         graphVersion: string;
         memorySnapshot: string;
     };
+    contextLocations: CognitionContextLocation[];
+    warnings: CognitionPacketWarning[];
     compiledPrompt: string;
+}
+
+interface InvestigationResult extends Record<string, unknown> {
+    ticket_id: string;
+    ticket: TicketShape;
+    payload_context: {
+        file_scope: string[];
+        memory_entries_count: number;
+        graph_snapshot_version: string;
+        partial_context: boolean;
+        warnings: CognitionPacketWarning[];
+    };
+    lessons: unknown[];
+    blast_radius: Array<Record<string, unknown>>;
+    symbol_hints: Array<Record<string, unknown>>;
+    context_locations: CognitionContextLocation[];
+    context_warnings: CognitionPacketWarning[];
+    cognition_snapshot: {
+        graphVersion: string;
+        partial: boolean;
+    };
 }
 
 interface QueuedCompileJob {
@@ -151,7 +181,11 @@ export async function compileTicketPrompt(ticketId: string): Promise<CompiledPro
     logger.info({ ticketId }, 'compiler: compiling ticket prompt');
 
     const investigation = await gatherInvestigation(ticketId);
-    const packetMetadata = createPacketMetadata();
+    const packetMetadata = createPacketMetadata(new Date(), {
+        graphVersion: investigation.cognition_snapshot.graphVersion,
+        contextLocations: investigation.context_locations,
+        warnings: investigation.context_warnings,
+    });
 
     const geminiResult = await tryGenerateGeminiPrompt(ticketId, investigation);
     if (geminiResult !== null) {
@@ -345,6 +379,8 @@ function createInstructionPacketEnvelope(
         compiledAt: metadata.compiledAt,
         contextHash: metadata.contextHash,
         canonicalContext: metadata.canonicalContext,
+        contextLocations: metadata.contextLocations,
+        warnings: metadata.warnings,
         compiledPrompt,
     };
 }
@@ -471,6 +507,7 @@ function isCompileWorkerBusy(): boolean {
 interface StoredPromptSnapshot {
     compiledPrompt: string | null;
     contextHash: string | null;
+    packetEnvelope: Partial<Pick<InstructionPacketEnvelope, 'contextLocations' | 'warnings'>>;
 }
 
 /**
@@ -481,19 +518,23 @@ async function loadStoredPromptSnapshot(ticketId: string): Promise<StoredPromptS
     const result = await pool.query<{
         compiled_prompt: string | null;
         compiled_prompt_context_hash: string | null;
+        metadata?: Record<string, unknown> | null;
     }>(
-        'SELECT compiled_prompt, compiled_prompt_context_hash FROM tickets WHERE ticket_id = $1',
+        'SELECT compiled_prompt, compiled_prompt_context_hash, metadata FROM tickets WHERE ticket_id = $1',
         [ticketId],
     );
 
     const row = result.rows[0];
     if (!row) {
-        return { compiledPrompt: null, contextHash: null };
+        return { compiledPrompt: null, contextHash: null, packetEnvelope: {} };
     }
+
+    const packetEnvelope = extractStoredPacketEnvelope(row.metadata);
 
     return {
         compiledPrompt: row.compiled_prompt ?? null,
         contextHash: row.compiled_prompt_context_hash ?? null,
+        packetEnvelope,
     };
 }
 
@@ -513,7 +554,11 @@ export async function compileIfStale(ticketId: string): Promise<CompiledPromptRe
     const hashInputs = buildContextHashInputsFromEnv(process.env, PACKET_VERSION, TEMPLATE_VERSION);
     const currentHash = computeContextHash(hashInputs);
 
-    const { compiledPrompt: storedPrompt, contextHash: storedHash } = await loadStoredPromptSnapshot(ticketId);
+    const {
+        compiledPrompt: storedPrompt,
+        contextHash: storedHash,
+        packetEnvelope: storedPacketEnvelope,
+    } = await loadStoredPromptSnapshot(ticketId);
 
     const freshness = evaluatePromptFreshness({
         compiledPrompt: storedPrompt,
@@ -542,6 +587,8 @@ export async function compileIfStale(ticketId: string): Promise<CompiledPromptRe
             freshnessStatus: 'fresh',
             staleReason: null,
             canonicalContext,
+            contextLocations: storedPacketEnvelope.contextLocations ?? [],
+            warnings: storedPacketEnvelope.warnings ?? [],
         };
 
         return {
@@ -639,8 +686,17 @@ function getFirstCandidateParts(response: Record<string, unknown>): unknown[] | 
     return Array.isArray(parts) ? parts : null;
 }
 
-function createPacketMetadata(now: Date = new Date()): PromptPacketMetadata {
-    const hashInputs = buildContextHashInputsFromEnv(process.env, PACKET_VERSION, TEMPLATE_VERSION);
+function createPacketMetadata(
+    now: Date = new Date(),
+    options: {
+        graphVersion?: string;
+        contextLocations?: CognitionContextLocation[];
+        warnings?: CognitionPacketWarning[];
+    } = {},
+): PromptPacketMetadata {
+    const hashInputs = buildContextHashInputsFromEnv(process.env, PACKET_VERSION, TEMPLATE_VERSION, {
+        graphVersion: options.graphVersion,
+    });
 
     return {
         compiledAt: now.toISOString(),
@@ -655,10 +711,12 @@ function createPacketMetadata(now: Date = new Date()): PromptPacketMetadata {
             graphVersion: hashInputs.graphVersion,
             memorySnapshot: hashInputs.memorySnapshot,
         },
+        contextLocations: options.contextLocations ?? [],
+        warnings: options.warnings ?? [],
     };
 }
 
-async function gatherInvestigation(ticketId: string): Promise<Record<string, unknown>> {
+async function gatherInvestigation(ticketId: string): Promise<InvestigationResult> {
     const [ticketRes, payloadRes] = await Promise.all([
         ticketsGetHandler({ ticket_id: ticketId }),
         ticketsPayloadHandler({ ticket_id: ticketId, agent_role: 'PromptArchitect' }),
@@ -687,23 +745,55 @@ async function gatherInvestigation(ticketId: string): Promise<Record<string, unk
     const instructionJson = parseToolText(instructionRes);
 
     const contextFiles = getContextFiles(payload.file_scope);
-    const blastSummaries = await gatherBlastSummaries(contextFiles);
-    const symbolHints = await gatherSymbolHints(ticket.title, ticket.description ?? '');
+    const cognitionSnapshot = await buildCognitionSnapshot({
+        graphVersion: process.env.FORGEOS_GRAPH_VERSION ?? 'unknown',
+        fileScope: contextFiles,
+        timeoutMs: getCognitionTimeoutMs(process.env.FORGEOS_COGNITION_TIMEOUT_MS),
+        fetchSupplementalContext: async () => {
+            const [blastRadius, symbolHints] = await Promise.all([
+                gatherBlastSummaries(contextFiles),
+                gatherSymbolHints(ticket.title, ticket.description ?? ''),
+            ]);
+
+            return {
+                blastRadius,
+                symbolHints,
+            };
+        },
+    });
 
     return {
         ticket_id: ticket.ticket_id ?? ticketId,
         ticket,
         payload_context: {
-            file_scope: payload.file_scope ?? [],
+            file_scope: contextFiles,
             memory_entries_count: Array.isArray(payload.memory_entries) ? payload.memory_entries.length : 0,
+            graph_snapshot_version: cognitionSnapshot.graphVersion,
+            partial_context: cognitionSnapshot.partial,
+            warnings: cognitionSnapshot.warnings,
         },
         lessons: [
             ...(Array.isArray(lessonsJson.lessons) ? lessonsJson.lessons : []),
             ...(Array.isArray(instructionJson.lessons) ? instructionJson.lessons : []),
         ],
-        blast_radius: blastSummaries,
-        symbol_hints: symbolHints,
+        blast_radius: cognitionSnapshot.supplemental.blastRadius,
+        symbol_hints: cognitionSnapshot.supplemental.symbolHints,
+        context_locations: cognitionSnapshot.locations,
+        context_warnings: cognitionSnapshot.warnings,
+        cognition_snapshot: {
+            graphVersion: cognitionSnapshot.graphVersion,
+            partial: cognitionSnapshot.partial,
+        },
     };
+}
+
+function getCognitionTimeoutMs(rawValue: string | undefined): number | undefined {
+    if (typeof rawValue !== 'string' || rawValue.trim().length === 0) {
+        return undefined;
+    }
+
+    const parsed = Number.parseInt(rawValue, 10);
+    return Number.isFinite(parsed) ? parsed : undefined;
 }
 
 function buildLessonQuery(ticket: TicketShape, ticketId: string): string {
@@ -783,15 +873,14 @@ function extractSymbolTerms(title: string, description: string): string[] {
 
 function mapInvestigationToFallbackContext(investigation: Record<string, unknown>): PromptGenerationContext {
     const ticketObj = (investigation.ticket ?? {}) as Record<string, unknown>;
-    const payload = (investigation.payload_context ?? {}) as Record<string, unknown>;
-    const fileScope = normalizeStringArray(payload.file_scope);
     const history = parseHistory(ticketObj.history);
-    const contextFiles = mapContextFiles(fileScope);
+    const contextFiles = mapContextFiles(investigation.context_locations);
     const lessons = mapLessons(investigation.lessons);
     const ticket = mapTicketSummary(ticketObj);
     const exactTask = typeof ticketObj.description === 'string'
         ? ticketObj.description
         : 'NOT FOUND — agent must investigate';
+    const warnings = mapWarnings(investigation.context_warnings);
 
     return {
         ticket,
@@ -808,7 +897,9 @@ function mapInvestigationToFallbackContext(investigation: Record<string, unknown
             'Implement surgically within scoped files.',
             'Run validation checks before completion.',
         ],
-        edgeCases: ['Missing historical context or lessons in memory.'],
+        edgeCases: warnings.length > 0
+            ? warnings
+            : ['Missing historical context or lessons in memory.'],
         nextStage: 'NOT FOUND — agent must investigate',
         validationChecks: ['Run tests', 'Run lint', 'Run type checks'],
     };
@@ -821,11 +912,28 @@ function normalizeStringArray(value: unknown): string[] {
     return value.filter((item): item is string => typeof item === 'string');
 }
 
-function mapContextFiles(fileScope: string[]): PromptContextFile[] {
-    if (fileScope.length === 0) {
+function mapContextFiles(contextLocationsRaw: unknown): PromptContextFile[] {
+    if (!Array.isArray(contextLocationsRaw) || contextLocationsRaw.length === 0) {
         return [{ path: 'NOT FOUND — agent must investigate', reason: 'No file scope returned.' }];
     }
-    return fileScope.map((path) => ({ path, reason: 'Derived from tickets.payload file_scope.' }));
+
+    return contextLocationsRaw
+        .filter(isRecord)
+        .map((entry) => ({
+            path: typeof entry.path === 'string' ? entry.path : 'NOT FOUND — agent must investigate',
+            reason: typeof entry.reason === 'string' ? entry.reason : 'NOT FOUND — agent must investigate',
+        }));
+}
+
+function mapWarnings(warningsRaw: unknown): string[] {
+    if (!Array.isArray(warningsRaw)) {
+        return [];
+    }
+
+    return warningsRaw
+        .filter(isRecord)
+        .map((warning) => warning.message)
+        .filter((message): message is string => typeof message === 'string');
 }
 
 function mapLessons(lessonsRaw: unknown): string[] {
@@ -876,4 +984,45 @@ function parseHistory(historyRaw: unknown): PromptHistoryEntry[] {
 
 function isRecord(value: unknown): value is Record<string, unknown> {
     return Boolean(value) && typeof value === 'object';
+}
+
+function extractStoredPacketEnvelope(
+    metadata: Record<string, unknown> | null | undefined,
+): Partial<Pick<InstructionPacketEnvelope, 'contextLocations' | 'warnings'>> {
+    if (!metadata || typeof metadata !== 'object') {
+        return {};
+    }
+
+    const compiledPrompt = metadata.compiled_prompt;
+    if (!compiledPrompt || typeof compiledPrompt !== 'object') {
+        return {};
+    }
+
+    const packetEnvelope = (compiledPrompt as Record<string, unknown>).packet_envelope;
+    if (!packetEnvelope || typeof packetEnvelope !== 'object') {
+        return {};
+    }
+
+    const record = packetEnvelope as Record<string, unknown>;
+    return {
+        contextLocations: Array.isArray(record.contextLocations)
+            ? record.contextLocations.filter(isContextLocation)
+            : undefined,
+        warnings: Array.isArray(record.warnings)
+            ? record.warnings.filter(isPacketWarning)
+            : undefined,
+    };
+}
+
+function isContextLocation(value: unknown): value is CognitionContextLocation {
+    return isRecord(value)
+        && typeof value.path === 'string'
+        && typeof value.reason === 'string';
+}
+
+function isPacketWarning(value: unknown): value is CognitionPacketWarning {
+    return isRecord(value)
+        && value.code === 'partial_context'
+        && typeof value.message === 'string'
+        && value.source === 'cognition_provider';
 }

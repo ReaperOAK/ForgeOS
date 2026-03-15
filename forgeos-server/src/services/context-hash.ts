@@ -31,6 +31,12 @@ export interface HashEnvironment {
     FORGEOS_MEMORY_SNAPSHOT_VERSION?: string;
 }
 
+export interface ContextHashOverrides {
+    repoCommit?: string;
+    graphVersion?: string;
+    memorySnapshot?: string;
+}
+
 export function normalizeCanonicalToken(value: string): string {
     return value.trim().replace(/[|\n\r\t]/g, '_');
 }
@@ -59,15 +65,19 @@ export function buildContextHashInputsFromEnv(
     env: HashEnvironment = process.env,
     packetSchema: string,
     templateVersion: string,
+    overrides: ContextHashOverrides = {},
 ): ContextHashInputs {
     const repoCommit = normalizeCanonicalToken(
-        env.FORGEOS_REPO_COMMIT
+        overrides.repoCommit
+        ?? env.FORGEOS_REPO_COMMIT
         ?? env.GIT_COMMIT_SHA
         ?? env.SOURCE_COMMIT
         ?? 'unknown',
     );
-    const graphVersion = normalizeCanonicalToken(env.FORGEOS_GRAPH_VERSION ?? 'unknown');
-    const memorySnapshot = normalizeCanonicalToken(env.FORGEOS_MEMORY_SNAPSHOT_VERSION ?? 'unknown');
+    const graphVersion = normalizeCanonicalToken(overrides.graphVersion ?? env.FORGEOS_GRAPH_VERSION ?? 'unknown');
+    const memorySnapshot = normalizeCanonicalToken(
+        overrides.memorySnapshot ?? env.FORGEOS_MEMORY_SNAPSHOT_VERSION ?? 'unknown',
+    );
 
     return {
         repoCommit,
