@@ -1,0 +1,92 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Documents/CommitteeSpecifications/2.1.0/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "ForgeOS CI Reviewer",
+          "version": "1.0.0",
+          "informationUri": "https://github.com/forgeos/forgeos",
+          "rules": [
+            {
+              "id": "CI-LINT",
+              "name": "LintCheck",
+              "shortDescription": { "text": "ESLint zero-error/zero-warning gate" }
+            },
+            {
+              "id": "CI-TSC",
+              "name": "TypeCheck",
+              "shortDescription": { "text": "TypeScript strict type check (noEmit)" }
+            },
+            {
+              "id": "CI-COV",
+              "name": "CoverageGate",
+              "shortDescription": { "text": "Test coverage >= 80% on changed files" }
+            },
+            {
+              "id": "CI-CC",
+              "name": "CyclomaticComplexity",
+              "shortDescription": { "text": "Cyclomatic complexity per function <= 10" }
+            },
+            {
+              "id": "OC-003",
+              "name": "WrapPrimitives",
+              "shortDescription": { "text": "Object Calisthenics rule 3: wrap primitives in domain types" }
+            },
+            {
+              "id": "CI-AF001",
+              "name": "ArchitectureFitnessDirection",
+              "shortDescription": { "text": "AF-001: dependency direction inner → outer only" }
+            },
+            {
+              "id": "CI-AF005",
+              "name": "ArchitectureFitnessCoverage",
+              "shortDescription": { "text": "AF-005: test coverage >= 80% on changed files" }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "OC-003",
+          "level": "note",
+          "message": {
+            "text": "Parameters 'ticketId: string' and 'inputHash: string' are unboxed primitives. Consider domain wrapper types (e.g., TicketId, InputHash) to improve type safety at call sites. Non-blocking suggestion for a data-layer helper."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "forgeos-server/src/db/compile-queue.ts"
+                },
+                "region": {
+                  "startLine": 57,
+                  "startColumn": 5
+                }
+              }
+            }
+          ]
+        }
+      ],
+      "artifacts": [
+        { "location": { "uri": "forgeos-server/src/db/migrations/009-prompt-compile-queue.sql" } },
+        { "location": { "uri": "forgeos-server/src/types/index.ts" } },
+        { "location": { "uri": "forgeos-server/src/db/index.ts" } },
+        { "location": { "uri": "forgeos-server/src/db/compile-queue.ts" } },
+        { "location": { "uri": "forgeos-server/src/__tests__/compile-queue.test.ts" } },
+        { "location": { "uri": "forgeos-server/src/__tests__/compile-queue-migration.test.ts" } }
+      ],
+      "invocations": [
+        {
+          "executionSuccessful": true,
+          "toolExecutionNotifications": [
+            {
+              "message": { "text": "CI PASS — Score 99/100 — 0 critical, 0 warnings, 1 suggestion. All quality gates satisfied." }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
