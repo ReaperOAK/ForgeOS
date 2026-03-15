@@ -13,7 +13,6 @@ import { pool } from '../db/pool.js';
 import { logger } from '../middleware/logging.js';
 import { ticketsGetHandler } from '../tools/tickets-get.js';
 import { ticketsPayloadHandler } from '../tools/tickets-payload.js';
-import { memorySearchLessonsHandler } from '../tools/memory-search-lessons.js';
 import { codeBlastRadiusHandler } from '../tools/code-blast-radius.js';
 import { codeSearchSymbolsHandler } from '../tools/code-search-symbols.js';
 import {
@@ -36,6 +35,12 @@ import {
     type PromptHistoryEntry,
     type PromptContextFile,
 } from './prompt-architect-service.js';
+import {
+    loadMemorySnapshotForTicket,
+    retrieveMemorySnapshot,
+    type MemorySnapshot,
+    type MemorySnapshotCompleteness,
+} from './memory-provider.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
 export interface CompiledPromptResult {
@@ -49,6 +54,9 @@ export interface CompiledPromptResult {
     packetSchemaVersion: number;
     packetVersion: string;
     templateVersion: string;
+    memorySnapshotVersion: string;
+    memoryCompleteness: MemorySnapshotCompleteness;
+    memoryWarnings: string[];
     freshnessStatus: 'fresh' | 'stale' | 'missing';
     staleReason: string | null;
     canonicalContext: {
@@ -111,6 +119,9 @@ interface PromptPacketMetadata {
     packetSchemaVersion: number;
     packetVersion: string;
     templateVersion: string;
+    memorySnapshotVersion: string;
+    memoryCompleteness: MemorySnapshotCompleteness;
+    memoryWarnings: string[];
     freshnessStatus: 'fresh' | 'stale' | 'missing';
     staleReason: string | null;
     canonicalContext: {
@@ -129,6 +140,9 @@ export interface InstructionPacketEnvelope {
     templateVersion: string;
     compiledAt: string;
     contextHash: string;
+    memorySnapshotVersion: string;
+    memoryCompleteness: MemorySnapshotCompleteness;
+    memoryWarnings: string[];
     canonicalContext: {
         repoCommit: string;
         graphVersion: string;
@@ -183,6 +197,7 @@ export async function compileTicketPrompt(ticketId: string): Promise<CompiledPro
     const investigation = await gatherInvestigation(ticketId);
     const packetMetadata = createPacketMetadata(new Date(), {
         graphVersion: investigation.cognition_snapshot.graphVersion,
+        memorySnapshot: getMemorySnapshotFromInvestigation(investigation),
         contextLocations: investigation.context_locations,
         warnings: investigation.context_warnings,
     });
@@ -343,6 +358,9 @@ async function persistCompiledPromptAtomic(ticketId: string, compiled: CompiledP
                     packet_schema_version: compiled.packetSchemaVersion,
                     packet_version: compiled.packetVersion,
                     template_version: compiled.templateVersion,
+                    memory_snapshot_version: compiled.memorySnapshotVersion,
+                    memory_completeness: compiled.memoryCompleteness,
+                    memory_warnings: compiled.memoryWarnings,
                     freshness_status: compiled.freshnessStatus,
                     stale_reason: compiled.staleReason,
                     canonical_context: {
@@ -378,6 +396,9 @@ function createInstructionPacketEnvelope(
         templateVersion: metadata.templateVersion,
         compiledAt: metadata.compiledAt,
         contextHash: metadata.contextHash,
+        memorySnapshotVersion: metadata.memorySnapshotVersion,
+        memoryCompleteness: metadata.memoryCompleteness,
+        memoryWarnings: metadata.memoryWarnings,
         canonicalContext: metadata.canonicalContext,
         contextLocations: metadata.contextLocations,
         warnings: metadata.warnings,
@@ -551,7 +572,10 @@ async function loadStoredPromptSnapshot(ticketId: string): Promise<StoredPromptS
  * missing or stale.
  */
 export async function compileIfStale(ticketId: string): Promise<CompiledPromptResult> {
-    const hashInputs = buildContextHashInputsFromEnv(process.env, PACKET_VERSION, TEMPLATE_VERSION);
+    const memorySnapshot = await loadMemorySnapshotForTicket(ticketId);
+    const hashInputs = buildContextHashInputsFromEnv(process.env, PACKET_VERSION, TEMPLATE_VERSION, {
+        memorySnapshotVersion: memorySnapshot.version,
+    });
     const currentHash = computeContextHash(hashInputs);
 
     const {
@@ -584,6 +608,9 @@ export async function compileIfStale(ticketId: string): Promise<CompiledPromptRe
             packetSchemaVersion: PACKET_SCHEMA_VERSION,
             packetVersion: PACKET_VERSION,
             templateVersion: TEMPLATE_VERSION,
+            memorySnapshotVersion: memorySnapshot.version,
+            memoryCompleteness: memorySnapshot.completeness,
+            memoryWarnings: memorySnapshot.warnings,
             freshnessStatus: 'fresh',
             staleReason: null,
             canonicalContext,
@@ -690,12 +717,14 @@ function createPacketMetadata(
     now: Date = new Date(),
     options: {
         graphVersion?: string;
+        memorySnapshot?: MemorySnapshot;
         contextLocations?: CognitionContextLocation[];
         warnings?: CognitionPacketWarning[];
     } = {},
 ): PromptPacketMetadata {
     const hashInputs = buildContextHashInputsFromEnv(process.env, PACKET_VERSION, TEMPLATE_VERSION, {
         graphVersion: options.graphVersion,
+        memorySnapshotVersion: options.memorySnapshot?.version,
     });
 
     return {
@@ -704,6 +733,9 @@ function createPacketMetadata(
         packetSchemaVersion: PACKET_SCHEMA_VERSION,
         packetVersion: PACKET_VERSION,
         templateVersion: TEMPLATE_VERSION,
+        memorySnapshotVersion: options.memorySnapshot?.version ?? hashInputs.memorySnapshotVersion ?? hashInputs.memorySnapshot,
+        memoryCompleteness: options.memorySnapshot?.completeness ?? 'reduced',
+        memoryWarnings: options.memorySnapshot?.warnings ?? ['memory-snapshot-missing'],
         freshnessStatus: 'fresh',
         staleReason: null,
         canonicalContext: {
@@ -728,21 +760,7 @@ async function gatherInvestigation(ticketId: string): Promise<InvestigationResul
     const ticket = (ticketJson.ticket ?? {}) as TicketShape;
     const payload = payloadJson as PayloadShape;
     const lessonQuery = buildLessonQuery(ticket, ticketId);
-
-    const lessonsRes = await memorySearchLessonsHandler({
-        query: lessonQuery,
-        category: undefined,
-        limit: 5,
-        threshold: 0.55,
-    });
-    const instructionRes = await memorySearchLessonsHandler({
-        query: lessonQuery,
-        category: 'instruction',
-        limit: 5,
-        threshold: 0.5,
-    });
-    const lessonsJson = parseToolText(lessonsRes);
-    const instructionJson = parseToolText(instructionRes);
+    const memorySnapshot = await retrieveMemorySnapshot(lessonQuery);
 
     const contextFiles = getContextFiles(payload.file_scope);
     const cognitionSnapshot = await buildCognitionSnapshot({
@@ -773,9 +791,16 @@ async function gatherInvestigation(ticketId: string): Promise<InvestigationResul
             warnings: cognitionSnapshot.warnings,
         },
         lessons: [
-            ...(Array.isArray(lessonsJson.lessons) ? lessonsJson.lessons : []),
-            ...(Array.isArray(instructionJson.lessons) ? instructionJson.lessons : []),
+            ...memorySnapshot.learningEntries,
+            ...memorySnapshot.bestPracticeEntries,
         ],
+        memory_snapshot: {
+            version: memorySnapshot.version,
+            completeness: memorySnapshot.completeness,
+            warnings: memorySnapshot.warnings,
+            learnings: memorySnapshot.learnings,
+            best_practices: memorySnapshot.bestPractices,
+        },
         blast_radius: cognitionSnapshot.supplemental.blastRadius,
         symbol_hints: cognitionSnapshot.supplemental.symbolHints,
         context_locations: cognitionSnapshot.locations,
@@ -875,18 +900,27 @@ function mapInvestigationToFallbackContext(investigation: Record<string, unknown
     const ticketObj = (investigation.ticket ?? {}) as Record<string, unknown>;
     const history = parseHistory(ticketObj.history);
     const contextFiles = mapContextFiles(investigation.context_locations);
-    const lessons = mapLessons(investigation.lessons);
+    const memorySnapshot = parseMemorySnapshot(investigation.memory_snapshot);
+    const lessons = memorySnapshot?.learnings ?? mapLessons(investigation.lessons);
     const ticket = mapTicketSummary(ticketObj);
     const exactTask = typeof ticketObj.description === 'string'
         ? ticketObj.description
         : 'NOT FOUND — agent must investigate';
     const warnings = mapWarnings(investigation.context_warnings);
+    const edgeCases = warnings.length > 0
+        ? warnings
+        : ['Missing historical context or lessons in memory.'];
+
+    if (memorySnapshot?.completeness === 'reduced') {
+        edgeCases.unshift('Memory snapshot completeness is reduced; treat memory guidance as partial.');
+    }
 
     return {
         ticket,
         history,
         learnings: lessons,
         bestPractices: [
+            ...(memorySnapshot?.bestPractices ?? []),
             'Respect SDLC stage ownership and evidence requirements.',
             'Keep edits within ticket file scope and avoid cross-ticket changes.',
         ],
@@ -897,11 +931,44 @@ function mapInvestigationToFallbackContext(investigation: Record<string, unknown
             'Implement surgically within scoped files.',
             'Run validation checks before completion.',
         ],
-        edgeCases: warnings.length > 0
-            ? warnings
-            : ['Missing historical context or lessons in memory.'],
+        edgeCases,
         nextStage: 'NOT FOUND — agent must investigate',
         validationChecks: ['Run tests', 'Run lint', 'Run type checks'],
+    };
+}
+
+function getMemorySnapshotFromInvestigation(investigation: Record<string, unknown>): MemorySnapshot {
+    const memorySnapshot = parseMemorySnapshot(investigation.memory_snapshot);
+
+    return {
+        query: typeof investigation.ticket_id === 'string' ? investigation.ticket_id : 'unknown',
+        version: memorySnapshot?.version ?? 'unknown',
+        completeness: memorySnapshot?.completeness ?? 'reduced',
+        warnings: memorySnapshot?.warnings ?? ['memory-snapshot-missing'],
+        learnings: memorySnapshot?.learnings ?? [],
+        bestPractices: memorySnapshot?.bestPractices ?? [],
+        learningEntries: [],
+        bestPracticeEntries: [],
+    };
+}
+
+function parseMemorySnapshot(memorySnapshotRaw: unknown): {
+    version: string;
+    completeness: MemorySnapshotCompleteness;
+    warnings: string[];
+    learnings: string[];
+    bestPractices: string[];
+} | null {
+    if (!isRecord(memorySnapshotRaw)) {
+        return null;
+    }
+
+    return {
+        version: typeof memorySnapshotRaw.version === 'string' ? memorySnapshotRaw.version : 'unknown',
+        completeness: memorySnapshotRaw.completeness === 'complete' ? 'complete' : 'reduced',
+        warnings: normalizeStringArray(memorySnapshotRaw.warnings),
+        learnings: normalizeStringArray(memorySnapshotRaw.learnings),
+        bestPractices: normalizeStringArray(memorySnapshotRaw.best_practices),
     };
 }
 
@@ -921,8 +988,20 @@ function mapContextFiles(contextLocationsRaw: unknown): PromptContextFile[] {
         .filter(isRecord)
         .map((entry) => ({
             path: typeof entry.path === 'string' ? entry.path : 'NOT FOUND — agent must investigate',
-            reason: typeof entry.reason === 'string' ? entry.reason : 'NOT FOUND — agent must investigate',
+            reason: normalizeContextReason(entry.reason),
         }));
+}
+
+function normalizeContextReason(reasonRaw: unknown): string {
+    if (typeof reasonRaw !== 'string') {
+        return 'NOT FOUND — agent must investigate';
+    }
+
+    if (reasonRaw.startsWith('Derived from tickets.payload file_scope.')) {
+        return 'Derived from tickets.payload file_scope.';
+    }
+
+    return reasonRaw;
 }
 
 function mapWarnings(warningsRaw: unknown): string[] {
@@ -988,7 +1067,7 @@ function isRecord(value: unknown): value is Record<string, unknown> {
 
 function extractStoredPacketEnvelope(
     metadata: Record<string, unknown> | null | undefined,
-): Partial<Pick<InstructionPacketEnvelope, 'contextLocations' | 'warnings'>> {
+): Partial<Pick<InstructionPacketEnvelope, 'contextLocations' | 'warnings' | 'memorySnapshotVersion' | 'memoryCompleteness' | 'memoryWarnings'>> {
     if (!metadata || typeof metadata !== 'object') {
         return {};
     }
@@ -1005,6 +1084,15 @@ function extractStoredPacketEnvelope(
 
     const record = packetEnvelope as Record<string, unknown>;
     return {
+        memorySnapshotVersion: typeof record.memorySnapshotVersion === 'string'
+            ? record.memorySnapshotVersion
+            : undefined,
+        memoryCompleteness: record.memoryCompleteness === 'complete' || record.memoryCompleteness === 'reduced'
+            ? record.memoryCompleteness
+            : undefined,
+        memoryWarnings: Array.isArray(record.memoryWarnings)
+            ? record.memoryWarnings.filter((warning): warning is string => typeof warning === 'string')
+            : undefined,
         contextLocations: Array.isArray(record.contextLocations)
             ? record.contextLocations.filter(isContextLocation)
             : undefined,

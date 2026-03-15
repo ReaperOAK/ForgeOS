@@ -9,6 +9,7 @@ export interface ContextHashInputs {
     memorySnapshot: string;
     packetSchema: string;
     templateVersion: string;
+    memorySnapshotVersion?: string;
 }
 
 export interface PromptFreshnessEvaluation {
@@ -35,6 +36,7 @@ export interface ContextHashOverrides {
     repoCommit?: string;
     graphVersion?: string;
     memorySnapshot?: string;
+    memorySnapshotVersion?: string;
 }
 
 export function normalizeCanonicalToken(value: string): string {
@@ -50,12 +52,13 @@ export function computeDeterministicHash(value: unknown): string {
 }
 
 export function computeContextHash(inputs: ContextHashInputs): string {
-    const canonicalInputs: ContextHashInputs = {
+    const canonicalInputs: Required<ContextHashInputs> = {
         repoCommit: normalizeCanonicalToken(inputs.repoCommit),
         graphVersion: normalizeCanonicalToken(inputs.graphVersion),
         memorySnapshot: normalizeCanonicalToken(inputs.memorySnapshot),
         packetSchema: normalizeCanonicalToken(inputs.packetSchema),
         templateVersion: normalizeCanonicalToken(inputs.templateVersion),
+        memorySnapshotVersion: normalizeCanonicalToken(inputs.memorySnapshotVersion ?? inputs.memorySnapshot),
     };
 
     return computeDeterministicHash(canonicalInputs);
@@ -78,14 +81,23 @@ export function buildContextHashInputsFromEnv(
     const memorySnapshot = normalizeCanonicalToken(
         overrides.memorySnapshot ?? env.FORGEOS_MEMORY_SNAPSHOT_VERSION ?? 'unknown',
     );
+    const memorySnapshotVersion = typeof overrides.memorySnapshotVersion === 'string'
+        ? normalizeCanonicalToken(overrides.memorySnapshotVersion)
+        : undefined;
 
-    return {
+    const inputs: ContextHashInputs = {
         repoCommit,
         graphVersion,
         memorySnapshot,
         packetSchema,
         templateVersion,
     };
+
+    if (memorySnapshotVersion) {
+        inputs.memorySnapshotVersion = memorySnapshotVersion;
+    }
+
+    return inputs;
 }
 
 export function evaluatePromptFreshness(input: FreshnessEvaluationInput): PromptFreshnessEvaluation {
