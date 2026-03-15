@@ -2510,3 +2510,13 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/QA/TASK-PC-BE-008.md, forgeos-server/src/__tests__/compile-queue-migration.test.ts
 - **Decisions:** PASS — 20/20 targeted tests pass, compile-queue.ts 100% statements/branches/functions/lines, lint clean, tsc clean. Added QA regression checks for migration schema/idempotency and barrel export contract. Residual note: live migration execution not run because migration commands require human approval.
 - **Timestamp:** 2026-03-15T16:26:06Z
+
+### [TASK-PC-BE-008] — Security Review
+- **Artifacts:** .github/agent-output/Security/TASK-PC-BE-008.md, .github/agent-output/Security/TASK-PC-BE-008.sarif, .github/agent-output/Security/TASK-PC-BE-008.sbom.json
+- **Decisions:** PASS — 0 critical/high findings. Medium accepted risk: queue `ticket_id` lacks DB-level referential integrity. Low accepted risk: unbounded durable diagnostic text fields. `npm audit` gate clean (0 high/critical, 1 moderate `hono`).
+- **Timestamp:** 2026-03-15T21:30:00Z
+
+### [TASK-PC-BE-012] — QA FAIL
+- **Artifacts:** .github/agent-output/QA/TASK-PC-BE-012.md, forgeos-server/coverage/coverage-summary.json
+- **Decisions:** REJECT — 24/24 related compiler/hash/memory tests pass and all 4 ACs are behaviorally verified, but coverage gate fails: compiler.ts 74.09% lines / 50.71% branches and memory-provider.ts 78.52% lines / 74% branches remain below the required 80% threshold. context-hash.ts is healthy at 97.95% lines. tsc clean; repo lint exits 0 with 10 pre-existing warnings outside ticket scope.
+- **Timestamp:** 2026-03-15T16:43:59Z
