@@ -146,6 +146,19 @@ append_only: true
 - **Status:** Open
 - **Evidence:** FORGEOS-BE058 Security Review — `.github/agent-output/Security/FORGEOS-BE058.md` (SEC-002)
 
+### RISK-008: Prompt Compile Queue Lacks Database-Level Ticket Integrity
+
+- **Date Identified:** 2026-03-15
+- **Identified By:** Security
+- **Severity:** Medium
+- **Likelihood:** Low
+- **Category:** Security
+- **Description:** `prompt_compile_queue.ticket_id` is modeled as free-form `TEXT` without a foreign key or equivalent integrity control linking the queued job to a canonical `tickets` row.
+- **Impact:** A buggy or compromised internal caller could create orphan compile jobs for nonexistent tickets, weakening data integrity, queue reconciliation, and audit confidence.
+- **Mitigation:** Current enqueue path is internal-only and parameterized. Follow up with either a database foreign key to the canonical ticket identifier or an explicit validated enqueue boundary before exposing durable queue writes to broader callers.
+- **Status:** Accepted
+- **Evidence:** TASK-PC-BE-008 Security Review — `.github/agent-output/Security/TASK-PC-BE-008.md`
+
 ---
 
 ## Closed Risks
