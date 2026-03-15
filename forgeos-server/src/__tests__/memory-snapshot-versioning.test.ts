@@ -7,6 +7,7 @@ const mockMemorySearchLessonsHandler = vi.fn();
 const mockCodeBlastRadiusHandler = vi.fn();
 const mockCodeSearchSymbolsHandler = vi.fn();
 const mockGeneratePrompt = vi.fn();
+const mockPoolQuery = vi.fn();
 
 vi.mock('../middleware/logging.js', () => ({
     logger: {
@@ -18,7 +19,7 @@ vi.mock('../middleware/logging.js', () => ({
 
 vi.mock('../db/pool.js', () => ({
     pool: {
-        query: vi.fn(),
+        query: (...args: unknown[]) => mockPoolQuery(...args),
     },
 }));
 
@@ -88,6 +89,7 @@ describe('memory snapshot versioning', () => {
     beforeEach(() => {
         vi.clearAllMocks();
         vi.resetModules();
+        mockPoolQuery.mockResolvedValue({ rowCount: 1, rows: [] });
 
         process.env.FORGEOS_REPO_COMMIT = 'repo-main';
         process.env.FORGEOS_GRAPH_VERSION = 'graph-v1';
@@ -238,5 +240,285 @@ describe('memory snapshot versioning', () => {
         expect(result.packetEnvelope.memoryCompleteness).toBe('reduced');
         expect(result.packetEnvelope.memoryWarnings).toContain('instruction-search-unavailable');
         expect(result.prompt).toContain('**BEST PRACTICES**');
+    });
+
+    // ── memory-provider normalization edge cases ─────────────────────────────────
+
+    it('filters out entries with empty, whitespace-only, or non-string lesson_text', async () => {
+        mockMemorySearchLessonsHandler
+            .mockResolvedValueOnce(textResult({
+                lessons: [
+                    { id: 'a', category: 'backend', lesson_text: '', similarity: 0.9, created_at: '2026-03-15T00:00:00Z' },
+                    { id: 'b', category: 'backend', lesson_text: '   ', similarity: 0.8, created_at: '2026-03-15T00:00:00Z' },
+                    { id: 'c', category: 'backend', lesson_text: null, similarity: 0.7, created_at: '2026-03-15T00:00:00Z' },
+                    { id: 'd', category: 'backend', lesson_text: 42, similarity: 0.6, created_at: '2026-03-15T00:00:00Z' },
+                    { id: 'e', category: 'backend', lesson_text: 'Valid lesson.', similarity: 0.5, created_at: '2026-03-15T00:00:00Z' },
+                ],
+            }))
+            .mockResolvedValueOnce(textResult({ lessons: [] }));
+
+        const { retrieveMemorySnapshot } = await import('../services/memory-provider.js');
+        const snapshot = await retrieveMemorySnapshot('edge case query');
+
+        expect(snapshot.learnings).toHaveLength(1);
+        expect(snapshot.learnings[0]).toBe('backend: Valid lesson.');
+    });
+
+    it('normalizes null, empty, and whitespace-only lesson category to "lesson"', async () => {
+        mockMemorySearchLessonsHandler
+            .mockResolvedValueOnce(textResult({
+                lessons: [
+                    { id: 'a', category: null, lesson_text: 'Null category lesson.', similarity: 0.9, created_at: '2026-03-15T00:00:00Z' },
+                    { id: 'b', category: '', lesson_text: 'Empty category lesson.', similarity: 0.8, created_at: '2026-03-15T00:00:00Z' },
+                    { id: 'c', category: '   ', lesson_text: 'Whitespace category lesson.', similarity: 0.7, created_at: '2026-03-15T00:00:00Z' },
+                ],
+            }))
+            .mockResolvedValueOnce(textResult({ lessons: [] }));
+
+        const { retrieveMemorySnapshot } = await import('../services/memory-provider.js');
+        const snapshot = await retrieveMemorySnapshot('category edge case');
+
+        expect(snapshot.learnings).toContain('lesson: Null category lesson.');
+        expect(snapshot.learnings).toContain('lesson: Empty category lesson.');
+        expect(snapshot.learnings).toContain('lesson: Whitespace category lesson.');
+    });
+
+    it('generates fallback id for entries with null, empty, or whitespace id', async () => {
+        mockMemorySearchLessonsHandler
+            .mockResolvedValueOnce(textResult({
+                lessons: [
+                    { id: null, category: 'backend', lesson_text: 'Null id lesson.', similarity: 0.9, created_at: '2026-03-15T00:00:00Z' },
+                    { id: '', category: 'backend', lesson_text: 'Empty id lesson.', similarity: 0.8, created_at: '2026-03-15T00:00:00Z' },
+                    { id: '   ', category: 'backend', lesson_text: 'Whitespace id lesson.', similarity: 0.7, created_at: '2026-03-15T00:00:00Z' },
+                ],
+            }))
+            .mockResolvedValueOnce(textResult({ lessons: [] }));
+
+        const { retrieveMemorySnapshot } = await import('../services/memory-provider.js');
+        const snapshot = await retrieveMemorySnapshot('id fallback');
+
+        expect(snapshot.learningEntries[0].id).toBe('lesson-0-backend');
+        expect(snapshot.learningEntries[1].id).toBe('lesson-1-backend');
+        expect(snapshot.learningEntries[2].id).toBe('lesson-2-backend');
+    });
+
+    it('defaults similarity to 0 for null, non-numeric, and non-finite values', async () => {
+        mockMemorySearchLessonsHandler
+            .mockResolvedValueOnce(textResult({
+                lessons: [
+                    { id: 'a', category: 'backend', lesson_text: 'Valid similarity.', similarity: 0.8, created_at: '2026-03-15T00:00:00Z' },
+                    { id: 'b', category: 'backend', lesson_text: 'Null similarity.', similarity: null, created_at: '2026-03-14T00:00:00Z' },
+                    { id: 'c', category: 'backend', lesson_text: 'String similarity.', similarity: 'high', created_at: '2026-03-13T00:00:00Z' },
+                ],
+            }))
+            .mockResolvedValueOnce(textResult({ lessons: [] }));
+
+        const { retrieveMemorySnapshot } = await import('../services/memory-provider.js');
+        const snapshot = await retrieveMemorySnapshot('similarity defaults');
+
+        expect(snapshot.learningEntries[0].similarity).toBe(0.8);
+        expect(snapshot.learningEntries[1].similarity).toBe(0);
+        expect(snapshot.learningEntries[2].similarity).toBe(0);
+    });
+
+    it('uses category as tiebreaker when similarity and createdAt are equal', async () => {
+        mockMemorySearchLessonsHandler
+            .mockResolvedValueOnce(textResult({
+                lessons: [
+                    { id: 'x', category: 'zzz-last', lesson_text: 'Late category.', similarity: 0.8, created_at: '2026-03-15T00:00:00Z' },
+                    { id: 'y', category: 'aaa-first', lesson_text: 'Early category.', similarity: 0.8, created_at: '2026-03-15T00:00:00Z' },
+                ],
+            }))
+            .mockResolvedValueOnce(textResult({ lessons: [] }));
+
+        const { retrieveMemorySnapshot } = await import('../services/memory-provider.js');
+        const snapshot = await retrieveMemorySnapshot('category sort');
+
+        expect(snapshot.learningEntries[0].category).toBe('aaa-first');
+        expect(snapshot.learningEntries[1].category).toBe('zzz-last');
+    });
+
+    it('uses lessonText as tiebreaker when similarity, createdAt, and category are all equal', async () => {
+        mockMemorySearchLessonsHandler
+            .mockResolvedValueOnce(textResult({
+                lessons: [
+                    { id: 'x', category: 'backend', lesson_text: 'Z lesson.', similarity: 0.8, created_at: '2026-03-15T00:00:00Z' },
+                    { id: 'y', category: 'backend', lesson_text: 'A lesson.', similarity: 0.8, created_at: '2026-03-15T00:00:00Z' },
+                ],
+            }))
+            .mockResolvedValueOnce(textResult({ lessons: [] }));
+
+        const { retrieveMemorySnapshot } = await import('../services/memory-provider.js');
+        const snapshot = await retrieveMemorySnapshot('lesson text sort');
+
+        expect(snapshot.learningEntries[0].lessonText).toBe('A lesson.');
+        expect(snapshot.learningEntries[1].lessonText).toBe('Z lesson.');
+    });
+
+    it('uses id as final tiebreaker when all other sort fields are identical', async () => {
+        mockMemorySearchLessonsHandler
+            .mockResolvedValueOnce(textResult({
+                lessons: [
+                    { id: 'z-id', category: 'backend', lesson_text: 'Same text.', similarity: 0.8, created_at: '2026-03-15T00:00:00Z' },
+                    { id: 'a-id', category: 'backend', lesson_text: 'Same text.', similarity: 0.8, created_at: '2026-03-15T00:00:00Z' },
+                ],
+            }))
+            .mockResolvedValueOnce(textResult({ lessons: [] }));
+
+        const { retrieveMemorySnapshot } = await import('../services/memory-provider.js');
+        const snapshot = await retrieveMemorySnapshot('id sort');
+
+        expect(snapshot.learningEntries[0].id).toBe('a-id');
+        expect(snapshot.learningEntries[1].id).toBe('z-id');
+    });
+
+    it('reports lessons-search-malformed when general search response has a non-array lessons field', async () => {
+        mockMemorySearchLessonsHandler
+            .mockResolvedValueOnce(textResult({ lessons: 'not-an-array' }))
+            .mockResolvedValueOnce(textResult({ lessons: [] }));
+
+        const { retrieveMemorySnapshot } = await import('../services/memory-provider.js');
+        const snapshot = await retrieveMemorySnapshot('malformed general');
+
+        expect(snapshot.completeness).toBe('reduced');
+        expect(snapshot.warnings).toContain('lessons-search-malformed');
+    });
+
+    it('reports instruction-search-malformed when instruction search response has a non-array lessons field', async () => {
+        mockMemorySearchLessonsHandler
+            .mockResolvedValueOnce(textResult({ lessons: [] }))
+            .mockResolvedValueOnce(textResult({ lessons: 42 }));
+
+        const { retrieveMemorySnapshot } = await import('../services/memory-provider.js');
+        const snapshot = await retrieveMemorySnapshot('malformed instruction');
+
+        expect(snapshot.completeness).toBe('reduced');
+        expect(snapshot.warnings).toContain('instruction-search-malformed');
+    });
+
+    // ── loadMemorySnapshotForTicket ───────────────────────────────────────────────
+
+    it('loadMemorySnapshotForTicket builds query from ticket title, description, and criteria', async () => {
+        mockMemorySearchLessonsHandler
+            .mockResolvedValueOnce(textResult({
+                lessons: [{ id: 'l1', category: 'backend', lesson_text: 'Fetched lesson.', similarity: 0.8, created_at: '2026-03-15T00:00:00Z' }],
+            }))
+            .mockResolvedValueOnce(textResult({ lessons: [] }));
+
+        const { loadMemorySnapshotForTicket } = await import('../services/memory-provider.js');
+        const snapshot = await loadMemorySnapshotForTicket('TASK-PC-BE-012');
+
+        expect(snapshot.query).toContain('Deterministic memory snapshot retrieval');
+        expect(snapshot.query).toContain('Project memory into packet sections');
+        expect(snapshot.learnings).toHaveLength(1);
+        expect(snapshot.learnings[0]).toBe('backend: Fetched lesson.');
+    });
+
+    it('loadMemorySnapshotForTicket falls back to ticketId when all ticket text fields are blank', async () => {
+        mockTicketsGetHandler.mockResolvedValueOnce(textResult({
+            ticket: { ticket_id: 'TASK-PC-BE-012', title: '', description: null, acceptance_criteria: [] },
+        }));
+        mockMemorySearchLessonsHandler.mockResolvedValue(textResult({ lessons: [] }));
+
+        const { loadMemorySnapshotForTicket } = await import('../services/memory-provider.js');
+        const snapshot = await loadMemorySnapshotForTicket('TASK-PC-BE-012');
+
+        expect(snapshot.query).toBe('TASK-PC-BE-012');
+    });
+
+    // ── compiler: queue machinery and cache operations ───────────────────────────
+
+    it('queues compile job, deduplicates by idempotency key, and drains queue to completion', async () => {
+        mockMemorySearchLessonsHandler.mockResolvedValue(textResult({ lessons: [] }));
+
+        const { queueCompileTicketPrompt, waitForCompileQueueToDrain } = await import('../services/compiler.js');
+
+        queueCompileTicketPrompt('TASK-PC-BE-012', 'test-trigger');
+        // same key → idempotent no-op
+        queueCompileTicketPrompt('TASK-PC-BE-012', 'test-trigger');
+
+        await waitForCompileQueueToDrain();
+
+        // persistCompiledPromptAtomic calls pool.query once
+        expect(mockPoolQuery).toHaveBeenCalledTimes(1);
+        const [sql] = mockPoolQuery.mock.calls[0] as [string];
+        expect(sql).toContain('SET compiled_prompt = $1');
+    });
+
+    it('logs error and continues when a queued compile job fails', async () => {
+        mockTicketsGetHandler.mockRejectedValueOnce(new Error('ticket unavailable'));
+
+        const { queueCompileTicketPrompt, waitForCompileQueueToDrain } = await import('../services/compiler.js');
+
+        queueCompileTicketPrompt('TASK-PC-BE-012', 'error-trigger');
+
+        await waitForCompileQueueToDrain();
+
+        // Pool was never reached because compile failed before persistence
+        expect(mockPoolQuery).not.toHaveBeenCalled();
+    });
+
+    it('invalidatePromptCache sets compiled_prompt_context_hash to NULL and freshness to missing', async () => {
+        const { invalidatePromptCache } = await import('../services/compiler.js');
+        await invalidatePromptCache('TASK-PC-BE-012');
+
+        expect(mockPoolQuery).toHaveBeenCalledOnce();
+        const [sql, params] = mockPoolQuery.mock.calls[0] as [string, unknown[]];
+        expect(sql).toContain('compiled_prompt_context_hash = NULL');
+        expect(sql).toContain("compiled_prompt_freshness_status = 'missing'");
+        expect(params[0]).toBe('TASK-PC-BE-012');
+    });
+
+    it('compileIfStale returns a cached result when the stored hash matches the current hash', async () => {
+        mockMemorySearchLessonsHandler.mockResolvedValue(textResult({ lessons: [] }));
+
+        // Compute the hash that compileIfStale will compute (context-hash is not mocked)
+        const { buildContextHashInputsFromEnv, computeContextHash } = await import('../services/context-hash.js');
+        const freshHash = computeContextHash(
+            buildContextHashInputsFromEnv(process.env, 'v1', 'prompt-architect-v1', { memorySnapshotVersion: 'memory-v1' }),
+        );
+
+        // Pool SELECT returns a stored prompt with a matching hash
+        mockPoolQuery.mockResolvedValueOnce({
+            rowCount: 1,
+            rows: [{
+                compiled_prompt: '**ROLE**\ncached content',
+                compiled_prompt_context_hash: freshHash,
+                metadata: null,
+            }],
+        });
+
+        const { compileIfStale } = await import('../services/compiler.js');
+        const result = await compileIfStale('TASK-PC-BE-012');
+
+        expect(result.provider).toBe('cached');
+        expect(result.freshnessStatus).toBe('fresh');
+        expect(result.contextHash).toBe(freshHash);
+        // Only SELECT — no UPDATE since cache is fresh
+        expect(mockPoolQuery).toHaveBeenCalledOnce();
+    });
+
+    it('compileIfStale recompiles and stores when the stored hash is stale', async () => {
+        mockMemorySearchLessonsHandler.mockResolvedValue(textResult({ lessons: [] }));
+
+        // Pool SELECT returns a mismatching hash; Pool UPDATE for persist
+        mockPoolQuery
+            .mockResolvedValueOnce({
+                rowCount: 1,
+                rows: [{
+                    compiled_prompt: '**ROLE**\nold prompt',
+                    compiled_prompt_context_hash: 'completely-wrong-stale-hash',
+                    metadata: null,
+                }],
+            })
+            .mockResolvedValueOnce({ rowCount: 1, rows: [] });
+
+        const { compileIfStale } = await import('../services/compiler.js');
+        const result = await compileIfStale('TASK-PC-BE-012');
+
+        expect(result.provider).toBe('ollama');
+        expect(result.usedFallback).toBe(true);
+        // SELECT (load stored) + UPDATE (persist recompiled)
+        expect(mockPoolQuery).toHaveBeenCalledTimes(2);
     });
 });
