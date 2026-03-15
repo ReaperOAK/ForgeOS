@@ -159,6 +159,19 @@ append_only: true
 - **Status:** Accepted
 - **Evidence:** TASK-PC-BE-008 Security Review — `.github/agent-output/Security/TASK-PC-BE-008.md`
 
+### RISK-009: Agent Identity Spoofing via Mutation Tool Parameters
+
+- **Date Identified:** 2026-03-15
+- **Identified By:** Security
+- **Severity:** High
+- **Likelihood:** Medium
+- **Category:** Security
+- **Description:** `tickets.claim` derives acting identity from caller-supplied `agent_name` instead of the authenticated request principal. If the name does not exist, the handler auto-registers a new agent row with wildcard permissions (`["*"]`).
+- **Impact:** Any caller with access to the claim tool can spoof another agent in claim metadata and ownership checks, pollute audit trails, and create over-privileged agent rows that may be trusted by later code paths.
+- **Mitigation:** Bind mutation handlers to `req.agent` identity from auth middleware, reject mismatched `agent_name` values, and remove runtime wildcard auto-registration from tool handlers. Add regression tests for identity mismatch and unknown-agent claim attempts.
+- **Status:** Open
+- **Evidence:** TASK-PC-BE-006 Security Review — `.github/agent-output/Security/TASK-PC-BE-006.md`
+
 ---
 
 ## Closed Risks
