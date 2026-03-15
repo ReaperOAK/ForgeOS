@@ -1,0 +1,86 @@
+{
+  "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/main/sarif-2.1/schema/sarif-schema-2.1.0.json",
+  "version": "2.1.0",
+  "runs": [
+    {
+      "tool": {
+        "driver": {
+          "name": "SecurityEngineer-Agent",
+          "version": "2.0.0",
+          "rules": [
+            {
+              "id": "SEC-DI-001",
+              "name": "MissingCompileQueueTicketForeignKey",
+              "shortDescription": {
+                "text": "Compile queue rows are not bound to a canonical ticket row at the database layer"
+              },
+              "defaultConfiguration": {
+                "level": "warning"
+              },
+              "properties": {
+                "severity": "medium",
+                "owasp": "A04:2021",
+                "cwe": "CWE-345"
+              }
+            },
+            {
+              "id": "SEC-DOS-001",
+              "name": "UnboundedCompileQueueDiagnosticFields",
+              "shortDescription": {
+                "text": "Durable queue text columns have no explicit length bounds"
+              },
+              "defaultConfiguration": {
+                "level": "note"
+              },
+              "properties": {
+                "severity": "low",
+                "owasp": "A09:2021",
+                "cwe": "CWE-400"
+              }
+            }
+          ]
+        }
+      },
+      "results": [
+        {
+          "ruleId": "SEC-DI-001",
+          "level": "warning",
+          "message": {
+            "text": "`prompt_compile_queue.ticket_id` is free-form TEXT with no foreign key or equivalent database-level integrity check against the canonical tickets table."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "forgeos-server/src/db/migrations/009-prompt-compile-queue.sql"
+                },
+                "region": {
+                  "startLine": 8
+                }
+              }
+            }
+          ]
+        },
+        {
+          "ruleId": "SEC-DOS-001",
+          "level": "note",
+          "message": {
+            "text": "Queue columns `ticket_id`, `idempotency_key`, `input_hash`, and `last_error` are unbounded TEXT values, which could become a storage or logging amplification vector if future callers supply oversized diagnostics."
+          },
+          "locations": [
+            {
+              "physicalLocation": {
+                "artifactLocation": {
+                  "uri": "forgeos-server/src/db/migrations/009-prompt-compile-queue.sql"
+                },
+                "region": {
+                  "startLine": 8
+                }
+              }
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
