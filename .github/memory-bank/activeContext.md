@@ -2495,3 +2495,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** forgeos-server/src/db/migrations/009-prompt-compile-queue.sql, forgeos-server/src/types/index.ts, forgeos-server/src/db/compile-queue.ts, forgeos-server/src/db/index.ts, forgeos-server/src/__tests__/compile-queue.test.ts
 - **Decisions:** Idempotency key = `ticketId:inputHash`. ON CONFLICT DO UPDATE ensures safe upsert. rowToJob handles Date/string duality from pg. 14/14 tests pass, 100% coverage.
 - **Timestamp:** 2026-03-15T21:00:00Z
+
+### [TASK-PC-BE-006] — QA PASS
+- **Artifacts:** .github/agent-output/QA/TASK-PC-BE-006.md
+- **Decisions:** PASS — 82/82 targeted tests pass. tickets-claim.ts coverage 100% lines/statements/functions, 86.2% branches; context-hash.ts coverage 100% lines/statements/functions, 96.66% branches. tsc clean, eslint clean, no console statements or explicit unhandled rejection hooks in scope. Ready for SECURITY.
+- **Timestamp:** 2026-03-15T16:25:01Z
