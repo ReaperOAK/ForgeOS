@@ -2506,6 +2506,11 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Decisions:** PASS — 82/82 targeted tests pass. tickets-claim.ts coverage 100% lines/statements/functions, 86.2% branches; context-hash.ts coverage 100% lines/statements/functions, 96.66% branches. tsc clean, eslint clean, no console statements or explicit unhandled rejection hooks in scope. Ready for SECURITY.
 - **Timestamp:** 2026-03-15T16:25:01Z
 
+### [TASK-PC-BE-006] — Security Review
+- **Artifacts:** .github/agent-output/Security/TASK-PC-BE-006.md, .github/agent-output/Security/TASK-PC-BE-006.sarif
+- **Decisions:** REJECT — High severity A01/CWE-285 issue in `tickets.claim`: handler trusts caller-supplied `agent_name` for ownership and auto-registers unknown names with wildcard permissions. Freshness/hash logic safe; `npm audit` has 0 high/critical; SBOM generation failed with npm `EINVALIDPURLTYPE`.
+- **Timestamp:** 2026-03-15T16:43:27Z
+
 ### [TASK-PC-BE-008] — QA PASS
 - **Artifacts:** .github/agent-output/QA/TASK-PC-BE-008.md, forgeos-server/src/__tests__/compile-queue-migration.test.ts
 - **Decisions:** PASS — 20/20 targeted tests pass, compile-queue.ts 100% statements/branches/functions/lines, lint clean, tsc clean. Added QA regression checks for migration schema/idempotency and barrel export contract. Residual note: live migration execution not run because migration commands require human approval.
