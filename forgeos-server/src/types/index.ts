@@ -879,3 +879,53 @@ export const TICKET_STATUSES: TicketStatus[] = [
 export const TICKET_PRIORITIES: TicketPriority[] = [
   'critical', 'high', 'medium', 'low',
 ];
+
+// ── Prompt Compile Queue Types ──
+
+/**
+ * Operational status of a job in the `prompt_compile_queue` table.
+ *
+ * - `pending`   — Waiting to be processed; `next_attempt_at` determines schedule.
+ * - `running`   — A worker has acquired the job and is executing the compile.
+ * - `done`      — Compilation succeeded; result persisted to the ticket.
+ * - `failed`    — All retry attempts exhausted; `last_error` contains diagnosis.
+ * - `cancelled` — Job was explicitly cancelled before completion.
+ */
+export type CompileQueueStatus = 'pending' | 'running' | 'done' | 'failed' | 'cancelled';
+
+/**
+ * A single job in the `prompt_compile_queue` table.
+ *
+ * Represents a durable, retryable unit of async prompt compilation work.
+ * Idempotency is enforced via the unique `idempotency_key` column so that
+ * repeated enqueue attempts for the same (ticket, hash) pair do not
+ * create duplicate jobs.
+ */
+export interface PromptCompileJob {
+  /** UUID primary key (database-generated). */
+  id: string;
+  /** The `ticket_id` of the ticket to compile a prompt for. */
+  ticket_id: string;
+  /**
+   * Stable deduplication key (typically `{ticket_id}:{input_hash}`).
+   * The unique constraint on this column guarantees at most one effective
+   * active job per logical compile request.
+   */
+  idempotency_key: string;
+  /** Current lifecycle status of the job. */
+  status: CompileQueueStatus;
+  /** Number of execution attempts made so far. */
+  attempts: number;
+  /** Maximum allowed attempts before the job transitions to `failed`. */
+  max_attempts: number;
+  /** ISO 8601 timestamp after which the job is eligible for the next attempt. */
+  next_attempt_at: string;
+  /** Error message from the most recent failed attempt. `null` if no failure yet. */
+  last_error: string | null;
+  /** Canonical context hash used as compile input (sha256-hex). `null` if not yet set. */
+  input_hash: string | null;
+  /** ISO 8601 creation timestamp. */
+  created_at: string;
+  /** ISO 8601 last-modified timestamp. */
+  updated_at: string;
+}

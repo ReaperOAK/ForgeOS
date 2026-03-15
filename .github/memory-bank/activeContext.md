@@ -2490,3 +2490,8 @@ Completed 7-part structural hardening upgrade: unlimited elastic workers, govern
 - **Artifacts:** .github/agent-output/Validator/TASK-PC-BE-005.md, .github/ticket-state/DONE/TASK-PC-BE-005.json
 - **Decisions:** APPROVED — 10/10 DoD pass (item 11 N/A backend-only), 4/4 AC verified. Tests 17/17 pass. compile-orchestrator.ts 100% coverage, compiler.ts 82-92% all metrics ≥80%. Lint clean, tsc clean, no console.log, no TODO. All upstream verdicts (QA/Security/CI/Docs) confirmed.
 - **Timestamp:** 2026-03-15T20:36:00Z
+
+### [TASK-PC-BE-008] — BACKEND complete
+- **Artifacts:** forgeos-server/src/db/migrations/009-prompt-compile-queue.sql, forgeos-server/src/types/index.ts, forgeos-server/src/db/compile-queue.ts, forgeos-server/src/db/index.ts, forgeos-server/src/__tests__/compile-queue.test.ts
+- **Decisions:** Idempotency key = `ticketId:inputHash`. ON CONFLICT DO UPDATE ensures safe upsert. rowToJob handles Date/string duality from pg. 14/14 tests pass, 100% coverage.
+- **Timestamp:** 2026-03-15T21:00:00Z

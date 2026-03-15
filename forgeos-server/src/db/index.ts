@@ -36,3 +36,8 @@ export {
   type AcquireFileLocksResult,
   type ReleaseFileLocksResult,
 } from './file-mutex.js';
+
+export {
+  enqueueCompileJob,
+  getCompileJob,
+} from './compile-queue.js';
