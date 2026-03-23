@@ -312,8 +312,12 @@ describe('memorySearchLessonsHandler', () => {
     expect(data.total).toBe(0);
   });
 
-  it('should return isError true on embedding failure', async () => {
+  it('should fall back to lexical search on embedding failure', async () => {
     mockEmbedText.mockRejectedValueOnce(new Error('OpenAI API unavailable'));
+    // Lexical fallback query
+    mockQuery.mockResolvedValueOnce({
+      rows: [makeLesson({ similarity: 0.5 })],
+    });
 
     const result = await memorySearchLessonsHandler({
       query: 'test query',
@@ -323,15 +327,15 @@ describe('memorySearchLessonsHandler', () => {
 
     const data = parseContent(result);
 
-    expect(result.isError).toBe(true);
-    expect(data.error).toBe('INTERNAL_ERROR');
-    expect(data.message).toContain('OpenAI API unavailable');
-    expect(data.lessons).toEqual([]);
-    expect(data.total).toBe(0);
+    // Should succeed with lexical fallback, not return an error
+    expect(result.isError).toBeUndefined();
+    expect(data.lessons).toHaveLength(1);
+    expect(data.total).toBe(1);
   });
 
-  it('should return isError true on database failure', async () => {
-    mockEmbedText.mockResolvedValueOnce(FAKE_EMBEDDING);
+  it('should return isError true on complete database failure (both embedding and fallback)', async () => {
+    mockEmbedText.mockRejectedValueOnce(new Error('OpenAI API unavailable'));
+    // Lexical fallback also fails
     mockQuery.mockRejectedValueOnce(new Error('connection refused'));
 
     const result = await memorySearchLessonsHandler({

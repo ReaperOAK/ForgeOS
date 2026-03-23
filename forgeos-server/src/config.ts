@@ -38,13 +38,18 @@ const configSchema = z.object({
   EMBEDDING_PROVIDER: z.enum(['ollama', 'openai']).default('ollama'),
   EMBEDDING_MODEL: z.string().min(1).default('mxbai-embed-large'),
   OLLAMA_BASE_URL: z.string().url().default('http://127.0.0.1:11434/api/embed'),
+  OLLAMA_GENERATE_URL: z.string().url().default('http://127.0.0.1:11434/api/generate'),
   OPENAI_API_KEY: z.string().optional(),
   GEMINI_API_KEY: z.string().optional(),
   GEMINI_MODEL: z.string().min(1).default('gemini-1.5-flash'),
+  PROMPT_LLM_PROVIDER: z.enum(['ollama', 'openai']).default('ollama'),
+  PROMPT_LLM_MODEL: z.string().min(1).default('qwen2.5:7b-instruct'),
   RATE_LIMIT_PER_MINUTE: z.coerce.number().int().min(1).default(100),
   DEFAULT_LEASE_MINUTES: z.coerce.number().int().min(5).max(120).default(30),
   MAX_LEASE_MINUTES: z.coerce.number().int().min(10).max(480).default(120),
   RECONCILIATION_INTERVAL: z.coerce.number().int().min(60).default(300),
+  COMPILE_WORKER_ENABLED: z.enum(['true', 'false']).default('true'),
+  COMPILE_WORKER_POLL_MS: z.coerce.number().int().min(1000).default(5000),
 }).superRefine((cfg, ctx) => {
   if (cfg.NODE_ENV === 'production') {
     const missing: string[] = [];

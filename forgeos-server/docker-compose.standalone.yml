@@ -1,0 +1,130 @@
+# ForgeOS MCP Server — Standalone Docker Compose
+#
+# Run the complete ForgeOS MCP stack with a single command:
+#
+#   docker compose -f docker-compose.standalone.yml up -d
+#
+# This starts:
+#   - PostgreSQL 17 with pgvector (embeddings + ticket state)
+#   - Ollama (local LLM for prompt compilation + embeddings)
+#   - ForgeOS MCP Server (22 tools over Model Context Protocol)
+#
+# After startup, add to VS Code MCP settings:
+#   {
+#     "type": "http",
+#     "url": "http://localhost:3011/mcp",
+#     "headers": { "Authorization": "Bearer <your-admin-key>" }
+#   }
+#
+# The admin API key is printed to stdout on first boot.
+# Check it with: docker compose -f docker-compose.standalone.yml logs mcp-server | grep "ADMIN API KEY"
+
+services:
+  # ── PostgreSQL with pgvector ──────────────────────
+  postgres:
+    image: pgvector/pgvector:pg17
+    container_name: forgeos-postgres
+    environment:
+      POSTGRES_DB: forgeos
+      POSTGRES_USER: forgeos
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-forgeos_standalone_pw}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${PG_PORT:-5432}:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U forgeos -d forgeos"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+    restart: unless-stopped
+
+  # ── Ollama (Local LLM + Embeddings) ───────────────
+  ollama:
+    image: ollama/ollama:latest
+    container_name: forgeos-ollama
+    volumes:
+      - ollama-data:/root/.ollama
+    ports:
+      - "${OLLAMA_PORT:-11434}:11434"
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:11434/api/tags > /dev/null || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    restart: unless-stopped
+    # GPU support (optional — remove 'deploy' block if no NVIDIA GPU)
+    # Without GPU, Ollama runs on CPU (slower but functional)
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: all
+              capabilities: [gpu]
+
+  # ── Model Puller (runs once, pulls required models) ─
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: forgeos-ollama-init
+    depends_on:
+      ollama:
+        condition: service_healthy
+    restart: "no"
+    entrypoint: >
+      sh -c "
+        echo 'Pulling embedding model...' &&
+        ollama pull mxbai-embed-large &&
+        echo 'Pulling LLM model...' &&
+        ollama pull qwen2.5:7b-instruct &&
+        echo 'All models ready.'
+      "
+    environment:
+      OLLAMA_HOST: http://ollama:11434
+
+  # ── ForgeOS MCP Server ────────────────────────────
+  mcp-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: forgeos/mcp-server:latest
+    container_name: forgeos-mcp
+    depends_on:
+      postgres:
+        condition: service_healthy
+      ollama:
+        condition: service_healthy
+    ports:
+      - "${MCP_PORT:-3011}:3011"
+    environment:
+      DATABASE_URL: postgresql://forgeos:${POSTGRES_PASSWORD:-forgeos_standalone_pw}@postgres:5432/forgeos
+      PORT: "3011"
+      NODE_ENV: production
+      LOG_LEVEL: info
+      ADMIN_API_KEY: ${ADMIN_API_KEY:-}
+      EMBEDDING_PROVIDER: ollama
+      EMBEDDING_MODEL: mxbai-embed-large
+      OLLAMA_BASE_URL: http://ollama:11434/api/embed
+      OLLAMA_GENERATE_URL: http://ollama:11434/api/generate
+      PROMPT_LLM_PROVIDER: ollama
+      PROMPT_LLM_MODEL: qwen2.5:7b-instruct
+      COMPILE_WORKER_ENABLED: "true"
+      COMPILE_WORKER_POLL_MS: "5000"
+      RATE_LIMIT_PER_MINUTE: "100"
+      DEFAULT_LEASE_MINUTES: "30"
+      MAX_LEASE_MINUTES: "120"
+      RECONCILIATION_INTERVAL: "300"
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3011/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+volumes:
+  pgdata:
+    name: forgeos-pgdata
+  ollama-data:
+    name: forgeos-ollama-data

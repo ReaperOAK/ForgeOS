@@ -1,0 +1,62 @@
+{
+  "ticket_id": "TASK-MCP-FE001",
+  "title": "Dashboard Live Kanban Improvements",
+  "description": "Improve the live Kanban dashboard with better UX: ticket detail modal, filter persistence, dark mode support, and mobile-responsive layout.",
+  "type": "frontend",
+  "priority": "low",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "UIDESIGNER",
+    "FRONTEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-23T16:22:32.526338+00:00",
+  "created_by": "TODO",
+  "dependencies": [],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/dashboard/"
+  ],
+  "acceptance_criteria": [
+    "Clicking a ticket card opens detail modal with full metadata",
+    "Stage filters persist across page reloads (URL params or localStorage)",
+    "Dark mode toggle with system preference detection",
+    "Responsive layout works on tablet and mobile screens",
+    "SSE reconnection with exponential backoff on disconnect",
+    "Loading skeleton while initial snapshot arrives"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-23T16:22:32.526343+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/mcp-standalone-production.md"
+    },
+    {
+      "timestamp": "2026-03-23T16:24:53.075177+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/mcp-standalone-production.md",
+  "tags": [
+    "mcp-standalone",
+    "dashboard",
+    "ux"
+  ]
+}

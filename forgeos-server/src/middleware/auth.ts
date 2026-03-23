@@ -39,7 +39,7 @@ import type { AgentIdentity } from '../types/index.js';
 // ── Public Path Detection ────────────────────────────────────────────────────
 
 /** Path prefixes exempt from authentication. */
-const publicPaths: readonly string[] = ['/health', '/dashboard', '/events'];
+const publicPaths: readonly string[] = ['/health', '/ready', '/dashboard', '/events'];
 
 /** Read-only dashboard API endpoints that are safe to expose without auth. */
 const dashboardPublicApiPaths: readonly string[] = [

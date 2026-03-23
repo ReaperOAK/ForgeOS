@@ -52,6 +52,14 @@ services:
       NODE_ENV: development
       ADMIN_API_KEY: ${ADMIN_API_KEY:-forgeos-dev-key}
       POSTGRES_PORT: ${POSTGRES_PORT:-5432}
+      EMBEDDING_PROVIDER: "ollama"
+      EMBEDDING_MODEL: "mxbai-embed-large"
+      OLLAMA_BASE_URL: "${OLLAMA_BASE_URL:-http://host.docker.internal:11434/api/embed}"
+      OLLAMA_GENERATE_URL: "${OLLAMA_GENERATE_URL:-http://host.docker.internal:11434/api/generate}"
+      PROMPT_LLM_PROVIDER: "ollama"
+      PROMPT_LLM_MODEL: "${PROMPT_LLM_MODEL:-qwen2.5:7b-instruct}"
+      GEMINI_API_KEY: "${GEMINI_API_KEY:-}"
+      GEMINI_MODEL: "${GEMINI_MODEL:-gemini-1.5-flash}"
     healthcheck:
       test: [ "CMD", "curl", "-f", "http://localhost:3011/health" ]
       interval: 15s

@@ -11,11 +11,13 @@ import { runMigrations } from './db/migrate.js';
 import { seed } from './db/seed.js';
 import { closePool } from './db/pool.js';
 import { logger } from './middleware/logging.js';
+import { seedAgentDefinitions } from './db/seed-agent-definitions.js';
 import {
   createApp,
   startNotifyListener,
   startReconciliationLoop,
 } from './server.js';
+import { startCompileWorker } from './services/compile-worker.js';
 
 /**
  * Application entry point.
@@ -48,6 +50,15 @@ async function main(): Promise<void> {
   await seed();
   logger.info('Seed complete');
 
+  // ── 1c. Seed agent definitions ────────────────────
+  logger.info('Seeding agent definitions...');
+  try {
+    await seedAgentDefinitions();
+    logger.info('Agent definitions seeded');
+  } catch (err) {
+    logger.warn({ err }, 'Agent definition seeding failed (non-fatal)');
+  }
+
   // ── 2. Create Express app ─────────────────────────
   const app = createApp(config);
 
@@ -75,7 +86,19 @@ async function main(): Promise<void> {
     'Reconciliation loop started',
   );
 
-  // ── 6. Graceful shutdown ──────────────────────────
+  // ── 6. Start compile queue worker ─────────────────
+  const compileWorker = startCompileWorker({
+    enabled: config.COMPILE_WORKER_ENABLED === 'true',
+    pollIntervalMs: config.COMPILE_WORKER_POLL_MS,
+  });
+  if (config.COMPILE_WORKER_ENABLED === 'true') {
+    logger.info(
+      { pollIntervalMs: config.COMPILE_WORKER_POLL_MS },
+      'Compile queue worker started',
+    );
+  }
+
+  // ── 7. Graceful shutdown ──────────────────────────
   /**
    * Graceful shutdown handler.
    *
@@ -90,6 +113,10 @@ async function main(): Promise<void> {
 
     clearInterval(reconciliationTimer);
 
+    // Stop compile worker (waits for current job to finish)
+    await compileWorker.stop();
+    logger.info('Compile worker stopped');
+
     server.close(async () => {
       logger.info('HTTP server closed');
       await closePool();
@@ -97,11 +124,11 @@ async function main(): Promise<void> {
       process.exit(0);
     });
 
-    // Force exit after 10 seconds
+    // Force exit after 30 seconds
     setTimeout(() => {
       logger.error('Forced shutdown after timeout');
       process.exit(1);
-    }, 10_000);
+    }, 30_000);
   };
 
   process.on('SIGTERM', () => void shutdown('SIGTERM'));

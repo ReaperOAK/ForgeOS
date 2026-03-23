@@ -1,0 +1,63 @@
+{
+  "ticket_id": "TASK-INT-DO002",
+  "title": "Install and Configure pgvector Extension",
+  "description": "Install pgvector 0.7+ in the PostgreSQL Docker image. Update all docker-compose files to use the pgvector-enabled image. Configure HNSW index parameters (m=16, ef_construction=200). Verify CREATE EXTENSION vector works in fresh database setup.",
+  "type": "infra",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "DEVOPS",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-23T16:22:32.520754+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-BE017"
+  ],
+  "blocked_by": [
+    "TASK-INT-BE017"
+  ],
+  "file_paths": [
+    "infra/docker/Dockerfile.postgres",
+    "infra/docker-compose.yml",
+    "forgeos-server/docker-compose.yml"
+  ],
+  "acceptance_criteria": [
+    "PostgreSQL Docker image includes pgvector 0.7+ extension",
+    "CREATE EXTENSION IF NOT EXISTS vector succeeds on fresh database",
+    "vector(1536) column type available for text-embedding-3-small dimensions",
+    "HNSW index creation with cosine operator class works",
+    "All docker-compose files reference the updated image",
+    "Setup scripts enable pgvector automatically",
+    "Seed script handles pgvector extension check"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-23T16:22:32.520761+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase3-schema-tools.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase3-schema-tools.md",
+  "tags": [
+    "intelligence",
+    "memory",
+    "phase3",
+    "infra",
+    "BLK-INT-10"
+  ]
+}

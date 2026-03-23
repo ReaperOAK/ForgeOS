@@ -1,0 +1,62 @@
+{
+  "ticket_id": "TASK-INT-BE029",
+  "title": "Performance Benchmarks for Code Graph",
+  "description": "Write performance benchmarks for the code graph system. Generate synthetic repositories of varying sizes (100, 1K, 10K files). Measure full index time, incremental index time, blast radius query latency, symbol search latency. Validate against NFR targets from the PRD.",
+  "type": "backend",
+  "priority": "medium",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-23T16:22:32.520082+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-BE027",
+    "TASK-INT-BE028"
+  ],
+  "blocked_by": [
+    "TASK-INT-BE027",
+    "TASK-INT-BE028"
+  ],
+  "file_paths": [
+    "forgeos-server/src/__tests__/benchmarks/codegraph-benchmark.test.ts"
+  ],
+  "acceptance_criteria": [
+    "Benchmark full index of 10K synthetic files completes in less than 60 seconds",
+    "Benchmark incremental index of 10 changed files completes in less than 5 seconds",
+    "Benchmark blast radius query on 10K-file graph completes in less than 500ms p99",
+    "Benchmark symbol search on 50K symbols completes in less than 100ms p99",
+    "Results logged in machine-readable JSON format",
+    "Benchmarks can run in CI and be optionally marked as slow"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-23T16:22:32.520087+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase2-tools-testing.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase2-tools-testing.md",
+  "tags": [
+    "intelligence",
+    "codegraph",
+    "phase2",
+    "performance",
+    "BLK-INT-09"
+  ]
+}

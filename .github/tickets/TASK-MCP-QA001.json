@@ -1,0 +1,63 @@
+{
+  "ticket_id": "TASK-MCP-QA001",
+  "title": "Comprehensive Integration Test Suite",
+  "description": "Create a comprehensive integration test suite that exercises all 22 MCP tools through the Streamable HTTP transport. Tests should use a real PostgreSQL database (via testcontainers or Docker) and verify the full lifecycle.",
+  "type": "fullstack",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "UIDESIGNER",
+    "FRONTEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-23T16:22:32.526533+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-MCP-BE001"
+  ],
+  "blocked_by": [
+    "TASK-MCP-BE001"
+  ],
+  "file_paths": [
+    "forgeos-server/src/__tests__/"
+  ],
+  "acceptance_criteria": [
+    "Test suite covers all 22 MCP tools",
+    "Full lifecycle test: claim \u2192 extend \u2192 update \u2192 spawn \u2192 complete \u2192 release",
+    "Rejection and rework cycle test",
+    "Concurrent claim conflict test (two agents claim same ticket)",
+    "File lock conflict detection test",
+    "Memory store/recall round-trip test",
+    "Code search/locate/explain tests with sample codebase",
+    "Tests run in CI via `npm test` with Docker Compose test stack",
+    "Coverage \u226580% for tool handlers"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-23T16:22:32.526539+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/mcp-standalone-production.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/mcp-standalone-production.md",
+  "tags": [
+    "mcp-standalone",
+    "testing",
+    "qa"
+  ]
+}

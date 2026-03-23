@@ -2,7 +2,7 @@
 name: 'Backend'
 description: 'Implements server-side logic, APIs, database operations, and business rules using TDD with SOLID principles and spec-driven development.'
 user-invocable: false
-tools: [vscode, execute, read, agent, edit, search, web, browser, 'awesome-copilot/*', 'com.figma.mcp/mcp/*', 'firecrawl/*', 'github/*', 'io.github.upstash/context7/*', 'markitdown/*', 'memory/*', 'microsoft-docs/*', 'mongodb/*', 'oraios/serena/*', 'playwright/*', 'sentry/*', 'sequentialthinking/*', 'stitch/*', 'terraform/*', 'tavily/*', vscode.mermaid-chat-features/renderMermaidDiagram, ms-azuretools.vscode-containers/containerToolsConfig, todo]
+tools: [vscode, execute, read, agent, edit, search, web, browser, 'forgeos/*', 'github/*', 'io.github.tavily-ai/tavily-mcp/*', 'io.github.upstash/context7/*', 'microsoft/markitdown/*', 'playwright/*', vscode.mermaid-chat-features/renderMermaidDiagram, todo]
 model: Claude Opus 4.6 (copilot)
 ---
 

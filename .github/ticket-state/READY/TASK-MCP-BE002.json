@@ -1,0 +1,63 @@
+{
+  "ticket_id": "TASK-MCP-BE002",
+  "title": "Publish Docker Image to GHCR",
+  "description": "Publish the ForgeOS MCP Server Docker image to GitHub Container Registry (ghcr.io) so users can run the standalone compose without building from source. Create a GitHub Actions workflow that builds and pushes on tag/release.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-23T16:22:32.525543+00:00",
+  "created_by": "TODO",
+  "dependencies": [],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/Dockerfile",
+    ".github/workflows/publish-docker.yml"
+  ],
+  "acceptance_criteria": [
+    "GitHub Actions workflow builds multi-arch image (amd64 + arm64)",
+    "Image published to ghcr.io/reaperoak/forgeos-mcp-server:latest and :version",
+    "docker-compose.standalone.yml updated to reference ghcr.io image instead of local build",
+    "Image size optimized (multi-stage build, no dev deps)",
+    "Workflow triggers on version tags (v*) and releases",
+    "README updated with ghcr.io pull instructions"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-23T16:22:32.525548+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/mcp-standalone-production.md"
+    },
+    {
+      "timestamp": "2026-03-23T16:24:53.084239+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/mcp-standalone-production.md",
+  "tags": [
+    "mcp-standalone",
+    "distribution",
+    "docker",
+    "ci"
+  ]
+}

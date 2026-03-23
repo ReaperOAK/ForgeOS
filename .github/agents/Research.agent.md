@@ -2,7 +2,7 @@
 name: 'Research Analyst'
 description: 'Technical research analyst. Conducts evidence-based research with Bayesian confidence, contradiction detection, and structured recommendations.'
 user-invocable: false
-tools: [vscode, execute, read, agent, edit, search, web, browser, 'awesome-copilot/*', 'com.figma.mcp/mcp/*', 'firecrawl/*', 'github/*', 'io.github.upstash/context7/*', 'markitdown/*', 'memory/*', 'microsoft-docs/*', 'mongodb/*', 'oraios/serena/*', 'playwright/*', 'sentry/*', 'sequentialthinking/*', 'stitch/*', 'terraform/*', 'tavily/*', vscode.mermaid-chat-features/renderMermaidDiagram, ms-azuretools.vscode-containers/containerToolsConfig, todo]
+tools: [vscode, execute, read, agent, edit, search, web, browser, 'com.figma.mcp/mcp/*', 'forgeos/*', 'github/*', 'io.github.tavily-ai/tavily-mcp/*', 'io.github.upstash/context7/*', 'microsoft/markitdown/*', vscode.mermaid-chat-features/renderMermaidDiagram, todo]
 model: Claude Opus 4.6 (copilot)
 ---
 
