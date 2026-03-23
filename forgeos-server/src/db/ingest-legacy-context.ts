@@ -254,8 +254,7 @@ const isDirectRun = process.argv[1]?.includes('ingest-legacy-context');
 if (isDirectRun) {
     ingestLegacyContext()
         .then((result) => {
-            // eslint-disable-next-line no-console
-            console.log(JSON.stringify(result, null, 2));
+            logger.info(result, 'legacy-context ingest result');
             process.exit(0);
         })
         .catch((err) => {

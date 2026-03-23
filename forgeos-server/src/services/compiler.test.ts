@@ -73,6 +73,13 @@ vi.mock('./packet-validator.js', () => ({
     },
 }));
 
+const mockGetAgentByStage = vi.fn();
+vi.mock('./agent-definition-provider.js', () => ({
+    getAgentByStage: (...args: unknown[]) => mockGetAgentByStage(...args),
+    buildAgentContext: (agent: Record<string, unknown>) => `Agent context for ${agent.agent_name}`,
+    formatAgentRole: (agent: Record<string, unknown>) => `You are the **${agent.agent_name}** subagent.`,
+}));
+
 function textResult(value: unknown): CallToolResult {
     return {
         content: [{ type: 'text', text: typeof value === 'string' ? value : JSON.stringify(value) }],
@@ -127,6 +134,26 @@ describe('compiler service', () => {
         mockCodeSearchSymbolsHandler.mockResolvedValue(
             textResult({ total: 1, symbols: [{ name: 'compileTicketPrompt' }] }),
         );
+        mockGetAgentByStage.mockResolvedValue({
+            id: 'agent-1',
+            agent_name: 'Backend',
+            agent_role: 'Backend',
+            description: 'Implements server-side logic',
+            stage: 'BACKEND',
+            model: 'Claude Opus 4.6',
+            tools: ['memory/*'],
+            constraints: {},
+            forbidden_actions: ['NEVER skip TDD'],
+            scope_included: ['src/'],
+            scope_excluded: [],
+            evidence_requirements: [],
+            boot_sequence: [],
+            execution_workflow: {},
+            metadata: {},
+            version: 1,
+            created_at: '2026-03-23T00:00:00.000Z',
+            updated_at: '2026-03-23T00:00:00.000Z',
+        });
     });
 
     it('uses Gemini path when configured and returns packet metadata', async () => {

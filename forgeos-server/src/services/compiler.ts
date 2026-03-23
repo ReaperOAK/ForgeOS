@@ -41,6 +41,11 @@ import {
     type MemorySnapshot,
     type MemorySnapshotCompleteness,
 } from './memory-provider.js';
+import {
+    getAgentByStage,
+    buildAgentContext,
+    formatAgentRole,
+} from './agent-definition-provider.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
 export interface CompiledPromptResult {
@@ -762,6 +767,9 @@ async function gatherInvestigation(ticketId: string): Promise<InvestigationResul
     const lessonQuery = buildLessonQuery(ticket, ticketId);
     const memorySnapshot = await retrieveMemorySnapshot(lessonQuery);
 
+    // Load agent definition from centralized database storage
+    const agentDefinition = await getAgentByStage(ticket.stage ?? 'UNKNOWN');
+
     const contextFiles = getContextFiles(payload.file_scope);
     const cognitionSnapshot = await buildCognitionSnapshot({
         graphVersion: process.env.FORGEOS_GRAPH_VERSION ?? 'unknown',
@@ -809,6 +817,21 @@ async function gatherInvestigation(ticketId: string): Promise<InvestigationResul
             graphVersion: cognitionSnapshot.graphVersion,
             partial: cognitionSnapshot.partial,
         },
+        agent_definition: agentDefinition ? {
+            agent_name: agentDefinition.agent_name,
+            agent_role: agentDefinition.agent_role,
+            description: agentDefinition.description,
+            stage: agentDefinition.stage,
+            model: agentDefinition.model,
+            tools: agentDefinition.tools,
+            constraints: agentDefinition.constraints,
+            forbidden_actions: agentDefinition.forbidden_actions,
+            scope_included: agentDefinition.scope_included,
+            scope_excluded: agentDefinition.scope_excluded,
+            evidence_requirements: agentDefinition.evidence_requirements,
+            context: buildAgentContext(agentDefinition),
+            role: formatAgentRole(agentDefinition),
+        } : null,
     };
 }
 
