@@ -49,6 +49,10 @@ vi.mock('../../middleware/logging.js', () => ({
   logger: mockLogger,
 }));
 
+vi.mock('../../webhooks/reconciliation.js', () => ({
+  handleTicketTransition: vi.fn(),
+}));
+
 // ── Import AFTER mocks ──────────────────────────────────────────────────────
 
 import { ticketsRejectSchema, ticketsRejectHandler } from '../../tools/tickets-reject.js';

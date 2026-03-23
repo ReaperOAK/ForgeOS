@@ -52,6 +52,26 @@ vi.mock('../../services/compiler.js', () => ({
   queueCompileTicketPrompt: (...args: unknown[]) => mockQueueCompileTicketPrompt(...args),
 }));
 
+vi.mock('../../services/context-hash.js', () => ({
+  buildContextHashInputsFromEnv: vi.fn().mockReturnValue({
+    repoCommit: 'test-commit',
+    graphVersion: 'test-graph',
+    memorySnapshot: 'test-memory',
+    packetSchema: 'v1',
+    templateVersion: 'prompt-architect-v1',
+  }),
+  computeContextHash: vi.fn().mockReturnValue('117f49edbc9a1e0efa6bc420b092a8e3897a5e29763f2250055c85f8a70804f9'),
+  evaluatePromptFreshness: vi.fn().mockImplementation(({ compiledPrompt, storedContextHash, currentContextHash }) => {
+    if (!compiledPrompt) {
+      return { freshnessStatus: 'missing', staleReason: 'not_compiled', shouldInvalidateCache: true };
+    }
+    if (storedContextHash !== currentContextHash) {
+      return { freshnessStatus: 'stale', staleReason: 'hash_mismatch', shouldInvalidateCache: true };
+    }
+    return { freshnessStatus: 'fresh', staleReason: null, shouldInvalidateCache: false };
+  }),
+}));
+
 // ── Import AFTER mocks ──────────────────────────────────────────────────────
 
 import { ticketsClaimSchema, ticketsClaimHandler } from '../../tools/tickets-claim.js';

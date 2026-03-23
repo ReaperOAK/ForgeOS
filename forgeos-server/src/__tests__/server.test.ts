@@ -995,9 +995,9 @@ describe('tools/index.ts source analysis', () => {
       });
     }
 
-    it('calls server.tool() exactly 21 times', () => {
+    it('calls server.tool() exactly 22 times', () => {
       const matches = toolsSrc.match(/server\.tool\s*\(/g);
-      expect(matches).toHaveLength(21);
+      expect(matches).toHaveLength(22);
     });
   });
 
@@ -1056,7 +1056,7 @@ describe('tools/index.ts source analysis', () => {
 
   it('passes schema.shape to server.tool for Zod integration', () => {
     const shapeMatches = toolsSrc.match(/Schema\.shape/g);
-    expect(shapeMatches).toHaveLength(21);
+    expect(shapeMatches).toHaveLength(22);
   });
 });
 

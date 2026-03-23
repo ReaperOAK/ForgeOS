@@ -75,8 +75,8 @@ interface MockResponse {
 function createMockReq(overrides: Partial<MockRequest> = {}): MockRequest {
   return {
     headers: {},
-    path: '/api/tickets',
-    method: 'GET',
+    path: '/mcp',
+    method: 'POST',
     requestId: 'test-req-id',
     ...overrides,
   };
