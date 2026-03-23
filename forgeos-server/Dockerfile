@@ -5,6 +5,9 @@ FROM node:22-alpine AS builder
 
 WORKDIR /app
 
+# curl is required by the HEALTHCHECK script in both builder (dev) and runtime stages.
+RUN apk add --no-cache curl
+
 # Copy dependency manifests first to maximise Docker layer caching.
 # Subsequent source changes won't invalidate the npm ci layer.
 COPY package.json package-lock.json tsconfig.json ./

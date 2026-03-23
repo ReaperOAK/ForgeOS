@@ -85,6 +85,22 @@ export function createApp(_config: AppConfig): express.Express {
     }
   });
 
+  // ── Readiness ──────────────────────────────────────
+  app.get('/ready', async (_req: Request, res: Response) => {
+    try {
+      const healthy = await healthCheck();
+      const result = await pool.query('SELECT COUNT(*)::int AS cnt FROM agent_definitions');
+      const agentCount = (result.rows[0] as { cnt: number }).cnt;
+      if (healthy && agentCount > 0) {
+        res.json({ status: 'ready', agents: agentCount, timestamp: new Date().toISOString() });
+      } else {
+        res.status(503).json({ status: 'not-ready', healthy, agents: agentCount, timestamp: new Date().toISOString() });
+      }
+    } catch {
+      res.status(503).json({ status: 'not-ready', timestamp: new Date().toISOString() });
+    }
+  });
+
   // ── SSE Events ─────────────────────────────────────
   app.get('/events', (req: Request, res: Response) => {
     res.writeHead(200, {

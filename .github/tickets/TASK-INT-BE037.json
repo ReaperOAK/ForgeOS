@@ -1,0 +1,65 @@
+{
+  "ticket_id": "TASK-INT-BE037",
+  "title": "Implement memory.add_lesson MCP Tool",
+  "description": "Implement the memory.add_lesson MCP tool. Allows agents to manually record lessons learned during their work. Generates embedding and stores in lessons/lesson_embeddings tables.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-23T16:22:32.522169+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-BE031",
+    "TASK-INT-BE033"
+  ],
+  "blocked_by": [
+    "TASK-INT-BE031",
+    "TASK-INT-BE033"
+  ],
+  "file_paths": [
+    "forgeos-server/src/tools/memory-add-lesson.ts"
+  ],
+  "acceptance_criteria": [
+    "MCP tool memory.add_lesson accepts ticket_id, title, content, category",
+    "Validates category is one of: pattern, anti-pattern, convention, decision",
+    "Generates embedding for title plus content via EmbeddingService",
+    "Stores in lessons table with default confidence 0.5",
+    "Stores embedding in lesson_embeddings table",
+    "Returns created lesson object with id",
+    "Prevents duplicate lessons (same ticket_id plus title combination)",
+    "Zod schemas validate all input parameters",
+    "Unit test: create lesson then verify in database"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-23T16:22:32.522175+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase3-schema-tools.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase3-schema-tools.md",
+  "tags": [
+    "intelligence",
+    "memory",
+    "phase3",
+    "mcp-tool",
+    "BLK-INT-12"
+  ]
+}

@@ -279,55 +279,153 @@ async function upsertAgentDefinition(agent: ParsedAgentDefinition): Promise<void
     );
 }
 
-// ── Main ─────────────────────────────────────────────────────────────────────
+// ── Embedding Generation ─────────────────────────────────────────────────────
 
-async function main(): Promise<void> {
+async function generateAgentEmbedding(agentId: string, description: string): Promise<void> {
+    const ollamaUrl = process.env['OLLAMA_BASE_URL'] || 'http://127.0.0.1:11434/api/embed';
+    const model = process.env['EMBEDDING_MODEL'] || 'mxbai-embed-large';
+
+    try {
+        const response = await fetch(ollamaUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ model, input: description }),
+            signal: AbortSignal.timeout(30_000),
+        });
+
+        if (!response.ok) {
+            logger.warn({ agentId, status: response.status }, 'seed-agent-definitions: embedding request failed');
+            return;
+        }
+
+        const data = await response.json() as { embeddings?: number[][] };
+        const embedding = data.embeddings?.[0];
+        if (!embedding || embedding.length === 0) {
+            logger.warn({ agentId }, 'seed-agent-definitions: empty embedding returned');
+            return;
+        }
+
+        const vectorStr = `[${embedding.join(',')}]`;
+        await pool.query(
+            `INSERT INTO agent_definition_embeddings (agent_definition_id, embedding, model_name)
+             VALUES ($1, $2::vector, $3)
+             ON CONFLICT (agent_definition_id) DO UPDATE SET
+               embedding = EXCLUDED.embedding,
+               model_name = EXCLUDED.model_name,
+               created_at = NOW()`,
+            [agentId, vectorStr, model],
+        );
+
+        logger.info({ agentId, dimensions: embedding.length }, 'seed-agent-definitions: embedding stored');
+    } catch (err) {
+        logger.warn(
+            { agentId, error: err instanceof Error ? err.message : String(err) },
+            'seed-agent-definitions: embedding generation failed (non-fatal)',
+        );
+    }
+}
+
+// ── Bundled Fallback Definitions ─────────────────────────────────────────────
+
+/**
+ * Built-in agent definitions for standalone mode where .github/agents/ is unavailable.
+ * These are the essential agents needed for the SDLC pipeline.
+ */
+const BUNDLED_AGENT_DEFINITIONS: ParsedAgentDefinition[] = [
+    { agent_name: 'Architect', agent_role: 'Architect', description: 'Designs system architecture, API contracts, database schemas, and component boundaries.', stage: 'ARCHITECT', model: null, tools: [], constraints: {}, forbidden_actions: [], scope_included: [], scope_excluded: [], evidence_requirements: [], boot_sequence: [], execution_workflow: {}, metadata: {}, source_file: 'bundled' },
+    { agent_name: 'Backend', agent_role: 'Backend', description: 'Implements server-side logic, APIs, database operations, and business rules.', stage: 'BACKEND', model: null, tools: [], constraints: {}, forbidden_actions: [], scope_included: [], scope_excluded: [], evidence_requirements: [], boot_sequence: [], execution_workflow: {}, metadata: {}, source_file: 'bundled' },
+    { agent_name: 'Frontend', agent_role: 'Frontend', description: 'Implements UIs, responsive layouts, state management, and accessible components.', stage: 'FRONTEND', model: null, tools: [], constraints: {}, forbidden_actions: [], scope_included: [], scope_excluded: [], evidence_requirements: [], boot_sequence: [], execution_workflow: {}, metadata: {}, source_file: 'bundled' },
+    { agent_name: 'QA', agent_role: 'QA', description: 'Designs and executes test strategies: TDD, mutation testing, E2E.', stage: 'QA', model: null, tools: [], constraints: {}, forbidden_actions: [], scope_included: [], scope_excluded: [], evidence_requirements: [], boot_sequence: [], execution_workflow: {}, metadata: {}, source_file: 'bundled' },
+    { agent_name: 'Security', agent_role: 'Security', description: 'Performs STRIDE threat modeling, OWASP Top 10 coverage, SBOM generation.', stage: 'SECURITY', model: null, tools: [], constraints: {}, forbidden_actions: [], scope_included: [], scope_excluded: [], evidence_requirements: [], boot_sequence: [], execution_workflow: {}, metadata: {}, source_file: 'bundled' },
+    { agent_name: 'DevOps', agent_role: 'DevOps', description: 'Infrastructure and operations engineer for GitOps workflows.', stage: 'BACKEND', model: null, tools: [], constraints: {}, forbidden_actions: [], scope_included: [], scope_excluded: [], evidence_requirements: [], boot_sequence: [], execution_workflow: {}, metadata: {}, source_file: 'bundled' },
+    { agent_name: 'Documentation', agent_role: 'Documentation', description: 'Technical documentation engineer with Flesch-Kincaid scoring.', stage: 'DOCUMENTATION', model: null, tools: [], constraints: {}, forbidden_actions: [], scope_included: [], scope_excluded: [], evidence_requirements: [], boot_sequence: [], execution_workflow: {}, metadata: {}, source_file: 'bundled' },
+    { agent_name: 'CIReviewer', agent_role: 'CIReviewer', description: 'Automated code review gatekeeper enforcing complexity thresholds.', stage: 'CI', model: null, tools: [], constraints: {}, forbidden_actions: [], scope_included: [], scope_excluded: [], evidence_requirements: [], boot_sequence: [], execution_workflow: {}, metadata: {}, source_file: 'bundled' },
+    { agent_name: 'ProductManager', agent_role: 'ProductManager', description: 'Translates business requirements into PRDs, user stories, and task specs.', stage: 'PRODUCT_MANAGER', model: null, tools: [], constraints: {}, forbidden_actions: [], scope_included: [], scope_excluded: [], evidence_requirements: [], boot_sequence: [], execution_workflow: {}, metadata: {}, source_file: 'bundled' },
+    { agent_name: 'Research', agent_role: 'Research', description: 'Technical research analyst with Bayesian confidence scoring.', stage: 'RESEARCH', model: null, tools: [], constraints: {}, forbidden_actions: [], scope_included: [], scope_excluded: [], evidence_requirements: [], boot_sequence: [], execution_workflow: {}, metadata: {}, source_file: 'bundled' },
+    { agent_name: 'UIDesigner', agent_role: 'UIDesigner', description: 'Generates UI mockups, design tokens, and component specs.', stage: 'UI_DESIGN', model: null, tools: [], constraints: {}, forbidden_actions: [], scope_included: [], scope_excluded: [], evidence_requirements: [], boot_sequence: [], execution_workflow: {}, metadata: {}, source_file: 'bundled' },
+    { agent_name: 'Validator', agent_role: 'Validator', description: 'Independent SDLC compliance reviewer verifying Definition of Done.', stage: 'VALIDATOR', model: null, tools: [], constraints: {}, forbidden_actions: [], scope_included: [], scope_excluded: [], evidence_requirements: [], boot_sequence: [], execution_workflow: {}, metadata: {}, source_file: 'bundled' },
+    { agent_name: 'TODO', agent_role: 'TODO', description: 'Progressive decomposition engine for L0-L4 task breakdown.', stage: 'READY', model: null, tools: [], constraints: {}, forbidden_actions: [], scope_included: [], scope_excluded: [], evidence_requirements: [], boot_sequence: [], execution_workflow: {}, metadata: {}, source_file: 'bundled' },
+    { agent_name: 'Ticketer', agent_role: 'Ticketer', description: 'ForgeOS orchestrator — stateless MCP-native dispatcher.', stage: 'READY', model: null, tools: [], constraints: {}, forbidden_actions: [], scope_included: [], scope_excluded: [], evidence_requirements: [], boot_sequence: [], execution_workflow: {}, metadata: {}, source_file: 'bundled' },
+];
+
+// ── Main (Exported) ──────────────────────────────────────────────────────────
+
+/**
+ * Seed agent definitions into the database.
+ *
+ * Tries to load from the filesystem (.github/agents/) first.
+ * Falls back to bundled definitions if the directory is unavailable.
+ * Generates vector embeddings for each agent after seeding.
+ *
+ * @param generateEmbeddings - Whether to generate embeddings (default: true)
+ */
+export async function seedAgentDefinitions(generateEmbeddings = true): Promise<void> {
+    // Check how many agents already exist
+    const existingCount = await pool.query('SELECT COUNT(*)::int AS cnt FROM agent_definitions');
+    const existingAgents = (existingCount.rows[0] as { cnt: number }).cnt;
+    logger.info({ existingAgents }, 'seed-agent-definitions: current agent count');
+
+    let agents: ParsedAgentDefinition[] = [];
+
+    // Try filesystem first (development mode)
     const agentsDir = join(process.cwd(), '..', '.github', 'agents');
-
-    logger.info({ agentsDir }, 'seed-agent-definitions: scanning agent files');
-
     try {
         const files = readdirSync(agentsDir)
             .filter(f => f.endsWith('.agent.md'))
             .map(f => join(agentsDir, f));
 
-        logger.info({ fileCount: files.length }, 'seed-agent-definitions: found agent files');
-
-        let successCount = 0;
-        let skipCount = 0;
-
-        for (const filePath of files) {
-            const agent = parseAgentFile(filePath);
-            if (!agent) {
-                skipCount++;
-                continue;
+        if (files.length > 0) {
+            logger.info({ agentsDir, fileCount: files.length }, 'seed-agent-definitions: loading from filesystem');
+            for (const filePath of files) {
+                const agent = parseAgentFile(filePath);
+                if (agent) agents.push(agent);
             }
-
-            await upsertAgentDefinition(agent);
-            successCount++;
         }
+    } catch {
+        logger.info('seed-agent-definitions: filesystem agents not available, using bundled definitions');
+    }
 
-        logger.info(
-            { successCount, skipCount, total: files.length },
-            'seed-agent-definitions: completed seeding',
+    // Fallback to bundled definitions
+    if (agents.length === 0) {
+        agents = BUNDLED_AGENT_DEFINITIONS;
+        logger.info({ agentCount: agents.length }, 'seed-agent-definitions: using bundled definitions');
+    }
+
+    // Upsert all agents
+    let successCount = 0;
+    for (const agent of agents) {
+        await upsertAgentDefinition(agent);
+        successCount++;
+    }
+
+    logger.info({ successCount, total: agents.length }, 'seed-agent-definitions: upserted agents');
+
+    // Generate embeddings
+    if (generateEmbeddings) {
+        const rows = await pool.query<{ id: string; description: string }>(
+            'SELECT id, description FROM agent_definitions WHERE is_active = TRUE',
         );
-    } catch (err) {
-        logger.error(
-            { error: err instanceof Error ? err.message : String(err) },
-            'seed-agent-definitions: failed to scan agent directory',
-        );
-        throw err;
+
+        for (const row of rows.rows) {
+            await generateAgentEmbedding(row.id, row.description);
+        }
     }
 }
 
-// ── Entry Point ──────────────────────────────────────────────────────────────
+// ── CLI Entry Point ──────────────────────────────────────────────────────────
 
-main()
-    .then(() => {
-        logger.info('seed-agent-definitions: done');
-        process.exit(0);
-    })
-    .catch((err) => {
-        logger.error({ err }, 'seed-agent-definitions: fatal error');
-        process.exit(1);
-    });
+// Only run as CLI if this is the main module
+const isMainModule = process.argv[1]?.endsWith('seed-agent-definitions.ts') ||
+                     process.argv[1]?.endsWith('seed-agent-definitions.js');
+
+if (isMainModule) {
+    seedAgentDefinitions()
+        .then(() => {
+            logger.info('seed-agent-definitions: done');
+            process.exit(0);
+        })
+        .catch((err) => {
+            logger.error({ err }, 'seed-agent-definitions: fatal error');
+            process.exit(1);
+        });
+}

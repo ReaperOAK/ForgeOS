@@ -244,7 +244,7 @@ describe('memoryAddLessonHandler', () => {
     expect(data.message).toContain('connection refused');
   });
 
-  it('should handle embedding service error', async () => {
+  it('should handle embedding service error gracefully (best-effort)', async () => {
     mockQuery.mockResolvedValueOnce({ rows: [{ id: FAKE_LESSON_ID }] });
     mockEmbedText.mockRejectedValueOnce(new Error('API rate limit exceeded'));
 
@@ -252,12 +252,13 @@ describe('memoryAddLessonHandler', () => {
     const result = await memoryAddLessonHandler(parsed);
     const data = parseContent(result);
 
-    expect(result.isError).toBe(true);
-    expect(data.error).toBe('INTERNAL_ERROR');
-    expect(data.message).toContain('API rate limit exceeded');
+    // Lesson should still be created even if embedding fails
+    expect(result.isError).toBeUndefined();
+    expect(data.lesson_id).toBe(FAKE_LESSON_ID);
+    expect(data.status).toBe('created');
   });
 
-  it('should handle database error on embedding insert', async () => {
+  it('should handle database error on embedding insert gracefully (best-effort)', async () => {
     mockQuery.mockResolvedValueOnce({ rows: [{ id: FAKE_LESSON_ID }] });
     mockEmbedText.mockResolvedValueOnce(FAKE_EMBEDDING);
     mockQuery.mockRejectedValueOnce(new Error('unique constraint violated'));
@@ -266,9 +267,10 @@ describe('memoryAddLessonHandler', () => {
     const result = await memoryAddLessonHandler(parsed);
     const data = parseContent(result);
 
-    expect(result.isError).toBe(true);
-    expect(data.error).toBe('INTERNAL_ERROR');
-    expect(data.message).toContain('unique constraint violated');
+    // Lesson should still be created even if embedding insert fails
+    expect(result.isError).toBeUndefined();
+    expect(data.lesson_id).toBe(FAKE_LESSON_ID);
+    expect(data.status).toBe('created');
   });
 
   it('should use default category and tags when not provided', async () => {

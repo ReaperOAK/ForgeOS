@@ -1,0 +1,64 @@
+{
+  "ticket_id": "TASK-INT-BE022",
+  "title": "TypeScript and JavaScript AST Parser",
+  "description": "Implement the TypeScript/JavaScript AST parser using web-tree-sitter. Extract symbols (functions, classes, methods, interfaces, type aliases, constants) and imports from TypeScript and JavaScript files. Populate code_symbols and code_imports tables.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-23T16:22:32.518178+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-DO001",
+    "TASK-INT-BE019"
+  ],
+  "blocked_by": [
+    "TASK-INT-DO001",
+    "TASK-INT-BE019"
+  ],
+  "file_paths": [
+    "forgeos-server/src/services/parsers/typescript-parser.ts"
+  ],
+  "acceptance_criteria": [
+    "Extracts function declarations with name, start_line, end_line, is_exported",
+    "Extracts class declarations with methods as child symbols (parent_symbol_id)",
+    "Extracts interface and type alias declarations",
+    "Extracts const/let/var declarations at module scope",
+    "Extracts import statements: named imports, default imports, namespace imports",
+    "Resolves relative import paths to code_files entries (resolved_file_id)",
+    "Handles JSX/TSX syntax without parser errors",
+    "Unit test: parse a 50-line TypeScript fixture then verify all symbols extracted"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-23T16:22:32.518183+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase2-schema-indexer.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase2-schema-indexer.md",
+  "tags": [
+    "intelligence",
+    "codegraph",
+    "phase2",
+    "parser",
+    "BLK-INT-07"
+  ]
+}

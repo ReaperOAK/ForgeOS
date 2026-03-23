@@ -76,21 +76,25 @@ export async function memoryAddLessonHandler(
     }
     const lessonId: string = row.id;
 
-    // 2. Generate embedding via EmbeddingService
-    const embeddingService = new EmbeddingService();
-    const embedding = await embeddingService.embedText(lesson_text);
-
-    // 3. Store embedding in lesson_embeddings
-    await pool.query(
-      `INSERT INTO lesson_embeddings (lesson_id, embedding)
-       VALUES ($1, $2::vector)`,
-      [lessonId, JSON.stringify(embedding)],
-    );
-
-    logger.info(
-      { lesson_id: lessonId, ticket_id, stage },
-      'memory.add_lesson created lesson with embedding',
-    );
+    // 2. Generate embedding (best effort — skip if provider unavailable)
+    try {
+      const embeddingService = new EmbeddingService();
+      const embedding = await embeddingService.embedText(lesson_text);
+      await pool.query(
+        `INSERT INTO lesson_embeddings (lesson_id, embedding)
+         VALUES ($1, $2::vector)`,
+        [lessonId, JSON.stringify(embedding)],
+      );
+      logger.info(
+        { lesson_id: lessonId, ticket_id, stage },
+        'memory.add_lesson created lesson with embedding',
+      );
+    } catch (embedErr) {
+      logger.warn(
+        { lesson_id: lessonId, error: embedErr instanceof Error ? embedErr.message : String(embedErr) },
+        'memory.add_lesson: embedding skipped (provider unavailable)',
+      );
+    }
 
     return {
       content: [{

@@ -1,0 +1,64 @@
+{
+  "ticket_id": "TASK-MCP-BE004",
+  "title": "Production Security Hardening",
+  "description": "Harden the MCP server for production deployment. Currently uses a default admin key that must be changed. Implement secure defaults, rate limiting improvements, and CORS configuration.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-23T16:22:32.525962+00:00",
+  "created_by": "TODO",
+  "dependencies": [],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/middleware/auth.ts",
+    "forgeos-server/src/config.ts",
+    "forgeos-server/docker-compose.standalone.yml"
+  ],
+  "acceptance_criteria": [
+    "Server refuses to start in production mode with default ADMIN_API_KEY",
+    "First-boot generates a random admin key and prints it once to stdout",
+    "API keys use bcrypt hashing instead of SHA-256",
+    "CORS origins configurable via ALLOWED_ORIGINS env var",
+    "Rate limiter uses sliding window per API key (not per IP)",
+    "Health and ready endpoints remain public, all others require auth",
+    "Secrets directory (.secrets/) in standalone compose uses Docker secrets"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-23T16:22:32.525968+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/mcp-standalone-production.md"
+    },
+    {
+      "timestamp": "2026-03-23T16:24:53.075867+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/mcp-standalone-production.md",
+  "tags": [
+    "mcp-standalone",
+    "security",
+    "production"
+  ]
+}

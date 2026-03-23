@@ -1,0 +1,62 @@
+{
+  "ticket_id": "TASK-INT-BE033",
+  "title": "Embedding Service Integration",
+  "description": "Implement the embedding service that interfaces with OpenAI text-embedding-3-small API. Provides embed_text() and embed_batch() methods. Handles rate limiting, retry with exponential backoff, and API key configuration via environment variables. API key must never be logged.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-23T16:22:32.521421+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-BE031"
+  ],
+  "blocked_by": [
+    "TASK-INT-BE031"
+  ],
+  "file_paths": [
+    "forgeos-server/src/services/embedding-service.ts"
+  ],
+  "acceptance_criteria": [
+    "EmbeddingService.embed_text(text) returns 1536-dim float array",
+    "EmbeddingService.embed_batch(texts) returns array of embeddings (max 100 per batch)",
+    "Uses text-embedding-3-small model (configurable via env)",
+    "API key from OPENAI_API_KEY environment variable (validated at startup)",
+    "Retry with exponential backoff (3 attempts, base 1s)",
+    "Rate limit handling (429 triggers exponential backoff)",
+    "API key never logged or exposed in error messages",
+    "Unit tests with mocked OpenAI API responses"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-23T16:22:32.521427+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase3-schema-tools.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase3-schema-tools.md",
+  "tags": [
+    "intelligence",
+    "memory",
+    "phase3",
+    "service",
+    "BLK-INT-11"
+  ]
+}

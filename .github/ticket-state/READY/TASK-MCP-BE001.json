@@ -1,0 +1,64 @@
+{
+  "ticket_id": "TASK-MCP-BE001",
+  "title": "Fix Compile Worker Packet Validation",
+  "description": "The compile worker processes queue jobs end-to-end but the LLM output (Ollama qwen2.5:7b-instruct) doesn't pass the 11-section packet validation. The error is \"Packet validation failed. Packet structure is invalid.\" The prompt template needs to be improved to reliably produce all 11 required sections in the correct order: ROLE, TICKET, SYSTEM CONSTRAINTS, HISTORY, LEARNINGS, BEST PRACTICES, CONTEXT LOCATIONS, YOUR EXACT TASK, EXECUTION PLAN, EDGE CASES, POST-COMPLETION.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-23T16:22:32.525347+00:00",
+  "created_by": "TODO",
+  "dependencies": [],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/services/compiler.ts",
+    "forgeos-server/src/services/packet-validator.ts",
+    "forgeos-server/src/services/compile-orchestrator.ts"
+  ],
+  "acceptance_criteria": [
+    "Prompt template includes explicit section headers in the required format",
+    "Few-shot example included in system prompt showing valid packet structure",
+    "LLM output passes `validatePacketSections()` on \u226590% of compile attempts",
+    "Compile worker successfully stores compiled prompts in the tickets table",
+    "Fallback: if validation fails after 3 retries, store raw output with warning flag",
+    "Add integration test for compile pipeline with mock LLM response"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-23T16:22:32.525353+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/mcp-standalone-production.md"
+    },
+    {
+      "timestamp": "2026-03-23T16:24:53.079370+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/mcp-standalone-production.md",
+  "tags": [
+    "mcp-standalone",
+    "compile-worker",
+    "llm",
+    "production"
+  ]
+}

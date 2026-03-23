@@ -1,0 +1,65 @@
+{
+  "ticket_id": "TASK-INT-DO001",
+  "title": "Tree-sitter WASM Infrastructure Setup",
+  "description": "Install and configure web-tree-sitter WASM bindings in the forgeos-server project. Set up WASM grammar loading for TypeScript, JavaScript, Python, and SQL. Create a grammar loader service that initializes parsers on demand. Verify parser initialization works in both development and Docker environments.",
+  "type": "infra",
+  "priority": "critical",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "DEVOPS",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-23T16:22:32.517322+00:00",
+  "created_by": "TODO",
+  "dependencies": [],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/package.json",
+    "forgeos-server/src/services/parsers/wasm-loader.ts"
+  ],
+  "acceptance_criteria": [
+    "web-tree-sitter npm package installed in forgeos-server",
+    "WASM grammar files downloaded for TypeScript, JavaScript, Python, SQL",
+    "Grammar loader service initializes parsers lazily (on first use)",
+    "Parser initialization succeeds in Node.js development environment",
+    "Parser initialization succeeds inside Docker container",
+    "Unit test: load TypeScript grammar then parse a simple file then verify AST node count",
+    "WASM files included in Docker build (not downloaded at runtime)"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-23T16:22:32.517328+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase2-schema-indexer.md"
+    },
+    {
+      "timestamp": "2026-03-23T16:22:32.534959+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase2-schema-indexer.md",
+  "tags": [
+    "intelligence",
+    "codegraph",
+    "phase2",
+    "infra",
+    "BLK-INT-06"
+  ]
+}

@@ -38,6 +38,12 @@ services:
       DEFAULT_LEASE_MINUTES: "30"
       MAX_LEASE_MINUTES: "120"
       RECONCILIATION_INTERVAL: "60"
+      EMBEDDING_PROVIDER: "ollama"
+      EMBEDDING_MODEL: "mxbai-embed-large"
+      OLLAMA_BASE_URL: "http://ollama:11434/api/embed"
+      PROMPT_LLM_PROVIDER: "ollama"
+      PROMPT_LLM_MODEL: "qwen2.5:7b-instruct"
+      OLLAMA_GENERATE_URL: "http://ollama:11434/api/generate"
     volumes:
       # Mount source code for live reloading — changes on host are reflected
       # immediately inside the container without rebuilding.
@@ -48,6 +54,9 @@ services:
       - "3011:3011"
       # Node.js debugger port for attaching VS Code debugger
       - "9229:9229"
+    depends_on:
+      ollama:
+        condition: service_started
 
   # ---------------------------------------------------------------------------
   # PostgreSQL — Development Overrides
@@ -71,3 +80,55 @@ services:
       - "log_connections=on"
       - "-c"
       - "log_disconnections=on"
+
+  # ---------------------------------------------------------------------------
+  # Ollama — Local LLM & Embedding Server
+  # ---------------------------------------------------------------------------
+  # Serves two models:
+  #   mxbai-embed-large  — 1024-dim embeddings for pgvector semantic search
+  #   qwen2.5:7b-instruct — prompt compilation (lightweight, local-first)
+  #
+  # Models are pulled once by ollama-init and cached in the ollama-data volume.
+  # On GPU hosts Ollama auto-detects CUDA/ROCm; falls back to CPU silently.
+  # ---------------------------------------------------------------------------
+  ollama:
+    image: ollama/ollama:latest
+    container_name: forgeos-ollama
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - forgeos-net
+    ports:
+      - "11434:11434"
+    healthcheck:
+      test: ["CMD-SHELL", "ollama list 2>/dev/null || exit 1"]
+      interval: 30s
+      timeout: 10s
+      start_period: 60s
+      retries: 5
+    restart: unless-stopped
+
+  # Pulls required models once; exits when done. Re-running is safe (noop if already present).
+  ollama-init:
+    image: ollama/ollama:latest
+    container_name: forgeos-ollama-init
+    depends_on:
+      - ollama
+    entrypoint: /bin/sh
+    command: >
+      -c "until ollama list > /dev/null 2>&1; do echo 'Waiting for Ollama...'; sleep 3; done;
+          echo 'Pulling mxbai-embed-large...'; ollama pull mxbai-embed-large;
+          echo 'Pulling qwen2.5:7b-instruct...'; ollama pull qwen2.5:7b-instruct;
+          echo 'Models ready.'"
+    environment:
+      OLLAMA_HOST: "http://ollama:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    networks:
+      - forgeos-net
+    restart: "no"
+
+volumes:
+  ollama-data:
+    name: forgeos-ollama-data
+    driver: local

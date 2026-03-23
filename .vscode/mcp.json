@@ -1,0 +1,15 @@
+{
+  // ForgeOS MCP Server configuration for VS Code.
+  // Prerequisites:
+  //   docker compose -f forgeos-server/docker-compose.standalone.yml up -d
+  //   OR: cd infra && docker compose up -d
+  "servers": {
+    "forgeos": {
+      "type": "http",
+      "url": "http://localhost:3011/mcp",
+      "headers": {
+        "Authorization": "Bearer forgeos_admin_CHANGE_ME"
+      }
+    }
+  }
+}

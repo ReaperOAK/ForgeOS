@@ -1,0 +1,66 @@
+{
+  "ticket_id": "TASK-INT-BE016",
+  "title": "Update Agent SDK for Cutover MCP Tools",
+  "description": "Update the ForgeOS Agent SDK (Python) to add client wrappers for the 3 new cutover MCP tools: tickets.get, tickets.list, tickets.payload. Add Pydantic models for ticket, payload, and list response types. This allows agents to call the new tools via the SDK.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "BLOCKED",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-03-23T16:22:32.516831+00:00",
+  "created_by": "TODO",
+  "dependencies": [
+    "TASK-INT-BE011",
+    "TASK-INT-BE012",
+    "TASK-INT-BE013"
+  ],
+  "blocked_by": [
+    "TASK-INT-BE011",
+    "TASK-INT-BE012",
+    "TASK-INT-BE013"
+  ],
+  "file_paths": [
+    "agent-sdk/src/forgeos_sdk/client.py",
+    "agent-sdk/src/forgeos_sdk/models.py"
+  ],
+  "acceptance_criteria": [
+    "client.tickets_get(ticket_id) wraps tickets.get MCP tool",
+    "client.tickets_list(filters) wraps tickets.list MCP tool",
+    "client.tickets_payload(ticket_id) wraps tickets.payload MCP tool",
+    "Pydantic models: Ticket, TicketPayload, TicketListResponse match MCP schemas",
+    "Error handling follows existing SDK patterns (raises typed exceptions)",
+    "Unit tests for each new method with mocked MCP responses",
+    "README updated with cutover tool usage examples"
+  ],
+  "rework_count": 0,
+  "claimed_by": null,
+  "machine_id": null,
+  "operator": null,
+  "lease_expiry": null,
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-03-23T16:22:32.516837+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/int-phase1-tools.md"
+    }
+  ],
+  "source_task_file": "TODO/tasks/int-phase1-tools.md",
+  "tags": [
+    "intelligence",
+    "cutover",
+    "phase1",
+    "agent-sdk",
+    "BLK-INT-04"
+  ]
+}
