@@ -1,263 +1,89 @@
-# Vibecoding Semantic Catalog
-# Maps semantic tags to chunk files for on-demand context loading
-# Source instruction files removed — chunks are the sole source of truth
-# Updated: 2026-02-26
-
 accessibility:
-  - ".github/vibecoding/chunks/a11y.instructions/chunk-01.yaml"
-  - ".github/vibecoding/chunks/a11y.instructions/chunk-02.yaml"
-
+- .github/skills/a11y/SKILL.md
+- .github/skills/a11y/references/
 agent:
-  - ".github/agents/Architect.agent.md"
-  - ".github/agents/Backend.agent.md"
-  - ".github/agents/CIReviewer.agent.md"
-  - ".github/agents/DevOps.agent.md"
-  - ".github/agents/Documentation.agent.md"
-  - ".github/agents/Frontend.agent.md"
-  - ".github/agents/ProductManager.agent.md"
-  - ".github/agents/QA.agent.md"
-  - ".github/agents/Ticketer.agent.md"
-  - ".github/agents/Research.agent.md"
-  - ".github/agents/Security.agent.md"
-  - ".github/agents/UIDesigner.agent.md"
-  - ".github/vibecoding/chunks/UIDesigner.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/UIDesigner.agent/chunk-02.yaml"
-  - ".github/agents/TODO.agent.md"
-  - ".github/vibecoding/chunks/TODO.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/TODO.agent/chunk-02.yaml"
-  - ".github/agents/Validator.agent.md"
-  - ".github/vibecoding/chunks/Validator.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/Validator.agent/chunk-02.yaml"
-  - ".github/agents/_cross-cutting-protocols.md"
-  - ".github/vibecoding/chunks/Architect.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/Architect.agent/chunk-02.yaml"
-  - ".github/vibecoding/chunks/Backend.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/Backend.agent/chunk-02.yaml"
-  - ".github/vibecoding/chunks/CIReviewer.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/CIReviewer.agent/chunk-02.yaml"
-  - ".github/vibecoding/chunks/DevOps.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/DevOps.agent/chunk-02.yaml"
-  - ".github/vibecoding/chunks/Documentation.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/Documentation.agent/chunk-02.yaml"
-  - ".github/vibecoding/chunks/Frontend.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/Frontend.agent/chunk-02.yaml"
-  - ".github/vibecoding/chunks/ProductManager.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/ProductManager.agent/chunk-02.yaml"
-  - ".github/vibecoding/chunks/QA.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/QA.agent/chunk-02.yaml"
-  - ".github/vibecoding/chunks/Ticketer.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/Ticketer.agent/chunk-02.yaml"
-  - ".github/vibecoding/chunks/Ticketer.agent/chunk-03.yaml"
-  - ".github/vibecoding/chunks/Research.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/Research.agent/chunk-02.yaml"
-  - ".github/vibecoding/chunks/Security.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/Security.agent/chunk-02.yaml"
-  - ".github/vibecoding/chunks/_cross-cutting-protocols/chunk-01.yaml"
-  - ".github/vibecoding/chunks/_cross-cutting-protocols/chunk-02.yaml"
-  - ".github/vibecoding/chunks/security.agentic-guardrails/chunk-01.yaml"
-  - ".github/vibecoding/chunks/security.agentic-guardrails/chunk-02.yaml"
-
+- .github/agents/Architect.agent.md
+- .github/agents/Backend.agent.md
+- .github/agents/CIReviewer.agent.md
+- .github/agents/DevOps.agent.md
+- .github/agents/Documentation.agent.md
+- .github/agents/Frontend.agent.md
+- .github/agents/ProductManager.agent.md
+- .github/agents/QA.agent.md
+- .github/agents/Ticketer.agent.md
+- .github/agents/Research.agent.md
+- .github/agents/Security.agent.md
+- .github/agents/UIDesigner.agent.md
+- .github/agents/TODO.agent.md
+- .github/agents/Validator.agent.md
 ai-safety:
-  - ".github/vibecoding/chunks/ai-prompt-engineering-safety-best-practices.instructions/chunk-01.yaml"
-  - ".github/vibecoding/chunks/ai-prompt-engineering-safety-best-practices.instructions/chunk-02.yaml"
-
+- .github/skills/ai-safety/SKILL.md
+- .github/skills/ai-safety/references/
 ci:
-  - ".github/vibecoding/chunks/CIReviewer.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/CIReviewer.agent/chunk-02.yaml"
-  - ".github/vibecoding/chunks/devops-core-principles.instructions/chunk-01.yaml"
-  - ".github/vibecoding/chunks/devops-core-principles.instructions/chunk-02.yaml"
-  - ".github/vibecoding/chunks/github-actions-ci-cd-best-practices.instructions/chunk-01.yaml"
-  - ".github/vibecoding/chunks/github-actions-ci-cd-best-practices.instructions/chunk-02.yaml"
-  - ".github/vibecoding/chunks/github-actions-ci-cd-best-practices.instructions/chunk-03.yaml"
-  - ".github/vibecoding/chunks/github-actions-ci-cd-best-practices.instructions/chunk-04.yaml"
-
+- .github/skills/ci-cd/SKILL.md
+- .github/skills/ci-cd/references/
 container:
-  - ".github/vibecoding/chunks/containerization-docker-best-practices.instructions/chunk-01.yaml"
-  - ".github/vibecoding/chunks/containerization-docker-best-practices.instructions/chunk-02.yaml"
-  - ".github/vibecoding/chunks/containerization-docker-best-practices.instructions/chunk-03.yaml"
-
+- .github/skills/containerization/SKILL.md
+- .github/skills/containerization/references/
 cto:
-  - ".github/vibecoding/chunks/CTO_Playbook/chunk-01.yaml"
-  - ".github/vibecoding/chunks/CTO_Playbook/chunk-02.yaml"
-  - ".github/vibecoding/chunks/CTO_Playbook/chunk-03.yaml"
-  - ".github/vibecoding/chunks/CTO_Playbook/chunk-04.yaml"
-  - ".github/vibecoding/chunks/Startup_Scalability__Technical_Foundations_Playbook/chunk-01.yaml"
-  - ".github/vibecoding/chunks/Startup_Scalability__Technical_Foundations_Playbook/chunk-02.yaml"
-  - ".github/vibecoding/chunks/Startup_Scalability__Technical_Foundations_Playbook/chunk-03.yaml"
-  - ".github/vibecoding/chunks/Startup_Scalability__Technical_Foundations_Playbook/chunk-04.yaml"
-
+- .github/skills/cto-playbook/SKILL.md
+- .github/skills/cto-playbook/references/
 design:
-  - ".github/vibecoding/chunks/UIDesigner.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/UIDesigner.agent/chunk-02.yaml"
-  - ".github/vibecoding/chunks/7._Figma_Prototypes_for_Architecture___Design/chunk-01.yaml"
-  - ".github/vibecoding/chunks/7._Figma_Prototypes_for_Architecture___Design/chunk-02.yaml"
-  - ".github/vibecoding/chunks/7._Figma_Prototypes_for_Architecture___Design/chunk-03.yaml"
-
+- .github/skills/design/SKILL.md
+- .github/skills/design/references/
 devops:
-  - ".github/vibecoding/chunks/DevOps.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/DevOps.agent/chunk-02.yaml"
-  - ".github/vibecoding/chunks/devops-core-principles.instructions/chunk-01.yaml"
-  - ".github/vibecoding/chunks/devops-core-principles.instructions/chunk-02.yaml"
-
-general:
-  - ".github/VALIDATION-REPORT.md"
-  - ".github/instructions/ARCHITECTURE.instructions.md"
-  - ".github/vibecoding/chunks/ARCHITECTURE/chunk-01.yaml"
-  - ".github/vibecoding/chunks/ARCHITECTURE/chunk-02.yaml"
-  - ".github/vibecoding/chunks/orchestration.rules/chunk-01.yaml"
-  - ".github/vibecoding/chunks/orchestration.rules/chunk-02.yaml"
-  - ".github/vibecoding/chunks/TODO.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/TODO.agent/chunk-02.yaml"
-  - ".github/vibecoding/chunks/Validator.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/Validator.agent/chunk-02.yaml"
-
-governance:
-  - ".github/instructions/core_governance.instructions.md"
-  - ".github/governance/lifecycle.md"
-  - ".github/governance/worker_policy.md"
-  - ".github/governance/commit_policy.md"
-  - ".github/governance/memory_policy.md"
-  - ".github/governance/ui_policy.md"
-  - ".github/governance/security_policy.md"
-  - ".github/governance/event_protocol.md"
-  - ".github/governance/context_injection.md"
-  - ".github/governance/performance_monitoring.md"
-
+- .github/skills/ci-cd/SKILL.md
+- .github/skills/ci-cd/references/
 instruction:
-  - ".github/vibecoding/chunks/a11y.instructions/chunk-01.yaml"
-  - ".github/vibecoding/chunks/a11y.instructions/chunk-02.yaml"
-  - ".github/vibecoding/chunks/ai-prompt-engineering-safety-best-practices.instructions/chunk-01.yaml"
-  - ".github/vibecoding/chunks/ai-prompt-engineering-safety-best-practices.instructions/chunk-02.yaml"
-  - ".github/vibecoding/chunks/containerization-docker-best-practices.instructions/chunk-01.yaml"
-  - ".github/vibecoding/chunks/containerization-docker-best-practices.instructions/chunk-02.yaml"
-  - ".github/vibecoding/chunks/containerization-docker-best-practices.instructions/chunk-03.yaml"
-  - ".github/vibecoding/chunks/devops-core-principles.instructions/chunk-01.yaml"
-  - ".github/vibecoding/chunks/devops-core-principles.instructions/chunk-02.yaml"
-  - ".github/vibecoding/chunks/github-actions-ci-cd-best-practices.instructions/chunk-01.yaml"
-  - ".github/vibecoding/chunks/github-actions-ci-cd-best-practices.instructions/chunk-02.yaml"
-  - ".github/vibecoding/chunks/github-actions-ci-cd-best-practices.instructions/chunk-03.yaml"
-  - ".github/vibecoding/chunks/github-actions-ci-cd-best-practices.instructions/chunk-04.yaml"
-  - ".github/vibecoding/chunks/performance-optimization.instructions/chunk-01.yaml"
-  - ".github/vibecoding/chunks/performance-optimization.instructions/chunk-02.yaml"
-  - ".github/vibecoding/chunks/update-docs-on-code-change.instructions/chunk-01.yaml"
-  - ".github/vibecoding/chunks/update-docs-on-code-change.instructions/chunk-02.yaml"
-  - ".github/vibecoding/chunks/10._Implementation_Phase_Best_Practices_Guide/chunk-01.yaml"
-  - ".github/vibecoding/chunks/10._Implementation_Phase_Best_Practices_Guide/chunk-02.yaml"
-  - ".github/vibecoding/chunks/10._Implementation_Phase_Best_Practices_Guide/chunk-03.yaml"
-  - ".github/vibecoding/chunks/11._QA_Best_Practices_and_Strategy_Guide/chunk-01.yaml"
-  - ".github/vibecoding/chunks/11._QA_Best_Practices_and_Strategy_Guide/chunk-02.yaml"
-  - ".github/vibecoding/chunks/11._QA_Best_Practices_and_Strategy_Guide/chunk-03.yaml"
-  - ".github/vibecoding/chunks/11._QA_Best_Practices_and_Strategy_Guide/chunk-04.yaml"
-  - ".github/vibecoding/chunks/2._Project_Selection_Tactics_for_Pre-Phase/chunk-01.yaml"
-  - ".github/vibecoding/chunks/2._Project_Selection_Tactics_for_Pre-Phase/chunk-02.yaml"
-  - ".github/vibecoding/chunks/2._Project_Selection_Tactics_for_Pre-Phase/chunk-03.yaml"
-  - ".github/vibecoding/chunks/2._Project_Selection_Tactics_for_Pre-Phase/chunk-04.yaml"
-  - ".github/vibecoding/chunks/2._Project_Selection_Tactics_for_Pre-Phase/chunk-05.yaml"
-  - ".github/vibecoding/chunks/3._PRD_for_Planning___Discovery/chunk-01.yaml"
-  - ".github/vibecoding/chunks/3._PRD_for_Planning___Discovery/chunk-02.yaml"
-  - ".github/vibecoding/chunks/3._PRD_for_Planning___Discovery/chunk-03.yaml"
-  - ".github/vibecoding/chunks/4._SRS_Creation_for_Planning___Discovery/chunk-01.yaml"
-  - ".github/vibecoding/chunks/4._SRS_Creation_for_Planning___Discovery/chunk-02.yaml"
-  - ".github/vibecoding/chunks/4._SRS_Creation_for_Planning___Discovery/chunk-03.yaml"
-  - ".github/vibecoding/chunks/5._User_Stories_in_Planning___Discovery/chunk-01.yaml"
-  - ".github/vibecoding/chunks/5._User_Stories_in_Planning___Discovery/chunk-02.yaml"
-  - ".github/vibecoding/chunks/5._User_Stories_in_Planning___Discovery/chunk-03.yaml"
-  - ".github/vibecoding/chunks/5._User_Stories_in_Planning___Discovery/chunk-04.yaml"
-  - ".github/vibecoding/chunks/6._High-Level_Project_Plan_Guide/chunk-01.yaml"
-  - ".github/vibecoding/chunks/6._High-Level_Project_Plan_Guide/chunk-02.yaml"
-  - ".github/vibecoding/chunks/6._High-Level_Project_Plan_Guide/chunk-03.yaml"
-  - ".github/vibecoding/chunks/7._Figma_Prototypes_for_Architecture___Design/chunk-01.yaml"
-  - ".github/vibecoding/chunks/7._Figma_Prototypes_for_Architecture___Design/chunk-02.yaml"
-  - ".github/vibecoding/chunks/7._Figma_Prototypes_for_Architecture___Design/chunk-03.yaml"
-  - ".github/vibecoding/chunks/8._Technical_Design_Doc_for_Architecture/chunk-01.yaml"
-  - ".github/vibecoding/chunks/8._Technical_Design_Doc_for_Architecture/chunk-02.yaml"
-  - ".github/vibecoding/chunks/8._Technical_Design_Doc_for_Architecture/chunk-03.yaml"
-  - ".github/vibecoding/chunks/8._Technical_Design_Doc_for_Architecture/chunk-04.yaml"
-  - ".github/vibecoding/chunks/9._API_Contract_Definition_in_Architecture/chunk-01.yaml"
-  - ".github/vibecoding/chunks/9._API_Contract_Definition_in_Architecture/chunk-02.yaml"
-  - ".github/vibecoding/chunks/9._API_Contract_Definition_in_Architecture/chunk-03.yaml"
-  - ".github/vibecoding/chunks/CTO_Playbook/chunk-01.yaml"
-  - ".github/vibecoding/chunks/CTO_Playbook/chunk-02.yaml"
-  - ".github/vibecoding/chunks/CTO_Playbook/chunk-03.yaml"
-  - ".github/vibecoding/chunks/CTO_Playbook/chunk-04.yaml"
-  - ".github/vibecoding/chunks/Startup_Scalability__Technical_Foundations_Playbook/chunk-01.yaml"
-  - ".github/vibecoding/chunks/Startup_Scalability__Technical_Foundations_Playbook/chunk-02.yaml"
-  - ".github/vibecoding/chunks/Startup_Scalability__Technical_Foundations_Playbook/chunk-03.yaml"
-  - ".github/vibecoding/chunks/Startup_Scalability__Technical_Foundations_Playbook/chunk-04.yaml"
-
+- .github/skills/a11y/SKILL.md
+- .github/skills/ai-safety/SKILL.md
+- .github/skills/containerization/SKILL.md
+- .github/skills/ci-cd/SKILL.md
+- .github/skills/performance/SKILL.md
+- .github/skills/implementation/SKILL.md
+- .github/skills/qa/SKILL.md
+- .github/skills/planning/SKILL.md
+- .github/skills/design/SKILL.md
+- .github/skills/architecture/SKILL.md
+- .github/skills/cto-playbook/SKILL.md
 memory-bank:
-  - ".github/memory-bank/activeContext.md"
-  - ".github/memory-bank/decisionLog.md"
-  - ".github/memory-bank/productContext.md"
-  - ".github/memory-bank/progress.md"
-  - ".github/memory-bank/riskRegister.md"
-  - ".github/memory-bank/systemPatterns.md"
-
+- .github/memory-bank/activeContext.md
+- .github/memory-bank/decisionLog.md
+- .github/memory-bank/productContext.md
+- .github/memory-bank/progress.md
+- .github/memory-bank/riskRegister.md
+- .github/memory-bank/systemPatterns.md
 performance:
-  - ".github/vibecoding/chunks/performance-optimization.instructions/chunk-01.yaml"
-  - ".github/vibecoding/chunks/performance-optimization.instructions/chunk-02.yaml"
-
+- .github/skills/performance/SKILL.md
+- .github/skills/performance/references/
 sdlc:
-  - ".github/vibecoding/chunks/10._Implementation_Phase_Best_Practices_Guide/chunk-01.yaml"
-  - ".github/vibecoding/chunks/10._Implementation_Phase_Best_Practices_Guide/chunk-02.yaml"
-  - ".github/vibecoding/chunks/10._Implementation_Phase_Best_Practices_Guide/chunk-03.yaml"
-  - ".github/vibecoding/chunks/11._QA_Best_Practices_and_Strategy_Guide/chunk-01.yaml"
-  - ".github/vibecoding/chunks/11._QA_Best_Practices_and_Strategy_Guide/chunk-02.yaml"
-  - ".github/vibecoding/chunks/11._QA_Best_Practices_and_Strategy_Guide/chunk-03.yaml"
-  - ".github/vibecoding/chunks/11._QA_Best_Practices_and_Strategy_Guide/chunk-04.yaml"
-  - ".github/vibecoding/chunks/2._Project_Selection_Tactics_for_Pre-Phase/chunk-01.yaml"
-  - ".github/vibecoding/chunks/2._Project_Selection_Tactics_for_Pre-Phase/chunk-02.yaml"
-  - ".github/vibecoding/chunks/2._Project_Selection_Tactics_for_Pre-Phase/chunk-03.yaml"
-  - ".github/vibecoding/chunks/2._Project_Selection_Tactics_for_Pre-Phase/chunk-04.yaml"
-  - ".github/vibecoding/chunks/2._Project_Selection_Tactics_for_Pre-Phase/chunk-05.yaml"
-  - ".github/vibecoding/chunks/3._PRD_for_Planning___Discovery/chunk-01.yaml"
-  - ".github/vibecoding/chunks/3._PRD_for_Planning___Discovery/chunk-02.yaml"
-  - ".github/vibecoding/chunks/3._PRD_for_Planning___Discovery/chunk-03.yaml"
-  - ".github/vibecoding/chunks/4._SRS_Creation_for_Planning___Discovery/chunk-01.yaml"
-  - ".github/vibecoding/chunks/4._SRS_Creation_for_Planning___Discovery/chunk-02.yaml"
-  - ".github/vibecoding/chunks/4._SRS_Creation_for_Planning___Discovery/chunk-03.yaml"
-  - ".github/vibecoding/chunks/5._User_Stories_in_Planning___Discovery/chunk-01.yaml"
-  - ".github/vibecoding/chunks/5._User_Stories_in_Planning___Discovery/chunk-02.yaml"
-  - ".github/vibecoding/chunks/5._User_Stories_in_Planning___Discovery/chunk-03.yaml"
-  - ".github/vibecoding/chunks/5._User_Stories_in_Planning___Discovery/chunk-04.yaml"
-  - ".github/vibecoding/chunks/6._High-Level_Project_Plan_Guide/chunk-01.yaml"
-  - ".github/vibecoding/chunks/6._High-Level_Project_Plan_Guide/chunk-02.yaml"
-  - ".github/vibecoding/chunks/6._High-Level_Project_Plan_Guide/chunk-03.yaml"
-  - ".github/vibecoding/chunks/7._Figma_Prototypes_for_Architecture___Design/chunk-01.yaml"
-  - ".github/vibecoding/chunks/7._Figma_Prototypes_for_Architecture___Design/chunk-02.yaml"
-  - ".github/vibecoding/chunks/7._Figma_Prototypes_for_Architecture___Design/chunk-03.yaml"
-  - ".github/vibecoding/chunks/8._Technical_Design_Doc_for_Architecture/chunk-01.yaml"
-  - ".github/vibecoding/chunks/8._Technical_Design_Doc_for_Architecture/chunk-02.yaml"
-  - ".github/vibecoding/chunks/8._Technical_Design_Doc_for_Architecture/chunk-03.yaml"
-  - ".github/vibecoding/chunks/8._Technical_Design_Doc_for_Architecture/chunk-04.yaml"
-  - ".github/vibecoding/chunks/9._API_Contract_Definition_in_Architecture/chunk-01.yaml"
-  - ".github/vibecoding/chunks/9._API_Contract_Definition_in_Architecture/chunk-02.yaml"
-  - ".github/vibecoding/chunks/9._API_Contract_Definition_in_Architecture/chunk-03.yaml"
-  - ".github/vibecoding/chunks/TODO.agent/chunk-01.yaml"
-
+- .github/skills/implementation/SKILL.md
+- .github/skills/qa/SKILL.md
+- .github/skills/planning/SKILL.md
+- .github/skills/design/SKILL.md
+- .github/skills/architecture/SKILL.md
 security:
-  - ".github/vibecoding/chunks/Security.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/Security.agent/chunk-02.yaml"
-  - ".github/vibecoding/chunks/security.agentic-guardrails/chunk-01.yaml"
-  - ".github/vibecoding/chunks/security.agentic-guardrails/chunk-02.yaml"
-
-validation:
-  - ".github/vibecoding/chunks/Validator.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/Validator.agent/chunk-02.yaml"
-
+- .github/skills/security/SKILL.md
+- .github/skills/security/references/
 terraform:
-  - ".github/vibecoding/chunks/containerization-docker-best-practices.instructions/chunk-01.yaml"
-  - ".github/vibecoding/chunks/containerization-docker-best-practices.instructions/chunk-02.yaml"
-  - ".github/vibecoding/chunks/containerization-docker-best-practices.instructions/chunk-03.yaml"
-
-sdlc-enforcement:
-  - ".github/vibecoding/chunks/Validator.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/Validator.agent/chunk-02.yaml"
-
+- .github/skills/containerization/SKILL.md
+- .github/skills/containerization/references/
 testing:
-  - ".github/vibecoding/chunks/11._QA_Best_Practices_and_Strategy_Guide/chunk-01.yaml"
-  - ".github/vibecoding/chunks/11._QA_Best_Practices_and_Strategy_Guide/chunk-02.yaml"
-  - ".github/vibecoding/chunks/11._QA_Best_Practices_and_Strategy_Guide/chunk-03.yaml"
-  - ".github/vibecoding/chunks/11._QA_Best_Practices_and_Strategy_Guide/chunk-04.yaml"
-  - ".github/vibecoding/chunks/QA.agent/chunk-01.yaml"
-  - ".github/vibecoding/chunks/QA.agent/chunk-02.yaml"
+- .github/skills/qa/SKILL.md
+- .github/skills/qa/references/
+skills:
+- .github/skills/a11y/SKILL.md
+- .github/skills/agent-protocols/SKILL.md
+- .github/skills/ai-safety/SKILL.md
+- .github/skills/architecture/SKILL.md
+- .github/skills/ci-cd/SKILL.md
+- .github/skills/containerization/SKILL.md
+- .github/skills/cto-playbook/SKILL.md
+- .github/skills/design/SKILL.md
+- .github/skills/implementation/SKILL.md
+- .github/skills/performance/SKILL.md
+- .github/skills/planning/SKILL.md
+- .github/skills/qa/SKILL.md
+- .github/skills/security/SKILL.md
+agent-protocols:
+- .github/skills/agent-protocols/SKILL.md

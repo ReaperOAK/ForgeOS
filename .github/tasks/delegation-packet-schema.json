@@ -367,14 +367,14 @@
         "string",
         "null"
       ],
-      "description": "Path to the upstream agent summary file in .github/agent-output/{Agent}/{ticket-id}.md"
+      "description": "Path to the upstream agent summary file in agent-output/{Agent}/{ticket-id}.md"
     },
     "expected_summary_output": {
       "type": [
         "string",
         "null"
       ],
-      "description": "Expected path for this agent's summary output in .github/agent-output/{Agent}/{ticket-id}.md"
+      "description": "Expected path for this agent's summary output in agent-output/{Agent}/{ticket-id}.md"
     },
     "lease_duration_minutes": {
       "type": "integer",

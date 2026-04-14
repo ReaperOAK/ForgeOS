@@ -1,9 +1,25 @@
 ---
-name: 'DevOps Engineer'
+name: 'DevOps'
 description: 'Infrastructure and operations engineer. Implements GitOps workflows, SLO/SLI reliability, and policy-as-code enforcement.'
 user-invocable: false
-tools: [vscode, execute, read, agent, edit, search, web, browser, 'forgeos/*', 'github/*', 'io.github.tavily-ai/tavily-mcp/*', 'io.github.upstash/context7/*', 'microsoft/markitdown/*', 'playwright/*', vscode.mermaid-chat-features/renderMermaidDiagram, todo]
-model: Claude Opus 4.6 (copilot)
+tools:
+  - vscode
+  - execute
+  - read
+  - agent
+  - edit
+  - search
+  - web
+  - 'com.figma.mcp/mcp/*'
+  - 'forgeos/*'
+  - 'github/*'
+  - 'io.github.tavily-ai/tavily-mcp/*'
+  - 'io.github.upstash/context7/*'
+  - 'microsoft/markitdown/*'
+  - 'playwright/*'
+  - 'vscode.mermaid-chat-features/renderMermaidDiagram'
+  - todo
+argument-hint: 'Describe the infrastructure to provision, CI/CD pipeline to create, or deployment strategy to implement'
 ---
 
 # DevOps Engineer Subagent
@@ -58,20 +74,20 @@ BACKEND stage. Every configuration is declarative, versioned, and testable.
 
 1. Read `.github/guardian/STOP_ALL` — if `STOP`: halt, zero edits, report blocked
 2. Read all `.github/instructions/*.instructions.md` (core, sdlc, ticket-system, git-protocol, agent-behavior, terminal-management)
-3. Read upstream summary from `.github/agent-output/{PreviousAgent}/{ticket-id}.md`
-4. Read `.github/vibecoding/chunks/DevOps.agent/` (all chunk files)
+3. Read upstream summary from `agent-output/{PreviousAgent}/{ticket-id}.md`
+4. Read `.github/skills/DevOps/` (all chunk files)
 5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks
-6. Call `tickets.payload(ticket_id)` to receive delegation context (ticket JSON, upstream summary, memory entries, file scope)
+6. Read ticket JSON from `ticket-state/` or `tickets/`
 
 ## 4. Pre-Claimed Ticket (Dispatcher-Claim Protocol)
 
-RULE: The ticket is already claimed by ForgeOS orchestrator before this agent is launched.
-RULE: Subagents NEVER perform claim commits — the dispatcher handles claiming via MCP.
+RULE: The ticket is already claimed by Ticketer before this agent is launched.
+RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
 
-1. Call `tickets.payload(ticket_id)` to receive full delegation context from the ForgeOS MCP server.
-2. Verify delegation context contains: ticket JSON, upstream summary, memory entries, file scope.
-3. If delegation context is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing delegation context`.
-4. Proceed directly to execution workflow.
+1. Read ticket JSON from `ticket-state/BACKEND/{ticket-id}.json`.
+2. Verify claim metadata exists: `claimed_by`, `machine_id`, `operator`, `lease_expiry`.
+3. If claim metadata is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing claim`.
+4. Proceed directly to execution workflow — no `git pull --rebase` for claiming.
 
 ## 5. Execution Workflow
 
@@ -121,9 +137,9 @@ Is this reversible? What is the blast radius? What is the rollback plan?
 
 ## 6. Work Commit (Commit 2)
 
-1. Write summary to `.github/agent-output/DevOps/{ticket-id}.md`
-2. Delete previous stage summary (`.github/agent-output/{PreviousAgent}/{ticket-id}.md`)
-3. Complete stage via MCP `tickets.complete` with structured evidence (artifacts, test_results, confidence)
+1. Write summary to `agent-output/DevOps/{ticket-id}.md`
+2. Delete previous stage summary (`agent-output/{PreviousAgent}/{ticket-id}.md`)
+3. Move ticket JSON to next stage: `ticket-state/QA/{ticket-id}.json`
 4. Update `.github/memory-bank/activeContext.md` with entry:
    `### [{ticket-id}] — Artifacts, Decisions, Timestamp (ISO8601)`
 5. Stage ONLY modified files explicitly — **NEVER `git add .`**
@@ -154,7 +170,6 @@ authoring (enforce policies from Security agent).
 - Modifying `systemPatterns.md` or `decisionLog.md`
 - Skipping rollback plan documentation
 - Ignoring SLO violations
-- Reading `.github/ticket-state/` or `.github/tickets/` directly for ticket context — use `tickets.payload` via MCP
 - Using or browsing tools outside the Assigned Tool Loadout section — strict boundary enforced.
 - Hallucinating tool names or capabilities not explicitly listed in the loadout.
 
@@ -170,9 +185,9 @@ Every completion must include:
 
 ## 10. References
 
-- `.github/instructions/core.instructions.md`
-- `.github/instructions/sdlc.instructions.md`
-- `.github/instructions/ticket-system.instructions.md`
-- `.github/instructions/git-protocol.instructions.md`
-- `.github/instructions/agent-behavior.instructions.md`
-- `.github/vibecoding/chunks/DevOps.agent/`
+- [.github/instructions/core.instructions.md](../.github/instructions/core.instructions.md)
+- [.github/instructions/sdlc.instructions.md](../.github/instructions/sdlc.instructions.md)
+- [.github/instructions/ticket-system.instructions.md](../.github/instructions/ticket-system.instructions.md)
+- [.github/instructions/git-protocol.instructions.md](../.github/instructions/git-protocol.instructions.md)
+- [.github/instructions/agent-behavior.instructions.md](../.github/instructions/agent-behavior.instructions.md)
+- [.github/skills/DevOps/](../.github/skills/DevOps/)

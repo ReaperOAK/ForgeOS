@@ -1,0 +1,482 @@
+---
+source: "./.github/instructions/orchestration.rules.instructions.md"
+chunk_index: 1
+token_estimate: 3963
+hash: "0359ff9d44272338dd090536b35df0817c8cc5742b65372b5a4fbd4cbf31c405"
+summary: "# Orchestration Rules  > **Version:** 2.0.0 > **Owner:** Ticketer (CTO / Supervisor Orchestrator) > **Authority:** T..."
+---
+# Orchestration Rules
+
+> **Version:** 2.0.0
+> **Owner:** Ticketer (CTO / Supervisor Orchestrator)
+> **Authority:** This file defines the canonical rules for task execution,
+> concurrency, DAG construction, confidence-gated progression, and integration
+> validation. All agents MUST comply.
+
+---
+
+## 1. Task State Machine
+
+Every task in the system follows this deterministic state machine. No state
+transitions may be skipped.
+
+```mermaid
+stateDiagram-v2
+    [*] --> PENDING
+    PENDING --> IN_PROGRESS : Dependencies met + Agent assigned
+    IN_PROGRESS --> REVIEW : Agent signals completion
+    IN_PROGRESS --> BLOCKED : Dependency failed or missing
+    IN_PROGRESS --> FAILED : Max retries exceeded
+    REVIEW --> MERGED : QA validation passes
+    REVIEW --> REJECTED : QA validation fails
+    REJECTED --> IN_PROGRESS : Fix delta provided (retry ≤ 3)
+    REJECTED --> FAILED : Max retries exceeded
+    BLOCKED --> PENDING : Blocker resolved
+    BLOCKED --> ESCALATED : Cannot resolve autonomously
+    ESCALATED --> PENDING : Human provides resolution
+    FAILED --> ESCALATED : Requires human intervention
+    MERGED --> [*]
+```
+
+### State Definitions
+
+| State | Owner | Entry Condition | Exit Condition |
+|-------|-------|-----------------|----------------|
+| PENDING | Ticketer | Task created, dependencies not yet met | All dependencies MERGED |
+| IN_PROGRESS | Assigned Agent | Agent begins execution | Agent signals completion or failure |
+| REVIEW | Ticketer + QA | Agent output ready for validation | Validation pass or fail |
+| MERGED | Ticketer | Validated and integrated | Terminal state |
+| BLOCKED | Ticketer | Cannot proceed due to external factor | Blocker resolved |
+| REJECTED | Ticketer | QA validation failed | Retry with fix delta |
+| FAILED | Ticketer | Max retries (3) exceeded | Escalate to human |
+| ESCALATED | Human | Autonomous resolution impossible | Human provides resolution |
+
+### Transition Rules
+
+1. **PENDING → IN_PROGRESS:** Only when ALL dependency tasks are MERGED
+2. **IN_PROGRESS → REVIEW:** Agent must provide evidence (test output, files
+   changed, validation results)
+3. **REVIEW → MERGED:** Ticketer's Reviewer lane confirms:
+   - Success criteria from delegation packet are met
+   - No forbidden files were modified
+   - Evidence expectations satisfied
+   - No regressions introduced
+4. **REVIEW → REJECTED:** Reviewer identifies defects. Fix delta is generated
+   and attached to the task for retry.
+5. **REJECTED → IN_PROGRESS:** Maximum 3 retries per task. Each retry
+   includes the prior rejection reason and fix guidance.
+6. **REJECTED → FAILED:** After 3 retries without passing review.
+7. **Any → ESCALATED:** When autonomous resolution is impossible.
+
+---
+
+## 2. DAG Construction Protocol
+
+### 2.1 Task Decomposition into DAG
+
+Ticketer MUST decompose every multi-agent objective into a **Directed Acyclic
+Graph** (DAG) before delegating. The DAG makes dependencies explicit, enables
+maximum parallelism, and prevents circular delegation.
+
+```yaml
+dag:
+  objective: "Implement user authentication feature"
+  constructed: "2025-01-15T10:00:00Z"
+  criticalPath: ["TASK-001", "TASK-003", "TASK-005", "TASK-007"]
+  estimatedDuration: "4 batches"
+  
+  nodes:
+    - id: "TASK-001"
+      agent: "ProductManager"
+      description: "Write EARS requirements for auth feature"
+      dependencies: []
+      estimatedTokens: 8000
+      
+    - id: "TASK-002"
+      agent: "Research"
+      description: "Evaluate auth libraries (passport, lucia, better-auth)"
+      dependencies: []
+      estimatedTokens: 12000
+      
+    - id: "TASK-003"
+      agent: "Architect"
+      description: "Design auth architecture with API contracts"
+      dependencies: ["TASK-001", "TASK-002"]
+      estimatedTokens: 15000
+      
+    - id: "TASK-004"
+      agent: "Security"
+      description: "Threat model for auth system"
+      dependencies: ["TASK-003"]
+      estimatedTokens: 10000
+      
+    - id: "TASK-005"
+      agent: "Backend"
+      description: "Implement auth endpoints"
+      dependencies: ["TASK-003", "TASK-004"]
+      estimatedTokens: 25000
+      
+    - id: "TASK-006"
+      agent: "Frontend"
+      description: "Implement login/register UI"
+      dependencies: ["TASK-003"]
+      estimatedTokens: 20000
+      
+    - id: "TASK-007"
+      agent: "QA"
+      description: "Write auth test suite"
+      dependencies: ["TASK-005", "TASK-006"]
+      estimatedTokens: 15000
+      
+  parallelBatches:
+    - batch: 1
+      tasks: ["TASK-001", "TASK-002"]  # No dependencies
+    - batch: 2
+      tasks: ["TASK-003"]              # Depends on batch 1
+    - batch: 3
+      tasks: ["TASK-004", "TASK-006"]  # Can run in parallel
+    - batch: 4
+      tasks: ["TASK-005"]              # Depends on TASK-004
+    - batch: 5
+      tasks: ["TASK-007"]              # Depends on TASK-005, TASK-006
+```
+
+### 2.2 DAG Validation Rules
+
+Before executing a DAG:
+
+1. **Acyclicity check:** No circular dependencies allowed
+2. **Completeness check:** Every task has an assigned agent
+3. **Scope isolation:** No two tasks in the same batch write to the same files
+4. **Critical path identification:** Highlight the longest dependency chain
+5. **Token budget validation:** Sum of all estimated tokens < session budget
+6. **No orphan tasks:** Every task is reachable from the DAG root
+
+### 2.3 DAG Checkpoint Protocol
+
+After each batch completes:
+
+```yaml
+checkpoint:
+  batchId: "BATCH-003"
+  completedAt: "2025-01-15T10:35:00Z"
+  tasksCompleted: ["TASK-004", "TASK-006"]
+  tasksRemaining: ["TASK-005", "TASK-007"]
+  tokensBurned: 45000
+  tokensRemaining: 155000
+  confidenceLevel: "HIGH"
+  blockers: []
+  memoryBankUpdated: true
+  nextBatch: "BATCH-004"
+```
+
+If a session expires mid-DAG, the checkpoint enables exact resumption.
+
+---
+
+## 3. Confidence-Gated Progression
+
+### 3.1 Confidence Assessment Protocol
+
+Before transitioning between major phases (Analysis → Design → Implementation
+→ Validation), Ticketer MUST assess confidence:
+
+| Level | Range | Action |
+|-------|-------|--------|
+| **HIGH** | 90-100% | Proceed to next phase immediately |
+| **MEDIUM** | 70-89% | Proceed with explicit risk acknowledgment |
+| **LOW** | 50-69% | Halt. Gather more context before proceeding |
+| **INSUFFICIENT** | <50% | Escalate to human for clarification |
+
+### 3.2 Confidence Factors
+
+| Factor | Weight | Source |
+|--------|--------|--------|
+| Requirements clarity | 25% | ProductManager deliverable completeness |
+| Architecture fitness | 20% | Architect ADR + fitness function results |
+| Codebase understanding | 20% | Files read / files relevant ratio |
+| Test coverage plan | 15% | QA test matrix completeness |
+| Security assessment | 10% | Security threat model coverage |
+| Prior art availability | 10% | Research evidence strength |
+
+### 3.3 Confidence Declaration Format
+
+```yaml
+confidenceGate:
+  phase: "Design → Implementation"
+  assessedBy: "Ticketer"
+  timestamp: "2025-01-15T10:30:00Z"
+  overallConfidence: 85
+  factors:
+    requirementsClarity: 90
+    architectureFitness: 85
+    codebaseUnderstanding: 80
+    testCoveragePlan: 75
+    securityAssessment: 90
+    priorArtAvailability: 85
+  decision: "PROCEED"
+  risks:
+    - "Test coverage plan needs expansion for edge cases"
+  mitigations:
+    - "QA will add boundary analysis in parallel with implementation"
+```
+
+---
+
+## 4. RUG Discipline (Read-Understand-Generate)
+
+### 4.1 Mandatory RUG Sequence
+
+Every agent MUST follow this sequence before generating any output:
+
+1. **READ:** Gather all relevant context
+   - Read delegation packet completely
+   - Read referenced files and memory bank entries
+   - Read cross-cutting protocols
+   
+2. **UNDERSTAND:** Confirm comprehension before acting
+   - State the objective in your own words
+   - List assumptions being made
+   - Identify what you know vs. what you're uncertain about
+   - Declare confidence level
+   
+3. **GENERATE:** Produce output only after R and U are complete
+   - Generate output constrained to understood scope
+   - Flag any gaps discovered during generation
+   - Self-reflect on output quality before submitting
+
+### 4.2 RUG Violation Detection
+
+Ticketer detects RUG violations when:
+
+| Signal | Detection | Action |
+|--------|-----------|--------|
+| Output references files not read | Agent mentions file content without tool call | REJECTED + retry |
+| Assumptions not declared | Agent proceeds without listing assumptions | Warning on first offense, REJECTED on second |
+| Confidence not stated | Agent skips confidence declaration | REJECTED + mandatory declaration |
+| Hallucinated content | Output contains unverifiable claims | REJECTED + evidence demand |
+
+---
+
+## 5. Concurrency Model
+
+### Parallel Execution Categories
+
+| Category | Parallel-Safe | Rationale |
+|----------|:------------:|-----------|
+| Read-only analysis by different agents | ✅ | No state mutation |
+| Write to different files by different agents | ✅ | No file conflicts |
+| Write to same file by different agents | ❌ | Race condition risk |
+| Independent test suites | ✅ | Isolated execution |
+| Shared database operations | ❌ | Transaction conflicts |
+| Infrastructure mutations | ❌ | State dependencies |
+| Memory bank append operations | ✅ | Append-only, timestamped |
+
+### Concurrency Limits
+
+- **Maximum parallel subagents:** 4 per batch
+- **Maximum parallel batches:** 1 (batches execute sequentially)
+- **Maximum total active tasks:** 8 (4 in-progress + 4 in-review)
+
+### File Ownership Protocol
+
+Before launching a parallel batch, Ticketer MUST:
+
+1. **Declare file ownership** for each subagent in the batch:
+
+   ```yaml
+   parallelBatch:
+     batchId: "BATCH-{timestamp}"
+     agents:
+       - agent: "Backend"
+         ownedFiles: ["src/api/**", "src/services/**"]
+       - agent: "Frontend"
+         ownedFiles: ["src/components/**", "src/pages/**"]
+       - agent: "QA"
+         ownedFiles: ["tests/**"]
+   ```
+
+2. **Validate no overlap** in owned file sets
+3. **Reject batch** if any file appears in multiple agents' ownership
+
+### File Lock Simulation
+
+Since we operate in a file-system environment without true locks:
+
+1. **Pre-batch:** Ticketer records owned files per agent in
+   `activeContext.md`
+2. **During execution:** Each agent checks its delegation packet for scope
+   boundaries before any write operation
+3. **Post-batch:** Ticketer diffs all modified files against ownership
+   declarations. Any out-of-scope modification triggers REJECTED state.
+
+---
+
+## 6. Integration Validation Gate
+
+After every parallel batch completes, Ticketer runs an integration
+validation gate before proceeding:
+
+### Gate Checklist
+
+1. **File conflict scan:** No file was modified by more than one agent
+2. **Cross-reference validation:** Frontend API calls match Backend endpoints
+3. **Test execution:** Run relevant test suites across all modified code
+4. **Syntax validation:** All modified files parse without errors
+5. **Convention check:** All changes follow `systemPatterns.md` conventions
+6. **Dependency check:** No circular or broken imports introduced
+7. **Confidence re-assessment:** Update confidence based on gate results
+
+### Gate Outcomes
+
+| Result | Action |
+|--------|--------|
+| All checks pass | Proceed to next batch |
+| File conflict detected | Sequential re-execution for conflicting agents |
+| Test failure | Route failing module to QA for investigation |
+| Syntax error | Route to originating agent for fix |
+| Convention violation | Route to originating agent with specific rule reference |
+| Confidence drop below 70% | Halt and reassess DAG |
+
+---
+
+## 7. Cost & Token Tracking
+
+### 7.1 Token Budget Management
+
+Every DAG has a token budget. Ticketer tracks consumption:
+
+```yaml
+tokenBudget:
+  sessionTotal: 200000
+  allocated:
+    ProductManager: 15000
+    Architect: 20000
+    Backend: 40000
+    Frontend: 35000
+    QA: 25000
+    Security: 15000
+    DevOps: 15000
+    Documentation: 15000
+    Research: 15000
+    CIReviewer: 5000
+  consumed:
+    ProductManager: 8200
+    Architect: 0
+    # ... updated in real-time
+  remaining: 191800
+  burnRate: "8200 tokens / 2 tasks"
+  projectedOverrun: false
+```
+
+### 7.2 Budget Enforcement
+
+| Threshold | Action |
+|-----------|--------|
+| 70% consumed | Log warning, assess remaining work |
+| 85% consumed | Compress remaining tasks, reduce scope if needed |
+| 95% consumed | Complete only critical-path tasks |
+| 100% consumed | Checkpoint state, prepare handoff note |
+
+---
+
+## 8. Rollback Strategy
+
+### Task-Level Rollback
+
+If a task fails after partial completion:
+
+1. **Identify modified files** from the agent's deliverable report
+2. **Git-based rollback:** If changes are committed, `git revert` the
+   specific commit
+3. **File-based rollback:** If uncommitted, restore from the pre-task
+   snapshot
+4. **Dependency cascade:** Identify downstream tasks that depend on the
+   failed task and move them to BLOCKED state
+
+### Batch-Level Rollback
+
+If an entire parallel batch fails integration validation:
+
+1. Revert all changes from all agents in the batch
+2. Re-analyze the batch for dependency issues
+3. Convert parallel batch to sequential execution
+4. Re-execute agents one at a time with integration checks between each
+
+### System-Level Rollback
+
+If the system enters an irrecoverable state:
+
+1. Halt all active agents
+2. Snapshot current state to `activeContext.md`
+3. Escalate to human with:
+   - Current system state
+   - List of completed tasks
+   - List of failed/pending tasks
+   - Recommended recovery actions
+
+---
+
+## 9. Infinite Loop Detection Heuristic
+
+### Detection Criteria
+
+A task is suspected of infinite looping if ANY of the following are true:
+
+| Signal | Threshold | Action |
+|--------|-----------|--------|
+| Retry count | > 3 | Force FAILED state |
+| Same error repeated | 3 consecutive identical errors | Force FAILED + escalate |
+| Token consumption | > 50,000 tokens per task | Warn at 35K, halt at 50K |
+| Execution time | > 15 minutes per task | Warn at 10min, halt at 15min |
+| File unchanged after edit | Agent claims edit but diff shows no change | Increment retry, warn |
+| Circular delegation | Agent A delegates to B, B delegates back to A | Immediate halt |
+| Confidence regression | Confidence drops below entry level after 2 retries | Escalate |
+
+### Prevention Mechanisms
+
+1. **Retry counter:** Each task tracks retry count. Hard cap at 3.
+2. **Error fingerprint:** Hash of error messages. If same hash appears 3x
+   consecutively, break the loop.
+3. **Progress assertion:** After each Plan-Act-Reflect cycle, agent must
+   demonstrate measurable progress (new files, passing tests, etc.). If no
+   progress after 2 cycles, escalate.
+4. **Delegation depth limit:** Maximum delegation chain depth of 2 (Ticketer
+   → Subagent → Sub-subagent). No deeper nesting.
+
+### Recovery from Detected Loop
+
+1. Halt the looping agent
+2. Capture current state and error context
+3. Move task to FAILED state
+4. Log loop detection to `activeContext.md` with diagnostics
+5. Escalate to Ticketer for alternative approach or human intervention
+
+---
+
+## 10. Delegation Protocol
+
+### Pre-Delegation Checklist (Ticketer)
+
+Before delegating any task:
+
+- [ ] Task objective is clear and measurable
+- [ ] Success criteria are specific and verifiable
+- [ ] Scope boundaries are defined (included + excluded)
+- [ ] Forbidden actions are listed
+- [ ] Required output format is specified
+- [ ] Evidence expectations are defined
+- [ ] Dependencies are resolved (all prerequisite tasks MERGED)
+- [ ] File ownership declared (for parallel batches)
+- [ ] Timeout budget assigned
+- [ ] Confidence level assessed (≥70% to proceed)
+- [ ] Cross-cutting protocols reference included
+
+### Post-Delegation Checklist (Ticketer)
+
+After receiving subagent output:
+
+- [ ] Output format matches expected format
+- [ ] All success criteria are addressed
+- [ ] Evidence is present and verifiable
+- [ ] No forbidden files were modified

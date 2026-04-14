@@ -1,7 +1,6 @@
 ---
 name: Agent Behavior
-applyTo: '**'
-description: Worker model, scope enforcement, context derivation, forbidden actions, evidence gates, dispatcher contract.
+description: Use when dispatching agents, enforcing scope boundaries, deriving context, managing worker models, or checking stage ownership rules.
 ---
 
 # Agent Behavior
@@ -15,47 +14,47 @@ RULE: No worker reuse across tickets.
 Allowed: Multi-ticket references in worker output.
 PROHIBITED: Cross-ticket file modifications.
 
-RULE: Worker termination
+RULE: Worker termination 
 Triggers:
 - Out-of-scope file modification
 - Protocol violation
 
 ## 2. Context Derivation
 
-RULE: Agents derive context from the following sources:
-1. Ticket data via MCP `tickets.get(ticket_id)` (acceptance criteria, file_paths, depends_on, history)
-2. Dispatch payload via MCP `tickets.payload(ticket_id, agent_role)` (ticket + upstream summary + memory lessons)
+RULE: Agents derive context ONLY from:
+1. Ticket JSON (acceptance criteria, file_paths, depends_on)
+2. Previous stage summary file
 3. Codebase files within ticket scope
 4. Instruction files (`.github/instructions/`)
-5. Agent chunk files (`.github/vibecoding/chunks/{Agent}.agent/`)
+5. Agent skill files (`.github/skills/` — SKILL.md and references)
 
-RULE: Ticket context is MCP-delivered, not filesystem-derived.
-RULE: The ForgeOS orchestrator provides `ticket_id` at dispatch. Agents call `tickets.get(ticket_id)` to load full context.
-PROHIBITED: Reading `.github/ticket-state/` or `.github/tickets/` directly for workflow purposes.
-PROHIBITED: Expecting context injection via environment variables or prompt preamble.
-Allowed: Reading other agents' summaries outside the chain via `tickets.payload`.
+PROHIBITED: Expecting context injection from Ticketer.
+Allowed: Reading other agents' summaries outside the chain.
+RULE: Context is filesystem-derived. Period.
 
-## 3. ForgeOS Dispatcher Contract
+## 3. Ticketer Dispatcher Contract
 
-RULE: ForgeOS is the orchestrator that dispatches agents.
+RULE: Ticketer is a stateless dispatcher.
 
-REQUIRED: ForgeOS behavior:
-1. Query MCP `tickets.list(stage='READY')` for available work
-2. For each ticket, dispatch the correct subagent with `ticket_id`
+REQUIRED: Ticketer behavior:
+1. Scan `ticket-state/READY/`
+2. For each ticket, call the correct subagent
 3. Stop when no READY tickets exist
 
-PROHIBITED for ForgeOS dispatcher:
+PROHIBITED for Ticketer:
 - Analyzing code
 - Computing file overlap
 - Computing safe parallel sets
 - Reasoning about dependencies
 - Optimizing batching
+- Injecting context into agents
 - Implementing any product code
+- Reading/modifying files 
 - Running build/test commands
 
-RULE: ForgeOS dispatches one subagent per READY ticket.
+RULE: Ticketer calls one subagent per READY ticket.
 RULE: No grouping logic. No dependency reasoning. No conflict analysis.
-RULE: MCP server + PostgreSQL enforce safety. Not the dispatcher.
+RULE: Git + tickets.py enforce safety. Not Ticketer.
 
 ## 4. Stage Ownership
 
@@ -84,11 +83,10 @@ PROHIBITED: Modifying files outside ticket scope.
 PROHIBITED: `git add .` / `git add -A` / `git add --all`
 PROHIBITED: Force pushing or deleting branches.
 PROHIBITED: Deploying to any environment. (allowed for DevOps agent)
-PROHIBITED: Modifying `systemPatterns.md` (except ForgeOS dispatcher and Documentation agent).
-PROHIBITED: Modifying `decisionLog.md` (except ForgeOS dispatcher and Documentation agent).
+PROHIBITED: Modifying `systemPatterns.md` (except Ticketer and Documentation agent).
+PROHIBITED: Modifying `decisionLog.md` (except Ticketer and Documentation agent).
 PROHIBITED: Processing unclaimed tickets.
 PROHIBITED: Holding claims on multiple tickets per agent instance.
-PROHIBITED: Reading `.github/ticket-state/` directories for workflow state (use MCP `tickets.get` instead).
 
 ## 7. Evidence Requirements
 
@@ -119,6 +117,7 @@ RULE: Same failure 3 times => escalate, do not retry same approach.
 REQUIRED: Before any work:
 ```bash
 git pull --rebase
+python3 tickets.py --sync
 ```
 
 RULE: Multiple operators work simultaneously on the same repo.

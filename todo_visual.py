@@ -2,8 +2,8 @@
 """
  PROJECT BOARD — Distributed Ticket Visualizer
 =================================================
-Reads ticket JSON from .github/ticket-state/ directories
-and .github/tickets/ master copies. Shows stage distribution,
+Reads ticket JSON from ticket-state/ directories
+and tickets/ master copies. Shows stage distribution,
 ownership, dependencies, blocked/ready status, and claim info.
 
 Read-only: NEVER mutates ticket files or state directories.
@@ -37,8 +37,8 @@ _log = logging.getLogger("board")
 
 # ─── Configuration ───────────────────────────────────────────
 ROOT = Path(__file__).resolve().parent
-TICKET_STATE_DIR = ROOT / ".github" / "ticket-state"
-TICKETS_DIR = ROOT / ".github" / "tickets"
+TICKET_STATE_DIR = ROOT / "ticket-state"
+TICKETS_DIR = ROOT / "tickets"
 
 STAGE_ORDER: list[str] = [
     "READY", "RESEARCH", "PM", "ARCHITECT", "DEVOPS", "BACKEND",
@@ -108,7 +108,7 @@ class BoardStats:
 # =====================================================================
 
 def discover_tickets() -> dict[str, Ticket]:
-    """Scan .github/ticket-state/<STAGE>/ directories for ticket JSON."""
+    """Scan ticket-state/<STAGE>/ directories for ticket JSON."""
     registry: dict[str, Ticket] = {}
 
     if not TICKET_STATE_DIR.is_dir():
@@ -850,7 +850,7 @@ footer{background:#1e293b;border-top:1px solid #334155;padding:8px 24px;text-ali
     </table>
   </div>
 </div>
-<footer>Distributed Ticket Board -- Read-only snapshot from .github/ticket-state/ -- Ticket files untouched</footer>
+<footer>Distributed Ticket Board -- Read-only snapshot from ticket-state/ -- Ticket files untouched</footer>
 <script>
 mermaid.initialize({startOnLoad:true,theme:'dark',flowchart:{useMaxWidth:false,htmlLabels:true,curve:'basis',padding:15},securityLevel:'loose',maxTextSize:500000});
 function showView(v){
@@ -937,8 +937,8 @@ def main() -> None:
     # Discovery
     tickets = discover_tickets()
     if not tickets:
-        print("No tickets found in .github/ticket-state/ or .github/tickets/")
-        print("  Hint: Create tickets with  python3 .github/tickets.py --parse <dir>")
+        print("No tickets found in ticket-state/ or tickets/")
+        print("  Hint: Create tickets with  python3 tickets.py --parse <dir>")
         return
 
     # Resolution

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/workbench/contrib/chat/common/hooks/hookSchema.json",
+  "description": "Automatically sync ticket state on agent session start. Runs tickets.py --sync to resolve dependencies and move unblocked tickets to READY.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "description": "Auto-sync ticket state: resolve dependencies, release expired claims, move unblocked tickets to READY",
+        "command": "bash .github/hooks/scripts/auto-sync-tickets.sh",
+        "enabled": true,
+        "comment": "Enabled by TASK-VIB-002"
+      }
+    ]
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "created_by": "TASK-SYS-036",
+    "created_at": "2026-03-26T00:00:00Z",
+    "requires": "VS Code agent hooks (Preview), Python 3"
+  }
+}

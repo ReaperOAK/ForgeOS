@@ -2,8 +2,25 @@
 name: 'UIDesigner'
 description: 'Generates UI mockups, iterates on designs via Google Stitch, produces component specs and design tokens for Frontend Engineer. Uses Playwright for visual validation.'
 user-invocable: false
-tools: [vscode, execute, read, agent, edit, search, web, browser, 'com.figma.mcp/mcp/*', 'forgeos/*', 'github/*', 'io.github.tavily-ai/tavily-mcp/*', 'io.github.upstash/context7/*', 'microsoft/markitdown/*', 'playwright/*', vscode.mermaid-chat-features/renderMermaidDiagram, todo]
-model: Claude Opus 4.6 (copilot)
+tools:
+  - vscode
+  - execute
+  - read
+  - agent
+  - edit
+  - search
+  - web
+  - 'com.figma.mcp/mcp/*'
+  - 'forgeos/*'
+  - 'github/*'
+  - 'io.github.tavily-ai/tavily-mcp/*'
+  - 'io.github.upstash/context7/*'
+  - 'microsoft/markitdown/*'
+  - 'playwright/*'
+  - 'vscode.mermaid-chat-features/renderMermaidDiagram'
+  - todo
+argument-hint: 'Describe the UI components to design, mockups to create, or design tokens to define'
+
 ---
 
 # UIDesigner Subagent
@@ -60,26 +77,21 @@ UIDesigner artifacts are a **blocking gate** for Frontend implementation.
 Execute in strict order before any work:
 1. Read `.github/guardian/STOP_ALL` — if `STOP`: halt, zero edits
 2. Read all `.github/instructions/*.instructions.md` (core, sdlc, ticket-system, git-protocol, agent-behavior, terminal-management)
-3. Call `tickets.payload(ticket_id)` — receive the full delegation context from ForgeOS MCP server:
-   - Ticket JSON (acceptance criteria, file paths, dependencies)
-   - Upstream summary from previous stage agent (e.g., Architect, ProductManager)
-   - Memory entries relevant to the ticket
-   - File scope (authorized read/write paths)
-4. Read `.github/vibecoding/chunks/UIDesigner.agent/` (all chunks)
+3. Read upstream summary from `agent-output/{PreviousAgent}/{ticket-id}.md`
+4. Read `.github/skills/UIDesigner/` (all chunks)
 5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks
-6. Read Stitch project ID from `.github/stitch-project-id.txt` if exists (persist across tickets for continuity)
-
-RULE: The `tickets.payload` response is the canonical source for ticket context.
-PROHIBITED: Reading `.github/ticket-state/` or `.github/tickets/` directly for workflow state — use MCP.
+6. Read ticket JSON from `ticket-state/` or `tickets/`
+7. Read Stitch project ID from `.github/stitch-project-id.txt` if exists (persist across tickets for continuity)
 
 ## 4. Pre-Claimed Ticket (Dispatcher-Claim Protocol)
 
-RULE: The ticket is already claimed by the ForgeOS orchestrator before this agent is launched.
-RULE: Subagents NEVER call `tickets.claim` — the ForgeOS orchestrator handles claiming.
+RULE: The ticket is already claimed by Ticketer before this agent is launched.
+RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
 
-1. Verify `tickets.payload` response contains valid claim metadata: `claimed_by`, `machine_id`, `operator`, `lease_expiry`.
-2. If claim metadata is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing claim`.
-3. Proceed directly to execution workflow.
+1. Read ticket JSON from `ticket-state/FRONTEND/{ticket-id}.json`.
+2. Verify claim metadata exists: `claimed_by`, `machine_id`, `operator`, `lease_expiry`.
+3. If claim metadata is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing claim`.
+4. Proceed directly to execution workflow — no `git pull --rebase` for claiming.
 
 ## 5. Execution Workflow
 
@@ -128,23 +140,13 @@ Include: screen inventory with routes, component specs, design token references,
 user flow diagrams (Mermaid), screenshot paths, accessibility checklist results.
 This document is the **gate artifact** — Frontend cannot start without it.
 
-## 6. Work Commit
+## 6. Work Commit (Commit 2)
 
-1. Write summary to `.github/agent-output/UIDesigner/{ticket-id}.md`
+1. Write summary to `agent-output/UIDesigner/{ticket-id}.md`
 2. Write approved mockup to `docs/uiux/mockups/{ticket-id}.md`
 3. Persist Stitch screenshots to `docs/uiux/mockups/{ticket-id}/` as PNGs
 4. Delete previous stage summary after reading it
-5. Call `tickets.complete` with structured evidence to advance the ticket:
-   ```jsonc
-   {
-     "ticket_id": "{ticket-id}",
-     "evidence": {
-       "artifacts": ["docs/uiux/mockups/{ticket-id}.md", "design-tokens.json"],
-       "test_results": "Visual validation passed, accessibility checks passed",
-       "confidence": "HIGH"
-     }
-   }
-   ```
+5. Move ticket JSON to next stage for Frontend implementation
 6. Append memory entry to `.github/memory-bank/activeContext.md`:
    ```markdown
    ### [{ticket-id}] — Summary
@@ -155,8 +157,6 @@ This document is the **gate artifact** — Frontend cannot start without it.
 7. Stage ONLY modified files explicitly — **NEVER** `git add .`
 8. Commit: `[{ticket-id}] FRONTEND complete by UIDesigner on {machine}`
 9. `git push`
-
-RULE: Ticket state transitions happen via MCP `tickets.complete` — not by moving JSON files between directories.
 
 ## 7. Scope
 
@@ -177,9 +177,6 @@ infrastructure, test authoring, security policies.
 - Cross-ticket references or modifications
 - Force push or branch deletion
 - Deploying to any environment
-- Reading `.github/ticket-state/` or `.github/tickets/` directly for workflow state — use MCP `tickets.payload`.
-- Moving ticket JSON files between directories — use MCP `tickets.complete` or `tickets.reject`.
-- Calling `tickets.claim` — the ForgeOS orchestrator handles claiming before dispatch.
 - Using or browsing tools outside the Assigned Tool Loadout section — strict boundary enforced.
 - Hallucinating tool names or capabilities not explicitly listed in the loadout.
 
@@ -195,5 +192,5 @@ Every completion claim must include:
 - Confidence level: HIGH / MEDIUM / LOW
 
 ## 10. References
-- `.github/instructions/*.instructions.md` (all 6 canonical instruction files)
-- `.github/vibecoding/chunks/UIDesigner.agent/` (chunk-01, chunk-02)
+- [.github/instructions/*.instructions.md](../.github/instructions/*.instructions.md) (all 6 canonical instruction files)
+- [.github/skills/UIDesigner/](../.github/skills/UIDesigner/) (chunk-01, chunk-02)

@@ -1,6 +1,8 @@
 ---
 name: stop
-description: Structured shutdown protocol. Drains active tickets through remaining SDLC stages, consolidates memory, and produces resume artifacts for continue.prompt.md.
+description: Structured shutdown protocol. Drains active tickets, consolidates memory, and produces resume artifacts for continue.prompt.md.
+agent: 'Ticketer'
+argument-hint: 'No arguments needed — just invoke /stop to cleanly pause development'
 ---
 
 We are entering SYSTEMATIC SHUTDOWN MODE.
@@ -23,7 +25,7 @@ Immediate actions:
 
 # STEP 2 — DRAIN ACTIVE TICKETS
 
-Run `python3 .github/tickets.py --status --json` to see full ticket landscape.
+Run `python3 tickets.py --status --json` to see full ticket landscape.
 
 For each ticket past READY, complete its remaining SDLC chain.
 Do NOT skip any stage. Use the correct post-implementation chain order:
@@ -58,17 +60,17 @@ No ticket may remain in an intermediate state.
 
 # STEP 3 — RECONCILE TICKET STATES
 
-1. Run `python3 .github/tickets.py --sync` to release expired claims and fix state.
+1. Run `python3 tickets.py --sync` to release expired claims and fix state.
 2. Any ticket stuck in an intermediate stage that was NOT drained in Step 2:
    - Set to READY (if safe to re-process) or BLOCKED (if invalid state).
-3. Update ticket state copies under `.github/ticket-state/<STAGE>/` and master metadata under `.github/tickets/`.
-4. Run `python3 .github/tickets.py --validate` to check integrity.
+3. Update ticket state copies under `ticket-state/<STAGE>/` and master metadata under `tickets/`.
+4. Run `python3 tickets.py --validate` to check integrity.
 
 ---
 
 # STEP 4 — LEASE CLEANUP
 
-1. Run `python3 .github/tickets.py --release-expired` to clear all stale claims.
+1. Run `python3 tickets.py --release-expired` to clear all stale claims.
 2. Run `git status` to confirm no unexpected staged/unstaged changes.
 
 ---
@@ -159,7 +161,7 @@ git diff --name-only HEAD~5 | xargs grep -l 'TODO\|FIXME\|HACK\|XXX' 2>/dev/null
 ```
 
 Checklist:
-- [ ] No ticket skipped commit (cross-check `.github/ticket-state/DONE/` tickets vs git log)
+- [ ] No ticket skipped commit (cross-check `ticket-state/DONE/` tickets vs git log)
 - [ ] No ticket skipped Validator (check feedback-log.md for Validator entries per DONE ticket)
 - [ ] No ticket skipped documentation (check feedback-log.md for Doc entries per DONE ticket)
 - [ ] No `git add .` in recent commits
@@ -179,7 +181,7 @@ Then re-verify.
 
 # STEP 8 — RESUME MARKER
 
-Run: `python3 .github/tickets.py --status --json` to get current state.
+Run: `python3 tickets.py --status --json` to get current state.
 Read `.github/memory-bank/riskRegister.md` for open risks.
 
 Generate:

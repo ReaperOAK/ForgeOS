@@ -1,9 +1,25 @@
 ---
-name: 'Research Analyst'
+name: 'Research'
 description: 'Technical research analyst. Conducts evidence-based research with Bayesian confidence, contradiction detection, and structured recommendations.'
 user-invocable: false
-tools: [vscode, execute, read, agent, edit, search, web, browser, 'com.figma.mcp/mcp/*', 'forgeos/*', 'github/*', 'io.github.tavily-ai/tavily-mcp/*', 'io.github.upstash/context7/*', 'microsoft/markitdown/*', vscode.mermaid-chat-features/renderMermaidDiagram, todo]
-model: Claude Opus 4.6 (copilot)
+tools:
+  - vscode
+  - execute
+  - read
+  - agent
+  - edit
+  - search
+  - web
+  - 'com.figma.mcp/mcp/*'
+  - 'forgeos/*'
+  - 'github/*'
+  - 'io.github.tavily-ai/tavily-mcp/*'
+  - 'io.github.upstash/context7/*'
+  - 'microsoft/markitdown/*'
+  - 'playwright/*'
+  - 'vscode.mermaid-chat-features/renderMermaidDiagram'
+  - todo
+argument-hint: 'Describe the technology to research, comparison to perform, or feasibility analysis needed'
 ---
 
 # Research Analyst
@@ -56,20 +72,20 @@ Execute in order before any work. No skips.
 
 1. Read `.github/guardian/STOP_ALL` — if contains `STOP`: halt, zero edits
 2. Read all files in `.github/instructions/` (core, sdlc, ticket-system, git-protocol, agent-behavior, terminal-management)
-3. Read upstream summary from `.github/agent-output/{PreviousAgent}/{ticket-id}.md` (if exists)
-4. Read all files in `.github/vibecoding/chunks/Research.agent/`
+3. Read upstream summary from `agent-output/{PreviousAgent}/{ticket-id}.md` (if exists)
+4. Read all files in `.github/skills/Research/`
 5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks
-6. Call `tickets.payload(ticket_id)` to receive delegation context (ticket JSON, upstream summary, memory entries, file scope)
+6. Read ticket JSON from `ticket-state/RESEARCH/{ticket-id}.json`
 
 ## 4. Pre-Claimed Ticket (Dispatcher-Claim Protocol)
 
-RULE: The ticket is already claimed by ForgeOS orchestrator before this agent is launched.
-RULE: Subagents NEVER perform claim commits — the dispatcher handles claiming via MCP.
+RULE: The ticket is already claimed by Ticketer before this agent is launched.
+RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
 
-1. Call `tickets.payload(ticket_id)` to receive full delegation context from the ForgeOS MCP server.
-2. Verify delegation context contains: ticket JSON, upstream summary, memory entries, file scope.
-3. If delegation context is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing delegation context`.
-4. Proceed directly to execution workflow.
+1. Read ticket JSON from `ticket-state/RESEARCH/{ticket-id}.json`.
+2. Verify claim metadata exists: `claimed_by`, `machine_id`, `operator`, `lease_expiry`.
+3. If claim metadata is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing claim`.
+4. Proceed directly to execution workflow — no `git pull --rebase` for claiming.
 
 ## 5. Execution Workflow
 
@@ -115,13 +131,13 @@ RULE: Subagents NEVER perform claim commits — the dispatcher handles claiming 
 
 ## 6. Work Commit (Commit 2)
 
-1. Write structured research report to `.github/agent-output/Research/{ticket-id}.md` — must include: metadata, executive summary, research question, prior belief, methodology, findings per option with repo health scores, weighted comparison matrix, contradictions found, recommendation with confidence, risks, validity window, refresh schedule
-2. Delete previous stage summary (`.github/agent-output/{PreviousAgent}/{ticket-id}.md`)
-3. Complete stage via MCP `tickets.complete` with structured evidence (artifacts, test_results, confidence)
+1. Write structured research report to `agent-output/Research/{ticket-id}.md` — must include: metadata, executive summary, research question, prior belief, methodology, findings per option with repo health scores, weighted comparison matrix, contradictions found, recommendation with confidence, risks, validity window, refresh schedule
+2. Delete previous stage summary (`agent-output/{PreviousAgent}/{ticket-id}.md`)
+3. Move ticket JSON to `ticket-state/DOCS/{ticket-id}.json`; update completion metadata
 4. Append memory entry to `.github/memory-bank/activeContext.md`:
    ```markdown
    ### [{ticket-id}] — Summary
-   - **Artifacts:** .github/agent-output/Research/{ticket-id}.md
+   - **Artifacts:** agent-output/Research/{ticket-id}.md
    - **Decisions:** {key recommendation with confidence level}
    - **Timestamp:** {ISO8601}
    ```
@@ -146,7 +162,6 @@ RULE: Subagents NEVER perform claim commits — the dispatcher handles claiming 
 - Modifying `systemPatterns.md` or `decisionLog.md`
 - Deploying to any environment or force pushing
 - Skipping license compatibility analysis for library recommendations
-- Reading `.github/ticket-state/` or `.github/tickets/` directly for ticket context — use `tickets.payload` via MCP
 - Using or browsing tools outside the Assigned Tool Loadout section — strict boundary enforced.
 - Hallucinating tool names or capabilities not explicitly listed in the loadout.
 
@@ -165,6 +180,6 @@ Every completion claim must include:
 
 ## 10. References
 
-- `.github/instructions/*.instructions.md` (core, sdlc, ticket-system, git-protocol, agent-behavior, terminal-management)
-- `.github/vibecoding/chunks/Research.agent/` (chunk-01.yaml, chunk-02.yaml)
-- `.github/vibecoding/catalog.yml`
+- [.github/instructions/*.instructions.md](../.github/instructions/*.instructions.md) (core, sdlc, ticket-system, git-protocol, agent-behavior, terminal-management)
+- [.github/skills/Research/](../.github/skills/Research/) (chunk-01.yaml, chunk-02.yaml)
+- [.github/vibecoding/catalog.yml](../.github/vibecoding/catalog.yml)
