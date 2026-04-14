@@ -1,0 +1,400 @@
+---
+source: "./.github/instructions/containerization-docker-best-practices.instructions.md"
+chunk_index: 2
+token_estimate: 3925
+hash: "eccd1bf95d07d6a3bb2573c06ade0e126818fe31fe34ff4494c9355900e08b88"
+summary: "- **`ENTRYPOINT`:** Defines the executable that will always run. Makes the     container behave like a specific appli..."
+---
+  - **`ENTRYPOINT`:** Defines the executable that will always run. Makes the
+    container behave like a specific application.
+  - **`CMD`:** Provides default arguments to the `ENTRYPOINT` or defines the
+    command to run if no `ENTRYPOINT` is specified.
+  - **Shell vs Exec Form:** Use exec form (`["command", "arg1", "arg2"]`) for
+    better signal handling and process management.
+  - **Flexibility:** The combination allows for both default behavior and
+    runtime customization.
+- **Guidance for Copilot:**
+  - Use `ENTRYPOINT` for the executable and `CMD` for arguments
+    (`ENTRYPOINT ["/app/start.sh"]`, `CMD ["--config", "prod.conf"]`).
+  - For simple execution, `CMD ["executable", "param1"]` is often sufficient.
+  - Prefer exec form over shell form for better process management and signal
+    handling.
+  - Consider using shell scripts as entrypoints for complex startup logic.
+- **Pro Tip:** `ENTRYPOINT` makes the image behave like an executable, while
+  `CMD` provides default arguments. This combination provides flexibility and
+  clarity.
+
+### **8. Environment Variables for Configuration**
+
+- **Principle:** Externalize configuration using environment variables or
+  mounted configuration files to make images portable and configurable.
+- **Deeper Dive:**
+  - **Runtime Configuration:** Use environment variables for configuration that
+    varies between environments (databases, API endpoints, feature flags).
+  - **Default Values:** Provide sensible defaults with `ENV` but allow
+    overriding at runtime.
+  - **Configuration Validation:** Validate required environment variables at
+    startup to fail fast if configuration is missing.
+  - **Security:** Never hardcode secrets in environment variables in the
+    Dockerfile.
+- **Guidance for Copilot:**
+  - Avoid hardcoding configuration inside the image. Use `ENV` for default
+    values, but allow overriding at runtime.
+  - Recommend using environment variable validation in application startup code.
+  - Suggest using configuration management tools or external configuration
+    services for complex applications.
+  - Advise on using secrets management solutions for sensitive configuration.
+- **Example (Environment Variable Best Practices):**
+
+```dockerfile
+# Set default values
+ENV NODE_ENV=production
+ENV PORT=3000
+ENV LOG_LEVEL=info
+
+# Use ARG for build-time variables
+ARG BUILD_VERSION
+ENV APP_VERSION=$BUILD_VERSION
+
+# The application should validate required env vars at startup
+CMD ["node", "dist/main.js"]
+```
+
+## Container Security Best Practices
+
+### **1. Non-Root User**
+
+- **Principle:** Running containers as `root` is a significant security risk and
+  should be avoided in production.
+- **Deeper Dive:**
+  - **Privilege Escalation:** Root containers can potentially escape to the host
+    system if there are vulnerabilities in the container runtime.
+  - **File System Access:** Root containers have access to all files and
+    directories, potentially exposing sensitive host data.
+  - **Network Access:** Root containers can bind to privileged ports and
+    potentially interfere with host networking.
+  - **Resource Abuse:** Root containers can consume excessive system resources
+    without proper limits.
+- **Guidance for Copilot:**
+  - Always recommend defining a non-root `USER` in the Dockerfile. Create a
+    dedicated user for your application.
+  - Ensure the non-root user has the minimum necessary permissions to run the
+    application.
+  - Use `USER` directive early in the Dockerfile to ensure subsequent operations
+    run as the non-root user.
+  - Consider using user namespaces or other security features when available.
+- **Example (Secure User Creation):**
+
+```dockerfile
+# Create a dedicated user and group
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup
+
+# Set proper ownership of application files
+RUN chown -R appuser:appgroup /app
+
+# Switch to non-root user
+USER appuser
+
+# Ensure the user can write to necessary directories
+VOLUME ["/app/data"]
+```
+
+### **2. Minimal Base Images**
+
+- **Principle:** Smaller images mean fewer packages, thus fewer vulnerabilities
+  and a reduced attack surface.
+- **Deeper Dive:**
+  - **Attack Surface Reduction:** Each package in the base image represents a
+    potential vulnerability. Fewer packages mean fewer potential attack vectors.
+  - **Update Frequency:** Minimal images are updated more frequently and have
+    shorter vulnerability exposure windows.
+  - **Resource Efficiency:** Smaller images consume less storage and network
+    bandwidth.
+  - **Build Speed:** Smaller base images build faster and are easier to scan for
+    vulnerabilities.
+- **Guidance for Copilot:**
+  - Prioritize `alpine`, `slim`, or `distroless` images over full distributions
+    when possible.
+  - Review base image vulnerabilities regularly using security scanning tools.
+  - Consider using language-specific minimal images (e.g., `openjdk:17-jre-slim`
+    instead of `openjdk:17`).
+  - Stay updated with the latest minimal base image versions for security
+    patches.
+- **Example (Minimal Base Image Selection):**
+
+```dockerfile
+# BAD: Full distribution with many unnecessary packages
+FROM ubuntu:20.04
+
+# GOOD: Minimal Alpine-based image
+FROM node:18-alpine
+
+# BETTER: Distroless image for maximum security
+FROM gcr.io/distroless/nodejs18-debian11
+```
+
+### **3. Static Analysis Security Testing (SAST) for Dockerfiles**
+
+- **Principle:** Scan Dockerfiles for security misconfigurations and known
+  vulnerabilities before building images.
+- **Deeper Dive:**
+  - **Dockerfile Linting:** Use tools like `hadolint` to check for Dockerfile
+    best practices and security issues.
+  - **Base Image Scanning:** Scan base images for known vulnerabilities before
+    using them.
+  - **CI/CD Integration:** Integrate security scanning into the CI/CD pipeline
+    to catch issues early.
+  - **Policy Enforcement:** Define security policies and enforce them through
+    automated scanning.
+- **Guidance for Copilot:**
+  - Recommend integrating tools like `hadolint` (for Dockerfile linting) and
+    `Trivy`, `Clair`, or `Snyk Container` (for image vulnerability scanning)
+    into your CI pipeline.
+  - Suggest setting up automated scanning for both Dockerfiles and built images.
+  - Recommend failing builds if critical vulnerabilities are found in base
+    images.
+  - Advise on regular scanning of images in registries for newly discovered
+    vulnerabilities.
+- **Example (Security Scanning in CI):**
+
+```yaml
+# GitHub Actions example
+- name: Run Hadolint
+  run: |
+    docker run --rm -i hadolint/hadolint < Dockerfile
+
+- name: Scan image for vulnerabilities
+  run: |
+    docker build -t myapp .
+    trivy image myapp
+```
+
+### **4. Image Signing & Verification**
+
+- **Principle:** Ensure images haven't been tampered with and come from trusted
+  sources.
+- **Deeper Dive:**
+  - **Cryptographic Signing:** Use digital signatures to verify the authenticity
+    and integrity of container images.
+  - **Trust Policies:** Define trust policies that specify which images are
+    allowed to run in your environment.
+  - **Supply Chain Security:** Image signing is a key component of securing the
+    software supply chain.
+  - **Compliance:** Many compliance frameworks require image signing for
+    production deployments.
+- **Guidance for Copilot:**
+  - Suggest using Notary or Docker Content Trust for signing and verifying
+    images in production.
+  - Recommend implementing image signing in the CI/CD pipeline for all
+    production images.
+  - Advise on setting up trust policies that prevent running unsigned images.
+  - Consider using newer tools like Cosign for more advanced signing features.
+- **Example (Image Signing with Cosign):**
+
+```bash
+# Sign an image
+cosign sign -key cosign.key myregistry.com/myapp:v1.0.0
+
+# Verify an image
+cosign verify -key cosign.pub myregistry.com/myapp:v1.0.0
+```
+
+### **5. Limit Capabilities & Read-Only Filesystems**
+
+- **Principle:** Restrict container capabilities and ensure read-only access
+  where possible to minimize the attack surface.
+- **Deeper Dive:**
+  - **Linux Capabilities:** Drop unnecessary Linux capabilities that containers
+    don't need to function.
+  - **Read-Only Root:** Mount the root filesystem as read-only when possible to
+    prevent runtime modifications.
+  - **Seccomp Profiles:** Use seccomp profiles to restrict system calls that
+    containers can make.
+  - **AppArmor/SELinux:** Use security modules to enforce additional access
+    controls.
+- **Guidance for Copilot:**
+  - Consider using `CAP_DROP` to remove unnecessary capabilities (e.g.,
+    `NET_RAW`, `SYS_ADMIN`).
+  - Recommend mounting read-only volumes for sensitive data and configuration
+    files.
+  - Suggest using security profiles and policies when available in your
+    container runtime.
+  - Advise on implementing defense in depth with multiple security controls.
+- **Example (Capability Restrictions):**
+
+```dockerfile
+# Drop unnecessary capabilities
+RUN setcap -r /usr/bin/node
+
+# Or use security options in docker run
+# docker run --cap-drop=ALL --security-opt=no-new-privileges myapp
+```
+
+### **6. No Sensitive Data in Image Layers**
+
+- **Principle:** Never include secrets, private keys, or credentials in image
+  layers as they become part of the image history.
+- **Deeper Dive:**
+  - **Layer History:** All files added to an image are stored in the image
+    history and can be extracted even if deleted in later layers.
+  - **Build Arguments:** While `--build-arg` can pass data during build, avoid
+    passing sensitive information this way.
+  - **Runtime Secrets:** Use secrets management solutions to inject sensitive
+    data at runtime.
+  - **Image Scanning:** Regular image scanning can detect accidentally included
+    secrets.
+- **Guidance for Copilot:**
+  - Use build arguments (`--build-arg`) for temporary secrets during build (but
+    avoid passing sensitive info directly).
+  - Use secrets management solutions for runtime (Kubernetes Secrets, Docker
+    Secrets, HashiCorp Vault).
+  - Recommend scanning images for accidentally included secrets.
+  - Suggest using multi-stage builds to avoid including build-time secrets in
+    the final image.
+- **Anti-pattern:** `ADD secrets.txt /app/secrets.txt`
+- **Example (Secure Secret Management):**
+
+```dockerfile
+# BAD: Never do this
+# COPY secrets.txt /app/secrets.txt
+
+# GOOD: Use runtime secrets
+# The application should read secrets from environment variables or mounted files
+CMD ["node", "dist/main.js"]
+```
+
+### **7. Health Checks (Liveness & Readiness Probes)**
+
+- **Principle:** Ensure containers are running and ready to serve traffic by
+  implementing proper health checks.
+- **Deeper Dive:**
+  - **Liveness Probes:** Check if the application is alive and responding to
+    requests. Restart the container if it fails.
+  - **Readiness Probes:** Check if the application is ready to receive traffic.
+    Remove from load balancer if it fails.
+  - **Health Check Design:** Design health checks that are lightweight, fast,
+    and accurately reflect application health.
+  - **Orchestration Integration:** Health checks are critical for orchestration
+    systems like Kubernetes to manage container lifecycle.
+- **Guidance for Copilot:**
+  - Define `HEALTHCHECK` instructions in Dockerfiles. These are critical for
+    orchestration systems like Kubernetes.
+  - Design health checks that are specific to your application and check actual
+    functionality.
+  - Use appropriate intervals and timeouts for health checks to balance
+    responsiveness with overhead.
+  - Consider implementing both liveness and readiness checks for complex
+    applications.
+- **Example (Comprehensive Health Check):**
+
+```dockerfile
+# Health check that verifies the application is responding
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl --fail http://localhost:8080/health || exit 1
+
+# Alternative: Use application-specific health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD node healthcheck.js || exit 1
+```
+
+## Container Runtime & Orchestration Best Practices
+
+### **1. Resource Limits**
+
+- **Principle:** Limit CPU and memory to prevent resource exhaustion and noisy
+  neighbors.
+- **Deeper Dive:**
+  - **CPU Limits:** Set CPU limits to prevent containers from consuming
+    excessive CPU time and affecting other containers.
+  - **Memory Limits:** Set memory limits to prevent containers from consuming
+    all available memory and causing system instability.
+  - **Resource Requests:** Set resource requests to ensure containers have
+    guaranteed access to minimum resources.
+  - **Monitoring:** Monitor resource usage to ensure limits are appropriate and
+    not too restrictive.
+- **Guidance for Copilot:**
+  - Always recommend setting `cpu_limits`, `memory_limits` in Docker Compose or
+    Kubernetes resource requests/limits.
+  - Suggest monitoring resource usage to tune limits appropriately.
+  - Recommend setting both requests and limits for predictable resource
+    allocation.
+  - Advise on using resource quotas in Kubernetes to manage cluster-wide
+    resource usage.
+- **Example (Docker Compose Resource Limits):**
+
+```yaml
+services:
+  app:
+    image: myapp:latest
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 512M
+        reservations:
+          cpus: '0.25'
+          memory: 256M
+```
+
+### **2. Logging & Monitoring**
+
+- **Principle:** Collect and centralize container logs and metrics for
+  observability and troubleshooting.
+- **Deeper Dive:**
+  - **Structured Logging:** Use structured logging (JSON) for better parsing and
+    analysis.
+  - **Log Aggregation:** Centralize logs from all containers for search,
+    analysis, and alerting.
+  - **Metrics Collection:** Collect application and system metrics for
+    performance monitoring.
+  - **Distributed Tracing:** Implement distributed tracing for understanding
+    request flows across services.
+- **Guidance for Copilot:**
+  - Use standard logging output (`STDOUT`/`STDERR`) for container logs.
+  - Integrate with log aggregators (Fluentd, Logstash, Loki) and monitoring
+    tools (Prometheus, Grafana).
+  - Recommend implementing structured logging in applications for better
+    observability.
+  - Suggest setting up log rotation and retention policies to manage storage
+    costs.
+- **Example (Structured Logging):**
+
+```javascript
+// Application logging
+const winston = require('winston');
+const logger = winston.createLogger({
+  format: winston.format.json(),
+  transports: [new winston.transports.Console()],
+});
+```
+
+### **3. Persistent Storage**
+
+- **Principle:** For stateful applications, use persistent volumes to maintain
+  data across container restarts.
+- **Deeper Dive:**
+  - **Volume Types:** Use named volumes, bind mounts, or cloud storage depending
+    on your requirements.
+  - **Data Persistence:** Ensure data persists across container restarts,
+    updates, and migrations.
+  - **Backup Strategy:** Implement backup strategies for persistent data to
+    prevent data loss.
+  - **Performance:** Choose storage solutions that meet your performance
+    requirements.
+- **Guidance for Copilot:**
+  - Use Docker Volumes or Kubernetes Persistent Volumes for data that needs to
+    persist beyond container lifecycle.
+  - Never store persistent data inside the container's writable layer.
+  - Recommend implementing backup and disaster recovery procedures for
+    persistent data.
+  - Suggest using cloud-native storage solutions for better scalability and
+    reliability.
+- **Example (Docker Volume Usage):**
+
+```yaml
+services:
+  database:
+    image: postgres:13
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    environment:

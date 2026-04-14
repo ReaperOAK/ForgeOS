@@ -1,0 +1,167 @@
+---
+source: "./.github/instructions/containerization-docker-best-practices.instructions.md"
+chunk_index: 3
+token_estimate: 1265
+hash: "199443a63a723b10709f9dfdc90d5d75c8b989c73de228f055bd8eeaf9ef2dce"
+summary: "POSTGRES_PASSWORD_FILE: /run/secrets/db_password  volumes:   postgres_data: ```  ### **4. Networking**  - **Principle..."
+---
+      POSTGRES_PASSWORD_FILE: /run/secrets/db_password
+
+volumes:
+  postgres_data:
+```
+
+### **4. Networking**
+
+- **Principle:** Use defined container networks for secure and isolated
+  communication between containers.
+- **Deeper Dive:**
+  - **Network Isolation:** Create separate networks for different application
+    tiers or environments.
+  - **Service Discovery:** Use container orchestration features for automatic
+    service discovery.
+  - **Network Policies:** Implement network policies to control traffic between
+    containers.
+  - **Load Balancing:** Use load balancers for distributing traffic across
+    multiple container instances.
+- **Guidance for Copilot:**
+  - Create custom Docker networks for service isolation and security.
+  - Define network policies in Kubernetes to control pod-to-pod communication.
+  - Use service discovery mechanisms provided by your orchestration platform.
+  - Implement proper network segmentation for multi-tier applications.
+- **Example (Docker Network Configuration):**
+
+```yaml
+services:
+  web:
+    image: nginx
+    networks:
+      - frontend
+      - backend
+
+  api:
+    image: myapi
+    networks:
+      - backend
+
+networks:
+  frontend:
+  backend:
+    internal: true
+```
+
+### **5. Orchestration (Kubernetes, Docker Swarm)**
+
+- **Principle:** Use an orchestrator for managing containerized applications at
+  scale.
+- **Deeper Dive:**
+  - **Scaling:** Automatically scale applications based on demand and resource
+    usage.
+  - **Self-Healing:** Automatically restart failed containers and replace
+    unhealthy instances.
+  - **Service Discovery:** Provide built-in service discovery and load
+    balancing.
+  - **Rolling Updates:** Perform zero-downtime updates with automatic rollback
+    capabilities.
+- **Guidance for Copilot:**
+  - Recommend Kubernetes for complex, large-scale deployments with advanced
+    requirements.
+  - Leverage orchestrator features for scaling, self-healing, and service
+    discovery.
+  - Use rolling update strategies for zero-downtime deployments.
+  - Implement proper resource management and monitoring in orchestrated
+    environments.
+- **Example (Kubernetes Deployment):**
+
+```yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: myapp
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: myapp
+  template:
+    metadata:
+      labels:
+        app: myapp
+    spec:
+      containers:
+        - name: myapp
+          image: myapp:latest
+          resources:
+            requests:
+              memory: '64Mi'
+              cpu: '250m'
+            limits:
+              memory: '128Mi'
+              cpu: '500m'
+```
+
+## Dockerfile Review Checklist
+
+- [ ] Is a multi-stage build used if applicable (compiled languages, heavy build
+      tools)?
+- [ ] Is a minimal, specific base image used (e.g., `alpine`, `slim`,
+      versioned)?
+- [ ] Are layers optimized (combining `RUN` commands, cleanup in same layer)?
+- [ ] Is a `.dockerignore` file present and comprehensive?
+- [ ] Are `COPY` instructions specific and minimal?
+- [ ] Is a non-root `USER` defined for the running application?
+- [ ] Is the `EXPOSE` instruction used for documentation?
+- [ ] Is `CMD` and/or `ENTRYPOINT` used correctly?
+- [ ] Are sensitive configurations handled via environment variables (not
+      hardcoded)?
+- [ ] Is a `HEALTHCHECK` instruction defined?
+- [ ] Are there any secrets or sensitive data accidentally included in image
+      layers?
+- [ ] Are there static analysis tools (Hadolint, Trivy) integrated into CI?
+
+## Troubleshooting Docker Builds & Runtime
+
+### **1. Large Image Size**
+
+- Review layers for unnecessary files. Use `docker history <image>`.
+- Implement multi-stage builds.
+- Use a smaller base image.
+- Optimize `RUN` commands and clean up temporary files.
+
+### **2. Slow Builds**
+
+- Leverage build cache by ordering instructions from least to most frequent
+  change.
+- Use `.dockerignore` to exclude irrelevant files.
+- Use `docker build --no-cache` for troubleshooting cache issues.
+
+### **3. Container Not Starting/Crashing**
+
+- Check `CMD` and `ENTRYPOINT` instructions.
+- Review container logs (`docker logs <container_id>`).
+- Ensure all dependencies are present in the final image.
+- Check resource limits.
+
+### **4. Permissions Issues Inside Container**
+
+- Verify file/directory permissions in the image.
+- Ensure the `USER` has necessary permissions for operations.
+- Check mounted volumes permissions.
+
+### **5. Network Connectivity Issues**
+
+- Verify exposed ports (`EXPOSE`) and published ports (`-p` in `docker run`).
+- Check container network configuration.
+- Review firewall rules.
+
+## Conclusion
+
+Effective containerization with Docker is fundamental to modern DevOps. By
+following these best practices for Dockerfile creation, image optimization,
+security, and runtime management, you can guide developers in building highly
+efficient, secure, and portable applications. Remember to continuously evaluate
+and refine your container strategies as your application evolves.
+
+---
+
+<!-- End of Containerization & Docker Best Practices Instructions -->

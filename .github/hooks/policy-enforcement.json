@@ -1,0 +1,53 @@
+{
+  "$schema": "https://raw.githubusercontent.com/microsoft/vscode/main/src/vs/workbench/contrib/chat/common/hooks/hookSchema.json",
+  "description": "Vibecoding policy enforcement hooks. These hooks provide deterministic enforcement of system rules that were previously reliant on LLM instruction-following.",
+  "hooks": {
+    "SessionStart": [
+      {
+        "description": "Check STOP_ALL guardian file before any agent work begins",
+        "command": "bash .github/hooks/scripts/check-guardian-stop.sh",
+        "enabled": true,
+        "comment": "Enabled by TASK-VIB-002"
+      }
+    ],
+    "PreToolUse": [
+      {
+        "description": "Block all tool use when STOP_ALL guardian is active",
+        "command": "bash .github/hooks/scripts/check-guardian-stop.sh",
+        "enabled": true,
+        "comment": "Enabled by TASK-VIB-002"
+      },
+      {
+        "description": "Block prohibited git commands (git add ., git add -A, git add --all)",
+        "command": "bash .github/hooks/scripts/block-git-add-all.sh",
+        "toolNames": [
+          "run_in_terminal"
+        ],
+        "enabled": true,
+        "comment": "Enabled by TASK-VIB-002"
+      }      
+    ],
+    "Stop": [
+      {
+        "description": "Verify agent output summary contains required evidence (artifacts, confidence)",
+        "command": "bash .github/hooks/scripts/verify-evidence.sh",
+        "enabled": true,
+        "comment": "Enabled by TASK-VIB-002"
+      }
+    ],
+    "SubagentStop": [
+      {
+        "description": "Verify agent wrote to activeContext.md before completing",
+        "command": "bash .github/hooks/scripts/verify-memory-gate.sh",
+        "enabled": true,
+        "comment": "Enabled by TASK-VIB-002"
+      }
+    ]
+  },
+  "metadata": {
+    "version": "1.0.0",
+    "created_by": "TASK-SYS-001",
+    "created_at": "2026-03-26T00:00:00Z",
+    "requires": "VS Code agent hooks (Preview)"
+  }
+}

@@ -1,6 +1,8 @@
 ---
 name: start
-description: Project initialization from scratch. Uses CTO agent to read docs, research, plan architecture, and generate the full ticket backlog before handing off to Ticketer.
+description: Initialize a new project from scratch with full SDLC planning
+agent: 'CTO'
+argument-hint: 'Describe your project vision or paste link to project docs'
 ---
 
 # start — Project Initialization Protocol
@@ -36,7 +38,7 @@ Before running, ensure:
 3. Read `.github/agents/CTO.agent.md` — internalize the CTO execution pipeline.
 4. Verify CTO Tool Loadout compliance — only use tools listed in the CTO's Assigned Tool Loadout.
 5. Invoke `sequentialthinking/sequentialthinking` to plan the initialization pipeline.
-6. Run `python3 .github/tickets.py --status --json` — confirm no existing tickets or understand current state.
+6. Run `python3 tickets.py --status --json` — confirm no existing tickets or understand current state.
 
 ---
 
@@ -98,8 +100,8 @@ After CTO completes, verify:
 
 1. **PRD exists:** `docs/PRD.md` (or equivalent) with features, acceptance criteria, priorities
 2. **Architecture exists:** `docs/ARCHITECTURE.md` with diagrams, API contracts, schema design
-3. **Tickets exist:** Run `python3 .github/tickets.py --status --json` to confirm tickets in READY
-4. **Integrity check:** Run `python3 .github/tickets.py --validate` — zero errors
+3. **Tickets exist:** Run `python3 tickets.py --status --json` to confirm tickets in READY
+4. **Integrity check:** Run `python3 tickets.py --validate` — zero errors
 5. **Memory gate:** `.github/memory-bank/activeContext.md` has CTO initialization entry
 
 If any artifact is missing or incomplete, re-delegate to CTO with specific feedback.

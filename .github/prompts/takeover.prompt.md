@@ -1,8 +1,8 @@
 ---
 name: Takeover
-agent: Ticketer
-model: Claude Opus 4.6 (copilot)
-description: Initializes legacy repository takeover. Guides structured reconstruction before resuming normal autonomous ticket-driven execution.
+description: Initialize legacy repository takeover with structured reconstruction before resuming normal autonomous ticket-driven execution.
+agent: 'CTO'
+argument-hint: 'No arguments needed — invoke /takeover to start legacy repo analysis'
 ---
 
 We are entering LEGACY REPOSITORY TAKEOVER MODE.
@@ -29,13 +29,13 @@ Before any work, execute the full 11-step boot sequence:
 1. Read `.github/guardian/STOP_ALL` — if contains `STOP`: halt, zero edits.
 2. Read all `.github/instructions/*.instructions.md` (6 files).
 3. Read your agent file: `.github/agents/{YourAgent}.agent.md` — internalize the Assigned Tool Loadout.
-4. Run `python3 .github/tickets.py --sync`
-5. Run `python3 .github/tickets.py --status --json`
-6. Read `.github/vibecoding/chunks/{YourAgent}.agent/` (all files).
+4. Run `python3 tickets.py --sync`
+5. Run `python3 tickets.py --status --json`
+6. Read `.github/skills/{YourAgent}/` (all files).
 7. Read `.github/vibecoding/catalog.yml`; load task-relevant chunks.
 8. Invoke `sequentialthinking` to plan execution before touching any files.
 
-All agents operate under strict Tool Loadouts per `agents.md` §0.1. No tool browsing or hallucination outside assigned loadout.
+All agents operate under strict Tool Loadouts per `AGENTS.md` §0.1. No tool browsing or hallucination outside assigned loadout.
 
 ---
 
@@ -120,20 +120,20 @@ Do NOT modify code yet.
 4. Create structured task files in `TODO/tasks/`.
 5. Parse L3 tasks into ticket JSON:
    ```bash
-   python3 .github/tickets.py --parse TODO/tasks/
+   python3 tickets.py --parse TODO/tasks/
    ```
 6. Run sync to evaluate dependencies:
    ```bash
-   python3 .github/tickets.py --sync
+   python3 tickets.py --sync
    ```
 7. Verify ticket state:
    ```bash
-   python3 .github/tickets.py --status
+   python3 tickets.py --status
    ```
 
 Tickets must be granular — one change per ticket.
-Each ticket must conform to `.github/tickets/ticket-schema.json`.
-Tickets enter the file-based state machine at `.github/ticket-state/READY/`.
+Each ticket must conform to `tickets/ticket-schema.json`.
+Tickets enter the file-based state machine at `ticket-state/READY/`.
 
 No implementation yet.
 
@@ -150,10 +150,10 @@ Before feature work, execute in parallel:
 - Missing lint rules
 
 Each ticket must:
-- Follow full SDLC through file-based state machine (`.github/ticket-state/`)
+- Follow full SDLC through file-based state machine (`ticket-state/`)
 - Use dispatcher-claim protocol per stage: Ticketer performs Commit 1 (CLAIM) before dispatch, subagent performs Commit 2 (WORK) only
 - Traverse per ticket type (e.g., backend): READY → BACKEND → QA → SECURITY → CI → DOCS → VALIDATION → DONE
-- Write agent summary to `.github/agent-output/{AgentName}/{ticket-id}.md`
+- Write agent summary to `agent-output/{AgentName}/{ticket-id}.md`
 - Read upstream summary from previous stage agent before starting
 
 Post-implementation chain for every ticket (strict order):
@@ -165,8 +165,8 @@ Post-implementation chain for every ticket (strict order):
 
 Sync ticket state between stages:
 ```bash
-python3 .github/tickets.py --sync
-python3 .github/tickets.py --status
+python3 tickets.py --sync
+python3 tickets.py --status
 ```
 
 Parallel execution allowed — Ticketer claims via push-based distributed lock before dispatching (push failure = another operator claimed first).
@@ -183,17 +183,17 @@ Only after:
 - CI exists
 - Architecture doc exists
 - PRD reconstructed
-- `.github/ticket-state/` directories populated
-- `python3 .github/tickets.py --validate` passes integrity check
+- `ticket-state/` directories populated
+- `python3 tickets.py --validate` passes integrity check
 
 Then continue normal autonomous execution:
-- Ticket by ticket via `python3 .github/tickets.py --sync` + `--status --json`
+- Ticket by ticket via `python3 tickets.py --sync` + `--status --json`
 - Dispatcher-claim protocol enforced: Ticketer performs CLAIM commit (ticket JSON only) → subagent performs WORK commit (code + summary + advance)
 - Ticketer is a dumb dispatcher — it NEVER reads/writes codebase files. Its toolset is restricted to `memory/*`, `execute/*`, `github/*`, and `sequentialthinking/*`
 - All agents follow their Assigned Tool Loadout from `.github/agents/{Agent}.agent.md` — no out-of-scope tool usage
 - Parallelized across operators/machines with push-based distributed locking
 - Full SDLC loop through stage directories
-- Agent summary handoff via `.github/agent-output/{AgentName}/{ticket-id}.md`
+- Agent summary handoff via `agent-output/{AgentName}/{ticket-id}.md`
 - Strict scoped git rules (explicit staging only, no `git add .`)
 - Agents use `oraios/serena/*` for code navigation and atomic edits
 - Each agent invokes `sequentialthinking` to plan before touching files
@@ -231,7 +231,7 @@ If major architectural inconsistency found:
 2. Reconstructed PRD
 3. Target architecture
 4. Gap analysis
-5. Ticket tree (ticket JSON in `.github/tickets/`, state in `.github/ticket-state/`)
+5. Ticket tree (ticket JSON in `tickets/`, state in `ticket-state/`)
 6. Stabilization completion
 7. Updated README
 8. Clean CI pipeline
@@ -242,8 +242,8 @@ System must transition from unstructured vibecoded chaos to governed, ticket-dri
 
 Verify system health:
 ```bash
-python3 .github/tickets.py --status
-python3 .github/tickets.py --validate
+python3 tickets.py --status
+python3 tickets.py --validate
 ```
 
 Do not skip reconstruction. Do not jump to coding.

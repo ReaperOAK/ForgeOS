@@ -1,9 +1,25 @@
 ---
-name: 'Documentation Specialist'
+name: 'Documentation'
 description: 'Technical documentation engineer. Produces readable docs with Flesch-Kincaid scoring, freshness tracking, and doc-as-code CI.'
 user-invocable: false
-tools: [vscode, execute, read, agent, edit, search, web, browser, 'forgeos/*', 'github/*', 'microsoft/markitdown/*', vscode.mermaid-chat-features/renderMermaidDiagram, todo]
-model: Claude Opus 4.6 (copilot)
+tools:
+  - vscode
+  - execute
+  - read
+  - agent
+  - edit
+  - search
+  - web
+  - 'com.figma.mcp/mcp/*'
+  - 'forgeos/*'
+  - 'github/*'
+  - 'io.github.tavily-ai/tavily-mcp/*'
+  - 'io.github.upstash/context7/*'
+  - 'microsoft/markitdown/*'
+  - 'playwright/*'
+  - 'vscode.mermaid-chat-features/renderMermaidDiagram'
+  - todo
+argument-hint: 'Describe the documentation to create, update, or the API docs to generate'
 ---
 
 # Documentation Specialist
@@ -57,20 +73,20 @@ Execute in order. No skips.
 
 1. Read `.github/guardian/STOP_ALL` — if `STOP`, halt immediately, zero edits.
 2. Read all 6 files in `.github/instructions/` (core, sdlc, ticket-system, git-protocol, agent-behavior, terminal-management).
-3. Read upstream summary: `.github/agent-output/CIReviewer/{ticket-id}.md`.
-4. Read all files in `.github/vibecoding/chunks/Documentation.agent/`.
+3. Read upstream summary: `agent-output/CIReviewer/{ticket-id}.md`.
+4. Read all files in `.github/skills/Documentation/`.
 5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks.
-6. Call `tickets.payload(ticket_id)` via the ForgeOS MCP server to receive full delegation context (ticket JSON, upstream summary, memory entries, file scope).
+6. Read ticket JSON from `ticket-state/DOCS/{ticket-id}.json`.
 
 ## 4. Pre-Claimed Ticket (Dispatcher-Claim Protocol)
 
-RULE: The ticket is already claimed by ForgeOS dispatcher before this agent is launched.
+RULE: The ticket is already claimed by Ticketer before this agent is launched.
 RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
 
-1. Call `tickets.payload(ticket_id)` to receive the full delegation context from the ForgeOS MCP server.
-2. Verify the payload includes ticket JSON with claim metadata (`claimed_by`, `machine_id`, `operator`, `lease_expiry`).
-3. If claim metadata is missing or the MCP server rejects the request, HALT and report `PROTOCOL_VIOLATION: missing claim`.
-4. Proceed directly to execution workflow.
+1. Read ticket JSON from `ticket-state/DOCS/{ticket-id}.json`.
+2. Verify claim metadata exists: `claimed_by`, `machine_id`, `operator`, `lease_expiry`.
+3. If claim metadata is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing claim`.
+4. Proceed directly to execution workflow — no `git pull --rebase` for claiming.
 
 ## 5. Execution Workflow
 
@@ -93,21 +109,10 @@ After verifying claim, execute docs work:
 
 ## 6. Work Commit (Commit 2)
 
-1. Write summary to `.github/agent-output/Documentation/{ticket-id}.md`.
-2. Delete upstream summary: `.github/agent-output/CIReviewer/{ticket-id}.md`.
-3. Call `tickets.complete` via the ForgeOS MCP server with structured evidence:
-   ```jsonc
-   {
-     "ticket_id": "{ticket-id}",
-     "evidence": {
-       "artifacts": [".github/agent-output/Documentation/{ticket-id}.md", "{updated doc files}"],
-       "test_results": "Readability FK grade ≤ 10, 0 broken links, freshness updated",
-       "confidence": "HIGH",
-       "notes": "DOCS complete — all documentation updated"
-     }
-   }
-   ```
-   The MCP server advances the ticket to VALIDATION.
+1. Write summary to `agent-output/Documentation/{ticket-id}.md`.
+2. Delete upstream summary: `agent-output/CIReviewer/{ticket-id}.md`.
+3. Move ticket JSON to `ticket-state/VALIDATION/{ticket-id}.json`
+   (remove from `DOCS/`). Update ticket metadata with completion info.
 4. Append memory entry to `.github/memory-bank/activeContext.md`:
    ```markdown
    ### [{ticket-id}] — Documentation Summary
@@ -165,9 +170,9 @@ If any criterion cannot be met, report `status: blocked` with reason.
 
 ## 10. References
 
-- `.github/instructions/core.instructions.md`
-- `.github/instructions/sdlc.instructions.md`
-- `.github/instructions/ticket-system.instructions.md`
-- `.github/instructions/git-protocol.instructions.md`
-- `.github/instructions/agent-behavior.instructions.md`
-- `.github/vibecoding/chunks/Documentation.agent/`
+- [.github/instructions/core.instructions.md](../.github/instructions/core.instructions.md)
+- [.github/instructions/sdlc.instructions.md](../.github/instructions/sdlc.instructions.md)
+- [.github/instructions/ticket-system.instructions.md](../.github/instructions/ticket-system.instructions.md)
+- [.github/instructions/git-protocol.instructions.md](../.github/instructions/git-protocol.instructions.md)
+- [.github/instructions/agent-behavior.instructions.md](../.github/instructions/agent-behavior.instructions.md)
+- [.github/skills/Documentation/](../.github/skills/Documentation/)

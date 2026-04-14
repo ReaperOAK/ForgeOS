@@ -2,8 +2,25 @@
 name: 'Validator'
 description: 'Independent SDLC compliance reviewer. Verifies Definition of Done, runs quality gates, checks pattern conformance, and validates initialization checklists. Cannot implement code — only reads artifacts and writes validation reports. Has authority to reject task completion.'
 user-invocable: false
-tools: [vscode, execute, read, agent, edit, search, web, browser, 'com.figma.mcp/mcp/*', 'forgeos/*', 'github/*', 'io.github.tavily-ai/tavily-mcp/*', 'io.github.upstash/context7/*', 'microsoft/markitdown/*', 'playwright/*', vscode.mermaid-chat-features/renderMermaidDiagram, todo]
-model: Claude Opus 4.6 (copilot)
+tools:
+  - vscode
+  - execute
+  - read
+  - agent
+  - edit
+  - search
+  - web
+  - 'com.figma.mcp/mcp/*'
+  - 'forgeos/*'
+  - 'github/*'
+  - 'io.github.tavily-ai/tavily-mcp/*'
+  - 'io.github.upstash/context7/*'
+  - 'microsoft/markitdown/*'
+  - 'playwright/*'
+  - 'vscode.mermaid-chat-features/renderMermaidDiagram'
+  - todo
+argument-hint: 'Describe the Definition of Done items to verify or quality gates to validate'
+
 ---
 
 # Validator Subagent
@@ -45,25 +62,25 @@ Independent SDLC compliance reviewer — verifies Definition of Done, runs quali
 ---
 
 ## 2. Stage
-`VALIDATION` — processes tickets after Documentation stage. Receives pre-claimed tickets via the ForgeOS MCP server.
+`VALIDATION` — processes tickets after Documentation stage. Tickets arrive from `ticket-state/VALIDATION/`.
 
 ## 3. Boot Sequence (run in order, no skips)
 1. Read `.github/guardian/STOP_ALL` — if `STOP`: halt, zero edits.
 2. Read all `.github/instructions/*.instructions.md` (core, sdlc, ticket-system, git-protocol, agent-behavior, terminal-management).
-3. Read upstream summary from `.github/agent-output/Documentation/{ticket-id}.md`.
-4. Read `.github/vibecoding/chunks/Validator.agent/` (all chunk files).
+3. Read upstream summary from `agent-output/Documentation/{ticket-id}.md`.
+4. Read `.github/skills/Validator/` (all chunk files).
 5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks.
-6. Call `tickets.payload(ticket_id)` via the ForgeOS MCP server to receive full delegation context (ticket JSON, upstream summary, memory entries, file scope).
+6. Read ticket JSON from `ticket-state/VALIDATION/{ticket-id}.json`.
 
 ## 4. Pre-Claimed Ticket (Dispatcher-Claim Protocol)
 
-RULE: The ticket is already claimed by ForgeOS dispatcher before this agent is launched.
+RULE: The ticket is already claimed by Ticketer before this agent is launched.
 RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
 
-1. Call `tickets.payload(ticket_id)` to receive the full delegation context from the ForgeOS MCP server.
-2. Verify the payload includes ticket JSON with claim metadata (`claimed_by`, `machine_id`, `operator`, `lease_expiry`).
-3. If claim metadata is missing or the MCP server rejects the request, HALT and report `PROTOCOL_VIOLATION: missing claim`.
-4. Proceed directly to execution workflow.
+1. Read ticket JSON from `ticket-state/VALIDATION/{ticket-id}.json`.
+2. Verify claim metadata exists: `claimed_by`, `machine_id`, `operator`, `lease_expiry`.
+3. If claim metadata is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing claim`.
+4. Proceed directly to execution workflow — no `git pull --rebase` for claiming.
 
 ## 5. Execution Workflow — Definition of Done (ALL 10 must pass)
 
@@ -87,7 +104,7 @@ RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
 - Cross-check CI verdict — must be **PASS**.
 - Independently re-run lint, type-check, and test commands — never trust self-reports.
 - Verify scoped git discipline: no `git add .` in commit history for this ticket.
-- Verify dispatcher-claim protocol: claim commit by ForgeOS dispatcher + work commit by subagent per stage in git log.
+- Verify dispatcher-claim protocol: claim commit by Ticketer + work commit by subagent per stage in git log.
 
 ### Verdict Logic
 ```
@@ -100,35 +117,16 @@ ELSE → verdict = REJECTED (list all failures with evidence)
 ```
 
 ## 6. Verdict Actions
-- **APPROVE:** Call `tickets.complete` via the ForgeOS MCP server with APPROVED evidence:
-  ```jsonc
-  {
-    "ticket_id": "{ticket-id}",
-    "evidence": {
-      "artifacts": [".github/agent-output/Validator/{ticket-id}.md"],
-      "test_results": "DoD {N}/10 pass, all upstream verdicts verified",
-      "confidence": "HIGH",
-      "notes": "VALIDATION APPROVED — all Definition of Done items satisfied"
-    }
-  }
-  ```
-  The MCP server advances the ticket to DONE and resolves downstream dependencies.
-- **REJECT:** Call `tickets.reject` via the ForgeOS MCP server with rejection evidence:
-  ```jsonc
-  {
-    "ticket_id": "{ticket-id}",
-    "reason": "{specific DoD failures with remediation guidance}",
-    "evidence": { "dod_failures": ["..."], "upstream_issues": ["..."] }
-  }
-  ```
-  The MCP server automatically routes the ticket back to its implementation stage for rework.
+- **APPROVE:** `python3 tickets.py --advance {ticket-id} Validator` → move to DONE.
+- **REJECT:** `python3 tickets.py --rework {ticket-id} Validator "{reason}"` → back to implementation stage with evidence.
 
 ## 7. Work Commit (Commit 2)
-1. Write validation report to `.github/agent-output/Validator/{ticket-id}.md`.
+1. Write validation report to `agent-output/Validator/{ticket-id}.md`.
 2. Delete previous stage summary (Documentation's `{ticket-id}.md`).
-3. If APPROVED: call `tickets.complete` with evidence payload (MCP server moves ticket to DONE and resolves downstream dependencies).
-4. If REJECTED: call `tickets.reject` with reason and evidence (MCP server routes ticket back for rework).
-5. Write memory entry to `.github/memory-bank/activeContext.md`:
+3. If APPROVED: move ticket JSON to `ticket-state/DONE/{ticket-id}.json`.
+4. If REJECTED: ticket goes back for rework (tickets.py handles state).
+5. Run `python3 tickets.py --sync` to unblock freed downstream tasks.
+6. Write memory entry to `.github/memory-bank/activeContext.md`:
    ```
    ### [TICKET-ID] — Validation Summary
    - **Artifacts:** validation report path
@@ -161,5 +159,5 @@ Every validation must produce:
 - Artifact paths for all files created/modified.
 
 ## 11. References
-- `.github/instructions/*.instructions.md` (all 6 canonical files)
-- `.github/vibecoding/chunks/Validator.agent/` (chunk-01, chunk-02, chunk-03)
+- [.github/instructions/*.instructions.md](../.github/instructions/*.instructions.md) (all 6 canonical files)
+- [.github/skills/Validator/](../.github/skills/Validator/) (chunk-01, chunk-02, chunk-03)

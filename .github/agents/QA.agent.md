@@ -1,9 +1,25 @@
 ---
-name: 'QA Engineer'
+name: 'QA'
 description: 'Designs and executes test strategies: TDD, mutation testing, property-based testing, E2E browser testing, and performance benchmarking.'
 user-invocable: false
-tools: [vscode, execute, read, agent, edit, search, web, browser, 'com.figma.mcp/mcp/*', 'forgeos/*', 'github/*', 'io.github.tavily-ai/tavily-mcp/*', 'io.github.upstash/context7/*', 'microsoft/markitdown/*', 'playwright/*', vscode.mermaid-chat-features/renderMermaidDiagram, todo]
-model: Claude Opus 4.6 (copilot)
+tools:
+  - vscode
+  - execute
+  - read
+  - agent
+  - edit
+  - search
+  - web
+  - 'com.figma.mcp/mcp/*'
+  - 'forgeos/*'
+  - 'github/*'
+  - 'io.github.tavily-ai/tavily-mcp/*'
+  - 'io.github.upstash/context7/*'
+  - 'microsoft/markitdown/*'
+  - 'playwright/*'
+  - 'vscode.mermaid-chat-features/renderMermaidDiagram'
+  - todo
+argument-hint: 'Describe what to test, test strategy to implement, or quality gates to verify'
 ---
 
 # QA Engineer Subagent
@@ -55,20 +71,20 @@ Execute in order before any work. No skips.
 
 1. Read `.github/guardian/STOP_ALL` — if contains `STOP`: halt, zero edits, report blocked
 2. Read all `.github/instructions/*.instructions.md` (core, sdlc, ticket-system, git-protocol, agent-behavior, terminal-management)
-3. Read upstream summary from `.github/agent-output/{PreviousAgent}/{ticket-id}.md`
-4. Read all files in `.github/vibecoding/chunks/QA.agent/`
-5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks.
-6. Call `tickets.payload(ticket_id)` via the ForgeOS MCP server to receive full delegation context (ticket JSON, upstream summary, memory entries, file scope).
+3. Read upstream summary from `agent-output/{PreviousAgent}/{ticket-id}.md`
+4. Read all files in `.github/skills/QA/`
+5. Read `.github/vibecoding/catalog.yml` — load task-relevant chunks
+6. Read ticket JSON from `ticket-state/QA/{ticket-id}.json`
 
 ## 4. Pre-Claimed Ticket (Dispatcher-Claim Protocol)
 
-RULE: The ticket is already claimed by ForgeOS dispatcher before this agent is launched.
+RULE: The ticket is already claimed by Ticketer before this agent is launched.
 RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
 
-1. Call `tickets.payload(ticket_id)` to receive the full delegation context from the ForgeOS MCP server.
-2. Verify the payload includes ticket JSON with claim metadata (`claimed_by`, `machine_id`, `operator`, `lease_expiry`).
-3. If claim metadata is missing or the MCP server rejects the request, HALT and report `PROTOCOL_VIOLATION: missing claim`.
-4. Proceed directly to execution workflow.
+1. Read ticket JSON from `ticket-state/QA/{ticket-id}.json`.
+2. Verify claim metadata exists: `claimed_by`, `machine_id`, `operator`, `lease_expiry`.
+3. If claim metadata is missing or invalid, HALT and report `PROTOCOL_VIOLATION: missing claim`.
+4. Proceed directly to execution workflow — no `git pull --rebase` for claiming.
 
 ## 5. Execution Workflow
 
@@ -117,46 +133,28 @@ RULE: Subagents NEVER perform claim commits — the dispatcher handles Commit 1.
 
 **PASS** — All quality gates satisfied:
 - All tests pass, coverage ≥80%, mutation score meets targets, no critical defects
-- Call `tickets.complete` via the ForgeOS MCP server with structured evidence:
-  ```jsonc
-  {
-    "ticket_id": "{ticket-id}",
-    "evidence": {
-      "artifacts": ["tests/...", ".github/agent-output/QA/{ticket-id}.md"],
-      "test_results": "{pass/fail counts, coverage %, mutation score}",
-      "confidence": "HIGH",
-      "notes": "QA PASS — all quality gates satisfied"
-    }
-  }
-  ```
+- Advance ticket: `python3 tickets.py --advance {ticket-id} QA`
 
 **FAIL** — Any gate fails:
 - Document specific failures: file, line, test name, expected vs actual
-- Call `tickets.reject` via the ForgeOS MCP server with rejection reason and evidence:
-  ```jsonc
-  {
-    "ticket_id": "{ticket-id}",
-    "reason": "{specific failure description with actionable fix guidance}",
-    "evidence": { "failures": ["..."], "coverage": "N%" }
-  }
-  ```
-- The MCP server automatically routes the ticket back to its implementation stage for rework
+- Send for rework: `python3 tickets.py --rework {ticket-id} QA "{reason}"`
 - Rework reason must include actionable fix guidance
 
 ## 7. Work Commit (Commit 2)
 
-1. Write QA report to `.github/agent-output/QA/{ticket-id}.md` (include verdict, evidence, metrics).
-2. Delete previous stage summary from `.github/agent-output/{PreviousAgent}/{ticket-id}.md`.
-3. If PASS: call `tickets.complete` with evidence payload (MCP server advances the ticket to SECURITY).
-4. If FAIL: call `tickets.reject` with reason and evidence (MCP server routes ticket back for rework).
-5. Append memory entry to `.github/memory-bank/activeContext.md` with ticket-id, artifacts, verdict, mutation score, coverage, and ISO8601 timestamp.
-6. Stage ONLY modified files explicitly — NEVER `git add .` or `git add -A`.
-7. `git commit -m "[{ticket-id}] QA complete by QA on {machine}"`.
-8. `git push`.
+1. Write QA report to `agent-output/QA/{ticket-id}.md` (include verdict, evidence, metrics)
+2. Delete previous stage summary from `agent-output/{PreviousAgent}/{ticket-id}.md`
+3. If PASS: move ticket to `ticket-state/SECURITY/{ticket-id}.json`
+4. If FAIL: ticket stays in rework state (handled by tickets.py)
+5. Update master copy at `tickets/{ticket-id}.json`
+6. Append memory entry to `.github/memory-bank/activeContext.md` with ticket-id, artifacts, verdict, mutation score, coverage, and ISO8601 timestamp
+7. Stage ONLY modified files explicitly — NEVER `git add .` or `git add -A`
+8. `git commit -m "[{ticket-id}] QA complete by QA on {machine}"`
+9. `git push`
 
 ## 8. Scope
 
-- **Included:** test files, test configs, test fixtures, coverage reports, QA reports, `.github/agent-output/QA/`
+- **Included:** test files, test configs, test fixtures, coverage reports, QA reports, `agent-output/QA/`
 - **Excluded:** implementation code (read-only), CI/CD configs, infrastructure, architecture decisions, deployment
 
 ## 9. Forbidden Actions
@@ -192,5 +190,5 @@ Every QA report must include:
 
 ## 11. References
 
-- `.github/instructions/*.instructions.md` (core, sdlc, ticket-system, git-protocol, agent-behavior, terminal-management)
-- `.github/vibecoding/chunks/QA.agent/` (test strategy details, examples, report templates)
+- [.github/instructions/*.instructions.md](../.github/instructions/*.instructions.md) (core, sdlc, ticket-system, git-protocol, agent-behavior, terminal-management)
+- [.github/skills/QA/](../.github/skills/QA/) (test strategy details, examples, report templates)

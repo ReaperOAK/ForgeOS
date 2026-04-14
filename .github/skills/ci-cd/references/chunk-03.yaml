@@ -1,0 +1,287 @@
+---
+source: "./.github/instructions/github-actions-ci-cd-best-practices.instructions.md"
+chunk_index: 3
+token_estimate: 3876
+hash: "c019284041fff147e7ad0d1b8c251e672beca52d63948bba22511191155282b7"
+summary: "possible to maximize test fidelity.   - Suggest implementing automated smoke tests and post-deployment validation on ..."
+---
+    possible to maximize test fidelity.
+  - Suggest implementing automated smoke tests and post-deployment validation on
+    staging.
+
+### **2. Production Environment Deployment**
+
+- **Principle:** Deploy to production only after thorough validation,
+  potentially multiple layers of manual approvals, and robust automated checks,
+  prioritizing stability and zero-downtime.
+- **Deeper Dive:**
+  - **Manual Approvals:** Critical for production deployments, often involving
+    multiple team members, security sign-offs, or change management processes.
+    GitHub Environments support this natively.
+  - **Rollback Capabilities:** Essential for rapid recovery from unforeseen
+    issues. Ensure a quick and reliable way to revert to the previous stable
+    state.
+  - **Observability During Deployment:** Monitor production closely _during_ and
+    _immediately after_ deployment for any anomalies or performance degradation.
+    Use dashboards, alerts, and tracing.
+  - **Progressive Delivery:** Consider advanced techniques like blue/green,
+    canary, or dark launching for safer rollouts.
+  - **Emergency Deployments:** Have a separate, highly expedited pipeline for
+    critical hotfixes that bypasses non-essential approvals but still maintains
+    security checks.
+- **Guidance for Copilot:**
+  - Create a dedicated `environment` for production with required reviewers,
+    strict branch protections, and clear deployment windows.
+  - Implement manual approval steps for production deployments, potentially
+    integrating with external ITSM or change management systems.
+  - Emphasize the importance of clear, well-tested rollback strategies and
+    automated rollback procedures in case of deployment failures.
+  - Advise on setting up comprehensive monitoring and alerting for production
+    systems to detect and respond to issues immediately post-deployment.
+
+### **3. Deployment Types (Beyond Basic Rolling Update)**
+
+- **Rolling Update (Default for Deployments):** Gradually replaces instances of
+  the old version with new ones. Good for most cases, especially stateless
+  applications.
+  - **Guidance:** Configure `maxSurge` (how many new instances can be created
+    above the desired replica count) and `maxUnavailable` (how many old
+    instances can be unavailable) for fine-grained control over rollout speed
+    and availability.
+- **Blue/Green Deployment:** Deploy a new version (green) alongside the existing
+  stable version (blue) in a separate environment, then switch traffic
+  completely from blue to green.
+  - **Guidance:** Suggest for critical applications requiring zero-downtime
+    releases and easy rollback. Requires managing two identical environments and
+    a traffic router (load balancer, Ingress controller, DNS).
+  - **Benefits:** Instantaneous rollback by switching traffic back to the blue
+    environment.
+- **Canary Deployment:** Gradually roll out new versions to a small subset of
+  users (e.g., 5-10%) before a full rollout. Monitor performance and error rates
+  for the canary group.
+  - **Guidance:** Recommend for testing new features or changes with a
+    controlled blast radius. Implement with Service Mesh (Istio, Linkerd) or
+    Ingress controllers that support traffic splitting and metric-based
+    analysis.
+  - **Benefits:** Early detection of issues with minimal user impact.
+- **Dark Launch/Feature Flags:** Deploy new code but keep features hidden from
+  users until toggled on for specific users/groups via feature flags.
+  - **Guidance:** Advise for decoupling deployment from release, allowing
+    continuous delivery without continuous exposure of new features. Use feature
+    flag management systems (LaunchDarkly, Split.io, Unleash).
+  - **Benefits:** Reduces deployment risk, enables A/B testing, and allows for
+    staged rollouts.
+- **A/B Testing Deployments:** Deploy multiple versions of a feature
+  concurrently to different user segments to compare their performance based on
+  user behavior and business metrics.
+  - **Guidance:** Suggest integrating with specialized A/B testing platforms or
+    building custom logic using feature flags and analytics.
+
+### **4. Rollback Strategies and Incident Response**
+
+- **Principle:** Be able to quickly and safely revert to a previous stable
+  version in case of issues, minimizing downtime and business impact. This
+  requires proactive planning.
+- **Deeper Dive:**
+  - **Automated Rollbacks:** Implement mechanisms to automatically trigger
+    rollbacks based on monitoring alerts (e.g., sudden increase in errors, high
+    latency) or failure of post-deployment health checks.
+  - **Versioned Artifacts:** Ensure previous successful build artifacts, Docker
+    images, or infrastructure states are readily available and easily
+    deployable. This is crucial for fast recovery.
+  - **Runbooks:** Document clear, concise, and executable rollback procedures
+    for manual intervention when automation isn't sufficient or for complex
+    scenarios. These should be regularly reviewed and tested.
+  - **Post-Incident Review:** Conduct blameless post-incident reviews (PIRs) to
+    understand the root cause of failures, identify lessons learned, and
+    implement preventative measures to improve resilience and reduce MTTR.
+  - **Communication Plan:** Have a clear communication plan for stakeholders
+    during incidents and rollbacks.
+- **Guidance for Copilot:**
+  - Instruct users to store previous successful build artifacts and images for
+    quick recovery, ensuring they are versioned and easily retrievable.
+  - Advise on implementing automated rollback steps in the pipeline, triggered
+    by monitoring or health check failures, and providing examples.
+  - Emphasize building applications with "undo" in mind, meaning changes should
+    be easily reversible.
+  - Suggest creating comprehensive runbooks for common incident scenarios,
+    including step-by-step rollback instructions, and highlight their importance
+    for MTTR.
+  - Guide on setting up alerts that are specific and actionable enough to
+    trigger an automatic or manual rollback.
+
+## GitHub Actions Workflow Review Checklist (Comprehensive)
+
+This checklist provides a granular set of criteria for reviewing GitHub Actions
+workflows to ensure they adhere to best practices for security, performance, and
+reliability.
+
+- [ ] **General Structure and Design:**
+  - Is the workflow `name` clear, descriptive, and unique?
+  - Are `on` triggers appropriate for the workflow's purpose (e.g., `push`,
+    `pull_request`, `workflow_dispatch`, `schedule`)? Are path/branch filters
+    used effectively?
+  - Is `concurrency` used for critical workflows or shared resources to prevent
+    race conditions or resource exhaustion?
+  - Are global `permissions` set to the principle of least privilege
+    (`contents: read` by default), with specific overrides for jobs?
+  - Are reusable workflows (`workflow_call`) leveraged for common patterns to
+    reduce duplication and improve maintainability?
+  - Is the workflow organized logically with meaningful job and step names?
+
+- [ ] **Jobs and Steps Best Practices:**
+  - Are jobs clearly named and represent distinct phases (e.g., `build`, `lint`,
+    `test`, `deploy`)?
+  - Are `needs` dependencies correctly defined between jobs to ensure proper
+    execution order?
+  - Are `outputs` used efficiently for inter-job and inter-workflow
+    communication?
+  - Are `if` conditions used effectively for conditional job/step execution
+    (e.g., environment-specific deployments, branch-specific actions)?
+  - Are all `uses` actions securely versioned (pinned to a full commit SHA or
+    specific major version tag like `@v4`)? Avoid `main` or `latest` tags.
+  - Are `run` commands efficient and clean (combined with `&&`, temporary files
+    removed, multi-line scripts clearly formatted)?
+  - Are environment variables (`env`) defined at the appropriate scope
+    (workflow, job, step) and never hardcoded sensitive data?
+  - Is `timeout-minutes` set for long-running jobs to prevent hung workflows?
+
+- [ ] **Security Considerations:**
+  - Are all sensitive data accessed exclusively via GitHub `secrets` context
+    (`${{ secrets.MY_SECRET }}`)? Never hardcoded, never exposed in logs (even
+    if masked).
+  - Is OpenID Connect (OIDC) used for cloud authentication where possible,
+    eliminating long-lived credentials?
+  - Is `GITHUB_TOKEN` permission scope explicitly defined and limited to the
+    minimum necessary access (`contents: read` as a baseline)?
+  - Are Software Composition Analysis (SCA) tools (e.g.,
+    `dependency-review-action`, Snyk) integrated to scan for vulnerable
+    dependencies?
+  - Are Static Application Security Testing (SAST) tools (e.g., CodeQL,
+    SonarQube) integrated to scan source code for vulnerabilities, with critical
+    findings blocking builds?
+  - Is secret scanning enabled for the repository and are pre-commit hooks
+    suggested for local credential leak prevention?
+  - Is there a strategy for container image signing (e.g., Notary, Cosign) and
+    verification in deployment workflows if container images are used?
+  - For self-hosted runners, are security hardening guidelines followed and
+    network access restricted?
+
+- [ ] **Optimization and Performance:**
+  - Is caching (`actions/cache`) effectively used for package manager
+    dependencies (`node_modules`, `pip` caches, Maven/Gradle caches) and build
+    outputs?
+  - Are cache `key` and `restore-keys` designed for optimal cache hit rates
+    (e.g., using `hashFiles`)?
+  - Is `strategy.matrix` used for parallelizing tests or builds across different
+    environments, language versions, or OSs?
+  - Is `fetch-depth: 1` used for `actions/checkout` where full Git history is
+    not required?
+  - Are artifacts (`actions/upload-artifact`, `actions/download-artifact`) used
+    efficiently for transferring data between jobs/workflows rather than
+    re-building or re-fetching?
+  - Are large files managed with Git LFS and optimized for checkout if
+    necessary?
+
+- [ ] **Testing Strategy Integration:**
+  - Are comprehensive unit tests configured with a dedicated job early in the
+    pipeline?
+  - Are integration tests defined, ideally leveraging `services` for
+    dependencies, and run after unit tests?
+  - Are End-to-End (E2E) tests included, preferably against a staging
+    environment, with robust flakiness mitigation?
+  - Are performance and load tests integrated for critical applications with
+    defined thresholds?
+  - Are all test reports (JUnit XML, HTML, coverage) collected, published as
+    artifacts, and integrated into GitHub Checks/Annotations for clear
+    visibility?
+  - Is code coverage tracked and enforced with a minimum threshold?
+
+- [ ] **Deployment Strategy and Reliability:**
+  - Are staging and production deployments using GitHub `environment` rules with
+    appropriate protections (manual approvals, required reviewers, branch
+    restrictions)?
+  - Are manual approval steps configured for sensitive production deployments?
+  - Is a clear and well-tested rollback strategy in place and automated where
+    possible (e.g., `kubectl rollout undo`, reverting to previous stable image)?
+  - Are chosen deployment types (e.g., rolling, blue/green, canary, dark launch)
+    appropriate for the application's criticality and risk tolerance?
+  - Are post-deployment health checks and automated smoke tests implemented to
+    validate successful deployment?
+  - Is the workflow resilient to temporary failures (e.g., retries for flaky
+    network operations)?
+
+- [ ] **Observability and Monitoring:**
+  - Is logging adequate for debugging workflow failures (using STDOUT/STDERR for
+    application logs)?
+  - Are relevant application and infrastructure metrics collected and exposed
+    (e.g., Prometheus metrics)?
+  - Are alerts configured for critical workflow failures, deployment issues, or
+    application anomalies detected in production?
+  - Is distributed tracing (e.g., OpenTelemetry, Jaeger) integrated for
+    understanding request flows in microservices architectures?
+  - Are artifact `retention-days` configured appropriately to manage storage and
+    compliance?
+
+## Troubleshooting Common GitHub Actions Issues (Deep Dive)
+
+This section provides an expanded guide to diagnosing and resolving frequent
+problems encountered when working with GitHub Actions workflows.
+
+### **1. Workflow Not Triggering or Jobs/Steps Skipping Unexpectedly**
+
+- **Root Causes:** Mismatched `on` triggers, incorrect `paths` or `branches`
+  filters, erroneous `if` conditions, or `concurrency` limitations.
+- **Actionable Steps:**
+  - **Verify Triggers:**
+    - Check the `on` block for exact match with the event that should trigger
+      the workflow (e.g., `push`, `pull_request`, `workflow_dispatch`,
+      `schedule`).
+    - Ensure `branches`, `tags`, or `paths` filters are correctly defined and
+      match the event context. Remember that `paths-ignore` and
+      `branches-ignore` take precedence.
+    - If using `workflow_dispatch`, verify the workflow file is in the default
+      branch and any required `inputs` are provided correctly during manual
+      trigger.
+  - **Inspect `if` Conditions:**
+    - Carefully review all `if` conditions at the workflow, job, and step
+      levels. A single false condition can prevent execution.
+    - Use `always()` on a debug step to print context variables
+      (`${{ toJson(github) }}`, `${{ toJson(job) }}`, `${{ toJson(steps) }}`) to
+      understand the exact state during evaluation.
+    - Test complex `if` conditions in a simplified workflow.
+  - **Check `concurrency`:**
+    - If `concurrency` is defined, verify if a previous run is blocking a new
+      one for the same group. Check the "Concurrency" tab in the workflow run.
+  - **Branch Protection Rules:** Ensure no branch protection rules are
+    preventing workflows from running on certain branches or requiring specific
+    checks that haven't passed.
+
+### **2. Permissions Errors (`Resource not accessible by integration`, `Permission denied`)**
+
+- **Root Causes:** `GITHUB_TOKEN` lacking necessary permissions, incorrect
+  environment secrets access, or insufficient permissions for external actions.
+- **Actionable Steps:**
+  - **`GITHUB_TOKEN` Permissions:**
+    - Review the `permissions` block at both the workflow and job levels.
+      Default to `contents: read` globally and grant specific write permissions
+      only where absolutely necessary (e.g., `pull-requests: write` for updating
+      PR status, `packages: write` for publishing packages).
+    - Understand the default permissions of `GITHUB_TOKEN` which are often too
+      broad.
+  - **Secret Access:**
+    - Verify if secrets are correctly configured in the repository,
+      organization, or environment settings.
+    - Ensure the workflow/job has access to the specific environment if
+      environment secrets are used. Check if any manual approvals are pending
+      for the environment.
+    - Confirm the secret name matches exactly (`secrets.MY_API_KEY`).
+  - **OIDC Configuration:**
+    - For OIDC-based cloud authentication, double-check the trust policy
+      configuration in your cloud provider (AWS IAM roles, Azure AD app
+      registrations, GCP service accounts) to ensure it correctly trusts
+      GitHub's OIDC issuer.
+    - Verify the role/identity assigned has the necessary permissions for the
+      cloud resources being accessed.
+
+### **3. Caching Issues (`Cache not found`, `Cache miss`, `Cache creation failed`)**

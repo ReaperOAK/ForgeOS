@@ -1,6 +1,8 @@
 ---
 name: continue
-description: Controlled continuation protocol. Loads resume state, repairs incomplete SDLC chains, then resumes ticket processing with full governance enforcement.
+description: Resume development after a stop. Loads resume state, repairs incomplete SDLC chains, then resumes ticket processing with full governance enforcement.
+agent: 'Ticketer'
+argument-hint: 'No arguments needed — just invoke /continue to resume'
 ---
 
 We are resuming structured development.
@@ -35,20 +37,20 @@ read_file(".github/memory-bank/activeContext.md")
 read_file(".github/memory-bank/progress.md")
 read_file(".github/memory-bank/decisionLog.md")
 read_file(".github/memory-bank/riskRegister.md")
-run_in_terminal("python3 .github/tickets.py --status --json")
+run_in_terminal("python3 tickets.py --status --json")
 ```
 
 **1c.** Get current ticket landscape:
 
 ```bash
-python3 .github/tickets.py --sync
-python3 .github/tickets.py --status --json
+python3 tickets.py --sync
+python3 tickets.py --status --json
 ```
 
-**1d.** Verify boot sequence compliance — ensure agents follow the 11-step boot from `agents.md`:
+**1d.** Verify boot sequence compliance — ensure agents follow the 11-step boot from `AGENTS.md`:
 - STOP_ALL check → instructions → agent file (with Tool Loadout) → upstream summary → chunks → catalog → sequentialthinking plan
 
-**1e.** Detect anomalies — scan `.github/ticket-state/*` for:
+**1e.** Detect anomalies — scan `ticket-state/*` for:
 
 - Tickets stuck in: BACKEND, FRONTEND, QA, SECURITY, CI, DOCS, VALIDATION
   (need SDLC chain completion in Step 2)
@@ -136,8 +138,8 @@ share file paths can be processed simultaneously.
 **3a.** Get READY tickets:
 
 ```bash
-python3 .github/tickets.py --sync
-python3 .github/tickets.py --status --json
+python3 tickets.py --sync
+python3 tickets.py --status --json
 ```
 
 **3b.** Filter and sort:
@@ -254,8 +256,8 @@ No skipping stages. No partial execution. Each stage advances via `tickets.py --
 
 After completing Step 4 for dispatched tickets:
 
-1. Re-run `python3 .github/tickets.py --sync` to evaluate dependencies and move newly unblocked tickets to READY.
-2. Re-run `python3 .github/tickets.py --status --json`.
+1. Re-run `python3 tickets.py --sync` to evaluate dependencies and move newly unblocked tickets to READY.
+2. Re-run `python3 tickets.py --status --json`.
 3. If new READY tickets exist → return to Step 3.
 4. If no READY tickets remain and no active workers → proceed to Step 6.
 
@@ -286,7 +288,7 @@ This will produce `RESUME_POINT.md`, `SESSION_SUMMARY.md`, and
 - Maintain velocity and governance
 - Ticketer does NOT reason about file conflicts — git push conflicts enforce safety
 - Ticketer does NOT implement code — only dispatches and advances. Its toolset is restricted to `memory/*`, `execute/*`, `github/*`, and `sequentialthinking/*`
-- All agents read their own chunks from `.github/vibecoding/chunks/{Agent}.agent/`
+- All agents read their own chunks from `.github/skills/{Agent}/`
 - All agents derive context from filesystem — Ticketer does NOT inject context
 - All agents follow their Assigned Tool Loadout defined in `.github/agents/{Agent}.agent.md` — no tool browsing or hallucination outside assigned loadout
 - Dispatcher-claim protocol enforced: Ticketer performs CLAIM commit (ticket JSON) → subagent performs WORK commit (deliverables)
