@@ -1,0 +1,73 @@
+{
+  "ticket_id": "TASK-COP-MCP012",
+  "title": "Fully Dockerize ForgeOS MCP Runtime",
+  "description": "Make ForgeOS MCP fully runnable through Docker for local development and repo adoption, including PostgreSQL, server startup, migrations, health checks, volumes, and VS Code/Copilot connection guidance.",
+  "type": "infra",
+  "priority": "critical",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "DEVOPS",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-04-30T09:43:52.973444+00:00",
+  "created_by": "TODO",
+  "dependencies": [],
+  "blocked_by": [],
+  "file_paths": [
+    "Dockerfile",
+    "docker-compose.yml",
+    "forgeos-server/Dockerfile",
+    "forgeos-server/docker-compose.yml",
+    "forgeos-server/docker-compose.standalone.yml",
+    "infra/docker-compose.yml",
+    "infra/docker-compose.dev.yml",
+    "infra/docker/",
+    "infra/scripts/",
+    "README.md",
+    "forgeos-server/README.md"
+  ],
+  "acceptance_criteria": [
+    "A documented Docker Compose flow starts the MCP server and required dependencies from a clean checkout",
+    "Containers include health checks for PostgreSQL and the ForgeOS MCP server",
+    "Migrations and seed/bootstrap steps are deterministic and documented",
+    "Secrets are provided through environment files or generated local config, not hardcoded defaults",
+    "Dockerized setup works with the one-click installer target workflow",
+    "Smoke validation confirms `/ready` and at least one MCP ticket tool are reachable"
+  ],
+  "rework_count": 0,
+  "claimed_by": "Ticketer",
+  "machine_id": "forgeos-ticketer-001",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-05-10T12:45:00Z",
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-04-30T09:43:52.973446+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/mcp-copilot-cutover.md"
+    },
+    {
+      "timestamp": "2026-04-30T09:43:52.978178+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/mcp-copilot-cutover.md",
+  "tags": [
+    "mcp",
+    "docker",
+    "deployment",
+    "infra",
+    "onboarding"
+  ]
+}

@@ -1,0 +1,61 @@
+{
+  "ticket_id": "TASK-COP-MCP008",
+  "title": "Add CI Guardrail Against Legacy Operational Drift",
+  "description": "Add CI checks that fail when active operator prompts, authoritative instructions, or setup docs reintroduce legacy operational references outside explicitly approved migration files.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-04-30T09:43:52.973051+00:00",
+  "created_by": "TODO",
+  "dependencies": [],
+  "blocked_by": [],
+  "file_paths": [
+    ".github/workflows/",
+    "scripts/",
+    "prompt and instruction surfaces"
+  ],
+  "acceptance_criteria": [
+    "CI fails on new active references to repo-root `python3 tickets.py`",
+    "CI fails on new active references to `ticket-state/` as the normal operator source of truth",
+    "Allowlist exists for explicit migration or archive files only"
+  ],
+  "rework_count": 0,
+  "claimed_by": "Ticketer",
+  "machine_id": "forgeos-ticketer-001",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-05-10T12:25:00Z",
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-04-30T09:43:52.973053+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/mcp-copilot-cutover.md"
+    },
+    {
+      "timestamp": "2026-04-30T09:43:52.976728+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/mcp-copilot-cutover.md",
+  "tags": [
+    "mcp",
+    "ci",
+    "governance",
+    "drift"
+  ]
+}
