@@ -1,0 +1,63 @@
+{
+  "ticket_id": "TASK-COP-MCP002",
+  "title": "Replace Checked-In Workspace Bearer With Safe Local Setup",
+  "description": "Remove the checked-in development bearer token from the workspace MCP config and replace it with a generated or prompted local setup flow that keeps ForgeOS easy to connect in VS Code without teaching unsafe defaults.",
+  "type": "backend",
+  "priority": "critical",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-04-30T09:43:52.972261+00:00",
+  "created_by": "TODO",
+  "dependencies": [],
+  "blocked_by": [],
+  "file_paths": [
+    ".vscode/mcp.json",
+    "README.md",
+    "forgeos-server/README.md",
+    "infra/scripts/setup.sh"
+  ],
+  "acceptance_criteria": [
+    "No committed live admin bearer remains in workspace config",
+    "Setup flow generates or prompts for local MCP credentials",
+    "README documents one canonical VS Code setup path",
+    "A new operator can complete local MCP setup without hand-editing secrets into source-controlled files"
+  ],
+  "rework_count": 0,
+  "claimed_by": "Ticketer",
+  "machine_id": "forgeos-ticketer-001",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-05-10T11:30:00Z",
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-04-30T09:43:52.972268+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/mcp-copilot-cutover.md"
+    },
+    {
+      "timestamp": "2026-04-30T09:43:52.991332+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/mcp-copilot-cutover.md",
+  "tags": [
+    "mcp",
+    "copilot",
+    "auth",
+    "setup"
+  ]
+}
