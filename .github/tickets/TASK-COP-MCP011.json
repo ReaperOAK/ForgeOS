@@ -1,0 +1,70 @@
+{
+  "ticket_id": "TASK-COP-MCP011",
+  "title": "Build One-Click Existing-Repo Installer",
+  "description": "Create a one-click installer that can install the ForgeOS `.github` agent/instruction/prompt stack, MCP configuration, and local bootstrap assets into any existing repository, similar in spirit to `scripts/sync-vibecoding.sh` but suitable for external repo adoption.",
+  "type": "infra",
+  "priority": "critical",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "DEVOPS",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-04-30T09:43:52.973333+00:00",
+  "created_by": "TODO",
+  "dependencies": [],
+  "blocked_by": [],
+  "file_paths": [
+    "scripts/sync-vibecoding.sh",
+    "scripts/install-forgeos.sh",
+    "README.md",
+    "forgeos-server/README.md",
+    ".github/prompts/",
+    ".github/instructions/",
+    ".github/agents/",
+    ".vscode/mcp.json"
+  ],
+  "acceptance_criteria": [
+    "Installer supports a target repository path argument and a dry-run mode",
+    "Installer copies or updates the required `.github` ForgeOS assets without clobbering unrelated existing repo files",
+    "Installer creates a safe local MCP setup path without committing live admin secrets",
+    "Installer validates prerequisites and reports clear next steps",
+    "README documents one-command install and rollback instructions",
+    "Installer has regression tests or a smoke test against a temporary sample repo"
+  ],
+  "rework_count": 0,
+  "claimed_by": "Ticketer",
+  "machine_id": "forgeos-ticketer-001",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-05-10T12:40:00Z",
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-04-30T09:43:52.973335+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/mcp-copilot-cutover.md"
+    },
+    {
+      "timestamp": "2026-04-30T09:43:52.979818+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/mcp-copilot-cutover.md",
+  "tags": [
+    "mcp",
+    "installer",
+    "copilot",
+    "existing-repos",
+    "onboarding"
+  ]
+}

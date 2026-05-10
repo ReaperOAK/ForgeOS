@@ -1,0 +1,62 @@
+{
+  "ticket_id": "TASK-COP-MCP004",
+  "title": "Generate Authoritative MCP Tool Manifest From Registration Code",
+  "description": "Generate public tool documentation from the registered tool inventory so README and architectural docs cannot drift from actual MCP tool names and descriptions.",
+  "type": "backend",
+  "priority": "high",
+  "stage": "READY",
+  "sdlc_flow": [
+    "READY",
+    "BACKEND",
+    "QA",
+    "SECURITY",
+    "CI",
+    "DOCS",
+    "VALIDATION",
+    "DONE"
+  ],
+  "created_at": "2026-04-30T09:43:52.972603+00:00",
+  "created_by": "TODO",
+  "dependencies": [],
+  "blocked_by": [],
+  "file_paths": [
+    "forgeos-server/src/tools/index.ts",
+    "forgeos-server/README.md",
+    "README.md",
+    "docs/architecture/api/"
+  ],
+  "acceptance_criteria": [
+    "Published tool list exactly matches registered tool names",
+    "Tool count and descriptions are generated or verified automatically",
+    "Contract drift is detected in CI"
+  ],
+  "rework_count": 0,
+  "claimed_by": "Ticketer",
+  "machine_id": "forgeos-ticketer-001",
+  "operator": "reaperoak",
+  "lease_expiry": "2026-05-10T12:05:00Z",
+  "lease_duration_minutes": 30,
+  "history": [
+    {
+      "timestamp": "2026-04-30T09:43:52.972606+00:00",
+      "event": "CREATED",
+      "agent": "TODO",
+      "machine_id": "system",
+      "details": "Ticket created from TODO/tasks/mcp-copilot-cutover.md"
+    },
+    {
+      "timestamp": "2026-04-30T09:43:52.982786+00:00",
+      "event": "MOVED_TO_READY",
+      "agent": "tickets.py",
+      "machine_id": "system",
+      "details": "Dependencies resolved, moved to READY"
+    }
+  ],
+  "source_task_file": "TODO/tasks/mcp-copilot-cutover.md",
+  "tags": [
+    "mcp",
+    "docs",
+    "contract",
+    "tooling"
+  ]
+}
