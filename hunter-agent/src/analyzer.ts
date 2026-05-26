@@ -1,6 +1,7 @@
 import type { Config } from './config.js';
 import { IssueFetcher } from './fetcher.js';
 import { makeToolDefinitions, ToolExecutor } from './tools.js';
+import { Investigator } from './investigator.js';
 import type { GitHubIssue, GitHubComment, Proposal, ChatMessage, OpenRouterChunk } from './types.js';
 import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -8,11 +9,13 @@ import { resolve } from 'node:path';
 export class Analyzer {
   private fetcher: IssueFetcher;
   private toolExecutor: ToolExecutor;
+  private investigator: Investigator;
   private toolDefs = makeToolDefinitions();
 
   constructor(private config: Config) {
     this.fetcher = new IssueFetcher(config);
     this.toolExecutor = new ToolExecutor(config);
+    this.investigator = new Investigator(config);
   }
 
   /** Analyze a specific issue by number */
@@ -39,151 +42,223 @@ export class Analyzer {
   }
 
   /**
-   * Deterministic 2-Phase Pipeline:
-   *   Phase 1: Code-driven investigation (grep key terms from issue body, read relevant files)
-   *   Phase 2: Feed all context to LLM (NO tools) to write proposal
-   *
-   * This is much more reliable than LLM-driven tool calling, which tends to loop.
+   * 5-Stage Competition-Killer Pipeline:
+   *   Stage 1: Deep Investigation (Investigator class — exhaustive context)
+   *   Stage 2: Root-cause hypothesis (LLM reasons step-by-step)
+   *   Stage 3: Draft proposal (LLM writes initial proposal)
+   *   Stage 4: Self-critique (LLM finds flaws in its own draft)
+   *   Stage 5: Final proposal (LLM rewrites, addresses critique, attacks competitors)
    */
   private async analyze(issue: GitHubIssue, comments: GitHubComment[]): Promise<Proposal> {
     console.log(`\n🔍 Investigating Expensify/App issue #${issue.number}: "${issue.title}"`);
 
-    // ── Phase 1: Code-driven investigation ─────────────────────────
-    const contextNotes: string[] = [];
+    // ── Stage 1: Build exhaustive context ──────────────────────────
+    console.log(`   [Stage 1] Building deep context...`);
+    const fullContext = await this.investigator.buildContext(issue, comments);
+    const contextSize = Math.round(fullContext.length / 4); // rough token estimate
+    console.log(`   [Stage 1] Context built: ${fullContext.length} chars (~${contextSize} tokens)`);
 
-    // 1. Extract key terms from the issue body
-    const issueBody = issue.body ?? '';
-    const issueLines = issueBody.split('\n');
-    const actionPerformed = issueLines.filter(l => /action|step|click|tap|navigate|open|select|enter/i.test(l)).join('\n').slice(0, 1000);
-    const expectedResult = issueLines.filter(l => /expect|should|would|hoping|suppose/i.test(l)).join('\n').slice(0, 500);
-    const actualResult = issueLines.filter(l => /actual|instead|but|issue|problem|bug|wrong|break|fail|error/i.test(l)).join('\n').slice(0, 500);
+    // ── Stage 2: Root-cause reasoning ──────────────────────────────
+    console.log(`   [Stage 2] Reasoning about root cause...`);
+    const hypothesis = await this.generateHypothesis(issue, fullContext);
+    console.log(`   [Stage 2] Hypothesis: ${hypothesis.slice(0, 120).replace(/\n/g, ' ')}...`);
 
-    contextNotes.push(`=== ISSUE PARSE ===`);
-    contextNotes.push(`Action Performed: ${actionPerformed || '(not clearly stated)'}`);
-    contextNotes.push(`Expected Result: ${expectedResult || '(not clearly stated)'}`);
-    contextNotes.push(`Actual Result: ${actualResult || '(not clearly stated)'}`);
+    // ── Stage 3: Draft proposal ────────────────────────────────────
+    console.log(`   [Stage 3] Drafting proposal...`);
+    const draft = await this.draftProposal(issue, fullContext, hypothesis);
+    console.log(`   [Stage 3] Draft: ${draft.length} chars`);
 
-    // 2. Search for relevant file paths mentioned in the issue
-    const issueKeywords = this.extractKeywords(issueBody);
-    contextNotes.push(`\n=== KEYWORDS FROM ISSUE ===`);
-    contextNotes.push(issueKeywords.join(', '));
+    // ── Stage 4: Self-critique ─────────────────────────────────────
+    console.log(`   [Stage 4] Self-critique...`);
+    const critique = await this.critiqueDraft(issue, fullContext, draft);
+    console.log(`   [Stage 4] Critique: ${critique.slice(0, 120).replace(/\n/g, ' ')}...`);
 
-    // 3. Search for key components/hooks mentioned
-    for (const keyword of issueKeywords.slice(0, 5)) {
-      try {
-        const result = await this.toolExecutor.execute('grep_search', { pattern: keyword, maxResults: 10 }, `search-${keyword}`);
-        if (result.content && !result.content.startsWith('No matches')) {
-          contextNotes.push(`\n=== SEARCH: "${keyword}" ===`);
-          contextNotes.push(result.content.slice(0, 1000));
-        }
-      } catch { /* skip */ }
+    // ── Stage 5: Final polished proposal ───────────────────────────
+    console.log(`   [Stage 5] Writing final proposal...`);
+    const final = await this.finalProposal(issue, fullContext, hypothesis, draft, critique, comments);
+    console.log(`   [Stage 5] Final: ${final.length} chars`);
+
+    if (!final || final.length < 200) {
+      return this.saveProposal(issue, `Failed to generate proposal.\n\nDraft was: ${draft}\n\nCritique was: ${critique}`, 0);
     }
 
-    // 4. Read key files found
-    const filesToRead = this.extractFilePaths(contextNotes.join('\n'));
-    for (const filePath of filesToRead.slice(0, 4)) {
-      try {
-        const result = await this.toolExecutor.execute('read_file', { path: filePath, maxLines: 300 }, `read-${filePath}`);
-        if (result.content && !result.content.startsWith('ERROR')) {
-          contextNotes.push(`\n=== FILE: ${filePath} ===`);
-          contextNotes.push(result.content.slice(0, 2000));
-        }
-      } catch { /* skip */ }
-    }
+    return this.saveProposal(issue, final, 0);
+  }
 
-    // 5. Add competitor analysis from comments
-    const competitorComments = comments
-      .filter(c => c.body && (c.body.includes('# Proposal') || c.body.includes('### Proposal') || c.body.includes('## Proposal')))
-      .slice(0, 3);
-
-    if (competitorComments.length > 0) {
-      contextNotes.push(`\n=== COMPETITOR PROPOSALS ===`);
-      for (const c of competitorComments) {
-        contextNotes.push(`--- ${c.user.login} ---\n${c.body.slice(0, 1500)}`);
-      }
-    }
-
-    const fullContext = contextNotes.join('\n\n');
-
-    // ── Phase 2: LLM writes proposal (NO tools available) ───────────
-    console.log(`\n📝 Generating proposal from ${contextNotes.length} context items...`);
-
-    const proposalMessages: ChatMessage[] = [
+  /** Stage 2: LLM reasons step-by-step about the root cause. */
+  private async generateHypothesis(issue: GitHubIssue, context: string): Promise<string> {
+    const messages: ChatMessage[] = [
       {
         role: 'system',
-        content: `You are an elite React Native architect competing for Expensify bug bounties. Write a competition-killer proposal based on the investigation context below.
+        content: `You are an elite React Native / Next.js architect debugging a complex bug in the Expensify/App codebase.
 
-Format your response EXACTLY as:
+Your task: REASON about the root cause. Think step-by-step. Be specific.
+
+Output format:
+1. **Bug behavior:** What is broken (1 sentence)
+2. **Affected user journey:** Which code path triggers the bug (2-3 sentences with file paths)
+3. **State / data flow:** Trace what data is wrong, where it diverges from expected
+4. **Root cause hypothesis:** The MOST LIKELY cause, with exact file + function + line number
+5. **Confidence:** HIGH / MEDIUM / LOW with reasoning
+
+Be RUTHLESSLY specific. Cite file paths from the context. If you're guessing, say so.`,
+      },
+      {
+        role: 'user',
+        content: `Investigation context for issue #${issue.number}:\n\n${context}\n\nNow reason about the root cause.`,
+      },
+    ];
+    const response = await this.callLLM(messages, false);
+    return this.extractText(response);
+  }
+
+  /** Stage 3: Write a first-draft proposal. */
+  private async draftProposal(issue: GitHubIssue, context: string, hypothesis: string): Promise<string> {
+    const messages: ChatMessage[] = [
+      {
+        role: 'system',
+        content: `You are writing an Expensify bug bounty proposal. Write a complete proposal in EXACTLY this format:
 
 # Proposal
 
 ### Please re-state the problem that we are trying to solve in this issue.
-...
+(1-2 sentences, synthesized from issue, not copy-pasted)
 
 ### What is the root cause of that problem?
-(Include exact file paths, function names, and why it fails)
+(Exact file paths with line numbers. Specific function names. Show the broken code if helpful.)
 
 ### What changes do you think we should make in order to solve the problem?
-(Include exact file paths and surgical code changes. Show pseudo-diff or exact code.)
+(Exact file paths. Show surgical code changes with before/after blocks or pseudo-diffs.
+Explain WHY this fix works and what regressions it could cause.)
 
 ### What alternative solutions did you explore? (Optional)
-(Your competitive edge — out-architect others by noting flaws in their approach)`,
+(Discuss alternative approaches, explain why your main solution is better.)
+
+Rules:
+- Be SURGICAL. No generic advice. Cite exact files & functions from the investigation.
+- Use real code from the codebase context, not invented APIs.
+- If you cite a line number, it must match what's in the context.`,
       },
       {
         role: 'user',
-        content: `Here is the investigation context for issue #${issue.number} ("${issue.title}"):
-
-${fullContext}
-
-Issue URL: ${issue.html_url}
-
-Write the complete proposal now. Be surgical and specific. Include exact file paths and code changes.`,
+        content: `Hypothesis from analysis:\n${hypothesis}\n\n---\n\nFull investigation context:\n${context}\n\n---\n\nWrite the complete proposal now.`,
       },
     ];
-
-    const response = await this.callLLM(proposalMessages, false);
-    const proposalText = this.extractText(response);
-
-    if (!proposalText || proposalText.length < 50) {
-      return this.saveProposal(issue, `Failed to generate proposal. Raw response: ${JSON.stringify(response).slice(0, 1000)}`, 0);
-    }
-
-    return this.saveProposal(issue, proposalText, 0);
+    const response = await this.callLLM(messages, false);
+    return this.extractText(response);
   }
 
-  /** Extract keywords from issue body for codebase search */
-  private extractKeywords(body: string): string[] {
-    const keywords: string[] = [];
-    // Common Expensify patterns
-    const patterns = [
-      /use[A-Z][a-zA-Z]+/g,          // hooks: useNewTransactions
-      /[A-Z][a-z]+[A-Z][a-zA-Z]+/g,   // Components: MoneyRequestReportPreview
-      /\b(CONST\.[A-Z_.]+)/g,         // CONST values
-      /\b(ONYXKEYS?\.[A-Z_]+)/g,      // Onyx keys
-      /\b[src]+\/[a-zA-Z\/.]+/g,       // file paths
+  /** Stage 4: LLM critiques its own draft for flaws. */
+  private async critiqueDraft(issue: GitHubIssue, context: string, draft: string): Promise<string> {
+    const messages: ChatMessage[] = [
+      {
+        role: 'system',
+        content: `You are a SENIOR Expensify engineer reviewing a bug bounty proposal critically. Find every flaw.
+
+Look for:
+- **Wrong file paths or line numbers** — does the cited code actually exist in the context?
+- **Invented APIs / function signatures** — do the cited functions exist as described?
+- **Missed edge cases** — empty states, error paths, race conditions, undefined values
+- **Wrong root cause** — would this fix actually solve the bug, or just mask a symptom?
+- **Regression risk** — would this change break OTHER flows? Which ones?
+- **Cross-platform bugs** — does it work on iOS, Android, Web, mWeb, Desktop?
+- **Onyx / state subtleties** — does the proposal handle Onyx pendingActions, optimistic updates, server reconciliation?
+- **Translation / i18n** — does it handle the en.ts key correctly?
+- **Type safety** — would TypeScript complain about the proposed change?
+- **Better alternative** — is there a more elegant fix the author missed?
+
+Output: bullet list of CONCRETE issues with the draft, ordered by severity. Be honest. If draft is solid, say so explicitly with reasoning.`,
+      },
+      {
+        role: 'user',
+        content: `Investigation context (the source of truth):\n${context.slice(0, 50000)}\n\n---\n\nDraft proposal to critique:\n${draft}\n\n---\n\nCritique it harshly.`,
+      },
     ];
-    for (const p of patterns) {
-      const matches = body.match(p);
-      if (matches) keywords.push(...matches);
-    }
-    // Also grab any quoted strings that look like file paths
-    const quotedPaths = body.match(/['"]([a-zA-Z\/]+\.(ts|tsx|js|jsx))['"]/g);
-    if (quotedPaths) keywords.push(...quotedPaths.map(s => s.replace(/['"]/g, '')));
-
-    return [...new Set(keywords)].slice(0, 15);
+    const response = await this.callLLM(messages, false);
+    return this.extractText(response);
   }
 
-  /** Extract file paths from context text */
-  private extractFilePaths(text: string): string[] {
-    const paths: string[] = [];
-    const matches = text.matchAll(/[a-zA-Z0-9_\/-]+\.(ts|tsx|js|jsx)/g);
-    for (const m of matches) {
-      const p = m[0].replace(/^\/+/, '');
-      if (!p.startsWith('node_modules') && !p.startsWith('.')) {
-        paths.push(p);
-      }
-    }
-    return [...new Set(paths)];
+  /** Stage 5: Final polished proposal that addresses critique and attacks competitors. */
+  private async finalProposal(
+    issue: GitHubIssue,
+    context: string,
+    hypothesis: string,
+    draft: string,
+    critique: string,
+    comments: GitHubComment[],
+  ): Promise<string> {
+    const competitorProposals = comments
+      .filter(c => c.body && (c.body.includes('# Proposal') || c.body.includes('## Proposal') || /What is the root cause/i.test(c.body)))
+      .filter(c => c.user.login !== 'melvin-bot[bot]')
+      .slice(0, 5);
+
+    const competitorBlock = competitorProposals.length > 0
+      ? `\n\nCompetitor proposals to beat (find their flaws and address them in your "Alternative solutions" section):\n${competitorProposals.map((c, i) => `\n### Competitor ${i + 1} (${c.user.login}):\n${c.body?.slice(0, 2000)}`).join('\n')}`
+      : '\n\nNo competitor proposals yet — you have first-mover advantage.';
+
+    const messages: ChatMessage[] = [
+      {
+        role: 'system',
+        content: `You are writing THE FINAL, WINNING Expensify bug bounty proposal. Your only goal: make this proposal so surgical, well-researched, and clearly correct that no other proposal can compete with it.
+
+OUTPUT EXACTLY this format (no extra commentary, no preamble):
+
+# Proposal
+
+### Please re-state the problem that we are trying to solve in this issue.
+(1-2 sentences. Synthesize the user-facing failure. Don't copy-paste the issue.)
+
+### What is the root cause of that problem?
+(Exact file paths AND line numbers. Specific function names. Quote the broken code in a code block.
+Explain the data flow / state machine that fails.
+If multiple files contribute, list them all.)
+
+### What changes do you think we should make in order to solve the problem?
+(For each file to change:
+  1. File path
+  2. Before/after code blocks or pseudo-diff
+  3. Required imports (if any)
+  4. Why this works
+  5. What regressions it avoids
+Use real types and function signatures from the codebase context, not invented ones.
+Be surgical — don't propose larger refactors unless absolutely necessary.)
+
+### What alternative solutions did you explore? (Optional)
+(This is your CHANCE TO BEAT COMPETITORS:
+- If competing proposals exist, name the specific flaw in each and explain why your approach is better.
+- If no competitors, discuss 1-2 plausible alternative approaches and explain why your main solution is superior.
+- Cover regressions, edge cases, and platform-specific gotchas your competitors missed.)
+
+CRITICAL RULES:
+- Every file path you cite MUST appear in the investigation context.
+- Every function name you cite MUST exist in the codebase context.
+- If the critique pointed out an error, FIX IT — don't repeat the same mistake.
+- Be technical, terse, and confident. No filler. No marketing speak.`,
+      },
+      {
+        role: 'user',
+        content: `# Issue #${issue.number}: ${issue.title}
+URL: ${issue.html_url}
+
+# Your prior reasoning:
+${hypothesis}
+
+# Your draft proposal:
+${draft}
+
+# Senior engineer's critique of your draft:
+${critique}
+
+# Full investigation context (source of truth for file paths and code):
+${context}${competitorBlock}
+
+---
+
+Write the FINAL proposal. Address every valid point in the critique. Beat every competitor. Be surgical.`,
+      },
+    ];
+    const response = await this.callLLM(messages, false);
+    return this.extractText(response);
   }
 
   /** Call OpenRouter streaming API */
