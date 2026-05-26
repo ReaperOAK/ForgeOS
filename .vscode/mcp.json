@@ -8,7 +8,7 @@
       "type": "http",
       "url": "http://localhost:3011/mcp",
       "headers": {
-        "Authorization": "Bearer forgeos_admin_CHANGE_ME"
+        "Authorization": "Bearer ${FORGEOS_ADMIN_TOKEN}"
       }
     }
   }
