@@ -14,6 +14,11 @@
 - **Decisions:** Recommended dual-distribution: npm package (@forgeos/mcp-server) for lightweight/client mode + Docker Compose for full-stack. Register on official MCP Registry (io.github.forgeos/mcp-server). Add VS Code one-click install badges. Posterior confidence: 92% HIGH.
 - **Timestamp:** 2026-03-23T12:00:00Z
 
+### [TASK-COP-MCP002] — Safe Local MCP Setup Complete
+- **Artifacts:** .vscode/mcp.json, README.md, forgeos-server/README.md, infra/scripts/setup.sh
+- **Decisions:** `${FORGEOS_ADMIN_TOKEN}` variable ref in mcp.json (no hardcoded creds). setup.sh generates token via `openssl rand -hex 32` with python3 fallback. README docs cover 5-step VS Code setup flow.
+- **Timestamp:** 2026-05-26T07:28:00Z
+
 ### [FORGEOS-FE008] — Validation APPROVED
 - **Artifacts:** .github/agent-output/Validator/FORGEOS-FE008.md
 - **Decisions:** APPROVED — 11/11 DoD pass, 7/7 AC verified, 68/68 tests pass, lint clean, tsc clean
