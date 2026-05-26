@@ -2,8 +2,9 @@
  * tickets.update — Update Ticket Metadata.
  *
  * Merges a provided metadata object into the ticket's existing metadata
- * JSONB field using PostgreSQL's || operator (shallow merge). Only the
- * current claim owner (matched by claimed_by_name) may call this tool.
+ * JSONB field using PostgreSQL's || operator (shallow merge). The caller's
+ * identity is sourced from the authenticated request context (`req.agent`)
+ * — caller-supplied agent metadata is NOT a trust anchor.
  *
  * On success, records an UPDATED event in the events table with the
  * metadata payload and returns the updated ticket object. The
@@ -11,12 +12,12 @@
  * trg_tickets_updated_at database trigger.
  *
  * Error codes returned on failure:
- * - NOT_CLAIM_OWNER — caller is not the current claim owner.
+ * - NOT_CLAIM_OWNER — authenticated caller is not the current claim owner.
  * - TICKET_NOT_FOUND — ticket does not exist.
  * - INTERNAL_ERROR — unexpected database or runtime error.
  *
  * @module tools/tickets-update
- * @ticket TASK-FOS-03-003
+ * @ticket TASK-FOS-03-003, TASK-COP-MCP003
  * @see {@link ticketsUpdateSchema} for input validation
  * @see {@link ticketsUpdateHandler} for the request handler
  */
@@ -24,6 +25,7 @@
 import { z } from 'zod';
 import { pool } from '../db/pool.js';
 import { logger } from '../middleware/logging.js';
+import { getRequestAgent } from './request-context.js';
 import type { Ticket } from '../types/index.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
@@ -79,8 +81,9 @@ interface TicketsUpdateError {
  * 1. Looks up the ticket by ticket_id using SELECT FOR UPDATE to
  *    prevent concurrent modifications.
  * 2. Verifies the ticket exists — returns TICKET_NOT_FOUND if absent.
- * 3. Verifies the caller (claimed_by_name) matches — returns
- *    NOT_CLAIM_OWNER if the caller is not the current owner.
+ * 3. Verifies the caller is the current claim owner by comparing
+ *    the authenticated identity from the request context against
+ *    `claimed_by` — returns NOT_CLAIM_OWNER on mismatch.
  * 4. Merges the provided metadata into ticket.metadata using the
  *    PostgreSQL || operator (shallow merge).
  * 5. Inserts an UPDATED event into the events table with the metadata
@@ -98,8 +101,9 @@ export async function ticketsUpdateHandler(
   params: TicketsUpdateInput,
 ): Promise<CallToolResult> {
   const { ticket_id, metadata } = params;
+  const agent = getRequestAgent();
 
-  logger.info({ ticket_id }, 'tickets.update called');
+  logger.info({ ticket_id, agent_name: agent.name }, 'tickets.update called');
 
   const client = await pool.connect();
 
@@ -127,12 +131,25 @@ export async function ticketsUpdateHandler(
 
     const ticket = ticketResult.rows[0]!;
 
-    // 2. Verify caller is the current claim owner
+    // 2. Verify caller is the current claim owner using authenticated identity
     if (ticket.claimed_by === null || ticket.claimed_by_name === null) {
       await client.query('ROLLBACK');
       const errorResponse: TicketsUpdateError = {
         error: 'NOT_CLAIM_OWNER',
         message: `Ticket ${ticket_id} is not currently claimed by any agent`,
+        ticket_id,
+        timestamp: new Date().toISOString(),
+      };
+      return {
+        content: [{ type: 'text', text: JSON.stringify(errorResponse) }],
+      };
+    }
+
+    if (ticket.claimed_by !== agent.id) {
+      await client.query('ROLLBACK');
+      const errorResponse: TicketsUpdateError = {
+        error: 'NOT_CLAIM_OWNER',
+        message: `Authenticated agent '${agent.name}' does not hold the claim on ticket ${ticket_id}`,
         ticket_id,
         timestamp: new Date().toISOString(),
       };
@@ -152,16 +169,16 @@ export async function ticketsUpdateHandler(
 
     const updatedTicket = updateResult.rows[0]!;
 
-    // 4. Record UPDATED event in the events table
+    // 4. Record UPDATED event in the events table using authenticated identity
     await client.query(
       `INSERT INTO events (ticket_id, event_type, agent_id, agent_name, machine_id, operator, payload)
        VALUES ($1, 'UPDATED', $2, $3, $4, $5, $6::jsonb)`,
       [
         ticket_id,
-        ticket.claimed_by,
-        ticket.claimed_by_name,
-        ticket.machine_id,
-        ticket.operator,
+        agent.id,
+        agent.name,
+        agent.machine_id ?? null,
+        null,
         JSON.stringify(metadata),
       ],
     );

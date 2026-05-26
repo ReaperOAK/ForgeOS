@@ -21,7 +21,9 @@ import { errorHandler } from './middleware/error-handler.js';
 import { requestLogger, logger } from './middleware/logging.js';
 import { createApiRouter } from './api/index.js';
 import { pool, healthCheck } from './db/pool.js';
+import { requestContext } from './tools/request-context.js';
 import type { AppConfig } from './config.js';
+import type { AgentIdentity } from './types/index.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -131,7 +133,23 @@ export function createApp(_config: AppConfig): express.Express {
   // ── MCP Endpoint ───────────────────────────────────
   // Stateless mode: SDK requires a fresh transport AND server per request
   // to avoid transport-reuse errors and connection conflicts.
+  //
+  // The auth middleware has already populated `req.agent` (or rejected the
+  // request) by this point.  We capture it into AsyncLocalStorage so that
+  // MCP tool handlers can call getRequestAgent() instead of trusting
+  // caller-supplied agent metadata.
   const handleMcpRequest = async (req: Request, res: Response) => {
+    const agent = (req as unknown as Record<string, unknown>).agent as AgentIdentity | undefined;
+
+    if (!agent) {
+      res.status(401).json({
+        error: 'UNAUTHORIZED',
+        message: 'Authentication required for MCP tool calls.',
+        timestamp: new Date().toISOString(),
+      });
+      return;
+    }
+
     try {
       const mcpServer = new McpServer({
         name: 'forgeos',
@@ -142,7 +160,12 @@ export function createApp(_config: AppConfig): express.Express {
         sessionIdGenerator: undefined, // stateless
       });
       await mcpServer.connect(transport);
-      await transport.handleRequest(req, res);
+
+      // Run the entire MCP request inside the authenticated request context
+      await requestContext.run({ agent }, () =>
+        transport.handleRequest(req, res),
+      );
+
       await transport.close();
     } catch (err) {
       logger.error({ err }, 'MCP request failed');

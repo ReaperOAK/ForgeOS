@@ -7,13 +7,16 @@
  * acquired for all paths in the ticket's `file_paths` array, and a
  * CLAIMED event is recorded in the events table.
  *
+ * Identity is sourced from the authenticated request context
+ * (`req.agent`) — caller-supplied agent metadata is NOT a trust anchor.
+ *
  * Error codes returned on failure:
  * - `ALREADY_CLAIMED` — ticket is locked by another agent or does not exist.
  * - `FILE_CONFLICT` — one or more file paths are locked by another ticket.
  * - `INTERNAL_ERROR` — unexpected database or runtime error.
  *
  * @module tools/tickets-claim
- * @ticket TASK-FOS-03-002
+ * @ticket TASK-FOS-03-002, TASK-COP-MCP003
  * @see {@link ticketsClaimSchema} for input validation
  * @see {@link ticketsClaimHandler} for the request handler
  */
@@ -21,6 +24,7 @@
 import { z } from 'zod';
 import { pool } from '../db/pool.js';
 import { logger } from '../middleware/logging.js';
+import { getRequestAgent } from './request-context.js';
 import type { Ticket, TicketsClaimOutput } from '../types/index.js';
 import { queueCompileTicketPrompt } from '../services/compiler.js';
 import {
@@ -34,14 +38,14 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
  * Zod schema for `tickets.claim` input parameters.
  *
  * Validates and coerces incoming MCP tool arguments before the handler
- * executes.  All string fields are required except `operator` (optional).
+ * executes.  Identity is obtained from the authenticated request context
+ * (`req.agent` set by `authMiddleware`) — caller-supplied agent metadata
+ * is NOT a trust anchor.
+ *
  * `lease_minutes` defaults to 30 and is clamped to the range 5–120.
  */
 export const ticketsClaimSchema = z.object({
   ticket_id: z.string().describe('Ticket ID to claim'),
-  agent_name: z.string().describe('Agent name claiming the ticket'),
-  machine_id: z.string().describe('Machine hostname'),
-  operator: z.string().optional().describe('Human operator name'),
   lease_minutes: z.number().int().min(5).max(120).default(30)
     .describe('Lease duration in minutes'),
   freshness_policy: z.enum(['strict', 'permissive']).default('permissive')
@@ -63,8 +67,9 @@ export const ticketsClaimSchema = z.object({
  * the updated ticket, the ISO 8601 lease expiry timestamp, and the list
  * of file paths that were locked.
  *
- * If the agent name does not exist in the `agents` table it is
- * auto-registered with wildcard permissions.
+ * The caller's identity is sourced from the authenticated request context
+ * (`req.agent`) — caller-supplied agent metadata is NOT accepted.  The
+ * agent identified by the bearer token is used for all claim operations.
  *
  * @param params - Validated input conforming to {@link ticketsClaimSchema}.
  * @returns A {@link CallToolResult} with JSON-serialised output or error.
@@ -74,42 +79,25 @@ export const ticketsClaimSchema = z.object({
  * // MCP request
  * { "method": "tools/call",
  *   "params": { "name": "tickets.claim",
- *     "arguments": { "ticket_id": "TASK-001", "agent_name": "Backend",
- *       "machine_id": "build-01", "lease_minutes": 30 } } }
+ *     "arguments": { "ticket_id": "TASK-001",
+ *       "lease_minutes": 30 } } }
  * ```
  */
 export async function ticketsClaimHandler(
   params: z.infer<typeof ticketsClaimSchema>,
 ): Promise<CallToolResult> {
-  const { ticket_id, agent_name, machine_id, operator, lease_minutes, freshness_policy } = params;
+  const { ticket_id, lease_minutes, freshness_policy } = params;
+  const agent = getRequestAgent();
 
-  logger.info({ ticket_id, agent_name, machine_id }, 'tickets.claim called');
+  logger.info(
+    { ticket_id, agent_name: agent.name, agent_id: agent.id },
+    'tickets.claim called',
+  );
 
   try {
-    // Look up agent by name to get UUID
-    const agentResult = await pool.query<{ id: string }>(
-      'SELECT id FROM agents WHERE name = $1 LIMIT 1',
-      [agent_name],
-    );
-
-    let agentId: string;
-    if (agentResult.rows.length === 0) {
-      // Auto-register agent if not found
-      const insertResult = await pool.query<{ id: string }>(
-        `INSERT INTO agents (name, role, permissions)
-         VALUES ($1, $1, '["*"]'::JSONB)
-         ON CONFLICT (name, role) DO UPDATE SET updated_at = NOW()
-         RETURNING id`,
-        [agent_name],
-      );
-      agentId = insertResult.rows[0]!.id;
-    } else {
-      agentId = agentResult.rows[0]!.id;
-    }
-
     const result = await pool.query<Ticket>(
       'SELECT * FROM claim_ticket_by_id($1, $2, $3, $4, $5, $6)',
-      [ticket_id, agentId, agent_name, machine_id, operator ?? null, lease_minutes],
+      [ticket_id, agent.id, agent.name, agent.machine_id ?? null, null, lease_minutes],
     );
 
     if (result.rows.length === 0) {

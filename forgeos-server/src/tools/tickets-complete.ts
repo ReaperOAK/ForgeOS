@@ -7,6 +7,11 @@
  * file locks, merges evidence into metadata, and resolves downstream
  * dependencies when a ticket reaches DONE.
  *
+ * Identity is sourced from the authenticated request context
+ * (`req.agent`) — caller-supplied agent metadata is NOT a trust anchor.
+ * The `advance_ticket` SQL function independently verifies claim ownership
+ * against the resolved agent UUID.
+ *
  * Error codes returned on failure:
  * - `MISSING_EVIDENCE` — evidence object is missing required fields.
  * - `INVALID_TRANSITION` — ticket is at the final stage or flow violation.
@@ -14,7 +19,7 @@
  * - `INTERNAL_ERROR` — unexpected database or runtime error.
  *
  * @module tools/tickets-complete
- * @ticket TASK-FOS-03-004
+ * @ticket TASK-FOS-03-004, TASK-COP-MCP003
  * @see {@link ticketsCompleteSchema} for input validation
  * @see {@link ticketsCompleteHandler} for the request handler
  */
@@ -22,6 +27,7 @@
 import { z } from 'zod';
 import { pool } from '../db/pool.js';
 import { logger } from '../middleware/logging.js';
+import { getRequestAgent } from './request-context.js';
 import { EmbeddingService } from '../services/embedding-service.js';
 import { ReflectionService } from '../services/reflection-service.js';
 import { handleTicketTransition } from '../webhooks/reconciliation.js';
@@ -134,23 +140,10 @@ export async function ticketsCompleteHandler(
 
   const previousStage = currentTicket.stage;
 
-  // ── Step 2: Resolve agent UUID from claimed_by ─────────────────────────
-  const agentId = currentTicket.claimed_by;
-  const agentName = currentTicket.claimed_by_name ?? 'Unknown';
-
-  if (!agentId) {
-    return {
-      content: [{
-        type: 'text',
-        text: JSON.stringify({
-          error: 'NOT_CLAIM_OWNER',
-          message: `Ticket ${ticket_id} is not currently claimed`,
-          ticket_id,
-          timestamp: new Date().toISOString(),
-        }),
-      }],
-    };
-  }
+  // ── Step 2: Resolve authenticated agent identity ─────────────────────────
+  const agent = getRequestAgent();
+  const agentId = agent.id;
+  const agentName = agent.name;
 
   // ── Step 3: Build evidence JSONB ───────────────────────────────────────
   const evidencePayload = {
