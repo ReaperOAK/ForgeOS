@@ -19,7 +19,72 @@ make up      # starts PostgreSQL, MCP Server, and pgAdmin
 make migrate && make seed  # apply schema and load sample data
 ```
 
-Open the live Kanban dashboard at **http://localhost:3011/dashboard**.
+---
+
+## VS Code MCP Setup (Safe — No Hardcoded Credentials)
+
+The ForgeOS MCP server authenticates via Bearer token. To configure VS Code
+without committing secrets:
+
+### 1. Run setup (or copy the env template manually)
+
+```bash
+make setup
+# OR manually:
+cp .env.example .env
+```
+
+### 2. Generate an admin token
+
+Pick a strong random value and set it in `.env`:
+
+```bash
+# Generate a secure token
+echo "FORGEOS_ADMIN_TOKEN=$(openssl rand -hex 32)" >> .env
+```
+
+### 3. Start the server (so the token takes effect)
+
+```bash
+make up   # or: docker compose -f infra/docker-compose.yml up -d
+```
+
+The server reads `FORGEOS_ADMIN_TOKEN` from `.env` at startup.
+
+### 4. Configure VS Code
+
+The workspace ships with `.vscode/mcp.json` that references the token via
+VS Code's variable substitution:
+
+```jsonc
+{
+  "servers": {
+    "forgeos": {
+      "type": "http",
+      "url": "http://localhost:3011/mcp",
+      "headers": {
+        "Authorization": "Bearer ${FORGEOS_ADMIN_TOKEN}"
+      }
+    }
+  }
+}
+```
+
+`${FORGEOS_ADMIN_TOKEN}` is resolved from VS Code's own environment (which
+inherits from your shell, or from a `.env` file loaded by the
+[vscode-env](https://marketplace.visualstudio.com/items?itemName=PKief.vscode-env)
+extension, or via `"terminal.integrated.env.linux"` in settings).
+
+**Never** hardcode the token in `mcp.json` — always use the variable reference.
+
+### 5. Verify the connection
+
+Open VS Code's MCP panel or check the DevTools console for:
+
+```
+[forgeos] connected to http://localhost:3011/mcp
+[forgeos] tools: tickets.next, tickets.claim, tickets.complete, …
+```
 
 ---
 

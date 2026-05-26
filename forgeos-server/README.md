@@ -24,26 +24,52 @@ curl http://localhost:3011/ready
 Auto-runs migrations, seeds 14 agent definitions with embeddings, pulls
 Ollama models, and starts the compile worker on first boot.
 
-## VS Code Setup
+## VS Code Setup (Safe — No Hardcoded Credentials)
 
-Click the badge above, or add manually:
+### 1. Generate an admin token
+
+```bash
+echo "FORGEOS_ADMIN_TOKEN=$(openssl rand -hex 32)" >> .env
+```
+
+The server reads `FORGEOS_ADMIN_TOKEN` from `.env` at startup and uses it to
+authenticate all MCP requests. The default `forgeos_admin_CHANGE_ME` (from
+`ADMIN_API_KEY`) is used only if `FORGEOS_ADMIN_TOKEN` is not set.
+
+### 2. Configure VS Code
+
+Add to `.vscode/mcp.json` — the `${FORGEOS_ADMIN_TOKEN}` variable is resolved
+from VS Code's process environment:
 
 ```jsonc
-// .vscode/mcp.json
 {
   "servers": {
     "forgeos": {
       "type": "http",
       "url": "http://localhost:3011/mcp",
       "headers": {
-        "Authorization": "Bearer ${input:forgeos-api-key}"
+        "Authorization": "Bearer ${FORGEOS_ADMIN_TOKEN}"
       }
     }
   }
 }
 ```
 
-Default admin key: `forgeos_admin_CHANGE_ME` — override via `ADMIN_API_KEY` env var.
+> **Security notes:**
+> - `FORGEOS_ADMIN_TOKEN` must be exported in your shell or loaded via a VS
+>   Code `.env` extension. It is **never** hardcoded in `mcp.json`.
+> - The `.env.example` template ships with a placeholder
+>   (`forgeos_admin_CHANGE_ME`). Replace it before starting the server.
+> - `ADMIN_API_KEY` env var overrides the default for non-VS-Code usage.
+
+### 3. Verify
+
+Open the VS Code MCP panel or check DevTools console. You should see:
+
+```
+[forgeos] connected to http://localhost:3011/mcp
+[forgeos] tools: tickets.next, tickets.claim, tickets.complete, …
+```
 
 ## Quick Start — From Source
 
