@@ -5,8 +5,8 @@
  * fields (claimed_by, machine_id, operator, lease_expiry), releases all
  * file locks, and records a RELEASED or FORCE_RELEASED event.
  *
- * Normal release requires the calling agent to be the current claim
- * owner. Forced release (admin only) can release any agent's claim.
+ * Normal release uses the authenticated request context identity.
+ * Forced release (admin only) can release any agent's claim.
  *
  * Error codes returned on failure:
  * - `TICKET_NOT_FOUND` — no ticket with the given ID exists.
@@ -15,7 +15,7 @@
  * - `INTERNAL_ERROR` — unexpected database or runtime error.
  *
  * @module tools/tickets-release
- * @ticket TASK-FOS-03-008
+ * @ticket TASK-FOS-03-008, TASK-COP-MCP003
  * @see {@link ticketsReleaseSchema} for input validation
  * @see {@link ticketsReleaseHandler} for the request handler
  */
@@ -23,6 +23,7 @@
 import { z } from 'zod';
 import { pool } from '../db/pool.js';
 import { logger } from '../middleware/logging.js';
+import { getRequestAgent } from './request-context.js';
 import type { Ticket } from '../types/index.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
@@ -32,17 +33,15 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
  * Zod schema for `tickets.release` input parameters.
  *
  * Validates and coerces incoming MCP tool arguments before the handler
- * executes.
+ * executes. Identity is sourced from the authenticated request context
+ * (`req.agent`) — caller-supplied agent metadata is NOT a trust anchor.
  *
  * - `ticket_id` (required) — Human-readable ticket ID to release.
- * - `agent_name` (required) — Name of the agent requesting the release.
- *   Used to look up the agent's UUID and verify claim ownership.
  * - `reason` (optional) — Free-text reason for releasing.
  * - `force` (boolean, default false) — Force-release (admin only).
  */
 export const ticketsReleaseSchema = z.object({
   ticket_id: z.string().min(1).describe('Human-readable ticket ID to release'),
-  agent_name: z.string().min(1).describe('Name of the agent releasing the claim'),
   reason: z.string().optional().describe('Optional reason for releasing the claim'),
   force: z.boolean().default(false).describe('Force-release even if not claim owner (admin only)'),
 });
@@ -119,9 +118,9 @@ function buildErrorResult(
  * serialised access to the ticket row.
  *
  * When `force` is `false` (default), the SQL function verifies that the
- * calling agent holds the current claim. When `force` is `true`, admin
- * permissions are verified at the application layer before invoking the
- * SQL function.
+ * authenticated calling agent holds the current claim. When `force` is
+ * `true`, admin permissions are checked from the authenticated identity's
+ * permission set before invoking the SQL function.
  *
  * On success the handler returns the updated ticket with cleared claim
  * fields and a list of file paths whose locks were released.
@@ -134,62 +133,37 @@ function buildErrorResult(
  * // MCP request — normal release
  * { "method": "tools/call",
  *   "params": { "name": "tickets.release",
- *     "arguments": { "ticket_id": "TASK-001", "agent_name": "Backend",
+ *     "arguments": { "ticket_id": "TASK-001",
  *       "reason": "Work complete" } } }
  *
  * // MCP request — forced admin release
  * { "method": "tools/call",
  *   "params": { "name": "tickets.release",
- *     "arguments": { "ticket_id": "TASK-001", "agent_name": "Admin",
+ *     "arguments": { "ticket_id": "TASK-001",
  *       "force": true, "reason": "Lease recovery" } } }
  * ```
  */
 export async function ticketsReleaseHandler(
   params: TicketsReleaseInput,
 ): Promise<CallToolResult> {
-  const { ticket_id, agent_name, reason, force } = params;
+  const { ticket_id, reason, force } = params;
+  const agent = getRequestAgent();
 
   logger.info(
-    { ticket_id, agent_name, force },
+    { ticket_id, agent_name: agent.name, agent_id: agent.id, force },
     'tickets.release called',
   );
 
   try {
-    // ── 1. Resolve agent identity ──────────────────────────────────────────
-    const agentResult = await pool.query<{
-      id: string;
-      permissions: string[];
-    }>(
-      'SELECT id, permissions FROM agents WHERE name = $1 LIMIT 1',
-      [agent_name],
-    );
-
-    let agentId: string;
-    let permissions: string[];
-
-    if (agentResult.rows.length === 0) {
-      // Auto-register agent with default (non-admin) permissions
-      const insertResult = await pool.query<{
-        id: string;
-        permissions: string[];
-      }>(
-        `INSERT INTO agents (name, role, permissions)
-         VALUES ($1, $1, '["agent_update"]'::JSONB)
-         ON CONFLICT (name, role) DO UPDATE SET updated_at = NOW()
-         RETURNING id, permissions`,
-        [agent_name],
-      );
-      agentId = insertResult.rows[0]!.id;
-      permissions = insertResult.rows[0]!.permissions;
-    } else {
-      agentId = agentResult.rows[0]!.id;
-      permissions = agentResult.rows[0]!.permissions;
-    }
+    // ── 1. Resolve authenticated identity — already validated by auth middleware ─
+    const agentId = agent.id;
+    const agentName = agent.name;
+    const permissions = agent.permissions;
 
     // ── 2. Admin gate for forced release ───────────────────────────────────
     if (force && !hasAdminPermission(permissions)) {
       logger.warn(
-        { ticket_id, agent_name, permissions },
+        { ticket_id, agent_name: agentName, permissions },
         'tickets.release FORBIDDEN: non-admin attempted force release',
       );
       return buildErrorResult(
@@ -209,7 +183,7 @@ export async function ticketsReleaseHandler(
     // ── 4. Call release_ticket SQL function ─────────────────────────────────
     const result = await pool.query<Ticket>(
       'SELECT * FROM release_ticket($1, $2, $3, $4, $5)',
-      [ticket_id, agentId, agent_name, reason ?? null, force],
+      [ticket_id, agentId, agentName, reason ?? null, force],
     );
 
     if (result.rows.length === 0) {
@@ -246,7 +220,7 @@ export async function ticketsReleaseHandler(
     return { content: [{ type: 'text', text: JSON.stringify(output) }] };
   } catch (err: unknown) {
     const message = err instanceof Error ? err.message : String(err);
-    logger.error({ err, ticket_id, agent_name }, 'tickets.release failed');
+    logger.error({ err, ticket_id, agent_name: agent.name }, 'tickets.release failed');
 
     // ── Map known SQL exceptions to error codes ────────────────────────────
     if (message.includes('TICKET_NOT_FOUND')) {

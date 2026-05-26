@@ -8,13 +8,16 @@
  * event is recorded with `new_expiry` and `extension_minutes` in the
  * payload.
  *
+ * Identity is sourced from the authenticated request context
+ * (`req.agent`) — caller-supplied agent metadata is NOT a trust anchor.
+ *
  * Error codes returned on failure:
  * - `NOT_CLAIM_OWNER` — caller does not hold the claim on the ticket.
  * - `LEASE_TOO_LONG` — duration_minutes exceeds max_lease_minutes.
  * - `INTERNAL_ERROR` — unexpected database or runtime error.
  *
  * @module tools/tickets-extend
- * @ticket TASK-FOS-03-009
+ * @ticket TASK-FOS-03-009, TASK-COP-MCP003
  * @see {@link ticketsExtendSchema} for input validation
  * @see {@link ticketsExtendHandler} for the request handler
  */
@@ -22,6 +25,7 @@
 import { z } from 'zod';
 import { pool } from '../db/pool.js';
 import { logger } from '../middleware/logging.js';
+import { getRequestAgent } from './request-context.js';
 import type { Ticket } from '../types/index.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
 
@@ -29,11 +33,11 @@ import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
  * Zod schema for `tickets.extend` input parameters.
  *
  * Validates and coerces incoming MCP tool arguments before the handler
- * executes. `duration_minutes` defaults to 30 and is clamped to 5–120.
+ * executes. Identity is sourced from the authenticated request context.
+ * `duration_minutes` defaults to 30 and is clamped to 5–120.
  */
 export const ticketsExtendSchema = z.object({
   ticket_id: z.string().describe('Ticket ID whose lease to extend'),
-  agent_name: z.string().describe('Agent name that holds the claim'),
   duration_minutes: z.number().int().min(5).max(120).default(30)
     .describe('Lease extension duration in minutes (5–120, default 30)'),
 });
@@ -76,36 +80,21 @@ interface TicketsExtendOutput {
 export async function ticketsExtendHandler(
   params: z.infer<typeof ticketsExtendSchema>,
 ): Promise<CallToolResult> {
-  const { ticket_id, agent_name, duration_minutes } = params;
+  const { ticket_id, duration_minutes } = params;
+  const agent = getRequestAgent();
 
-  logger.info({ ticket_id, agent_name, duration_minutes }, 'tickets.extend called');
+  logger.info(
+    { ticket_id, agent_name: agent.name, agent_id: agent.id, duration_minutes },
+    'tickets.extend called',
+  );
 
   try {
-    // Look up agent by name to get UUID
-    const agentResult = await pool.query<{ id: string }>(
-      'SELECT id FROM agents WHERE name = $1 LIMIT 1',
-      [agent_name],
-    );
-
-    if (agentResult.rows.length === 0) {
-      return {
-        content: [{
-          type: 'text',
-          text: JSON.stringify({
-            error: 'NOT_CLAIM_OWNER',
-            message: `Agent '${agent_name}' not found — cannot verify claim ownership`,
-            ticket_id,
-            timestamp: new Date().toISOString(),
-          }),
-        }],
-      };
-    }
-
-    const agentId = agentResult.rows[0]!.id;
+    const agentId = agent.id;
+    const agentName = agent.name;
 
     const result = await pool.query<Ticket>(
       'SELECT * FROM extend_lease($1, $2, $3, $4)',
-      [ticket_id, agentId, agent_name, duration_minutes],
+      [ticket_id, agentId, agentName, duration_minutes],
     );
 
     if (result.rows.length === 0) {

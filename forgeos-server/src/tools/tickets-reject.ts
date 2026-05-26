@@ -10,12 +10,15 @@
  * SQL signature: `reject_ticket(p_ticket_id TEXT, p_agent_id UUID,
  * p_agent_name TEXT, p_reason TEXT, p_evidence JSONB)`
  *
+ * Identity is sourced from the authenticated request context
+ * (`req.agent`) — caller-supplied agent metadata is NOT a trust anchor.
+ *
  * Error codes returned on failure:
  * - `NOT_CLAIM_OWNER` — caller does not hold the claim on the ticket.
  * - `INTERNAL_ERROR` — unexpected database or runtime error.
  *
  * @module tools/tickets-reject
- * @ticket TASK-FOS-03-005
+ * @ticket TASK-FOS-03-005, TASK-COP-MCP003
  * @see {@link ticketsRejectSchema} for input validation
  * @see {@link ticketsRejectHandler} for the request handler
  */
@@ -23,6 +26,7 @@
 import { z } from 'zod';
 import { pool } from '../db/pool.js';
 import { logger } from '../middleware/logging.js';
+import { getRequestAgent } from './request-context.js';
 import { handleTicketTransition } from '../webhooks/reconciliation.js';
 import type { Ticket, TicketsRejectOutput } from '../types/index.js';
 import type { CallToolResult } from '@modelcontextprotocol/sdk/types.js';
@@ -65,8 +69,8 @@ export const ticketsRejectSchema = z.object({
  * - File lock release (`released_at = NOW()`)
  * - Event recording (STAGE_REJECTED or ESCALATED)
  *
- * If the agent name does not exist in the `agents` table it is
- * auto-registered with wildcard permissions.
+ * The caller's identity is sourced from the authenticated request context
+ * (`req.agent`) — caller-supplied agent metadata is NOT a trust anchor.
  *
  * @param params - Validated input conforming to {@link ticketsRejectSchema}.
  * @returns A {@link CallToolResult} with JSON-serialised output or error.
@@ -85,37 +89,20 @@ export async function ticketsRejectHandler(
   params: z.infer<typeof ticketsRejectSchema>,
 ): Promise<CallToolResult> {
   const { ticket_id, reason, evidence } = params;
-  const agentName = 'system';
+  const agent = getRequestAgent();
 
-  logger.info({ ticket_id, agent_name: agentName, reason }, 'tickets.reject called');
+  logger.info(
+    { ticket_id, agent_name: agent.name, agent_id: agent.id, reason },
+    'tickets.reject called',
+  );
 
   try {
-    const agentResult = await pool.query<{ id: string }>(
-      'SELECT id FROM agents WHERE name = $1 LIMIT 1',
-      [agentName],
-    );
-
-    let agentId: string;
-    if (agentResult.rows.length === 0) {
-      // Auto-register agent if not found
-      const insertResult = await pool.query<{ id: string }>(
-        `INSERT INTO agents (name, role, permissions)
-         VALUES ($1, $1, '["*"]'::JSONB)
-         ON CONFLICT (name, role) DO UPDATE SET updated_at = NOW()
-         RETURNING id`,
-        [agentName],
-      );
-      agentId = insertResult.rows[0]!.id;
-    } else {
-      agentId = agentResult.rows[0]!.id;
-    }
-
     const result = await pool.query<Ticket>(
       'SELECT * FROM reject_ticket($1, $2, $3, $4, $5::JSONB)',
       [
         ticket_id,
-        agentId,
-        agentName,
+        agent.id,
+        agent.name,
         reason,
         JSON.stringify(evidence ?? {}),
       ],
