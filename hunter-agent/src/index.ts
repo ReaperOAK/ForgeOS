@@ -122,6 +122,18 @@ async function watchMode(autoSubmit: boolean = false) {
           continue;
         }
 
+        // Pull latest Expensify code before analysis
+        try {
+          const pullResult = execSync(
+            `git -C "${config.expensifyPath}" pull --ff-only 2>&1`,
+            { encoding: 'utf-8', timeout: 30000 },
+          );
+          const pullLines = pullResult.trim().split('\n').filter(Boolean);
+          console.log(`   📥 Expensify updated: ${pullLines.slice(-1)[0]?.slice(0, 60) ?? 'already up to date'}`);
+        } catch (pullErr) {
+          console.log(`   ⚠️  Git pull failed (proceeding anyway): ${pullErr instanceof Error ? pullErr.message.slice(0, 100) : String(pullErr)}`);
+        }
+
         // Run analysis
         const proposal = await analyzer.analyzeIssue(latest.number);
         if (proposal) {
