@@ -7,7 +7,6 @@ import { submitProposal, findProposalFile } from './submitter.js';
 import { writeFileSync, existsSync, readFileSync } from 'node:fs';
 import { resolve, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { execSync } from 'node:child_process';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -56,6 +55,9 @@ GITHUB_TOKEN=ghp_your_token_here
 # Required: Absolute path to your local Expensify/App checkout
 EXPENSIFY_PATH=/path/to/Expensify/App
 
+# Branch Hunter must verify and fast-forward before analysis
+EXPENSIFY_BRANCH=main
+
 # Discord webhook URL (optional — sends notifications)
 DISCORD_WEBHOOK=
 
@@ -67,6 +69,9 @@ MODEL=deepseek/deepseek-v4-flash
 
 # Max tool call iterations before forcing completion (default: 30)
 MAX_TOOL_ITERATIONS=30
+
+# Maximum completion tokens per OpenRouter call (default: 1024)
+OPENROUTER_MAX_TOKENS=1024
 
 # Output directory for proposals (default: agent-output/hunter)
 OUTPUT_DIR=agent-output/hunter
@@ -113,34 +118,23 @@ async function watchMode(autoSubmit: boolean = false) {
 
       if (latest.id !== lastIssueId) {
         console.log(`\n🚨 NEW ISSUE DETECTED! #${latest.number}: "${latest.title}"`);
+        lastIssueId = latest.id;
 
         // Check for existing proposal
         const proposalPath = resolve(config.outputDir, `proposal-for-${latest.number}.md`);
         if (existsSync(proposalPath)) {
           console.log(`   Proposal already exists — skipping.`);
-          lastIssueId = latest.id;
           continue;
         }
 
-        // Pull latest Expensify code before analysis
-        try {
-          const pullResult = execSync(`git -C "${config.expensifyPath}" pull --ff-only`, {
-            encoding: 'utf-8',
-            timeout: 60000,
-          });
-          console.log(`   📥 Expensify repo updated: ${pullResult.split('\n')[0]}`);
-        } catch (pullErr) {
-          console.log(`   ⚠️ Git pull failed (continuing with existing code): ${pullErr instanceof Error ? pullErr.message.slice(0, 100) : String(pullErr)}`);
-        }
-
-        // Run analysis
+        // Analyzer preflight verifies the branch and fast-forwards the checkout.
         const proposal = await analyzer.analyzeIssue(latest.number);
         if (proposal) {
           console.log(`\n✅ Proposal generated for #${latest.number}`);
 
           // Auto-submit if watch mode is using --watch-submit
           if (autoSubmit) {
-            const submitResult = submitProposal(proposal.issueNumber, proposal.filePath, proposal.issueUrl);
+            const submitResult = await submitProposal(proposal.issueNumber, proposal.filePath, config, proposal.issueUrl);
             if (submitResult.success) {
               console.log(`   ✅ Auto-submitted: ${submitResult.issueUrl}`);
             } else {
@@ -165,7 +159,6 @@ async function watchMode(autoSubmit: boolean = false) {
             }
           }
 
-          lastIssueId = latest.id;
         }
       }
     } catch (err) {
@@ -230,7 +223,7 @@ async function main() {
       return;
     }
 
-    const result = submitProposal(submitIssueNumber, propFile);
+    const result = await submitProposal(submitIssueNumber, propFile, config);
     if (result.success) {
       console.log(`✅ Proposal submitted: ${result.issueUrl}`);
     } else {
@@ -254,7 +247,7 @@ async function main() {
 
     if (proposal) {
       console.log(`\n📄 Proposal saved: ${proposal.filePath}`);
-      const result = submitProposal(proposal.issueNumber, proposal.filePath, proposal.issueUrl);
+      const result = await submitProposal(proposal.issueNumber, proposal.filePath, config, proposal.issueUrl);
       if (result.success) {
         console.log(`✅ Proposal analyzed and submitted: ${result.issueUrl}`);
       } else {

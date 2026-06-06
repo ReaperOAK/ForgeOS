@@ -1,6 +1,9 @@
-import { execSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync } from 'node:fs';
 import { resolve } from 'node:path';
+import type {Config} from './config.js';
+import {IssueFetcher} from './fetcher.js';
+import {assessProposal} from './quality.js';
 
 export interface SubmitResult {
   success: boolean;
@@ -14,11 +17,12 @@ export interface SubmitResult {
  * Submit a proposal as a comment on the Expensify/App GitHub issue.
  * Uses `gh issue comment` CLI which must be authenticated.
  */
-export function submitProposal(
+export async function submitProposal(
   issueNumber: number,
   proposalPath: string,
+  config: Config,
   issueUrl?: string,
-): SubmitResult {
+): Promise<SubmitResult> {
   const owner = 'Expensify';
   const repo = 'App';
 
@@ -42,9 +46,20 @@ export function submitProposal(
     };
   }
 
+  const comments = await new IssueFetcher(config).fetchComments(issueNumber);
+  const quality = assessProposal(proposalBody, comments, config.expensifyPath);
+  if (!quality.approved) {
+    return {
+      success: false,
+      issueNumber,
+      issueUrl: issueUrl ?? `https://github.com/${owner}/${repo}/issues/${issueNumber}`,
+      error: 'Pre-submit quality gate blocked proposal: source evidence validation failed',
+    };
+  }
+
   // Check gh CLI is available
   try {
-    execSync('gh --version', { encoding: 'utf-8', timeout: 5000 });
+    execFileSync('gh', ['--version'], { encoding: 'utf-8', timeout: 5000 });
   } catch {
     return {
       success: false,
@@ -56,7 +71,7 @@ export function submitProposal(
 
   // Check gh auth
   try {
-    execSync('gh auth status', { encoding: 'utf-8', timeout: 5000 });
+    execFileSync('gh', ['auth', 'status'], { encoding: 'utf-8', timeout: 5000 });
   } catch {
     return {
       success: false,
@@ -69,8 +84,7 @@ export function submitProposal(
   console.log(`\n📤 Submitting proposal for #${issueNumber}...`);
 
   try {
-    const cmd = `gh issue comment ${issueNumber} --repo ${owner}/${repo} --body-file "${proposalPath}"`;
-    const output = execSync(cmd, {
+    execFileSync('gh', ['issue', 'comment', String(issueNumber), '--repo', `${owner}/${repo}`, '--body-file', proposalPath], {
       encoding: 'utf-8',
       timeout: 30000,
       maxBuffer: 1024 * 1024,

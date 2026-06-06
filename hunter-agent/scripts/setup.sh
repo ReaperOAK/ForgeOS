@@ -39,6 +39,9 @@ GITHUB_TOKEN=ghp_your_token_here
 # Required: Absolute path to your local Expensify/App checkout
 EXPENSIFY_PATH=/path/to/Expensify/App
 
+# Branch Hunter must verify and fast-forward before analysis
+EXPENSIFY_BRANCH=main
+
 # Discord webhook URL (optional — sends notifications)
 DISCORD_WEBHOOK=
 
@@ -50,6 +53,9 @@ MODEL=deepseek/deepseek-v4-flash
 
 # Max tool call iterations before forcing completion (default: 30)
 MAX_TOOL_ITERATIONS=30
+
+# Maximum completion tokens per OpenRouter call (default: 1024)
+OPENROUTER_MAX_TOKENS=1024
 
 # Output directory for proposals
 OUTPUT_DIR=agent-output/hunter
