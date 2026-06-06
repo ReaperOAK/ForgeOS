@@ -1,7 +1,8 @@
 import type { Config } from './config.js';
 import { IssueFetcher } from './fetcher.js';
 import { makeToolDefinitions, ToolExecutor } from './tools.js';
-import { Investigator } from './investigator.js';
+import {assessProposal, type ProposalQualityReport} from './quality.js';
+import {prepareExpensifyRepository} from './repository.js';
 import type { GitHubIssue, GitHubComment, Proposal, ChatMessage, OpenRouterChunk } from './types.js';
 import { writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { resolve } from 'node:path';
@@ -9,13 +10,11 @@ import { resolve } from 'node:path';
 export class Analyzer {
   private fetcher: IssueFetcher;
   private toolExecutor: ToolExecutor;
-  private investigator: Investigator;
   private toolDefs = makeToolDefinitions();
 
   constructor(private config: Config) {
     this.fetcher = new IssueFetcher(config);
     this.toolExecutor = new ToolExecutor(config);
-    this.investigator = new Investigator(config);
   }
 
   /** Analyze a specific issue by number */
@@ -42,21 +41,26 @@ export class Analyzer {
   }
 
   /**
-   * 5-Stage Competition-Killer Pipeline:
-   *   Stage 1: Deep Investigation (Investigator class — exhaustive context)
+   * Source-backed proposal pipeline:
+   *   Stage 1: Autonomous repository investigation with file and git tools
    *   Stage 2: Root-cause hypothesis (LLM reasons step-by-step)
    *   Stage 3: Draft proposal (LLM writes initial proposal)
    *   Stage 4: Self-critique (LLM finds flaws in its own draft)
-   *   Stage 5: Final proposal (LLM rewrites, addresses critique, attacks competitors)
+   *   Stage 5: Final proposal (LLM rewrites and addresses critique)
+   *   Stage 6: Competitor differentiation when technical overlap is high
    */
-  private async analyze(issue: GitHubIssue, comments: GitHubComment[]): Promise<Proposal> {
+  private async analyze(issue: GitHubIssue, comments: GitHubComment[]): Promise<Proposal | null> {
     console.log(`\n🔍 Investigating Expensify/App issue #${issue.number}: "${issue.title}"`);
 
-    // ── Stage 1: Build exhaustive context ──────────────────────────
-    console.log(`   [Stage 1] Building deep context...`);
-    const fullContext = await this.investigator.buildContext(issue, comments);
+    console.log(`   [Preflight] Verifying Expensify checkout...`);
+    prepareExpensifyRepository(this.config);
+
+    // ── Stage 1: Autonomous repository investigation ───────────────
+    console.log(`   [Stage 1] Exploring the repository with file and git tools...`);
+    const investigation = await this.investigateWithTools(issue, comments);
+    const fullContext = investigation.report;
     const contextSize = Math.round(fullContext.length / 4); // rough token estimate
-    console.log(`   [Stage 1] Context built: ${fullContext.length} chars (~${contextSize} tokens)`);
+    console.log(`   [Stage 1] Evidence report: ${fullContext.length} chars (~${contextSize} tokens), ${investigation.toolCalls} tool calls`);
 
     // ── Stage 2: Root-cause reasoning ──────────────────────────────
     console.log(`   [Stage 2] Reasoning about root cause...`);
@@ -75,14 +79,219 @@ export class Analyzer {
 
     // ── Stage 5: Final polished proposal ───────────────────────────
     console.log(`   [Stage 5] Writing final proposal...`);
-    const final = await this.finalProposal(issue, fullContext, hypothesis, draft, critique, comments);
+    const latestComments = await this.fetcher.fetchComments(issue.number);
+    let final = await this.finalProposal(issue, fullContext, hypothesis, draft, critique, latestComments);
     console.log(`   [Stage 5] Final: ${final.length} chars`);
 
     if (!final || final.length < 200) {
-      return this.saveProposal(issue, `Failed to generate proposal.\n\nDraft was: ${draft}\n\nCritique was: ${critique}`, 0);
+      this.saveRejectedProposal(issue, final || draft, {
+        approved: false,
+        missingPaths: [],
+        invalidLineReferences: [],
+        missingClaimedSymbols: [],
+      }, 'Generated proposal was empty or too short.');
+      return null;
     }
 
-    return this.saveProposal(issue, final, 0);
+    let quality = assessProposal(final, latestComments, this.config.expensifyPath);
+    if (quality.duplicateMatch) {
+      const closestComment = latestComments.find((comment) => comment.html_url === quality.duplicateMatch?.commentUrl);
+      if (closestComment) {
+        console.log(`   [Stage 6] Strengthening differentiation from @${quality.duplicateMatch.author}...`);
+        final = await this.differentiateProposal(issue, fullContext, final, closestComment);
+        quality = assessProposal(final, latestComments, this.config.expensifyPath);
+      }
+    }
+
+    console.log(`   [Quality Gate] Validating source evidence...`);
+    if (!quality.approved) {
+      this.saveRejectedProposal(issue, final, quality, 'Proposal failed source-evidence checks.');
+      return null;
+    }
+    if (quality.duplicateMatch) {
+      console.log(
+        `   [Competition Check] Closest proposal: @${quality.duplicateMatch.author} (${Math.round(quality.duplicateMatch.similarity * 100)}% overlap).`,
+      );
+    }
+
+    return this.saveProposal(issue, final, investigation.toolCalls);
+  }
+
+  private async differentiateProposal(
+    issue: GitHubIssue,
+    context: string,
+    proposal: string,
+    closestCompetitor: GitHubComment,
+  ): Promise<string> {
+    const messages: ChatMessage[] = [
+      {
+        role: 'system',
+        content: `Rewrite the proposal so it provides a material technical improvement over the closest existing proposal.
+
+Keep the standard Expensify proposal format. Preserve correct shared observations, but add only source-backed value from the investigation:
+- a more exact state/data-flow explanation
+- corrected path, symbol, or patch location
+- a narrower implementation
+- missing edge cases or regression guards
+- concrete tests that distinguish the fix
+
+Do not invent APIs or broaden scope merely to look different. Do not mention similarity scores or proposal policing.`,
+      },
+      {
+        role: 'user',
+        content: `# Issue #${issue.number}: ${issue.title}
+
+## Investigation evidence
+${context}
+
+## Current proposal
+${proposal}
+
+## Closest existing proposal by @${closestCompetitor.user.login}
+${closestCompetitor.body?.slice(0, 5000)}
+
+Rewrite the current proposal so its added technical contribution is unmistakable and fully supported by the investigation evidence.`,
+      },
+    ];
+    const response = await this.callLLM(messages, false);
+    return this.extractText(response) || proposal;
+  }
+
+  private async investigateWithTools(
+    issue: GitHubIssue,
+    comments: GitHubComment[],
+  ): Promise<{report: string; toolCalls: number}> {
+    const competitorProposals = comments
+      .filter((comment) => comment.body && /#\s*Proposal|What is the root cause/i.test(comment.body))
+      .slice(0, 12);
+    const competitorBlock = competitorProposals.length > 0
+      ? competitorProposals
+        .map((comment, index) => `\n## Competitor ${index + 1}: @${comment.user.login}\n${comment.body.slice(0, 3500)}`)
+        .join('\n')
+      : 'No competitor proposals have been posted yet.';
+
+    const messages: ChatMessage[] = [
+      {
+        role: 'system',
+        content: `You are the repository investigator for an Expensify/App bug bounty proposal.
+
+You have direct tools for the same core repository operations a senior coding agent uses:
+- find files by glob
+- ripgrep with line numbers
+- read exact file ranges
+- inspect directories
+- find symbols and references
+- inspect file history
+- read files at commits linked by issue comments
+
+Investigate before reasoning. Trace the complete user journey from UI event to action/state update to rendered symptom. Verify every competitor claim against source instead of repeating it.
+
+Minimum evidence before finishing:
+- at least 8 repository tool calls
+- at least 3 ranged file reads
+- at least 2 independent searches
+- exact paths, symbols, and line numbers for the root cause
+- the strongest existing competitor thesis and a concrete way to improve on it
+- regression risks and the narrowest source-backed fix
+
+Do not write the final proposal. Call finish_investigation with a detailed evidence report only after the minimum evidence is satisfied.`,
+      },
+      {
+        role: 'user',
+        content: `# Issue #${issue.number}: ${issue.title}
+URL: ${issue.html_url}
+
+## Issue body
+${issue.body?.slice(0, 10000) ?? '(empty)'}
+
+## Existing proposals and discussion
+${competitorBlock}
+
+Explore the repository now. Start from the reproduction steps and verify the current implementation.`,
+      },
+    ];
+
+    let toolCalls = 0;
+    let fileReads = 0;
+    let searches = 0;
+
+    for (let iteration = 0; iteration < this.config.maxToolIterations; iteration++) {
+      const response = await this.callLLM(messages, true);
+      if (response.error) {
+        throw new Error(`Investigation model error: ${response.error.message}`);
+      }
+
+      const delta = response.choices[0]?.delta ?? {};
+      const calls = (delta.tool_calls ?? []).map((call: any) => ({
+        id: call.id,
+        type: 'function' as const,
+        function: {
+          name: call.function?.name ?? '',
+          arguments: call.function?.arguments ?? '{}',
+        },
+      }));
+      messages.push({
+        role: 'assistant',
+        content: delta.content ?? null,
+        tool_calls: calls,
+      });
+
+      if (calls.length === 0) {
+        const text = String(delta.content ?? '').trim();
+        if (toolCalls >= 8 && fileReads >= 3 && searches >= 2 && text.length >= 500) {
+          return {report: text, toolCalls};
+        }
+        messages.push({
+          role: 'user',
+          content: `Continue investigating. Current evidence count: ${toolCalls} tool calls, ${fileReads} file reads, ${searches} searches. Use tools and finish only after meeting every minimum.`,
+        });
+        continue;
+      }
+
+      for (const call of calls) {
+        let args: Record<string, unknown>;
+        try {
+          args = JSON.parse(call.function.arguments || '{}') as Record<string, unknown>;
+        } catch {
+          args = {};
+        }
+
+        if (call.function.name === 'finish_investigation') {
+          const report = typeof args.report === 'string' ? args.report.trim() : '';
+          if (toolCalls >= 8 && fileReads >= 3 && searches >= 2 && report.length >= 500) {
+            return {report, toolCalls};
+          }
+          messages.push({
+            role: 'tool',
+            tool_call_id: call.id,
+            content: `INVESTIGATION_INCOMPLETE: Need at least 8 tool calls, 3 file reads, 2 searches, and a 500-character evidence report. Current counts: ${toolCalls}/${fileReads}/${searches}.`,
+          });
+          continue;
+        }
+
+        toolCalls++;
+        console.log(`      [Tool ${toolCalls}] ${call.function.name}`);
+        if (call.function.name === 'read_file' || call.function.name === 'git_show_file') {
+          fileReads++;
+        }
+        if (call.function.name === 'grep_search' || call.function.name === 'find_symbol' || call.function.name === 'find_files') {
+          searches++;
+        }
+        const result = await this.toolExecutor.execute(call.function.name, args, call.id);
+        messages.push(result);
+      }
+    }
+
+    messages.push({
+      role: 'user',
+      content: 'Tool budget reached. Synthesize the strongest evidence gathered into a source-backed investigation report. Do not invent missing details.',
+    });
+    const synthesis = await this.callLLM(messages, false);
+    const report = this.extractText(synthesis);
+    if (report.length < 500) {
+      throw new Error('Investigation ended without enough source-backed evidence.');
+    }
+    return {report, toolCalls};
   }
 
   /** Stage 2: LLM reasons step-by-step about the root cause. */
@@ -190,16 +399,16 @@ Output: bullet list of CONCRETE issues with the draft, ordered by severity. Be h
     const competitorProposals = comments
       .filter(c => c.body && (c.body.includes('# Proposal') || c.body.includes('## Proposal') || /What is the root cause/i.test(c.body)))
       .filter(c => c.user.login !== 'melvin-bot[bot]')
-      .slice(0, 5);
+      .slice(0, 12);
 
     const competitorBlock = competitorProposals.length > 0
-      ? `\n\nCompetitor proposals to beat (find their flaws and address them in your "Alternative solutions" section):\n${competitorProposals.map((c, i) => `\n### Competitor ${i + 1} (${c.user.login}):\n${c.body?.slice(0, 2000)}`).join('\n')}`
+      ? `\n\nExisting proposals to improve upon. Preserve correct parts, but add verified evidence, narrower changes, or missed regressions rather than paraphrasing them:\n${competitorProposals.map((c, i) => `\n### Competitor ${i + 1} (${c.user.login}):\n${c.body?.slice(0, 3000)}`).join('\n')}`
       : '\n\nNo competitor proposals yet — you have first-mover advantage.';
 
     const messages: ChatMessage[] = [
       {
         role: 'system',
-        content: `You are writing THE FINAL, WINNING Expensify bug bounty proposal. Your only goal: make this proposal so surgical, well-researched, and clearly correct that no other proposal can compete with it.
+        content: `You are writing the final Expensify bug bounty proposal. It must be more useful than existing proposals because it is better verified, more precise, and safer to implement.
 
 OUTPUT EXACTLY this format (no extra commentary, no preamble):
 
@@ -225,7 +434,7 @@ Be surgical — don't propose larger refactors unless absolutely necessary.)
 
 ### What alternative solutions did you explore? (Optional)
 (This is your CHANCE TO BEAT COMPETITORS:
-- If competing proposals exist, name the specific flaw in each and explain why your approach is better.
+- If competing proposals exist, preserve their correct observations but state the concrete evidence or implementation detail your proposal adds.
 - If no competitors, discuss 1-2 plausible alternative approaches and explain why your main solution is superior.
 - Cover regressions, edge cases, and platform-specific gotchas your competitors missed.)
 
@@ -233,6 +442,7 @@ CRITICAL RULES:
 - Every file path you cite MUST appear in the investigation context.
 - Every function name you cite MUST exist in the codebase context.
 - If the critique pointed out an error, FIX IT — don't repeat the same mistake.
+- Do not paraphrase an existing proposal. Add a verified technical contribution: a corrected root cause, narrower patch location, missing state transition, test plan, or regression analysis.
 - Be technical, terse, and confident. No filler. No marketing speak.`,
       },
       {
@@ -274,9 +484,15 @@ Write the FINAL proposal. Address every valid point in the critique. Beat every 
         role: m.role,
         content: m.content,
         tool_calls: m.tool_calls,
+        tool_call_id: m.tool_call_id,
       })),
       stream: true,
     };
+
+    // Only include max_tokens when explicitly set (> 0)
+    if (this.config.maxOutputTokens > 0) {
+      body.max_tokens = this.config.maxOutputTokens;
+    }
 
     // Only include tools in Phase 1 (investigation)
     if (includeTools) {
@@ -409,5 +625,35 @@ Write the FINAL proposal. Address every valid point in the critique. Beat every 
     console.log(`   Tool calls: ${toolCalls}`);
 
     return proposal;
+  }
+
+  private saveRejectedProposal(
+    issue: GitHubIssue,
+    body: string,
+    quality: ProposalQualityReport,
+    reason: string,
+  ): void {
+    const dir = this.config.outputDir;
+    if (!existsSync(dir)) mkdirSync(dir, { recursive: true });
+
+    const filePath = resolve(dir, `proposal-for-${issue.number}.rejected.md`);
+    const duplicate = quality.duplicateMatch
+      ? `- Duplicate match: @${quality.duplicateMatch.author} (${Math.round(quality.duplicateMatch.similarity * 100)}%) ${quality.duplicateMatch.commentUrl ?? ''}`
+      : '- Duplicate match: none';
+    const audit = [
+      '# Proposal Rejected by Hunter Quality Gate',
+      '',
+      `- Reason: ${reason}`,
+      `- Missing paths: ${quality.missingPaths.join(', ') || 'none'}`,
+      `- Invalid line references: ${quality.invalidLineReferences.join(', ') || 'none'}`,
+      `- Missing claimed symbols: ${quality.missingClaimedSymbols.join(', ') || 'none'}`,
+      duplicate.replace('Duplicate match', 'Closest competitor overlap'),
+      '',
+      '## Candidate',
+      '',
+      body,
+    ].join('\n');
+    writeFileSync(filePath, audit, 'utf-8');
+    console.log(`   Proposal quarantined: ${filePath}`);
   }
 }

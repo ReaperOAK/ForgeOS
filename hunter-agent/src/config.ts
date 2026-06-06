@@ -11,6 +11,8 @@ export interface Config {
   model: string;
   /** Path to the Expensify/App checkout */
   expensifyPath: string;
+  /** Branch that must be synchronized before analysis */
+  expensifyBranch: string;
   /** GitHub token for API access */
   githubToken: string;
   /** Discord webhook for notifications */
@@ -21,6 +23,8 @@ export interface Config {
   outputDir: string;
   /** Max tool call iterations per analysis */
   maxToolIterations: number;
+  /** Maximum completion tokens per OpenRouter call */
+  maxOutputTokens: number;
 }
 
 function loadEnvFile(): Record<string, string> {
@@ -67,10 +71,12 @@ export function loadConfig(): Config {
     openrouterApiKey,
     model: get('MODEL', 'deepseek/deepseek-v4-flash'),
     expensifyPath,
+    expensifyBranch: get('EXPENSIFY_BRANCH', 'main'),
     githubToken,
     discordWebhook,
     pollInterval: parseInt(get('POLL_INTERVAL', '60'), 10),
     outputDir: get('OUTPUT_DIR', resolve(process.cwd(), 'agent-output', 'hunter')),
     maxToolIterations: parseInt(get('MAX_TOOL_ITERATIONS', '15'), 10),
+    maxOutputTokens: parseInt(get('OPENROUTER_MAX_TOKENS', '0'), 10),
   };
 }

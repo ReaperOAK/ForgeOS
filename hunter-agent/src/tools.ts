@@ -1,5 +1,6 @@
+import {execFileSync} from 'node:child_process';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { resolve, extname } from 'node:path';
+import {relative, resolve, sep} from 'node:path';
 import { Config } from './config.js';
 import type { ToolDefinition, ToolResult } from './types.js';
 
@@ -36,8 +37,30 @@ export function makeToolDefinitions(): ToolDefinition[] {
     {
       type: 'function',
       function: {
+        name: 'find_files',
+        description: 'Find files by glob across the repository using ripgrep file discovery.',
+        parameters: {
+          type: 'object',
+          properties: {
+            pattern: {
+              type: 'string',
+              description: 'Glob pattern such as **/*Split*.ts or src/**/MoneyRequest*.tsx.',
+            },
+            maxResults: {
+              type: 'number',
+              description: 'Maximum paths to return (default: 100).',
+              default: 100,
+            },
+          },
+          required: ['pattern'],
+        },
+      },
+    },
+    {
+      type: 'function',
+      function: {
         name: 'grep_search',
-        description: 'Search for a string or pattern across the Expensify codebase. Use this to find where functions are defined, where translation keys are used, etc.',
+        description: 'Run a ripgrep regex search across the repository with file paths and line numbers.',
         parameters: {
           type: 'object',
           properties: {
@@ -78,6 +101,58 @@ export function makeToolDefinitions(): ToolDefinition[] {
             },
           },
           required: ['path'],
+        },
+      },
+    },
+    {
+      type: 'function',
+      function: {
+        name: 'git_history',
+        description: 'Inspect commits that touched a file, optionally following renames.',
+        parameters: {
+          type: 'object',
+          properties: {
+            path: {
+              type: 'string',
+              description: 'Repository-relative file path.',
+            },
+            maxResults: {
+              type: 'number',
+              description: 'Maximum commits to return (default: 10).',
+              default: 10,
+            },
+          },
+          required: ['path'],
+        },
+      },
+    },
+    {
+      type: 'function',
+      function: {
+        name: 'git_show_file',
+        description: 'Read a repository file at a specific commit or branch, useful for code links in issue comments.',
+        parameters: {
+          type: 'object',
+          properties: {
+            revision: {
+              type: 'string',
+              description: 'Git revision or commit SHA.',
+            },
+            path: {
+              type: 'string',
+              description: 'Repository-relative file path.',
+            },
+            startLine: {
+              type: 'number',
+              description: 'Optional starting line number (1-indexed).',
+            },
+            maxLines: {
+              type: 'number',
+              description: 'Maximum lines to return (default: 200).',
+              default: 200,
+            },
+          },
+          required: ['revision', 'path'],
         },
       },
     },
@@ -140,22 +215,22 @@ export function makeToolDefinitions(): ToolDefinition[] {
     {
       type: 'function',
       function: {
-        name: 'done',
-        description: 'Call this ONLY when you have completed the full investigation and have a complete proposal ready. Your final message must be the COMPLETE proposal markdown following the exact Expensify template.',
+        name: 'finish_investigation',
+        description: 'Finish only after tracing the failing user journey through source code and verifying competitor claims.',
         parameters: {
           type: 'object',
           properties: {
-            proposal: {
+            report: {
               type: 'string',
-              description: 'The COMPLETE proposal in Expensify format. Must include all sections: problem statement, root cause (with file paths), proposed changes (with exact code), and alternative solutions.',
+              description: 'Evidence report with exact paths, line numbers, symbols, data flow, root cause, regression risks, and competitor differentiation.',
             },
             confidence: {
               type: 'string',
               enum: ['high', 'medium', 'low'],
-              description: 'Confidence in your proposal',
+              description: 'Confidence in the evidence report',
             },
           },
-          required: ['proposal', 'confidence'],
+          required: ['report', 'confidence'],
         },
       },
     },
@@ -193,23 +268,33 @@ export class ToolExecutor {
       case 'read_file':
       if (!args.path) return `ERROR: 'path' argument is required for read_file. Example: read_file({path: "src/components/SomeFile.tsx"})`;
       return this.readFile(String(args.path), Number(args.maxLines ?? 200), args.startLine ? Number(args.startLine) : undefined);
+      case 'find_files': return this.findFiles(String(args.pattern), Number(args.maxResults ?? 100));
       case 'grep_search': return this.grepSearch(
         String(args.pattern),
         args.includePattern ? String(args.includePattern) : undefined,
         Number(args.maxResults ?? 20),
       );
       case 'list_directory': return this.listDir(String(args.path), Number(args.maxDepth ?? 0));
+      case 'git_history': return this.gitHistory(String(args.path), Number(args.maxResults ?? 10));
+      case 'git_show_file': return this.gitShowFile(
+        String(args.revision),
+        String(args.path),
+        Number(args.maxLines ?? 200),
+        args.startLine ? Number(args.startLine) : undefined,
+      );
       case 'read_contributing_guide': return this.readGuide(String(args.guideName ?? 'CONTRIBUTING.md'));
       case 'find_symbol': return this.findSymbol(String(args.name), String(args.kind ?? ''));
       case 'extract_info': return this.extractInfo(String(args.issueBody));
-      case 'done': return 'PROPOSAL_COMPLETE'; // handled by caller
+      case 'finish_investigation': return 'INVESTIGATION_COMPLETE'; // handled by caller
       default: throw new Error(`Unknown tool: ${name}`);
     }
   }
 
   private rootPath(subPath: string): string {
-    const full = resolve(this.config.expensifyPath, subPath);
-    if (!full.startsWith(resolve(this.config.expensifyPath))) {
+    const root = resolve(this.config.expensifyPath);
+    const full = resolve(root, subPath);
+    const relativePath = relative(root, full);
+    if (relativePath === '..' || relativePath.startsWith(`..${sep}`)) {
       throw new Error('Path traversal detected');
     }
     return full;
@@ -228,38 +313,38 @@ export class ToolExecutor {
   }
 
   private async grepSearch(pattern: string, includePattern?: string, maxResults?: number): Promise<string> {
-    const extMappings: Record<string, string[]> = {
-      ts: ['.ts', '.tsx'],
-      js: ['.js', '.jsx'],
-    };
-
-    const results: string[] = [];
-
-    const searchDir = this.config.expensifyPath;
-    // Use a simple grep-like approach: find files and search within
-    const { execSync } = await import('node:child_process');
-
-    const includeArg = includePattern ? `--include="${includePattern}"` : '';
-    const grepCmd = [
-      `grep -rn "${pattern.replace(/"/g, '\\"')}"`,
-      includeArg,
-      `--max-count=${Math.min(maxResults ?? 20, 100)}`,
-      `--exclude-dir=node_modules`,
-      `--exclude-dir=.git`,
-      `--exclude-dir=android`,
-      `--exclude-dir=ios`,
-      `--exclude-dir=venv`,
-      `--exclude-dir=dist`,
-      `--exclude-dir=build`,
-      `${this.config.expensifyPath}/src/`,
-    ].filter(Boolean).join(' ');
-
+    const limit = Math.min(maxResults ?? 20, 100);
+    const args = ['--line-number', '--no-heading', '--color', 'never', '--smart-case'];
+    if (includePattern) {
+      args.push('--glob', includePattern);
+    }
+    args.push('--glob', '!node_modules/**', '--glob', '!.git/**', '--glob', '!dist/**', '--glob', '!build/**', pattern, '.');
     try {
-      const output = execSync(grepCmd, { encoding: 'utf-8', maxBuffer: 2 * 1024 * 1024, timeout: 15000 });
-      const lines = output.split('\n').filter(Boolean).slice(0, maxResults ?? 20);
-      return `Found ${output.split('\n').filter(Boolean).length} matches (showing up to ${maxResults ?? 20}):\n\n${lines.join('\n')}`;
+      const output = execFileSync('rg', args, {
+        cwd: this.config.expensifyPath,
+        encoding: 'utf-8',
+        maxBuffer: 2 * 1024 * 1024,
+        timeout: 15000,
+      });
+      const allLines = output.split('\n').filter(Boolean);
+      return `Found ${allLines.length} matches (showing up to ${limit}):\n\n${allLines.slice(0, limit).join('\n')}`;
     } catch {
       return `No matches found for "${pattern}"`;
+    }
+  }
+
+  private async findFiles(pattern: string, maxResults: number): Promise<string> {
+    try {
+      const output = execFileSync('rg', ['--files', '--glob', pattern, '--glob', '!node_modules/**', '--glob', '!.git/**'], {
+        cwd: this.config.expensifyPath,
+        encoding: 'utf-8',
+        maxBuffer: 2 * 1024 * 1024,
+        timeout: 15000,
+      });
+      const paths = output.split('\n').filter(Boolean);
+      return `Found ${paths.length} files (showing up to ${maxResults}):\n${paths.slice(0, maxResults).join('\n')}`;
+    } catch {
+      return `No files found for glob "${pattern}"`;
     }
   }
 
@@ -268,7 +353,7 @@ export class ToolExecutor {
     if (!existsSync(full)) throw new Error(`Directory not found: ${relativePath}`);
     if (!statSync(full).isDirectory()) return `[file] ${relativePath}`;
 
-    const lines: string[] = [];
+    const lines: string[] = [`[DIR] ${relativePath || '.'}/`];
     const walk = (dir: string, depth: number) => {
       if (depth > maxDepth) return;
       const indent = '  '.repeat(depth);
@@ -277,7 +362,6 @@ export class ToolExecutor {
         for (const entry of entries) {
           if (entry.name.startsWith('.') || entry.name === 'node_modules') continue;
           if (entry.isDirectory()) {
-            const rel = dir === full ? entry.name : relativePath + '/' + entry.name;
             lines.push(indent + '[DIR] ' + entry.name + '/');
             if (depth < maxDepth) walk(resolve(dir, entry.name), depth + 1);
           } else {
@@ -287,9 +371,43 @@ export class ToolExecutor {
       } catch { /* skip inaccessible */ }
     };
 
-    lines.push('[DIR] ' + relativePath + '/');
-    walk(full, 1);
+    walk(full, 0);
     return lines.join('\n');
+  }
+
+  private async gitHistory(relativePath: string, maxResults: number): Promise<string> {
+    this.rootPath(relativePath);
+    try {
+      return execFileSync(
+        'git',
+        ['log', '--follow', `-n${Math.min(maxResults, 30)}`, '--date=short', '--pretty=format:%h | %ad | %an | %s', '--', relativePath],
+        {
+          cwd: this.config.expensifyPath,
+          encoding: 'utf-8',
+          maxBuffer: 1024 * 1024,
+          timeout: 15000,
+        },
+      );
+    } catch {
+      return `No git history found for "${relativePath}"`;
+    }
+  }
+
+  private async gitShowFile(revision: string, relativePath: string, maxLines: number, startLine?: number): Promise<string> {
+    this.rootPath(relativePath);
+    if (!/^[A-Za-z0-9_./~-]+$/.test(revision)) {
+      throw new Error('Invalid git revision');
+    }
+    const content = execFileSync('git', ['show', `${revision}:${relativePath}`], {
+      cwd: this.config.expensifyPath,
+      encoding: 'utf-8',
+      maxBuffer: 4 * 1024 * 1024,
+      timeout: 15000,
+    });
+    const lines = content.split('\n');
+    const sliceStart = startLine ? Math.max(0, startLine - 1) : 0;
+    const slice = lines.slice(sliceStart, sliceStart + maxLines);
+    return `--- ${revision}:${relativePath} (lines ${sliceStart + 1}-${sliceStart + slice.length}) ---\n${slice.join('\n')}`;
   }
 
   private async readGuide(guideName: string): Promise<string> {
@@ -309,55 +427,18 @@ export class ToolExecutor {
   }
 
   private async findSymbol(name: string, kind: string): Promise<string> {
-    // Search for definitions — function/const/class declarations
-    const patterns: string[] = [
-      `(export\\s+)?(function|const|class|interface|type)\\s+${name}\\b`,
-      `\\b${name}\\s*[=:(]\\s*`,
-      `import\\s+.*\\b${name}\\b`,
-    ];
-
-    const results: string[] = [];
-    for (const p of patterns) {
-      try {
-        const { execSync } = await import('node:child_process');
-        const grepCmd = [
-          `grep -rn "${p.replace(/"/g, '\\"')}"`,
-          `--max-count=10`,
-          `--exclude-dir=node_modules`,
-          `--exclude-dir=.git`,
-          `${this.config.expensifyPath}/src/`,
-        ].join(' ');
-
-        const output = execSync(grepCmd, { encoding: 'utf-8', maxBuffer: 1024 * 1024, timeout: 10000 });
-        const lines = output.split('\n').filter(Boolean).slice(0, 10);
-        if (lines.length > 0) {
-          results.push(`Pattern "${p}":\n${lines.join('\n')}`);
-          break; // Found it, no need for more patterns
-        }
-      } catch { /* continue */ }
+    if (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(name)) {
+      throw new Error('Invalid symbol name');
     }
-
-    if (results.length === 0) {
-      // Fallback: try non-regex grep
-      try {
-        const { execSync } = await import('node:child_process');
-        const grepCmd = [
-          `grep -rn "${name.replace(/"/g, '\\"')}"`,
-          `--max-count=15`,
-          `--exclude-dir=node_modules`,
-          `--exclude-dir=.git`,
-          `${this.config.expensifyPath}/src/`,
-        ].join(' ');
-        const output = execSync(grepCmd, { encoding: 'utf-8', maxBuffer: 1024 * 1024, timeout: 10000 });
-        const lines = output.split('\n').filter(Boolean).slice(0, 15);
-        if (lines.length > 0) {
-          return `Relevant matches for "${name}":\n${lines.join('\n')}`;
-        }
-      } catch { /* */ }
-      return `Symbol "${name}" not found.`;
+    const declarationKinds = kind
+      ? kind === 'component' ? '(?:function|const|class)' : kind
+      : '(?:function|const|class|interface|type)';
+    const declarationPattern = `(?:export\\s+)?${declarationKinds}\\s+${name}\\b|\\b${name}\\s*[:=]\\s*(?:\\(|function)`;
+    const declarations = await this.grepSearch(declarationPattern, 'src/**/*.{ts,tsx,js,jsx}', 20);
+    if (!declarations.startsWith('No matches')) {
+      return declarations;
     }
-
-    return results.join('\n\n');
+    return this.grepSearch(`\\b${name}\\b`, 'src/**/*.{ts,tsx,js,jsx}', 30);
   }
 
   private async extractInfo(issueBody: string): Promise<string> {

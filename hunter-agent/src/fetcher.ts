@@ -38,10 +38,17 @@ export class IssueFetcher {
 
   /** Fetch all comments for an issue */
   async fetchComments(issueNumber: number): Promise<GitHubComment[]> {
-    const res = await fetch(`${this.baseUrl}/issues/${issueNumber}/comments?per_page=100`, {
-      headers: this.headers,
-    });
-    if (!res.ok) throw new Error(`GitHub API error fetching comments for #${issueNumber}: ${res.status}`);
-    return res.json() as Promise<GitHubComment[]>;
+    const comments: GitHubComment[] = [];
+    for (let page = 1; ; page++) {
+      const res = await fetch(`${this.baseUrl}/issues/${issueNumber}/comments?per_page=100&page=${page}`, {
+        headers: this.headers,
+      });
+      if (!res.ok) throw new Error(`GitHub API error fetching comments for #${issueNumber}: ${res.status}`);
+      const pageComments = await res.json() as GitHubComment[];
+      comments.push(...pageComments);
+      if (pageComments.length < 100) {
+        return comments;
+      }
+    }
   }
 }

@@ -16,14 +16,17 @@
 │              hunter-agent/ (TypeScript)              │
 │  Opens OpenRouter → DeepSeek V4 Flash                │
 │  LLM has function-calling access to:                 │
-│    • read_file     — read source files               │
-│    • grep_search   — search codebase                 │
+│    • find_files    — discover files by glob          │
+│    • read_file     — ranged source reads             │
+│    • grep_search   — ripgrep with line numbers       │
 │    • list_directory — explore structure              │
 │    • find_symbol   — locate definitions              │
+│    • git_history   — inspect file history            │
+│    • git_show_file — read source at linked commits   │
 │    • read_contributing_guide — Expensify conventions │
 │    • extract_info  — parse issue body                │
-│  LLM investigates autonomously, then calls `done`    │
-│  with complete proposal                              │
+│  LLM investigates autonomously and produces an       │
+│  evidence report before proposal generation          │
 └──────────┬──────────────────────────────────────────┘
            │ writes proposal
            ▼
@@ -79,13 +82,15 @@ Standalone watch mode (without Python wrapper).
 
 ## How the LLM Investigation Works
 
-1. **Receive issue** — Gets full issue body + last 10 comments
-2. **Extract info** — Calls `extract_info` to parse Action Performed / Expected / Actual
-3. **Codebase recon** — Uses `grep_search`, `find_symbol`, `read_file` to trace the bug
-4. **Analyze competitors** — Reads existing comments for competing proposals
-5. **Generate proposal** — When ready, calls `done` with the complete proposal markdown
+1. **Receive issue** — Gets the issue body and all paginated comments
+2. **Explore autonomously** — Uses file discovery, `rg`, ranged reads, symbols, and git history
+3. **Build evidence** — Must meet minimum search/read counts and cite exact source locations
+4. **Analyze competitors** — Verifies existing proposals and looks for a material improvement
+5. **Draft and critique** — Produces a proposal, runs a senior-engineer critique, and rewrites
+6. **Differentiate** — If close to an existing proposal, adds source-backed technical value
+7. **Validate** — Rejects invented paths, impossible line references, and missing claimed symbols
 
-The LLM (DeepSeek V4 Flash) makes **autonomous tool decisions** — it decides what to search for, what files to read, and when it has enough info to call `done`.
+Competitor overlap is not a submission blocker. It triggers a differentiation pass; only unsupported source claims are quarantined.
 
 ## Configuration
 
@@ -94,10 +99,12 @@ The LLM (DeepSeek V4 Flash) makes **autonomous tool decisions** — it decides w
 | `OPENROUTER_API_KEY` | ✅ | OpenRouter API key |
 | `GITHUB_TOKEN` | ✅ | GitHub PAT with `public_repo` scope |
 | `EXPENSIFY_PATH` | ✅ | Path to local Expensify/App checkout |
+| `EXPENSIFY_BRANCH` | ❌ | Branch Hunter verifies and fast-forwards before analysis (default: `main`) |
 | `DISCORD_WEBHOOK` | ❌ | Discord webhook URL for alerts |
 | `POLL_INTERVAL` | ❌ | Poll interval in seconds (default: 60) |
 | `MODEL` | ❌ | LLM model (default: `deepseek/deepseek-v4-flash`) |
 | `MAX_TOOL_ITERATIONS` | ❌ | Max tool calls before force-complete (default: 30) |
+| `OPENROUTER_MAX_TOKENS` | ❌ | Maximum completion tokens per model call (default: 1024) |
 
 ## File Layout
 
