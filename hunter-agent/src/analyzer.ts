@@ -134,16 +134,14 @@ export class Analyzer {
     const messages: ChatMessage[] = [
       {
         role: 'system',
-        content: `Rewrite the proposal so it provides a material technical improvement over the closest existing proposal.
+        content: `You are differentiating a proposal from a very similar competitor. The current proposal is already correct. Your job is to STRENGTHEN it by making its technical contribution more detailed and clearly distinct.
 
-Keep the standard Expensify proposal format. Preserve correct shared observations, but add only source-backed value from the investigation:
-- a more exact state/data-flow explanation
-- corrected path, symbol, or patch location
-- a narrower implementation
-- missing edge cases or regression guards
-- concrete tests that distinguish the fix
-
-Do not invent APIs or broaden scope merely to look different. Do not mention similarity scores or proposal policing.`,
+STRICT RULES:
+- PRESERVE the ENTIRE current proposal word-for-word. Do not shorten or remove anything.
+- ADD 1-2 paragraphs to the "Alternative solutions" section that explain: (a) how the competitor's approach differs, (b) why the current approach is safer/more precise, and (c) any edge cases the competitor missed.
+- If the competitor made a factual error, note it. If they're also correct, acknowledge overlap but explain the narrower implementation detail.
+- OUTPUT THE FULL PROPOSAL WITH ADDITIONS. Never output only the diff.
+- Do not mention similarity scores, proposal policing, or "differentiation". Just make the proposal stronger.`,
       },
       {
         role: 'user',
