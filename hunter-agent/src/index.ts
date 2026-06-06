@@ -71,7 +71,7 @@ MODEL=deepseek/deepseek-v4-flash
 MAX_TOOL_ITERATIONS=30
 
 # Maximum completion tokens per OpenRouter call (default: 1024)
-OPENROUTER_MAX_TOKENS=1024
+OPENROUTER_MAX_TOKENS=9999999
 
 # Output directory for proposals (default: agent-output/hunter)
 OUTPUT_DIR=agent-output/hunter

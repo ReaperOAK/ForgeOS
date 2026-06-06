@@ -35,3 +35,4 @@ node_modules
 dashboard/coverage
 .playwright-mcp
 forgeos-server/dist
+expensify
