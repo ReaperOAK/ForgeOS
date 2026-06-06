@@ -77,6 +77,6 @@ export function loadConfig(): Config {
     pollInterval: parseInt(get('POLL_INTERVAL', '60'), 10),
     outputDir: get('OUTPUT_DIR', resolve(process.cwd(), 'agent-output', 'hunter')),
     maxToolIterations: parseInt(get('MAX_TOOL_ITERATIONS', '15'), 10),
-    maxOutputTokens: parseInt(get('OPENROUTER_MAX_TOKENS', '0'), 10),
+    maxOutputTokens: parseInt(get('OPENROUTER_MAX_TOKENS', '16384'), 10),
   };
 }
