@@ -64,8 +64,8 @@ DISCORD_WEBHOOK=
 # Poll interval in seconds (default: 60)
 POLL_INTERVAL=60
 
-# LLM model (default: deepseek/deepseek-v4-flash)
-MODEL=deepseek/deepseek-v4-flash
+# LLM model (default: anthropic/claude-sonnet-4.6)
+MODEL=anthropic/claude-sonnet-4.6
 
 # Max tool call iterations before forcing completion (default: 30)
 MAX_TOOL_ITERATIONS=30
