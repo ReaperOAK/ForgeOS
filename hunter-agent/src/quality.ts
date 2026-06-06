@@ -135,7 +135,7 @@ export function assessProposal(
   const missingClaimedSymbols: string[] = [];
   for (const symbol of claimedSymbols) {
     try {
-      execFileSync('rg', ['--fixed-strings', '--quiet', '--glob', '*.{ts,tsx,js,jsx}', symbol, 'src'], {
+      execFileSync('rg', ['--fixed-strings', '--quiet', '--glob', '**/*.{ts,tsx,js,jsx}', symbol, 'src'], {
         cwd: expensifyPath,
         stdio: 'ignore',
         timeout: 10000,
