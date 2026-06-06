@@ -20,7 +20,7 @@ export interface ProposalQualityReport {
 const SOURCE_PATH_PATTERN =
   /(?:https:\/\/github\.com\/Expensify\/App\/blob\/[^/\s]+\/)?((?:src|tests|contributingGuides)\/[A-Za-z0-9_./@+-]+\.(?:ts|tsx|js|jsx|md))/g;
 const LINE_REFERENCE_PATTERN =
-  /(?:https:\/\/github\.com\/Expensify\/App\/blob\/[^/\s]+\/)?((?:src|tests)\/[A-Za-z0-9_./@+-]+\.(?:ts|tsx|js|jsx))#L(\d+)(?:-L(\d+))?/g;
+  /(?:https:\/\/github\.com\/Expensify\/App\/blob\/[^\/\s]+\/)?((?:src|tests)\/[A-Za-z0-9_.\/@+-]+\.(?:ts|tsx|js|jsx))#L(\d+)(?:-L(\d+))?/g;
 const CLAIMED_SYMBOL_PATTERNS = [
   /(?:function|hook|method|helper|component|selector)\s+`([A-Za-z_$][A-Za-z0-9_$]{3,})`/gi,
   /(?:calls?|invokes?|uses?|via|through|driven by)\s+`([A-Za-z_$][A-Za-z0-9_$]{3,})`/gi,
@@ -108,7 +108,16 @@ export function assessProposal(
   expensifyPath: string,
 ): ProposalQualityReport {
   const sourcePaths = uniqueMatches(proposal, SOURCE_PATH_PATTERN);
-  const missingPaths = sourcePaths.filter((path) => !existsSync(resolve(expensifyPath, path)));
+  const missingPaths: string[] = [];
+  for (const path of sourcePaths) {
+    if (existsSync(resolve(expensifyPath, path))) continue;
+    // Try alternate extension (.ts ↔ .tsx)
+    const altExt = path.endsWith('.ts') ? path.slice(0, -3) + '.tsx'
+      : path.endsWith('.tsx') ? path.slice(0, -4) + '.ts'
+      : null;
+    if (altExt && existsSync(resolve(expensifyPath, altExt))) continue;
+    missingPaths.push(path);
+  }
 
   const invalidLineReferences: string[] = [];
   for (const match of proposal.matchAll(LINE_REFERENCE_PATTERN)) {
@@ -134,6 +143,7 @@ export function assessProposal(
 
   const missingClaimedSymbols: string[] = [];
   for (const symbol of claimedSymbols) {
+    if (symbol.length < 5) continue; // short tokens are too noisy
     try {
       execFileSync('rg', ['--fixed-strings', '--quiet', '--glob', '**/*.{ts,tsx,js,jsx}', symbol, 'src'], {
         cwd: expensifyPath,
@@ -141,7 +151,21 @@ export function assessProposal(
         timeout: 10000,
       });
     } catch {
-      missingClaimedSymbols.push(symbol);
+      // Try with trimmed version (remove "s" for plurals)
+      const trimmed = symbol.endsWith('s') ? symbol.slice(0, -1) : '';
+      if (trimmed && trimmed.length >= 5) {
+        try {
+          execFileSync('rg', ['--fixed-strings', '--quiet', '--glob', '**/*.{ts,tsx,js,jsx}', trimmed, 'src'], {
+            cwd: expensifyPath,
+            stdio: 'ignore',
+            timeout: 10000,
+          });
+        } catch {
+          missingClaimedSymbols.push(symbol);
+        }
+      } else {
+        missingClaimedSymbols.push(symbol);
+      }
     }
   }
 

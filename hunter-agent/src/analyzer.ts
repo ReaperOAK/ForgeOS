@@ -71,7 +71,13 @@ export class Analyzer {
 
     // ── Stage 3: Draft proposal ────────────────────────────────────
     console.log(`   [Stage 3] Drafting proposal...`);
-    const draft = await this.draftProposal(issue, fullContext, hypothesis);
+    let draft = await this.draftProposal(issue, fullContext, hypothesis);
+    if (!draft || draft.length < 100) {
+      console.log(`   [Stage 3] Draft empty, writing proposal directly from context...`);
+      draft = await this.finalProposal(issue, fullContext, hypothesis, '', 'No draft was generated. Write the full proposal from scratch.', comments);
+      console.log(`   [Stage 3] Direct proposal: ${draft.length} chars`);
+      // Fall through to quality gate instead of returning early
+    }
     console.log(`   [Stage 3] Draft: ${draft.length} chars`);
 
     // ── Stage 4: Self-critique ─────────────────────────────────────
