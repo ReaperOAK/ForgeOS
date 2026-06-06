@@ -1,5 +1,6 @@
 import type { Config } from './config.js';
 import { IssueFetcher } from './fetcher.js';
+import { Investigator } from './investigator.js';
 import { makeToolDefinitions, ToolExecutor } from './tools.js';
 import {assessProposal, type ProposalQualityReport} from './quality.js';
 import {prepareExpensifyRepository} from './repository.js';
@@ -9,11 +10,13 @@ import { resolve } from 'node:path';
 
 export class Analyzer {
   private fetcher: IssueFetcher;
+  private investigator: Investigator;
   private toolExecutor: ToolExecutor;
   private toolDefs = makeToolDefinitions();
 
   constructor(private config: Config) {
     this.fetcher = new IssueFetcher(config);
+    this.investigator = new Investigator(config);
     this.toolExecutor = new ToolExecutor(config);
   }
 
@@ -55,12 +58,11 @@ export class Analyzer {
     console.log(`   [Preflight] Verifying Expensify checkout...`);
     prepareExpensifyRepository(this.config);
 
-    // ── Stage 1: Autonomous repository investigation ───────────────
-    console.log(`   [Stage 1] Exploring the repository with file and git tools...`);
-    const investigation = await this.investigateWithTools(issue, comments);
-    const fullContext = investigation.report;
-    const contextSize = Math.round(fullContext.length / 4); // rough token estimate
-    console.log(`   [Stage 1] Evidence report: ${fullContext.length} chars (~${contextSize} tokens), ${investigation.toolCalls} tool calls`);
+    // ── Stage 1: Deterministic code investigation ─────────────────
+    console.log(`   [Stage 1] Investigating codebase with grep, git blame & symbol resolution...`);
+    const fullContext = await this.investigator.buildContext(issue, comments);
+    const contextSize = Math.round(fullContext.length / 4);
+    console.log(`   [Stage 1] Context: ${fullContext.length} chars (~${contextSize} tokens)`);
 
     // ── Stage 2: Root-cause reasoning ──────────────────────────────
     console.log(`   [Stage 2] Reasoning about root cause...`);
@@ -114,7 +116,7 @@ export class Analyzer {
       );
     }
 
-    return this.saveProposal(issue, final, investigation.toolCalls);
+    return this.saveProposal(issue, final, 0);
   }
 
   private async differentiateProposal(
@@ -155,143 +157,6 @@ Rewrite the current proposal so its added technical contribution is unmistakable
     ];
     const response = await this.callLLM(messages, false);
     return this.extractText(response) || proposal;
-  }
-
-  private async investigateWithTools(
-    issue: GitHubIssue,
-    comments: GitHubComment[],
-  ): Promise<{report: string; toolCalls: number}> {
-    const competitorProposals = comments
-      .filter((comment) => comment.body && /#\s*Proposal|What is the root cause/i.test(comment.body))
-      .slice(0, 12);
-    const competitorBlock = competitorProposals.length > 0
-      ? competitorProposals
-        .map((comment, index) => `\n## Competitor ${index + 1}: @${comment.user.login}\n${comment.body.slice(0, 3500)}`)
-        .join('\n')
-      : 'No competitor proposals have been posted yet.';
-
-    const messages: ChatMessage[] = [
-      {
-        role: 'system',
-        content: `You are the repository investigator for an Expensify/App bug bounty proposal.
-
-You have direct tools for the same core repository operations a senior coding agent uses:
-- find files by glob
-- ripgrep with line numbers
-- read exact file ranges
-- inspect directories
-- find symbols and references
-- inspect file history
-- read files at commits linked by issue comments
-
-Investigate before reasoning. Trace the complete user journey from UI event to action/state update to rendered symptom. Verify every competitor claim against source instead of repeating it.
-
-Minimum evidence before finishing:
-- at least 8 repository tool calls
-- at least 3 ranged file reads
-- at least 2 independent searches
-- exact paths, symbols, and line numbers for the root cause
-- the strongest existing competitor thesis and a concrete way to improve on it
-- regression risks and the narrowest source-backed fix
-
-Do not write the final proposal. Call finish_investigation with a detailed evidence report only after the minimum evidence is satisfied.`,
-      },
-      {
-        role: 'user',
-        content: `# Issue #${issue.number}: ${issue.title}
-URL: ${issue.html_url}
-
-## Issue body
-${issue.body?.slice(0, 10000) ?? '(empty)'}
-
-## Existing proposals and discussion
-${competitorBlock}
-
-Explore the repository now. Start from the reproduction steps and verify the current implementation.`,
-      },
-    ];
-
-    let toolCalls = 0;
-    let fileReads = 0;
-    let searches = 0;
-
-    for (let iteration = 0; iteration < this.config.maxToolIterations; iteration++) {
-      const response = await this.callLLM(messages, true);
-      if (response.error) {
-        throw new Error(`Investigation model error: ${response.error.message}`);
-      }
-
-      const delta = response.choices[0]?.delta ?? {};
-      const calls = (delta.tool_calls ?? []).map((call: any) => ({
-        id: call.id,
-        type: 'function' as const,
-        function: {
-          name: call.function?.name ?? '',
-          arguments: call.function?.arguments ?? '{}',
-        },
-      }));
-      messages.push({
-        role: 'assistant',
-        content: delta.content ?? null,
-        tool_calls: calls,
-      });
-
-      if (calls.length === 0) {
-        const text = String(delta.content ?? '').trim();
-        if (toolCalls >= 8 && fileReads >= 3 && searches >= 2 && text.length >= 500) {
-          return {report: text, toolCalls};
-        }
-        messages.push({
-          role: 'user',
-          content: `Continue investigating. Current evidence count: ${toolCalls} tool calls, ${fileReads} file reads, ${searches} searches. Use tools and finish only after meeting every minimum.`,
-        });
-        continue;
-      }
-
-      for (const call of calls) {
-        let args: Record<string, unknown>;
-        try {
-          args = JSON.parse(call.function.arguments || '{}') as Record<string, unknown>;
-        } catch {
-          args = {};
-        }
-
-        if (call.function.name === 'finish_investigation') {
-          const report = typeof args.report === 'string' ? args.report.trim() : '';
-          if (toolCalls >= 8 && fileReads >= 3 && searches >= 2 && report.length >= 500) {
-            return {report, toolCalls};
-          }
-          messages.push({
-            role: 'tool',
-            tool_call_id: call.id,
-            content: `INVESTIGATION_INCOMPLETE: Need at least 8 tool calls, 3 file reads, 2 searches, and a 500-character evidence report. Current counts: ${toolCalls}/${fileReads}/${searches}.`,
-          });
-          continue;
-        }
-
-        toolCalls++;
-        console.log(`      [Tool ${toolCalls}] ${call.function.name}`);
-        if (call.function.name === 'read_file' || call.function.name === 'git_show_file') {
-          fileReads++;
-        }
-        if (call.function.name === 'grep_search' || call.function.name === 'find_symbol' || call.function.name === 'find_files') {
-          searches++;
-        }
-        const result = await this.toolExecutor.execute(call.function.name, args, call.id);
-        messages.push(result);
-      }
-    }
-
-    messages.push({
-      role: 'user',
-      content: 'Tool budget reached. Synthesize the strongest evidence gathered into a source-backed investigation report. Do not invent missing details.',
-    });
-    const synthesis = await this.callLLM(messages, false);
-    const report = this.extractText(synthesis);
-    if (report.length < 500) {
-      throw new Error('Investigation ended without enough source-backed evidence.');
-    }
-    return {report, toolCalls};
   }
 
   /** Stage 2: LLM reasons step-by-step about the root cause. */
