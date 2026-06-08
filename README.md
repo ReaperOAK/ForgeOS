@@ -9,7 +9,32 @@ simulates a professional engineering organization — not a code generator.
 
 Version 9.1.0 | Built on GitHub Copilot Agent Infrastructure
 
-## Quick Start
+## Install for Claude Code (plugin — fastest, no infra)
+
+Run the full ForgeOS engine inside Claude Code in **any** project — no Docker,
+no database, no MCP server required.
+
+```bash
+# 1. Add the marketplace, then install the plugin
+claude plugin marketplace add reaperoak/ForgeOS
+claude plugin install forgeos@forgeos
+```
+
+Then, in your project:
+
+```
+cd your-project && claude
+/forgeos:init          # scaffold the engine into ./.forgeos/ (once per project)
+/start <your vision>   # PRD → architecture → tickets, then build
+```
+
+This installs 15 SDLC agents, a 14-stage ticket lifecycle, governance hooks,
+and 20+ skills. See [`plugin/forgeos/README.md`](plugin/forgeos/README.md) for
+details, and [`scripts/build-plugin.sh`](scripts/build-plugin.sh) to regenerate
+the plugin from source. The optional PostgreSQL-backed MCP server below is a
+separate, heavier deployment for multi-worker fleets.
+
+## Quick Start (self-hosted MCP server — optional)
 
 ```bash
 git clone https://github.com/Ticketer/ForgeOS.git

@@ -1,0 +1,115 @@
+accessibility:
+- .forgeos/skills/a11y/SKILL.md
+- .forgeos/skills/a11y/references/
+agent:
+- .forgeos/agents/Architect.agent.md
+- .forgeos/agents/Backend.agent.md
+- .forgeos/agents/CIReviewer.agent.md
+- .forgeos/agents/DevOps.agent.md
+- .forgeos/agents/Documentation.agent.md
+- .forgeos/agents/Frontend.agent.md
+- .forgeos/agents/ProductManager.agent.md
+- .forgeos/agents/QA.agent.md
+- .forgeos/agents/Ticketer.agent.md
+- .forgeos/agents/Research.agent.md
+- .forgeos/agents/Security.agent.md
+- .forgeos/agents/UIDesigner.agent.md
+- .forgeos/agents/TODO.agent.md
+- .forgeos/agents/Validator.agent.md
+- .forgeos/agents/_cross-cutting-protocols.md
+ai-safety:
+- .forgeos/skills/ai-safety/SKILL.md
+- .forgeos/skills/ai-safety/references/
+ci:
+- .forgeos/skills/ci-cd/SKILL.md
+- .forgeos/skills/ci-cd/references/
+container:
+- .forgeos/skills/containerization/SKILL.md
+- .forgeos/skills/containerization/references/
+cto:
+- .forgeos/skills/cto-playbook/SKILL.md
+- .forgeos/skills/cto-playbook/references/
+design:
+- .forgeos/skills/design/SKILL.md
+- .forgeos/skills/design/references/
+devops:
+- .forgeos/skills/ci-cd/SKILL.md
+- .forgeos/skills/ci-cd/references/
+general:
+- .github/VALIDATION-REPORT.md
+- .forgeos/instructions/ARCHITECTURE.instructions.md
+governance:
+- .forgeos/instructions/core_governance.instructions.md
+- .github/governance/lifecycle.md
+- .github/governance/worker_policy.md
+- .github/governance/commit_policy.md
+- .github/governance/memory_policy.md
+- .github/governance/ui_policy.md
+- .github/governance/security_policy.md
+- .github/governance/event_protocol.md
+- .github/governance/context_injection.md
+- .github/governance/performance_monitoring.md
+instruction:
+- .forgeos/skills/a11y/SKILL.md
+- .forgeos/skills/ai-safety/SKILL.md
+- .forgeos/skills/containerization/SKILL.md
+- .forgeos/skills/ci-cd/SKILL.md
+- .forgeos/skills/performance/SKILL.md
+- .forgeos/skills/implementation/SKILL.md
+- .forgeos/skills/qa/SKILL.md
+- .forgeos/skills/planning/SKILL.md
+- .forgeos/skills/design/SKILL.md
+- .forgeos/skills/architecture/SKILL.md
+- .forgeos/skills/cto-playbook/SKILL.md
+memory-bank:
+- .forgeos/memory-bank/activeContext.md
+- .forgeos/memory-bank/decisionLog.md
+- .forgeos/memory-bank/productContext.md
+- .forgeos/memory-bank/progress.md
+- .forgeos/memory-bank/riskRegister.md
+- .forgeos/memory-bank/systemPatterns.md
+performance:
+- .forgeos/skills/performance/SKILL.md
+- .forgeos/skills/performance/references/
+sdlc:
+- .forgeos/skills/implementation/SKILL.md
+- .forgeos/skills/qa/SKILL.md
+- .forgeos/skills/planning/SKILL.md
+- .forgeos/skills/design/SKILL.md
+- .forgeos/skills/architecture/SKILL.md
+- .forgeos/skills/orchestration/SKILL.md
+- .forgeos/skills/sdlc/SKILL.md
+security:
+- .forgeos/skills/security/SKILL.md
+- .forgeos/skills/security/references/
+validation:
+- .forgeos/skills/sdlc/SKILL.md
+- .forgeos/skills/sdlc/references/
+terraform:
+- .forgeos/skills/containerization/SKILL.md
+- .forgeos/skills/containerization/references/
+sdlc-enforcement:
+- .forgeos/skills/sdlc/SKILL.md
+- .forgeos/skills/sdlc/references/
+testing:
+- .forgeos/skills/testing/SKILL.md
+- .forgeos/skills/testing/references/
+- .forgeos/skills/qa/SKILL.md
+- .forgeos/skills/qa/references/
+skills:
+- .forgeos/skills/a11y/SKILL.md
+- .forgeos/skills/agent-protocols/SKILL.md
+- .forgeos/skills/ai-safety/SKILL.md
+- .forgeos/skills/architecture/SKILL.md
+- .forgeos/skills/ci-cd/SKILL.md
+- .forgeos/skills/containerization/SKILL.md
+- .forgeos/skills/cto-playbook/SKILL.md
+- .forgeos/skills/design/SKILL.md
+- .forgeos/skills/implementation/SKILL.md
+- .forgeos/skills/orchestration/SKILL.md
+- .forgeos/skills/performance/SKILL.md
+- .forgeos/skills/planning/SKILL.md
+- .forgeos/skills/qa/SKILL.md
+- .forgeos/skills/security/SKILL.md
+- .forgeos/skills/sdlc/SKILL.md
+- .forgeos/skills/testing/SKILL.md

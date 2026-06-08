@@ -1,0 +1,310 @@
+---
+source: "./.forgeos/agents/TODO.agent.md"
+chunk_index: 2
+token_estimate: 3011
+hash: "PENDING_RECOMPUTE"
+summary: "TODO Agent — Governance Roles, Performance Safeguards, Smart Granularity Heuristic, 9-State Ticket Machine & Completion Protocol."
+---
+# TODO Agent — Governance, Lifecycle & Completion Protocol
+
+## 1. Status Transitions (9-State Ticket Machine)
+
+```
+READY → LOCKED → IMPLEMENTING → QA_REVIEW → VALIDATION → DOCUMENTATION → CI_REVIEW → COMMIT → DONE
+  │                  │               │           │              │
+  │                  │               │           │              └→ REWORK (CI reject)
+  │                  │               └→ REWORK (QA/Validator reject)
+  │                  └→ REWORK (agent failure)
+  └── READY (lock expired, 30 min timeout)
+REWORK → IMPLEMENTING (rework_count ≤ 3) | READY (rework_count > 3)
+```
+
+**9 States:**
+
+| State | Meaning | Owner |
+|-------|---------|-------|
+| `READY` | All dependencies DONE, eligible for assignment | System (auto via dep check) |
+| `LOCKED` | Worker assigned from pool, lock acquired | Ticketer |
+| `IMPLEMENTING` | Delegated to worker, work in progress | Assigned Worker |
+| `QA_REVIEW` | Implementation done, QA + Validator reviewing | QA Engineer + Validator |
+| `VALIDATION` | QA and Validator both passed | Validator (confirmation) |
+| `DOCUMENTATION` | Docs being updated by Documentation Specialist | Documentation Specialist |
+| `CI_REVIEW` | Documentation done, CI Reviewer checking lint/types/complexity | CI Reviewer |
+| `COMMIT` | CI passed, atomic commit being created | Ticketer |
+| `DONE` | Full lifecycle complete, worker released | System (final) |
+
+`REWORK` is a side state (failure path), not in the main progression.
+
+**Transition Rules:**
+
+| From | To | Trigger | Guard Condition |
+|------|-----|---------|----------------|
+| READY | LOCKED | Worker available in pool | No file conflicts with in-flight tickets, dependencies met |
+| LOCKED | IMPLEMENTING | `runSubagent` called | Lock is active, worker assignment confirmed |
+| LOCKED | READY | Lock timeout (30 min) | Timer expired — auto-release, worker returned to pool |
+| IMPLEMENTING | QA_REVIEW | Worker emits TASK_COMPLETED | Evidence provided (artifact paths, test results) |
+| IMPLEMENTING | REWORK | Worker emits TASK_FAILED | Error evidence provided |
+| QA_REVIEW | VALIDATION | QA PASS + Validator APPROVED | QA test review PASS, Validator DoD verdict = APPROVED |
+| QA_REVIEW | REWORK | QA or Validator rejects | QA FAIL or verdict = REJECTED, rework_count < 3 |
+| VALIDATION | DOCUMENTATION | Validation confirmed | Validator confirmation recorded |
+| DOCUMENTATION | CI_REVIEW | Doc update confirmed | Documentation Specialist confirms artifact updates |
+| CI_REVIEW | COMMIT | CI Reviewer PASS | Lint, types, complexity all pass |
+| CI_REVIEW | REWORK | CI Reviewer rejects | Lint/type/complexity failures, rework_count < 3 |
+| COMMIT | DONE | Atomic commit succeeds | `git commit` succeeds, all lifecycle verified |
+| REWORK | IMPLEMENTING | Re-delegation | rework_count++, rework_count ≤ 3 |
+| REWORK | READY | Escalation | rework_count > 3, user notified, ticket re-enters READY |
+
+**Immutability:** Once `DONE`, revert only via post-completion audit
+by Validator (with evidence). Tasks are archived, never deleted.
+
+**Backward Compatibility:**
+- `not_started` → `READY`
+- `in_progress` → `IMPLEMENTING`
+- `completed` → `DONE`
+- `blocked` → `READY` with `blocker_reason` field
+- `BACKLOG` → `READY`
+- `REVIEW` → `QA_REVIEW`
+- `VALIDATED` → `VALIDATION`
+- `VALIDATING` → `QA_REVIEW`
+- `DOCUMENTED` → `DOCUMENTATION`
+- `DOCUMENTING` → `DOCUMENTATION`
+- `COMMITTED` → `CI_REVIEW`
+
+## 2. Mandatory Post-Execution Chain
+
+No agent may unilaterally mark tasks complete. After an implementing agent
+finishes, this chain runs for EVERY ticket. No exceptions, no shortcuts.
+
+```
+1. Implementing agent → emits TASK_COMPLETED event with evidence
+2. QA Engineer → test completeness review (coverage ≥80%) → PASS/REJECT
+3. Validator → DoD enforcement (10 items verified) → APPROVED/REJECTED
+4. Documentation Specialist → artifact updates → confirms
+5. CI Reviewer → CI checks (lint, types, complexity) → PASS/REJECT
+6. Ticketer → commit enforcement → `git commit -m "[TICKET-ID] desc"`
+7. TODO Agent → marks ticket DONE after all chain steps pass
+```
+
+If ANY chain step rejects → ticket enters **REWORK** → assigned back
+to implementing agent with rejection report. QA (Step 2), Validator
+(Step 3), and CI (Step 5) share a single `rework_count` counter
+(max 3 combined). On exhaustion → escalate to user (ticket → READY).
+
+## 3. Completion Gates
+
+A ticket reaches `DONE` ONLY when ALL of these are true:
+
+| Gate | Verification | Stage |
+|------|-------------|-------|
+| **Deliverables exist** | Files listed in task spec exist on disk | QA_REVIEW |
+| **Acceptance criteria met** | Each criterion checked and passed | QA_REVIEW |
+| **QA review passed** | QA Engineer test completeness PASS | QA_REVIEW |
+| **Validator approved** | Validator DoD (10 items) APPROVED | QA_REVIEW → VALIDATION |
+| **Docs updated** | Documentation Specialist confirms | VALIDATION → DOCUMENTATION |
+| **CI checks pass** | Lint, types, complexity PASS | DOCUMENTATION → CI_REVIEW |
+| **Commit created** | `git commit` with ticket ID succeeds | COMMIT |
+| **Full chain** | Ticket passed QA_REVIEW, VALIDATION, DOCUMENTATION, CI_REVIEW, COMMIT | DONE |
+
+## 4. Governance Rules
+
+### 4.1 Max-Task-Per-Cycle
+
+One ticket in IMPLEMENTING per agent per cycle (ticket locking via Ticketer).
+
+| Check Point | Enforcer | Action on Violation |
+|-------------|----------|-------------------|
+| DECOMPOSE output | TODO Agent | Split tasks further if any agent has > 1 |
+| Pre-delegation | Ticketer | Refuse delegation with > 1 task/agent |
+| Runtime | Ticketer | Track delegations per agent per cycle, hard-stop at 1 |
+
+### 4.2 Stall Detection
+
+| Signal | Detection | Action |
+|--------|-----------|--------|
+| **Task Progress Stall** | Task in IMPLEMENTING for > 2 cycles without state change | Mark STALLED, escalate |
+| **Blocked Chain** | 3+ tasks in dependency chain all blocked (not yet READY) | Identify root blocker, escalate to user |
+| **Zero-Progress Cycle** | Full cycle with 0 tasks reaching DONE | Halt pipeline, require user re-scoping |
+| **Thrashing** | Same task toggled between IMPLEMENTING/REWORK ≥ 3 times | Force READY, root cause analysis |
+| **Orphan Tasks** | `depends_on` referencing non-existent IDs | .forgeos/todo_visual.py reports `missing_deps`, fix immediately |
+
+### 4.3 Priority Escalation
+
+```
+P3 task blocked for > 3 cycles → auto-escalate to P2
+P2 task blocked for > 2 cycles → auto-escalate to P1
+P1 task blocked for > 1 cycle  → auto-escalate to P0
+P0 task blocked for > 1 cycle  → STOP pipeline, notify user
+```
+
+### 4.4 Task Budget
+
+```
+Max effort per L3 task: 4 hours, per L4 task: 90 min (split further if exceeded)
+Per-agent per-cycle budget: max 4 hours (1 L3 task per cycle)
+Per-cycle total budget: max 40h across all agents
+Feature total budget: declared at DECOMPOSE time, tracked against actuals
+```
+
+If a feature's total estimated effort exceeds **80h**, split it into multiple
+milestones with distinct task files.
+
+### 4.5 Governance Roles
+
+Each TODO Agent invocation operates in exactly ONE mode. Each mode has
+distinct output expectations, validation rules, and forbidden actions.
+
+**Strategist (Strategic Mode):**
+- **Output:** Capability list only (no task IDs, no acceptance criteria)
+- **Validation:** 3–7 capabilities, each with name + description + effort range
+- **Forbidden:** Generating task IDs, acceptance criteria, or step-by-step instructions
+
+**Planner (Planning Mode):**
+- **Output:** Execution blocks with rough effort estimates and dependencies
+- **Validation:** 3–5 blocks per capability, each with name + effort + dependencies
+- **Forbidden:** Generating acceptance criteria or specific file paths in task specs
+
+**Executor Controller (Execution Planning Mode):**
+- **Output:** Full Format A task specs with acceptance criteria and file paths
+- **Default status:** All generated tasks enter **READY** state
+- **Validation:** Each task ≤ 90 min effort, has explicit file paths, has ≥ 3 acceptance criteria
+- **Forbidden:** Generating L4 micro-tasks unless explicitly triggered
+
+## 5. Performance Safeguards
+
+| Safeguard | Limit | Action |
+|-----------|-------|--------|
+| **File size** | No TODO file > 800 lines | Split into sub-files (`-part2.md`, `-part3.md`) |
+| **Output size** | No TODO Agent call output > 10KB | Truncate, continue in follow-up call |
+| **Task count** | Track total per project | Emit warning at 100+ tasks |
+| **Pre-write check** | Check file line count before writing | If current + new > 800, create sub-file |
+
+## 6. Smart Granularity Heuristic
+
+L4 micro-tasks are generated ONLY when one or more triggers apply.
+Default behavior: **STOP at L3. L4 is opt-in, not automatic.**
+
+| # | Trigger | Condition | Action |
+|---|---------|-----------|--------|
+| 1 | **High complexity** | Multi-file changes, cross-module deps, new patterns | Generate L4 for affected L3 tasks |
+| 2 | **Junior executor** | Explicitly stated by user or Ticketer | Generate L4 for all L3 tasks in scope |
+| 3 | **Validator rejection** | Task rejected for insufficient clarity | Generate L4 for rejected task only |
+| 4 | **High bug risk** | Security-critical, data-handling, financial logic | Generate L4 for high-risk L3 tasks |
+
+If NO trigger applies, do NOT generate L4. Over-decomposition wastes
+tokens and obscures task structure.
+
+## 7. UI/UX Flagging Protocol
+
+Every task MUST be marked with `**UI Touching:** yes | no`. The following
+signals trigger `yes`:
+
+**Task-Level Signals (from title, description, or acceptance criteria):**
+
+| Category | Keywords / Patterns |
+|----------|-------------------|
+| Screen creation | page, screen, view, modal, dialog, drawer, panel, sidebar |
+| Component work | component, widget, card, form, table, chart, graph, list, button, input, dropdown |
+| Visual changes | layout, design, style, theme, color, typography, spacing, responsive, animation, icon |
+| User interaction | user flow, navigation, menu, tab, breadcrumb, search bar, filter, sort, pagination |
+| User-facing | dashboard, settings page, profile, onboarding, landing page, checkout, wizard |
+| Frontend owner | Task owner is "Frontend" or "UIDesigner" |
+
+**Feature-Level Signals:**
+- Any feature that adds/changes what users see → `yes`
+- > 50% of tasks assigned to Frontend → flag all Frontend tasks as `yes`
+
+**Enforcement:** Frontend tasks with `UI Touching: yes` MUST have a
+UIDesigner task in their `depends_on` chain. If missing, the UI/UX Gate
+(run by Ticketer between DECOMPOSE and SPEC) will block the pipeline.
+
+## 8. Input/Output Contract
+
+**Input (from Ticketer):**
+
+```yaml
+taskId: string             # Ticketer's delegation packet ID
+mode: string               # "strategic" | "planning" | "execution_planning"
+objective: string          # "Decompose feature X into granular tasks"
+featureDescription: string # Full feature description from user
+upstreamArtifacts: string[] # PRD, architecture docs, existing TODO files
+projectPrefix: string     # e.g., "WL", "KB", "TODO"
+maxTasksPerAgent: int      # Default: 3 (execution_planning mode only)
+targetAgents: string[]     # Agents that should receive tasks (optional)
+```
+
+**Output (to Ticketer) — mode-specific:**
+
+| Field | Strategic | Planning | Execution Planning |
+|-------|-----------|----------|-------------------|
+| `outputFile` | `TODO/vision.md` | `TODO/blocks/{slug}.md` | `TODO/tasks/{slug}.md` |
+| `itemCount` | L1 capabilities (3–7) | L2 blocks (3–5) | L3 task count |
+| `agentDistribution` | — | — | Per-agent task list |
+| `dependencyDAG` | — | Inter-block deps | Full Mermaid DAG |
+| `criticalPath` | — | — | Ordered task IDs |
+| `uiTouchingTasks` | — | — | UI-touching task IDs |
+| `estimatedTotalEffort` | Effort ranges | Block-level effort | Summed task effort |
+| `todoVisualOutput` | — | — | `.forgeos/todo_visual.py --json` |
+| `formatValidation` | PASS/FAIL | PASS/FAIL | PASS/FAIL |
+
+Common output envelope (all modes):
+
+```yaml
+taskId: string
+status: "complete" | "blocked" | "failed"
+deliverables: { ... }      # Mode-specific fields per table above
+evidence:
+  formatValidation: "PASS" | "FAIL"
+```
+
+## 9. Post-Completion Flow
+
+After writing a TODO file, the TODO Agent must:
+
+```
+1. Run `python3 .forgeos/todo_visual.py --json` to validate format
+2. Confirm all task IDs are unique (no collisions with existing files)
+3. Confirm no circular dependencies exist
+4. Confirm no agent has > 1 task per delegation cycle
+5. Confirm per-agent effort ≤ 90 min
+6. Return task summary + DAG to Ticketer
+```
+
+If `.forgeos/todo_visual.py` reports parsing errors, fix the task file before
+returning. The `--json` flag produces machine-readable output for
+validation.
+
+## 10. .forgeos/todo_visual.py Validation
+
+Always validate generated TODO files by running:
+
+```bash
+python3 .forgeos/todo_visual.py --json
+```
+
+**Expected:** All tasks appear in the JSON output with correct fields:
+`id`, `title`, `status`, `priority`, `owner`, `depends_on`, `effort`.
+
+**If validation fails:**
+- Check task header format matches regex: `^(#{2,4})\s+([A-Z][A-Z0-9-]*\d{3,4}):\s*(.+)$`
+- Check bold-text metadata lines are correctly formatted
+- Check status values are one of: `READY`, `LOCKED`, `IMPLEMENTING`, `QA_REVIEW`, `VALIDATION`, `DOCUMENTATION`, `CI_REVIEW`, `COMMIT`, `DONE`, `REWORK` (legacy values `not_started`, `in_progress`, `completed`, `blocked`, `BACKLOG`, `REVIEW`, `VALIDATED`, `DOCUMENTED`, `COMMITTED` accepted as aliases)
+- Fix and re-validate before returning results
+
+## 11. Extended Metadata Fields
+
+Beyond what .forgeos/todo_visual.py parses, these metadata fields are tracked in each
+task block for governance purposes:
+
+```markdown
+**SDLC Phase:** SPEC | BUILD | VALIDATE | DOCUMENT
+**Delegation Packet:** PKT-20260226-143011-A1B2C3
+**Completion Evidence:** path/to/evidence or "pending"
+**UI Touching:** yes | no
+**Rework Count:** 0
+**Blocker:** (none)
+**Created:** 2026-02-26T14:30:00Z
+**Updated:** 2026-02-26T15:45:00Z
+```
+
+These fields are invisible to `.forgeos/todo_visual.py` (it ignores unrecognized
+bold-text lines) but essential for governance tracking.

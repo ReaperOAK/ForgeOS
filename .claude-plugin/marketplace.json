@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-marketplace.json",
+  "name": "forgeos",
+  "owner": {
+    "name": "ReaperOAK",
+    "url": "https://github.com/reaperoak/ForgeOS"
+  },
+  "description": "ForgeOS — an autonomous software-agency engine for Claude Code. Multi-agent SDLC orchestration with a ticket lifecycle, governance hooks, and skills.",
+  "plugins": [
+    {
+      "name": "forgeos",
+      "source": "./plugin/forgeos",
+      "description": "15 SDLC agents, a 14-stage ticket lifecycle, governance hooks, and 20+ skills. Run /forgeos:init then /start to turn a vision into governed, shipped code.",
+      "category": "workflow",
+      "keywords": ["sdlc", "multi-agent", "orchestration", "autonomous", "ticketing"]
+    }
+  ]
+}

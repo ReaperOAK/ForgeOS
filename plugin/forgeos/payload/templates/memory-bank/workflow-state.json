@@ -1,0 +1,16 @@
+{
+  "$schema": "workflow-state-v1",
+  "version": "1.0.0",
+  "session_id": null,
+  "objective": null,
+  "started_at": null,
+  "updated_at": null,
+  "current_phase": null,
+  "phase_iteration": 0,
+  "overall_status": "uninitialized",
+  "phases": {},
+  "task_states": {},
+  "fix_loops": [],
+  "blockers": [],
+  "escalations": []
+}
