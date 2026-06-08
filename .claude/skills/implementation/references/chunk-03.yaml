@@ -1,0 +1,83 @@
+---
+source: "./.github/instructions/SDLC/10. Implementation Phase Best Practices Guide.md"
+chunk_index: 3
+token_estimate: 3585
+hash: "615ac45e8feae0774a77e7b3dc8244057eac038388d324f940b21ff6332dc22d"
+summary: "* **Set Clear Expectations:** The team must agree on the goals and norms of the code review process. This includes ex..."
+---
+* **Set Clear Expectations:** The team must agree on the goals and norms of the code review process. This includes expected turnaround times for reviews, the definition of "done," and how to handle disagreements.10  
+* **Automate the Trivial:** Leverage technology to handle objective checks. Linters, code formatters, and static analysis tools should be integrated into the CI pipeline to automatically enforce style and catch simple errors. This frees human reviewers to focus their valuable time on the more nuanced aspects of logic, design, and architecture.24  
+* **Know When to Talk in Person:** If a review thread involves significant back-and-forth, becomes contentious, or is about a complex design trade-off, it is often far more efficient to switch to a synchronous conversation (a quick video call or in-person chat). The resolution should then be summarized and documented back in the PR for traceability.24
+
+## **The Final Artifact: Merging and Concluding the Implementation Phase**
+
+The final stage of the Implementation phase involves formalizing the completion of the work, integrating it into the main codebase, and preparing for the handoff to the subsequent Verification & QA phase.
+
+### **Finalizing the Pull Request**
+
+Before a PR can be merged, a few final steps must be completed to ensure a clean integration.
+
+* **Address All Feedback:** The author must respond to every comment left by the reviewers. This doesn't mean accepting every suggestion, but every point must be acknowledged. Changes are made in response to feedback, or a discussion is had until the author and reviewer reach an agreement.26  
+* **Final Sync and Test:** As a final safety check, the feature branch should be updated with the latest changes from the main branch (e.g., via git rebase origin/main). This ensures the changes are being applied to the most current version of the codebase. The full test suite must be run one last time to catch any newly introduced integration issues.  
+* **Squash Commits (Optional):** For a cleaner project history, many teams prefer to "squash" the numerous small, incremental commits on a feature branch into a single, cohesive commit before merging. This single commit should have a well-written message that summarizes the entire change, making the main branch history easier to read.
+
+### **The Merge: Gating the Transition**
+
+The merge is the formal act of incorporating the feature branch's code into the main branch. This is a critical control point and should be protected by automation and process.
+
+* **Automated Gating:** The merge should be blocked until all required conditions are met. Modern version control systems allow for the configuration of branch protection rules to enforce these gates.7  
+* **Branch Protection Rules:** The main branch should be configured to:  
+  1. **Prevent Direct Pushes:** No one should be able to push code directly to main. All changes must go through a PR.7  
+  2. **Require PR Approval:** Require at least one (or more, depending on team policy) approving review from a designated code owner before merging is allowed.28  
+  3. **Require Passing Status Checks:** Require that the CI build, including all automated tests and quality checks, completes successfully.7
+
+### **Post-Merge Cleanup**
+
+Once the PR has been successfully merged, the feature branch has served its purpose. It should be deleted from the central repository. This practice, known as post-merge cleanup, keeps the repository tidy, reduces clutter, and prevents confusion about which branches are active.14
+
+### **Handoff to Verification & QA**
+
+With the merge complete, the Implementation phase for that feature concludes. The merged code, now part of the main branch and verified by a full suite of passing unit tests, becomes the input for the Verification & QA phase.1 A rigorously executed Implementation phase provides a high degree of confidence in the correctness of individual code units. This allows QA engineers and SDETs to focus their efforts on higher-level testing, such as integration testing, end-to-end system testing, and exploratory testing, where they can provide the most value.1
+
+#### **Works cited**
+
+1. 1\. SDLC.pdf  
+2. The Core Principles of Writing a Clean Code | Axolo Blog, accessed October 29, 2025, [https://axolo.co/blog/p/core-principles-of-writing-clean-code](https://axolo.co/blog/p/core-principles-of-writing-clean-code)  
+3. Master clean code principles and best practices | EngX Space, accessed October 29, 2025, [https://engx.space/global/en/blog/master-clean-code-principles-and-best-practices](https://engx.space/global/en/blog/master-clean-code-principles-and-best-practices)  
+4. Introduction to Test Driven Development (TDD) and Unit Testing \- Usersnap, accessed October 29, 2025, [https://usersnap.com/blog/tdd-unit-testing/](https://usersnap.com/blog/tdd-unit-testing/)  
+5. Is unit testing or test-driven development worthwhile?, accessed October 29, 2025, [https://softwareengineering.stackexchange.com/questions/140156/is-unit-testing-or-test-driven-development-worthwhile](https://softwareengineering.stackexchange.com/questions/140156/is-unit-testing-or-test-driven-development-worthwhile)  
+6. Git Feature Branch Workflow | Atlassian Git Tutorial, accessed October 29, 2025, [https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/feature-branch-workflow)  
+7. Git branching guidance \- Azure Repos | Microsoft Learn, accessed October 29, 2025, [https://learn.microsoft.com/en-us/azure/devops/repos/git/git-branching-guidance?view=azure-devops](https://learn.microsoft.com/en-us/azure/devops/repos/git/git-branching-guidance?view=azure-devops)  
+8. Test‑driven development: principles, tools & pitfalls \- Statsig, accessed October 29, 2025, [https://www.statsig.com/perspectives/tdd-principles-tools-pitfalls](https://www.statsig.com/perspectives/tdd-principles-tools-pitfalls)  
+9. What is Test Driven Development (TDD) ? | BrowserStack, accessed October 29, 2025, [https://www.browserstack.com/guide/what-is-test-driven-development](https://www.browserstack.com/guide/what-is-test-driven-development)  
+10. Best Practices for Code Review | SmartBear, accessed October 29, 2025, [https://smartbear.com/learn/code-review/best-practices-for-peer-code-review/](https://smartbear.com/learn/code-review/best-practices-for-peer-code-review/)  
+11. Helping others review your changes \- GitHub Docs, accessed October 29, 2025, [https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/getting-started/helping-others-review-your-changes](https://docs.github.com/en/pull-requests/collaborating-with-pull-requests/getting-started/helping-others-review-your-changes)  
+12. The (written) unwritten guide to pull requests \- Work Life by Atlassian, accessed October 29, 2025, [https://www.atlassian.com/blog/git/written-unwritten-guide-pull-requests](https://www.atlassian.com/blog/git/written-unwritten-guide-pull-requests)  
+13. How to implement feature branch workflows in GitHub \- Graphite, accessed October 29, 2025, [https://graphite.dev/guides/implement-feature-branch-workflows-github](https://graphite.dev/guides/implement-feature-branch-workflows-github)  
+14. Git Branching: Best Practices for Software Development | by Shreyas Matade | Medium, accessed October 29, 2025, [https://medium.com/@shreyasmatade/git-branching-best-practices-for-software-development-d2a10bdc00bf](https://medium.com/@shreyasmatade/git-branching-best-practices-for-software-development-d2a10bdc00bf)  
+15. Feature Branch: A Quick Walk Through Git Workflow, accessed October 29, 2025, [https://blog.mergify.com/feature-branch-a-quick-walk-through-git-workflow/](https://blog.mergify.com/feature-branch-a-quick-walk-through-git-workflow/)  
+16. Gitflow Workflow | Atlassian Git Tutorial, accessed October 29, 2025, [https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow](https://www.atlassian.com/git/tutorials/comparing-workflows/gitflow-workflow)  
+17. 5 steps of test-driven development \- IBM Developer, accessed October 29, 2025, [https://developer.ibm.com/articles/5-steps-of-test-driven-development/](https://developer.ibm.com/articles/5-steps-of-test-driven-development/)  
+18. Top 7 TDD Best Practices \- ACCELQ, accessed October 29, 2025, [https://www.accelq.com/blog/tdd-best-practices/](https://www.accelq.com/blog/tdd-best-practices/)  
+19. Writing Tests Before the Implementation | Design Pattern Evangelist Blog, accessed October 29, 2025, [https://jhumelsine.github.io/2024/07/15/tdd.html](https://jhumelsine.github.io/2024/07/15/tdd.html)  
+20. 7 Tips For Writing Great Unit Tests \- Marc Littlemore, accessed October 29, 2025, [https://www.marclittlemore.com/talks/7-tips-for-writing-great-unit-tests/](https://www.marclittlemore.com/talks/7-tips-for-writing-great-unit-tests/)  
+21. Code Review Best Practices. The Internet provides a wealth of… | by ..., accessed October 29, 2025, [https://blog.palantir.com/code-review-best-practices-19e02780015f](https://blog.palantir.com/code-review-best-practices-19e02780015f)  
+22. How to Make a Perfect Pull Request | by Anton Chuchkalov | Better Programming, accessed October 29, 2025, [https://betterprogramming.pub/how-to-make-a-perfect-pull-request-3578fb4c112](https://betterprogramming.pub/how-to-make-a-perfect-pull-request-3578fb4c112)  
+23. Mastering Code Reviews: Best Practices for Collaboration \- DevDynamics, accessed October 29, 2025, [https://devdynamics.ai/blog/code-review-best-practices-ensuring-high-quality-codebase-with-effective-reviews/](https://devdynamics.ai/blog/code-review-best-practices-ensuring-high-quality-codebase-with-effective-reviews/)  
+24. 30 Proven Code Review Best Practices from Microsoft \- Dr. McKayla, accessed October 29, 2025, [https://www.michaelagreiler.com/code-review-best-practices/](https://www.michaelagreiler.com/code-review-best-practices/)  
+25. 8 pull request best practices for optimal engineering \- Graphite, accessed October 29, 2025, [https://graphite.dev/blog/pull-request-best-practices](https://graphite.dev/blog/pull-request-best-practices)  
+26. A Guide to Perfecting Pull Requests \- DEV Community, accessed October 29, 2025, [https://dev.to/karaluton/a-guide-to-perfecting-pull-requests-2b66](https://dev.to/karaluton/a-guide-to-perfecting-pull-requests-2b66)  
+27. Write a good pull request | Blockly \- Google for Developers, accessed October 29, 2025, [https://developers.google.com/blockly/guides/contribute/get-started/write\_a\_good\_pr](https://developers.google.com/blockly/guides/contribute/get-started/write_a_good_pr)  
+28. What do you think should be the standard for pull requests? : r/ExperiencedDevs \- Reddit, accessed October 29, 2025, [https://www.reddit.com/r/ExperiencedDevs/comments/142n5ea/what\_do\_you\_think\_should\_be\_the\_standard\_for\_pull/](https://www.reddit.com/r/ExperiencedDevs/comments/142n5ea/what_do_you_think_should_be_the_standard_for_pull/)  
+29. GitHub pull request template | Axolo Blog, accessed October 29, 2025, [https://axolo.co/blog/p/part-3-github-pull-request-template](https://axolo.co/blog/p/part-3-github-pull-request-template)  
+30. Write better PR's with this template \- DEV Community, accessed October 29, 2025, [https://dev.to/nicolasmontielf/writing-a-good-pull-request-with-template-46pm](https://dev.to/nicolasmontielf/writing-a-good-pull-request-with-template-46pm)  
+31. Writing Your First Pull Request: Tips, Best Practices, and AI-Powered Tools for Success, accessed October 29, 2025, [https://opensauced.pizza/docs/community-resources/writing-your-first-pull-request-tips-best-practices-and-ai-powered-tools-for-success/](https://opensauced.pizza/docs/community-resources/writing-your-first-pull-request-tips-best-practices-and-ai-powered-tools-for-success/)  
+32. Mastering The Art of Pull Requests: A Developer's Guide to Smooth Code Reviews, accessed October 29, 2025, [https://dev.to/budiwidhiyanto/the-art-of-pull-requests-a-developers-guide-to-smooth-code-reviews-38bk](https://dev.to/budiwidhiyanto/the-art-of-pull-requests-a-developers-guide-to-smooth-code-reviews-38bk)  
+33. What to Include in a Pull Request Description \- Cloud City Development, accessed October 29, 2025, [https://cloudcity.io/blog/2022/08/08/what-to-include-in-a-pull-request-description/](https://cloudcity.io/blog/2022/08/08/what-to-include-in-a-pull-request-description/)  
+34. PR Templates for Effective Pull Requests | SoundCloud Backstage Blog, accessed October 29, 2025, [https://developers.soundcloud.com/blog/pr-templates-for-effective-pull-requests/](https://developers.soundcloud.com/blog/pr-templates-for-effective-pull-requests/)  
+35. Pull Request Best Practices \- Codacy | Blog, accessed October 29, 2025, [https://blog.codacy.com/pull-request-best-practices](https://blog.codacy.com/pull-request-best-practices)  
+36. Ultimate 10-Step Code Review Checklist \- Swimm, accessed October 29, 2025, [https://swimm.io/learn/code-reviews/ultimate-10-step-code-review-checklist](https://swimm.io/learn/code-reviews/ultimate-10-step-code-review-checklist)  
+37. How to Give Respectful and Constructive Code Review Feedback \- Dr. Michaela Greiler, accessed October 29, 2025, [https://www.michaelagreiler.com/respectful-constructive-code-review-feedback/](https://www.michaelagreiler.com/respectful-constructive-code-review-feedback/)  
+38. How do you give real code review feedback without sounding bossy? \- Reddit, accessed October 29, 2025, [https://www.reddit.com/r/ExperiencedDevs/comments/1l4lsfw/how\_do\_you\_give\_real\_code\_review\_feedback\_without/](https://www.reddit.com/r/ExperiencedDevs/comments/1l4lsfw/how_do_you_give_real_code_review_feedback_without/)  
+39. 12 Tips for Giving Constructive Feedback to Developers \- Daily.dev, accessed October 29, 2025, [https://daily.dev/blog/12-tips-for-giving-constructive-feedback-to-developers](https://daily.dev/blog/12-tips-for-giving-constructive-feedback-to-developers)  
+40. 6 Best Practices to Manage Pull Request Creation and Feedback \- DoorDash, accessed October 29, 2025, [https://careersatdoordash.com/blog/6-best-practices-to-manage-pull-request-creation-and-feedback/](https://careersatdoordash.com/blog/6-best-practices-to-manage-pull-request-creation-and-feedback/)

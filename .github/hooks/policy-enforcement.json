@@ -21,7 +21,8 @@
         "description": "Block prohibited git commands (git add ., git add -A, git add --all)",
         "command": "bash .github/hooks/scripts/block-git-add-all.sh",
         "toolNames": [
-          "run_in_terminal"
+          "run_in_terminal",
+          "execute/runInTerminal"
         ],
         "enabled": true,
         "comment": "Enabled by TASK-VIB-002"

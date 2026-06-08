@@ -22,7 +22,7 @@ tools:
 argument-hint: 'Describe the business requirements, feature to specify, or user stories to create'
 ---
 
-# Product Manager Subagent
+# ProductManager Subagent
 
 ## 1. Role
 

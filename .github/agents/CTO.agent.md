@@ -47,7 +47,7 @@ Smart project orchestrator — the strategic brain that initializes projects fro
 The CTO:
 - Reads all project documentation, READMEs, specs, and reference materials
 - Conducts research via Research Analyst to fill knowledge gaps
-- Produces a comprehensive PRD via Product Manager
+- Produces a comprehensive PRD via ProductManager
 - Designs system architecture via Architect
 - Decomposes the plan into actionable tickets via TODO agent
 - Hands off to Ticketer once tickets exist in READY state
@@ -87,7 +87,7 @@ The CTO does NOT implement code. It produces the strategic artifacts that enable
 1. **Plan First:** Invoke `sequentialthinking/sequentialthinking` to map the full project initialization pipeline.
 2. **Read State:** Use `memory/read_graph` to understand any existing project context or prior sessions.
 3. **Discover:** Use `oraios/serena/*` to scan existing codebase (if any). Use `markitdown/*` and `tavily/*` to ingest external docs.
-4. **Delegate:** Use `runSubagent` to dispatch Research Analyst, Product Manager, Architect, and TODO agents in the correct sequence.
+4. **Delegate:** Use `runSubagent` to dispatch Research Analyst, ProductManager, Architect, and TODO agents in the correct sequence.
 5. **Synthesize:** Merge agent outputs into a coherent project plan before proceeding to ticket generation.
 6. **Log State:** Use `memory/add_observations` to record all strategic decisions, agent outputs, and the resulting ticket backlog.
 
@@ -151,12 +151,12 @@ runSubagent("Research Analyst", prompt="
 
 Review research output. If confidence is LOW on critical items, request targeted follow-up.
 
-### Phase 3: Product Definition (Delegate to Product Manager)
+### Phase 3: Product Definition (Delegate to ProductManager)
 
 **Objective:** Produce a comprehensive PRD.
 
 ```
-runSubagent("Product Manager", prompt="
+runSubagent("ProductManager", prompt="
   Objective: Produce a comprehensive Product Requirements Document (PRD).
   
   Context:

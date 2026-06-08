@@ -1,6 +1,7 @@
 ---
 name: Git Protocol
-description: Use when performing git commits, push-based distributed locking, dispatcher-claim protocol, lease management, or summary handoff between agents.
+applyTo: '**'
+description: Dispatcher-claim protocol, scoped git, commit format, push-based locking, lease mechanism, failure recovery. Defines how distributed locking works via git commits.
 ---
 
 # Git Protocol

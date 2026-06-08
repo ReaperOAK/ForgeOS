@@ -1,6 +1,7 @@
 ---
 name: SDLC Lifecycle
-description: Use when advancing SDLC stages, processing rework, checking Definition of Done, or managing stage transitions in the ticket pipeline.
+applyTo: '**'
+description: Stage-based lifecycle, per-type flows, post-execution chain, rework rules, Definition of Done, stage transitions. Defines the 14-stage SDLC pipeline and ticket type flows.
 ---
 
 # SDLC Lifecycle
@@ -23,15 +24,15 @@ READY > RESEARCH > PM > ARCHITECT > DevOps > BACKEND > UIDesigner > FRONTEND > Q
 |-------|-------------|-------|
 | READY | Dependencies met, eligible for claim | System (tickets.py) |
 | RESEARCH | Evidence-based research, PoC, analysis | Research Analyst |
-| PM | Project management, stakeholder communication | Product Manager |
+| PM | Project management, stakeholder communication | ProductManager |
 | ARCHITECT | Architecture design, ADRs, API contracts | Architect |
-| DevOps | Infrastructure, deployment, monitoring | DevOps Engineer |
+| DevOps | Infrastructure, deployment, monitoring | DevOps |
 | BACKEND | Server-side implementation, APIs, business logic | Backend |
 | UIDesigner | UI/UX design, mockups, prototypes, import from figma/stitch | UIDesigner |
-| FRONTEND | UI implementation, components, layouts | Frontend Engineer |
-| QA | Test coverage, functional verification, mutation testing | QA Engineer |
-| SECURITY | Vulnerability scan, STRIDE, OWASP review | Security Engineer |
-| CI | Lint, type checks, complexity analysis | CI Reviewer |
+| FRONTEND | UI implementation, components, layouts | Frontend  |
+| QA | Test coverage, functional verification, mutation testing | QA |
+| SECURITY | Vulnerability scan, STRIDE, OWASP review | Security |
+| CI | Lint, type checks, complexity analysis | CIReviewer |
 | DOCS | Documentation updates, JSDoc/TSDoc, README | Documentation Specialist |
 | VALIDATION | Independent DoD review, upstream verdict verification | Validator |
 | DONE | Lifecycle complete | System |

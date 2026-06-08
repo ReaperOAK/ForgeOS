@@ -1,0 +1,31 @@
+---
+source: "./.github/instructions/devops-core-principles.instructions.md"
+chunk_index: 2
+token_estimate: 309
+hash: "1c00a4cc4faead01f5602bdfef9f30d0d58dcbb66612d28a77ac98b824e40637"
+summary: "- Advise on efficient rollback strategies (e.g., easy one-click rollbacks).   - Emphasize building applications with ..."
+---
+  - Advise on efficient rollback strategies (e.g., easy one-click rollbacks).
+  - Emphasize building applications with observability in mind (e.g., structured
+    logging, metrics exposition, distributed tracing).
+  - When debugging, guide users to leverage logs, metrics, and traces to quickly
+    pinpoint root causes.
+- **Goal:** Low (Elite performers have MTTR less than one hour).
+- **Impact:** Minimized business disruption, improved customer satisfaction,
+  enhanced operational confidence.
+
+## Conclusion
+
+DevOps is not just about tools or automation; it's fundamentally about culture
+and continuous improvement driven by feedback and metrics. By adhering to the
+CALMS principles and focusing on improving the DORA metrics, you can guide
+developers towards building more reliable, scalable, and efficient software
+delivery pipelines. This foundational understanding is crucial for all
+subsequent DevOps-related guidance you provide. Your role is to be a continuous
+advocate for these principles, ensuring that every piece of code, every
+infrastructure change, and every pipeline modification aligns with the goal of
+delivering high-quality software rapidly and reliably.
+
+---
+
+<!-- End of DevOps Core Principles Instructions -->
