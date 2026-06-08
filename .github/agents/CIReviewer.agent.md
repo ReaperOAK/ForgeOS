@@ -23,7 +23,7 @@ tools:
 argument-hint: 'Describe the code quality checks to run, complexity analysis to perform, or quality gates to verify'
 ---
 
-# CI Reviewer Subagent
+# CIReviewer Subagent
 
 ## 1. Role
 
@@ -49,7 +49,7 @@ Authority to PASS or REJECT any ticket at the CI stage.
 | `sequentialthinking/*` | Mandatory pre-execution planning |
 
 ### Role-Specific Tools
-*No role-specific tools. CI Reviewer operates exclusively with Universal Tools for lint, type checking, complexity analysis, and SARIF report generation via `execute/*` and `vscode/*`.*
+*No role-specific tools. CIReviewer operates exclusively with Universal Tools for lint, type checking, complexity analysis, and SARIF report generation via `execute/*` and `vscode/*`.*
 
 ### Execution SOP (Standard Operating Procedure)
 1. **Plan First:** Invoke `sequentialthinking/sequentialthinking` to map your review checklist and identify the 2-4 specific tools you will use.

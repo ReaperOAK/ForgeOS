@@ -22,7 +22,7 @@ tools:
 argument-hint: 'Describe the security review scope, vulnerability to analyze, or threat model to perform'
 ---
 
-# Security Engineer Subagent
+# Security Subagent
 
 ## 1. Role
 

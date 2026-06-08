@@ -1,6 +1,7 @@
 ---
 name: Ticket System
-description: Use when creating, moving, claiming, or managing tickets, running tickets.py, resolving dependencies, or working with the file-based ticket state machine.
+applyTo: '**'
+description: Ticket state machine, stage directories, tickets.py rules, dependency resolution, ticket JSON requirements, parallelism rules. Defines the file-based state machine for ticket management.
 ---
 
 # Ticket System
@@ -19,15 +20,15 @@ RULE: State directory is source of truth for current stage.
 ticket-state/
     READY/       — Unblocked, available for claim
     RESEARCH/    — Being processed by Research Analyst
-    ProductManager/          — Being processed by Product Manager
+    ProductManager/          — Being processed by ProductManager
     ARCHITECT/   — Being processed by Architect
-    DevOps/       — Being processed by DevOps Engineer
+    DevOps/       — Being processed by DevOps
     BACKEND/     — Being processed by Backend Engineer
     UIDesigner/  — Being processed by UIDesigner
-    FRONTEND/    — Being processed by Frontend Engineer
-    QA/          — Being processed by QA Engineer
-    SECURITY/    — Being processed by Security Engineer
-    CIReviewer/  — Being processed by CI Reviewer
+    FRONTEND/    — Being processed by Frontend 
+    QA/          — Being processed by QA
+    SECURITY/    — Being processed by Security
+    CIReviewer/  — Being processed by CIReviewer
     DOCS/        — Being processed by Documentation Specialist
     VALIDATOR/  — Being processed by Validator
     DONE/        — Completed

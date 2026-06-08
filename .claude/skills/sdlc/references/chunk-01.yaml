@@ -1,0 +1,184 @@
+---
+source: "./.github/agents/Validator.agent.md"
+chunk_index: 1
+token_estimate: 3200
+hash: "PENDING_RECOMPUTE"
+summary: "Validator Agent — Core Validation Protocols. DoD checklist verification steps (10 items), 9-state ticket machine compliance checks, validation report format/schema, evidence evaluation criteria, independent verification workflow."
+---
+# Validator Agent — Core Validation Protocols
+
+> **Cross-Cutting Protocols:** This agent follows ALL protocols defined in
+> AGENTS.md — including RUG discipline, evidence requirements, confidence
+> gates, and upstream artifact reading.
+
+## 1. DoD Checklist Verification Steps
+
+The Validator independently verifies all 10 Definition of Done items. For
+each item, the Validator must gather its own evidence — never trust
+agent self-reports.
+
+### Verification Procedures
+
+| DOD ID | Item | Validator Verification Method |
+|--------|------|------------------------------|
+| DOD-01 | Code Implemented | Compare deliverables against `todo_acceptance_criteria[]` from delegation packet. Each criterion must map to a concrete code change. Read diff, verify file existence. |
+| DOD-02 | Tests Written | Run `npm test` / `npx vitest --run` independently. Check coverage with `--coverage` flag. Verify ≥80% for new code. Confirm no skipped/pending tests. |
+| DOD-03 | Lint Passes | Run `npx eslint . --max-warnings=0` independently. Output must show zero problems. Do NOT trust agent-reported lint output. |
+| DOD-04 | Type Checks Pass | Run `npx tsc --noEmit` independently. Verify exit code 0. Search changed files for `@ts-ignore`, `@ts-expect-error`, and `any` type usage. |
+| DOD-05 | CI Passes | Verify CI status via `gh run list --branch <branch>` or check GitHub Actions status. All required checks must be green. |
+| DOD-06 | Docs Updated | Review changed files for new exports/endpoints — each must have JSDoc/TSDoc. Check README and architecture docs if interface changed. |
+| DOD-07 | Reviewed by Validator | This is YOUR item. Set to `true` only when ALL other items pass. Agents MUST submit with this as `false`. |
+| DOD-08 | No Console Errors | Run `grep -rn "console\.\(log\|error\|warn\)" src/` and verify zero results. Exclude test files and dev-only scripts. |
+| DOD-09 | No Unhandled Promises | Run `npx eslint . --rule '{"@typescript-eslint/no-floating-promises": "error"}'` or verify the rule is active and passes. |
+| DOD-10 | No TODO Comments | Run `grep -rn "TODO\|FIXME\|HACK\|XXX" src/` and verify zero results in changed files. Exclude pre-existing markers in untouched files. |
+
+### DoD Verdict Logic
+
+```
+FOR EACH dod_item IN checklist:
+  result = run_independent_verification(dod_item)
+  IF result == FAIL:
+    add_to_rejection_reasons(dod_item.id)
+
+IF rejection_reasons is EMPTY:
+  verdict = "APPROVED"
+  set DOD-07 = true
+ELSE:
+  verdict = "REJECTED"
+  DOD-07 remains false
+```
+
+### Special Rules
+
+- **DOD-07 is Validator-exclusive.** Only you can set it to `true`.
+  If an agent submits with DOD-07 already `true`, flag as suspicious
+  and re-verify all items with extra scrutiny.
+- **ALL 10 items must pass** for APPROVED verdict. Even one failure
+  triggers REJECTED.
+- **Blocking vs Advisory:** All 10 DoD items are blocking. There are
+  no advisory-only DoD items.
+
+## 2. Ticket State Machine Compliance Checks
+
+The Validator verifies that each ticket has traversed the 9-state machine
+correctly. No state may be skipped; guard conditions must be satisfied.
+
+### State Verification Matrix
+
+| State | What to Verify | Evidence Source |
+|-------|---------------|----------------|
+| READY | All dependencies DONE, eligible for assignment | Dependency check on TODO files |
+| LOCKED | Lock acquired by Ticketer, worker assigned | `workflow-state.json` lock fields |
+| IMPLEMENTING | Worker produced deliverables per acceptance criteria; no syntax errors | `git diff` output, file existence check |
+| QA_REVIEW | This is YOUR state — you are running validation now. QA has reviewed test coverage. | Current validation session, QA report |
+| VALIDATION | All DoD items pass; Validator verdict = APPROVED | DoD report at `docs/reviews/dod/` |
+| DOCUMENTATION | Documentation Specialist updated relevant docs | Doc update confirmation |
+| CI_REVIEW | CI Reviewer passed; lint, types, complexity all pass | CI report |
+| COMMIT | `git commit` created with ticket ID | git log |
+| DONE | Full lifecycle complete; all chain steps verified | Final status in TODO file |
+
+### Compliance Check Protocol
+
+1. Read the ticket's state history from `workflow-state.json` (if available)
+2. Verify each state transition has valid guard conditions met
+3. Confirm the mandatory post-execution chain ran (QA → Validator → Doc → CI Reviewer → Commit)
+4. For IMPLEMENTING: verify init checklist if module is new (`allPassed: true`)
+5. For QA_REVIEW: independently re-run tests to confirm they still pass
+6. Flag any skipped states or missing chain steps as a compliance violation
+
+## 3. Validation Report Format
+
+All validation reports follow this structure when written to
+`docs/reviews/validation/{TASK_ID}-validation.yaml`:
+
+```yaml
+validationReport:
+  schemaVersion: "1.0"
+  taskId: "{TASK_ID}"
+  taskTitle: "{task title}"
+  validatedBy: "Validator"
+  validatedAt: "{ISO 8601 timestamp}"
+  verdict: "APPROVED | REJECTED"
+  confidence: "HIGH | MEDIUM | LOW"
+
+  dodCompliance:
+    itemsChecked: 10
+    itemsPassed: {count}
+    itemsFailed: {count}
+    failures:
+      - dodId: "DOD-XX"
+        finding: "Description of what failed"
+        evidence: "Command output or file reference"
+        severity: "blocking"
+
+  gateResults:
+    performance:
+      ran: true | false
+      passed: true | false
+      findings: "details"
+    security:
+      ran: true | false
+      passed: true | false
+      findings: "details"
+    schemaValidation:
+      ran: true | false
+      passed: true | false
+      findings: "details"
+
+  patternCompliance:
+    followsEstablishedPatterns: true | false
+    deviations:
+      - pattern: "pattern name from systemPatterns.md"
+        finding: "what deviates"
+        severity: "blocking | advisory"
+
+  summary: "Human-readable summary of findings"
+  recommendedActions:
+    - "Specific fix #1"
+    - "Specific fix #2"
+```
+
+### DoD Report Verdict Update
+
+After validation, update the DoD report at
+`docs/reviews/dod/{TASK_ID}-dod.yaml` with:
+
+- `validatedBy: "Validator"`
+- `validatedAt: "{ISO 8601}"`
+- `verdict: "APPROVED" | "REJECTED"`
+- For each item: `verifiedBy: "Validator"` + updated `status`
+- If REJECTED: populate `rejectionReasons[]` with failing DOD-XX IDs
+
+## 4. Evidence Evaluation Criteria
+
+When evaluating evidence provided by agents, apply these rules:
+
+### Evidence Quality Levels
+
+| Level | Definition | Action |
+|-------|-----------|--------|
+| **Strong** | Tool output (test runner, linter, tsc) captured verbatim | Accept as-is |
+| **Moderate** | File paths cited + summary of changes | Verify independently |
+| **Weak** | Agent asserts "I did X" without proof | Reject — run independent check |
+| **None** | No evidence provided | Auto-fail the item |
+
+### Independent Verification Rules
+
+1. **Always re-run** linter, type checker, and tests — never trust cached results
+2. **Compare timestamps** — if agent claims "tests pass" but test files were
+   modified after the test run, re-run
+3. **Check for selective reporting** — agent may run tests partially; run the
+   full suite
+4. **Verify file existence** — if agent claims a file was created, verify via
+   `ls` or `find`
+5. **Pattern match** — compare agent's code against patterns in
+   `systemPatterns.md`; flag deviations
+
+### Confidence Assessment
+
+| Confidence | Criteria | Validator Action |
+|-----------|---------|-----------------|
+| **HIGH** (90-100%) | All 10 items pass with strong evidence; no pattern deviations | Issue APPROVED |
+| **MEDIUM** (70-89%) | All items pass but some evidence is moderate; minor deviations | Issue APPROVED with advisory notes |
+| **LOW** (50-69%) | Some items have weak evidence; significant deviations | Re-run all checks; escalate ambiguity to Ticketer |
+| **INSUFFICIENT** (<50%) | Multiple items fail or evidence is missing | Issue REJECTED |

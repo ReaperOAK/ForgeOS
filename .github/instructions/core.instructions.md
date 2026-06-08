@@ -1,6 +1,7 @@
 ---
 name: Core System Rules
-description: Use when processing tickets, following multi-agent orchestration protocol, checking halt gates, boot sequences, memory gates, or security baseline rules.
+applyTo: '**'
+description: System identity, rule precedence, boot sequence, halt gate, human approval, memory gate, anti-loop, security baseline. All agents must follow these rules.
 ---
 
 # Core System Rules
@@ -72,7 +73,7 @@ RULE: Every entry requires ISO8601 timestamp and agent attribution.
 | `activeContext.md` | All agents (append) |
 | `progress.md` | All agents (append) |
 | `systemPatterns.md` | Ticketer & Documentation only |
-| `productContext.md` | Ticketer, Documentation & Product Manager only |
+| `productContext.md` | Ticketer, Documentation & ProductManager only |
 | `decisionLog.md` | Ticketer & Documentation only |
 | `riskRegister.md` | Ticketer + Security |
 

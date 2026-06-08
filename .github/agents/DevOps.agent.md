@@ -22,7 +22,7 @@ tools:
 argument-hint: 'Describe the infrastructure to provision, CI/CD pipeline to create, or deployment strategy to implement'
 ---
 
-# DevOps Engineer Subagent
+# DevOps Subagent
 
 ## 1. Role
 

@@ -1,0 +1,115 @@
+accessibility:
+- .github/skills/a11y/SKILL.md
+- .github/skills/a11y/references/
+agent:
+- .github/agents/Architect.agent.md
+- .github/agents/Backend.agent.md
+- .github/agents/CIReviewer.agent.md
+- .github/agents/DevOps.agent.md
+- .github/agents/Documentation.agent.md
+- .github/agents/Frontend.agent.md
+- .github/agents/ProductManager.agent.md
+- .github/agents/QA.agent.md
+- .github/agents/Ticketer.agent.md
+- .github/agents/Research.agent.md
+- .github/agents/Security.agent.md
+- .github/agents/UIDesigner.agent.md
+- .github/agents/TODO.agent.md
+- .github/agents/Validator.agent.md
+- .github/agents/_cross-cutting-protocols.md
+ai-safety:
+- .github/skills/ai-safety/SKILL.md
+- .github/skills/ai-safety/references/
+ci:
+- .github/skills/ci-cd/SKILL.md
+- .github/skills/ci-cd/references/
+container:
+- .github/skills/containerization/SKILL.md
+- .github/skills/containerization/references/
+cto:
+- .github/skills/cto-playbook/SKILL.md
+- .github/skills/cto-playbook/references/
+design:
+- .github/skills/design/SKILL.md
+- .github/skills/design/references/
+devops:
+- .github/skills/ci-cd/SKILL.md
+- .github/skills/ci-cd/references/
+general:
+- .github/VALIDATION-REPORT.md
+- .github/instructions/ARCHITECTURE.instructions.md
+governance:
+- .github/instructions/core_governance.instructions.md
+- .github/governance/lifecycle.md
+- .github/governance/worker_policy.md
+- .github/governance/commit_policy.md
+- .github/governance/memory_policy.md
+- .github/governance/ui_policy.md
+- .github/governance/security_policy.md
+- .github/governance/event_protocol.md
+- .github/governance/context_injection.md
+- .github/governance/performance_monitoring.md
+instruction:
+- .github/skills/a11y/SKILL.md
+- .github/skills/ai-safety/SKILL.md
+- .github/skills/containerization/SKILL.md
+- .github/skills/ci-cd/SKILL.md
+- .github/skills/performance/SKILL.md
+- .github/skills/implementation/SKILL.md
+- .github/skills/qa/SKILL.md
+- .github/skills/planning/SKILL.md
+- .github/skills/design/SKILL.md
+- .github/skills/architecture/SKILL.md
+- .github/skills/cto-playbook/SKILL.md
+memory-bank:
+- .github/memory-bank/activeContext.md
+- .github/memory-bank/decisionLog.md
+- .github/memory-bank/productContext.md
+- .github/memory-bank/progress.md
+- .github/memory-bank/riskRegister.md
+- .github/memory-bank/systemPatterns.md
+performance:
+- .github/skills/performance/SKILL.md
+- .github/skills/performance/references/
+sdlc:
+- .github/skills/implementation/SKILL.md
+- .github/skills/qa/SKILL.md
+- .github/skills/planning/SKILL.md
+- .github/skills/design/SKILL.md
+- .github/skills/architecture/SKILL.md
+- .github/skills/orchestration/SKILL.md
+- .github/skills/sdlc/SKILL.md
+security:
+- .github/skills/security/SKILL.md
+- .github/skills/security/references/
+validation:
+- .github/skills/sdlc/SKILL.md
+- .github/skills/sdlc/references/
+terraform:
+- .github/skills/containerization/SKILL.md
+- .github/skills/containerization/references/
+sdlc-enforcement:
+- .github/skills/sdlc/SKILL.md
+- .github/skills/sdlc/references/
+testing:
+- .github/skills/testing/SKILL.md
+- .github/skills/testing/references/
+- .github/skills/qa/SKILL.md
+- .github/skills/qa/references/
+skills:
+- .github/skills/a11y/SKILL.md
+- .github/skills/agent-protocols/SKILL.md
+- .github/skills/ai-safety/SKILL.md
+- .github/skills/architecture/SKILL.md
+- .github/skills/ci-cd/SKILL.md
+- .github/skills/containerization/SKILL.md
+- .github/skills/cto-playbook/SKILL.md
+- .github/skills/design/SKILL.md
+- .github/skills/implementation/SKILL.md
+- .github/skills/orchestration/SKILL.md
+- .github/skills/performance/SKILL.md
+- .github/skills/planning/SKILL.md
+- .github/skills/qa/SKILL.md
+- .github/skills/security/SKILL.md
+- .github/skills/sdlc/SKILL.md
+- .github/skills/testing/SKILL.md

@@ -16,6 +16,7 @@ agent:
 - .github/agents/UIDesigner.agent.md
 - .github/agents/TODO.agent.md
 - .github/agents/Validator.agent.md
+- .github/agents/_cross-cutting-protocols.md
 ai-safety:
 - .github/skills/ai-safety/SKILL.md
 - .github/skills/ai-safety/references/
@@ -34,6 +35,20 @@ design:
 devops:
 - .github/skills/ci-cd/SKILL.md
 - .github/skills/ci-cd/references/
+general:
+- .github/VALIDATION-REPORT.md
+- .github/instructions/ARCHITECTURE.instructions.md
+governance:
+- .github/instructions/core_governance.instructions.md
+- .github/governance/lifecycle.md
+- .github/governance/worker_policy.md
+- .github/governance/commit_policy.md
+- .github/governance/memory_policy.md
+- .github/governance/ui_policy.md
+- .github/governance/security_policy.md
+- .github/governance/event_protocol.md
+- .github/governance/context_injection.md
+- .github/governance/performance_monitoring.md
 instruction:
 - .github/skills/a11y/SKILL.md
 - .github/skills/ai-safety/SKILL.md
@@ -62,13 +77,23 @@ sdlc:
 - .github/skills/planning/SKILL.md
 - .github/skills/design/SKILL.md
 - .github/skills/architecture/SKILL.md
+- .github/skills/orchestration/SKILL.md
+- .github/skills/sdlc/SKILL.md
 security:
 - .github/skills/security/SKILL.md
 - .github/skills/security/references/
+validation:
+- .github/skills/sdlc/SKILL.md
+- .github/skills/sdlc/references/
 terraform:
 - .github/skills/containerization/SKILL.md
 - .github/skills/containerization/references/
+sdlc-enforcement:
+- .github/skills/sdlc/SKILL.md
+- .github/skills/sdlc/references/
 testing:
+- .github/skills/testing/SKILL.md
+- .github/skills/testing/references/
 - .github/skills/qa/SKILL.md
 - .github/skills/qa/references/
 skills:
@@ -76,14 +101,31 @@ skills:
 - .github/skills/agent-protocols/SKILL.md
 - .github/skills/ai-safety/SKILL.md
 - .github/skills/architecture/SKILL.md
+- .github/skills/boot-sequence/SKILL.md
 - .github/skills/ci-cd/SKILL.md
 - .github/skills/containerization/SKILL.md
 - .github/skills/cto-playbook/SKILL.md
 - .github/skills/design/SKILL.md
+- .github/skills/git-protocol/SKILL.md
 - .github/skills/implementation/SKILL.md
+- .github/skills/orchestration/SKILL.md
 - .github/skills/performance/SKILL.md
 - .github/skills/planning/SKILL.md
 - .github/skills/qa/SKILL.md
+- .github/skills/sdlc/SKILL.md
+- .github/skills/sdlc-lifecycle/SKILL.md
 - .github/skills/security/SKILL.md
+- .github/skills/testing/SKILL.md
+- .github/skills/ticket-system/SKILL.md
+boot-sequence:
+- .github/skills/boot-sequence/SKILL.md
+git-protocol:
+- .github/skills/git-protocol/SKILL.md
+sdlc-lifecycle:
+- .github/skills/sdlc-lifecycle/SKILL.md
+ticket-system:
+- .github/skills/ticket-system/SKILL.md
 agent-protocols:
 - .github/skills/agent-protocols/SKILL.md
+orchestration:
+- .github/skills/orchestration/SKILL.md

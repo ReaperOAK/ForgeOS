@@ -1,0 +1,277 @@
+---
+source: "./.github/instructions/a11y.instructions.md"
+chunk_index: 2
+token_estimate: 1985
+hash: "ecc4ea2f7f2c999e721be01e75c972f5a862eddbd04e005f0a05d51048c86ab2"
+summary: "`<ul>` with links. - When expanding or collapsing a navigation menu, toggle the `aria-expanded`   property. - Use the..."
+---
+  `<ul>` with links.
+- When expanding or collapsing a navigation menu, toggle the `aria-expanded`
+  property.
+- Use the roving tabindex pattern to manage focus within the navigation. Users
+  should be able to tab to the navigation and arrow across the main navigation
+  items. Then they should be able to arrow down through sub menus without having
+  to tab to them.
+- Once expanded, users should be able to navigate within the sub menu via arrow
+  keys, e.g., up and down arrow keys.
+- The `escape` key could close any expanded menus.
+
+### Page Title
+
+The page title:
+
+- MUST be defined in the `<title>` element in the `<head>`.
+- MUST describe the purpose of the page.
+- SHOULD be unique for each page.
+- SHOULD front-load unique information.
+- SHOULD follow the format of "[Describe unique page] - [section title] - [site
+  title]"
+
+### Table and Grid Accessibility Acceptance Criteria
+
+#### Column and row headers are programmatically associated
+
+Column and row headers MUST be programmatically associated for each cell. In
+HTML, this is done by using `<th>` elements. Column headers MUST be defined in
+the first table row `<tr>`. Row headers must defined in the row they are for.
+Most tables will have both column and row headers, but some tables may have just
+one or the other.
+
+#### Good example - table with both column and row headers:
+
+```html
+<table>
+  <tr>
+    <th>Header 1</th>
+    <th>Header 2</th>
+    <th>Header 3</th>
+  </tr>
+  <tr>
+    <th>Row Header 1</th>
+    <td>Cell 1</td>
+    <td>Cell 2</td>
+  </tr>
+  <tr>
+    <th>Row Header 2</th>
+    <td>Cell 1</td>
+    <td>Cell 2</td>
+  </tr>
+</table>
+```
+
+#### Good example - table with just column headers:
+
+```html
+<table>
+  <tr>
+    <th>Header 1</th>
+    <th>Header 2</th>
+    <th>Header 3</th>
+  </tr>
+  <tr>
+    <td>Cell 1</td>
+    <td>Cell 2</td>
+    <td>Cell 3</td>
+  </tr>
+  <tr>
+    <td>Cell 1</td>
+    <td>Cell 2</td>
+    <td>Cell 3</td>
+  </tr>
+</table>
+```
+
+#### Bad example - calendar grid with partial semantics:
+
+The following example is a date picker or calendar grid.
+
+```html
+<div role="grid">
+  <div role="columnheader">Sun</div>
+  <div role="columnheader">Mon</div>
+  <div role="columnheader">Tue</div>
+  <div role="columnheader">Wed</div>
+  <div role="columnheader">Thu</div>
+  <div role="columnheader">Fri</div>
+  <div role="columnheader">Sat</div>
+  <button role="gridcell" tabindex="-1" aria-label="Sunday, June 1, 2025">
+    1
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Monday, June 2, 2025">
+    2
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Tuesday, June 3, 2025">
+    3
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Wednesday, June 4, 2025">
+    4
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Thursday, June 5, 2025">
+    5
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Friday, June 6, 2025">
+    6
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Saturday, June 7, 2025">
+    7
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Sunday, June 8, 2025">
+    8
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Monday, June 9, 2025">
+    9
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Tuesday, June 10, 2025">
+    10
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Wednesday, June 11, 2025">
+    11
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Thursday, June 12, 2025">
+    12
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Friday, June 13, 2025">
+    13
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Saturday, June 14, 2025">
+    14
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Sunday, June 15, 2025">
+    15
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Monday, June 16, 2025">
+    16
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Tuesday, June 17, 2025">
+    17
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Wednesday, June 18, 2025">
+    18
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Thursday, June 19, 2025">
+    19
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Friday, June 20, 2025">
+    20
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Saturday, June 21, 2025">
+    21
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Sunday, June 22, 2025">
+    22
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Monday, June 23, 2025">
+    23
+  </button>
+  <button
+    role="gridcell"
+    tabindex="-1"
+    aria-label="Tuesday, June 24, 2025"
+    aria-current="date"
+  >
+    24
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Wednesday, June 25, 2025">
+    25
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Thursday, June 26, 2025">
+    26
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Friday, June 27, 2025">
+    27
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Saturday, June 28, 2025">
+    28
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Sunday, June 29, 2025">
+    29
+  </button>
+  <button role="gridcell" tabindex="-1" aria-label="Monday, June 30, 2025">
+    30
+  </button>
+  <button
+    role="gridcell"
+    tabindex="-1"
+    aria-label="Tuesday, July 1, 2025"
+    aria-disabled="true"
+  >
+    1
+  </button>
+  <button
+    role="gridcell"
+    tabindex="-1"
+    aria-label="Wednesday, July 2, 2025"
+    aria-disabled="true"
+  >
+    2
+  </button>
+  <button
+    role="gridcell"
+    tabindex="-1"
+    aria-label="Thursday, July 3, 2025"
+    aria-disabled="true"
+  >
+    3
+  </button>
+  <button
+    role="gridcell"
+    tabindex="-1"
+    aria-label="Friday, July 4, 2025"
+    aria-disabled="true"
+  >
+    4
+  </button>
+  <button
+    role="gridcell"
+    tabindex="-1"
+    aria-label="Saturday, July 5, 2025"
+    aria-disabled="true"
+  >
+    5
+  </button>
+</div>
+```
+
+##### The good:
+
+- It uses `role="grid"` to indicate that it is a grid.
+- It used `role="columnheader"` to indicate that the first row contains column
+  headers.
+- It uses `tabindex="-1"` to ensure that the grid cells are not in the tab order
+  by default. Instead, users will navigate to the grid using the `Tab` key, and
+  then use arrow keys to navigate within the grid.
+
+##### The bad:
+
+- `role=gridcell` elements are not nested within `role=row` elements. Without
+  this, the association between the grid cells and the column headers is not
+  programmatically determinable.
+
+#### Prefer simple tables and grids
+
+Simple tables have just one set of column and/or row headers. Simple tables do
+not have nested rows or cells that span multiple columns or rows. Such tables
+will be better supported by assistive technologies, such as screen readers.
+Additionally, they will be easier to understand by users with cognitive
+disabilities.
+
+Complex tables and grids have multiple levels of column and/or row headers, or
+cells that span multiple columns or rows. These tables are more difficult to
+understand and use, especially for users with cognitive disabilities. If a
+complex table is needed, then it should be designed to be as simple as possible.
+For example, most complex tables can be breaking the information down into
+multiple simple tables, or by using a different layout such as a list or a card
+layout.
+
+#### Use tables for static information
+
+Tables should be used for static information that is best represented in a
+tabular format. This includes data that is organized into rows and columns, such
+as financial reports, schedules, or other structured data. Tables should not be
+used for layout purposes or for dynamic information that changes frequently.
+
+#### Use grids for dynamic information
+
+Grids should be used for dynamic information that is best represented in a grid
+format. This includes data that is organized into rows and columns, such as date
+pickers, interactive calendars, spreadsheets, etc.

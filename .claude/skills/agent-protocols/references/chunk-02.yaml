@@ -1,0 +1,75 @@
+---
+source: "./.github/instructions/orchestration.rules.instructions.md"
+chunk_index: 2
+token_estimate: 530
+hash: "0632b0dbe499e38018429915fffc91441acb5417f71d77f636f2c4bd5e9a1e5f"
+summary: "- [ ] No forbidden actions were taken - [ ] Memory bank entries are properly formatted and timestamped - [ ] No hallu..."
+---
+- [ ] No forbidden actions were taken
+- [ ] Memory bank entries are properly formatted and timestamped
+- [ ] No hallucinated capabilities claimed
+- [ ] Self-reflection quality score ≥ 7/10
+- [ ] Token consumption within budget
+
+---
+
+## 11. Communication Protocol
+
+### Agent-to-Orchestrator Communication
+
+Subagents communicate with Ticketer ONLY through:
+
+1. **Delegation output:** Structured YAML response matching the contract
+2. **Memory bank append:** Timestamped entries in `activeContext.md` or
+   `progress.md`
+3. **Escalation signal:** Structured escalation with attempted paths and
+   blockers
+
+### Inter-Agent Communication
+
+Agents do NOT communicate directly with each other. All coordination flows
+through Ticketer. This ensures:
+
+- Single source of truth for task state
+- No circular dependencies between agents
+- Clear audit trail of all decisions
+- Prevents authority fragmentation
+
+### Error Reporting Format
+
+```yaml
+error:
+  taskId: string
+  agent: string
+  errorType: "compile" | "test" | "runtime" | "scope_violation" | "blocked" | "confidence_insufficient"
+  message: string
+  stackTrace: string  # if applicable
+  attemptedFix: string  # what the agent tried
+  retryCount: number
+  confidenceLevel: number
+  recommendation: string  # what should happen next
+```
+
+---
+
+## 12. Governance Hooks Integration
+
+The following hooks are deployed in `.github/hooks/` and activate
+automatically during Copilot sessions:
+
+| Hook | Trigger | Purpose |
+|------|---------|---------|
+| `governance-audit` | sessionStart, sessionEnd, userPromptSubmitted | Threat detection, audit logging |
+| `session-logger` | sessionStart, sessionEnd, userPromptSubmitted | Session activity tracking |
+| `session-auto-commit` | sessionEnd | Auto-commit changes at session end |
+
+### Governance Levels
+
+| Level | Behavior |
+|-------|----------|
+| `open` | Log only, no blocking |
+| `standard` | Log + warn on threats (default) |
+| `strict` | Log + block prompts with threat signals |
+| `locked` | Log + block + require human approval for all tool use |
+
+Configuration: Set `GOVERNANCE_LEVEL` environment variable in hooks.json.

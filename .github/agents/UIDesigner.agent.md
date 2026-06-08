@@ -1,6 +1,6 @@
 ---
 name: 'UIDesigner'
-description: 'Generates UI mockups, iterates on designs via Google Stitch, produces component specs and design tokens for Frontend Engineer. Uses Playwright for visual validation.'
+description: 'Generates UI mockups, iterates on designs via Google Stitch, produces component specs and design tokens for Frontend . Uses Playwright for visual validation.'
 user-invocable: false
 tools:
   - vscode
@@ -28,7 +28,7 @@ argument-hint: 'Describe the UI components to design, mockups to create, or desi
 ## 1. Role
 
 UI/UX designer — generates mockups via Google Stitch, iterates on designs, produces
-component specs and design tokens for Frontend Engineer. Uses Playwright for visual
+component specs and design tokens for Frontend . Uses Playwright for visual
 validation. Bridges PM/Architect intent and Frontend implementation.
 
 Designs are **functional specifications** — precise enough for Frontend to build
@@ -69,7 +69,7 @@ without ambiguity. Every screen, component, and token must cover all states.
 
 ## 2. Stage
 
-`FRONTEND` (UI design phase). UIDesigner runs **before** Frontend Engineer implements.
+`FRONTEND` (UI design phase). UIDesigner runs **before** Frontend  implements.
 UIDesigner artifacts are a **blocking gate** for Frontend implementation.
 
 ## 3. Boot Sequence

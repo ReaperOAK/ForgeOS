@@ -130,7 +130,7 @@ Task ID convention must match regex: `^(#{2,4})\s+([A-Z][A-Z0-9-]*\d{3,4}):\s*(.
 
 Agent codes: ARC (Architect), BE (Backend), FE (Frontend), QA (QA), SEC (Security),
 DO (DevOps), DOC (Documentation), RES (Research), PM (ProductManager),
-CIR (CI Reviewer), UID (UIDesigner), SYS (System/cross-cutting).
+CIR (CIReviewer), UID (UIDesigner), SYS (System/cross-cutting).
 
 ## 7. Output Artifacts
 

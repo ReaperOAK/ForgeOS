@@ -26,25 +26,6 @@ Execute the following orchestration pipeline with ruthless precision:
 	- No match: create a new component or asset only after documenting why reuse would distort the design or codebase.
 6. Default rule: if an existing component or icon matches the Figma design closely enough without structural abuse, reuse it. Do not create duplicates with different names.
 
-### UI COMPONENT RULE: ICON HANDLING
-When converting Figma designs to React Native code, you have a strict zero-tolerance policy for hallucinated icons. Follow this exact routing protocol:
-
-1. THE STANDARD LIBRARY PREFERENCE:
-If the icon in Figma is a generic UI element (e.g., chevron, close-x, menu-hamburger, user-profile), DO NOT extract the SVG. You must map it to `lucide-react-native` (or our designated standard icon library). 
-Example: `<ChevronRight color={colors.primary} size={24} />`
-
-2. THE CUSTOM ASSET PROTOCOL:
-If the icon is a highly custom brand asset, logo, or complex illustration that cannot be mapped to a standard library:
-- Use the Figma MCP to extract the exact SVG code for that specific node.
-- DO NOT inject the raw SVG string inline into the screen component.
-- Create a new, dedicated file in `frontend/src/components/icons/` (e.g., `CustomTrophyIcon.tsx`).
-- Convert the extracted SVG to a valid React Native SVG component using `react-native-svg` elements (`<Svg>`, `<Path>`, etc.).
-- Expose `width`, `height`, and `fill` props so the icon inherits styling natively.
-- Import and use this new component in the main screen file.
-
-3. THE PLACEHOLDER FALLBACK:
-If you cannot extract the SVG and it does not exist in a standard library, DO NOT leave the code broken. Drop a placeholder `<View style={{ width: 24, height: 24, backgroundColor: 'red' }} />` and add a `// TODO: Replace with proper SVG` comment.
-
 ### Phase 1: Deep Figma Extraction (Delegate to UIDesigner — uses `com.figma.mcp/*`)
 1. Delegate to UIDesigner: query the Figma MCP using the provided file/node URL and capture the reference screenshot for the exact node/frame being implemented.
 2. Extract the exact design tokens: color values, typography (font families, weights, sizes, line heights), border radii, shadows, stroke widths, opacity, and spacing scales.
@@ -63,8 +44,8 @@ If you cannot extract the SVG and it does not exist in a standard library, DO NO
 4. No hardcoded color, spacing, typography, radius, or shadow values in markup if an existing project token, variant, or component already covers that requirement.
 5. If Storybook already contains a component specimen visually aligned with the Figma node, treat that as the preferred implementation anchor.
 
-### Phase 3: Implementation Delegation (Agent: Frontend Engineer)
-Draft a strict instruction packet for the `Frontend Engineer` agent. The packet MUST mandate the following production standards:
+### Phase 3: Implementation Delegation (Agent: Frontend )
+Draft a strict instruction packet for the `Frontend ` agent. The packet MUST mandate the following production standards:
 - **Reuse First:** Search existing components and stories before writing new ones. Reuse existing components, compose them, or extend them with narrowly-scoped variants whenever they match the design.
 - **Icon Reuse First:** Use the existing icon registry and Figma-backed SVG assets first. Only introduce a new SVG if no equivalent exists; when needed, export/download it from Figma and register it in the shared icon system.
 - **No Duplicate Components:** Do not create a new component when a Storybook-backed or production component already satisfies the same semantic and visual role.
@@ -77,7 +58,7 @@ Draft a strict instruction packet for the `Frontend Engineer` agent. The packet 
 - **Sanitization:** Ensure zero tolerance for XSS and unsafe markup or asset handling.
 
 ### Phase 4: Screenshot Parity Validation (Agent: UIDesigner + QA + Validator)
-Once the `Frontend Engineer` agent returns the implementation:
+Once the `Frontend ` agent returns the implementation:
 1. Capture the canonical Figma screenshot for the target node/frame.
 2. Capture a matching Playwright screenshot of the implemented UI at the same viewport, scale, and state. Prefer Storybook screenshots for isolated components; use app-level screenshots when the design is page-level.
 3. Compare the Figma screenshot and Playwright screenshot directly. Validation is not complete until the implementation is visually 1:1 for layout, spacing, type scale, icon geometry, color, radius, and alignment.

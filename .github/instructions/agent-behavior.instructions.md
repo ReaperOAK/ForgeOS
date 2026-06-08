@@ -1,6 +1,7 @@
 ---
 name: Agent Behavior
-description: Use when dispatching agents, enforcing scope boundaries, deriving context, managing worker models, or checking stage ownership rules.
+applyTo: '**'
+description: Worker model, scope enforcement, context derivation, forbidden actions, evidence gates, dispatcher contract. Defines how all agents operate within the vibecoding system.
 ---
 
 # Agent Behavior
@@ -61,16 +62,16 @@ RULE: Git + tickets.py enforce safety. Not Ticketer.
 | Agent | Processes Stage |
 |-------|----------------|
 | Research Analyst | RESEARCH |
-| Product Manager | PM |
+| ProductManager | PM |
 | Architect | ARCHITECT |
 | TODO | Ticket creation only |
-| DevOps Engineer | BACKEND (infra tickets) |
+| DevOps | BACKEND (infra tickets) |
 | Backend | BACKEND |
 | UIDesigner | UI |
-| Frontend Engineer | FRONTEND |
-| QA Engineer | QA |
-| Security Engineer | SECURITY |
-| CI Reviewer | CI |
+| Frontend  | FRONTEND |
+| QA | QA |
+| Security | SECURITY |
+| CIReviewer | CI |
 | Documentation Specialist | DOCS |
 | Validator | VALIDATION |
 
