@@ -32,6 +32,9 @@ forgeos-server/node_modules
 forgeos-server/coverage
 node_modules
 .venv
+.env
+.env.hunter
+.env.*
 dashboard/coverage
 .playwright-mcp
 forgeos-server/dist
