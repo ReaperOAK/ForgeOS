@@ -1,0 +1,32 @@
+{
+  "name": "@forgeos/corsair-connector",
+  "version": "0.2.0",
+  "private": true,
+  "type": "module",
+  "description": "Corsair-powered ingestion: turn GitHub Issues into ForgeOS warm tickets.",
+  "bin": {
+    "forgeos-corsair": "dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "ingest": "tsx src/cli.ts",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  },
+  "optionalDependencies": {
+    "corsair": "*",
+    "@corsair-dev/github": "*",
+    "better-sqlite3": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.12.0",
+    "@vitest/coverage-v8": "^1.6.1",
+    "tsx": "^4.7.0",
+    "typescript": "^5.4.0",
+    "vitest": "^1.6.0"
+  }
+}
